@@ -52,14 +52,21 @@ fs.mkdirSync(path.dirname(workerPath), { recursive: true });
 
 const worker = `export default {
   async fetch(request, env) {
-    if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
-      return env.ASSETS.fetch(request);
+    if (!env || !env.ASSETS || typeof env.ASSETS.fetch !== 'function') {
+      return new Response('RadShield-MX static assets binding is unavailable.', {
+        status: 503,
+        headers: { 'content-type': 'text/plain; charset=utf-8' },
+      });
     }
 
-    return new Response('RadShield-MX static assets binding is unavailable.', {
-      status: 503,
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
-    });
+    const response = await env.ASSETS.fetch(request);
+    if (response.status !== 404 || request.method !== 'GET') return response;
+
+    const url = new URL(request.url);
+    const lastSegment = url.pathname.split('/').pop() ?? '';
+    if (lastSegment.includes('.')) return response;
+
+    return env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
   },
 };
 `;
