@@ -1,0 +1,1969 @@
+import { useState, useCallback, Suspense, lazy, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
+import { MATERIALS } from '@/types/radshield';
+import { useShieldingEngine } from '@/hooks/useShieldingEngine';
+import { useCanvas } from '@/hooks/useCanvas';
+import { useControlledAreas } from '@/hooks/useControlledAreas';
+import { useFileSystemAccess } from '@/hooks/useFileSystemAccess';
+import { useWebGPU } from '@/hooks/useWebGPU';
+import { useBroadcastChannel } from '@/hooks/useBroadcastChannel';
+import { useWebWorker } from '@/hooks/useWebWorker';
+import { useIndexedDB } from '@/hooks/useIndexedDB';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
+import { useWASM } from '@/hooks/useWASM';
+import { useCalculationCache } from '@/hooks/useCalculationCache';
+import { useWorkerCalculation } from '@/hooks/useWorkerCalculation';
+import { useHighContrast } from '@/hooks/useHighContrast';
+import { useWebGPUHeatmap } from '@/hooks/useWebGPUHeatmap';
+import { useCanvasKeyboardNav } from '@/hooks/useCanvasKeyboardNav';
+import { inverseArcher, tvlThickness } from '@/lib/shieldingMath';
+// v50: Motor optimizado con spatial hashing + async WebWorker
+import { ShieldingEngine } from '@/lib/shieldingEngine';
+import { AsyncShieldingEngine } from '@/lib/engine/AsyncShieldingEngine';
+import { CanvasRenderer } from '@/lib/canvas/CanvasRenderer';
+import { createProfiler } from '@/lib/performance/Profiler';
+// Fase 1.1: ErrorBoundary para cada dialog
+import ErrorBoundary from '@/components/ErrorBoundary';
+// Fase 2.9: a11y announcer
+import A11yAnnouncer, { announce } from '@/components/A11yAnnouncer';
+// Fase 2.10: Canvas search
+import CanvasSearch from '@/components/CanvasSearch';
+// Fase 3.11: Minimap
+import Minimap from '@/components/Minimap';
+// v50.1: Responsive layout + skip-to-content
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import SkipToContent from '@/components/SkipToContent';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
+import { useAuth } from '@/hooks/useAuth';
+import { useDarkMode } from '@/hooks/useDarkMode';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { useWebShare } from '@/hooks/useWebShare';
+import { captureException } from '@/lib/sentry';
+import { trpc } from '@/providers/trpc';
+import { type CTIsodosisProfile, parseIsodosisFile } from '@/types/ctIsodosis';
+import { type CNSNSReportData, generateCNSNSReport } from '@/hooks/useCNSNSReport';
+import { generateGEANT4Macro, generateGATEMacro, generateValidationInstructions, type MCConfig } from '@/hooks/useMCBridge';
+// ═══ State Management: Zustand stores (Phase 0 - ready for v53-v60) ═══
+import { useAppStore } from '@/stores/appStore';
+import LazyDialog from '@/components/LazyDialog';
+
+// react-resizable-panels removed — using flexbox layout for simplicity
+import Toolbar from '@/sections/Toolbar';
+import Sidebar from '@/sections/Sidebar';
+import CanvasArea from '@/sections/CanvasArea';
+import ResultsPanel from '@/sections/ResultsPanel';
+import StatusBar from '@/sections/StatusBar';
+import WelcomeScreen from '@/sections/WelcomeScreen';
+import KeyboardShortcutsDialog from '@/sections/dialogs/KeyboardShortcutsDialog';
+import SmartSearchDICOMDialog from '@/sections/dialogs/SmartSearchDICOMDialog';
+import LogFileAnalysisDialog from '@/sections/dialogs/LogFileAnalysisDialog';
+import CommandPalette, { DEFAULT_COMMANDS } from '@/sections/dialogs/CommandPalette';
+import UndoRedoHistoryPanel from '@/sections/dialogs/UndoRedoHistoryPanel';
+import ContextualHelpPanel from '@/sections/ContextualHelpPanel';
+import IsodosisViewer from '@/sections/dialogs/IsodosisViewer';
+import DoseMapping3D from '@/sections/dialogs/DoseMapping3D';
+import HeatMapViewer from '@/sections/dialogs/HeatMapViewer';
+// ─── ALL Dialogs lazy-loaded for performance ───
+const CompareModeDialog = lazy(() => import('@/sections/dialogs/CompareModeDialog'));
+const BatchCalculationDialog = lazy(() => import('@/sections/dialogs/BatchCalculationDialog'));
+// v45: Enhanced Sensitivity Analysis with tornado chart
+const SensitivityAnalysisDialog = lazy(() => import('@/sections/dialogs/SensitivityAnalysis'));
+const AuditDashboardDialog = lazy(() => import('@/sections/dialogs/AuditDashboardDialog'));
+const GeometrySelectorDialog = lazy(() => import('@/sections/dialogs/GeometrySelectorDialog'));
+const NuclideDataViewer = lazy(() => import('@/sections/dialogs/NuclideDataViewer'));
+const DecayHeatCalculator = lazy(() => import('@/sections/dialogs/DecayHeatCalculator'));
+const BuildupFactorDialog = lazy(() => import('@/sections/dialogs/BuildupFactorDialog'));
+const ExposureRateProjectionDialog = lazy(() => import('@/sections/dialogs/ExposureRateProjectionDialog'));
+const SketchPadDialog = lazy(() => import('@/sections/dialogs/SketchPadDialog'));
+const ExampleWizardDialog = lazy(() => import('@/sections/dialogs/ExampleWizardDialog'));
+const CADImportDialog = lazy(() => import('@/sections/dialogs/CADImportDialog'));
+const ParametricBunkerDesigner = lazy(() => import('@/sections/dialogs/ParametricBunkerDesigner'));
+const MLPredictionDialog = lazy(() => import('@/sections/dialogs/MLPredictionDialog'));
+const KeyboardConfigDialog = lazy(() => import('@/sections/dialogs/KeyboardConfigDialog'));
+const CNSNSAutoReportDialog = lazy(() => import('@/sections/dialogs/CNSNSAutoReportDialog'));
+const OnboardingTour = lazy(() => import('@/components/OnboardingTour'));
+const MaterialPropertyCalculator = lazy(() => import('@/sections/dialogs/MaterialPropertyCalculator'));
+const LeadFreeMaterialsDialog = lazy(() => import('@/sections/dialogs/LeadFreeMaterialsDialog'));
+const NeutronRemovalDialog = lazy(() => import('@/sections/dialogs/NeutronRemovalDialog'));
+const NuclearMedicineAdvanced = lazy(() => import('@/sections/dialogs/NuclearMedicineAdvanced'));
+const GMPCyclotronCertificationDialog = lazy(() => import('@/sections/dialogs/GMPCyclotronCertificationDialog'));
+const AAPMTG108PETDialog = lazy(() => import('@/sections/dialogs/AAPMTG108PETDialog'));
+const IPEMReport109Dialog = lazy(() => import('@/sections/dialogs/IPEMReport109Dialog'));
+const ChiltonSkyshineDialog = lazy(() => import('@/sections/dialogs/ChiltonSkyshineDialog'));
+const TherapyShieldingDialog = lazy(() => import('@/sections/dialogs/TherapyShieldingDialog'));
+const DecayChainsDialog = lazy(() => import('@/sections/dialogs/DecayChainsDialog'));
+const CompareScenariosDialog = lazy(() => import('@/sections/dialogs/CompareScenariosDialog'));
+const TornadoSensitivityDialog = lazy(() => import('@/sections/dialogs/TornadoSensitivityDialog'));
+const NCRPValidationDialog = lazy(() => import('@/sections/dialogs/NCRPValidationDialog'));
+const ThemeEngineDialog = lazy(() => import('@/sections/dialogs/ThemeEngineDialog'));
+const BIMConnectorDialog = lazy(() => import('@/sections/dialogs/BIMConnectorDialog'));
+const CloudSyncDialog = lazy(() => import('@/sections/dialogs/CloudSyncDialog'));
+const ValidationDashboardDialog = lazy(() => import('@/sections/dialogs/ValidationDashboardDialog'));
+const ExternalConnectorDialog = lazy(() => import('@/sections/dialogs/ExternalConnectorDialog'));
+const BIMRADDialog = lazy(() => import('@/sections/dialogs/BIMRADDialog'));
+const CollaborationHub = lazy(() => import('@/sections/dialogs/CollaborationHub'));
+const GATESimulationDialog = lazy(() => import('@/sections/dialogs/GATESimulationDialog'));
+const ShieldingDesignAgentDialog = lazy(() => import('@/sections/dialogs/ShieldingDesignAgentDialog'));
+const MonteCarloIntegrationDialog = lazy(() => import('@/sections/dialogs/MonteCarloIntegrationDialog'));
+const UncertaintyQuantificationDialog = lazy(() => import('@/sections/dialogs/UncertaintyQuantificationDialog'));
+const ExperimentalValidationDialog = lazy(() => import('@/sections/dialogs/ExperimentalValidationDialog'));
+const DICOMRTIntegrationDialog = lazy(() => import('@/sections/dialogs/DICOMRTIntegrationDialog'));
+const AIAssistantDialog = lazy(() => import('@/sections/dialogs/AIAssistantDialog'));
+const AutoBarrierDetectionDialog = lazy(() => import('@/sections/dialogs/AutoBarrierDetectionDialog'));
+const PredictiveMaterialDialog = lazy(() => import('@/sections/dialogs/PredictiveMaterialDialog'));
+const AnomalyDetectionDialog = lazy(() => import('@/sections/dialogs/AnomalyDetectionDialog'));
+const AutoFillEquipmentDialog = lazy(() => import('@/sections/dialogs/AutoFillEquipmentDialog'));
+const VRARBunkerPreview = lazy(() => import('@/sections/dialogs/VRARBunkerPreview'));
+const VideoTutorialGenerator = lazy(() => import('@/sections/dialogs/VideoTutorialGenerator'));
+const FloorCeilingDialog = lazy(() => import('@/sections/dialogs/FloorCeilingDialog'));
+const ICRU57Dialog = lazy(() => import('@/sections/dialogs/ICRU57Dialog'));
+const ICRU96Dialog = lazy(() => import('@/sections/dialogs/ICRU96Dialog'));
+const AnimatedDoseMapsDialog = lazy(() => import('@/sections/dialogs/AnimatedDoseMapsDialog'));
+const PointCloudImportDialog = lazy(() => import('@/sections/dialogs/PointCloudImportDialog'));
+const IndustrialRadiationDialog = lazy(() => import('@/sections/dialogs/IndustrialRadiationDialog'));
+const MultiSourceDetectorDialog = lazy(() => import('@/sections/dialogs/MultiSourceDetectorDialog'));
+const PACSIntegrationDialog = lazy(() => import('@/sections/dialogs/PACSIntegrationDialog'));
+const InternationalRegulationsDialog = lazy(() => import('@/sections/dialogs/InternationalRegulationsDialog'));
+const RegulatoryComparisonDialog = lazy(() => import('@/sections/dialogs/RegulatoryComparisonDialog'));
+const ComplianceCertificationDialog = lazy(() => import('@/sections/dialogs/ComplianceCertificationDialog'));
+const RegulatoryAlertsDialog = lazy(() => import('@/sections/dialogs/RegulatoryAlertsDialog'));
+const PythonIntegrationDialog = lazy(() => import('@/sections/dialogs/PythonIntegrationDialog'));
+const NativeMCDialog = lazy(() => import('@/sections/dialogs/NativeMCDialog'));
+const NeutronShieldingDialog = lazy(() => import('@/sections/dialogs/NeutronShieldingDialog'));
+const BatemanDecayDialog = lazy(() => import('@/sections/dialogs/BatemanDecayDialog'));
+const NISTLibraryDialog = lazy(() => import('@/sections/dialogs/NISTLibraryDialog'));
+const ModelingToolboxDialog = lazy(() => import('@/sections/dialogs/ModelingToolboxDialog'));
+const ElectronTransportDialog = lazy(() => import('@/sections/dialogs/ElectronTransportDialog'));
+const STEPImporterDialog = lazy(() => import('@/sections/dialogs/STEPImporterDialog'));
+const ManualDialog = lazy(() => import('@/sections/dialogs/ManualDialog'));
+const MemoriaAIWizard = lazy(() => import('@/sections/dialogs/MemoriaAIWizard'));
+const DoseMapDialog = lazy(() => import('@/sections/dialogs/DoseMapDialog'));
+const RealTime3DDialog = lazy(() => import('@/sections/dialogs/RealTime3DDialog'));
+const ShieldingOptimizerDialog = lazy(() => import('@/sections/dialogs/ShieldingOptimizerDialog'));
+const PACSRealDialog = lazy(() => import('@/sections/dialogs/PACSRealDialog'));
+const ElectronApplicatorDialog = lazy(() => import('@/sections/dialogs/ElectronApplicatorDialog'));
+const VoxelPhantomDialog = lazy(() => import('@/sections/dialogs/VoxelPhantomDialog'));
+const MCNPCyclotronDialog = lazy(() => import('@/sections/dialogs/MCNPCyclotronDialog'));
+const ShapesReconstructionDialog = lazy(() => import('@/sections/dialogs/ShapesReconstructionDialog'));
+const EquipmentManagerDialog = lazy(() => import('@/sections/dialogs/EquipmentManagerDialog'));
+const CategoryToolsDialog = lazy(() => import('@/sections/dialogs/CategoryToolsDialog'));
+const EmergencyProceduresDialog = lazy(() => import('@/sections/dialogs/EmergencyProceduresDialog'));
+const AuditTrailDialog = lazy(() => import('@/sections/dialogs/AuditTrailDialog'));
+const EPAGuidanceDialog = lazy(() => import('@/sections/dialogs/EPAGuidanceDialog'));
+const ShleienHandbookDialog = lazy(() => import('@/sections/dialogs/ShleienHandbookDialog'));
+const GammaKnifeDialog = lazy(() => import('@/sections/dialogs/GammaKnifeDialog'));
+const BraquiterapiaCo60Dialog = lazy(() => import('@/sections/dialogs/BraquiterapiaCo60Dialog'));
+const VersaHD15MVDialog = lazy(() => import('@/sections/dialogs/VersaHD15MVDialog'));
+const CycloneKIUBEWizard = lazy(() => import('@/sections/dialogs/CycloneKIUBEWizard'));
+const EquipmentLibraryDialog = lazy(() => import('@/sections/dialogs/EquipmentLibraryDialog'));
+const DashboardDialog = lazy(() => import('@/sections/dialogs/DashboardDialog'));
+const DXFViewerDialog = lazy(() => import('@/sections/dialogs/DXFViewerDialog'));
+const LayoutBunkerDialog = lazy(() => import('@/sections/dialogs/LayoutBunkerDialog'));
+const MazeCalculatorDialog = lazy(() => import('@/sections/dialogs/MazeCalculatorDialog'));
+
+
+const ReferenceLibraryDialog = lazy(() => import('@/sections/dialogs/ReferenceLibraryDialog'));
+const NCRP151TablesDialog = lazy(() => import('@/sections/dialogs/NCRP151TablesDialog'));
+const ExportDialog = lazy(() => import('@/sections/dialogs/ExportDialog'));
+const MCDialog = lazy(() => import('@/sections/dialogs/MCDialog'));
+const ProjectManagerDialog = lazy(() => import('@/sections/dialogs/ProjectManagerDialog'));
+const Viewer3DDialog = lazy(() => import('@/sections/dialogs/Viewer3DDialog'));
+const QuickBarrierDialog = lazy(() => import('@/sections/dialogs/QuickBarrierDialog'));
+const EquipmentDBDialog = lazy(() => import('@/sections/dialogs/EquipmentDBDialog'));
+const MCCloudDialog = lazy(() => import('@/sections/dialogs/MCCloudDialog'));
+const MCConfigDialog = lazy(() => import('@/sections/dialogs/MCConfigDialog'));
+const MCResultsDialog = lazy(() => import('@/sections/dialogs/MCResultsDialog'));
+const BarrierCalculatorDialog = lazy(() => import('@/sections/dialogs/BarrierCalculatorDialog'));
+const DashboardCalcDialog = lazy(() => import('@/sections/dialogs/DashboardCalcDialog'));
+const CostEstimatorDialog = lazy(() => import('@/sections/dialogs/CostEstimatorDialog'));
+const CNSNSChecklistDialog = lazy(() => import('@/sections/dialogs/CNSNSChecklistDialog'));
+// v11.0: All 20 improvements
+const BatchImportDialog = lazy(() => import('@/sections/dialogs/BatchImportDialog'));
+const CostOptimizerDialog = lazy(() => import('@/sections/dialogs/CostOptimizerDialog'));
+const NeutronDialog = lazy(() => import('@/sections/dialogs/NeutronDialog'));
+const SeasonalDialog = lazy(() => import('@/sections/dialogs/SeasonalDialog'));
+const UncertaintyDialog = lazy(() => import('@/sections/dialogs/UncertaintyDialog'));
+const VentilationDialog = lazy(() => import('@/sections/dialogs/VentilationDialog'));
+const DICOMDialog = lazy(() => import('@/sections/dialogs/DICOMDialog'));
+const TechSpecsDialog = lazy(() => import('@/sections/dialogs/TechSpecsDialog'));
+const CNSNSDashboardDialog = lazy(() => import('@/sections/dialogs/CNSNSDashboardDialog'));
+// v13.4+v13.5: Shielding Calculator + DXF Viewer
+const ShieldingCalculatorDialog = lazy(() => import('@/sections/dialogs/ShieldingCalculatorDialog'));
+// v14.3: Gap analysis - Excel hojas faltantes
+const CBCTIGRTDialog = lazy(() => import('@/sections/dialogs/CBCTIGRTDialog'));
+const MaintenanceLogDialog = lazy(() => import('@/sections/dialogs/MaintenanceLogDialog'));
+const ScenarioAnalysisDialog = lazy(() => import('@/sections/dialogs/ScenarioAnalysisDialog'));
+const ChecklistCNSNSDialog = lazy(() => import('@/sections/dialogs/ChecklistCNSNSDialog'));
+const CNSNSDialog = lazy(() => import('@/sections/dialogs/CNSNSDialog'));
+// v14.4: Special cases (24 hojas restantes del Excel)
+const SpecialCasesDialog = lazy(() => import('@/sections/dialogs/SpecialCasesDialog'));
+// v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points
+const BarrierEditorDialog = lazy(() => import('@/sections/dialogs/BarrierEditor'));
+const AirKermaOverlayDialog = lazy(() => import('@/sections/dialogs/AirKermaOverlay'));
+const MosaicProjectManagerDialog = lazy(() => import('@/sections/dialogs/ProjectManager'));
+const ControlPointsDialog = lazy(() => import('@/sections/dialogs/ControlPointsDialog'));
+// v39: PHITS, CADMesh, JENDL-5
+const PHITSInputGeneratorDialog = lazy(() => import('@/sections/dialogs/PHITSInputGenerator'));
+const DCHAINActivationDialog = lazy(() => import('@/sections/dialogs/DCHAINActivationCalculator'));
+const CADToMCImportDialog = lazy(() => import('@/sections/dialogs/CADToMCImport'));
+const JENDL5DataViewerDialog = lazy(() => import('@/sections/dialogs/JENDL5DataViewer'));
+// v40: Recomendaciones implementadas
+const VersionHistoryDialog = lazy(() => import('@/sections/dialogs/VersionHistoryDialog'));
+const DICOMRTSTRUCTDialog = lazy(() => import('@/sections/dialogs/DICOMRTSTRUCTDialog'));
+const CNSNSDigitalSubmissionDialog = lazy(() => import('@/sections/dialogs/CNSNSDigitalSubmission'));
+// v41: GitHub-inspired integrations (TopasGraphSim, pyshield, OpenXRayMC, matRad)
+const GammaIndexAnalyzerDialog = lazy(() => import('@/sections/dialogs/GammaIndexAnalyzer'));
+const NuclearDoseGridDialog = lazy(() => import('@/sections/dialogs/NuclearDoseGrid'));
+const MonteCarloEngineDialog = lazy(() => import('@/sections/dialogs/MonteCarloEngine'));
+const DVHAnalyzerDialog = lazy(() => import('@/sections/dialogs/DVHAnalyzer'));
+// v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification
+const FLUKAInputGeneratorDialog = lazy(() => import('@/sections/dialogs/FLUKAInputGenerator'));
+const PENELOPEInputGeneratorDialog = lazy(() => import('@/sections/dialogs/PENELOPEInputGenerator'));
+const RadionuclideTherapyDosimetryDialog = lazy(() => import('@/sections/dialogs/RadionuclideTherapyDosimetry'));
+const ShieldingVerificationDialog = lazy(() => import('@/sections/dialogs/ShieldingVerification'));
+// v42: McGinley integration — Laminated barriers + Controlled areas
+const LaminatedBarrierCalculatorDialog = lazy(() => import('@/sections/dialogs/LaminatedBarrierCalculator'));
+const PerformanceRecommendationsDialog = lazy(() => import('@/sections/dialogs/PerformanceRecommendations'));
+// v50: Performance Dashboard — Grafana-style metrics, benchmarks, profiling
+const PerformanceDashboardDialog = lazy(() => import('@/sections/dialogs/PerformanceDashboardDialog'));
+// v51: CATIA-GDML Geometry Builder & CAD-to-ROOT Conversion
+const CADGeometryConverterDialog = lazy(() => import('@/sections/dialogs/CADGeometryConverterDialog'));
+// v43: Attila4MC-inspired FW-CADIS variance reduction
+const Attila4MCVarianceReductionDialog = lazy(() => import('@/sections/dialogs/Attila4MCVarianceReduction'));
+// v44: Attila4MC GUI features — MCNP Deck, CAD Mapper, 3D Solution Fields
+const MCNPGUIDeckGeneratorDialog = lazy(() => import('@/sections/dialogs/MCNPGUIDeckGenerator'));
+const CADAssemblyMapperDialog = lazy(() => import('@/sections/dialogs/CADAssemblyMapper'));
+const SolutionField3DDialog = lazy(() => import('@/sections/dialogs/SolutionField3D'));
+// v46: Recommendations A-E — Skyshine, Annual Dose, Cross-Validation, Oblique, Spectra, Adaptive, Self-Shielding, Transmission, Neutron Maze
+const SkyshineCalculatorDialog = lazy(() => import('@/sections/dialogs/SkyshineCalculator'));
+const AnnualDoseReportDialog = lazy(() => import('@/sections/dialogs/AnnualDoseReport'));
+const CrossValidationDialog = lazy(() => import('@/sections/dialogs/CrossValidationDialog'));
+const ObliqueIncidenceDialog = lazy(() => import('@/sections/dialogs/ObliqueIncidenceDialog'));
+const MultiEnergySpectraDialog = lazy(() => import('@/sections/dialogs/MultiEnergySpectraDialog'));
+const AdaptiveSamplingDialog = lazy(() => import('@/sections/dialogs/AdaptiveSamplingDialog'));
+const SelfShieldingDialog = lazy(() => import('@/sections/dialogs/SelfShieldingDialog'));
+const TransmissionCurveDialog = lazy(() => import('@/sections/dialogs/TransmissionCurveDialog'));
+const NeutronMazeDialog = lazy(() => import('@/sections/dialogs/NeutronMazeDialog'));
+// v47: St-Germain scatter method
+const StGermainScatterDialog = lazy(() => import('@/sections/dialogs/StGermainScatterDialog'));
+const SecondaryBarrierAlbedoDialog = lazy(() => import('@/sections/dialogs/SecondaryBarrierAlbedoDialog'));
+const ConcreteActivationDialog = lazy(() => import('@/sections/dialogs/ConcreteActivationDialog'));
+const CertificationModeDialog = lazy(() => import('@/sections/dialogs/CertificationModeDialog'));
+const CommunityTemplatesDialog = lazy(() => import('@/sections/dialogs/CommunityTemplatesDialog'));
+const AuditLogDialog = lazy(() => import('@/sections/dialogs/AuditLogDialog'));
+const AnalyticsDialog = lazy(() => import('@/sections/dialogs/AnalyticsDialog'));
+// v14.5: Bibliography validated
+const BibliographyDialog = lazy(() => import('@/sections/dialogs/BibliographyDialog'));
+// v13.8: Plan Validator
+const PlanValidatorDialog = lazy(() => import('@/sections/dialogs/PlanValidatorDialog'));
+// v14.0: Equipment Shielding Wizard
+const EquipmentShieldingWizard = lazy(() => import('@/sections/dialogs/EquipmentShieldingWizard'));
+// v14.1: Monte Carlo Simulation Wizard
+const MonteCarloSimulationWizard = lazy(() => import('@/sections/dialogs/MonteCarloSimulationWizard'));
+const AboutDialog = lazy(() => import('@/sections/dialogs/AboutDialog'));
+const GlossaryDialog = lazy(() => import('@/sections/dialogs/GlossaryDialog'));
+const SplashScreen = lazy(() => import('@/sections/dialogs/SplashScreen'));
+import { generatePDFReport } from '@/hooks/usePDFGenerator';
+
+type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'reset';
+
+const defaultFloorPlan: FloorPlan = {
+  id: 'plan-1',
+  name: 'Plano de Blindaje 1',
+  imageUrl: null,
+  scale_m_per_pixel: 0.01,
+  width_pixels: 1000,
+  height_pixels: 800,
+  barriers: [],
+  sources: [],
+  occupiedRegions: []
+};
+
+function DialogFallback() {
+  return (
+    <div className="p-6 flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-gray-300 border-t-red-700 rounded-full animate-spin" />
+    </div>
+  );
+}
+
+export default function ShieldingDesigner() {
+  const { state: floorPlan, setState: setFloorPlan, undo, redo, canUndo, canRedo, reset: resetFloorPlan } = useUndoRedo<FloorPlan>(defaultFloorPlan, { maxHistory: 50 });
+  const [activeTool, setActiveTool] = useState<Tool>('select');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // [ZUSTAND] Replaced: const [showExportDialog, setShowExportDialog] = useState(false);
+  // [ZUSTAND] Replaced: const [showCNSNSDialog, setShowCNSNSDialog] = useState(false);
+  // [ZUSTAND] Replaced: const [showMCDialog, setShowMCDialog] = useState(false);
+  // [ZUSTAND] Replaced: const [showProjectDialog, setShowProjectDialog] = useState(false);
+  // [ZUSTAND] viewer3d
+  // const [show3DDialog, setShow3DDialog] = useState(false);
+  // [ZUSTAND] maze
+  // const [showMazeDialog, setShowMazeDialog] = useState(false);
+  // [ZUSTAND] quickBarrier
+  // const [showQuickDialog, setShowQuickDialog] = useState(false);
+  // [ZUSTAND] equipmentDB
+  // const [showEquipmentDialog, setShowEquipmentDialog] = useState(false);
+  // [ZUSTAND] mcCloud
+  // const [showMCCloudDialog, setShowMCCloudDialog] = useState(false);
+  // [ZUSTAND] mcConfig
+  // const [showMCConfigDialog, setShowMCConfigDialog] = useState(false);
+  // [ZUSTAND] floorCeiling
+  const [showFloorCeilingDialog, setShowFloorCeilingDialog] = useState(false);
+  // [ZUSTAND] dashboardCalc
+  // const [showDashboardCalcDialog, setShowDashboardCalcDialog] = useState(false);
+  // [ZUSTAND] costEstimator
+  // const [showCostEstimatorDialog, setShowCostEstimatorDialog] = useState(false);
+  // [ZUSTAND] cnsnsChecklist
+  // const [showCNSNSChecklistDialog, setShowCNSNSChecklistDialog] = useState(false);
+  // MC dual-output config state
+  const [mcJobConfig, setMcJobConfig] = useState<{ jobId: number; format: string; particles: number; jobName: string } | null>(null);
+  // [ZUSTAND] mcResults — managed via calculationStore
+  const [lastMCResult, setLastMCResult] = useState<string | null>(null);
+  // [ZUSTAND] barrierCalculator
+  // const [showBarrierCalculatorDialog, setShowBarrierCalculatorDialog] = useState(false);
+  // Dark mode
+  const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
+  // v11.0: 20 improvements dialogs
+  // [ZUSTAND] batchImport
+  // const [showBatchImportDialog, setShowBatchImportDialog] = useState(false);
+  // [ZUSTAND] costOptimizer
+  // const [showCostOptimizerDialog, setShowCostOptimizerDialog] = useState(false);
+  // [ZUSTAND] neutron
+  // const [showNeutronDialog, setShowNeutronDialog] = useState(false);
+  // [ZUSTAND] seasonal
+  // const [showSeasonalDialog, setShowSeasonalDialog] = useState(false);
+  // [ZUSTAND] uncertainty
+  // const [showUncertaintyDialog, setShowUncertaintyDialog] = useState(false);
+  // [ZUSTAND] ventilation
+  // const [showVentilationDialog, setShowVentilationDialog] = useState(false);
+  // [ZUSTAND] dicom
+  // const [showDICOMDialog, setShowDICOMDialog] = useState(false);
+  // [ZUSTAND] techSpecs
+  // const [showTechSpecsDialog, setShowTechSpecsDialog] = useState(false);
+  // [ZUSTAND] cnsnsDashboard
+  // const [showCNSNSDashboardDialog, setShowCNSNSDashboardDialog] = useState(false);
+  // [ZUSTAND] dxfViewer
+  // const [showDXFViewer, setShowDXFViewer] = useState(false);
+  // [ZUSTAND] auditTrail
+  // const [showAuditTrailDialog, setShowAuditTrailDialog] = useState(false);
+  // [ZUSTAND] epaGuidance
+  // const [showEPAGuidanceDialog, setShowEPAGuidanceDialog] = useState(false);
+  // [ZUSTAND] shleien
+  // const [showShleienDialog, setShowShleienDialog] = useState(false);
+  // [ZUSTAND] gammaKnife
+  // const [showGammaKnifeDialog, setShowGammaKnifeDialog] = useState(false);
+  // [ZUSTAND] braquiCo60
+  // const [showBraquiCo60Dialog, setShowBraquiCo60Dialog] = useState(false);
+  // [ZUSTAND] versaHD
+  // const [showVersaHDDialog, setShowVersaHDDialog] = useState(false);
+  // [ZUSTAND] icru57
+  const [showICRU57Dialog, setShowICRU57Dialog] = useState(false);
+  // [ZUSTAND] icru96
+  const [showICRU96Dialog, setShowICRU96Dialog] = useState(false);
+  // v13.2: Consolidated library dialogs
+  // [ZUSTAND] equipmentLibrary
+  // const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(false);
+  // [ZUSTAND] referenceLibrary
+  // const [showReferenceLibrary, setShowReferenceLibrary] = useState(false);
+  // [ZUSTAND] ncrp151Tables
+  // const [showNCRP151Tables, setShowNCRP151Tables] = useState(false);
+  // v13.4: Shielding Calculator RadSHIELD Mx Protocol
+  // [ZUSTAND] shieldingCalculator
+  // const [showShieldingCalculator, setShowShieldingCalculator] = useState(false);
+  // v13.7: Memoria Analitica Wizard
+  const [showMemoriaWizard, setShowMemoriaWizard] = useState(false);
+  const [showMemoriaAI, setShowMemoriaAI] = useState(false);
+  // v13.8: Plan Validator
+  const [showPlanValidator, setShowPlanValidator] = useState(false);
+  // v14.0: Equipment Shielding Wizard
+  const [showEquipmentShieldingWizard, setShowEquipmentShieldingWizard] = useState(false);
+  // v14.1: Monte Carlo Simulation
+  const [showMonteCarloSim, setShowMonteCarloSim] = useState(false);
+  // v14.1: Cyclone KIUBE Wizard
+  const [showCycloneKIUBE, setShowCycloneKIUBE] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  // v14.3: Gap analysis states
+  const [showCBCTIGRT, setShowCBCTIGRT] = useState(false);
+  const [showLayoutBunker, setShowLayoutBunker] = useState(false);
+  const [showMaintenanceLog, setShowMaintenanceLog] = useState(false);
+  const [showScenarioAnalysis, setShowScenarioAnalysis] = useState(false);
+  // [ZUSTAND] showDashboard → store.dialogs["dashboard"]
+  // const [showDashboard, setShowDashboard] = useState(false);
+  const [showChecklistCNSNS, setShowChecklistCNSNS] = useState(false);
+  // v14.4: Special cases
+  const [showSpecialCases, setShowSpecialCases] = useState(false);
+  // v14.5: Bibliography
+  // [ZUSTAND] showBibliography → store.dialogs["bibliography"]
+  // const [showBibliography, setShowBibliography] = useState(false);
+  // v15: New dialogs
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showSmartSearchDICOM, setShowSmartSearchDICOM] = useState(false);
+  const [showLogFileAnalysis, setShowLogFileAnalysis] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(() => {
+    try { const dismissed = localStorage.getItem('radshield_welcome_dismissed'); const saved = localStorage.getItem('radshield_v15_welcome'); return !saved && !dismissed; } catch { return true; }
+  });
+  // v15: Status bar state
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [calculationStatus, setCalculationStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [isDirty, setIsDirty] = useState(false);
+  // v15: Command Palette
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  // v15: Undo/Redo History Panel
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+  const [actionHistory, setActionHistory] = useState<Array<{id: number; timestamp: number; action: string; description: string; type: string}>>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  // v15: Contextual Help Panel
+  const [showHelpPanel, setShowHelpPanel] = useState(false);
+  const [helpContext, setHelpContext] = useState('default');
+  // v15: Visualization dialogs
+  const [showIsodosis, setShowIsodosis] = useState(false);
+  const [showDose3D, setShowDose3D] = useState(false);
+  const [showHeatMap, setShowHeatMap] = useState(false);
+  // v15.2: Category C dialogs
+  const [showCompareMode, setShowCompareMode] = useState(false);
+  const [showBatchCalc, setShowBatchCalc] = useState(false);
+  const [showSensitivity, setShowSensitivity] = useState(false);
+  const [showAuditDashboard, setShowAuditDashboard] = useState(false);
+  // v15.2: MicroShield patterns
+  const [showGeometrySelector, setShowGeometrySelector] = useState(false);
+  const [showNuclideData, setShowNuclideData] = useState(false);
+  const [showDecayHeat, setShowDecayHeat] = useState(false);
+  const [showBuildupFactor, setShowBuildupFactor] = useState(false);
+  const [showExposureRateProjection, setShowExposureRateProjection] = useState(false);
+  // v15.2: Additional features (sketch, examples, CAD import)
+  const [showSketchPad, setShowSketchPad] = useState(false);
+  const [showExampleWizard, setShowExampleWizard] = useState(false);
+  const [showCADImport, setShowCADImport] = useState(false);
+  // v16: New features
+  const [showParametricBunker, setShowParametricBunker] = useState(false);
+  const [showMLPrediction, setShowMLPrediction] = useState(false);
+  const [showKeyboardConfig, setShowKeyboardConfig] = useState(false);
+  const [showCNSNSAutoReport, setShowCNSNSAutoReport] = useState(false);
+  // v17: Phy-X/PSD + Lead-free + Neutron removal
+  const [showMaterialProperty, setShowMaterialProperty] = useState(false);
+  const [showLeadFreeMaterials, setShowLeadFreeMaterials] = useState(false);
+  const [showNeutronRemoval, setShowNeutronRemoval] = useState(false);
+  // v18: Nuclear Medicine Advanced + Theme Engine + BIM + Cloud Sync + Validation
+  const [showNuclearMedicine, setShowNuclearMedicine] = useState(false);
+  const [showGMPCertification, setShowGMPCertification] = useState(false);
+  const [showAAPMTG108PET, setShowAAPMTG108PET] = useState(false);
+  const [showIPEM109, setShowIPEM109] = useState(false);
+  const [showChiltonSkyshine, setShowChiltonSkyshine] = useState(false);
+  const [showTherapyShielding, setShowTherapyShielding] = useState(false);
+  const [showDecayChains, setShowDecayChains] = useState(false);
+  // [ZUSTAND] showAbout → store.dialogs["about"]
+  // const [showAbout, setShowAbout] = useState(false);
+  // [ZUSTAND] showGlossary → store.dialogs["glossary"]
+  // const [showGlossary, setShowGlossary] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [showCompareScenarios, setShowCompareScenarios] = useState(false);
+  const [showTornadoSensitivity, setShowTornadoSensitivity] = useState(false);
+  const [showNCRPValidation, setShowNCRPValidation] = useState(false);
+  // [ZUSTAND] themeEngine, bimConnector, cloudSync, validationDashboard
+  // const [showThemeEngine, setShowThemeEngine] = useState(false);
+  // const [showBIMConnector, setShowBIMConnector] = useState(false);
+  // const [showCloudSync, setShowCloudSync] = useState(false);
+  // const [showValidationDashboard, setShowValidationDashboard] = useState(false);
+  // v19: External Software Connector
+  // [ZUSTAND] externalConnector
+  // const [showExternalConnector, setShowExternalConnector] = useState(false);
+  // v20: BIMRAD + Collaboration + GATE PET/SPECT
+  const [showBIMRAD, setShowBIMRAD] = useState(false);
+  const [showCollaboration, setShowCollaboration] = useState(false);
+  const [showGATE, setShowGATE] = useState(false);
+  // v21: Ejes 1, 2, 5 completos + Proteccion Industrial
+  const [showMonteCarlo, setShowMonteCarlo] = useState(false);
+  const [showGUMUncertainty, setShowGUMUncertainty] = useState(false);
+  const [showExperimental, setShowExperimental] = useState(false);
+  const [showDICOMRT, setShowDICOMRT] = useState(false);
+  // [ZUSTAND] Replaced: const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showAutoBarrier, setShowAutoBarrier] = useState(false);
+  const [showPredictiveMaterial, setShowPredictiveMaterial] = useState(false);
+  const [showAnomalyDetection, setShowAnomalyDetection] = useState(false);
+  const [showAutoFillEquipment, setShowAutoFillEquipment] = useState(false);
+  const [showVRAR, setShowVRAR] = useState(false);
+  const [showVideoTutorial, setShowVideoTutorial] = useState(false);
+  const [showAnimatedDose, setShowAnimatedDose] = useState(false);
+  const [showPointCloud, setShowPointCloud] = useState(false);
+  const [showIndustrial, setShowIndustrial] = useState(false);
+  // v22: Multi-Source Multi-Detector + PACS Integration
+  const [showMultiSource, setShowMultiSource] = useState(false);
+  const [showPACS, setShowPACS] = useState(false);
+  // v23: Eje 3 Regulation + Python Integration
+  const [showInternationalRegulations, setShowInternationalRegulations] = useState(false);
+  const [showRegulatoryComparison, setShowRegulatoryComparison] = useState(false);
+  const [showComplianceCertification, setShowComplianceCertification] = useState(false);
+  const [showRegulatoryAlerts, setShowRegulatoryAlerts] = useState(false);
+  const [showPythonIntegration, setShowPythonIntegration] = useState(false);
+  // v25: Native Monte Carlo
+  const [showNativeMC, setShowNativeMC] = useState(false);
+  // v26: Neutron + Bateman + NIST + Toolbox
+  const [showNeutronShielding, setShowNeutronShielding] = useState(false);
+  const [showBatemanDecay, setShowBatemanDecay] = useState(false);
+  const [showNISTLibrary, setShowNISTLibrary] = useState(false);
+  const [showModelingToolbox, setShowModelingToolbox] = useState(false);
+  // v27: Electron Transport + STEP Import
+  const [showElectronTransport, setShowElectronTransport] = useState(false);
+  const [showSTEPImporter, setShowSTEPImporter] = useState(false);
+  // v28: Manual de Usuario PDF
+  // [ZUSTAND] showManual → store.dialogs["manual"]
+  // const [showManual, setShowManual] = useState(false);
+  // v29: Real-Time 3D Design Exploration
+  const [showRealTime3D, setShowRealTime3D] = useState(false);
+  // v31: Dose Map Visualization
+  const [showDoseMap, setShowDoseMap] = useState(false);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  // v32: Shielding Optimizer + PACS Real + Electron Applicator
+  const [showShieldingOptimizer, setShowShieldingOptimizer] = useState(false);
+  const [showPACSReal, setShowPACSReal] = useState(false);
+  const [showElectronApplicator, setShowElectronApplicator] = useState(false);
+  // v33: Voxel Phantoms + MCNP Cyclotron + Shapes Reconstruction + Equipment Manager
+  const [showVoxelPhantom, setShowVoxelPhantom] = useState(false);
+  const [showMCNPCyclotron, setShowMCNPCyclotron] = useState(false);
+  const [showShapesReconstruction, setShowShapesReconstruction] = useState(false);
+  const [showEquipmentManager, setShowEquipmentManager] = useState(false);
+  // v34: Category Tools Dialog
+  const [showCategoryTools, setShowCategoryTools] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<'diagnostic' | 'therapy' | 'nuclear' | 'cyclotron'>('diagnostic');
+  // v35: Emergency Procedures
+  const [showEmergency, setShowEmergency] = useState(false);
+  // v38: Mosaic Atomics features
+  const [showBarrierEditor, setShowBarrierEditor] = useState(false);
+  const [showAirKermaOverlay, setShowAirKermaOverlay] = useState(false);
+  const [showMosaicProjectManager, setShowMosaicProjectManager] = useState(false);
+  const [showControlPoints, setShowControlPoints] = useState(false);
+  // v39: PHITS, CADMesh, JENDL-5
+  const [showPHITSGenerator, setShowPHITSGenerator] = useState(false);
+  const [showDCHAINCalc, setShowDCHAINCalc] = useState(false);
+  const [showCADToMC, setShowCADToMC] = useState(false);
+  const [showJENDL5Viewer, setShowJENDL5Viewer] = useState(false);
+  // v40: Nuevas recomendaciones
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showDICOMRTSTRUCT, setShowDICOMRTSTRUCT] = useState(false);
+  const [showCNSNSDigital, setShowCNSNSDigital] = useState(false);
+  // v41: GitHub-inspired integrations (TopasGraphSim, pyshield, OpenXRayMC, matRad)
+  const [showGammaIndex, setShowGammaIndex] = useState(false);
+  const [showNuclearDoseGrid, setShowNuclearDoseGrid] = useState(false);
+  const [showMonteCarloEngine, setShowMonteCarloEngine] = useState(false);
+  const [showDVHAnalyzer, setShowDVHAnalyzer] = useState(false);
+  // v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification
+  const [showFLUKA, setShowFLUKA] = useState(false);
+  const [showPENELOPE, setShowPENELOPE] = useState(false);
+  const [showTherapyDosimetry, setShowTherapyDosimetry] = useState(false);
+  const [showShieldingVerification, setShowShieldingVerification] = useState(false);
+  const [showLaminatedBarrier, setShowLaminatedBarrier] = useState(false);
+  const [showPerformanceRecommendations, setShowPerformanceRecommendations] = useState(false);
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
+  const [showCADGeometryConverter, setShowCADGeometryConverter] = useState(false);
+  const [showDesignAgent, setShowDesignAgent] = useState(false);
+  const [showAttila4MC, setShowAttila4MC] = useState(false);
+  const [showMCNPDeck, setShowMCNPDeck] = useState(false);
+  const [showCADMapper, setShowCADMapper] = useState(false);
+  const [showSolutionField3D, setShowSolutionField3D] = useState(false);
+  // v46: Recommendations A-E — Engine improvements
+  const [showSkyshine, setShowSkyshine] = useState(false);
+  const [showAnnualDose, setShowAnnualDose] = useState(false);
+  const [showCrossValidation, setShowCrossValidation] = useState(false);
+  const [showObliqueIncidence, setShowObliqueIncidence] = useState(false);
+  const [showMultiEnergySpectra, setShowMultiEnergySpectra] = useState(false);
+  const [showAdaptiveSampling, setShowAdaptiveSampling] = useState(false);
+  const [showSelfShielding, setShowSelfShielding] = useState(false);
+  const [showTransmissionCurve, setShowTransmissionCurve] = useState(false);
+  const [showNeutronMaze, setShowNeutronMaze] = useState(false);
+  // v47: St-Germain scatter method
+  const [showStGermain, setShowStGermain] = useState(false);
+  // v49: All remaining audit recommendations
+  const [showAlbedo, setShowAlbedo] = useState(false);
+  const [showConcreteActivation, setShowConcreteActivation] = useState(false);
+  const [showCertification, setShowCertification] = useState(false);
+  const [showCommunityTemplates, setShowCommunityTemplates] = useState(false);
+  const [showAuditLog, setShowAuditLog] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  // v42: Controlled areas hook
+  const controlledAreas = useControlledAreas();
+  const fileSystem = useFileSystemAccess();
+  const webgpu = useWebGPU();
+  const broadcastChannel = useBroadcastChannel();
+  const webWorker = useWebWorker();
+  const indexedDB = useIndexedDB();
+  const serviceWorker = useServiceWorker();
+  const wasm = useWASM();
+  // v47: Real API integrations — Fase 1.3, 1.4, 3.13
+  const calculationCache = useCalculationCache();
+  const workerCalculation = useWorkerCalculation();
+  const highContrast = useHighContrast();
+  // v48: WebGPU heatmap
+  const webgpuHeatmap = useWebGPUHeatmap();
+  // D.1: Screen Wake Lock API — keeps screen awake during calculations
+  const wakeLock = useWakeLock();
+  // D.2: Web Share API — native OS share sheet
+  const webShare = useWebShare();
+  // v50.1: Responsive layout
+  const responsive = useResponsiveLayout();
+  // v50: Async engine + profiler (instanciados una sola vez)
+  const asyncEngineRef = useRef(new AsyncShieldingEngine());
+  const profilerRef = useRef(createProfiler());
+  const rendererRef = useRef<CanvasRenderer | null>(null);
+  const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([
+    { id: 'cp-1', name: 'Control Desk', x: 150, y: 150, designGoal_mSv_per_wk: 0.02, occupancyFactor: 1.0, notes: 'Main control room' },
+    { id: 'cp-2', name: 'Patient Waiting', x: 500, y: 100, designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.2, notes: 'Public area' },
+    { id: 'cp-3', name: 'Staff Corridor', x: 350, y: 450, designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.1, notes: 'Staff only' },
+  ]);
+
+  // ═══ Keyboard Shortcuts (Recomendacion #8) ═══
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const key = e.key.toLowerCase();
+      const ctrl = e.ctrlKey || e.metaKey;
+      if (!ctrl) {
+        switch (key) {
+          case 'b': e.preventDefault(); setActiveTool('barrier'); toast.info('Tool: Barrier'); break;
+          case 'f': e.preventDefault(); setActiveTool('source'); toast.info('Tool: Source'); break;
+          case 's': e.preventDefault(); setActiveTool('select'); toast.info('Tool: Select'); break;
+          case 'm': e.preventDefault(); setActiveTool('measure'); toast.info('Tool: Measure'); break;
+          case 'h': e.preventDefault(); setActiveTool('pan'); toast.info('Tool: Pan'); break;
+          case 'escape': setActiveTool('select'); break;
+          case 'f5': e.preventDefault(); runRadShieldCalculations(); break;
+        }
+      } else {
+        switch (key) {
+          case 's': e.preventDefault(); handleNativeSave(); break;
+          case 'o': e.preventDefault(); handleNativeOpen(); break;
+          case 'b': e.preventDefault(); setShowQuickShielding(true); break;
+          case 'l': e.preventDefault(); setShowMazeCalculator(true); break;
+          case 'z': e.preventDefault(); undo(); toast.info('Undo'); break;
+          case 'y': e.preventDefault(); redo(); toast.info('Redo'); break;
+          case 'k': e.preventDefault(); setShowCommandPalette(true); break;
+          case 'g': e.preventDefault(); setActiveTool('region'); toast.info('Tool: Region'); break;
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Auto-load demo data when welcome screen is dismissed
+  useEffect(() => {
+    if (!showWelcomeScreen && floorPlan.barriers.length === 0 && floorPlan.sources.length === 0) {
+      // Load a demo R&F room configuration similar to RadShield paper (DeLorenzo et al. 2016, Fig. 6)
+      setFloorPlan(prev => ({
+        ...prev,
+        name: 'Demo - R&F Room (RadShield Fig.6)',
+        scale_m_per_pixel: 0.01,
+        sources: [
+          { id: 'source-chest', x: 300, y: 200, name: 'Chest X-ray', modality: { id: 'xr_chest', name: 'Chest Radiography', energies: [120], typicalDose_mGy: 0.2, workloadDefault: 150, unit: 'exams/week', description: 'Chest radiography, standing patient, wall Bucky' }, workloadValue: 150, workloadUnit: 'exams/week', isocenterHeight_m: 1.5, useFactor: 0.25, workloadHoursPerWeek: 40 },
+          { id: 'source-table', x: 350, y: 350, name: 'Table Top X-ray', modality: { id: 'xr_table', name: 'Table Top Radiography', energies: [90], typicalDose_mGy: 1.5, workloadDefault: 80, unit: 'exams/week', description: 'Table top radiography, supine patient' }, workloadValue: 80, workloadUnit: 'exams/week', isocenterHeight_m: 1.0, useFactor: 1.0, workloadHoursPerWeek: 40 },
+          { id: 'source-fluoro', x: 400, y: 300, name: 'Fluoroscopy', modality: { id: 'xr_fluoro', name: 'Fluoroscopy', energies: [110], typicalDose_mGy: 15, workloadDefault: 20, unit: 'hours/week', description: 'Continuous fluoroscopy for procedures' }, workloadValue: 20, workloadUnit: 'hours/week', isocenterHeight_m: 1.1, useFactor: 0.083, workloadHoursPerWeek: 20 },
+        ],
+        barriers: [
+          { id: 'wall-north', x1: 100, y1: 100, x2: 600, y2: 100, name: 'Wall 1 (North)', barrierType: 'primary', useFactor: 1.0, occupancyFactor: 1.0, designGoal_mSv_per_wk: 0.02, materialCode: 'CONCRETE235' },
+          { id: 'wall-east', x1: 600, y1: 100, x2: 600, y2: 500, name: 'Wall 2 (East)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: 0.2, designGoal_mSv_per_wk: 0.02, materialCode: 'CONCRETE235' },
+          { id: 'wall-south', x1: 100, y1: 500, x2: 600, y2: 500, name: 'Wall 3 (South)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: 1.0, designGoal_mSv_per_wk: 0.02, materialCode: 'CONCRETE235' },
+          { id: 'wall-west', x1: 100, y1: 100, x2: 100, y2: 500, name: 'Wall 4 (West)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: 0.2, designGoal_mSv_per_wk: 0.02, materialCode: 'CONCRETE235' },
+          { id: 'wall-divider', x1: 350, y1: 100, x2: 350, y2: 300, name: 'Wall 5 (Divider)', barrierType: 'primary', useFactor: 1.0, occupancyFactor: 0.5, designGoal_mSv_per_wk: 0.02, materialCode: 'CONCRETE235' },
+        ],
+        occupiedRegions: [
+          { id: 'region-control', name: 'Control Room', designGoal_mSv_per_wk: 0.02, occupancyFactor: 1.0, points: [{ x: 110, y: 110 }, { x: 340, y: 110 }, { x: 340, y: 290 }, { x: 110, y: 290 }] },
+          { id: 'region-corridor', name: 'Corridor', designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.2, points: [{ x: 360, y: 110 }, { x: 590, y: 110 }, { x: 590, y: 490 }, { x: 360, y: 490 }] },
+        ],
+      }));
+      toast.info('Demo cargado: R&F Room — RadShield Fig.6 (DeLorenzo et al. 2016)', { duration: 4000 });
+    }
+  }, [showWelcomeScreen]);
+
+  // D.2: Web Share — compartir resumen de calculos
+  const handleShare = useCallback(async () => {
+    if (!floorPlan.barriers.some(b => b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+    const passCount = floorPlan.barriers.filter(b => (b.maxKerma || 0) <= (b.designGoal_mSv_per_wk || 0.02)).length;
+    const totalCount = floorPlan.barriers.length;
+    const summaryText = `RadShield-MX: ${floorPlan.name}\n${totalCount} barreras calculadas | ${passCount}/${totalCount} PASS | Kerma max: ${Math.max(...floorPlan.barriers.map(b => b.maxKerma || 0)).toFixed(4)} mSv/sem`;
+    const shared = await webShare.share({ title: `RadShield-MX: ${floorPlan.name}`, text: summaryText });
+    if (shared) toast.success('Compartido exitosamente');
+  }, [floorPlan, webShare]);
+
+  // D.3: FileSystemAccess API para Ctrl+S / Ctrl+O (ya implementado en v47)
+  const handleNativeSave = useCallback(async () => {
+    try {
+      const blob = new Blob([JSON.stringify(floorPlan, null, 2)], { type: 'application/json' });
+      if ('showSaveFilePicker' in window) {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: `${floorPlan.name || 'proyecto'}.radshield`,
+          types: [{ description: 'RadShield-MX Project', accept: { 'application/json': ['.radshield', '.json'] } }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        toast.success('Proyecto guardado', { description: handle.name });
+      } else {
+        // Fallback: download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `${floorPlan.name || 'proyecto'}.radshield`; a.click();
+        URL.revokeObjectURL(url);
+        toast.success('Proyecto descargado');
+      }
+      setLastSaved(new Date());
+      setIsDirty(false);
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') toast.error('Error al guardar: ' + (err as Error).message);
+    }
+  }, [floorPlan]);
+
+  const handleNativeOpen = useCallback(async () => {
+    try {
+      let file: File;
+      if ('showOpenFilePicker' in window) {
+        const [handle] = await (window as any).showOpenFilePicker({
+          types: [{ description: 'RadShield-MX Project', accept: { 'application/json': ['.radshield', '.json'] } }],
+          multiple: false,
+        });
+        file = await handle.getFile();
+      } else {
+        // Fallback: input file
+        const input = document.createElement('input'); input.type = 'file'; input.accept = '.radshield,.json';
+        file = await new Promise<File>((resolve, reject) => {
+          input.onchange = () => { if (input.files?.[0]) resolve(input.files[0]); else reject(); };
+          input.click();
+        });
+      }
+      const text = await file.text();
+      const data = JSON.parse(text);
+      setFloorPlan(prev => ({ ...prev, ...data, imageUrl: data.imageUrl || prev.imageUrl }));
+      toast.success('Proyecto cargado', { description: data.name || file.name });
+      broadcastChannel.broadcast('project-loaded', { name: data.name });
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') toast.error('Error al abrir: ' + (err as Error).message);
+    }
+  }, [broadcastChannel]);
+
+  // Handle tool actions from CategoryToolsDialog + WelcomeScreen Quick Tools
+  const handleOpenTool = (action: string) => {
+    switch (action) {
+      // CategoryToolsDialog actions
+      case 'shieldingCalculator': useAppStore.getState().open('shieldingCalculator'); break;
+      case 'gammaKnife': useAppStore.getState().open('gammaKnife'); break;
+      case 'braquiCo60': useAppStore.getState().open('braquiCo60'); break;
+      case 'nuclearMedicine': setShowNuclearMedicine(true); break;
+      case 'cbctigrt': setShowCBCTIGRT(true); break;
+      case 'batemanDecay': setShowBatemanDecay(true); break;
+      case 'neutronShielding': setShowNeutronShielding(true); break;
+      case 'cycloneKIUBE': setShowCycloneKIUBE(true); break;
+      case 'electronApplicator': setShowElectronApplicator(true); break;
+      case 'mcnpCyclotron': setShowMCNPCyclotron(true); break;
+      case 'layoutBunker': setShowLayoutBunker(true); break;
+      case 'ventilation': toast.info('Ventilation calculator coming in v37'); break;
+      // WelcomeScreen Quick Tools
+      case 'shielding-calc': useAppStore.getState().open('shieldingCalculator'); break;
+      case 'laberinto': setShowMazeCalculator(true); break;
+      case 'suelo-techo': setShowFloorCeiling(true); break;
+      case 'uaq': setShowUAQ(true); break;
+      case 'monte-carlo': setShowNativeMC(true); break;
+      case 'neutrones': setShowNeutronShielding(true); break;
+      case 'costos': setShowCostEstimator(true); break;
+      case 'dose-map': setShowDoseMap(true); break;
+      case 'optimizer': setShowShieldingOptimizer(true); break;
+      case 'equipment': setShowEquipmentManager(true); break;
+      case 'pacs': setShowPACSReal(true); break;
+      case 'emergency': setShowEmergency(true); break;
+      case 'export-cad-3d': setShowRealTime3D(true); break;
+      case 'export-realtime-3d': setShowRealTime3D(true); break;
+      // v38: Mosaic Atomics tools
+      case 'barrier-editor': setShowBarrierEditor(true); break;
+      case 'air-kerma': setShowAirKermaOverlay(true); break;
+      case 'project-manager': setShowMosaicProjectManager(true); break;
+      case 'control-points': setShowControlPoints(true); break;
+      // v39: PHITS, CADMesh, JENDL-5
+      case 'phits-generator': setShowPHITSGenerator(true); break;
+      case 'dchain-calc': setShowDCHAINCalc(true); break;
+      case 'cad-to-mc': setShowCADToMC(true); break;
+      case 'jendl5-viewer': setShowJENDL5Viewer(true); break;
+      default: toast.info(`Tool "${action}" will be available in the next update`);
+    }
+  };
+  const [heatmapData, setHeatmapData] = useState<{ x: number; y: number; kerma: number }[]>([]);
+  const [isodosisProfiles, setIsodosisProfiles] = useState<CTIsodosisProfile[]>([]);
+  const [selectedIsodosisId, setSelectedIsodosisId] = useState<string | null>(null);
+
+  const [reportMeta, setReportMeta] = useState({
+    preparerName: '', reviewerName: '', institution: '', licenseNumber: ''
+  });
+  const [mcConfig, setMcConfig] = useState<MCConfig>({
+    numParticles: 1_000_000, physicsList: 'QGSP_BIC_EMY', cutValue_mm: 0.1, useVarianceReduction: true
+  });
+
+  const { calculateAllBarriers, calculateHeatmap, roundThickness } = useShieldingEngine();
+
+  // RadShield floor-plan driven state
+  const [sampleLines, setSampleLines] = useState<import('@/hooks/useCanvas').CanvasSampleLine[]>([]);
+  const [barrierResults, setBarrierResults] = useState<import('@/hooks/useCanvas').CanvasBarrierResult[]>([]);
+  const [showSampleLines, setShowSampleLines] = useState(true);
+  const [showSamplePoints, setShowSamplePoints] = useState(true);
+  const [showMaxima, setShowMaxima] = useState(true);
+
+  const { canvasRef, canvasState, setCanvasState, hoverInfo, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
+
+  // v48.4: Canvas keyboard navigation (must be after useCanvas for canvasRef)
+  const canvasKeyboardNav = useCanvasKeyboardNav({
+    canvasRef,
+    floorPlan,
+    state: { offsetX: canvasState.offsetX, offsetY: canvasState.offsetY, scale: canvasState.scale, selectedId: canvasState.selectedId },
+    onPan: (dx, dy) => setCanvasState(prev => ({ ...prev, offsetX: prev.offsetX + dx * prev.scale, offsetY: prev.offsetY + dy * prev.scale })),
+    onZoom: (factor) => setCanvasState(prev => ({ ...prev, scale: Math.max(0.1, Math.min(10, prev.scale * factor)) })),
+    onSelect: (id) => setCanvasState(prev => ({ ...prev, selectedId: id })),
+    onDelete: deleteSelected,
+    onFocusElement: (x, y) => setCanvasState(prev => ({
+      ...prev,
+      offsetX: -x * prev.scale + (canvasRef.current?.width || 800) / 2,
+      offsetY: -y * prev.scale + (canvasRef.current?.height || 600) / 2,
+    })),
+  });
+
+  // Fase 5: Local storage
+  const { projects, saveProject: saveProjectToStorage, loadProject, deleteProject, renameProject, exportProjectJSON, importProjectJSON, saveCurrent, loadCurrent } = useLocalStorage();
+
+  // Fase 5: Backend persistence via tRPC
+  const { user } = useAuth();
+  const createProjectMutation = trpc.project.create.useMutation({
+    onError: (err) => { toast.error(`Error al crear en nube: ${err.message}`); }
+  });
+  const updateProjectMutation = trpc.project.update.useMutation({
+    onError: (err) => { toast.error(`Error al actualizar en nube: ${err.message}`); }
+  });
+  const deleteProjectMutation = trpc.project.delete.useMutation({
+    onError: (err) => { toast.error(`Error al eliminar de nube: ${err.message}`); }
+  });
+  const cloudProjectsQuery = trpc.project.list.useQuery({ userId: user?.unionId || '' }, { enabled: !!user?.unionId, retry: false });
+  const utils = trpc.useUtils();
+
+  // v15: Track dirty state
+  useEffect(() => { setIsDirty(true); }, [floorPlan.barriers, floorPlan.sources, floorPlan.imageUrl]);
+
+  // Auto-save current project every 30 seconds
+  useEffect(() => {
+    const iv = setInterval(() => { saveCurrent(floorPlan); setLastSaved(new Date()); setIsDirty(false); }, 30000);
+    return () => clearInterval(iv);
+  }, [floorPlan, saveCurrent]);
+
+  // Try to restore from session on first load
+  useEffect(() => {
+    const saved = loadCurrent();
+    if (saved && saved.sources.length > 0) { resetFloorPlan(saved); toast.info('Proyecto restaurado de la sesion anterior'); }
+  }, []); // eslint-disable-line
+
+  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / ? / Ctrl+K
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isCtrl = e.ctrlKey || e.metaKey;
+      // "?" key (Shift + /) — Keyboard shortcuts
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setShowKeyboardShortcuts(v => !v);
+        return;
+      }
+      // Ctrl+K — Command Palette
+      if (isCtrl && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(v => !v);
+        return;
+      }
+      // Ctrl+H — History Panel
+      if (isCtrl && e.key === 'h') {
+        e.preventDefault();
+        setShowHistoryPanel(v => !v);
+        return;
+      }
+      // Ctrl+Shift+H — Help Panel
+      if (isCtrl && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
+        setShowHelpPanel(v => !v);
+        return;
+      }
+      if (!isCtrl) return;
+      if (e.key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        redo();
+      } else if (e.key === 'z') {
+        e.preventDefault();
+        undo();
+      } else if (e.key === 'y') {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [undo, redo]);
+
+  const handleSaveProject = useCallback((name: string) => {
+    saveProjectToStorage(floorPlan, name);
+    // Also save to backend if user is logged in
+    if (user?.unionId) {
+      const json = JSON.stringify(floorPlan);
+      const maxKerma = Math.max(...floorPlan.barriers.map(b => b.maxKerma || 0), 0);
+      const existingCloud = cloudProjectsQuery.data?.find(p => p.name === name);
+      if (existingCloud) {
+        updateProjectMutation.mutate({
+          id: existingCloud.id, userId: user.unionId, name, floorPlanJson: json,
+          modality: floorPlan.sources[0]?.modality.name || 'Desconocida',
+          numSources: String(floorPlan.sources.length),
+          numBarriers: String(floorPlan.barriers.length),
+          maxKerma: maxKerma.toFixed(4),
+        }, { onSuccess: () => { utils.project.list.invalidate(); toast.success('Proyecto actualizado en la nube'); } });
+      } else {
+        createProjectMutation.mutate({
+          userId: user.unionId, name, floorPlanJson: json, version: '1.2',
+          modality: floorPlan.sources[0]?.modality.name || 'Desconocida',
+          numSources: String(floorPlan.sources.length),
+          numBarriers: String(floorPlan.barriers.length),
+          maxKerma: maxKerma.toFixed(4),
+        }, { onSuccess: () => { utils.project.list.invalidate(); toast.success('Proyecto sincronizado en la nube'); } });
+      }
+    }
+  }, [floorPlan, saveProjectToStorage, user, createProjectMutation, updateProjectMutation, cloudProjectsQuery.data, utils]);
+
+  const handleLoadProject = useCallback((projectId: string) => {
+    // Try localStorage first
+    const localProj = loadProject(projectId);
+    if (localProj) { resetFloorPlan(localProj.floorPlan); toast.success('Proyecto local cargado'); return; }
+    // Try backend if logged in
+    if (user?.unionId && cloudProjectsQuery.data) {
+      const cloudProj = cloudProjectsQuery.data.find(p => String(p.id) === projectId);
+      if (cloudProj && cloudProj.floorPlanJson) {
+        try {
+          const fp = JSON.parse(cloudProj.floorPlanJson);
+          resetFloorPlan(fp);
+          toast.success('Proyecto de nube cargado');
+        } catch { toast.error('Error al parsear proyecto de nube'); }
+      }
+    }
+  }, [loadProject, user, cloudProjectsQuery.data, resetFloorPlan]);
+
+  const handleDeleteProject = useCallback((projectId: string) => {
+    deleteProject(projectId);
+    // Also delete from backend if logged in
+    if (user?.unionId && cloudProjectsQuery.data) {
+      const cloudProj = cloudProjectsQuery.data.find(p => String(p.id) === projectId);
+      if (cloudProj) {
+        deleteProjectMutation.mutate({ id: cloudProj.id, userId: user.unionId }, {
+          onSuccess: () => { utils.project.list.invalidate(); toast.success('Proyecto eliminado de la nube'); }
+        });
+      }
+    }
+  }, [deleteProject, user, cloudProjectsQuery.data, deleteProjectMutation, utils]);
+
+  // v15: Enhanced calculation with progress toast and Pass/Fail status
+  const runCalculations = useCallback(() => {
+    if (!floorPlan.sources.length) { toast.error('Agregue al menos una fuente de radiacion'); return; }
+    if (!floorPlan.barriers.length) { toast.error('Agregue al menos una barrera'); return; }
+    setCalculationStatus('running');
+    const toastId = toast.loading('Calculando blindajes...', {
+      description: `Procesando ${floorPlan.barriers.length} barreras con ${floorPlan.sources.length} fuentes`,
+    });
+    // Simulate progressive calculation with setTimeout for UX
+    setTimeout(async () => {
+      try {
+        const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
+        const updatedBarriers = calculateAllBarriers(floorPlan.barriers, floorPlan.sources, floorPlan.scale_m_per_pixel, ctProfile);
+        // Calculate Pass/Fail stats
+        const pass = updatedBarriers.filter(b => (b.maxKerma || 0) <= (b.designGoal_mSv_per_wk || 0.02)).length;
+        const warn = updatedBarriers.filter(b => {
+          const k = b.maxKerma || 0; const g = b.designGoal_mSv_per_wk || 0.02;
+          return k > g && k <= g * 1.5;
+        }).length;
+        const fail = updatedBarriers.filter(b => {
+          const k = b.maxKerma || 0; const g = b.designGoal_mSv_per_wk || 0.02;
+          return k > g * 1.5;
+        }).length;
+        setFloorPlan(prev => ({ ...prev, barriers: updatedBarriers }));
+        // v48.3: WebGPU heatmap acceleration
+        if (heatmapEnabled) {
+          let hm: { x: number; y: number; kerma: number }[] | null = null;
+          if (webgpuHeatmap.available) {
+            hm = await webgpuHeatmap.computeHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40);
+          }
+          if (!hm) { // Fallback to CPU
+            hm = calculateHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40, ctProfile);
+          }
+          setHeatmapData(hm);
+        }
+        setCalculationStatus(fail > 0 ? 'error' : warn > 0 ? 'success' : 'success');
+        setIsDirty(true);
+        // Dismiss loading and show enriched result toast
+        toast.dismiss(toastId);
+        if (fail > 0) {
+          toast.error(`Calculo completado: ${fail} barrera(s) FAIL`, {
+            description: `${pass} PASS, ${warn} WARN, ${fail} FAIL — Revise el panel Pass/Fail`,
+            duration: 6000,
+          });
+        } else if (warn > 0) {
+          toast.success(`Calculo completado con advertencias`, {
+            description: `${pass} PASS, ${warn} WARN — ${updatedBarriers.length} barreras calculadas`,
+            duration: 4000,
+          });
+        } else {
+          toast.success(`Todas las barreras PASS`, {
+            description: `${pass}/${updatedBarriers.length} barreras dentro del limite de diseno`,
+            duration: 4000,
+          });
+        }
+      } catch (err) {
+        setCalculationStatus('error');
+        toast.dismiss(toastId);
+        toast.error('Error en el calculo: ' + (err as Error).message);
+        captureException(err as Error, { 
+          context: 'Barrier Calculator (NCRP-151)', 
+          barriers: floorPlan.barriers.length, 
+          sources: floorPlan.sources.length 
+        });
+      }
+    }, 300);
+  }, [floorPlan, calculateAllBarriers, calculateHeatmap, setFloorPlan, heatmapEnabled, isodosisProfiles, selectedIsodosisId]);
+
+  // ===== RadShield Floor-Plan Driven Calculation =====
+  // FIXED v42: Now delegates to shieldingMath.ts (no more inline duplication)
+  // Uses proper TVL-based material conversion instead of hardcoded 120x factor
+  // Integrates McGinley scatter-primary ratios per angle (Table 2-1)
+  // v50: Motor optimizado con spatial hashing
+  // v50: Motor async optimizado con WebWorker + spatial hashing + profiler
+  const runRadShieldCalculations = useCallback(async () => {
+    if (floorPlan.barriers.length === 0 || floorPlan.sources.length === 0) {
+      toast.error('Se requieren barreras y fuentes para calcular');
+      return;
+    }
+
+    // Check cache first
+    const cached = await calculationCache.getCached(floorPlan);
+    if (cached) {
+      setSampleLines(cached.sampleLines as any);
+      setBarrierResults(cached.barrierResults as any);
+      announce(`${cached.barrierResults.length} barreras desde cache`, 'polite');
+      return;
+    }
+
+    // D.1: Request screen wake lock during calculation
+    await wakeLock.request();
+
+    const p = profilerRef.current;
+    const toastId = toast.loading('Calculando blindajes...', {
+      description: `${floorPlan.barriers.length} barreras x ${floorPlan.sources.length} fuentes | AsyncEngine | WebWorker${wakeLock.supported ? ' | WakeLock ON' : ''}`,
+    });
+
+    try {
+      const engine = asyncEngineRef.current;
+
+      const { results, sampleLines } = await p.run('engine.calculate', () =>
+        engine.calculate(
+          floorPlan.barriers,
+          floorPlan.sources,
+          floorPlan.scale_m_per_pixel || 0.01,
+          (pct) => toast.loading(`Progreso: ${pct}%`, { id: toastId })
+        )
+      );
+
+      p.run('state_update', () => {
+        setBarrierResults(results as any);
+        setSampleLines(sampleLines as any);
+      });
+
+      await calculationCache.setCached(floorPlan, results as any, sampleLines as any);
+
+      broadcastChannel.broadcast('calculation-result', {
+        barrierCount: results.length,
+        timestamp: Date.now(),
+      });
+
+      console.log(p.export());
+      p.report().forEach(r => console.log(`${r.name}: ${r.avgMs.toFixed(1)}ms avg (${r.calls} calls)`));
+
+      const failing = results.filter((r: any) => !r.pass).length;
+      announce(`${results.length} barreras calculadas. ${failing > 0 ? failing + ' requieren atencion.' : 'Todas cumplen.'}`, 'polite');
+
+      toast.dismiss(toastId);
+      toast.success(`Calculo completado - ${results.length} barreras`, {
+        description: failing > 0 ? `${failing} barreras no cumplen` : 'Todas cumplen',
+        duration: 4000,
+      });
+    } catch (err) {
+      toast.dismiss(toastId);
+      toast.error('Error: ' + (err as Error).message);
+      announce('Error en calculo', 'assertive');
+      captureException(err as Error, { 
+        context: 'RadShield AsyncEngine', 
+        barriers: floorPlan.barriers.length, 
+        sources: floorPlan.sources.length,
+        engine: 'WebWorker + SpatialHashing'
+      });
+    } finally {
+      // D.1: Release screen wake lock
+      await wakeLock.release();
+    }
+  }, [floorPlan, calculationCache, broadcastChannel, wakeLock]);
+
+  const selectedSource = floorPlan.sources.find(s => s.id === canvasState.selectedId) || null;
+  const selectedBarrier = floorPlan.barriers.find(b => b.id === canvasState.selectedId) || null;
+
+  const handleIsodosisUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { const profile = parseIsodosisFile(ev.target?.result as string, file.name); if (profile) { setIsodosisProfiles(prev => [...prev, profile]); setSelectedIsodosisId(profile.id); toast.success(`Curva isodosis cargada: ${profile.name}`); } else toast.error('Formato no reconocido'); };
+    reader.readAsText(file);
+  }, []);
+
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { setFloorPlan(prev => ({ ...prev, imageUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, '') })); toast.success(`Plano cargado: ${file.name}`); };
+    reader.readAsDataURL(file);
+  }, [setFloorPlan]);
+
+  const exportCSV = useCallback(() => {
+    const headers = ['Barrera_ID','Barrera_Nombre','Tipo','Longitud_m','Kerma_max_mSv_sem','Material_recomendado','Espesor_mm','Espesor_redondeado_mm','Material_2','Espesor_2_mm','Material_3','Espesor_3_mm','Fuente','Modalidad','Pacientes_Sem','Objetivo_mSv_sem'];
+    const rows = floorPlan.barriers.map(b => {
+      const length_m = Math.sqrt((b.x2-b.x1)**2+(b.y2-b.y1)**2)*floorPlan.scale_m_per_pixel;
+      const sortedMats = Object.entries(b.requiredThickness_mm||{}).map(([code,t])=>({code,t,mat:MATERIALS.find(m=>m.code===code)!})).filter(x=>x.mat).sort((a,b)=>a.t-b.t);
+      const [t1,t2,t3]=sortedMats;
+      return [b.id,b.name,b.barrierType,length_m.toFixed(2),(b.maxKerma||0).toFixed(4),t1?.mat?.name||'',(t1?.t||0).toFixed(2),roundThickness(t1?.t||0,t1?.code||'').toFixed(2),t2?.mat?.name||'',(t2?.t||0).toFixed(2),t3?.mat?.name||'',(t3?.t||0).toFixed(2),floorPlan.sources.map(s=>s.name).join('; '),floorPlan.sources.map(s=>s.modality.name).join('; '),floorPlan.sources.reduce((sum,s)=>sum+s.workloadValue,0).toString(),b.designGoal_mSv_per_wk.toString()];
+    });
+    const csv = [headers.join(','),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.csv`; a.click(); URL.revokeObjectURL(url);
+    toast.success('CSV exportado'); useAppStore.getState().close('export');
+  }, [floorPlan, roundThickness]);
+
+  const exportJSON = useCallback(() => {
+    const data={project:floorPlan.name,date:new Date().toISOString(),software:'RadShield-MX v1.2',scale_m_per_pixel:floorPlan.scale_m_per_pixel,numSources:floorPlan.sources.length,numBarriers:floorPlan.barriers.length,sources:floorPlan.sources.map(s=>({id:s.id,name:s.name,modality:s.modality.name,category:s.modality.category,workload:s.workloadValue})),barriers:floorPlan.barriers.map(b=>({id:b.id,name:b.name,type:b.barrierType,length_m:Math.sqrt((b.x2-b.x1)**2+(b.y2-b.y1)**2)*floorPlan.scale_m_per_pixel,maxKerma_mSv_wk:b.maxKerma||0,requiredThickness_mm:b.requiredThickness_mm||{}}))};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.json`; a.click(); URL.revokeObjectURL(url);
+    toast.success('JSON exportado');
+  }, [floorPlan]);
+
+  // E.1: Excel Export — Multi-sheet workbook
+  const exportExcel = useCallback(() => {
+    import('@/lib/excelExport').then(({ exportShieldingReport }) => {
+      const barriers = floorPlan.barriers.map(b => {
+        const sortedMats = Object.entries(b.requiredThickness_mm || {}).map(([code, t]) => ({ code, t: t as number, mat: MATERIALS.find(m => m.code === code) })).filter(x => x.mat).sort((a, b) => a.t - b.t);
+        const t1 = sortedMats[0];
+        return {
+          name: b.name,
+          type: b.barrierType,
+          material: t1?.mat?.name || 'N/A',
+          thickness: Math.round((t1?.t || 0) * 10) / 10,
+          tvls: t1 ? Math.ceil((t1.t || 0) / (t1.mat?.tvl_mm || 1)) : 0,
+          transmission: 0.001,
+          goalDose: b.designGoal_mSv_per_wk,
+        };
+      });
+      const totalConcrete = barriers.reduce((sum, b) => sum + (b.type === 'primary' ? b.thickness * 2.5 : b.thickness * 1.5), 0);
+      exportShieldingReport({
+        projectName: floorPlan.name,
+        barriers,
+        summary: {
+          totalConcreteVolume: Math.round(totalConcrete),
+          totalCost: Math.round(totalConcrete * 150),
+          maxDose: Math.max(...floorPlan.barriers.map(b => b.maxKerma || 0)),
+          compliance: floorPlan.barriers.every(b => (b.maxKerma || 0) <= b.designGoal_mSv_per_wk) ? 'CUMPLE NCRP 151' : 'REVISION REQUERIDA',
+        },
+      });
+      toast.success('Excel exportado — Multi-hoja');
+    });
+  }, [floorPlan]);
+
+  const generateReport = useCallback(async () => {
+    if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${floorPlan.name.replace(/\s+/g,'_')}.docx`; a.click(); URL.revokeObjectURL(url); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
+  }, [floorPlan, reportMeta, canvasRef]);
+
+  const generateMCMacro = useCallback(() => {
+    if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+    try { const macroG4=generateGEANT4Macro(floorPlan,mcConfig,''); const macroGate=generateGATEMacro(floorPlan,mcConfig,''); const instructions=generateValidationInstructions(floorPlan,mcConfig);
+      const dl=(content:string,fn:string)=>{const blob=new Blob([content],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();URL.revokeObjectURL(url);};
+      dl(macroG4,`${floorPlan.name.replace(/\s+/g,'_')}_geant4.mac`); dl(macroGate,`${floorPlan.name.replace(/\s+/g,'_')}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${floorPlan.name.replace(/\s+/g,'_')}.txt`);
+      toast.success('Macros MC descargados'); setShowMCDialog(false);
+    } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'MC Macro Generation', format: mcConfig.format }); }
+  }, [floorPlan, mcConfig]);
+
+  const handleUpdateSelected = useCallback((props: Partial<Barrier> | Partial<RadiationSource>) => { updateSelected(props); }, [updateSelected]);
+
+  // v10.1: PDF generation
+  const handleGeneratePDF = useCallback(() => {
+    if (!floorPlan.barriers.some(b => b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+    const blob = generatePDFReport(floorPlan, { ...reportMeta, date: new Date().toLocaleDateString('es-MX') });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${floorPlan.name.replace(/\s+/g, '_')}.pdf`; a.click(); URL.revokeObjectURL(url);
+    toast.success('PDF generado y descargado');
+  }, [floorPlan, reportMeta]);
+
+  // v15: Action history tracking
+  const addActionHistory = useCallback((action: string, description: string, type: string = 'other') => {
+    setActionHistory(prev => {
+      const next = [...prev, { id: prev.length, timestamp: Date.now(), action, description, type }];
+      if (next.length > 100) next.shift();
+      return next;
+    });
+    setHistoryIndex(prev => prev + 1);
+  }, []);
+
+  // v15: Command Palette handlers
+  const commandHandlers: Record<string, () => void> = {
+    onCalculate: runCalculations,
+    onShieldingCalculator: () => useAppStore.getState().open('shieldingCalculator'),
+    onEquipmentShieldingWizard: () => setShowEquipmentShieldingWizard(true),
+    onQuick: () => useAppStore.getState().open('quickBarrier'),
+    onMaze: () => useAppStore.getState().open('maze'),
+    onFloorCeiling: () => useAppStore.getState().open('floorCeiling'),
+    onNeutron: () => useAppStore.getState().open('neutron'),
+    onCBCTIGRT: () => setShowCBCTIGRT(true),
+    onVentilation: () => useAppStore.getState().open('ventilation'),
+    onUncertainty: () => useAppStore.getState().open('uncertainty'),
+    onSeasonal: () => useAppStore.getState().open('seasonal'),
+    onMC: () => setShowMCDialog(true),
+    onMCCloud: () => useAppStore.getState().open('mcConfig'),
+    onMonteCarloSim: () => setShowMonteCarloSim(true),
+    onCycloneKIUBE: () => setShowCycloneKIUBE(true),
+    onPlanValidator: () => setShowPlanValidator(true),
+    onChecklistCNSNS: () => setShowChecklistCNSNS(true),
+    onScenarioAnalysis: () => setShowScenarioAnalysis(true),
+    onDashboard: () => useAppStore.getState().open('dashboard'),
+    onMemoriaWizard: () => setShowMemoriaAI(true),
+    onCNSNS: () => setShowCNSNSDialog(true),
+    onPDF: handleGeneratePDF,
+    onMaintenanceLog: () => setShowMaintenanceLog(true),
+    onLogFileAnalysis: () => setShowLogFileAnalysis(true),
+    onDXFViewer: () => useAppStore.getState().open('dxfViewer'),
+    on3D: () => useAppStore.getState().open('viewer3d'),
+    onSmartSearchDICOM: () => setShowSmartSearchDICOM(true),
+    onIsodosisViewer: () => setShowIsodosis(true),
+    onDoseMapping3D: () => setShowDose3D(true),
+    onHeatMapViewer: () => setShowHeatMap(true),
+    // Category C
+    onCompareMode: () => setShowCompareMode(true),
+    onBatchCalc: () => setShowBatchCalc(true),
+    onSensitivity: () => setShowSensitivity(true),
+    onAuditDashboard: () => setShowAuditDashboard(true),
+    // MicroShield
+    onGeometrySelector: () => setShowGeometrySelector(true),
+    onNuclideData: () => setShowNuclideData(true),
+    onDecayHeat: () => setShowDecayHeat(true),
+    onBuildupFactor: () => setShowBuildupFactor(true),
+    onExposureRateProjection: () => setShowExposureRateProjection(true),
+    // Additional features
+    onSketchPad: () => setShowSketchPad(true),
+    onExampleWizard: () => setShowExampleWizard(true),
+    onCADImport: () => setShowCADImport(true),
+    // v16 features
+    onParametricBunker: () => setShowParametricBunker(true),
+    onMLPrediction: () => setShowMLPrediction(true),
+    onKeyboardConfig: () => setShowKeyboardConfig(true),
+    onCNSNSAutoReport: () => setShowCNSNSAutoReport(true),
+    onEquipmentLibrary: () => useAppStore.getState().open('equipmentLibrary'),
+    onReferenceLibrary: () => useAppStore.getState().open('referenceLibrary'),
+    onBibliography: () => useAppStore.getState().open('bibliography'),
+    onNCRP151Tables: () => useAppStore.getState().open('ncrp151Tables'),
+    onEPA: () => useAppStore.getState().open('epaGuidance'),
+    onShleien: () => useAppStore.getState().open('shleien'),
+    onGammaKnife: () => useAppStore.getState().open('gammaKnife'),
+    onBraquiCo60: () => useAppStore.getState().open('braquiCo60'),
+    onVersaHD: () => useAppStore.getState().open('versaHD'),
+    onICRU57: () => useAppStore.getState().open('icru57'),
+    onICRU96: () => useAppStore.getState().open('icru96'),
+    onLayoutBunker: () => setShowLayoutBunker(true),
+    onProjects: () => { useAppStore.getState().open('projects'); setShowWelcomeScreen(false); },
+    onBatchImport: () => useAppStore.getState().open('batchImport'),
+    onExport: () => useAppStore.getState().open('export'),
+    onTechSpecs: () => useAppStore.getState().open('techSpecs'),
+    onAuditTrail: () => useAppStore.getState().open('auditTrail'),
+    onKeyboardShortcuts: () => setShowKeyboardShortcuts(true),
+    onDarkModeToggle: toggleDarkMode,
+    onLangToggle: () => {},
+    onTutorial: () => setShowTutorial(true),
+    onManual: () => useAppStore.getState().open('manual'),
+    onDoseMap: () => setShowDoseMap(true),
+    // v41: GitHub-inspired integrations
+    onGammaIndex: () => setShowGammaIndex(true),
+    onNuclearDoseGrid: () => setShowNuclearDoseGrid(true),
+    onMonteCarloEngine: () => setShowMonteCarloEngine(true),
+    onDVHAnalyzer: () => setShowDVHAnalyzer(true),
+  };
+  const paletteActions = DEFAULT_COMMANDS(commandHandlers);
+
+  return (
+    <>
+      <SkipToContent />
+      <div className={`flex h-screen w-screen overflow-hidden flex-col ${highContrast.isHighContrast ? 'high-contrast bg-black' : 'bg-gray-50'}`}>
+      {/* v47 Fase 2.9: A11y announcer for screen readers */}
+      <A11yAnnouncer />
+      <Toolbar floorPlan={floorPlan} onCalculate={runCalculations} onExport={() => useAppStore.getState().open('export')} onShare={handleShare} onCNSNS={() => useAppStore.getState().open('cnsns')} onMC={() => useAppStore.getState().open('mc')} onProjects={() => { useAppStore.getState().open('projects'); setShowWelcomeScreen(false); }} on3D={()=>useAppStore.getState().open('viewer3d')} onMaze={()=>useAppStore.getState().open('maze')} onQuick={()=>useAppStore.getState().open('quickBarrier')} onEquipment={()=>useAppStore.getState().open('equipmentDB')} onPDF={handleGeneratePDF} onMCCloud={()=>useAppStore.getState().open('mcConfig')} onFloorCeiling={()=>useAppStore.getState().open('floorCeiling')} onBatchImport={()=>useAppStore.getState().open('batchImport')} onCostOptimizer={()=>useAppStore.getState().open('costOptimizer')} onNeutron={()=>useAppStore.getState().open('neutron')} onSeasonal={()=>useAppStore.getState().open('seasonal')} onUncertainty={()=>useAppStore.getState().open('uncertainty')} onVentilation={()=>useAppStore.getState().open('ventilation')} onDICOM={()=>useAppStore.getState().open('dicom')} onTechSpecs={()=>useAppStore.getState().open('techSpecs')} onCNSNSDashboard={()=>useAppStore.getState().open('cnsnsDashboard')} onAuditTrail={()=>useAppStore.getState().open('auditTrail')} onDashboardCalc={()=>useAppStore.getState().open('dashboardCalc')} onCostEstimator={()=>useAppStore.getState().open('costEstimator')} onCNSNSChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onBarrierCalculator={()=>useAppStore.getState().open('barrierCalculator')} onEPA={()=>useAppStore.getState().open('epaGuidance')} onShleien={()=>useAppStore.getState().open('shleien')} onGammaKnife={()=>useAppStore.getState().open('gammaKnife')} onBraquiCo60={()=>useAppStore.getState().open('braquiCo60')} onVersaHD={()=>useAppStore.getState().open('versaHD')} onICRU57={()=>useAppStore.getState().open('icru57')} onICRU96={()=>useAppStore.getState().open('icru96')} onEquipmentLibrary={()=>useAppStore.getState().open('equipmentLibrary')} onReferenceLibrary={()=>useAppStore.getState().open('referenceLibrary')} onNCRP151Tables={()=>useAppStore.getState().open('ncrp151Tables')} onShieldingCalculator={()=>useAppStore.getState().open('shieldingCalculator')} onCompareScenarios={()=>setShowCompareScenarios(true)} onTornadoSensitivity={()=>setShowTornadoSensitivity(true)} onNCRPValidation={()=>setShowNCRPValidation(true)} onDXFViewer={()=>useAppStore.getState().open('dxfViewer')} onMemoriaWizard={()=>setShowMemoriaWizard(true)} onPlanValidator={()=>setShowPlanValidator(true)} onEquipmentShieldingWizard={()=>setShowEquipmentShieldingWizard(true)} onMonteCarloSim={()=>setShowMonteCarloSim(true)} onCycloneKIUBE={()=>setShowCycloneKIUBE(true)} onTutorial={()=>setShowTutorial(true)} onCBCTIGRT={()=>setShowCBCTIGRT(true)} onLayoutBunker={()=>setShowLayoutBunker(true)} onMaintenanceLog={()=>setShowMaintenanceLog(true)} onScenarioAnalysis={()=>setShowScenarioAnalysis(true)} onDashboard={()=>useAppStore.getState().open('dashboard')} onChecklistCNSNS={()=>setShowChecklistCNSNS(true)} onSpecialCases={()=>setShowSpecialCases(true)} onBibliography={()=>useAppStore.getState().open('bibliography')} isDarkMode={isDarkMode} onDarkModeToggle={toggleDarkMode} onKeyboardShortcuts={()=>setShowKeyboardShortcuts(true)} onSmartSearchDICOM={()=>setShowSmartSearchDICOM(true)} onLogFileAnalysis={()=>setShowLogFileAnalysis(true)}
+          onMaterialProperty={()=>setShowMaterialProperty(true)} onLeadFreeMaterials={()=>setShowLeadFreeMaterials(true)} onNeutronRemoval={()=>setShowNeutronRemoval(true)}
+          onNuclearMedicine={()=>setShowNuclearMedicine(true)} onGMPCertification={()=>setShowGMPCertification(true)} onAAPMTG108PET={()=>setShowAAPMTG108PET(true)} onIPEM109={()=>setShowIPEM109(true)} onChiltonSkyshine={()=>setShowChiltonSkyshine(true)} onTherapyShielding={()=>setShowTherapyShielding(true)} onDecayChains={()=>setShowDecayChains(true)} onAbout={()=>useAppStore.getState().open('about')} onGlossary={()=>useAppStore.getState().open('glossary')} onThemeEngine={()=>useAppStore.getState().open('themeEngine')} onBIMConnector={()=>useAppStore.getState().open('bimConnector')} onCloudSync={()=>useAppStore.getState().open('cloudSync')} onValidationDashboard={()=>useAppStore.getState().open('validationDashboard')} onExternalConnector={()=>useAppStore.getState().open('externalConnector')}
+          onBIMRAD={()=>setShowBIMRAD(true)} onCollaboration={()=>setShowCollaboration(true)} onGATE={()=>setShowGATE(true)}
+          onMonteCarlo={()=>setShowMonteCarlo(true)} onGUMUncertainty={()=>setShowGUMUncertainty(true)} onExperimental={()=>setShowExperimental(true)} onDICOMRT={()=>setShowDICOMRT(true)} onAIShielding={() => useAppStore.getState().open('aiAssistant')} onAutoBarrier={()=>setShowAutoBarrier(true)} onPredictiveMaterial={()=>setShowPredictiveMaterial(true)} onAnomalyDetection={()=>setShowAnomalyDetection(true)} onAutoFillEquipment={()=>setShowAutoFillEquipment(true)} onVRAR={()=>setShowVRAR(true)} onVideoTutorial={()=>setShowVideoTutorial(true)} onAnimatedDose={()=>setShowAnimatedDose(true)} onPointCloud={()=>setShowPointCloud(true)} onIndustrial={()=>setShowIndustrial(true)}
+          onMultiSource={()=>setShowMultiSource(true)} onPACS={()=>setShowPACS(true)}
+          onInternationalRegulations={()=>setShowInternationalRegulations(true)} onRegulatoryComparison={()=>setShowRegulatoryComparison(true)} onComplianceCertification={()=>setShowComplianceCertification(true)} onRegulatoryAlerts={()=>setShowRegulatoryAlerts(true)} onPythonIntegration={()=>setShowPythonIntegration(true)}
+          onNativeMC={()=>setShowNativeMC(true)}
+          onNeutronShielding={()=>setShowNeutronShielding(true)} onBatemanDecay={()=>setShowBatemanDecay(true)} onNISTLibrary={()=>setShowNISTLibrary(true)} onModelingToolbox={()=>setShowModelingToolbox(true)}
+          onElectronTransport={()=>setShowElectronTransport(true)} onSTEPImporter={()=>setShowSTEPImporter(true)}
+          onManual={()=>useAppStore.getState().open('manual')}
+          onRealTime3D={()=>setShowRealTime3D(true)}
+          onDoseMap={()=>setShowDoseMap(true)}
+          onShieldingOptimizer={()=>setShowShieldingOptimizer(true)} onPACSReal={()=>setShowPACSReal(true)} onElectronApplicator={()=>setShowElectronApplicator(true)}
+          onVoxelPhantom={()=>setShowVoxelPhantom(true)} onMCNPCyclotron={()=>setShowMCNPCyclotron(true)} onShapesReconstruction={()=>setShowShapesReconstruction(true)} onEquipmentManager={()=>setShowEquipmentManager(true)}
+          onCategoryTools={(cat) => { setActiveCategory(cat); setShowCategoryTools(true); }}
+          onEmergency={() => setShowEmergency(true)}
+          onBarrierEditor={() => setShowBarrierEditor(true)}
+          onAirKermaOverlay={() => setShowAirKermaOverlay(true)}
+          onMosaicProjectManager={() => setShowMosaicProjectManager(true)}
+          onControlPoints={() => setShowControlPoints(true)}
+          onPHITSGenerator={() => setShowPHITSGenerator(true)}
+          onDCHAINCalc={() => setShowDCHAINCalc(true)}
+          onCADToMC={() => setShowCADToMC(true)}
+          onJENDL5Viewer={() => setShowJENDL5Viewer(true)}
+          onVersionHistory={() => setShowVersionHistory(true)}
+          onDICOMRTSTRUCT={() => setShowDICOMRTSTRUCT(true)}
+          onCNSNSDigital={() => setShowCNSNSDigital(true)}
+          // v41: GitHub-inspired integrations
+          onGammaIndex={() => setShowGammaIndex(true)}
+          onNuclearDoseGrid={() => setShowNuclearDoseGrid(true)}
+          onMonteCarloEngine={() => setShowMonteCarloEngine(true)}
+          onDVHAnalyzer={() => setShowDVHAnalyzer(true)}
+          // v41b
+          onFLUKA={() => setShowFLUKA(true)}
+          onPENELOPE={() => setShowPENELOPE(true)}
+          onTherapyDosimetry={() => setShowTherapyDosimetry(true)}
+          onShieldingVerification={() => setShowShieldingVerification(true)}
+          // v42: McGinley
+          onLaminatedBarrier={() => setShowLaminatedBarrier(true)}
+          onPerformanceRecommendations={() => setShowPerformanceRecommendations(true)}
+          onPerformanceDashboard={() => setShowPerformanceDashboard(true)}
+          onCADGeometryConverter={() => setShowCADGeometryConverter(true)}
+          onDesignAgent={() => setShowDesignAgent(true)}
+          // v43: Attila4MC
+          onAttila4MC={() => setShowAttila4MC(true)}
+          // v44: Attila4MC GUI features
+          onMCNPDeck={() => setShowMCNPDeck(true)}
+          onCADMapper={() => setShowCADMapper(true)}
+          onSolutionField3D={() => setShowSolutionField3D(true)}
+          // v45: WASM + Sensitivity Analysis
+          onSensitivityAnalysis={() => setShowSensitivity(true)}
+          // v46: Recommendations A-E
+          onSkyshine={() => setShowSkyshine(true)}
+          onAnnualDose={() => setShowAnnualDose(true)}
+          onCrossValidation={() => setShowCrossValidation(true)}
+          onObliqueIncidence={() => setShowObliqueIncidence(true)}
+          onMultiEnergySpectra={() => setShowMultiEnergySpectra(true)}
+          onAdaptiveSampling={() => setShowAdaptiveSampling(true)}
+          onSelfShielding={() => setShowSelfShielding(true)}
+          onTransmissionCurve={() => setShowTransmissionCurve(true)}
+          onNeutronMaze={() => setShowNeutronMaze(true)}
+          // v47: St-Germain + high contrast
+          onStGermain={() => setShowStGermain(true)}
+          highContrast={highContrast.isHighContrast}
+          onToggleHighContrast={highContrast.toggle}
+          // v49: All remaining audit recommendations
+          onAlbedo={() => setShowAlbedo(true)}
+          onConcreteActivation={() => setShowConcreteActivation(true)}
+          onCertification={() => setShowCertification(true)}
+          onCommunityTemplates={() => setShowCommunityTemplates(true)}
+          onAuditLog={() => setShowAuditLog(true)}
+          onAnalytics={() => setShowAnalytics(true)} />
+      <Suspense fallback={null}>
+        <OnboardingTour />
+      </Suspense>
+      <div className="flex-1 flex overflow-hidden">
+        {showWelcomeScreen ? (
+          <div className="welcome-panel flex-1">
+            <WelcomeScreen onNewProject={()=>{setShowWelcomeScreen(false);}} onOpenProject={()=>{setShowProjectDialog(true); setShowWelcomeScreen(false);}} onImportDXF={()=>{useAppStore.getState().open('dxfViewer'); setShowWelcomeScreen(false);}} onImportFloorPlan={()=>{const el=document.getElementById('floorplan-upload');if(el){(el as HTMLInputElement).click();}setShowWelcomeScreen(false);}} onLoadTemplate={(id)=>{toast.success(`Template cargado: ${id}`); setShowWelcomeScreen(false);}} onLoadRecent={(id)=>{handleLoadProject(id); setShowWelcomeScreen(false);}} onTutorial={()=>setShowTutorial(true)} onManual={()=>useAppStore.getState().open('manual')} onDismiss={()=>{setShowWelcomeScreen(false);}} onOpenTool={(toolId)=>{handleOpenTool(toolId);}} />
+          </div>
+        ) : (
+          <div className="flex flex-1 overflow-hidden" style={{ display: 'flex' }}>
+            {/* Sidebar Panel */}
+            <div className="w-80 min-w-[200px] max-w-[450px] bg-white border-r border-gray-200 flex flex-col shrink-0">
+              <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} />
+            </div>
+            {/* Resize Handle */}
+            <div className="w-1.5 bg-slate-200 hover:bg-[#f97316] active:bg-[#ea580c] transition-colors relative cursor-col-resize shrink-0">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-6 bg-slate-400 rounded-full" />
+            </div>
+            {/* Canvas Panel */}
+            <div className="flex-1 min-w-0 flex flex-col">
+              <div className="flex flex-col h-full main-canvas-area">
+                {/* Hidden file input for floor plan import */}
+                <input
+                  id="floorplan-upload"
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.tif,.tiff,.gif,.dxf,.csv"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <CanvasArea
+                  canvasRef={canvasRef} canvasState={canvasState} setCanvasState={setCanvasState}
+                  onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
+                  onWheel={handleWheel} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+                  onZoomToFit={zoomToFit} onExportPNG={exportPNG} onToggleSnap={toggleSnap}
+                  onImportFloorPlan={() => document.getElementById('floorplan-upload')?.click()}
+                  sampleLines={sampleLines}
+                  barrierResults={barrierResults}
+                  showSampleLines={showSampleLines}
+                  setShowSampleLines={setShowSampleLines}
+                  showSamplePoints={showSamplePoints}
+                  setShowSamplePoints={setShowSamplePoints}
+                  showMaxima={showMaxima}
+                  setShowMaxima={setShowMaxima}
+                  onRunCalculations={runRadShieldCalculations}
+                />
+                <ResultsPanel floorPlan={floorPlan} roundThickness={roundThickness} />
+                {/* v47 Fase 2.10: Canvas search (Ctrl+F) */}
+                <CanvasSearch
+                  floorPlan={floorPlan}
+                  canvasOffset={{ x: canvasState.offsetX, y: canvasState.offsetY }}
+                  canvasScale={canvasState.scale}
+                  onFocusElement={(x, y) => {
+                    setCanvasState(prev => ({
+                      ...prev,
+                      offsetX: -x * prev.scale + canvasRef.current!.width / 2,
+                      offsetY: -y * prev.scale + canvasRef.current!.height / 2,
+                    }));
+                  }}
+                />
+                {/* v47 Fase 3.11: Minimap navigator */}
+                <Minimap
+                  floorPlan={floorPlan}
+                  viewport={{
+                    x: -canvasState.offsetX / canvasState.scale,
+                    y: -canvasState.offsetY / canvasState.scale,
+                    width: canvasRef.current?.width || 800,
+                    height: canvasRef.current?.height || 600,
+                    scale: canvasState.scale,
+                  }}
+                  onViewportChange={(vx, vy) => {
+                    setCanvasState(prev => ({
+                      ...prev,
+                      offsetX: -vx * prev.scale,
+                      offsetY: -vy * prev.scale,
+                    }));
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {!showWelcomeScreen && (
+        <div className="status-bar">
+          <StatusBar projectName={floorPlan.name} lastSaved={lastSaved} isCalculating={calculationStatus==="running"} calculationStatus={calculationStatus} numSources={floorPlan.sources.length} numBarriers={floorPlan.barriers.length} numBarriersCalculated={floorPlan.barriers.filter(b=>b.requiredThickness_mm).length} version="RadShield-MX v50" isDirty={isDirty} />
+        </div>
+      )}
+      {/* Help panel floating button */}
+      {!showWelcomeScreen && (
+        <button
+          className="fixed bottom-10 right-4 z-50 w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+          onClick={() => setShowHelpPanel(v => !v)}
+          title="Panel de ayuda (Ctrl+Shift+H)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      )}
+      <Suspense fallback={<DialogFallback />}>
+        <LazyDialog name="export" component={ExportDialog} onExportCSV={exportCSV} onExportJSON={exportJSON} onExportExcel={exportExcel} />
+        <LazyDialog name="cnsns" component={CNSNSDialog} meta={reportMeta} setMeta={setReportMeta} onGenerate={generateReport} />
+        <LazyDialog name="mc" component={MCDialog} config={mcConfig} setConfig={setMcConfig} onGenerate={generateMCMacro} />
+        <LazyDialog name="projects" component={ProjectManagerDialog} projects={projects} cloudProjects={cloudProjectsQuery.data || []} currentProjectName={floorPlan.name} onSave={handleSaveProject} onLoad={handleLoadProject} onDelete={handleDeleteProject} onRename={renameProject} onExport={exportProjectJSON} onImport={importProjectJSON} isLoggedIn={!!user?.unionId} />
+        <LazyDialog name="viewer3d" component={Viewer3DDialog} floorPlan={floorPlan} />
+        <LazyDialog name="maze" component={MazeCalculatorDialog} />
+        <LazyDialog name="quickBarrier" component={QuickBarrierDialog} />
+        <LazyDialog name="equipmentDB" component={EquipmentDBDialog} />
+        <LazyDialog name="mcConfig" component={MCConfigDialog} floorPlan={floorPlan} onLaunchMC={(jobId: number, format: string) => { setMcJobConfig({ jobId, format, particles: 1000000, jobName: `MC_${floorPlan.name}` }); useAppStore.getState().close('mcConfig'); useAppStore.getState().open('mcCloud'); }} />
+        {mcJobConfig && <LazyDialog name="mcCloud" component={MCCloudDialog} projectId={floorPlan.id} format={mcJobConfig.format} particles={mcJobConfig.particles} jobName={mcJobConfig.jobName} />}
+        <LazyDialog name="barrierCalculator" component={BarrierCalculatorDialog} />
+        <LazyDialog name="floorCeiling" component={FloorCeilingDialog} />
+        <LazyDialog name="dashboardCalc" component={DashboardCalcDialog} floorPlan={floorPlan} />
+        <LazyDialog name="costEstimator" component={CostEstimatorDialog} />
+        <LazyDialog name="cnsnsChecklist" component={CNSNSChecklistDialog} />
+        <LazyDialog name="batchImport" component={BatchImportDialog} floorPlan={floorPlan} onImport={setFloorPlan} />
+        <LazyDialog name="costOptimizer" component={CostOptimizerDialog} />
+        <LazyDialog name="neutron" component={NeutronDialog} />
+        <LazyDialog name="seasonal" component={SeasonalDialog} baseWorkload={floorPlan.sources.reduce((s,src)=>s+src.workloadValue,0)} />
+        <LazyDialog name="uncertainty" component={UncertaintyDialog} />
+        <LazyDialog name="ventilation" component={VentilationDialog} />
+        <LazyDialog name="dicom" component={DICOMDialog} />
+        <LazyDialog name="techSpecs" component={TechSpecsDialog} floorPlanName={floorPlan.name} />
+        <LazyDialog name="cnsnsDashboard" component={CNSNSDashboardDialog} floorPlan={floorPlan} />
+        <LazyDialog name="auditTrail" component={AuditTrailDialog} projectId={floorPlan.id} />
+        <LazyDialog name="epaGuidance" component={EPAGuidanceDialog} />
+        <LazyDialog name="shleien" component={ShleienHandbookDialog} />
+        <LazyDialog name="gammaKnife" component={GammaKnifeDialog} />
+        <LazyDialog name="braquiCo60" component={BraquiterapiaCo60Dialog} />
+        <LazyDialog name="versaHD" component={VersaHD15MVDialog} />
+        <LazyDialog name="icru57" component={ICRU57Dialog} />
+        <LazyDialog name="icru96" component={ICRU96Dialog} />
+        <LazyDialog name="equipmentLibrary" component={EquipmentLibraryDialog} onOpenVersaHD={() => useAppStore.getState().open('versaHD')} onOpenGammaKnife={() => useAppStore.getState().open('gammaKnife')} onOpenBraquiCo60={() => useAppStore.getState().open('braquiCo60')} />
+        <LazyDialog name="referenceLibrary" component={ReferenceLibraryDialog} onOpenEPA={() => useAppStore.getState().open('epaGuidance')} onOpenShleien={() => useAppStore.getState().open('shleien')} onOpenICRU57={() => useAppStore.getState().open('icru57')} onOpenICRU96={() => useAppStore.getState().open('icru96')} />
+        <LazyDialog name="ncrp151Tables" component={NCRP151TablesDialog} />
+        <LazyDialog name="shieldingCalculator" component={ShieldingCalculatorDialog} />
+        <LazyDialog name="dxfViewer" component={DXFViewerDialog} />
+        {showMCResultsDialog && <MCResultsDialog open={showMCResultsDialog} onOpenChange={setShowMCResultsDialog} resultJson={lastMCResult} />}
+        {showMemoriaWizard && (
+          <Suspense fallback={<DialogFallback />}>
+            <MemoriaAnaliticaWizard open={showMemoriaWizard} onOpenChange={setShowMemoriaWizard} />
+          </Suspense>
+        )}
+        {/* v30: AI-Powered Analytical Memory Wizard */}
+        {showMemoriaAI && <MemoriaAIWizard open={showMemoriaAI} onOpenChange={setShowMemoriaAI} />}
+        {showPlanValidator && (
+          <Suspense fallback={<DialogFallback />}>
+            <PlanValidatorDialog open={showPlanValidator} onOpenChange={setShowPlanValidator} floorPlan={floorPlan} />
+          </Suspense>
+        )}
+        {showEquipmentShieldingWizard && (
+          <Suspense fallback={<DialogFallback />}>
+            <EquipmentShieldingWizard open={showEquipmentShieldingWizard} onOpenChange={setShowEquipmentShieldingWizard} />
+          </Suspense>
+        )}
+        {showMonteCarloSim && (
+          <Suspense fallback={<DialogFallback />}>
+            <MonteCarloSimulationWizard open={showMonteCarloSim} onOpenChange={setShowMonteCarloSim} />
+          </Suspense>
+        )}
+        {showCycloneKIUBE && (
+          <Suspense fallback={<DialogFallback />}>
+            <CycloneKIUBEWizard open={showCycloneKIUBE} onOpenChange={setShowCycloneKIUBE} />
+          </Suspense>
+        )}
+        {showTutorial && <TutorialDialog open={showTutorial} onOpenChange={setShowTutorial} />}
+        {showCBCTIGRT && (
+          <Suspense fallback={<DialogFallback />}>
+            <CBCTIGRTDialog open={showCBCTIGRT} onOpenChange={setShowCBCTIGRT} />
+          </Suspense>
+        )}
+        {showLayoutBunker && (
+          <Suspense fallback={<DialogFallback />}>
+            <LayoutBunkerDialog open={showLayoutBunker} onOpenChange={setShowLayoutBunker} />
+          </Suspense>
+        )}
+        {showMaintenanceLog && (
+          <Suspense fallback={<DialogFallback />}>
+            <MaintenanceLogDialog open={showMaintenanceLog} onOpenChange={setShowMaintenanceLog} />
+          </Suspense>
+        )}
+        {showScenarioAnalysis && (
+          <Suspense fallback={<DialogFallback />}>
+            <ScenarioAnalysisDialog open={showScenarioAnalysis} onOpenChange={setShowScenarioAnalysis} />
+          </Suspense>
+        )}
+        <LazyDialog name="dashboard" component={DashboardDialog} />
+        {showChecklistCNSNS && (
+          <Suspense fallback={<DialogFallback />}>
+            <ChecklistCNSNSDialog open={showChecklistCNSNS} onOpenChange={setShowChecklistCNSNS} />
+          </Suspense>
+        )}
+        {showSpecialCases && (
+          <Suspense fallback={<DialogFallback />}>
+            <SpecialCasesDialog open={showSpecialCases} onOpenChange={setShowSpecialCases} />
+          </Suspense>
+        )}
+        <LazyDialog name="bibliography" component={BibliographyDialog} />
+        {/* v15: New dialogs */}
+        <KeyboardShortcutsDialog open={showKeyboardShortcuts} onOpenChange={setShowKeyboardShortcuts} />
+        <SmartSearchDICOMDialog open={showSmartSearchDICOM} onOpenChange={setShowSmartSearchDICOM} />
+        <LogFileAnalysisDialog open={showLogFileAnalysis} onOpenChange={setShowLogFileAnalysis} />
+        {/* v15: Command Palette */}
+        <CommandPalette open={showCommandPalette} onOpenChange={setShowCommandPalette} actions={paletteActions} />
+        {/* v15: Undo/Redo History */}
+        <UndoRedoHistoryPanel open={showHistoryPanel} onOpenChange={setShowHistoryPanel} history={actionHistory} currentIndex={historyIndex} onJumpTo={(idx) => setHistoryIndex(idx)} onUndo={undo} onRedo={redo} canUndo={canUndo} canRedo={canRedo} />
+        {/* v15: Visualization dialogs */}
+        <IsodosisViewer open={showIsodosis} onOpenChange={setShowIsodosis} />
+        <DoseMapping3D open={showDose3D} onOpenChange={setShowDose3D} />
+        <HeatMapViewer open={showHeatMap} onOpenChange={setShowHeatMap} />
+        {/* v15: Contextual Help Panel (rendered inline, not in Suspense) */}
+        {showHelpPanel && <ContextualHelpPanel activeContext={helpContext} onClose={() => setShowHelpPanel(false)} />}
+        {/* v15.2: Category C dialogs (conditional mount) */}
+        {showCompareMode && <CompareModeDialog open={showCompareMode} onOpenChange={setShowCompareMode} />}
+        {showBatchCalc && <BatchCalculationDialog open={showBatchCalc} onOpenChange={setShowBatchCalc} />}
+        {showSensitivity && <SensitivityAnalysisDialog open={showSensitivity} onOpenChange={setShowSensitivity} />}
+        {showAuditDashboard && <AuditDashboardDialog open={showAuditDashboard} onOpenChange={setShowAuditDashboard} />}
+        {/* v15.2: MicroShield pattern dialogs (conditional mount) */}
+        {showGeometrySelector && <GeometrySelectorDialog open={showGeometrySelector} onOpenChange={setShowGeometrySelector} />}
+        {showNuclideData && <NuclideDataViewer open={showNuclideData} onOpenChange={setShowNuclideData} />}
+        {showDecayHeat && <DecayHeatCalculator open={showDecayHeat} onOpenChange={setShowDecayHeat} />}
+        {showBuildupFactor && <BuildupFactorDialog open={showBuildupFactor} onOpenChange={setShowBuildupFactor} />}
+        {showExposureRateProjection && <ExposureRateProjectionDialog open={showExposureRateProjection} onOpenChange={setShowExposureRateProjection} />}
+        {/* v15.2: Additional requested features */}
+        {showSketchPad && <SketchPadDialog open={showSketchPad} onOpenChange={setShowSketchPad} />}
+        {showExampleWizard && <ExampleWizardDialog open={showExampleWizard} onOpenChange={setShowExampleWizard} />}
+        {showCADImport && <CADImportDialog open={showCADImport} onOpenChange={setShowCADImport} />}
+        {/* v16: New feature dialogs */}
+        {showParametricBunker && <ParametricBunkerDesigner open={showParametricBunker} onOpenChange={setShowParametricBunker} />}
+        {showMLPrediction && <MLPredictionDialog open={showMLPrediction} onOpenChange={setShowMLPrediction} />}
+        {showKeyboardConfig && <KeyboardConfigDialog open={showKeyboardConfig} onOpenChange={setShowKeyboardConfig} />}
+        {showCNSNSAutoReport && <CNSNSAutoReportDialog open={showCNSNSAutoReport} onOpenChange={setShowCNSNSAutoReport} />}
+        {/* v17: Phy-X/PSD + Lead-free + Neutron removal */}
+        {showMaterialProperty && <MaterialPropertyCalculator open={showMaterialProperty} onOpenChange={setShowMaterialProperty} />}
+        {showLeadFreeMaterials && <LeadFreeMaterialsDialog open={showLeadFreeMaterials} onOpenChange={setShowLeadFreeMaterials} />}
+        {showNeutronRemoval && <NeutronRemovalDialog open={showNeutronRemoval} onOpenChange={setShowNeutronRemoval} />}
+        {/* v18: Nuclear Medicine Advanced + Theme Engine + BIM + Cloud Sync + Validation */}
+        {showNuclearMedicine && <NuclearMedicineAdvanced open={showNuclearMedicine} onOpenChange={setShowNuclearMedicine} />}
+        {showGMPCertification && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando certificación GMP...</p></div></div>}>
+            <GMPCyclotronCertificationDialog onClose={() => setShowGMPCertification(false)} />
+          </Suspense>
+        )}
+        {showAAPMTG108PET && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando AAPM TG 108...</p></div></div>}>
+            <AAPMTG108PETDialog onClose={() => setShowAAPMTG108PET(false)} />
+          </Suspense>
+        )}
+        {showIPEM109 && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando IPEM 109...</p></div></div>}>
+            <IPEMReport109Dialog onClose={() => setShowIPEM109(false)} />
+          </Suspense>
+        )}
+        {showChiltonSkyshine && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-sky-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando Chilton Skyshine...</p></div></div>}>
+            <ChiltonSkyshineDialog onClose={() => setShowChiltonSkyshine(false)} />
+          </Suspense>
+        )}
+        {showTherapyShielding && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-rose-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando Therapy Shielding...</p></div></div>}>
+            <TherapyShieldingDialog onClose={() => setShowTherapyShielding(false)} />
+          </Suspense>
+        )}
+        {showDecayChains && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando Decay Chains...</p></div></div>}>
+            <DecayChainsDialog onClose={() => setShowDecayChains(false)} />
+          </Suspense>
+        )}
+        {showCompareScenarios && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando comparación...</p></div></div>}>
+            <CompareScenariosDialog onClose={() => setShowCompareScenarios(false)} />
+          </Suspense>
+        )}
+        {showTornadoSensitivity && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando análisis de sensibilidad...</p></div></div>}>
+            <TornadoSensitivityDialog onClose={() => setShowTornadoSensitivity(false)} />
+          </Suspense>
+        )}
+        {showNCRPValidation && (
+          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"><div className="bg-white rounded-lg p-6 shadow-xl"><div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto" /><p className="mt-3 text-sm text-slate-600">Cargando suite de validación...</p></div></div>}>
+            <NCRPValidationDialog onClose={() => setShowNCRPValidation(false)} />
+          </Suspense>
+        )}
+        <LazyDialog name="about" component={AboutDialog} />
+        <LazyDialog name="glossary" component={GlossaryDialog} />
+        {showSplash && (
+          <Suspense fallback={null}>
+            <SplashScreen onClose={() => setShowSplash(false)} />
+          </Suspense>
+        )}
+        <LazyDialog name="themeEngine" component={ThemeEngineDialog} />
+        <LazyDialog name="bimConnector" component={BIMConnectorDialog} />
+        <LazyDialog name="cloudSync" component={CloudSyncDialog} />
+        <LazyDialog name="validationDashboard" component={ValidationDashboardDialog} />
+        <LazyDialog name="externalConnector" component={ExternalConnectorDialog} />
+        {/* v20: BIMRAD + Collaboration + GATE PET/SPECT */}
+        {showBIMRAD && <BIMRADDialog open={showBIMRAD} onOpenChange={setShowBIMRAD} />}
+        {showCollaboration && <CollaborationHub open={showCollaboration} onOpenChange={setShowCollaboration} />}
+        {showGATE && <GATESimulationDialog open={showGATE} onOpenChange={setShowGATE} />}
+        {/* v21: Ejes 1, 2, 5 + Proteccion Industrial */}
+        {showMonteCarlo && <MonteCarloIntegrationDialog open={showMonteCarlo} onOpenChange={setShowMonteCarlo} />}
+        {showGUMUncertainty && <UncertaintyQuantificationDialog open={showGUMUncertainty} onOpenChange={setShowGUMUncertainty} />}
+        {showExperimental && <ExperimentalValidationDialog open={showExperimental} onOpenChange={setShowExperimental} />}
+        {showDICOMRT && <DICOMRTIntegrationDialog open={showDICOMRT} onOpenChange={setShowDICOMRT} />}
+        <LazyDialog name="aiAssistant" component={AIAssistantDialog} />
+        {showAutoBarrier && <AutoBarrierDetectionDialog open={showAutoBarrier} onOpenChange={setShowAutoBarrier} />}
+        {showPredictiveMaterial && <PredictiveMaterialDialog open={showPredictiveMaterial} onOpenChange={setShowPredictiveMaterial} />}
+        {showAnomalyDetection && <AnomalyDetectionDialog open={showAnomalyDetection} onOpenChange={setShowAnomalyDetection} />}
+        {showAutoFillEquipment && <AutoFillEquipmentDialog open={showAutoFillEquipment} onOpenChange={setShowAutoFillEquipment} />}
+        {showVRAR && <VRARBunkerPreview open={showVRAR} onOpenChange={setShowVRAR} />}
+        {showVideoTutorial && <VideoTutorialGenerator open={showVideoTutorial} onOpenChange={setShowVideoTutorial} />}
+        {showAnimatedDose && <AnimatedDoseMapsDialog open={showAnimatedDose} onOpenChange={setShowAnimatedDose} />}
+        {showPointCloud && <PointCloudImportDialog open={showPointCloud} onOpenChange={setShowPointCloud} />}
+        {showIndustrial && <IndustrialRadiationDialog open={showIndustrial} onOpenChange={setShowIndustrial} />}
+        {/* v22: Multi-Source Multi-Detector + PACS Integration */}
+        {showMultiSource && <MultiSourceDetectorDialog open={showMultiSource} onOpenChange={setShowMultiSource} />}
+        {showPACS && <PACSIntegrationDialog open={showPACS} onOpenChange={setShowPACS} />}
+        {/* v23: Eje 3 Regulation + Python Integration */}
+        {showInternationalRegulations && <InternationalRegulationsDialog open={showInternationalRegulations} onOpenChange={setShowInternationalRegulations} />}
+        {showRegulatoryComparison && <RegulatoryComparisonDialog open={showRegulatoryComparison} onOpenChange={setShowRegulatoryComparison} />}
+        {showComplianceCertification && <ComplianceCertificationDialog open={showComplianceCertification} onOpenChange={setShowComplianceCertification} />}
+        {showRegulatoryAlerts && <RegulatoryAlertsDialog open={showRegulatoryAlerts} onOpenChange={setShowRegulatoryAlerts} />}
+        {showPythonIntegration && <PythonIntegrationDialog open={showPythonIntegration} onOpenChange={setShowPythonIntegration} />}
+        {/* v25: Native Monte Carlo */}
+        {showNativeMC && <NativeMCDialog open={showNativeMC} onOpenChange={setShowNativeMC} />}
+        {/* v26: Neutron + Bateman + NIST + Toolbox */}
+        {showNeutronShielding && <NeutronShieldingDialog open={showNeutronShielding} onOpenChange={setShowNeutronShielding} />}
+        {showBatemanDecay && <BatemanDecayDialog open={showBatemanDecay} onOpenChange={setShowBatemanDecay} />}
+        {showNISTLibrary && <NISTLibraryDialog open={showNISTLibrary} onOpenChange={setShowNISTLibrary} />}
+        {showModelingToolbox && <ModelingToolboxDialog open={showModelingToolbox} onOpenChange={setShowModelingToolbox} />}
+        {/* v27: Electron Transport + STEP Import */}
+        {showElectronTransport && <ElectronTransportDialog open={showElectronTransport} onOpenChange={setShowElectronTransport} />}
+        {showSTEPImporter && <STEPImporterDialog open={showSTEPImporter} onOpenChange={setShowSTEPImporter} />}
+        {/* v28: Manual de Usuario PDF */}
+        <LazyDialog name="manual" component={ManualDialog} />
+        {/* v29: Real-Time 3D Design Exploration */}
+        {showRealTime3D && <RealTime3DDialog open={showRealTime3D} onOpenChange={setShowRealTime3D} floorPlan={floorPlan} />}
+        {/* v31: Dose Map Visualization */}
+        {showDoseMap && <DoseMapDialog open={showDoseMap} onOpenChange={setShowDoseMap} />}
+        {/* v32: Shielding Optimizer + PACS Real + Electron Applicator */}
+        {showShieldingOptimizer && <ShieldingOptimizerDialog open={showShieldingOptimizer} onOpenChange={setShowShieldingOptimizer} floorPlan={floorPlan} />}
+        {showPACSReal && <PACSRealDialog open={showPACSReal} onOpenChange={setShowPACSReal} />}
+        {showElectronApplicator && <ElectronApplicatorDialog open={showElectronApplicator} onOpenChange={setShowElectronApplicator} />}
+        {/* v33: Voxel Phantoms + MCNP Cyclotron + Shapes Reconstruction + Equipment Manager */}
+        {showVoxelPhantom && <VoxelPhantomDialog open={showVoxelPhantom} onOpenChange={setShowVoxelPhantom} />}
+        {showMCNPCyclotron && <MCNPCyclotronDialog open={showMCNPCyclotron} onOpenChange={setShowMCNPCyclotron} />}
+        {showShapesReconstruction && <ShapesReconstructionDialog open={showShapesReconstruction} onOpenChange={setShowShapesReconstruction} />}
+        {showEquipmentManager && <EquipmentManagerDialog open={showEquipmentManager} onOpenChange={setShowEquipmentManager} />}
+        {/* v34: Category Tools Dialog (DX/TX/NM/CY) */}
+        {showCategoryTools && (
+          <CategoryToolsDialog
+            open={showCategoryTools}
+            onOpenChange={setShowCategoryTools}
+            initialCategory={activeCategory}
+            onOpenTool={handleOpenTool}
+          />
+        )}
+        {/* v35: Emergency Procedures */}
+        {showEmergency && <EmergencyProceduresDialog open={showEmergency} onOpenChange={setShowEmergency} />}
+        {/* v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points */}
+        {showBarrierEditor && (
+          <BarrierEditorDialog barriers={floorPlan.barriers} onUpdateBarrier={(id, updates) => setFloorPlan(p => ({ ...p, barriers: p.barriers.map(b => b.id === id ? { ...b, ...updates } : b) }))} onClose={() => setShowBarrierEditor(false)} onGenerateRecommendations={runRadShieldCalculations} />
+        )}
+        {showAirKermaOverlay && (
+          <AirKermaOverlayDialog distributions={barrierResults.map(r => ({
+            barrierId: r.barrierId,
+            barrierName: r.barrierName,
+            points: Array.from({ length: 50 }, (_, i) => ({
+              x: i * 0.1,
+              kerma: r.maxKermaRate_mGy_per_wk * (0.5 + 0.5 * Math.sin(i * 0.2)),
+              shieldedKerma: r.maxKermaRate_mGy_per_wk * 0.1 * (0.5 + 0.5 * Math.sin(i * 0.2)),
+              thickness: r.maxBarrierThickness_mm * (0.8 + 0.2 * Math.sin(i * 0.3)),
+            })),
+            maxKerma: r.maxKermaRate_mGy_per_wk,
+            maxKermaX: 2.5,
+            maxThickness: r.maxBarrierThickness_mm,
+            designGoal: 0.02,
+            material: r.material,
+          }))} onClose={() => setShowAirKermaOverlay(false)} onExportPDF={() => toast.success('Air kerma report exported')} />
+        )}
+        {showMosaicProjectManager && (
+          <MosaicProjectManagerDialog onClose={() => setShowMosaicProjectManager(false)} onOpenProject={(id) => { handleLoadProject(id); setShowMosaicProjectManager(false); }} />
+        )}
+        {showControlPoints && (
+          <ControlPointsDialog controlPoints={controlPoints} onUpdate={setControlPoints} onClose={() => setShowControlPoints(false)} floorPlanWidth={floorPlan.width_pixels} floorPlanHeight={floorPlan.height_pixels} />
+        )}
+        {/* v39: PHITS, CADMesh, JENDL-5 */}
+        {showPHITSGenerator && (
+          <PHITSInputGeneratorDialog open={showPHITSGenerator} onOpenChange={setShowPHITSGenerator} floorPlan={{ name: floorPlan.name, sources: floorPlan.sources, barriers: floorPlan.barriers }} />
+        )}
+        {showDCHAINCalc && (
+          <DCHAINActivationDialog open={showDCHAINCalc} onOpenChange={setShowDCHAINCalc} />
+        )}
+        {showCADToMC && (
+          <CADToMCImportDialog open={showCADToMC} onOpenChange={setShowCADToMC} />
+        )}
+        {showJENDL5Viewer && (
+          <JENDL5DataViewerDialog open={showJENDL5Viewer} onOpenChange={setShowJENDL5Viewer} />
+        )}
+        {/* v40: Nuevos dialogs */}
+        {showVersionHistory && (
+          <VersionHistoryDialog open={showVersionHistory} onOpenChange={setShowVersionHistory} />
+        )}
+        {showDICOMRTSTRUCT && (
+          <DICOMRTSTRUCTDialog open={showDICOMRTSTRUCT} onOpenChange={setShowDICOMRTSTRUCT} />
+        )}
+        {showCNSNSDigital && (
+          <CNSNSDigitalSubmissionDialog open={showCNSNSDigital} onOpenChange={setShowCNSNSDigital} />
+        )}
+        {/* v41: GitHub-inspired integrations (TopasGraphSim, pyshield, OpenXRayMC, matRad) */}
+        {showGammaIndex && (
+          <Suspense fallback={<DialogFallback />}>
+            <GammaIndexAnalyzerDialog open={showGammaIndex} onClose={() => setShowGammaIndex(false)} />
+          </Suspense>
+        )}
+        {showNuclearDoseGrid && (
+          <Suspense fallback={<DialogFallback />}>
+            <NuclearDoseGridDialog open={showNuclearDoseGrid} onClose={() => setShowNuclearDoseGrid(false)} />
+          </Suspense>
+        )}
+        {showMonteCarloEngine && (
+          <Suspense fallback={<DialogFallback />}>
+            <MonteCarloEngineDialog open={showMonteCarloEngine} onClose={() => setShowMonteCarloEngine(false)} />
+          </Suspense>
+        )}
+        {showDVHAnalyzer && (
+          <Suspense fallback={<DialogFallback />}>
+            <DVHAnalyzerDialog open={showDVHAnalyzer} onClose={() => setShowDVHAnalyzer(false)} />
+          </Suspense>
+        )}
+        {/* v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification */}
+        {showFLUKA && (
+          <Suspense fallback={<DialogFallback />}>
+            <FLUKAInputGeneratorDialog open={showFLUKA} onClose={() => setShowFLUKA(false)} />
+          </Suspense>
+        )}
+        {showPENELOPE && (
+          <Suspense fallback={<DialogFallback />}>
+            <PENELOPEInputGeneratorDialog open={showPENELOPE} onClose={() => setShowPENELOPE(false)} />
+          </Suspense>
+        )}
+        {showTherapyDosimetry && (
+          <Suspense fallback={<DialogFallback />}>
+            <RadionuclideTherapyDosimetryDialog open={showTherapyDosimetry} onClose={() => setShowTherapyDosimetry(false)} />
+          </Suspense>
+        )}
+        {showShieldingVerification && (
+          <Suspense fallback={<DialogFallback />}>
+            <ShieldingVerificationDialog open={showShieldingVerification} onClose={() => setShowShieldingVerification(false)} />
+          </Suspense>
+        )}
+        {showLaminatedBarrier && (
+          <Suspense fallback={<DialogFallback />}>
+            <LaminatedBarrierCalculatorDialog open={showLaminatedBarrier} onClose={() => setShowLaminatedBarrier(false)} />
+          </Suspense>
+        )}
+        {showPerformanceRecommendations && (
+          <Suspense fallback={<DialogFallback />}>
+            <PerformanceRecommendationsDialog open={showPerformanceRecommendations} onClose={() => setShowPerformanceRecommendations(false)} />
+          </Suspense>
+        )}
+        {showPerformanceDashboard && (
+          <Suspense fallback={<DialogFallback />}>
+            <PerformanceDashboardDialog open={showPerformanceDashboard} onClose={() => setShowPerformanceDashboard(false)} />
+          </Suspense>
+        )}
+        {showCADGeometryConverter && (
+          <Suspense fallback={<DialogFallback />}>
+            <CADGeometryConverterDialog open={showCADGeometryConverter} onClose={() => setShowCADGeometryConverter(false)} />
+            {showDesignAgent && (
+              <Suspense fallback={null}>
+                <ShieldingDesignAgentDialog open={showDesignAgent} onOpenChange={setShowDesignAgent} />
+              </Suspense>
+            )}
+          </Suspense>
+        )}
+        {showAttila4MC && (
+          <Suspense fallback={<DialogFallback />}>
+            <Attila4MCVarianceReductionDialog open={showAttila4MC} onClose={() => setShowAttila4MC(false)} />
+          </Suspense>
+        )}
+        {/* v44: Attila4MC GUI features */}
+        {showMCNPDeck && (
+          <Suspense fallback={<DialogFallback />}>
+            <MCNPGUIDeckGeneratorDialog open={showMCNPDeck} onClose={() => setShowMCNPDeck(false)} />
+          </Suspense>
+        )}
+        {showCADMapper && (
+          <Suspense fallback={<DialogFallback />}>
+            <CADAssemblyMapperDialog open={showCADMapper} onClose={() => setShowCADMapper(false)} />
+          </Suspense>
+        )}
+        {showSolutionField3D && (
+          <Suspense fallback={<DialogFallback />}>
+            <SolutionField3DDialog open={showSolutionField3D} onClose={() => setShowSolutionField3D(false)} />
+          </Suspense>
+        )}
+        {/* v46: Recommendations A-E — Engine improvements */}
+        {showSkyshine && (
+          <Suspense fallback={<DialogFallback />}>
+            <SkyshineCalculatorDialog open={showSkyshine} onClose={() => setShowSkyshine(false)} />
+          </Suspense>
+        )}
+        {showAnnualDose && (
+          <Suspense fallback={<DialogFallback />}>
+            <AnnualDoseReportDialog open={showAnnualDose} onClose={() => setShowAnnualDose(false)} />
+          </Suspense>
+        )}
+        {showCrossValidation && (
+          <Suspense fallback={<DialogFallback />}>
+            <CrossValidationDialog open={showCrossValidation} onClose={() => setShowCrossValidation(false)} />
+          </Suspense>
+        )}
+        {showObliqueIncidence && (
+          <Suspense fallback={<DialogFallback />}>
+            <ObliqueIncidenceDialog open={showObliqueIncidence} onClose={() => setShowObliqueIncidence(false)} />
+          </Suspense>
+        )}
+        {showMultiEnergySpectra && (
+          <Suspense fallback={<DialogFallback />}>
+            <MultiEnergySpectraDialog open={showMultiEnergySpectra} onClose={() => setShowMultiEnergySpectra(false)} />
+          </Suspense>
+        )}
+        {showAdaptiveSampling && (
+          <Suspense fallback={<DialogFallback />}>
+            <AdaptiveSamplingDialog open={showAdaptiveSampling} onClose={() => setShowAdaptiveSampling(false)} />
+          </Suspense>
+        )}
+        {showSelfShielding && (
+          <Suspense fallback={<DialogFallback />}>
+            <SelfShieldingDialog open={showSelfShielding} onClose={() => setShowSelfShielding(false)} />
+          </Suspense>
+        )}
+        {showTransmissionCurve && (
+          <Suspense fallback={<DialogFallback />}>
+            <TransmissionCurveDialog open={showTransmissionCurve} onClose={() => setShowTransmissionCurve(false)} />
+          </Suspense>
+        )}
+        {showNeutronMaze && (
+          <Suspense fallback={<DialogFallback />}>
+            <NeutronMazeDialog open={showNeutronMaze} onClose={() => setShowNeutronMaze(false)} />
+          </Suspense>
+        )}
+        {/* v47 Fase 3.12: St-Germain scatter method */}
+        {showStGermain && (
+          <ErrorBoundary dialogName="St-Germain Scatter" onReset={() => setShowStGermain(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <StGermainScatterDialog open={showStGermain} onClose={() => setShowStGermain(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Secondary Barrier Albedo (B.12) */}
+        {showAlbedo && (
+          <ErrorBoundary dialogName="Secondary Barrier Albedo" onReset={() => setShowAlbedo(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <SecondaryBarrierAlbedoDialog open={showAlbedo} onClose={() => setShowAlbedo(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Concrete Activation (B.13) */}
+        {showConcreteActivation && (
+          <ErrorBoundary dialogName="Concrete Activation" onReset={() => setShowConcreteActivation(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <ConcreteActivationDialog open={showConcreteActivation} onClose={() => setShowConcreteActivation(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Certification Mode (E.7) */}
+        {showCertification && (
+          <ErrorBoundary dialogName="Certification Mode" onReset={() => setShowCertification(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <CertificationModeDialog open={showCertification} onClose={() => setShowCertification(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Community Templates (E.8) */}
+        {showCommunityTemplates && (
+          <ErrorBoundary dialogName="Community Templates" onReset={() => setShowCommunityTemplates(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <CommunityTemplatesDialog open={showCommunityTemplates} onClose={() => setShowCommunityTemplates(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Audit Log (E.9) */}
+        {showAuditLog && (
+          <ErrorBoundary dialogName="Audit Log" onReset={() => setShowAuditLog(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <AuditLogDialog open={showAuditLog} onClose={() => setShowAuditLog(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+        {/* v49: Analytics (E.10) */}
+        {showAnalytics && (
+          <ErrorBoundary dialogName="Analytics" onReset={() => setShowAnalytics(false)}>
+            <Suspense fallback={<DialogFallback />}>
+              <AnalyticsDialog open={showAnalytics} onClose={() => setShowAnalytics(false)} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+      </Suspense>
+    </div>
+    </>
+  );
+}

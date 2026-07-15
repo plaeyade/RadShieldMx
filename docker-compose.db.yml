@@ -1,0 +1,28 @@
+# RadShield-MX local/test database only.
+#
+# Use this compose file for Fase 32B-run before enabling the frontend backend
+# bridge. It intentionally starts only MySQL; migrations and seed are executed
+# explicitly from the host with DATABASE_URL.
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: radshield-mx-db-test
+    environment:
+      MYSQL_ROOT_PASSWORD: radshield-root
+      MYSQL_DATABASE: radshield_mx_test
+      MYSQL_USER: radshield
+      MYSQL_PASSWORD: radshield
+    ports:
+      - "3306:3306"
+    volumes:
+      - radshield-mx-db-test:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uradshield", "-pradshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  radshield-mx-db-test:

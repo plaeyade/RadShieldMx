@@ -1,0 +1,64 @@
+# RadShield-MX full local stack.
+#
+# The frontend can run without DB. The API depends on MySQL and should be used
+# only after running migrations/seed against this local/test database.
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    networks:
+      - radshield-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: mysql://radshield:radshield@db:3306/radshield_mx_test
+      APP_ID: ${APP_ID:-}
+      APP_SECRET: ${APP_SECRET:-}
+      KIMI_AUTH_URL: ${KIMI_AUTH_URL:-}
+      KIMI_OPEN_URL: ${KIMI_OPEN_URL:-}
+      OWNER_UNION_ID: ${OWNER_UNION_ID:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - radshield-net
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: radshield-root
+      MYSQL_DATABASE: radshield_mx_test
+      MYSQL_USER: radshield
+      MYSQL_PASSWORD: radshield
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uradshield", "-pradshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - radshield-net
+
+volumes:
+  mysql-data:
+
+networks:
+  radshield-net:
+    driver: bridge

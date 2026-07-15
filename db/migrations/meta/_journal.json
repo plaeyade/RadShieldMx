@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1780798470072,
+      "tag": "0000_pretty_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1783817365858,
+      "tag": "0001_optimal_yellowjacket",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1783858693641,
+      "tag": "0002_safe_gideon",
+      "breakpoints": true
+    }
+  ]
+}

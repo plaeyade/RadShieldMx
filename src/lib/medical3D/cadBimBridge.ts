@@ -1,0 +1,216 @@
+import { extractBIMFromIFC, type BIMModel } from '@/lib/bimRAD';
+import { parseDXF, type DXFParsed, type DXFPoint } from '@/lib/dxfParser';
+import type { Barrier, FloorPlan } from '@/types/radshield';
+
+export type CadBimImportKind = 'dxf' | 'ifc' | 'step' | 'unknown';
+
+export interface CadBimImportSummary {
+  kind: CadBimImportKind;
+  fileName: string;
+  sourceEntities: number;
+  mappedBarriers: number;
+  detectedLayers: string[];
+  warnings: string[];
+}
+
+export interface CadBimBridgeResult {
+  floorPlan: FloorPlan;
+  summary: CadBimImportSummary;
+}
+
+const DEFAULT_SCALE_M_PER_UNIT = 0.001;
+
+function unitToMeters(unit: string) {
+  const normalized = unit.toLowerCase();
+  if (normalized === 'm') return 1;
+  if (normalized === 'cm') return 0.01;
+  if (normalized === 'mm') return 0.001;
+  if (normalized === 'in') return 0.0254;
+  if (normalized === 'ft') return 0.3048;
+  return DEFAULT_SCALE_M_PER_UNIT;
+}
+
+function inferMaterial(text: string) {
+  const value = text.toLowerCase();
+  if (value.includes('lead') || value.includes('plomo') || value.includes('pb')) return 'plomo';
+  if (value.includes('barit')) return 'concreto_baritado';
+  if (value.includes('steel') || value.includes('acero')) return 'acero';
+  if (value.includes('glass') || value.includes('window') || value.includes('vidrio')) return 'vidrio_plomo';
+  if (value.includes('tungsten') || value.includes('wolfram')) return 'tungsteno';
+  return 'concreto';
+}
+
+function inferBarrierType(text: string): Barrier['barrierType'] {
+  const value = text.toLowerCase();
+  if (value.includes('primary') || value.includes('primaria') || value.includes('prim')) return 'primary';
+  if (value.includes('door') || value.includes('puerta') || value.includes('window') || value.includes('ventana')) return 'leakage';
+  if (value.includes('scatter') || value.includes('secundaria') || value.includes('secondary') || value.includes('sec')) return 'secondary';
+  if (value.includes('nuclear') || value.includes('pet') || value.includes('hot') || value.includes('radiofarm')) return 'nuclear';
+  return 'secondary';
+}
+
+function inferThicknessMm(text: string, fallback = 200) {
+  const value = text.toLowerCase();
+  const match = value.match(/(\d+(?:\.\d+)?)\s*(mm|cm|m)?/);
+  if (!match) return fallback;
+  const amount = Number(match[1]);
+  const unit = match[2] || 'mm';
+  if (!Number.isFinite(amount) || amount <= 0) return fallback;
+  if (unit === 'm') return amount * 1000;
+  if (unit === 'cm') return amount * 10;
+  return amount;
+}
+
+function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint): Barrier {
+  const layerText = `${layer} ${name}`;
+  const materialCode = inferMaterial(layerText);
+  return {
+    id,
+    x1: start.x,
+    y1: start.y,
+    x2: end.x,
+    y2: end.y,
+    name,
+    barrierType: inferBarrierType(layerText),
+    useFactor: inferBarrierType(layerText) === 'primary' ? 1 : 0.25,
+    occupancyFactor: 1,
+    designGoal_mSv_per_wk: 0.02,
+    materialCode,
+    requiredThickness_mm: inferThicknessMm(layerText, materialCode === 'plomo' ? 3 : 200),
+  };
+}
+
+function collectDxfBarriers(parsed: DXFParsed) {
+  const barriers: Barrier[] = [];
+  const warnings: string[] = [];
+  let ignored = 0;
+
+  const addSegment = (layer: string, start: DXFPoint, end: DXFPoint) => {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 0.01) {
+      ignored += 1;
+      return;
+    }
+    const id = `dxf-barrier-${barriers.length + 1}`;
+    barriers.push(makeBarrier(id, `DXF ${barriers.length + 1} (${layer})`, layer, start, end));
+  };
+
+  for (const entity of parsed.entities) {
+    if (entity.type === 'LINE') addSegment(entity.layer, entity.start, entity.end);
+    if (entity.type === 'LWPOLYLINE') {
+      entity.points.forEach((point, index) => {
+        const next = entity.points[index + 1] || (entity.closed ? entity.points[0] : null);
+        if (next) addSegment(entity.layer, point, next);
+      });
+    }
+  }
+
+  if (ignored > 0) warnings.push(`${ignored} segmentos DXF degenerados fueron ignorados.`);
+  if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE utilizables como barreras.');
+  return { barriers, warnings };
+}
+
+export function importDXFToFloorPlan(content: string, fileName = 'import.dxf'): CadBimBridgeResult {
+  const parsed = parseDXF(content);
+  const { barriers, warnings } = collectDxfBarriers(parsed);
+  const scale = unitToMeters(parsed.unit);
+  const width = Math.max(parsed.bounds.maxX - parsed.bounds.minX, 1);
+  const height = Math.max(parsed.bounds.maxY - parsed.bounds.minY, 1);
+  const detectedLayers = Array.from(parsed.layers.keys());
+
+  return {
+    floorPlan: {
+      id: `cad-dxf-${Date.now()}`,
+      name: `CAD ${fileName}`,
+      imageUrl: null,
+      scale_m_per_pixel: scale,
+      width_pixels: Math.ceil(width),
+      height_pixels: Math.ceil(height),
+      barriers,
+      sources: [],
+      occupiedRegions: [],
+    },
+    summary: {
+      kind: 'dxf',
+      fileName,
+      sourceEntities: parsed.entities.length,
+      mappedBarriers: barriers.length,
+      detectedLayers,
+      warnings,
+    },
+  };
+}
+
+function makeIfcRoomBarriers(model: BIMModel) {
+  const walls = model.elements.filter((element) => element.ifcType.toLowerCase().includes('wall'));
+  const wallCount = Math.max(walls.length || 4, 4);
+  const side = Math.max(7, Math.ceil(Math.sqrt(wallCount) * 2.2));
+  const corners = [
+    { x: 0, y: 0 },
+    { x: side, y: 0 },
+    { x: side, y: side },
+    { x: 0, y: side },
+  ];
+
+  return Array.from({ length: Math.min(wallCount, 16) }, (_, index): Barrier => {
+    const start = corners[index % 4];
+    const end = corners[(index + 1) % 4];
+    const sourceWall = walls[index] || walls[index % walls.length];
+    const label = sourceWall?.name || `IFC Wall ${index + 1}`;
+    const materialText = `${label} ${sourceWall?.material?.name || ''} ${sourceWall?.shieldingMaterial || ''}`;
+    const materialCode = inferMaterial(materialText);
+    return {
+      id: `ifc-barrier-${index + 1}`,
+      x1: start.x,
+      y1: start.y,
+      x2: end.x,
+      y2: end.y,
+      name: label,
+      barrierType: inferBarrierType(materialText),
+      useFactor: 0.25,
+      occupancyFactor: 1,
+      designGoal_mSv_per_wk: 0.02,
+      materialCode,
+      requiredThickness_mm: sourceWall?.shieldingValue_mm || inferThicknessMm(materialText, materialCode === 'plomo' ? 3 : 200),
+    };
+  });
+}
+
+export function importIFCToFloorPlan(content: string, fileName = 'import.ifc'): CadBimBridgeResult {
+  const model = extractBIMFromIFC(content);
+  const barriers = makeIfcRoomBarriers(model);
+  const warnings = [
+    'IFC se mapea en modo preliminar: el parser actual extrae entidades y genera geometria de revision, no B-Rep completo.',
+  ];
+
+  return {
+    floorPlan: {
+      id: `cad-ifc-${Date.now()}`,
+      name: `BIM ${model.projectName || fileName}`,
+      imageUrl: null,
+      scale_m_per_pixel: 1,
+      width_pixels: 12,
+      height_pixels: 12,
+      barriers,
+      sources: [],
+      occupiedRegions: [],
+    },
+    summary: {
+      kind: 'ifc',
+      fileName,
+      sourceEntities: model.elements.length + model.spaces.length,
+      mappedBarriers: barriers.length,
+      detectedLayers: model.levels,
+      warnings,
+    },
+  };
+}
+
+export async function importCadBimFile(file: File): Promise<CadBimBridgeResult> {
+  const content = await file.text();
+  const lowerName = file.name.toLowerCase();
+  if (lowerName.endsWith('.dxf')) return importDXFToFloorPlan(content, file.name);
+  if (lowerName.endsWith('.ifc')) return importIFCToFloorPlan(content, file.name);
+  throw new Error('Formato no soportado en visor Medical 3D. Use DXF o IFC para Fase 42.');
+}

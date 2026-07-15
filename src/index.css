@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* RadShield-MX v24 — Professional Radiation Safety Theme */
+    --background: 220 25% 97%;
+    --foreground: 220 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 10%;
+    --primary: 215 75% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 220 30% 15%;
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 215 75% 95%;
+    --accent-foreground: 215 75% 35%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 215 75% 42%;
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 220 30% 8%;
+    --sidebar-foreground: 220 15% 85%;
+    --sidebar-primary: 215 75% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 215 75% 50%;
+
+    /* Custom RadShield variables */
+    --rs-safety-green: 145 65% 42%;
+    --rs-caution-amber: 38 92% 50%;
+    --rs-danger-red: 0 72% 51%;
+    --rs-radiation-blue: 215 75% 42%;
+    --rs-ice-blue: 205 100% 96%;
+    --rs-surface: 0 0% 100%;
+    --rs-elevated: 220 20% 98%;
+    --rs-toolbar: 220 30% 8%;
+    --rs-toolbar-text: 220 15% 85%;
+    --rs-kpi-green: 145 65% 95%;
+    --rs-kpi-amber: 38 92% 95%;
+    --rs-kpi-red: 0 72% 95%;
+    --rs-kpi-blue: 215 75% 95%;
+  }
+
+  .dark {
+    --background: 220 25% 5%;
+    --foreground: 220 15% 95%;
+    --card: 220 20% 8%;
+    --card-foreground: 220 15% 95%;
+    --popover: 220 20% 8%;
+    --popover-foreground: 220 15% 95%;
+    --primary: 215 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 15%;
+    --secondary-foreground: 220 15% 90%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 215 80% 18%;
+    --accent-foreground: 215 80% 70%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 215 80% 55%;
+
+    --sidebar-background: 220 30% 5%;
+    --sidebar-foreground: 220 15% 80%;
+    --sidebar-primary: 215 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 12%;
+    --sidebar-accent-foreground: 220 15% 90%;
+    --sidebar-border: 220 20% 15%;
+    --sidebar-ring: 215 80% 55%;
+
+    --rs-surface: 220 20% 8%;
+    --rs-elevated: 220 20% 10%;
+    --rs-toolbar: 220 30% 5%;
+    --rs-toolbar-text: 220 15% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  /* RadShield custom utilities */
+  .rs-card {
+    @apply rounded-lg border bg-card shadow-sm transition-all duration-200;
+  }
+  .rs-card-hover {
+    @apply rs-card hover:shadow-md hover:border-primary/20;
+  }
+  .rs-kpi-green {
+    @apply bg-[hsl(var(--rs-kpi-green))] text-[hsl(var(--rs-safety-green))] border-[hsl(var(--rs-safety-green))]/20;
+  }
+  .rs-kpi-amber {
+    @apply bg-[hsl(var(--rs-kpi-amber))] text-[hsl(var(--rs-caution-amber))] border-[hsl(var(--rs-caution-amber))]/20;
+  }
+  .rs-kpi-red {
+    @apply bg-[hsl(var(--rs-kpi-red))] text-[hsl(var(--rs-danger-red))] border-[hsl(var(--rs-danger-red))]/20;
+  }
+  .rs-kpi-blue {
+    @apply bg-[hsl(var(--rs-kpi-blue))] text-[hsl(var(--rs-radiation-blue))] border-[hsl(var(--rs-radiation-blue))]/20;
+  }
+  .rs-badge-tx {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200;
+  }
+  .rs-badge-nm {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200;
+  }
+  .rs-badge-dx {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 border border-blue-200;
+  }
+  .rs-badge-cy {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 border border-violet-200;
+  }
+  .rs-gradient-hero {
+    background: linear-gradient(135deg, hsl(215 75% 42%) 0%, hsl(220 60% 35%) 50%, hsl(210 50% 25%) 100%);
+  }
+  .rs-gradient-card {
+    background: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 25% 97%) 100%);
+  }
+  .rs-text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(215,75%,42%)] to-[hsl(200,70%,50%)];
+  }
+  .rs-animate-fade-in {
+    animation: rsFadeIn 0.3s ease-out forwards;
+  }
+  .rs-animate-slide-up {
+    animation: rsSlideUp 0.4s ease-out forwards;
+  }
+  @keyframes rsFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rsSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     v47: High Contrast Mode — WCAG 2.1 §1.4.11
+     Activado por .high-contrast en <html> o prefers-contrast: more
+     ═══════════════════════════════════════════════════════════════ */
+  .high-contrast {
+    --background: 0 0% 0% !important;
+    --foreground: 0 0% 100% !important;
+    --card: 0 0% 5% !important;
+    --card-foreground: 0 0% 100% !important;
+    --popover: 0 0% 5% !important;
+    --popover-foreground: 0 0% 100% !important;
+    --primary: 60 100% 50% !important;
+    --primary-foreground: 0 0% 0% !important;
+    --secondary: 0 0% 15% !important;
+    --secondary-foreground: 0 0% 100% !important;
+    --muted: 0 0% 15% !important;
+    --muted-foreground: 0 0% 80% !important;
+    --accent: 60 100% 50% !important;
+    --accent-foreground: 0 0% 0% !important;
+    --destructive: 0 100% 60% !important;
+    --destructive-foreground: 0 0% 100% !important;
+    --border: 0 0% 40% !important;
+    --input: 0 0% 25% !important;
+    --ring: 60 100% 50% !important;
+  }
+
+  .high-contrast * {
+    border-color: hsl(0 0% 50%) !important;
+    outline-color: hsl(60 100% 50%) !important;
+  }
+
+  .high-contrast canvas {
+    border: 2px solid hsl(0 0% 100%) !important;
+  }
+
+  .high-contrast button:focus,
+  .high-contrast input:focus,
+  .high-contrast select:focus {
+    outline: 3px solid hsl(60 100% 50%) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Status indicators with patterns (not just color) */
+  .high-contrast .status-pass::before { content: "✓ "; }
+  .high-contrast .status-warn::before { content: "⚠ "; }
+  .high-contrast .status-fail::before { content: "✗ "; }
+
+  /* sr-only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

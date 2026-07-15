@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.stable.tsbuildinfo"
+  },
+  "include": [
+    "src/types/**/*.ts",
+    "src/stores/**/*.ts",
+    "src/providers/**/*.tsx",
+    "src/components/ui/**/*.tsx",
+    "src/lib/shieldingMath.ts",
+    "src/lib/shieldingEngine.ts",
+    "src/lib/tvlInterpolation.ts",
+    "src/lib/excelDataTables.ts",
+    "src/lib/equipmentDatabase.ts",
+    "src/lib/materialDatabase.ts",
+    "src/lib/ncrp151Tables.ts",
+    "src/lib/ncrpOccupancy.ts",
+    "src/lib/inputSanitization.ts",
+    "src/lib/logger.ts",
+    "src/lib/utils.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/components/DialogHost.tsx",
+    "src/sections/**/*.tsx",
+    "src/pages/**/*.tsx",
+    "src/hooks/useWebGPU.ts",
+    "src/hooks/useWebGPUHeatmap.ts"
+  ]
+}

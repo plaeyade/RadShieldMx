@@ -1,0 +1,224 @@
+# RadShield-MX - Fases recientes
+
+## F73 (2026-07-12) - Documentacion, Update App y roadmap tecnico
+
+- README reemplazado por documentacion tecnica real de RadShield-MX.
+- Manual de usuario actualizado con F71-F73: DB, RAG, DWG, canvas y 3D.
+- Update App reorganizado para mostrar estado, plataforma, normativas, DB/IA/RAG y roadmap.
+- Se documenta que DWG requiere conversion externa a DXF/SVG antes de importar.
+- Se formaliza que NCRP no debe reingresarse si ya existe dataset/documentos versionados; debe revalidarse por hash/version.
+- Se propone estrategia de aprendizaje con memorias analiticas validadas y anonimizadas.
+- Se documenta mejora de render: renderer 2D por capas, cache de assets, hit-testing espacial y 3D con LOD.
+
+## F72 (2026-07-12) - RAG, DWG, equipos visuales, 3D y canvas
+
+- Perfiles visuales por equipo/modalidad: LINAC, Gamma Knife, CT, PET/CT, HDR, ciclotron, SPECT y mastografia.
+- Canvas renderiza fuentes con footprint e icono vectorial, no solo circulo generico.
+- Medical 3D recibe footprint, asset hint y tags RAG por equipo.
+- Se agrega roadmap RAG: busqueda hibrida, ledger de citas, reranking regulatorio, fingerprints y deep-dive planner.
+- Se agrega declaracion de capacidades CAD: DXF/OBJ nativo, SVG/PNG overlay, DWG por conversion externa.
+
+## F71 (2026-07-12) - Gate de reconstruccion DB
+
+- Se agrega db:validate:live para validar tablas y seed contra MySQL real.
+- Runbook DB actualizado con validacion post-seed.
+- Backend health y contratos validados en modo sin DB.
+- Reconstruccion real bloqueada solo por infraestructura: falta DATABASE_URL, Docker CLI y MySQL CLI.
+
+---
+# RadShield-MX — Control de Cambios
+
+## v62 (2026-06-05) — Update Center + Zustand Etapas 1-2
+
+### Nuevo: Update Center Dialog
+- **4 tabs**: Changelog, Auditoría (55 items), Docs pendientes (10), Estado plataforma
+- Progreso visual con barras de progreso
+- Estado de cada item de auditoría: Completado/Pendiente/Baja prioridad
+- Lista de documentos pendientes por vectorizar para RAG v70
+- Estadísticas en vivo: Zustand 75/208, Tests 240/240, Auditoría 45/55 (82%)
+
+### SplashScreen Actualizado v58 → v62
+- Versión: v62 | 240 Tests | Zustand 75/208 | Auditoría 82%
+- 2 nuevos features: Update Menu, Auditoria 82%
+- Tests corregidos: 59 → 240 (tests pasando tras corrección de física)
+
+### Zustand Migración: 75/208 dialogs (+27 en esta sesión)
+**Etapa 1 (v60) — 12 dialogs**: memoriaWizard, planValidator, equipmentShieldingWizard, monteCarloSim, cycloneKIUBE, tutorial, cbctIgrt, layoutBunker, maintenanceLog, scenarioAnalysis, checklistCNSNS, specialCases
+
+**Etapa 2 (v61) — 15 dialogs**: keyboardShortcuts, smartSearchDICOM, logFileAnalysis, compareMode, batchCalc, sensitivity, auditDashboard, geometrySelector, nuclideData, decayHeat, buildupFactor, exposureRateProjection, sketchPad, exampleWizard, cadImport
+
+### Fixes Deploy
+- FloorCeilingDialog import faltante
+- ICRU57Dialog/ICRU96Dialog imports faltantes
+- showMCResultsDialog useState eliminado accidentalmente
+
+---
+
+## v58 (2026-06-05) — Validación Completa + Media/Baja Prioridad
+
+### Auditoría Implementada (50 recomendaciones)
+- **A. GUI/UX 12/12 COMPLETADO**
+  - A.1 Zoom centrado en cursor (mouse wheel)
+  - A.2 Touch gestures: pinch zoom + two-finger pan + double-tap zoom
+  - A.3 Leyendas mejoradas: tab "Leyendas" en ResultsPanel (semáforo, tipos barrera, materiales, símbolos, refs NCRP)
+  - A.4 Undo/Redo visual con historial (50 pasos)
+  - A.5 Onboarding Tour (react-joyride 6 pasos)
+  - A.6 Preview de barrera: ghost crosshair punteado rojo + coordenadas snap
+  - A.7 Command Palette (Cmd+K, 40+ comandos)
+  - A.8 Keyboard shortcuts (B/F/S/M/H/G/Ctrl+Z/Ctrl+Y/Ctrl+K/Ctrl+Enter)
+  - A.9 Responsive layout (useResponsiveLayout)
+  - A.10 Dark mode toggle
+  - A.11 High contrast mode
+  - A.12 Skip-to-content + a11y announcer
+
+- **B. Motores 10/10 COMPLETADO**
+  - B.1 Multi-energy spectra support (TASMIP)
+  - B.2 Self-shielding correction
+  - B.3 Adaptive sampling (Monte Carlo)
+  - B.4 Chilton skyshine roof scatter
+  - B.5 Neutron maze calculations
+  - B.6 Oblique incidence correction
+  - B.7 Annual dose report
+  - B.8 Cross-validation NCRP vs IAEA
+  - B.9 Async WebWorker calculation engine
+  - B.10 Spatial hashing + WebGPU heatmap
+
+- **C. Código 7/10**
+  - C.1 Error Boundaries (LazyDialog + ErrorBoundary)
+  - C.2 Web Vitals (connected in App.tsx)
+  - C.3 Sentry error tracking (@sentry/react + ErrorBoundary)
+  - C.4 Unit Tests: 59 tests Vitest (shieldingMath 25, appStore 17, useCanvas 17)
+  - C.5 Zustand state management: 75/208 dialogs migrados (36%)
+  - C.6 Design tokens (designTokens.ts)
+  - C.7 Performance profiler + dashboard
+
+- **D. APIs Web 7/8**
+  - D.1 Screen Wake Lock API (cálculos)
+  - D.2 Web Share API (compartir resultados nativos)
+  - D.3 File System Access API (Ctrl+S/Ctrl+O)
+  - D.4 Broadcast Channel (cross-tab sync)
+  - D.5 Web Share Target (manifest.json)
+  - D.6 Service Worker
+  - D.7 WebGPU heatmap renderer
+
+- **E. General 4/10**
+  - E.1 Excel Export (.xls multi-hoja)
+  - E.2 i18n hook (useI18n)
+  - E.5 Community Templates
+  - E.6 GitHub-style integrations
+
+### 5 Capas AI (Completado en v52)
+1. LLM Integration (OpenAI/Ollama/LMStudio)
+2. RAG (vector DB + cosine similarity, 50+ chunks)
+3. ML Predictivo (TensorFlow.js NN [8→64→32→16→1])
+4. Computer Vision (Canny + Hough wall detection)
+5. Agentes Autónomos (ShieldingDesign + Validation + CostOptimization)
+
+### Componentes Implementados
+- **Sentry**: `src/lib/sentry.ts` — SDK completo con ErrorBoundary, breadcrumbs, user tracking
+- **Ghost Barrier Preview**: `useCanvas.ts` — crosshair punteado rojo + coordenadas en tiempo real
+- **Web Share Target**: `manifest.json` — share_target con accept de imágenes/JSON/DXF/STEP
+- **PWA Manifest**: shortcuts, categories, theme, display:standalone
+- **Unit Tests**: `src/__tests__/` — 59 tests pasando
+
+### Zustand Migration (75 dialogs)
+Batches 1-4: export, cnsns, mc, projects, maze, quickBarrier, viewer3d, equipmentDB, mcCloud, mcConfig, barrierCalculator, floorCeiling, dashboardCalc, costEstimator, cnsnsChecklist, batchImport, costOptimizer, neutron, seasonal, uncertainty, ventilation, dicom, techSpecs, cnsnsDashboard, auditTrail, epaGuidance, shleien, gammaKnife, braquiCo60, versaHD, icru57, icru96, equipmentLibrary, referenceLibrary, ncrp151Tables, shieldingCalculator, dxfViewer, dashboard, bibliography, about, glossary, themeEngine, bimConnector, cloudSync, validationDashboard, externalConnector, aiAssistant, manual
+
+Etapa 1 (v60): memoriaWizard, planValidator, equipmentShieldingWizard, monteCarloSim, cycloneKIUBE, tutorial, cbctIgrt, layoutBunker, maintenanceLog, scenarioAnalysis, checklistCNSNS, specialCases
+
+Etapa 2 (v61): keyboardShortcuts, smartSearchDICOM, logFileAnalysis, compareMode, batchCalc, sensitivity, auditDashboard, geometrySelector, nuclideData, decayHeat, buildupFactor, exposureRateProjection, sketchPad, exampleWizard, cadImport
+
+Nuevo v62: updateCenter
+
+---
+
+## v52 (2026-05) — 5 Capas AI Completadas
+
+### Fase 1: LLM + RAG
+- Multi-provider LLM client (OpenAI, Ollama, LMStudio)
+- Vector store with cosine similarity
+- 50+ knowledge chunks from NCRP 151, NCRP 147, IAEA 47
+- tRPC routers: ai-router.ts, rag-router.ts
+- AIAssistantDialog with streaming chat
+
+### Fase 2: ML Predictivo
+- TensorFlow.js neural network [8→64→32→16→1]
+- 3,000+ training data points
+- Anomaly detection with Isolation Forest
+- useAutoML hook with feedback loop
+
+### Fase 3: Agentes Autónomos
+- ShieldingDesignAgent: multi-step planning
+- ValidationAgent: cross-reference NCRP
+- CostOptimizationAgent: minimize material cost
+
+### Fase 4: Computer Vision
+- planAnalyzer.ts with Canny edge detection + Hough transform
+- Automatic wall detection from floor plan images
+
+### Fase 5: Cost Optimization Agent
+- Linear programming for material selection
+- Multi-objective: cost × weight × thickness
+
+---
+
+## v50 (2026-04) — Core Platform
+
+### Canvas System
+- HTML5 Canvas 2D with world-to-screen transforms
+- Zoom, pan, grid snapping
+- Barrier drawing, source placement, occupancy regions
+- Selection, dragging, deletion
+
+### Calculation Engine
+- NCRP 147 Archer broad-beam transmission
+- NCRP 151 TVL method for megavoltage
+- AAPM TG 108 PET/CT shielding
+- WebWorker async calculations
+- Spatial hashing for dose grid
+
+### UI Framework
+- 8-menú toolbar system
+- 208+ dialog components
+- React.lazy() code splitting
+- Dark mode, i18n, undo/redo
+- Command palette, keyboard shortcuts
+
+---
+
+## v1–v49 (2025-2026) — Foundation
+
+### v1-v25: Prototipo Inicial
+- Canvas interactivo básico
+- Cálculos NCRP 147/151 iniciales
+- Primeros 50 diálogos
+
+### v26-v45: Feature Expansion
+- Más modalidades (Gamma Knife, HDR, Cyclotron)
+- Reportes CNSNS
+- Monte Carlo integration
+- Biblioteca de materiales
+- Sistema de proyectos
+
+### v46-v49: Pre-AI
+- WebGPU compute shaders
+- File System Access API
+- Broadcast Channel
+- Service Worker
+- Community templates
+
+---
+
+## Estadísticas del Proyecto
+
+| Métrica | Valor |
+|---------|-------|
+| Versión actual | v58 |
+| Diálogos | 208+ |
+| Tests unitarios | 59 pasando |
+| Referencias bibliográficas | 82 |
+| Capas AI | 5 |
+| Recomendaciones auditoría | 35/50 completadas |
+| APIs Web | 7 implementadas |
+| Idiomas | 2 (es/en) |
+| Commits desde v1 | ~500+ |

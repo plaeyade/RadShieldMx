@@ -1,0 +1,317 @@
+// Funciones puras de cálculo de blindaje — extraídas de useShieldingEngine para testabilidad
+// Todas las fórmulas referenciadas contra NCRP 147, 151, AAPM TG 108
+
+import {
+  type Barrier,
+  type RadiationSource,
+  type ShieldingMaterial,
+  WORKLOAD_DISTRIBUTIONS
+} from '@/types/radshield';
+import { type CTIsodosisProfile, getCTIsodosisFactor, DEFAULT_CT_ISODOSIS } from '@/types/ctIsodosis';
+
+export const SAMPLING_DISTANCE_M = 0.3;
+export const SAMPLING_SPACING_M = 0.2;
+
+// ───────────────────────────────────────────────────────────────
+// NCRP 147 — Archer Equation (Diagnostic X-ray)
+// B(x) = [(1+β/α)·exp(αγx/cosθ) − β/α]^(−1/γ)
+// ───────────────────────────────────────────────────────────────
+export function archerTransmission(
+  thickness_mm: number,
+  material: ShieldingMaterial,
+  theta_rad: number = 0
+): number {
+  if (thickness_mm <= 0) return 1.0;
+  if (!material.archerAlpha || !material.archerBeta || !material.archerGamma) {
+    const hvl = Object.values(material.HVL_mm || {})[0] || material.TVL_mm?.['6MV'] || 100;
+    if (hvl <= 0) return 1;
+    return Math.exp(-0.693 * (thickness_mm / hvl) / Math.max(0.01, Math.cos(theta_rad)));
+  }
+  const x_cm = thickness_mm / 10;
+  const cos_theta = Math.max(0.01, Math.cos(theta_rad));
+  const exponent = (material.archerAlpha * material.archerGamma * x_cm) / cos_theta;
+  const inner = (1 + material.archerBeta / material.archerAlpha) * Math.exp(exponent) - material.archerBeta / material.archerAlpha;
+  if (inner <= 0) return 0;
+  return Math.pow(inner, -1 / material.archerGamma);
+}
+
+// Inversa de Archer — encuentra espesor para transmisión objetivo
+export function inverseArcher(
+  targetTransmission: number,
+  material: ShieldingMaterial,
+  theta_rad: number = 0,
+  tolerance: number = 1e-14,
+  maxIter: number = 100
+): number {
+  if (targetTransmission >= 1.0) return 0;
+  if (targetTransmission <= 0) return 500;
+  let low = 0, high = 500, iter = 0;
+  while (archerTransmission(high, material, theta_rad) > targetTransmission && iter < 20) {
+    high *= 2;
+    iter++;
+  }
+  for (let i = 0; i < maxIter; i++) {
+    const mid = (low + high) / 2;
+    const B_mid = archerTransmission(mid, material, theta_rad);
+    if (Math.abs(B_mid - targetTransmission) < tolerance) return mid;
+    if (B_mid > targetTransmission) low = mid;
+    else high = mid;
+  }
+  return (low + high) / 2;
+}
+
+// ───────────────────────────────────────────────────────────────
+// NCRP 151 — TVL forward transmission (therapy / nuclear gamma)
+// B(x) = 10^(−x/TVL)   —  exact exponential in base-10
+// ───────────────────────────────────────────────────────────────
+export function tvlTransmission(
+  thickness_mm: number,
+  material: ShieldingMaterial,
+  energyKey: string
+): number {
+  if (thickness_mm <= 0) return 1.0;
+  const tvl = material.TVL_mm?.[energyKey];
+  if (!tvl || tvl <= 0) {
+    // Fallback: estimate from density
+    const refTVL = 350;
+    const refDensity = 2.35;
+    const estTVL = refTVL * (refDensity / material.density);
+    return Math.pow(10, -thickness_mm / estTVL);
+  }
+  return Math.pow(10, -thickness_mm / tvl);
+}
+export function tvlThickness(
+  unshieldedKerma_mSv: number,
+  designGoal_mSv: number,
+  material: ShieldingMaterial,
+  energyKey: string
+): number {
+  if (unshieldedKerma_mSv <= designGoal_mSv) return 0;
+  const tvl = material.TVL_mm?.[energyKey];
+  if (!tvl || tvl <= 0) {
+    const refTVL = 350;
+    const refDensity = 2.35;
+    const estTVL = refTVL * (refDensity / material.density);
+    const n = Math.log10(unshieldedKerma_mSv / designGoal_mSv);
+    return n * estTVL;
+  }
+  const n = Math.log10(unshieldedKerma_mSv / designGoal_mSv);
+  return n * tvl;
+}
+
+// ───────────────────────────────────────────────────────────────
+// Exponential attenuation (Nuclear medicine / Gamma)
+// K = Γ·A/d²  →  x = ln(K_unshielded/K_design) · TVL/ln(10)
+// ───────────────────────────────────────────────────────────────
+export function exponentialThickness(
+  unshieldedKerma_mSv: number,
+  designGoal_mSv: number,
+  material: ShieldingMaterial,
+  energyKey: string
+): number {
+  if (unshieldedKerma_mSv <= designGoal_mSv) return 0;
+  const tvl = material.TVL_mm?.[energyKey];
+  const hvl = material.HVL_mm?.[energyKey];
+  if (!tvl && !hvl) {
+    const refTVL = 170;
+    const refDensity = 2.35;
+    const estTVL = refTVL * (refDensity / material.density);
+    const n = Math.log10(unshieldedKerma_mSv / designGoal_mSv);
+    return n * estTVL;
+  }
+  const attenuationLength = tvl ? tvl / Math.log(10) : (hvl! / Math.log(2));
+  if (attenuationLength <= 0) return 0;
+  return Math.log(unshieldedKerma_mSv / designGoal_mSv) * attenuationLength;
+}
+
+// ───────────────────────────────────────────────────────────────
+// NCRP 147 §5.6 — CT-DLP Method
+// K(θ,d) = DLP × f(θ) × (100cm/d)^1.5
+// ───────────────────────────────────────────────────────────────
+export function calculateCTKerma(
+  source: RadiationSource,
+  pointX: number,
+  pointY: number,
+  scale_m_per_pixel: number,
+  isodosisProfile?: CTIsodosisProfile
+): number {
+  const dx = (pointX - source.x) * scale_m_per_pixel;
+  const dy = (pointY - source.y) * scale_m_per_pixel;
+  const dz = source.isocenterHeight_m;
+  const d_cm = Math.sqrt(dx * dx + dy * dy + dz * dz) * 100;
+  if (d_cm < 10) return 1e6;
+
+  const angle_rad = Math.atan2(dy, dx);
+  const angle_deg = ((angle_rad * 180 / Math.PI) + 360) % 360;
+
+  const dlp = source.ctDLP_mGy_cm || source.modality.doseRateConstant;
+  const scansPerPatient = source.ctScansPerPatient || 1;
+  const patientsPerWeek = source.workloadValue;
+
+  const profile = isodosisProfile || DEFAULT_CT_ISODOSIS;
+  const fTheta = getCTIsodosisFactor(profile, angle_deg);
+
+  const distanceFactor = Math.pow(100 / d_cm, 1.5);
+  return dlp * fTheta * distanceFactor * patientsPerWeek * scansPerPatient;
+}
+
+// ───────────────────────────────────────────────────────────────
+// AAPM TG 108 / IAEA SRS 47 — Nuclear medicine exponential
+// K = Γ · A / d²
+// ───────────────────────────────────────────────────────────────
+export function calculateNuclearKerma(
+  source: RadiationSource,
+  pointX: number,
+  pointY: number,
+  scale_m_per_pixel: number
+): number {
+  const dx = (pointX - source.x) * scale_m_per_pixel;
+  const dy = (pointY - source.y) * scale_m_per_pixel;
+  const dz = source.isocenterHeight_m;
+  const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (d < 0.1) return 1e6;
+
+  const gamma = source.modality.doseRateConstant; // μSv·m²/GBq·h
+  const activity_GBq = source.nuclearActivity_GBq || source.workloadValue;
+  const hoursPerWeek = source.workloadHoursPerWeek || 40;
+
+  return (gamma * activity_GBq * hoursPerWeek) / (d * d);
+}
+
+// ───────────────────────────────────────────────────────────────
+// Main unshielded kerma — dispatcher por modalidad
+// ───────────────────────────────────────────────────────────────
+export function calculateUnshieldedKerma(
+  source: RadiationSource,
+  pointX: number,
+  pointY: number,
+  scale_m_per_pixel: number,
+  ctIsodosisProfile?: CTIsodosisProfile
+): number {
+  const mod = source.modality;
+
+  if (mod.id === 'ct-head' || mod.id === 'ct-body') {
+    return calculateCTKerma(source, pointX, pointY, scale_m_per_pixel, ctIsodosisProfile);
+  }
+
+  if (mod.category === 'nuclear' || mod.category === 'cyclotron') {
+    return calculateNuclearKerma(source, pointX, pointY, scale_m_per_pixel);
+  }
+
+  const dx = (pointX - source.x) * scale_m_per_pixel;
+  const dy = (pointY - source.y) * scale_m_per_pixel;
+  const dz = source.isocenterHeight_m;
+  const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (d < 0.1) return 1e6;
+
+  if (mod.category === 'diagnostic') {
+    const wl = WORKLOAD_DISTRIBUTIONS.find(w => w.name === mod.workloadDistribution);
+    const K1 = wl ? wl.K1 : mod.doseRateConstant;
+    const N = source.workloadValue;
+    if (mod.id.includes('fluoro') && source.workloadHoursPerWeek) {
+      const kermaRate = K1 / 3;
+      return kermaRate * source.workloadHoursPerWeek * N / (d * d);
+    }
+    return K1 * N / (d * d);
+  }
+
+  if (mod.category === 'therapy') {
+    if (mod.id === 'gamma-knife') {
+      const fractionsPerWeek = source.workloadValue;
+      const dosePerFraction_Gy = 15;
+      return dosePerFraction_Gy * fractionsPerWeek * source.useFactor / (d * d) * 1000; // mSv/week
+    }
+    if (mod.id === 'hdr-192ir' || mod.id === 'ldr-cs137') {
+      const gamma = mod.doseRateConstant;
+      const hoursPerWeek = source.workloadHoursPerWeek || 40;
+      const activity_Ci = source.workloadValue;
+      return (gamma * activity_Ci * 37 * hoursPerWeek) / (d * d * 100);
+    }
+    const fractionsPerWeek = source.workloadValue;
+    const dosePerFraction_Gy = 2.0;
+    return dosePerFraction_Gy * fractionsPerWeek * source.useFactor / (d * d) * 1000; // convert Gy → mSv
+  }
+
+  return 0;
+}
+
+// ───────────────────────────────────────────────────────────────
+// Sampling points along barrier (perpendicular offset)
+// ───────────────────────────────────────────────────────────────
+export function generateSamplePoints(barrier: Barrier, scale_m_per_pixel: number): { x: number; y: number }[] {
+  const dx = barrier.x2 - barrier.x1;
+  const dy = barrier.y2 - barrier.y1;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const length_m = length * scale_m_per_pixel;
+  if (length_m < 0.1) return [];
+
+  const nx = -dy / length;
+  const ny = dx / length;
+  const offset_pixels = SAMPLING_DISTANCE_M / scale_m_per_pixel;
+  const numPoints = Math.max(2, Math.ceil(length_m / SAMPLING_SPACING_M) + 1);
+
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i < numPoints; i++) {
+    const t = i / (numPoints - 1);
+    points.push({
+      x: barrier.x1 + t * dx + nx * offset_pixels,
+      y: barrier.y1 + t * dy + ny * offset_pixels
+    });
+  }
+  return points;
+}
+
+// ───────────────────────────────────────────────────────────────
+// Rounding rules by material code (construction standards)
+// ───────────────────────────────────────────────────────────────
+export function roundThickness(thickness_mm: number, materialCode: string): number {
+  if (materialCode === 'PB') {
+    const increment = 0.79375; // 1/32 inch in mm
+    return Math.ceil(thickness_mm / increment) * increment;
+  }
+  if (materialCode.startsWith('NIPOL') || materialCode.startsWith('CONCRETE') || materialCode.startsWith('NELCO') || materialCode.startsWith('VERITAS')) {
+    return Math.ceil(thickness_mm / 5) * 5; // 5 mm increments
+  }
+  if (materialCode === 'GYPSUM' || materialCode === 'BRICK') {
+    return Math.ceil(thickness_mm / 10) * 10; // 10 mm increments
+  }
+  if (materialCode === 'STEEL') {
+    return Math.ceil(thickness_mm / 1) * 1; // 1 mm increments
+  }
+  if (materialCode === 'LEADGLASS') {
+    return Math.ceil(thickness_mm / 0.5) * 0.5; // 0.5 mm increments
+  }
+  return Math.ceil(thickness_mm); // Default: round up to nearest mm
+}
+
+// ───────────────────────────────────────────────────────────────
+// Heatmap grid — IDW interpolation (for visualization only)
+// ───────────────────────────────────────────────────────────────
+export function calculateHeatmapGrid(
+  sources: RadiationSource[],
+  scale_m_per_pixel: number,
+  gridSize: number = 50,
+  ctIsodosisProfile?: CTIsodosisProfile
+): { x: number; y: number; kerma: number }[] {
+  if (!sources.length) return [];
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const s of sources) {
+    minX = Math.min(minX, s.x - 200);
+    minY = Math.min(minY, s.y - 200);
+    maxX = Math.max(maxX, s.x + 200);
+    maxY = Math.max(maxY, s.y + 200);
+  }
+
+  const points: { x: number; y: number; kerma: number }[] = [];
+  for (let gx = minX; gx <= maxX; gx += gridSize) {
+    for (let gy = minY; gy <= maxY; gy += gridSize) {
+      let totalKerma = 0;
+      for (const source of sources) {
+        totalKerma += calculateUnshieldedKerma(source, gx, gy, scale_m_per_pixel, ctIsodosisProfile);
+      }
+      points.push({ x: gx, y: gy, kerma: totalKerma });
+    }
+  }
+  return points;
+}

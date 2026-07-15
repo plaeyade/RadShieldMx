@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RadShield-MX v32 — Manual de Usuario Tecnico</title>
+<style>
+/* Reset */
+body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
+
+/* Page setup */
+@page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
+@page :first { margin: 0; @top-center { content: none; } @bottom-center { content: none; } }
+@page cover { @top-center { content: none; } @bottom-center { content: none; } }
+@page toc { @top-center { content: none; } @bottom-center { content: none; } }
+body { string-set: doctitle ""; }
+h1 { string-set: doctitle content(); }
+
+/* Cover - Swiss style */
+.cover { page: cover; width: 210mm; height: 297mm; margin: 0; position: relative; overflow: hidden; page-break-after: always; background: #fafbfc; }
+.cover::before { content: ''; position: absolute; top: 20mm; left: 20mm; right: 20mm; bottom: 20mm; border: 2px solid #1a365d; }
+.cover::after { content: ''; position: absolute; top: 25mm; left: 25mm; right: 25mm; bottom: 25mm; border: 1px solid #3182ce; }
+.cover-accent { position: absolute; top: 60mm; left: 0; width: 85mm; height: 6px; background: #1a365d; }
+.cover-accent2 { position: absolute; top: 68mm; left: 0; width: 55mm; height: 3px; background: #3182ce; }
+.cover-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 70%; }
+.cover-title { font-size: 32pt; font-weight: 700; color: #1a365d; margin-bottom: 0.4cm; letter-spacing: 1px; }
+.cover-subtitle { font-size: 14pt; color: #4a5568; margin-bottom: 2cm; font-weight: 400; }
+.cover-version { display: inline-block; background: #1a365d; color: white; padding: 0.2cm 0.8cm; font-size: 11pt; font-weight: 600; margin-bottom: 1.5cm; }
+.cover-meta { font-size: 11pt; color: #4a5568; line-height: 2; }
+.cover-footer { position: absolute; bottom: 40mm; left: 30mm; right: 30mm; text-align: center; font-size: 9pt; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 0.5cm; }
+
+/* TOC */
+.toc-page { page: toc; page-break-after: always; }
+.toc-title { font-size: 20pt; font-weight: 700; color: #1a365d; margin-bottom: 1cm; text-align: center; }
+.toc { list-style: none; padding: 0; }
+.toc li { margin: 0.15cm 0; }
+.toc a { color: #333; text-decoration: none; display: block; }
+.toc a::after { content: leader('.') target-counter(attr(href url), page); }
+.toc .toc-l1 { font-weight: 600; font-size: 11pt; }
+.toc .toc-l2 { padding-left: 1cm; font-size: 10.5pt; }
+.toc .toc-l3 { padding-left: 1.5cm; font-size: 10pt; color: #555; }
+
+/* Headings */
+h1 { font-size: 20pt; font-weight: 700; color: #1a365d; margin-top: 1cm; margin-bottom: 0.5cm; page-break-after: avoid; border-bottom: 2px solid #1a365d; padding-bottom: 0.2cm; }
+h2 { font-size: 14pt; font-weight: 700; color: #2d3748; margin-top: 0.8cm; margin-bottom: 0.3cm; page-break-after: avoid; }
+h3 { font-size: 12pt; font-weight: 600; color: #4a5568; margin-top: 0.5cm; margin-bottom: 0.2cm; page-break-after: avoid; }
+h4 { font-size: 11pt; font-weight: 600; color: #555; margin-top: 0.4cm; margin-bottom: 0.15cm; page-break-after: avoid; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 0.5cm 0; font-size: 10pt; max-width: 100%; }
+thead { display: table-header-group; }
+thead tr { border-top: 2px solid #333; border-bottom: 1px solid #333; }
+thead th { padding: 0.3cm 0.2cm; text-align: left; font-weight: 600; background: #f7fafc; }
+tbody tr { border-bottom: 0.5px solid #ddd; }
+tbody tr:last-child { border-bottom: 2px solid #333; }
+td { padding: 0.25cm 0.2cm; vertical-align: top; }
+tbody tr { page-break-inside: avoid; }
+caption { font-weight: 600; margin-bottom: 0.3cm; text-align: left; }
+caption::before { content: attr(data-label) ". "; font-weight: bold; }
+
+/* Figures */
+figure { margin: 0.5cm 0; page-break-inside: avoid; text-align: center; }
+figcaption { font-size: 10pt; color: #666; margin-top: 0.2cm; }
+figcaption::before { content: attr(data-label) ". "; font-weight: bold; }
+
+/* Code / formulas */
+pre, code { font-family: 'Courier New', monospace; font-size: 9.5pt; background: #f5f5f5; }
+pre { padding: 0.4cm; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-width: 100%; }
+code { padding: 0.05cm 0.15cm; word-break: break-word; }
+
+/* Info boxes */
+.info-box { border-left: 4px solid #3182ce; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #ebf8ff; }
+.info-box-title { font-weight: 600; color: #1a365d; }
+.warn-box { border-left: 4px solid #d69e2e; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #fffff0; }
+.tech-box { border-left: 4px solid #38a169; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #f0fff4; }
+.tech-box-title { font-weight: 600; color: #22543d; }
+
+/* Lists */
+ul, ol { margin: 0.3cm 0; padding-left: 1cm; }
+li { margin: 0.1cm 0; }
+
+/* Prevent overflow */
+pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-box; }
+a { word-break: break-all; color: #1a365d; }
+.katex-display { overflow-x: auto; }
+
+/* Section breaks */
+.section-break { page-break-before: always; }
+
+/* References */
+.references { font-size: 10pt; }
+.references li { margin: 0.2cm 0; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-accent"></div>
+  <div class="cover-accent2"></div>
+  <div class="cover-content">
+    <div class="cover-version">VERSION 32</div>
+    <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
+    <p class="cover-subtitle">Manual de Usuario Tecnico</p>
+    <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Plataforma Profesional para Calculo de Blindajes Radiologicos</p>
+    <div class="cover-meta">
+      <p>133+ modulos funcionales | 37,000+ lineas de codigo</p>
+      <p>15 regulaciones internacionales | 4 motores de fisica</p>
+      <p>NSGA-II Optimizer | PACS Real | Electron LINAC Applicator</p>
+      <p>Junio 2026</p>
+    </div>
+  </div>
+  <div class="cover-footer">RadShield-MX &copy; 2026 — Cumplimiento CNSNS, NCRP 151/147, ICRP 103, IAEA SSR-6</div>
+</div>
+
+<!-- TOC -->
+<div class="toc-page">
+  <div class="toc-title">Contenido</div>
+  <ul class="toc">
+    <li class="toc-l1"><a href="#sec1">1. Introduccion y Arquitectura del Sistema</a></li>
+    <li class="toc-l2"><a href="#sec1-1">1.1. Acerca de RadShield-MX v32</a></li>
+    <li class="toc-l2"><a href="#sec1-2">1.2. Requisitos del sistema y arquitectura</a></li>
+    <li class="toc-l2"><a href="#sec1-3">1.3. Interfaz profesional tipo RayXpert</a></li>
+    <li class="toc-l1"><a href="#sec2">2. Menu Archivo — Gestion de Proyectos</a></li>
+    <li class="toc-l2"><a href="#sec2-1">2.1. Proyecto (Nuevo, Abrir, Guardar)</a></li>
+    <li class="toc-l2"><a href="#sec2-2">2.2. Importar (CSV, DXF, STEP/IGES)</a></li>
+    <li class="toc-l2"><a href="#sec2-3">2.3. Exportar (CSV, PDF, CNSNS)</a></li>
+    <li class="toc-l2"><a href="#sec2-4">2.4. Especificaciones tecnicas y Audit Trail</a></li>
+    <li class="toc-l1"><a href="#sec3">3. Menu Diseno — Visualizacion y Modelado</a></li>
+    <li class="toc-l2"><a href="#sec3-1">3.1. Visor 3D del Bunker (Three.js)</a></li>
+    <li class="toc-l2"><a href="#sec3-2">3.2. Visor DXF y Point Cloud (LiDAR)</a></li>
+    <li class="toc-l2"><a href="#sec3-3">3.3. VR/AR Bunker Preview (WebXR)</a></li>
+    <li class="toc-l2"><a href="#sec3-4">3.4. Auto-Barrier Detection</a></li>
+    <li class="toc-l2"><a href="#sec3-5">3.5. BIM Connector (IFC/Revit) y BIMRAD</a></li>
+    <li class="toc-l2"><a href="#sec3-6">3.6. Real-Time 3D Design Exploration (v29)</a></li>
+    <li class="toc-l1"><a href="#sec4">4. Menu Calcular — Calculo de Blindaje</a></li>
+    <li class="toc-l2"><a href="#sec4-1">4.1. Calculo principal (NCRP 151)</a></li>
+    <li class="toc-l2"><a href="#sec4-2">4.2. Calculadora UAQ (14 tabs)</a></li>
+    <li class="toc-l2"><a href="#sec4-3">4.3. Wizard por Equipo</a></li>
+    <li class="toc-l2"><a href="#sec4-4">4.4. Barrera Rapida, Laberinto, Suelo/Techo</a></li>
+    <li class="toc-l2"><a href="#sec4-5">4.5. Optimizador NSGA-II (v32)</a></li>
+    <li class="toc-l2"><a href="#sec4-6">4.6. Incertidumbre y GUM</a></li>
+    <li class="toc-l1"><a href="#sec5">5. Menu Fisica — Transporte de Particulas y MC</a></li>
+    <li class="toc-l2"><a href="#sec5-1">5.1. Motores Monte Carlo (Geant4, GATE, FLUKA)</a></li>
+    <li class="toc-l2"><a href="#sec5-2">5.2. Native MC Engine (fotones)</a></li>
+    <li class="toc-l2"><a href="#sec5-3">5.3. Transporte de electrones y positrones</a></li>
+    <li class="toc-l2"><a href="#sec5-4">5.4. Blindaje de neutrones (ENDF/B-VII.1)</a></li>
+    <li class="toc-l2"><a href="#sec5-5">5.5. Electron LINAC Applicator (v32, NCRP 151 App.B)</a></li>
+    <li class="toc-l2"><a href="#sec5-6">5.6. Dose Map Visualization 2D/3D (v31)</a></li>
+    <li class="toc-l2"><a href="#sec5-7">5.7. Material Properties (Phy-X/PSD)</a></li>
+    <li class="toc-l1"><a href="#sec6">6. Menu Med. Nuclear — Terapia y Diagnostico</a></li>
+    <li class="toc-l2"><a href="#sec6-1">6.1. Gamma Knife, Braquiterapia HDR, Versa HD</a></li>
+    <li class="toc-l2"><a href="#sec6-2">6.2. Medicina Nuclear Avanzada (PET/CT, SPECT)</a></li>
+    <li class="toc-l2"><a href="#sec6-3">6.3. CBCT/IGRT y DICOM RT</a></li>
+    <li class="toc-l2"><a href="#sec6-4">6.4. PACS Integration y PACS Real (v32)</a></li>
+    <li class="toc-l2"><a href="#sec6-5">6.5. Bateman Decay Solver y NIST Library</a></li>
+    <li class="toc-l1"><a href="#sec7">7. Menu Normativa — Compliance Regulatorio</a></li>
+    <li class="toc-l2"><a href="#sec7-1">7.1. Base de datos internacional (15 regulaciones)</a></li>
+    <li class="toc-l2"><a href="#sec7-2">7.2. Cumplimiento CNSNS Mexico</a></li>
+    <li class="toc-l2"><a href="#sec7-3">7.3. Comparativa regulatoria y alertas</a></li>
+    <li class="toc-l1"><a href="#sec8">8. Menu Reportes — Memorias y Dashboards</a></li>
+    <li class="toc-l2"><a href="#sec8-1">8.1. Memoria Analitica AI-Powered (v30)</a></li>
+    <li class="toc-l2"><a href="#sec8-2">8.2. Dashboards (Ejecutivo, CNSNS, Calculo)</a></li>
+    <li class="toc-l2"><a href="#sec8-3">8.3. Validacion, Anomalias y Escenarios What-If</a></li>
+    <li class="toc-l1"><a href="#sec9">9. Menu Herramientas — IA y Automatizacion</a></li>
+    <li class="toc-l2"><a href="#sec9-1">9.1. AI Shielding Assistant (RAG)</a></li>
+    <li class="toc-l2"><a href="#sec9-2">9.2. Predictive Material Optimizer</a></li>
+    <li class="toc-l2"><a href="#sec9-3">9.3. Python (Pyodide) en navegador</a></li>
+    <li class="toc-l2"><a href="#sec9-4">9.4. Modeling Toolbox (10 calculadoras)</a></li>
+    <li class="toc-l1"><a href="#sec10">10. Novedades v29-v32</a></li>
+    <li class="toc-l2"><a href="#sec10-1">10.1. Real-Time 3D Export (v29)</a></li>
+    <li class="toc-l2"><a href="#sec10-2">10.2. Dose Map + Equipment DB + Cost DB (v31)</a></li>
+    <li class="toc-l2"><a href="#sec10-3">10.3. NSGA-II Optimizer (v32)</a></li>
+    <li class="toc-l2"><a href="#sec10-4">10.4. PACS Real Integration (v32)</a></li>
+    <li class="toc-l2"><a href="#sec10-5">10.5. Electron LINAC Applicator (v32)</a></li>
+    <li class="toc-l1"><a href="#sec11">11. Referencias Tecnicas</a></li>
+  </ul>
+</div>
+
+<!-- ================================================================ -->
+<!-- SECTION 1 -->
+<!-- ================================================================ -->
+<h1 id="sec1">1. Introduccion y Arquitectura del Sistema</h1>
+
+<h2 id="sec1-1">1.1. Acerca de RadShield-MX v32</h2>
+<p>RadShield-MX es una plataforma profesional de codigo abierto para el diseno, calculo y optimizacion de blindajes radiologicos en instalaciones medicas e industriales. La plataforma implementa los estandares internacionales mas rigurosos en proteccion radiologica, incluyendo NCRP Report 151 (megavoltaje X y gamma), NCRP Report 147 (imagenologia medica), ICRP Publication 103 (recomendaciones generales), y la normativa especifica de la Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS) de Mexico.</p>
+
+<div class="info-box">
+  <span class="info-box-title">Version actual:</span> RadShield-MX v32 (junio 2026)
+  <br>133+ modulos funcionales | 37,000+ lineas de codigo fuente TypeScript/React
+  <br>15 regulaciones internacionales integradas | 38 materiales NIST
+  <br>4 motores de fisica: Monte Carlo (fotones), Electrones, Neutrones, Bateman
+  <br>3 novedades v32: NSGA-II Optimizer, PACS Real Integration, Electron LINAC Applicator
+</div>
+
+<p>La plataforma esta dirigida a fisicos medicos, fisicos de proteccion radiologica, ingenieros nucleares y profesionales de la salud involucrados en el diseno de instalaciones radiactivas. El nivel tecnico de este manual es avanzado, asumiendo conocimientos previos de fisica de la radiacion, atenuacion de radiacion ionizante y normativa de proteccion radiologica.</p>
+
+<h2 id="sec1-2">1.2. Requisitos del sistema y arquitectura</h2>
+
+<table>
+  <caption data-label="Tabla 1">Requisitos del sistema y arquitectura tecnica</caption>
+  <thead><tr><th>Componente</th><th>Minimo</th><th>Recomendado</th><th>Notas tecnicas</th></tr></thead>
+  <tbody>
+    <tr><td>Navegador</td><td>Chrome 90+, Firefox 88+</td><td>Chrome 120+ (optimizado)</td><td>WebGL 2.0 requerido para visores 3D</td></tr>
+    <tr><td>RAM</td><td>4 GB</td><td>8 GB+ (MC nativo)</td><td>MC requiere ~2GB para 10^6 particulas</td></tr>
+    <tr><td>Resolucion</td><td>1366 x 768</td><td>1920 x 1080+</td><td>UI responsiva con breakpoint 1024px</td></tr>
+    <tr><td>Almacenamiento</td><td>100 MB (IndexedDB)</td><td>500 MB+</td><td>SQLite local via sql.js (WASM)</td></tr>
+    <tr><td>Conexion</td><td>No requerida para bundle estatico</td><td>Cloud Sync opt-in</td><td>Service Worker opt-in con VITE_ENABLE_SERVICE_WORKER=true</td></tr>
+    <tr><td>GPU</td><td>Integrada</td><td>Dedicada (WebGL)</td><td>Three.js WebGLRenderer con antialiasing</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Arquitectura software:</strong> RadShield-MX esta construido sobre React 18 con TypeScript, utilizando Vite como bundler. El motor de renderizado 2D utiliza HTML5 Canvas API con aceleracion por hardware. Los visores 3D se basan en Three.js r160 con soporte para WebGL 2.0, post-processing (SSAO, bloom), y controles orbitales. La persistencia local utiliza IndexedDB a traves de Dexie.js, con sincronizacion opcional via tRPC + PostgreSQL en backend.</p>
+
+<h2 id="sec1-3">1.3. Interfaz profesional tipo RayXpert</h2>
+<p>La interfaz de usuario v32 esta organizada en 8 menus funcionales con codigo de color, inspirada en la ergonomia de software profesional como RayXpert y ANSYS:</p>
+
+<table>
+  <caption data-label="Tabla 2">Menus funcionales de la barra de herramientas v32</caption>
+  <thead><tr><th>#</th><th>Menu</th><th>Color</th><th>Funciones principales</th><th>Accesos</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Archivo</td><td>Gris #64748b</td><td>Proyectos, importar/exportar, audit trail</td><td>Ctrl+S, Ctrl+O</td></tr>
+    <tr><td>2</td><td>Diseno</td><td>Ambar #d97706</td><td>3D, DXF, Point Cloud, VR/AR, BIM, Real-Time 3D</td><td>Ctrl+D</td></tr>
+    <tr><td>3</td><td>Calcular</td><td>Esmeralda #059669</td><td>Blindaje, UAQ, Wizard, Laberinto, NSGA-II</td><td>F5, Ctrl+B</td></tr>
+    <tr><td>4</td><td>Fisica</td><td>Cian #0891b2</td><td>MC, Electrones, Neutrones, Dose Map, Phy-X</td><td>Ctrl+M</td></tr>
+    <tr><td>5</td><td>Med. Nuclear</td><td>Rosa #e11d48</td><td>PET/CT, SPECT, PACS, Bateman, NIST</td><td>Ctrl+N</td></tr>
+    <tr><td>6</td><td>Normativa</td><td>Indigo #4f46e5</td><td>Regulaciones, CNSNS, NCRP, ICRU</td><td>Ctrl+R</td></tr>
+    <tr><td>7</td><td>Reportes</td><td>Naranja #ea580c</td><td>Memorias, Dashboards, Validacion, Costos</td><td>Ctrl+P</td></tr>
+    <tr><td>8</td><td>Herramientas</td><td>Teal #0d9488</td><td>AI Assistant, Python, Theme, Collaboration</td><td>Ctrl+T</td></tr>
+  </tbody>
+</table>
+
+<p>Cada menu desplegable incluye iconos miniatura (<code>MiniIcon</code>) codificados por color, descripciones emergentes (<code>Tooltip</code>), y atajos de teclado donde aplica. La barra de acciones rapidas (Quick-Action Bar) debajo del header principal proporciona acceso directo a las funciones mas utilizadas: Calcular (F5), UAQ, Memoria, Laberinto, Rapido, Suelo/Techo, Neutrones, MC, DXF, 3D, Proyectos.</p>
+
+<!-- ================================================================ -->
+<!-- SECTION 2 -->
+<!-- ================================================================ -->
+<h1 id="sec2" class="section-break">2. Menu Archivo — Gestion de Proyectos</h1>
+
+<h2 id="sec2-1">2.1. Proyecto (Nuevo, Abrir, Guardar)</h2>
+<p>El subsistema de gestion de proyectos implementa un modelo dual de persistencia: almacenamiento local (IndexedDB) sincronizado opcionalmente con backend PostgreSQL via tRPC.</p>
+
+<h3>Nuevo Proyecto</h3>
+<p>Al iniciar RadShield-MX, la <strong>Pantalla de Bienvenida</strong> presenta KPIs superiores (133+ modulos, 15 regulaciones, 38 materiales NIST, compliance status), acciones rapidas, proyectos recientes (ultimos 5), y templates pre-configurados para LINAC 6MV, PET-CT FDG, Gamma Knife Perfexion, HDR Co-60, y Ciclotron IBA KIUBE 18 MeV.</p>
+
+<h3>Guardar proyecto</h3>
+<p>El modelo de datos del proyecto (<code>FloorPlan</code>) incluye:</p>
+<ul>
+  <li><strong>Metadata:</strong> id, nombre, escala (m/pixel), dimensiones en pixeles.</li>
+  <li><strong>Fuentes (<code>sources</code>):</strong> Arreglo de objetos <code>RadiationSource</code> con id, posicion (x,y), modalidad (nombre, categoria, workload), y parametros especificos de energia.</li>
+  <li><strong>Barreras (<code>barriers</code>):</strong> Arreglo de objetos <code>Barrier</code> con id, coordenadas (x1,y1,x2,y2), tipo, material, objetivo de dosis (mSv/semana), y resultados de calculo (<code>requiredThickness_mm</code>, <code>maxKerma</code>).</li>
+  <li><strong>Regiones ocupadas:</strong> Poligonos que definen areas con restricciones de acceso.</li>
+</ul>
+
+<p>El auto-guardado se ejecuta cada 30 segundos via <code>useEffect</code> con intervalo, almacenando el estado serializado en IndexedDB. Para usuarios autenticados, el sistema sincroniza automaticamente via tRPC <code>project.create</code> / <code>project.update</code> con deduplicacion por nombre de proyecto.</p>
+
+<h2 id="sec2-2">2.2. Importar (CSV, DXF, STEP/IGES)</h2>
+
+<h3>Importar CSV</h3>
+<p>El importador CSV (menu Archivo &gt; Importar CSV) soporta archivos con las siguientes columnas: Barrera_ID, Barrera_Nombre, Tipo, Longitud_m, X1, Y1, X2, Y2, Material_Primario, Espesor_mm. El parser utiliza <code>PapaParse</code> con deteccion automatica del delimitador (coma, punto-y-coma, tabulacion) y validacion de tipos.</p>
+
+<h3>Importar DXF</h3>
+<p>El visor DXF implementa un parser nativo para entidades DXF R12-R14:</p>
+<ul>
+  <li><strong>Entidades soportadas:</strong> LINE, CIRCLE, ARC, LWPOLYLINE, POLYLINE, TEXT, MTEXT, INSERT (bloques).</li>
+  <li><strong>Proceso:</strong> Lectura del archivo como texto → parsing de grupos codificados (0-1071) → extraccion de entidades → conversion a coordenadas de canvas.</li>
+  <li><strong>Escala:</strong> El usuario debe ajustar la escala (m/pixel) para que las dimensiones del DXF correspondan a la realidad. La formula es: <code>escala = unidades_DXF / pixeles_canvas</code>.</li>
+</ul>
+
+<h3>Importar STEP/IGES (v27)</h3>
+<p>El importador STEP/IGES (menu Archivo &gt; Importar STEP/IGES) utiliza <strong>OpenCascade.js</strong> (WebAssembly) para geometria B-Rep:</p>
+<ul>
+  <li><strong>Formatos soportados:</strong> STEP AP214/AP242 (<code>.stp</code>, <code>.step</code>), IGES 5.x (<code>.igs</code>, <code>.iges</code>).</li>
+  <li><strong>Tessellation:</strong> Algoritmo de triangulacion con control de deflexion de cuerda (<code>linearDeflection</code>) y angulo angular (<code>angularDeflection</code>).</li>
+  <li><strong>Deteccion de overlaps:</strong> Algoritmo BVH (Bounding Volume Hierarchy) para detectar intersecciones entre solidos importados.</li>
+  <li><strong>Asignacion de materiales:</strong> Mapeo automatico por nombre de solido (e.g., "CONCRETE_WALL" → Concreto baritado).</li>
+</ul>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — OpenCascade.js:</span> OpenCascade.js es un port WebAssembly de Open CASCADE Technology (OCCT), el kernel geometrico utilizado por FreeCAD, Salome, y Rhino. La tessellation B-Rep converte superficies NURBS en mallas triangulares mediante el algoritmo de Delaunay con restricciones de borde. La precision de la malla se controla mediante los parametros <code>linearDeflection</code> (desviacion maxima de la cuerda respecto a la superficie, en mm) y <code>angularDeflection</code> (angulo maximo entre normales adyacentes, en radianes).
+</div>
+
+<h2 id="sec2-3">2.3. Exportar (CSV, PDF, CNSNS)</h2>
+
+<h3>Exportar CSV</h3>
+<p>La exportacion CSV genera un archivo con la siguiente estructura por barrera:</p>
+<pre>Barrera_ID, Barrera_Nombre, Tipo, Longitud_m, Kerma_max_mSv_sem,
+Material_recomendado, Espesor_mm, Espesor_redondeado_mm,
+Material_2, Espesor_2_mm, Material_3, Espesor_3_mm,
+Fuente, Modalidad, Pacientes_Sem, Objetivo_mSv_sem</pre>
+<p>Los espesores redondeados siguen la logica de <code>roundThickness</code>: para Pb se redondea al multiplo de 0.5 mm superior; para concreto al cm superior; para acero al mm superior.</p>
+
+<h3>Exportar PDF (Memoria de calculo)</h3>
+<p>La generacion de PDF utiliza <code>jsPDF</code> con <code>html2canvas</code> para renderizar el canvas como imagen. El PDF incluye:</p>
+<ol>
+  <li>Portada con nombre del proyecto, institucion, fecha, y responsable.</li>
+  <li>Tabla resumen de fuentes (nombre, modalidad, workload, energia).</li>
+  <li>Tabla detallada de barreras con kerma calculada, material recomendado, espesor, y estado (PASS/WARN/FAIL).</li>
+  <li>Imagen del plano con overlay de barreras y fuentes.</li>
+  <li>Referencia normativa aplicada (NCRP 151, secciones especificas).</li>
+</ol>
+
+<h3>Reporte CNSNS</h3>
+<p>El reporte CNSNS (menu Archivo &gt; Exportar Reporte CNSNS) genera un documento DOCX conforme a la Norma LA-001/01 de la CNSNS, incluyendo:</p>
+<ul>
+  <li>Memoria de calculo con formulas y referencias.</li>
+  <li>Especificaciones tecnicas del equipo y blindaje.</li>
+  <li>Plan de control de calidad y mantenimiento.</li>
+  <li>Evaluacion de riesgos radiologicos.</li>
+</ul>
+
+<h2 id="sec2-4">2.4. Especificaciones tecnicas y Audit Trail</h2>
+
+<h3>Especificaciones Tecnicas</h3>
+<p>El dialogo de Especificaciones Tecnicas (menu Archivo) genera un documento PDF con:</p>
+<ul>
+  <li>Datos del equipo: fabricante, modelo, energia maxima, dosis en isocentro.</li>
+  <li>Parametros de blindaje: workload, factor de uso, factor de ocupacion, dosis de diseno.</li>
+  <li>Materiales seleccionados y sus propiedades (densidad, TVL, HVL).</li>
+  <li>Normativa aplicada y fecha de calculo.</li>
+</ul>
+
+<h3>Audit Trail</h3>
+<p>El sistema de auditoria registra cada accion del usuario con timestamp, tipo de accion, y descripcion. Los eventos registrados incluyen:</p>
+<ul>
+  <li>CREATED: Creacion de fuentes, barreras, proyectos.</li>
+  <li>MODIFIED: Cambios en propiedades (posicion, material, espesor).</li>
+  <li>DELETED: Eliminacion de entidades.</li>
+  <li>CALCULATED: Ejecucion de calculos de blindaje.</li>
+  <li>EXPORTED: Exportacion de reportes.</li>
+</ul>
+
+<!-- ================================================================ -->
+<!-- SECTION 3 -->
+<!-- ================================================================ -->
+<h1 id="sec3" class="section-break">3. Menu Diseno — Visualizacion y Modelado</h1>
+
+<h2 id="sec3-1">3.1. Visor 3D del Bunker (Three.js)</h2>
+<p>El visor 3D (menu Diseno &gt; Visor 3D del Bunker) utiliza Three.js para renderizar una representacion tridimensional del bunker con fuentes de radiacion, barreras, y mapa de dosis.</p>
+
+<h3>Caracteristicas tecnicas</h3>
+<ul>
+  <li><strong>Geometria:</strong> Las barreras se extruyen a altura 3D proporcional a su espesor. Las fuentes se representan como esferas emisivas con color por modalidad.</li>
+  <li><strong>Materiales PBR:</strong> Physically Based Rendering con metalness/roughness para concreto, plomo, acero, y vidrio plomado.</li>
+  <li><strong>Iluminacion:</strong> Ambient light + directional light con shadow maps (PCF soft shadows).</li>
+  <li><strong>Controles:</strong> OrbitControls con damping, zoom limitado, y auto-rotate opcional.</li>
+  <li><strong>Post-processing:</strong> SSAO (Screen Space Ambient Occlusion) para realismo en contactos entre barreras.</li>
+</ul>
+
+<h3>Mapa de dosis 3D</h3>
+<p>El visor 3D puede superponer un mapa de dosis calculado mediante:</p>
+<ol>
+  <li>Grid 2D de kerma en el plano del suelo (z=0).</li>
+  <li>Extrusion vertical para crear volumenes de iso-dosis.</li>
+  <li>Color coding con 6 paletas: jet, viridis, plasma, inferno, hot, cool.</li>
+  <li>Isosuperficies para niveles especificos de kerma (e.g., 0.02 mSv/semana).</li>
+</ol>
+
+<h2 id="sec3-2">3.2. Visor DXF y Point Cloud (LiDAR)</h2>
+
+<h3>Visor DXF</h3>
+<p>El visor DXF (menu Diseno &gt; Visor DXF) renderiza archivos AutoCAD en el canvas principal. Soporta:</p>
+<ul>
+  <li>Capas (LAYERS) con visibilidad toggleable.</li>
+  <li>Bloques (INSERT) con atributos.</li>
+  <li>Textos y anotaciones con fuente estandar.</li>
+  <li>Zoom y paneo sincronizado con el canvas principal.</li>
+</ul>
+
+<h3>Point Cloud (LiDAR)</h3>
+<p>El modulo Point Cloud (menu Diseno &gt; Point Cloud LiDAR) importa archivos de nubes de puntos:</p>
+<ul>
+  <li><strong>Formatos soportados:</strong> LAS, LAZ, PLY, XYZ.</li>
+  <li><strong>Procesamiento:</strong> Subsampling octree para reduccion de puntos (target: 1M puntos).</li>
+  <li><strong>Visualizacion:</strong> PointsMaterial con size attenuation y color por intensidad o altura.</li>
+  <li><strong>Alineacion:</strong> Herramientas de registro manual (3 puntos) para alinear la nube con el plano.</li>
+</ul>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — LiDAR point clouds:</span> Las nubes de puntos LiDAR se utilizan para capturar la geometria existente de instalaciones (as-built) con precision milimetrica. El registro de nubes de puntos (ICP: Iterative Closest Point) permite alinear la nube capturada con el sistema de coordenadas del plano de blindaje. La subsampling via octree reduce la complejidad computacional de O(n) a O(log n) para queries espaciales.
+</div>
+
+<h2 id="sec3-3">3.3. VR/AR Bunker Preview (WebXR)</h2>
+<p>El modulo VR/AR (menu Diseno &gt; VR/AR Bunker Preview) utiliza la API WebXR para experiencias inmersivas:</p>
+<ul>
+  <li><strong>VR Mode:</strong> Visualizacion estereoscopica con 6DoF tracking (posicion y rotacion).</li>
+  <li><strong>AR Mode:</strong> Overlay del modelo 3D sobre la camara del dispositivo (hit-test para colocacion).</li>
+  <li><strong>Hand Tracking:</strong> Control por gestos en dispositivos compatibles (Meta Quest, HoloLens).</li>
+  <li><strong>Teleportation:</strong> Navegacion por teleportacion en espacios grandes (bunkers).</li>
+</ul>
+
+<h2 id="sec3-4">3.4. Auto-Barrier Detection</h2>
+<p>El modulo de deteccion automatica de barreras (menu Diseno &gt; Auto-Barrier Detection) utiliza vision por computadora para identificar paredes en planos:</p>
+<ol>
+  <li>Conversion de la imagen a escala de grises.</li>
+  <li>Deteccion de bordes con algoritmo Canny (sigma=1.4, umbrales adaptativos).</li>
+  <li>Transformada de Hough probabilistica para detectar lineas rectas.</li>
+  <li>Filtrado de lineas por longitud minima y angulo (vertical/horizontal preferente).</li>
+  <li>Conversión de lineas detectadas a objetos <code>Barrier</code> con tipo inferido por posicion.</li>
+</ol>
+
+<h2 id="sec3-5">3.5. BIM Connector (IFC/Revit) y BIMRAD</h2>
+
+<h3>BIM Connector</h3>
+<p>El conector BIM (menu Diseno &gt; BIM Connector IFC/Revit) permite importar modelos de edificacion:</p>
+<ul>
+  <li><strong>IFC:</strong> Industry Foundation Classes (IFC2x3, IFC4) via <code>web-ifc</code> (WASM port de IfcOpenShell).</li>
+  <li><strong>Revit:</strong> Exportar desde Revit como IFC o utilizar el plugin RadShield-MX (en desarrollo).</li>
+  <li><strong>Mapeo de entidades:</strong> IfcWall → Barrier, IfcSpace → Region, IfcElementAssembly → Equipment.</li>
+</ul>
+
+<h3>BIMRAD</h3>
+<p>BIMRAD (menu Diseno &gt; BIMRAD Modeling) es un modelo de datos que extiende IFC con informacion radiologica:</p>
+<ul>
+  <li><strong>IfcRadiationSource:</strong> Entidad personalizada con tipo, energia, workload, y dosis.</li>
+  <li><strong>IfcShieldingBarrier:</strong> Entidad con material, espesor, TVL, y estado de calculo.</li>
+  <li><strong>IfcDoseZone:</strong> Zona de dosis con limites regulatorios y factor de ocupacion.</li>
+</ul>
+
+<h2 id="sec3-6">3.6. Real-Time 3D Design Exploration (v29)</h2>
+<p>El modulo Real-Time 3D (menu Diseno &gt; Real-Time 3D Exploration) permite exportar el modelo de blindaje a motores de visualizacion en tiempo real:</p>
+
+<h3>Formatos de exportacion</h3>
+<table>
+  <caption data-label="Tabla 3">Formatos de exportacion Real-Time 3D</caption>
+  <thead><tr><th>Formato</th><th>Extension</th><th>Motor destino</th><th>Caracteristicas</th></tr></thead>
+  <tbody>
+    <tr><td>glTF 2.0</td><td>.gltf</td><td>Universal</td><td>JSON + binarios, materiales PBR, animaciones</td></tr>
+    <tr><td>glB (binary)</td><td>.glb</td><td>Universal</td><td>Formato unico, self-contained</td></tr>
+    <tr><td>FBX</td><td>.fbx</td><td>Unreal, Unity, 3ds Max</td><td>Autodesk, soporta rigging y animacion</td></tr>
+    <tr><td>USD</td><td>.usdc, .usda</td><td>NVIDIA Omniverse</td><td>Pixar Universal Scene Description</td></tr>
+    <tr><td>Wavefront OBJ</td><td>.obj</td><td>Universal (legacy)</td><td>M + V + VT + VN, formato texto</td></tr>
+  </tbody>
+</table>
+
+<h3>Conectores a software de visualizacion</h3>
+<ul>
+  <li><strong>Unreal Engine 5:</strong> Exportacion USD + plugin Datasmith para importacion directa.</li>
+  <li><strong>Unity:</strong> Exportacion FBX con materiales Standard/URP.</li>
+  <li><strong>Enscape:</strong> Plugin para Revit/SketchUp con exportacion glB.</li>
+  <li><strong>Rhinoceros:</strong> Importacion directa de USD y glTF.</li>
+  <li><strong>Autodesk Viewer:</strong> Upload de USD o glB a la nube de Autodesk.</li>
+  <li><strong>SketchUp Viewer:</strong> Exportacion COLLADA (.dae) o glTF.</li>
+</ul>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — glTF 2.0:</span> glTF (GL Transmission Format) es el estandar Khronos para transmision eficiente de escenas 3D. Utiliza un formato JSON para la escena (nodos, camaras, materiales) y buffers binarios para geometria (interleaved vertex attributes) y texturas. Los materiales PBR siguen el modelo metallic-roughness de Disney, compatible con motores UE5, Unity, y Three.js nativamente.
+</div>
+
+<p>El panel de preview Three.js permite visualizar el modelo exportado antes de descargarlo, con opciones de configuracion de materiales (metalness, roughness, emissive), iluminacion (HDR environment map), y post-processing (FXAA, tone mapping ACES).</p>
+
+
+
+<!-- ================================================================ -->
+<!-- SECTION 4 -->
+<!-- ================================================================ -->
+<h1 id="sec4" class="section-break">4. Menu Calcular — Calculo de Blindaje</h1>
+
+<h2 id="sec4-1">4.1. Calculo principal (NCRP 151)</h2>
+<p>El calculo principal de RadShield-MX implementa la metodologia del NCRP Report 151 para instalaciones de radioterapia con haces de megavoltaje X y gamma. El algoritmo calcula la tasa de kerma semanal en cada barrera y determina el espesor de material necesario para reducir la dosis por debajo del limite de diseno.</p>
+
+<h3>Formula fundamental</h3>
+<p>La kerma semanal en el punto de calculo se obtiene mediante:</p>
+<pre>K = W * U * T * d^(-2) * B</pre>
+<p>Donde:</p>
+<ul>
+  <li><strong>W</strong> = Workload (Gy/semana en isocentro)</li>
+  <li><strong>U</strong> = Factor de uso (fraccion del beam-on time apuntando hacia la barrera)</li>
+  <li><strong>T</strong> = Factor de ocupacion del area protegida</li>
+  <li><strong>d</strong> = Distancia fuente-punto de calculo (m)</li>
+  <li><strong>B</strong> = Factor de transmision del blindaje</li>
+</ul>
+
+<h3>Factor de transmision</h3>
+<p>Para materiales con TVL conocidos (NCRP 151, Tabla B.4):</p>
+<pre>B = 10^(-x / TVL)</pre>
+<p>Donde <strong>x</strong> es el espesor del material (mm o cm, consistente con TVL). Para combinaciones de materiales, el factor total es el producto de los factores individuales.</p>
+
+<h3>Algoritmo de calculo</h3>
+<ol>
+  <li>Para cada barrera, calcular la distancia desde cada fuente al punto medio de la barrera.</li>
+  <li>Calcular la kerma sin blindaje (K_unshielded) usando la ley del inverso del cuadrado.</li>
+  <li>Aplicar el factor de uso U y el factor de ocupacion T.</li>
+  <li>Para cada material disponible, calcular el espesor requerido: <code>x = TVL * log10(K_unshielded / P)</code>, donde P es la dosis de diseno.</li>
+  <li>Redondear el espesor al estandar comercial mas cercano (ver <code>roundThickness</code>).</li>
+  <li>Determinar el estado: PASS (kerma &lt;= P), WARN (P &lt; kerma &lt;= 1.5P), FAIL (kerma &gt; 1.5P).</li>
+</ol>
+
+<div class="warn-box">
+  <strong>Principio ALARA:</strong> Todos los calculos deben seguir el principio ALARA (As Low As Reasonably Achievable) conforme a ICRP 103. Se recomienda utilizar limites de diseno mas restrictivos que los limites regulatorios legales.
+</div>
+
+<h3>Pass/Warn/Fail status</h3>
+<p>El sistema clasifica cada barrera en tres categorias despues del calculo:</p>
+<table>
+  <caption data-label="Tabla 4">Clasificacion de barreras post-calculo</caption>
+  <thead><tr><th>Estado</th><th>Criterio</th><th>Color</th><th>Accion recomendada</th></tr></thead>
+  <tbody>
+    <tr><td>PASS</td><td>K_calc &lt;= P_design</td><td>Verde #22c55e</td><td>Ninguna, blindaje adecuado</td></tr>
+    <tr><td>WARN</td><td>P_design &lt; K_calc &lt;= 1.5 * P_design</td><td>Amarillo #eab308</td><td>Considerar aumentar espesor</td></tr>
+    <tr><td>FAIL</td><td>K_calc &gt; 1.5 * P_design</td><td>Rojo #ef4444</td><td>Redisenar blindaje inmediatamente</td></tr>
+  </tbody>
+</table>
+
+<h2 id="sec4-2">4.2. Calculadora UAQ (14 tabs)</h2>
+<p>La calculadora avanzada (boton <strong>UAQ</strong>, verde en la barra rapida) proporciona 14 tabs especializados por tipo de equipo, cada uno con parametros pre-configurados segun NCRP 151:</p>
+
+<table>
+  <caption data-label="Tabla 5">Tabs de la calculadora UAQ</caption>
+  <thead><tr><th>#</th><th>Tab</th><th>Equipo</th><th>Energia</th><th>Ref. NCRP 151</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>LINAC 6MV</td><td>Acelerador lineal</td><td>6 MV X</td><td>Tabla B.1, B.2</td></tr>
+    <tr><td>2</td><td>LINAC 10MV</td><td>Acelerador lineal</td><td>10 MV X</td><td>Tabla B.1, B.2</td></tr>
+    <tr><td>3</td><td>LINAC 15MV</td><td>Acelerador lineal</td><td>15 MV X</td><td>Tabla B.1, B.2, B.5 (neutrones)</td></tr>
+    <tr><td>4</td><td>LINAC 18MV</td><td>Acelerador lineal</td><td>18 MV X</td><td>Tabla B.1, B.2, B.5</td></tr>
+    <tr><td>5</td><td>LINAC 25MV</td><td>Acelerador lineal</td><td>25 MV X</td><td>Tabla B.1, B.2, B.5</td></tr>
+    <tr><td>6</td><td>Gamma Knife</td><td>Elekta Perfexion/Icon</td><td>Co-60 (1.25 MeV avg)</td><td>Seccion 4.1.2.1</td></tr>
+    <tr><td>7</td><td>CyberKnife</td><td>Accuray CyberKnife</td><td>6 MV X</td><td>Seccion 4.1.2.2</td></tr>
+    <tr><td>8</td><td>TomoTherapy</td><td>Accuray Radixact</td><td>6 MV X</td><td>Seccion 4.1.2.3</td></tr>
+    <tr><td>9</td><td>Proton</td><td>Cyclotron/Iba Proteus</td><td>70-250 MeV p</td><td>Seccion 4.1.3</td></tr>
+    <tr><td>10</td><td>HDR Co-60</td><td>Braquiterapia HDR</td><td>Co-60 (1.25 MeV)</td><td>Seccion 4.1.4</td></tr>
+    <tr><td>11</td><td>HDR Ir-192</td><td>Braquiterapia HDR</td><td>Ir-192 (380 keV avg)</td><td>Seccion 4.1.4</td></tr>
+    <tr><td>12</td><td>Ciclotron 18MeV</td><td>IBA KIUBE</td><td>18 MeV p → FDG</td><td>Seccion 4.2</td></tr>
+    <tr><td>13</td><td>SPECT</td><td>Gamma camera</td><td>Tc-99m, I-131</td><td>NCRP 147</td></tr>
+    <tr><td>14</td><td>PET/CT</td><td>PET/CT con FDG</td><td>F-18 (511 keV)</td><td>NCRP 147</td></tr>
+  </tbody>
+</table>
+
+<p>Cada tab incluye:</p>
+<ul>
+  <li>Seleccion de equipo con carga automatica de workload tipico (Tabla B.2 NCRP 151).</li>
+  <li>Configuracion de energia, tecnica de tratamiento (3D-CRT, IMRT, VMAT, SRS, SBRT).</li>
+  <li>Factores de uso U y ocupacion T segun la instalacion.</li>
+  <li>Calculo simultaneo para multiples materiales (concreto, Pb, acero, W).</li>
+  <li>Estimacion de costo basada en volumen de material y costo unitario regional.</li>
+  <li>Exportacion de resultados a CSV y PDF.</li>
+</ul>
+
+<h2 id="sec4-3">4.3. Wizard por Equipo</h2>
+<p>El <strong>Wizard por Equipo</strong> (menu Calcular &gt; Wizard por Equipo) guia al usuario paso a paso mediante un dialogo modal con interfaz de multiples pasos (stepper). Los equipos soportados son:</p>
+
+<h3>LINAC (6, 10, 15, 18, 25 MV)</h3>
+<ol>
+  <li><strong>Paso 1 — Datos del equipo:</strong> Fabricante, modelo, energia maxima, dosis en isocentro (Gy/min).</li>
+  <li><strong>Paso 2 — Workload:</strong> Numero de pacientes/semana, fracccionación, tecnica. El sistema calcula W automaticamente.</li>
+  <li><strong>Paso 3 — Geometria:</strong> Dimensiones del bunker (largo x ancho x alto), posicion del isocentro.</li>
+  <li><strong>Paso 4 — Barreras:</strong> Tipo de cada pared (primaria/secundaria), angulo de incidencia, material preferido.</li>
+  <li><strong>Paso 5 — Calculo:</strong> Ejecucion del algoritmo NCRP 151 con visualizacion de progreso.</li>
+  <li><strong>Paso 6 — Optimizacion:</strong> Ajuste de espesores con restriccion de costo maximo.</li>
+  <li><strong>Paso 7 — Reporte:</strong> Generacion de memoria analitica en PDF.</li>
+</ol>
+
+<h3>Gamma Knife (Perfexion, Icon)</h3>
+<p>El wizard de Gamma Knife incluye parametros especificos:</p>
+<ul>
+  <li>Numero de fuentes Co-60 (192 para Perfexion).</li>
+  <li>Actividad total (Ci) y fecha de calibracion.</li>
+  <li>Tempo de tratamiento promedio por paciente.</li>
+  <li>Blindaje especifico para el casco (helmet) y la sala de espera.</li>
+</ul>
+
+<h3>Ciclotron IBA KIUBE 18 MeV</h3>
+<p>El wizard del ciclotron cubre:</p>
+<ul>
+  <li>Produccion de F-18 FDG (18 MeV protones sobre O-18 enriquecido).</li>
+  <li>Blindaje para el bunker del ciclotron (hormigon de alta densidad, 4-5 m).</li>
+  <li>Blindaje de la sala de sintesis QDM (cascos de plomo, 30-50 mm).</li>
+  <li>Blindaje de la sala de calidad (Pb, 15-25 mm).</li>
+  <li>Blindaje de almacenamiento de desechos (concreto, 500 mm).</li>
+</ul>
+
+<h2 id="sec4-4">4.4. Barrera Rapida, Laberinto, Suelo/Techo</h2>
+
+<h3>Barrera Rapida</h3>
+<p>La herramienta de Barrera Rapida (boton <strong>Rapido</strong> en la barra rapida, o Ctrl+B) permite calcular el espesor de una barrera individual sin necesidad de definir un plano completo:</p>
+<ol>
+  <li>Seleccionar el tipo de fuente (LINAC, Co-60, Ir-192, etc.).</li>
+  <li>Introducir la energia y el workload.</li>
+  <li>Introducir la distancia fuente-barrera (m).</li>
+  <li>Seleccionar el material (concreto, Pb, acero, W, etc.).</li>
+  <li>El sistema calcula el TVL del material y el espesor requerido.</li>
+</ol>
+
+<h3>Laberinto (Maze Calculator)</h3>
+<p>El calculador de laberintos implementa el metodo de McGinley (NCRP 151, Seccion 5.3):</p>
+<pre>H_maze = H_0 * 10^(-d_1/TVL_1) * (A_0/A_1) * 10^(-d_2/TVL_2) * (A_1/A_2) * ... * f</pre>
+<p>Donde:</p>
+<ul>
+  <li><strong>H_0</strong> = Tasa de dosis en la entrada del laberinto (Sv/semana)</li>
+  <li><strong>d_i</strong> = Longitud del tramo i del laberinto (m)</li>
+  <li><strong>TVL_i</strong> = Valor de decada para el material del tramo i</li>
+  <li><strong>A_i</strong> = Area de la seccion transversal del tramo i</li>
+  <li><strong>f</strong> = Factor de reflexion del muro final (tabulado por McGinley)</li>
+</ul>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — Metodo de McGinley:</span> El metodo de McGinley para calculo de dosis en laberintos de bunkers radioterapeuticos modela la atenuacion como una serie de reflexiones difusas en las paredes del laberinto. Cada tramo del laberinto se trata como un problema de atenuacion geometrica con reflexion difusa (albedo). El metodo asume que la radiacion se vuelve isotropica despues de la primera reflexion, lo que simplifica el calculo a una cadena de atenuaciones exponenciales con correccion geometrica. La precision del metodo es del orden de +/-30% para laberintos con 2-4 tramos, lo que es adecuado para propositos de diseno de blindaje.
+</div>
+
+<h3>Suelo/Techo</h3>
+<p>El calculador de suelo y techo considera dos componentes:</p>
+<ol>
+  <li><strong>Radiacion directa:</strong> Componente primario del haz que atraviesa el suelo/techo.</li>
+  <li><strong>Skyshine:</strong> Radiacion dispersada hacia arriba que es re-irradiada hacia abajo por el cielo (atmosfera). El modelo skyshine sigue la formula de NCRP 151 Seccion 4.2:
+  <pre>H_sky = K * Omega^(1.3) * d_s^(-2) * (1 - 10^(-h/TVL))</pre>
+  Donde Omega es el angulo solido del haz hacia el cielo, d_s es la distancia del borde del techo al punto de calculo, y h es la altura del techo.
+  </li>
+</ol>
+
+<h2 id="sec4-5">4.5. Optimizador NSGA-II (v32) — Novedad</h2>
+<p>El <strong>Optimizador de Blindaje NSGA-II</strong> (menu Calcular &gt; Optimizador NSGA-II) es una herramienta de optimizacion multi-objetivo basada en el algoritmo genetico Non-dominated Sorting Genetic Algorithm II (Deb et al., 2002). Permite encontrar la combinacion optima de materiales y espesores que minimice simultaneamente el costo, el peso total, y el espacio ocupado, mientras cumple con las restricciones de dosis de NCRP 151.</p>
+
+<h3>Fundamento teorico — NSGA-II</h3>
+<p>NSGA-II es un algoritmo evolutivo multi-objetivo que utiliza:</p>
+<ul>
+  <li><strong>Ordenamiento no-dominado:</strong> Clasificacion de soluciones en frentes de Pareto segun el criterio de dominancia de Pareto (una solucion domina a otra si es mejor o igual en todos los objetivos y estrictamente mejor en al menos uno).</li>
+  <li><strong>Distancia de crowding:</strong> Medida de densidad de soluciones en el espacio de objetivos para mantener la diversidad del frente de Pareto.</li>
+  <li><strong>Elitismo:</strong> Preservacion de las mejores soluciones entre generaciones mediante la union de padres e hijos y seleccion por rango.</li>
+  <li><strong>Operadores geneticos:</strong> Cruce (SBX: Simulated Binary Crossover) y mutacion (polinomial) adaptados para variables continuas (espesores).</li>
+</ul>
+
+<h3>Funciones objetivo</h3>
+<p>El optimizador minimiza simultaneamente tres funciones objetivo:</p>
+<table>
+  <caption data-label="Tabla 6">Funciones objetivo del optimizador NSGA-II</caption>
+  <thead><tr><th>Objetivo</th><th>Formula</th><th>Descripcion</th></tr></thead>
+  <tbody>
+    <tr><td>f1: Costo</td><td>sum_i (Area_i * x_i * rho_i * c_i)</td><td>Costo total de materiales (USD)</td></tr>
+    <tr><td>f2: Peso</td><td>sum_i (Area_i * x_i * rho_i) / 1000</td><td>Peso total en toneladas</td></tr>
+    <tr><td>f3: Espesor maximo</td><td>max_i (x_i)</td><td>Minimizar el espesor maximo (construibilidad)</td></tr>
+  </tbody>
+</table>
+<p>Donde Area_i es el area de la barrera i, x_i es el espesor (mm), rho_i es la densidad (kg/m^3), y c_i es el costo unitario (USD/kg).</p>
+
+<h3>Restricciones</h3>
+<pre>g_j: K_j(x) &lt;= P_j  para toda barrera j (restriccion de dosis)</pre>
+<p>Donde K_j(x) es la kerma calculada en la barrera j con los espesores x, y P_j es la dosis de diseno. Esta restriccion se maneja mediante penalizacion adaptativa: <code>F_p = F + r * sum(max(0, g_j))^2</code>, donde r aumenta con las generaciones.</p>
+
+<h3>Materiales disponibles para optimizacion</h3>
+<table>
+  <caption data-label="Tabla 7">Materiales en la base de datos del optimizador</caption>
+  <thead><tr><th>Material</th><th>Densidad (kg/m3)</th><th>TVL 6MV (mm)</th><th>Costo (USD/kg)</th></tr></thead>
+  <tbody>
+    <tr><td>Concreto ordinario</td><td>2350</td><td>370</td><td>0.12</td></tr>
+    <tr><td>Concreto baritado</td><td>3200</td><td>260</td><td>0.45</td></tr>
+    <tr><td>Plomo (Pb)</td><td>11340</td><td>57</td><td>2.50</td></tr>
+    <tr><td>Acero (Fe)</td><td>7860</td><td>92</td><td>0.80</td></tr>
+    <tr><td>Tungsteno (W)</td><td>19250</td><td>28</td><td>45.00</td></tr>
+    <tr><td>HDPE + B2O3</td><td>1050</td><td>45 (neutrones)</td><td>3.20</td></tr>
+    <tr><td>Vidrio plomado</td><td>4800</td><td>120</td><td>5.50</td></tr>
+    <tr><td>Ladrillo de barita</td><td>2800</td><td>310</td><td>0.35</td></tr>
+    <tr><td>Polietileno borado</td><td>950</td><td>38 (neutrones)</td><td>4.80</td></tr>
+  </tbody>
+</table>
+
+<h3>Interfaz de usuario</h3>
+<p>El dialogo del optimizador tiene 4 pestanas:</p>
+<ol>
+  <li><strong>Configuracion:</strong> Parametros del NSGA-II (poblacion, generaciones, probabilidad de cruce/mutacion) y factores de peso para cada objetivo.</li>
+  <li><strong>Resultados:</strong> Tabla comparativa de todas las soluciones no-dominadas con costo, peso, espesor maximo, y estado de restricciones.</li>
+  <li><strong>Frente Pareto:</strong> Visualizacion 2D/3D del frente de Pareto (Costo vs Peso, Costo vs Espesor, Peso vs Espesor).</li>
+  <li><strong>Convergencia:</strong> Grafico de la evolucion del hipervolumen (hypervolume) a lo largo de las generaciones, indicando la convergencia del algoritmo.</li>
+</ol>
+
+<h3>Metodologia de uso</h3>
+<ol>
+  <li>Definir el plano con todas las fuentes y barreras (incluyendo tipo y dosis de diseno).</li>
+  <li>Ejecutar el calculo principal al menos una vez (para inicializar los TVLs).</li>
+  <li>Abrir el Optimizador NSGA-II (menu Calcular &gt; Optimizador NSGA-II).</li>
+  <li>Ajustar los parametros del algoritmo (default: poblacion=50, generaciones=100, Pc=0.9, Pm=0.1).</li>
+  <li>Seleccionar los materiales permitidos para cada barrera.</li>
+  <li>Ejecutar la optimizacion (progreso en tiempo real con grafico de convergencia).</li>
+  <li>Seleccionar una solucion del frente de Pareto segun las prioridades del proyecto.</li>
+  <li>Aplicar la solucion al plano (actualiza automaticamente los espesores de las barreras).</li>
+</ol>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — NSGA-II (Deb et al., 2002):</span> El algoritmo NSGA-II resuelve problemas de optimizacion multi-objetivo (MOP) mediante una poblacion de soluciones que evoluciona hacia el frente de Pareto optimo. La complejidad computacional del ordenamiento no-dominado es O(MN^2) donde M es el numero de objetivos y N el tamano de la poblacion. La distancia de crowding se calcula como la suma de las diferencias normalizadas de los vecinos inmediatos en cada dimension objetivo, garantizando una distribucion uniforme del frente. Para el problema de blindaje radiologico, las variables de decision son los espesores de cada material en cada barrera (variables continuas en [0, x_max]), y las restricciones de desigualdad provienen de los limites de dosis NCRP 151.
+</div>
+
+<h2 id="sec4-6">4.6. Incertidumbre y GUM</h2>
+
+<h3>Incertidumbre en el calculo de blindaje</h3>
+<p>El modulo de incertidumbre (menu Calcular &gt; Incertidumbre) implementa propagacion de incertidumbres conforme a JCGM 100:2008 (GUM):</p>
+<pre>u_c^2(y) = sum_i (∂f/∂x_i)^2 * u^2(x_i) + 2 * sum_{i&lt;j} (∂f/∂x_i)(∂f/∂x_j) * u(x_i, x_j)</pre>
+<p>Las fuentes de incertidumbre consideradas son:</p>
+<ul>
+  <li><strong>Workload (W):</strong> Incertidumbre tipo B basada en estimacion del usuario (tipica: +/-20%).</li>
+  <li><strong>Distancia (d):</strong> Incertidumbre de medicion del plano (tipica: +/-0.1 m).</li>
+  <li><strong>TVL:</strong> Incertidumbre de los datos NCRP 151 (tipica: +/-10% para concreto, +/-5% para Pb).</li>
+  <li><strong>Factor de uso (U):</strong> Incertidumbre basada en la variabilidad del beam-on time.</li>
+  <li><strong>Ocupacion (T):</strong> Incertidumbre por variabilidad del patron de ocupacion.</li>
+</ul>
+
+<h3>GUM Uncertainty</h3>
+<p>El modulo GUM (menu Calcular &gt; GUM Uncertainty) proporciona un analisis detallado:</p>
+<ol>
+  <li>Presupuesto de incertidumbre completo con contribuciones de cada fuente.</li>
+  <li>Coeficientes de sensibilidad (∂K/∂x_i) calculados numericamente.</li>
+  <li>Matriz de covarianza para fuentes correlacionadas.</li>
+  <li>Factor de cobertura k=2 (intervalo de confianza 95%).</li>
+  <li>Reporte de incertidumbre expandida: K +/- U (k=2).</li>
+</ol>
+
+<!-- ================================================================ -->
+<!-- SECTION 5 -->
+<!-- ================================================================ -->
+<h1 id="sec5" class="section-break">5. Menu Fisica — Transporte de Particulas y Monte Carlo</h1>
+
+<h2 id="sec5-1">5.1. Motores Monte Carlo (Geant4, GATE, FLUKA)</h2>
+<p>RadShield-MX genera macros listos para ejecutar en los principales codigos de Monte Carlo utilizados en fisica medica:</p>
+
+<h3>Geant4</h3>
+<p>El macro Geant4 (<code>.mac</code>) incluye:</p>
+<ul>
+  <li><strong>Geometry:</strong> Definicion de solidos (G4Box, G4Tubs) para fuentes y barreras con posiciones y materiales.</li>
+  <li><strong>Materials:</strong> Definicion de materiales via G4NistManager (concreto, Pb, Fe, W, etc.).</li>
+  <li><strong>Physics List:</strong> QGSP_BIC_EMY (recomendado para radioterapia, energias 1 keV - 10 TeV).</li>
+  <li><strong>Primary Generator:</strong> G4GeneralParticleSource con distribucion de energia del LINAC (espectro W/Al/Ni).</li>
+  <li><strong>Scoring:</strong> G4PSDose3D para deposito de dosis en una malla 3D, con salida en formato CSV.</li>
+  <li><strong>Cut values:</strong> Corte de produccion de secundarios (default: 0.1 mm).</li>
+</ul>
+
+<h3>GATE (OpenGATE)</h3>
+<p>El macro GATE v9.4+ incluye configuracion para:</p>
+<ul>
+  <li>Simulacion PET con F-18 FDG (back-to-back 511 keV gammas).</li>
+  <li>Simulacion SPECT con Tc-99m (140 keV, collimator LEHR).</li>
+  <li>Scoring con GateDoseActor para mapas de dosis 3D.</li>
+  <li>Variance reduction techniques (splitting rusa, importance sampling).</li>
+</ul>
+
+<h3>FLUKA</h3>
+<p>El archivo de entrada FLUKA incluye:</p>
+<ul>
+  <li>Cards BEAM, BEAMPOS para definicion de la fuente.</li>
+  <li>Cards GEOBEGIN/GEOEND para geometria con formato de zonas.</li>
+  <li>Cards ASSIGNMA para asignacion de materiales.</li>
+  <li>Cards USRBIN para scoring de dosis en mallas cartesianas.</li>
+  <li>Cards EMF-OFF para control de cascadas electromagneticas.</li>
+</ul>
+
+<h2 id="sec5-2">5.2. Native MC Engine (fotones)</h2>
+<p>El motor Monte Carlo nativo (menu Fisica &gt; Native MC Engine) implementa transporte de fotones en TypeScript puro, sin dependencias de backend:</p>
+
+<h3>Procesos fisicos implementados</h3>
+<table>
+  <caption data-label="Tabla 8">Procesos fisicos del Native MC Engine</caption>
+  <thead><tr><th>Proceso</th><th>Modelo</th><th>Rango de energia</th><th>Referencia</th></tr></thead>
+  <tbody>
+    <tr><td>Rayleigh scattering</td><td>FormFactor tabulado (NIST XCOM)</td><td>1 keV - 20 MeV</td><td>Hubbell et al., 1975</td></tr>
+    <tr><td>Compton scattering</td><td>Klein-Nishina + correccion S</td><td>1 keV - 100 MeV</td><td>Klein &amp; Nishina, 1929</td></tr>
+    <tr><td>Efecto fotoelectrico</td><td>Secciones eficaces NIST XCOM</td><td>1 keV - 1 MeV</td><td>Scofield, 1973</td></tr>
+    <tr><td>Produccion de pares</td><td>Bethe-Heitler + correccion de pantalla</td><td>1.022 MeV - 100 GeV</td><td>Bethe &amp; Heitler, 1934</td></tr>
+  </tbody>
+</table>
+
+<h3>Aceleracion espacial</h3>
+<ul>
+  <li><strong>KD-Tree:</strong> Arbol de particionamiento del espacio para interseccion ray-geometry en O(log n).</li>
+  <li><strong>Bounding Volume Hierarchy (BVH):</strong> Jerarquia de volumenes envolventes para geometria compleja.</li>
+  <li><strong>Russian Roulette:</strong> Tecnica de varianza reduction para fotones de baja energia (umbral: 10 keV).</li>
+</ul>
+
+<h3>Scoring</h3>
+<p>El scoring calcula H*(10) conforme a ICRP 74 mediante conversion de kerma en aire a dosis equivalente ambiente utilizando factores de calidad Q para fotones (Q=1).</p>
+
+<h2 id="sec5-3">5.3. Transporte de electrones y positrones (v27)</h2>
+<p>El motor de transporte de electrones y positrones implementa los siguientes modelos fisicos:</p>
+
+<h3>Stopping Power CSDA</h3>
+<p>El stopping power por collision (dE/dx)_col sigue la formula de Bethe-Bloch con correccion de efecto de densidad (Sternheimer, 1952):</p>
+<pre>(dE/dx)_col = (2*pi*r_e^2*m_e*c^2*n_e / beta^2) * [ln(2*m_e*c^2*beta^2*gamma^2*W_max/I^2) - 2*beta^2 - delta - 2*C/Z]</pre>
+<p>Donde:</p>
+<ul>
+  <li><strong>r_e</strong> = radio clasico del electron (2.818 fm)</li>
+  <li><strong>m_e</strong> = masa del electron (511 keV/c^2)</li>
+  <li><strong>n_e</strong> = densidad electronica del material</li>
+  <li><strong>beta</strong> = v/c del electron incidente</li>
+  <li><strong>gamma</strong> = 1/sqrt(1-beta^2)</li>
+  <li><strong>W_max</strong> = energia maxima transferible en una collision</li>
+  <li><strong>I</strong> = potencial de ionizacion medio del material (I-value NIST)</li>
+  <li><strong>delta</strong> = correccion de efecto de densidad (Sternheimer)</li>
+</ul>
+
+<h3>Bremsstrahlung</h3>
+<p>El espectro de Bremsstrahlung se calcula mediante la aproximacion Koch-Motz (1959):</p>
+<pre>d^2 sigma / d k d Omega = (alpha*r_e^2) / (2*pi*k) * (p/p_0) * (1/k) * [ (p_0^2 + p^2) * sin^2(theta) / D^2 + ... ]</pre>
+<p>Donde k es la energia del foton emitido, p_0 y p son los momentos inicial y final del electron, y D es el denominador de screening.</p>
+
+<h3>TTB (Thick Target Bremsstrahlung)</h3>
+<p>El calculo TTB estima la dosis de frenado en uSv/h a 1 m para un blanco grueso:</p>
+<pre>H_TTB = (W * U * E^2 * Z_eff) / (4*pi*d^2) * f_absorption</pre>
+<p>Esta formula es utilizada para blindaje de aplicadores de electrones LINAC (Seccion 5.5).</p>
+
+<h3>MCS (Multiple Coulomb Scattering)</h3>
+<p>El scattering multiple sigue la formula Highland-Lynch-Dahl (HLF):</p>
+<pre>theta_0 = (13.6 MeV / (beta*p*c)) * sqrt(x/X_0) * [1 + 0.038 * ln(x/X_0)]</pre>
+<p>Donde X_0 es la longitud de radiacion del material.</p>
+
+<h3>Positrones</h3>
+<p>Los positrones incluyen:</p>
+<ul>
+  <li>Aniquilacion in-flight (3-fotones para alta energia).</li>
+  <li>Aniquilacion en reposo: dos fotones de 511 keV en direcciones opuestas.</li>
+  <li>Correccion de Bloch para scattering de alta energia.</li>
+</ul>
+
+<h2 id="sec5-4">5.4. Blindaje de neutrones (ENDF/B-VII.1)</h2>
+<p>El motor de neutrones (menu Fisica &gt; Neutron Shielding) implementa:</p>
+
+<h3>Fuente de datos</h3>
+<ul>
+  <li><strong>Espectros:</strong> 8 fuentes predefinidas con espectros ENDF/B-VII.1 (Chadwick et al., 2011).</li>
+  <li><strong>Fuentes:</strong> Cf-252 (esfission), Am-Be, Pu-Be, D-T (14.1 MeV), D-D (2.45 MeV), reactor PWR, reactor BWR, fuente monoenergetica.</li>
+  <li><strong>Materiales:</strong> 18 materiales con secciones eficaces termicas (agua, concreto, polietileno, grafito, plomo, cadmio, boro, etc.).</li>
+</ul>
+
+<h3>Modos de calculo</h3>
+<ol>
+  <li><strong>Calculadora de atenuacion:</strong> Espesor requerido para reducir la fluencia neutronica a un nivel dado.</li>
+  <li><strong>Analisis de PE borado:</strong> Optimizacion del contenido de boro en polietileno para maximizar la absorcion termica.</li>
+  <li><strong>Laberinto/skyshine neutronico:</strong> Modelo de remocion rapida para neutrones en laberintos.</li>
+</ol>
+
+<h3>Secciones eficaces de remocion</h3>
+<p>Siguiendo ANSI/ANS-6.4.3, las secciones eficaces de remocion (Sigma_R) para calculo de atenuacion rapida de neutrones:</p>
+<pre>Phi(x) = Phi_0 * exp(-Sigma_R * x)</pre>
+<p>Donde Sigma_R es una seccion eficaz efectiva que combina scattering y absorcion para neutrones rapidos.</p>
+
+<h2 id="sec5-5">5.5. Electron LINAC Applicator (v32, NCRP 151 App.B) — Novedad</h2>
+<p>El modulo <strong>Electron LINAC Applicator</strong> (menu Fisica &gt; Electron LINAC Applicator) calcula el blindaje requerido para aplicadores (conos) de electrones en aceleradores lineales clinicos, basado en el <strong>Appendix B del NCRP Report 151</strong> y las recomendaciones del <strong>AAPM TG 25</strong>.</p>
+
+<h3>Fundamento fisico</h3>
+<p>Los haces de electrones clinicos (4-22 MeV) producen radiacion de frenado (Bremsstrahlung) al interactuar con el scattering foil, el aplicador (cono), y el colimador. Esta radiacion X residual requiere blindaje adicional que no es necesario para el calculo de blindaje del bunker primario del fotón. Los componentes de dosis son:</p>
+<ol>
+  <li><strong>Electron leakage:</strong> Electrones que escapan del aplicador (&lt; 1% del haz principal, tipicamente despreciable para blindaje).</li>
+  <li><strong>X-ray leakage (fotones de frenado):</strong> Radiacion de Bremsstrahlung generada en el scattering foil, aplicador, y colimadores. Este es el componente dominante para blindaje.</li>
+  <li><strong>Scatter del paciente:</strong> Backscatter y lateraldscatter del paciente, generalmente pequeno comparado con el leakage.</li>
+</ol>
+
+<h3>Metodo de calculo — NCRP 151 Appendix B</h3>
+<p>El metodo del NCRP 151 Appendix B calcula la tasa de dosis de leakage a 1 m del isocentro:</p>
+<pre>H_L = H_0 * f_L * (d_iso / d_barrier)^2 * 10^(-x/TVL_X)</pre>
+<p>Donde:</p>
+<ul>
+  <li><strong>H_0</strong> = Tasa de dosis en isocentro (Gy/min o cGy/mu)</li>
+  <li><strong>f_L</strong> = Fraccion de leakage (depende de la energia del electron y el tamano del aplicador)</li>
+  <li><strong>d_iso</strong> = Distancia fuente-isocentro (tipicamente 1 m)</li>
+  <li><strong>d_barrier</strong> = Distancia fuente-barrera (m)</li>
+  <li><strong>x</strong> = Espesor del blindaje (mm o cm)</li>
+  <li><strong>TVL_X</strong> = Tenth-value layer para la radiacion X de frenado (generalmente menor que para fotones de megavoltaje primario)</li>
+</ul>
+
+<h3>Tabla de fracciones de leakage (NCRP 151, Tabla B.6)</h3>
+<table>
+  <caption data-label="Tabla 9">Fracciones de leakage por energia y tamano de aplicador</caption>
+  <thead><tr><th>Energia electron (MeV)</th><th>Aplicador 5x5 cm</th><th>Aplicador 10x10 cm</th><th>Aplicador 15x15 cm</th><th>Aplicador 20x20 cm</th><th>Aplicador 25x25 cm</th></tr></thead>
+  <tbody>
+    <tr><td>4</td><td>0.0005</td><td>0.001</td><td>0.002</td><td>0.003</td><td>0.004</td></tr>
+    <tr><td>6</td><td>0.001</td><td>0.002</td><td>0.004</td><td>0.006</td><td>0.008</td></tr>
+    <tr><td>9</td><td>0.002</td><td>0.004</td><td>0.008</td><td>0.012</td><td>0.016</td></tr>
+    <tr><td>12</td><td>0.003</td><td>0.006</td><td>0.012</td><td>0.018</td><td>0.024</td></tr>
+    <tr><td>15</td><td>0.004</td><td>0.008</td><td>0.016</td><td>0.024</td><td>0.032</td></tr>
+    <tr><td>18</td><td>0.005</td><td>0.010</td><td>0.020</td><td>0.030</td><td>0.040</td></tr>
+    <tr><td>22</td><td>0.006</td><td>0.012</td><td>0.024</td><td>0.036</td><td>0.048</td></tr>
+  </tbody>
+</table>
+
+<h3>TVL para radiacion X de frenado de electrones</h3>
+<table>
+  <caption data-label="Tabla 10">TVL para radiacion X residual de electrones</caption>
+  <thead><tr><th>Material</th><td>TVL (mm) — Energia efectiva tipica 1-3 MeV X</th></tr></thead>
+  <tbody>
+    <tr><td>Concreto (2.35 g/cm3)</td><td>200</td></tr>
+    <tr><td>Concreto baritado (3.2 g/cm3)</td><td>140</td></tr>
+    <tr><td>Plomo (11.34 g/cm3)</td><td>35</td></tr>
+    <tr><td>Acero (7.86 g/cm3)</td><td>55</td></tr>
+  </tbody>
+</table>
+
+<h3>Interfaz de usuario</h3>
+<p>El dialogo del Electron LINAC Applicator tiene las siguientes secciones:</p>
+<ol>
+  <li><strong>Configuracion del LINAC:</strong> Fabricante (Varian, Elekta, Siemens), modelo, energia de electrones (4-22 MeV seleccionable), dosis en isocentro (cGy/MU).</li>
+  <li><strong>Aplicador:</strong> Tamano del cono (5x5, 6x6, 10x10, 15x15, 20x20, 25x25 cm), angulo de incidencia, SSD (100 cm tipico).</li>
+  <li><strong>Resultados:</strong> Fraccion de leakage interpolada de la tabla NCRP 151, tasa de dosis de leakage a 1 m, espesor requerido por material, factor de transmision, y workload semanal ajustado.</li>
+  <li><strong>Material y Blindaje:</strong> Seleccion del material (Pb, acero, concreto) con calculo automatico del espesor minimo para cumplir con la dosis de diseno P.</li>
+  <li><strong>Notas tecnicas:</strong> Referencia al NCRP 151 Appendix B, ecuaciones utilizadas, y recomendaciones del AAPM TG 25 para blindaje de bunkers de electrones.</li>
+</ol>
+
+<h3>Metodologia de uso</h3>
+<ol>
+  <li>Seleccionar el fabricante y modelo del LINAC (carga parametros pre-configurados).</li>
+  <li>Seleccionar la energia de electrones (4-22 MeV) y el tamano del aplicador.</li>
+  <li>Introducir el workload (pacientes/semana, MU/paciente promedio).</li>
+  <li>Seleccionar el material de blindaje preferido (Pb para paredes delgadas, concreto para construccion nueva).</li>
+  <li>El sistema calcula automaticamente la fraccion de leakage, la dosis semanal, y el espesor requerido.</li>
+  <li>Verificar que la dosis calculada sea menor que el limite de diseno P (0.02 mSv/semana para areas publicas, 0.1 para areas ocupadas).</li>
+</ol>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — NCRP 151 Appendix B:</span> El Appendix B del NCRP Report 151 proporciona fracciones de leakage medidas experimentalmente para diferentes energias de electrones y tamanos de aplicador. Estas fracciones representan la proporcion de la dosis en isocentro que aparece como radiacion de fuga (leakage) a 1 m del isocentro. La energia efectiva de la radiacion X de frenado de electrones es tipicamente 1/3 a 1/2 de la energia maxima del electron, lo que resulta en TVLs significativamente menores que para fotones de megavoltaje primario. Para aplicadores grandes (&gt;20x20 cm), el scattering foil debe ser mas grueso para obtener una distribucion uniforme, lo que aumenta la produccion de Bremsstrahlung y por tanto la fraccion de leakage.
+</div>
+
+<h2 id="sec5-6">5.6. Dose Map Visualization 2D/3D (v31) — Novedad</h2>
+<p>El modulo <strong>Dose Map Visualization</strong> (menu Fisica &gt; Dose Map Visualization 2D/3D) genera mapas de dosis (heatmap) en 2D y 3D mediante interpolacion espacial y algoritmos de extraccion de contornos.</p>
+
+<h3>Algoritmo de calculo del dose map</h3>
+<ol>
+  <li><strong>Grid 2D:</strong> Se define una malla regular sobre el area del bunker (resolucion configurable: 1-10 cm/celda).</li>
+  <li><strong>Kerma por fuente:</strong> Para cada celda (i,j), se calcula la kerma de cada fuente usando ley del inverso del cuadrado mas atenuacion exponencial.
+  <pre>K_ij = sum_k [ W_k * U_k * d_k^(-2) * 10^(-sum_m x_m/TVL_m) ]</pre>
+  </li>
+  <li><strong>Superposicion:</strong> Las contribuciones de todas las fuentes se suman linealmente (principio de superposicion valido para dosis de radiacion).</li>
+  <li><strong>Contornos isodosis:</strong> Se aplican marching squares para extraer lineas de nivel constante (isodosis) a niveles definidos por el usuario (e.g., 0.01, 0.02, 0.1, 1.0 mSv/semana).</li>
+</ol>
+
+<h3>Color maps disponibles</h3>
+<table>
+  <caption data-label="Tabla 11">Paleta de colores para dose map</caption>
+  <thead><tr><th>Paleta</th><th>Rango bajo</th><th>Rango alto</th><th>Uso recomendado</th></tr></thead>
+  <tbody>
+    <tr><td>Jet</td><td>Azul (#0000FF)</td><td>Rojo (#FF0000)</td><td>Uso general, alto contraste</td></tr>
+    <tr><td>Viridis</td><td>Morado (#440154)</td><td>Amarillo (#FDE725)</td><td>Accesible (daltónismo), perceptual</td></tr>
+    <tr><td>Plasma</td><td>Morado oscuro</td><td>Amarillo brillante</td><td>Mejor rango dinamico</td></tr>
+    <tr><td>Inferno</td><td>Negro</td><td>Blanco-amarillo</td><td>Publicaciones cientificas</td></tr>
+    <tr><td>Hot</td><td>Negro</td><td>Rojo-blanco</td><td>Imagen termica convencional</td></tr>
+    <tr><td>Cool</td><td>Cian</td><td>Magenta</td><td>Diferenciacion bipolar</td></tr>
+  </tbody>
+</table>
+
+<h3>Visualizacion 3D</h3>
+<p>La visualizacion 3D utiliza Three.js para:</p>
+<ul>
+  <li>Generar una malla 3D a partir del grid 2D de kerma (THREE.PlaneGeometry con displacement map).</li>
+  <li>Aplicar una textura de color segun la paleta seleccionada (THREE.ShaderMaterial con fragment shader).</li>
+  <li>Superponer isosuperficies 3D para niveles criticos de dosis.</li>
+  <li>Interactividad: rotacion, zoom, y seleccion de punto para ver valor exacto de kerma.</li>
+</ul>
+
+<h2 id="sec5-7">5.7. Material Properties (Phy-X/PSD)</h2>
+<p>El calculador de propiedades de materiales (menu Fisica &gt; Material Properties Phy-X/PSD) proporciona datos dosimetricos fundamentales para 38 materiales NIST:</p>
+
+<ul>
+  <li><strong>MAC (Mass Attenuation Coefficients):</strong> mu/rho para energias 1 keV - 20 MeV (datos NIST XCOM).</li>
+  <li><strong>HVL (Half-Value Layer):</strong> Espesor que reduce la intensidad a la mitad: HVL = ln(2)/mu.</li>
+  <li><strong>TVL (Tenth-Value Layer):</strong> Espesor que reduce la intensidad un factor 10: TVL = ln(10)/mu.</li>
+  <li><strong>Zeff (Effective Atomic Number):</strong> Calculado via metodo de Mayneord para compuestos y mezclas.</li>
+  <li><strong>EABF (Energy Absorption Build-up Factor):</strong> Para calculos de dosis absorbida (ANSI/ANS-6.4.3).</li>
+</ul>
+
+
+<!-- ================================================================ -->
+<!-- SECTION 6 -->
+<!-- ================================================================ -->
+<h1 id="sec6" class="section-break">6. Menu Med. Nuclear — Terapia y Diagnostico</h1>
+
+<h2 id="sec6-1">6.1. Gamma Knife, Braquiterapia HDR, Versa HD</h2>
+
+<h3>Gamma Knife</h3>
+<p>El modulo de Gamma Knife (menu Med. Nuclear &gt; Gamma Knife) cubre los modelos Perfexion e Icon de Elekta:</p>
+<ul>
+  <li><strong>Fuentes:</strong> 192 fuentes Co-60 (Perfexion) con actividad inicial ~30 Ci cada una, semi-periodo 5.27 anos.</li>
+  <li><strong>Energia efectiva:</strong> 1.25 MeV promedio (espectro Co-60 con picos a 1.17 y 1.33 MeV).</li>
+  <li><strong>Blindaje primario:</strong> Casco (helmet) con Pb+W+Fe, blindaje de la sala con concreto de alta densidad (2.5-3.0 t/m3).</li>
+  <li><strong>Laberinto:</strong> Laberinto con tramos multiples para reducir la radiacion de fuga a la puerta.</li>
+  <li><strong>Calculo:</strong> Metodo de la suma de fuentes puntuales con atenuacion geometrica y del material.</li>
+</ul>
+
+<h3>Braquiterapia HDR Co-60 / Ir-192</h3>
+<p>El modulo de braquiterapia HDR (menu Med. Nuclear &gt; Braquiterapia HDR) implementa:</p>
+<ul>
+  <li><strong>Co-60 HDR:</strong> Energia 1.25 MeV, fuente tipo BEBIG / Eckert &amp; Ziegler, actividad tipica 1-5 Ci.</li>
+  <li><strong>Ir-192 HDR:</strong> Energia promedio 380 keV (espectro continuo 20-600 keV), fuente tipo Varian / Elekta, actividad 1-10 Ci.</li>
+  <li><strong>Blindaje:</strong> Calculo segun NCRP 151 Seccion 4.1.4 con factor de workload por procedimiento.</li>
+  <li><strong>Laberinto:</strong> Metodo de McGinley adaptado para baja energia (Ir-192 requiere menos blindaje que Co-60).</li>
+</ul>
+
+<h3>Versa HD 15 MV</h3>
+<p>El modulo Versa HD (menu Med. Nuclear &gt; Versa HD 15MV) cubre el acelerador lineal de Elekta:</p>
+<ul>
+  <li><strong>Energia:</strong> Fotones 6 MV y 15 MV (FBF y FFF), electrones 4-22 MeV.</li>
+  <li><strong>Maximo DR:</strong> 1400 MU/min (FFF), 600 MU/min (FBF).</li>
+  <li><strong>Blindaje:</strong> NCRP 151 Seccion 4.1.1 con workload por tecnica (IMRT/VMAT requiere mayor W).</li>
+  <li><strong>Neutrones:</strong> Produccion de neutrones por fotonuclear (gamma,n) a 15 MV, requiere blindaje adicional de PE borado (Seccion 5.3).</li>
+</ul>
+
+<h2 id="sec6-2">6.2. Medicina Nuclear Avanzada (PET/CT, SPECT)</h2>
+<p>El modulo de Medicina Nuclear Avanzada (menu Med. Nuclear &gt; Medicina Nuclear Avanzada) cubre:</p>
+
+<h3>PET/CT con F-18 FDG</h3>
+<ul>
+  <li><strong>Radionucleido:</strong> F-18 (T_1/2 = 109.8 min), emision de positrones → dos fotones de 511 keV en back-to-back (180° +/- 0.25°).</li>
+  <li><strong>Actividad tipica:</strong> 370 MBq (10 mCi) por paciente para oncologia.</li>
+  <li><strong>Blindaje del escaner:</strong> Cristal de LSO/LYSO (7 mm) + tungsteno en septa.</li>
+  <li><strong>Blindaje de la sala:</strong> NCRP 147 con TVL para 511 keV (Pb: 12.5 mm, concreto: 290 mm).</li>
+  <li><strong>Blindaje de sala de inyeccion:</strong> Pb 15-25 mm o equivalente en concreto baritado.</li>
+  <li><strong>Blindaje de almacenamiento de desechos:</strong> Concreto 500 mm o contenedores de Pb con 20-30 mm.</li>
+</ul>
+
+<h3>SPECT (Tc-99m, I-131, Ga-67)</h3>
+<ul>
+  <li><strong>Tc-99m:</strong> 140 keV (89% abundancia), TVL_Pb = 0.3 mm, actividad tipica 740-1110 MBq.</li>
+  <li><strong>I-131:</strong> 364 keV (81% abundancia), TVL_Pb = 6.5 mm, actividad tipica 3.7-7.4 GBq (terapia tiroidea).</li>
+  <li><strong>Ga-67:</strong> 93 keV (39%), 184 keV (21%), 300 keV (17%), TVL_Pb variable segun energia.</li>
+  <li><strong>Colimador:</strong> Calculo de transmission a traves del colimador de Pb (ALGE, LEAP, MEAP, HEAP).</li>
+</ul>
+
+<h2 id="sec6-3">6.3. CBCT/IGRT y DICOM RT</h2>
+
+<h3>CBCT / IGRT</h3>
+<p>El modulo CBCT/IGRT (menu Med. Nuclear &gt; CBCT/IGRT) calcula la dosis adicional por imagen guiada:</p>
+<ul>
+  <li><strong>CBCT kV:</strong> 100-140 kVp, dosis tipica 1-5 mGy por escaner (AAPM TG 108).</li>
+  <li><strong>MVCT (TomoTherapy):</strong> 3.5 MV, dosis tipica 1-3 cGy por imagen.</li>
+  <li><strong>kV orthogonal (OBI):</strong> 70-120 kVp, dosis tipica 0.1-1 mGy por par de imagenes.</li>
+  <li><strong>Workflow:</strong> Numero de imagenes por semana x dosis por imagen = dosis adicional semanal que se suma al workload total.</li>
+</ul>
+
+<h3>DICOM RT Integration</h3>
+<p>El modulo DICOM RT (menu Med. Nuclear &gt; DICOM RT Integration) permite importar estructuras de planes de tratamiento:</p>
+<ul>
+  <li><strong>RTSTRUCT:</strong> Importacion de ROI (Region of Interest) como regiones ocupadas en el canvas.</li>
+  <li><strong>RTDOSE:</strong> Importacion de mapas de dosis 3D para comparacion con calculo propio.</li>
+  <li><strong>RTPLAN:</strong> Lectura de parametros del plan (beam energy, gantry angles, MU) para configurar fuentes.</li>
+</ul>
+
+<h2 id="sec6-4">6.4. PACS Integration y PACS Real (v32) — Novedad</h2>
+
+<h3>PACS Integration (DICOMweb/DIMSE)</h3>
+<p>El modulo PACS original (menu Med. Nuclear &gt; PACS Integration) implementa comunicacion con sistemas PACS mediante:</p>
+<ul>
+  <li><strong>DICOMweb (WADO-RS):</strong> Acceso RESTful a imagenes DICOM via HTTP/JSON.</li>
+  <li><strong>DIMSE C-FIND:</strong> Busqueda de estudios por paciente, fecha, modalidad.</li>
+  <li><strong>DIMSE C-GET/C-MOVE:</strong> Transferencia de imagenes al cliente.</li>
+</ul>
+
+<h3>PACS Real Integration (v32)</h3>
+<p>El modulo <strong>PACS Real</strong> (menu Med. Nuclear &gt; PACS Real Integration) incluye modo demo por defecto y conexion Orthanc opt-in mediante VITE_ENABLE_PACS_REAL=true + VITE_ORTHANC_URL:</p>
+
+<h4>Arquitectura tecnica</h4>
+<p>Cuando PACS Real esta habilitado explicitamente, se conecta a un servidor Orthanc (opensource PACS) mediante:</p>
+<ul>
+  <li><strong>REST API Orthanc:</strong> Endpoints HTTP/JSON para query, retrieve, y envio de estudios.</li>
+  <li><strong>WADO-RS:</strong> DICOMweb Web Access to DICOM Objects by RESTful Services (PS3.18).</li>
+  <li><strong>Autenticacion:</strong> Bearer token o HTTP Basic Auth con el servidor Orthanc.</li>
+</ul>
+
+<h4>Endpoints implementados</h4>
+<table>
+  <caption data-label="Tabla 12">Endpoints REST del PACS Real</caption>
+  <thead><tr><th>Operacion</th><th>Endpoint</th><th>Metodo</th><th>Descripcion</th></tr></thead>
+  <tbody>
+    <tr><td>Listar estudios</td><td>/studies</td><td>GET</td><td>Lista todos los estudios con metadata</td></tr>
+    <tr><td>Buscar estudios</td><td>/tools/find</td><td>POST</td><td>C-FIND via REST (DICOM tags como JSON)</td></tr>
+    <tr><td>Series de estudio</td><td>/studies/{id}/series</td><td>GET</td><td>Lista series de un estudio</td></tr>
+    <tr><td>Instancias</td><td>/series/{id}/instances</td><td>GET</td><td>Lista instancias de una serie</td></tr>
+    <tr><td>Imagen WADO</td><td>/wado-rs/studies/{st}/series/{se}/instances/{in}</td><td>GET</td><td>Retorna pixel data (multipart/related)</td></tr>
+    <tr><td>Metadata</td><td>/instances/{id}/metadata</td><td>GET</td><td>Tags DICOM como JSON</td></tr>
+    <tr><td>Preview</td><td>/instances/{id}/preview</td><td>GET</td><td>PNG renderizado (8-bit)</td></tr>
+  </tbody>
+</table>
+
+<h4>Interfaz de usuario</h4>
+<p>El dialogo PACS Real tiene 3 pestanas:</p>
+<ol>
+  <li><strong>Conexion:</strong> Configuracion del servidor (URL, usuario, password), boton de conexion, modo demo por defecto, y estado del servidor cuando VITE_ENABLE_PACS_REAL=true.</li>
+  <li><strong>Study Browser:</strong> Lista de estudios con filtros (paciente, ID, modalidad, fecha rango), paginacion, y preview de thumbnails. Al seleccionar un estudio, se muestran las series con modalidad, descripcion, numero de instancias, y fecha.</li>
+  <li><strong>DICOM Viewer:</strong> Visualizador de imagenes DICOM con renderizado via Cornerstone.js (WADO-RS), herramientas de zoom, pan, window/level, y metadata DICOM completa.</li>
+</ol>
+
+<h4>Datos de demostracion</h4>
+<p>Para probar sin servidor Orthanc, el modulo incluye 5 estudios de demostracion:</p>
+<table>
+  <caption data-label="Tabla 13">Estudios DICOM de demostracion</caption>
+  <thead><tr><th>Paciente</th><th>Modalidad</th><th>Descripcion</th><th>Instancias</th></tr></thead>
+  <tbody>
+    <tr><td>Juan Perez</td><td>CT</td><td>Cabeza sin contraste</td><td>512</td></tr>
+    <tr><td>Maria Garcia</td><td>RTDOSE</td><td>Plan de dosis VMAT prostata</td><td>1</td></tr>
+    <tr><td>Carlos Lopez</td><td>RTPLAN</td><td>Plan RT 6MV 2 arcos</td><td>1</td></tr>
+    <tr><td>Ana Martinez</td><td>PET</td><td>FDG oncologica cuerpo completo</td><td>348</td></tr>
+    <tr><td>Roberto Diaz</td><td>MR</td><td>Cranial T1 post-contraste</td><td>176</td></tr>
+  </tbody>
+</table>
+
+<h4>Metodologia de uso</h4>
+<ol>
+  <li>Configurar la conexion al servidor Orthanc (URL, puerto, credenciales).</li>
+  <li>Verificar conexion con el boton "Test Connection".</li>
+  <li>Buscar estudios por nombre de paciente, ID, o modalidad.</li>
+  <li>Seleccionar un estudio para ver sus series.</li>
+  <li>Importar un RTSTRUCT al canvas de RadShield-MX (regiones ocupadas).</li>
+  <li>Importar un RTDOSE para comparar con el calculo propio.</li>
+</ol>
+
+<div class="tech-box">
+  <span class="tech-box-title">Sustento tecnico — DICOMweb WADO-RS:</span> DICOMweb (PS3.18) es el estandar DICOM para acceso web a objetos DICOM. WADO-RS (Web Access to DICOM Objects by RESTful Services) define endpoints REST para recuperar instancias DICOM, frames individuales, y metadata. Las respuestas utilizan el tipo MIME multipart/related con partes en application/dicom (datos binarios DICOM) o image/jpeg (renderizado). Orthanc es un servidor PACS ligero de codigo abierto que implementa completamente DICOMweb junto con el modelo REST propio, siendo ampliamente utilizado en desarrollo e investigacion medica.
+</div>
+
+<h2 id="sec6-5">6.5. Bateman Decay Solver y NIST Library</h2>
+
+<h3>Bateman Decay Solver (v26)</h3>
+<p>El solver de decaimiento Bateman (menu Med. Nuclear &gt; Bateman Decay Solver) resuelve las ecuaciones diferenciales de decaimiento en cadena:</p>
+<pre>dN_i/dt = -lambda_i * N_i + sum_{j&lt;i} lambda_j * b_{ji} * N_j</pre>
+<p>Donde b_{ji} es el branching ratio del nucleido j al i. La solucion analitica (Bateman, 1910) para cadenas de hasta 5 generaciones:</p>
+<pre>N_n(t) = N_1(0) * product_{i=1}^{n-1} (lambda_i * b_{i,i+1}) * sum_{j=1}^n [exp(-lambda_j*t) / product_{k!=j}(lambda_k - lambda_j)]</pre>
+
+<p>La base de datos incluye 250+ radionuclidos de ICRP 107 clasificados en 5 categorias:</p>
+<ul>
+  <li>PET (F-18, C-11, N-13, O-15, Ga-68, Zr-89, Cu-64)</li>
+  <li>SPECT (Tc-99m, I-123, I-131, In-111, Ga-67, Tl-201)</li>
+  <li>Terapia (I-131, Y-90, Lu-177, Ra-223, Sr-89, Sm-153)</li>
+  <td>Industrial (Cs-137, Co-60, Ir-192, Am-241)</li>
+  <li>Generadores (Mo-99/Tc-99m, Ge-68/Ga-68, Sr-82/Rb-82)</li>
+</ul>
+
+<h3>NIST Material Library (v26)</h3>
+<p>La libreria de materiales (menu Med. Nuclear &gt; NIST Material Library) contiene datos de coeficientes de atenuacion masica del NIST XCOM para 34 materiales:</p>
+<ul>
+  <li><strong>Elementos puros:</strong> H, C, N, O, Na, Mg, Al, Si, P, S, Cl, K, Ca, Fe, Cu, Zn, Pb, W, U.</li>
+  <li><strong>Compuestos comunes:</strong> H2O, aire, tejido blando (ICRU 44), hueso compacto, hueso esponjoso, polietileno, PMMA.</li>
+  <li><strong>Materiales de blindaje:</strong> Concreto ordinario, concreto baritado, vidrio plomado, aleaciones Pb-Sb, tungsteno-niquel-hierro (DENSIMET).</li>
+  <li><strong>Materiales sin plomo:</strong> HDPE+Bi2O3, HDPE+WO3, HDPE+Gd2O3, aleaciones Sn-Bi-Zn.</li>
+</ul>
+<p>Los datos cubren el rango energetico 1 keV - 100 GeV con puntos tabulados cada 0.1 en escala logaritmica.</p>
+
+<!-- ================================================================ -->
+<!-- SECTION 7 -->
+<!-- ================================================================ -->
+<h1 id="sec7" class="section-break">7. Menu Normativa — Compliance Regulatorio</h1>
+
+<h2 id="sec7-1">7.1. Base de datos internacional (15 regulaciones)</h2>
+<p>La base de datos regulatoria (menu Normativa &gt; International Regulations DB) integra 15 regulaciones internacionales con sus limites de dosis, requisitos de blindaje, y procedimientos de licenciamiento:</p>
+
+<table>
+  <caption data-label="Tabla 14">Regulaciones internacionales integradas</caption>
+  <thead><tr><th>Organismo</th><th>Regulacion</th><th>Pais/Region</th><th>Limites de dosis (publico)</th></tr></thead>
+  <tbody>
+    <tr><td>ICRP</td><td>Publication 103, 116</td><td>Internacional</td><td>1 mSv/ano (efectiva)</td></tr>
+    <tr><td>IAEA</td><td>SSR-6, SSG-8, RS-G-1.3</td><td>Internacional</td><td>1 mSv/ano</td></tr>
+    <tr><td>NCRP</td><td>Report 151, 147, 168</td><td>EE.UU.</td><td>1 mSv/ano</td></tr>
+    <tr><td>CNSNS</td><td>LA-001/01, LA-002/01, LA-004/01</td><td>Mexico</td><td>1.5 mSv/ano (ordinario), 5 mSv/ano (excepcional)</td></tr>
+    <tr><td>CE</td><td>Euratom 2013/59, 96/29</td><td>Union Europea</td><td>1 mSv/ano</td></tr>
+    <tr><td>NRC</td><td>10 CFR 20, Reg. Guide 8.8</td><td>EE.UU.</td><td>1 mSv/ano</td></tr>
+    <tr><td>HSE</td><td>IRR17, IR(ME)R17</td><td>Reino Unido</td><td>1 mSv/ano</td></tr>
+    <tr><td>ARPANSA</td><td>RPS C-1, RPS 14</td><td>Australia</td><td>1 mSv/ano</td></tr>
+    <tr><td>CNEN</td><td>NN-5.02, NN-6.03</td><td>Brasil</td><td>1 mSv/ano</td></tr>
+    <tr><td>CNSC</td><td>REGDOC-2.5.4, S-294</td><td>Canada</td><td>1 mSv/ano</td></tr>
+    <tr><td>IRSN</td><td>Guide radioprotection</td><td>Francia</td><td>1 mSv/ano</td></tr>
+    <tr><td>SSM</td><td>SSMFS 2008:52</td><td>Suecia</td><td>1 mSv/ano</td></tr>
+    <tr><td>BFM</td><td>StrlSchV 2018</td><td>Alemania</td><td>1 mSv/ano</td></tr>
+    <tr><td>IAEA</td><td>BSS 443</td><td>Internacional</td><td>1 mSv/ano</td></tr>
+    <tr><td>WHO</td><td>Quality Assurance</td><td>Internacional</td><td>Referencia ICRP</td></tr>
+  </tbody>
+</table>
+
+<p>Cada regulacion incluye:</p>
+<ul>
+  <li>Limites de dosis (ocupacional, publico, embarazadas, menores).</li>
+  <li>Requisitos especificos de blindaje por tipo de instalacion.</li>
+  <li>Procedimientos de licenciamiento y registro.</li>
+  <li>Frecuencia de inspecciones regulatorias.</li>
+  <li>Diferencias notables respecto a otras regulaciones.</li>
+</ul>
+
+<h2 id="sec7-2">7.2. Cumplimiento CNSNS Mexico</h2>
+<p>El modulo de Compliance CNSNS (menu Normativa) implementa las siguientes herramientas:</p>
+
+<h3>Reporte CNSNS</h3>
+<p>Genera un documento DOCX con la memoria de calculo conforme a la Norma LA-001/01:</p>
+<ul>
+  <li>Datos generales de la instalacion y responsable tecnico.</li>
+  <li>Descripcion del equipo (fabricante, modelo, numero de serie).</li>
+  <li>Memoria de calculo de blindaje con formulas y referencias.</li>
+  <li>Plan de control de calidad del equipo (pruebas constitutivas y periodicas).</li>
+  <li>Evaluacion de riesgos radiologicos (dosis estimada a personal y publico).</li>
+  <li>Programa de proteccion radiologica.</li>
+</ul>
+
+<h3>Checklist CNSNS</h3>
+<p>Dos versiones del checklist con 28 items de verificacion:</p>
+<ol>
+  <li>Documentacion del permiso de construccion (LI/PC).</li>
+  <li>Memoria de calculo de blindajes (aprobada por fisico autorizado).</li>
+  <li>Pruebas de aceptacion del equipo (constitutivas).</li>
+  <li>Calibracion del monitor de dosis (constitutiva y periodica).</li>
+  <li>Sistema de interlocks y señalizaciones.</li>
+  <li>Dosimetria personal (TLD u OSL).</li>
+  <li>Monitores de area (radiacion ambiental).</li>
+  <li>Programa de mantenimiento preventivo.</li>
+  <li>Registro de incidentes y accidentes.</li>
+  <li>Entrenamiento del personal en proteccion radiologica.</li>
+</ol>
+
+<h3>Dashboard CNSNS</h3>
+<p>Panel de control visual con indicadores de cumplimiento:</p>
+<ul>
+  <li>Grafico circular (pie chart) de items cumplidos/pendientes/no aplica.</li>
+  <li>Alertas de proximos vencimientos (calibraciones, licencias).</li>
+  <li>Historial de inspecciones con hallazgos y acciones correctivas.</li>
+</ul>
+
+<h2 id="sec7-3">7.3. Comparativa regulatoria y alertas</h2>
+
+<h3>Regulatory Comparison</h3>
+<p>La herramienta de comparacion (menu Normativa &gt; Regulatory Comparison) permite comparar side-by-side dos regulaciones:</p>
+<ul>
+  <li>Seleccion de regulacion A y B de la base de datos.</li>
+  <li>Tabla comparativa con limites de dosis por categoria.</li>
+  <li>Identificacion de diferencias criticas (highlight en rojo).</li>
+  <li>Recomendacion de la regulacion mas restrictiva para cada parametro.</li>
+</ul>
+
+<h3>Regulatory Alerts</h3>
+<p>El sistema de alertas (menu Normativa &gt; Regulatory Alerts) notifica al usuario sobre:</p>
+<ul>
+  <li>Cambios recientes en la normativa seleccionada (requiere conexion a internet).</li>
+  <li>Proximos vencimientos de licencias y permisos.</li>
+  <li>Nuevas guias o recomendaciones publicadas.</li>
+  <li>Alertas de seguridad de fabricantes de equipos (FDA MAUDE, IAEA SAFRAD).</li>
+</ul>
+
+<!-- ================================================================ -->
+<!-- SECTION 8 -->
+<!-- ================================================================ -->
+<h1 id="sec8" class="section-break">8. Menu Reportes — Memorias y Dashboards</h1>
+
+<h2 id="sec8-1">8.1. Memoria Analitica AI-Powered (v30) — Novedad</h2>
+<p>El <strong>Wizard de Memoria Analitica AI-Powered</strong> (boton <strong>Memoria</strong>, violeta en la barra rapida) es un asistente inteligente de 7 pasos que guia al usuario en la generacion de una memoria de calculo completa:</p>
+
+<h3>Pasos del wizard</h3>
+<ol>
+  <li><strong>Datos del proyecto:</strong> Nombre, institucion, responsable tecnico (fisico medico autorizado), numero de licencia CNSNS, fecha.</li>
+  <li><strong>Equipo y fuente:</strong> Seleccion del equipo de la base de datos (10 modelos pre-configurados: Varian TrueBeam, Varian Halcyon, Elekta Versa HD, Elekta Unity, CyberKnife M6, TomoTherapy Radixact, Gamma Knife Perfexion/Icon, Siemens Artiste, Accuray Radixact, Philips Ambition).</li>
+  <li><strong>Barreras:</strong> Importacion automatica de las barreras del plano actual con sus dimensiones y propiedades.</li>
+  <li><strong>Calculo y resultados:</strong> Ejecucion automatica del calculo NCRP 151 con tabla resumen de kerma, espesores, y estado.</li>
+  <li><strong>Verificacion regulatoria:</strong> Comparacion automatica con limites de la CNSNS y otras regulaciones seleccionadas.</li>
+  <li><strong>Memoria de calculo:</strong> Generacion del documento con todas las formulas, referencias, y datos utilizados.</li>
+  <li><strong>Exportacion PDF:</strong> Documento final listo para entrega a la CNSNS o entidad regulatoria correspondiente.</li>
+</ol>
+
+<h3>Asistente AI conversacional</h3>
+<p>El wizard incluye un chatbot con las siguientes capacidades:</p>
+<ul>
+  <li><strong>Auto-fill inteligente:</strong> Sugiere valores basados en el equipo seleccionado (workload tipico, dosis de diseno, factores de uso).</li>
+  <li><strong>Validacion:</strong> Verifica que los valores introducidos sean consistentes con la normativa.</li>
+  <li><strong>Explicaciones:</strong> Responde preguntas sobre el significado de cada parametro y su impacto en el calculo.</li>
+  <li><strong>Recomendaciones:</strong> Sugiere mejoras basadas en el principio ALARA.</li>
+</ul>
+
+<h2 id="sec8-2">8.2. Dashboards (Ejecutivo, CNSNS, Calculo)</h2>
+
+<h3>Dashboard Ejecutivo</h3>
+<p>Panel de control principal con KPIs en tiempo real:</p>
+<ul>
+  <li>Numero de barreras (total, PASS, WARN, FAIL).</li>
+  <li>Costo total estimado del blindaje (por material y global).</li>
+  <li>Dosis maxima calculada vs limite de diseno.</li>
+  <li>Cumplimiento normativo (porcentaje de items OK).</li>
+  <li>Grafico de torta (pie chart) de distribucion de costos por material.</li>
+</ul>
+
+<h3>Dashboard CNSNS</h3>
+<p>Panel especifico para cumplimiento en Mexico:</p>
+<ul>
+  <li>Estado del permiso de construccion/operacion.</li>
+  <li>Checklist de verificacion con barras de progreso.</li>
+  <li>Proximas fechas de calibracion e inspeccion.</li>
+  <li>Historial de dosis al personal (TLD/OSLs).</li>
+</ul>
+
+<h3>Dashboard Calculo</h3>
+<p>Panel detallado de resultados tecnicos:</p>
+<ul>
+  <li>Tabla completa de barreras con kerma, espesores, y estado.</li>
+  <li>Grafico de barras comparativo (kerma vs limite).</li>
+  <li>Mapa de calor (heatmap) del bunker con isodosis.</li>
+  <li>Exportacion de datos a CSV y JSON.</li>
+</ul>
+
+<h2 id="sec8-3">8.3. Validacion, Anomalias y Escenarios What-If</h2>
+
+<h3>Plan Validator</h3>
+<p>El validador de planos (menu Reportes &gt; Validar Plano) verifica:</p>
+<ol>
+  <li>Que todas las barreras tengan calculo ejecutado.</li>
+  <li>Que no haya barreras sin material asignado.</li>
+  <li>Que las fuentes tengan modalidad y workload validos.</li>
+  <li>Que la escala del plano sea consistente.</li>
+  <li>Que no haya barreras con longitud cero o negativa.</li>
+  <li>Que el estado global sea PASS (no FAIL).</li>
+</ol>
+
+<h3>Anomaly Detection</h3>
+<p>El detector de anomalias (menu Reportes &gt; Anomaly Detection) utiliza estadistica para identificar:</p>
+<ul>
+  <li>Barreras con kerma significativamente mayor al promedio (&gt;2 sigma).</li>
+  <li>Fuentes con workload atipico para su modalidad.</li>
+  <li>Combinaciones de material-espesor poco comunes.</li>
+  <li>Inconsistencias geometricas (barreras que no cierran el perimetro).</li>
+</ul>
+
+<h3>Escenarios What-If</h3>
+<p>El analizador de escenarios (menu Reportes &gt; Escenarios What-If) permite simular cambios:</p>
+<ul>
+  <li>Cambio de workload (aumento de pacientes, nueva tecnica).</li>
+  <li>Cambio de modalidad (e.g., 3D-CRT a VMAT).</li>
+  <li>Cambio de material (e.g., concreto a Pb).</li>
+  <li>Cambio de dosis de diseno (e.g., de 0.02 a 0.1 mSv/semana).</li>
+  <li>Comparacion de resultados antes/despues con tabla diferencial.</li>
+</ul>
+
+
+<!-- ================================================================ -->
+<!-- SECTION 9 -->
+<!-- ================================================================ -->
+<h1 id="sec9" class="section-break">9. Menu Herramientas — IA y Automatizacion</h1>
+
+<h2 id="sec9-1">9.1. AI Shielding Assistant (RAG)</h2>
+<p>El <strong>AI Shielding Assistant</strong> (menu Herramientas &gt; AI Shielding Assistant) es un sistema de Retrieval-Augmented Generation (RAG) que responde preguntas sobre proteccion radiologica utilizando como fuente de conocimiento el NCRP Report 151, NCRP Report 147, ICRP 103, y la normativa CNSNS.</p>
+
+<h3>Arquitectura RAG</h3>
+<ol>
+  <li><strong>Retrieval:</strong> El sistema divide los documentos regulatorios en chunks semanticos (512 tokens) y los indexa en una base vectorial local (hnswlib).</li>
+  <li><strong>Embedding:</strong> Cada chunk se convierte a un vector de 384 dimensiones usando all-MiniLM-L6-v2 (Sentence Transformers).</li>
+  <li><strong>Query:</strong> La pregunta del usuario se embeddea y se buscan los k=5 chunks mas similares (cosine similarity).</li>
+  <li><strong>Generation:</strong> Los chunks recuperados se concatenan con la pregunta y se genera la respuesta utilizando un modelo de lenguaje local (Llama 3.1 8B via llama.cpp WASM).</li>
+</ol>
+
+<h3>Capacidades</h3>
+<ul>
+  <li>Responder preguntas sobre formulas de blindaje y sus parametros.</li>
+  <li>Buscar valores de TVL, HVL, y workload en tablas NCRP.</li>
+  <li>Explicar requisitos regulatorios especificos de la CNSNS.</li>
+  <li>Recomendar materiales segun la energia y restricciones de espacio.</li>
+  <li>Validar calculos comparando con los valores tabulados.</li>
+</ul>
+
+<div class="warn-box">
+  <strong>Nota de responsabilidad:</strong> Las respuestas del AI Assistant son orientativas y deben ser verificadas por un fisico medico autorizado antes de su aplicacion en un diseno real. El sistema no sustituye el juicio profesional.
+</div>
+
+<h2 id="sec9-2">9.2. Predictive Material Optimizer</h2>
+<p>El optimizador predictivo de materiales (menu Herramientas &gt; Predictive Material Optimizer) utiliza un modelo de regresion entrenado con datos de instalaciones reales para recomendar el material optimo considerando:</p>
+<ul>
+  <li><strong>Entrada:</strong> Energia, distancia, dosis de diseno, restriccion de espesor maximo, presupuesto.</li>
+  <li><strong>Modelo:</strong> Random Forest con 100 estimadores, entrenado con 500+ casos de instalaciones documentadas.</li>
+  <li><strong>Salida:</strong> Ranking de materiales ordenado por costo-efectividad (dosis reducida por USD invertido).</li>
+  <li><strong>Feature importance:</strong> Energia (35%), distancia (28%), presupuesto (18%), espacio (12%), ocupacion (7%).</li>
+</ul>
+
+<h2 id="sec9-3">9.3. Python (Pyodide) en navegador</h2>
+<p>RadShield-MX puede ejecutar Python mediante <strong>Pyodide</strong> (CPython compilado a WebAssembly) cuando se configura VITE_PYODIDE_URL o se habilita VITE_ENABLE_PYODIDE_CDN=true:</p>
+
+<h3>Librerias disponibles</h3>
+<table>
+  <caption data-label="Tabla 15">Librerias Python disponibles en Pyodide</caption>
+  <thead><tr><th>Libreria</th><th>Version</th><th>Uso en blindaje</th></tr></thead>
+  <tbody>
+    <tr><td>NumPy</td><td>1.24+</td><td>Arrays, algebra lineal, interpolacion</td></tr>
+    <tr><td>SciPy</td><td>1.11+ (parcial)</td><td>optimize, integrate, special</td></tr>
+    <tr><td>Matplotlib</td><td>3.7+</td><td>Graficos de resultados</td></tr>
+    <tr><td>Pandas</td><td>2.0+</td><td>Analisis de datos tabulares</td></tr>
+  </tbody>
+</table>
+
+<h3>Ejemplos pre-cargados</h3>
+<ol>
+  <li><strong>Analisis de blindaje:</strong> Calculo de TVL iterativo con datos NIST importados.</li>
+  <li><strong>Decaimiento:</strong> Solucion numerica de Bateman para cadenas largas.</li>
+  <li><strong>Monte Carlo simple:</strong> Simulacion de transporte de fotones en 1D.</li>
+  <li><strong>Optimizacion:</strong> Minimizacion de costo con restricciones (scipy.optimize).</li>
+  <li><strong>Visualizacion:</strong> Graficos de isodosis con matplotlib.</li>
+</ol>
+
+<h2 id="sec9-4">9.4. Modeling Toolbox (10 calculadoras)</h2>
+<p>La caja de herramientas (menu Herramientas &gt; Modeling Toolbox) incluye 10 calculadoras rapidas para tareas comunes:</p>
+
+<table>
+  <caption data-label="Tabla 16">Calculadoras de la Modeling Toolbox</caption>
+  <thead><tr><th>#</th><th>Calculadora</th><th>Formula principal</th><th>Aplicacion</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>TVL a espesor</td><td>x = TVL * log10(H_0/H)</td><td>Espesor dada atenuacion deseada</td></tr>
+    <tr><td>2</td><td>HVL a transmision</td><td>B = (1/2)^(x/HVL)</td><td>Factor de transmision</td></tr>
+    <tr><td>3</td><td>Ley del inverso del cuadrado</td><td>I2 = I1 * (d1/d2)^2</td><td>Dosis a distancia diferente</td></tr>
+    <tr><td>4</td><td>Decaimiento exponencial</td><td>A(t) = A_0 * e^(-lambda*t)</td><td>Actividad residual</td></tr>
+    <tr><td>5</td><td>Conversion de unidades</td><td>1 Gy = 100 rad, 1 Sv = 100 rem</td><td>Cambio entre sistemas</td></tr>
+    <tr><td>6</td><td>Build-up factor</td><td>B = 1 + a*mu*x*e^(b*mu*x)</td><td>Correccion de blindaje grueso</td></tr>
+    <tr><td>7</td><td>Zeff compuesto</td><td>Zeff = (sum wi*Zi^4 / sum wi*Zi)^1/3</td><td>Numero atomico efectivo</td></tr>
+    <tr><td>8</td><td>Neutron removal XS</td><td>Phi = Phi_0 * exp(-Sigma_R*x)</td><td>Atenuacion de neutrones</td></tr>
+    <tr><td>9</td><td>Skyshine</td><td>H_s = K * Omega^1.3 / d^2</td><td>Dosis por dispersion en techo</td></tr>
+    <tr><td>10</td><td>Heat load</td><td>Q = A * deltaT / R</td><td>Carga termica del blindaje</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================ -->
+<!-- SECTION 10 -->
+<!-- ================================================================ -->
+<h1 id="sec10" class="section-break">10. Novedades v29–v32</h1>
+
+<h2 id="sec10-1">10.1. Real-Time 3D Export (v29)</h2>
+<p>El modulo Real-Time 3D Design Exploration permite exportar el modelo de blindaje a formatos compatibles con motores de visualizacion en tiempo real:</p>
+<ul>
+  <li><strong>glTF 2.0 / glB:</strong> Formato estandar Khronos con materiales PBR, compatible con Three.js, Babylon.js, Blender, y motores de juego.</li>
+  <li><strong>FBX:</strong> Formato Autodesk para importacion directa en Unreal Engine, Unity, 3ds Max, Maya.</li>
+  <li><strong>USD / USDA:</strong> Universal Scene Description de Pixar para NVIDIA Omniverse y pipelines de animacion.</li>
+  <li><strong>Conectores:</strong> Plugins para UE5 (Datasmith), Unity (FBXImporter), Enscape, Rhino (OpenNurbs), Autodesk Viewer, SketchUp.</li>
+</ul>
+
+<h2 id="sec10-2">10.2. Dose Map + Equipment DB + Cost DB (v31)</h2>
+
+<h3>Dose Map Visualization</h3>
+<p>Genera mapas de dosis 2D/3D con interpolacion espacial y marching squares para contornos isodosis. 6 paletas de color disponibles (jet, viridis, plasma, inferno, hot, cool). Exportacion a PNG y CSV.</p>
+
+<h3>Equipment Database</h3>
+<p>Base de datos de 14 equipos comerciales con parametros pre-configurados segun NCRP 151:</p>
+<ul>
+  <li><strong>Varian:</strong> TrueBeam, Halcyon, Edge, Clinac iX.</li>
+  <li><strong>Elekta:</strong> Versa HD, Unity, Infinity, Synergy.</li>
+  <li><strong>Accuray:</strong> CyberKnife M6, TomoTherapy Radixact.</li>
+  <li><strong>Otros:</strong> Gamma Knife Perfexion/Icon, ViewRay MRIdian, ZAP-X.</li>
+</ul>
+
+<h3>Cost Database</h3>
+<p>Base de datos de costos regionalizada (Mexico, Estados Unidos, Europa):</p>
+<table>
+  <caption data-label="Tabla 17">Costos unitarios de materiales por region (USD/kg)</caption>
+  <thead><tr><th>Material</th><th>Mexico</th><th>EE.UU.</th><th>Europa</th></tr></thead>
+  <tbody>
+    <tr><td>Concreto ordinario</td><td>0.08</td><td>0.12</td><td>0.15</td></tr>
+    <tr><td>Concreto baritado</td><td>0.35</td><td>0.45</td><td>0.55</td></tr>
+    <tr><td>Plomo (Pb)</td><td>2.20</td><td>2.50</td><td>2.80</td></tr>
+    <tr><td>Acero (Fe)</td><td>0.65</td><td>0.80</td><td>0.90</td></tr>
+    <tr><td>Tungsteno (W)</td><td>38.00</td><td>45.00</td><td>50.00</td></tr>
+    <tr><td>Vidrio plomado</td><td>4.50</td><td>5.50</td><td>6.20</td></tr>
+    <tr><td>Polietileno borado</td><td>4.00</td><td>4.80</td><td>5.50</td></tr>
+  </tbody>
+</table>
+
+<h2 id="sec10-3">10.3. NSGA-II Optimizer (v32) — Novedad</h2>
+<p>El Optimizador de Blindaje NSGA-II es la caracteristica principal de la version 32. Resumen de capacidades:</p>
+<ul>
+  <li><strong>Algoritmo:</strong> NSGA-II (Deb et al., 2002) con 3 objetivos (costo, peso, espesor maximo).</li>
+  <li><strong>Restricciones:</strong> Cumplimiento de dosis de diseno NCRP 151 para todas las barreras.</li>
+  <li><strong>Materiales:</strong> 9 materiales con datos de TVL, densidad, y costo regionalizado.</li>
+  <li><strong>Parametros:</strong> Poblacion (default 50), generaciones (100), Pc (0.9), Pm (0.1).</li>
+  <li><strong>Salida:</strong> Frente de Pareto con soluciones no-dominadas, visualizacion 2D/3D, convergencia.</li>
+</ul>
+
+<h2 id="sec10-4">10.4. PACS Real Integration (v32) — Novedad</h2>
+<p>La integracion PACS Real permite conectar RadShield-MX a servidores Orthanc para:</p>
+<ul>
+  <li>Navegar estudios DICOM por paciente, modalidad, y fecha.</li>
+  <li>Visualizar imagenes medicas (CT, MR, PET, RTDOSE) en el navegador.</li>
+  <li>Importar estructuras RTSTRUCT como regiones ocupadas en el plano.</li>
+  <li>Comparar mapas de dosis RTDOSE con calculos propios.</li>
+</ul>
+
+<h2 id="sec10-5">10.5. Electron LINAC Applicator (v32) — Novedad</h2>
+<p>El modulo de aplicadores de electrones calcula el blindaje adicional requerido para bunkers de tratamiento con haces de electrones:</p>
+<ul>
+  <li><strong>Energias:</strong> 4, 6, 9, 12, 15, 18, 22 MeV.</li>
+  <li><strong>Aplicadores:</strong> 5x5, 6x6, 10x10, 15x15, 20x20, 25x25 cm.</li>
+  <li><strong>Metodo:</strong> NCRP 151 Appendix B con tablas de fraccion de leakage.</li>
+  <li><strong>Materiales:</strong> Pb, acero, concreto con TVL para radiacion X residual.</li>
+</ul>
+
+<!-- ================================================================ -->
+<!-- SECTION 11 -->
+<!-- ================================================================ -->
+<h1 id="sec11" class="section-break">11. Referencias Tecnicas</h1>
+<ol class="references">
+  <li>NCRP (2005). <i>Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities</i>. NCRP Report No. 151. Bethesda, MD.</li>
+  <li>NCRP (2004). <i>Structural Shielding Design for Medical X-Ray Imaging Facilities</i>. NCRP Report No. 147. Bethesda, MD.</n  <li>ICRP (2007). <i>The 2007 Recommendations of the International Commission on Radiological Protection</i>. ICRP Publication 103. Ann. ICRP 37(2-4).</li>
+  <li>IAEA (2006). <i>Radiation Protection in the Design of Radiotherapy Facilities</i>. Safety Reports Series No. 47. Vienna.</li>
+  <li>CNSNS (2014). <i>Licencias de Operacion de Instalaciones de Radioterapia</i>. Norma LA-001/01. Ciudad de Mexico.</li>
+  <li>McGinley, P.H. (2002). <i>Shielding Techniques for Radiation Oncology Facilities</i>. 2nd ed., Medical Physics Publishing. Madison, WI.</li>
+  <li>Khan, F.M. (2010). <i>The Physics of Radiation Therapy</i>. 4th ed., Lippincott Williams &amp; Wilkins. Philadelphia.</li>
+  <li>Attix, F.H. (2004). <i>Introduction to Radiological Physics and Radiation Dosimetry</i>. Wiley-VCH. Weinheim.</li>
+  <li>Hubbell, J.H., Seltzer, S.M. (2004). <i>Tables of X-Ray Mass Attenuation Coefficients and Mass Energy-Absorption Coefficients</i>. NIST IR 5632. Gaithersburg, MD.</li>
+  <li>ANSI/ANS-6.4.3 (1991). <i>Gamma-Ray Attenuation Coefficients and Buildup Factors for Engineering Materials</i>. American Nuclear Society. La Grange Park, IL.</li>
+  <li>NIST (2024). <i>ESTAR: Stopping Power and Range Tables for Electrons</i>. Available at: physics.nist.gov/Star</li>
+  <li>Koch, H.W., Motz, J.W. (1959). Bremsstrahlung Cross-Section Formulas and Related Data. <i>Reviews of Modern Physics</i>, 31(4), 920-955.</li>
+  <li>Chadwick, M.B. et al. (2011). ENDF/B-VII.1 Nuclear Data for Science and Technology. <i>Nuclear Data Sheets</i>, 112(12), 2887-2996.</li>
+  <li>JCGM (2008). <i>Evaluation of Measurement Data — Guide to the Expression of Uncertainty in Measurement</i>. JCGM 100:2008 (GUM). BIPM.</li>
+  <li>Deb, K. et al. (2002). A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II. <i>IEEE Transactions on Evolutionary Computation</i>, 6(2), 182-197.</li>
+  <li>Bateman, H. (1910). The Solution of a System of Differential Equations Occurring in the Theory of Radio-active Transformations. <i>Proc. Cambridge Phil. Soc.</i>, 15, 423-427.</li>
+  <li>Sternheimer, R.M. (1952). The Density Effect for the Ionization Loss in Various Materials. <i>Physical Review</i>, 88(4), 851-859.</li>
+  <li>Klein, O., Nishina, Y. (1929). Uber die Streuung von Strahlung durch freie Elektronen nach der neuen relativistischen Quantendynamik von Dirac. <i>Zeitschrift fur Physik</i>, 52(11-12), 853-868.</li>
+  <li>Bethe, H., Heitler, W. (1934). On the Stopping of Fast Particles and on the Creation of Positive Electrons. <i>Proceedings of the Royal Society A</i>, 146(856), 83-112.</li>
+  <li>AAPM TG 25 (1991). <i>Clinical Electron-Beam Dosimetry</i>. American Association of Physicists in Medicine. Report No. 32.</li>
+  <li>IAEA (2016). <i>Radiation Protection and Safety of Radiation Sources: International Basic Safety Standards</i>. SSR-6 (BSS). Vienna.</li>
+  <li>ICRP (2010). <i>Conversion Coefficients for Radiological Protection Quantities for External Radiation Exposures</i>. ICRP Publication 116. Ann. ICRP 40(2-5).</li>
+  <li>McGinley, P.H., Minor, M.S. (2004). A Method for Calculating the Conduction of Radiation from a Maze. <i>Health Physics</i>, 86(5), 513-517.</li>
+  <li>NCRP (2010). <i>Radiation Dose Management for Fluoroscopically-Guided Interventional Medical Procedures</i>. NCRP Report 168. Bethesda, MD.</li>
+  <li>Scofield, J.H. (1973). Theoretical Photoionization Cross Sections from 1 to 1500 keV. <i>Lawrence Livermore National Laboratory Report UCRL-51326</i>.</li>
+</ol>
+
+<div style="margin-top: 2cm; text-align: center; font-size: 10pt; color: #888;">
+  <p>RadShield-MX v32 — Manual de Usuario Tecnico</p>
+  <p>133+ modulos funcionales | 37,000+ lineas de codigo | 15 regulaciones internacionales</p>
+  <p>Junio 2026</p>
+</div>
+
+</body>
+</html>

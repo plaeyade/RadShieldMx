@@ -1,0 +1,45 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "RadShield-MX",
+  "version": "13.4.0",
+  "identifier": "com.radshieldmx.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "RadShield-MX v13.4 - Sistema Integral de Blindajes Radiologicos",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 768,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "rpm", "msi", "dmg", "app", "appimage"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "copyright": "(c) 2026 RadShield-MX",
+    "category": "MedicalDevice",
+    "shortDescription": "Sistema Integral de Blindajes Radiologicos",
+    "longDescription": "RadShield-MX es un sistema integral para el diseno, calculo, validacion y documentacion de blindajes radiologicos conforme a normas NCRP, IAEA, ICRP, CNSNS y RGSR."
+  }
+}
