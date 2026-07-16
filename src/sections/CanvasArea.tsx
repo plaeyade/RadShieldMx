@@ -35,6 +35,7 @@ import { buildF99CanvasCadReadiness } from '@/lib/f99CanvasCadReadiness';
 import { buildF122CanvasStructuralOverlay } from '@/lib/f122CanvasStructuralOverlay';
 import { buildF141ProfessionalCanvasSummary } from '@/lib/f141CanvasProfessionalPolish';
 import { buildF145CanvasCadProfessionalSummary } from '@/lib/f145CanvasCadProfessional';
+import { buildF171CanvasPolishPredeploy } from '@/lib/f171CanvasPolishPredeploy';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 
@@ -252,6 +253,15 @@ export default function CanvasArea({
     barrierResults,
     sampleLines,
     snapToGrid: canvasState.snapToGrid,
+  });
+  const f171CanvasPolish = buildF171CanvasPolishPredeploy({
+    floorPlan,
+    selectedId: canvasState.selectedId,
+    selectedIds: canvasState.selectedIds,
+    barrierResults,
+    sampleLines,
+    snapToGrid: canvasState.snapToGrid,
+    heatmapPointCount,
   });
 
   const formatResultNumber = (value: unknown, digits: number) => {
@@ -834,6 +844,38 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Sel {f145CadProfessional.selectedCount} | Ctrl+drag lasso | snap interseccion
+                </span>
+              </div>
+              <div
+                data-testid="f171-canvas-polish-predeploy"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f171CanvasPolish.decision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f171CanvasPolish.status === 'canvas-polish-predeploy-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F171 {f171CanvasPolish.score}%
+                </span>
+                {f171CanvasPolish.items.slice(0, 7).map((item) => (
+                  <span
+                    key={item.id}
+                    data-testid={`f171-polish-${item.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      item.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : item.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={`${item.evidence} ${item.releaseUse}`}
+                  >
+                    {item.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Canvas polish predeploy | no cambia calculos
                 </span>
               </div>
               <div className="border-b border-slate-100 p-1.5">

@@ -1,5 +1,21 @@
 # RadShield-MX - Manual de Versiones
 
+## F171 (2026-07-16) - Canvas polish predeploy
+
+- Objetivo: cerrar una mejora visual y contractual del canvas antes del deploy, manteniendo bajo riesgo operativo.
+- Superficie: `src/sections/CanvasArea.tsx` muestra `f171-canvas-polish-predeploy` con estado de grips, cotas, snapping, seleccion, heatmap, propiedades y export.
+- Artefactos: `outputs/f171_canvas_polish_predeploy/f171_canvas_polish_predeploy.json` y `outputs/fase_171_canvas_polish_predeploy.md`.
+- Uso: `npm run prepare:f171:canvas-polish` y `npm run test:f171:canvas-polish`.
+- Criterio: F170 debe estar listo y sin warnings; F171 no modifica formulas ni valores normativos.
+
+## F170B (2026-07-16) - Reindexacion canonica NCRP147/TG108
+
+- Objetivo: cerrar la brecha detectada por F170 para `NCRP147` y `TG108` con fuentes PDF versionadas por hash en `document_chunks`.
+- Fuentes: `f170b-ncrp147` y `f170b-aapm-tg108`.
+- Artefactos: `outputs/f170b_canonical_reindex/f170b_canonical_reindex.json` y `outputs/fase_170b_canonical_reindex.md`.
+- Uso: `npm run prepare:f170b:canonical-reindex`, `npm run test:f170b:canonical-reindex`, luego repetir `npm run prepare:f170:rag-citations`.
+- Nota: los PDFs arXiv subidos se registran como detectados no indexados hasta tener politica documental y utilidad clinica definida.
+
 ## F170 (2026-07-16) - RAG citation governance DB-backed
 
 - Artefactos: `outputs/f170_rag_citation_governance/f170_rag_citation_governance.json` y `outputs/fase_170_rag_citation_governance.md`.

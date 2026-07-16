@@ -1,5 +1,17 @@
 # RadShield-MX - Fases recientes
 
+## F171 (2026-07-16) - Canvas polish predeploy
+
+- Se agrega panel visible `f171-canvas-polish-predeploy` dentro de `CanvasArea` para revisar grips, cotas, snap, seleccion, heatmap, propiedades y export antes del deploy.
+- La fase enlaza canvas con F170 sin cambiar calculos, constantes de materiales ni objetivos regulatorios.
+- Nuevos comandos: `npm run prepare:f171:canvas-polish` y `npm run test:f171:canvas-polish`.
+
+## F170B (2026-07-16) - Canonical NCRP147/TG108 reindex
+
+- Se agrega reindexacion canonica para `f170b-ncrp147` y `f170b-aapm-tg108` desde PDFs locales, con hash SHA-256 del documento completo, chunks por pagina y tags compatibles con F170.
+- Se registran `2601.10336v2.pdf` y `2407.12991v2.pdf` como detectados no indexados; quedan para revision tecnica posterior y no se promueven como fuente normativa canonica.
+- Nuevos comandos: `npm run prepare:f170b:canonical-reindex` y `npm run test:f170b:canonical-reindex`.
+
 ## F170 (2026-07-16) - RAG citation governance DB-backed
 
 - Se agrega compuerta DB-backed para `document_chunks`: conteo de chunks/fuentes/modalidades, calidad de source/content/page_ref/tags y cobertura canonica NCRP/IAEA/TG/UAQ.
