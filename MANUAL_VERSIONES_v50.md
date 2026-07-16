@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F189 (2026-07-16) - Visual smoke layout canvas/sidebar
+
+- Objetivo: validar visualmente que F188 no rompa sidebar, canvas ni demo R&F.
+- Superficies: `CanvasArea`, `Sidebar`, preview local y evidencia Playwright.
+- Uso: `npm run test:f189:visual-smoke`.
+- Incluye: prueba en 1366x768 y 1920x1080, cierre/restauracion del panel QA, dock derecho del panel de flujo y ajuste de ancho de sidebar.
+- Evidencia: capturas en `outputs/f189_visual_smoke` con estados inicial, QA oculto y final.
+- Guardrail: si falla esta prueba, no avanzar a mas cambios de layout antes de corregir visibilidad de canvas/sidebar.
+
 ## F188 (2026-07-16) - Panel layout controls
 
 - Objetivo: recuperar area util del canvas sin eliminar funciones ni mover la arquitectura principal.

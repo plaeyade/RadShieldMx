@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F189 (2026-07-16) - Visual smoke layout canvas/sidebar
+
+- Se agrega smoke visual Playwright para validar F188 en `1366x768` y `1920x1080`.
+- La prueba entra directo al demo R&F, verifica sidebar visible, canvas workflow, panel QA, panel continuidad y controles F188.
+- Se valida cerrar/restaurar QA, mover el panel de flujo al dock derecho y aumentar ancho de sidebar.
+- Se generan capturas en `outputs/f189_visual_smoke`.
+- Nuevo comando: `npm run test:f189:visual-smoke`.
+
 ## F188 (2026-07-16) - Panel layout controls
 
 - Se agrega control persistente para ajustar el ancho de la sidebar expandida sin cambiar el modo colapsado.
