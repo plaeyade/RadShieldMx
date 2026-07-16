@@ -4,6 +4,7 @@
 
 - Se cerro la DB live real con MySQL 8.0.46, autenticacion valida, migraciones/seed aplicados y `db-live-validation` OK.
 - Se valido backup/restore probe de F153: dump con hash SHA-256, restauracion temporal 22/22 tablas y cleanup correcto.
+- Se valido Node/npm instalado en Windows: Node v24.18.0, npm 11.16.0, `npm run test:f168:db-live-final`, `npm run db:validate:live` y `npm run build` OK.
 - Decision: la DB ya no bloquea release local/full stack; el deploy publico sigue bloqueado por F167 hasta habilitar push a `git.chatgpt-team.site:443`.
 - Siguiente paso tras URL publica: repetir F154-F158 contra HTTPS final.
 
