@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F177 (2026-07-16) - Sites deploy retry
+
+- Objetivo: reintentar deploy publico mediante Sites despues de F176 sin comprometer el paquete local.
+- Prerrequisitos: `F159 sites-deploy-ready`, `F176 local-smoke-ready`, worktree limpio y salida HTTPS a `git.chatgpt-team.site:443`.
+- Artefactos: `outputs/f177_sites_deploy_retry/f177_sites_deploy_retry.json` y `outputs/fase_177_sites_deploy_retry.md`.
+- Uso: `npm run prepare:f177:sites-deploy` y `npm run test:f177:sites-deploy`.
+- Guardrail: si no puede empujar el source exacto, no se ejecuta `save_site_version` ni deploy; se debe usar retry de red o deploy alterno.
+
 ## F176 (2026-07-16) - Local smoke final
 
 - Objetivo: validar que el paquete local recuperado sirve el shell, reset de cache y assets actuales antes de volver al deploy publico.

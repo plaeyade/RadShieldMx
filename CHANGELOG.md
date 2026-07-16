@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F177 (2026-07-16) - Sites deploy retry
+
+- Se agrega compuerta F177 para reintentar Sites/Git hosting despues de F176.
+- La fase valida proyecto Sites, commit SHA, F159, F176 y conectividad a `git.chatgpt-team.site:443`.
+- Si la red esta bloqueada, no guarda version ni despliega; conserva el paquete local y documenta alternativas.
+- Nuevos comandos: `npm run prepare:f177:sites-deploy` y `npm run test:f177:sites-deploy`.
+
 ## F176 (2026-07-16) - Local smoke final
 
 - Se agrega compuerta local sobre `LOCAL_SMOKE_URL` para validar HTML, `reset-cache.html`, assets JS/CSS y evidencias F175/F174A.
