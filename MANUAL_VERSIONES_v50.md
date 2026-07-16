@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F181 (2026-07-16) - Deploy now handoff
+
+- Objetivo: ejecutar deploy inmediato si Sites permite push; si no, dejar paquete estatico listo para publicacion alterna.
+- Resultado esperado en entorno actual: `sites-deploy-blocked-static-package-ready` por bloqueo de red hacia `git.chatgpt-team.site:443`.
+- Artefactos: `outputs/f181_deploy_now_handoff/f181_deploy_now_handoff.json`, `outputs/f181_deploy_now_handoff/README_F181_DEPLOY_NOW.md`, `outputs/f181_deploy_now_handoff/radshield-mx-static-dist.zip` y `outputs/fase_181_deploy_now_handoff.md`.
+- Uso: `npm run prepare:f181:deploy-now` y `npm run test:f181:deploy-now`.
+- Guardrail: no guardar version Sites ni ejecutar deploy si no se pudo empujar el source exacto.
+- Posterior: subir paquete/repo a `vercel-static` o similar, configurar `PUBLIC_DEPLOY_URL` y repetir F154-F158.
+
 ## F180 (2026-07-16) - Static publish runbook
 
 - Objetivo: convertir F179 en instrucciones operativas para publicar una URL publica de frontend.

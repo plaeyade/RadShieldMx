@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F181 (2026-07-16) - Deploy now handoff
+
+- Se intenta deploy por Sites usando el proyecto existente, pero el push de source queda bloqueado por `git.chatgpt-team.site:443`.
+- Por seguridad no se guarda version ni se despliega si no se pudo empujar el source exacto.
+- Se genera paquete estatico `radshield-mx-static-dist.zip` para carga manual en Vercel/Netlify/Cloudflare.
+- Se mantiene la regla: al tener URL final, configurar `PUBLIC_DEPLOY_URL` y repetir F154-F158.
+- Nuevos comandos: `npm run prepare:f181:deploy-now` y `npm run test:f181:deploy-now`.
+
 ## F180 (2026-07-16) - Static publish runbook
 
 - Se agrega runbook operativo para publicar frontend estatico en `vercel-static`, `netlify-static` o `cloudflare-pages`.
