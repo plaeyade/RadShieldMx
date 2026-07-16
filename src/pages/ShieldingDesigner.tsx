@@ -486,7 +486,9 @@ export default function ShieldingDesigner() {
   // v15: New dialogs (keyboardShortcuts → Zustand store)
   
   
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(() => {
+    try { const dismissed = localStorage.getItem('radshield_welcome_dismissed'); const saved = localStorage.getItem('radshield_v15_welcome'); return !saved && !dismissed; } catch { return true; }
+  });
   // v15: Status bar state
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [calculationStatus, setCalculationStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');

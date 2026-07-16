@@ -1,14 +1,5 @@
 # RadShield-MX - Fases recientes
 
-## F182 (2026-07-16) - Canvas professional workspace
-
-- Se apaga la pantalla de bienvenida/ejemplo al abrir la app para no cubrir el floorplan.
-- Se agrega empty-state limpio dentro del canvas con acciones de importar plano, plantillas y capas.
-- Se repliegan los paneles de QA/continuidad en un dock `CAD workspace` para que no tapen el layout.
-- Se repliega el panel de flujo `Layout - blindaje - memoria` y queda disponible como chip compacto.
-- Se hace la barra superior del canvas tolerante a overflow horizontal en pantallas estrechas.
-- Validacion: `npm run build`, smoke HTTP local y `npm run test:f182:canvas-workspace`.
-
 ## F181 (2026-07-16) - Deploy now handoff
 
 - Se intenta deploy por Sites usando el proyecto existente, pero el push de source queda bloqueado por `git.chatgpt-team.site:443`.
