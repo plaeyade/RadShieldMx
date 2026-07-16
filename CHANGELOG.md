@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F174A (2026-07-16) - Predeploy low-risk hardening
+
+- Se agregan guardas no invasivas al motor: `isFinitePositive`, `clampTransmission` y `getCalculationInputWarnings`.
+- `archerTransmission` y `tvlTransmission` acotan salidas forward al intervalo fisico 0..1 para evitar propagacion de NaN/Infinity en datos corruptos.
+- Se agrega politica RAG de fuente: canonica, investigacion, evidencia de materiales, memoria analitica y externa.
+- Update Center muestra el estado F174A antes de deploy, sin migracion de DB ni dependencias nuevas.
+- Nuevos comandos: `npm run prepare:f174a:predeploy-hardening`, `npm run test:f174a:predeploy-hardening` y `npm run test:f174a:predeploy-hardening:unit`.
+
 ## F173 (2026-07-16) - Canvas low-risk polish
 
 - Se agrega HUD compacto `f173-canvas-hud` dentro del overlay existente del canvas para mostrar seleccion, snap, objetos, evidencia, heatmap y estado de export.

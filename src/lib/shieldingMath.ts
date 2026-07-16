@@ -12,6 +12,59 @@ import { type CTIsodosisProfile, getCTIsodosisFactor, DEFAULT_CT_ISODOSIS } from
 export const SAMPLING_DISTANCE_M = 0.3;
 export const SAMPLING_SPACING_M = 0.2;
 
+export interface CalculationInputWarning {
+  field: string;
+  severity: 'warning' | 'error';
+  message: string;
+}
+
+export function isFinitePositive(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+export function clampTransmission(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
+}
+
+export function getCalculationInputWarnings(input: Record<string, unknown>): CalculationInputWarning[] {
+  const warnings: CalculationInputWarning[] = [];
+  const positiveFields = [
+    'distance_m',
+    'scale_m_per_pixel',
+    'workloadValue',
+    'designGoal_mSv',
+    'unshieldedKerma_mSv',
+    'thickness_mm',
+    'density',
+  ];
+
+  for (const field of positiveFields) {
+    if (field in input && !isFinitePositive(input[field])) {
+      warnings.push({
+        field,
+        severity: 'error',
+        message: `${field} must be a finite positive number before release calculations.`,
+      });
+    }
+  }
+
+  if ('transmission' in input) {
+    const transmission = input.transmission;
+    if (typeof transmission !== 'number' || !Number.isFinite(transmission) || transmission < 0 || transmission > 1) {
+      warnings.push({
+        field: 'transmission',
+        severity: 'warning',
+        message: 'transmission should be finite and bounded between 0 and 1.',
+      });
+    }
+  }
+
+  return warnings;
+}
+
 // ───────────────────────────────────────────────────────────────
 // NCRP 147 — Archer Equation (Diagnostic X-ray)
 // B(x) = [(1+β/α)·exp(αγx/cosθ) − β/α]^(−1/γ)
@@ -25,14 +78,14 @@ export function archerTransmission(
   if (!material.archerAlpha || !material.archerBeta || !material.archerGamma) {
     const hvl = Object.values(material.HVL_mm || {})[0] || material.TVL_mm?.['6MV'] || 100;
     if (hvl <= 0) return 1;
-    return Math.exp(-0.693 * (thickness_mm / hvl) / Math.max(0.01, Math.cos(theta_rad)));
+    return clampTransmission(Math.exp(-0.693 * (thickness_mm / hvl) / Math.max(0.01, Math.cos(theta_rad))));
   }
   const x_cm = thickness_mm / 10;
   const cos_theta = Math.max(0.01, Math.cos(theta_rad));
   const exponent = (material.archerAlpha * material.archerGamma * x_cm) / cos_theta;
   const inner = (1 + material.archerBeta / material.archerAlpha) * Math.exp(exponent) - material.archerBeta / material.archerAlpha;
   if (inner <= 0) return 0;
-  return Math.pow(inner, -1 / material.archerGamma);
+  return clampTransmission(Math.pow(inner, -1 / material.archerGamma));
 }
 
 // Inversa de Archer — encuentra espesor para transmisión objetivo
@@ -76,9 +129,9 @@ export function tvlTransmission(
     const refTVL = 350;
     const refDensity = 2.35;
     const estTVL = refTVL * (refDensity / material.density);
-    return Math.pow(10, -thickness_mm / estTVL);
+    return clampTransmission(Math.pow(10, -thickness_mm / estTVL));
   }
-  return Math.pow(10, -thickness_mm / tvl);
+  return clampTransmission(Math.pow(10, -thickness_mm / tvl));
 }
 export function tvlThickness(
   unshieldedKerma_mSv: number,

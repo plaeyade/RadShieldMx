@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F174A (2026-07-16) - Predeploy low-risk hardening
+
+- Objetivo: agregar una capa pequena de seguridad antes del deploy sin cambiar metodologia validada ni schema DB.
+- Calculo: `shieldingMath` expone validacion de entradas finitas y acota transmisiones forward al rango fisico 0..1.
+- RAG: `f174aPredeployHardening` clasifica fuentes canonicas, investigacion, materiales, memorias analiticas y externas con advertencias de cita.
+- Frontend: Update Center muestra `F174A Predeploy hardening` para que el estado sea visible al operador.
+- Artefactos: `outputs/f174a_predeploy_hardening/f174a_predeploy_hardening.json` y `outputs/fase_174a_predeploy_hardening.md`.
+- Uso: `npm run prepare:f174a:predeploy-hardening`, `npm run test:f174a:predeploy-hardening` y `npm run test:f174a:predeploy-hardening:unit`.
+- Guardrail: no cambia TVL, materiales, objetivos regulatorios, formulas canonicas, migraciones DB ni seed.
+
 ## F173 (2026-07-16) - Canvas low-risk polish
 
 - Objetivo: mejorar la lectura operativa del canvas antes del smoke visual local sin tocar calculos ni geometria.
