@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F172A (2026-07-16) - arXiv research methodology
+
+- Objetivo: cerrar los dos documentos arXiv pendientes e integrarlos como evidencia de investigacion/metodologia sin promoverlos a norma canonica.
+- Fuentes: `f172a-arxiv-2601-10336v2` para concretos de blindaje y `f172a-arxiv-2407-12991v2` para PET 511 keV concreto/plomo.
+- Superficies: `MaterialComparisonDialog` muestra metodologia de concretos avanzados; `AAPMTG108PETDialog` muestra nota PET 511 keV sobre buildup/MC.
+- Artefactos: `outputs/f172a_arxiv_research/f172a_arxiv_research.json` y `outputs/fase_172a_arxiv_research.md`.
+- Uso: `npm run prepare:f172a:arxiv-research` y `npm run test:f172a:arxiv-research`.
+- Politica: uso `research-methodology-only`; los valores de calculo siguen gobernados por NCRP, IAEA, AAPM TG-108 y UAQ.
+
 ## F171 (2026-07-16) - Canvas polish predeploy
 
 - Objetivo: cerrar una mejora visual y contractual del canvas antes del deploy, manteniendo bajo riesgo operativo.

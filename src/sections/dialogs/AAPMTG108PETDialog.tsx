@@ -6,6 +6,7 @@
  */
 import { useState, useMemo } from 'react';
 import { X, Calculator, Activity, Table, FileDown, Beaker } from 'lucide-react';
+import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 
 interface PETProcedure { name: string; patientsPerWeek: number; avgAdminActivity_MBQ: number; avgScanTime_min: number; ctScans: number; }
 
@@ -33,6 +34,8 @@ export default function AAPMTG108PETDialog({ onClose }: { onClose: () => void })
   const [designGoal_uSv_week, setDesignGoal_uSv_week] = useState(100);
   const [wallThickness_mm, setWallThickness_mm] = useState(200);
   const [wallMaterial, setWallMaterial] = useState<'concrete' | 'lead' | 'gypsum'>('concrete');
+  const f172aMethodology = useMemo(() => buildF172AResearchMethodology(), []);
+  const f172aPet = f172aMethodology.sources.find((source) => source.modality === 'Nuclear Medicine');
 
   const gamma = gammaConstant(radionuclide);
 
@@ -131,6 +134,12 @@ export default function AAPMTG108PETDialog({ onClose }: { onClose: () => void })
             <p>• Componente CT: factor scatter {CT_SCATTER_FACTOR} mGy·cm/scan a 1m (Dixon & Frey 2023)</p>
             <p>• TVL F-18: Concreto=170mm, Plomo=5.8mm, Yeso=330mm (AAPM TG 108 Table III)</p>
             <p>• Gamma F-18 = 0.143 uSv·m²/MBq·h | Ga-68 = 0.134 | Cu-64 = 0.136 | Zr-89 = 0.120</p>
+          </div>
+          <div data-testid="f172a-pet-methodology" className="p-3 bg-violet-50 rounded-lg border border-violet-200 text-xs space-y-1">
+            <p className="font-semibold text-violet-900">F172A PET 511 keV - nota de metodologia</p>
+            <p>{f172aPet?.reportLanguage}</p>
+            <p className="text-violet-800">{f172aPet?.calculationPolicy}</p>
+            <p className="text-[10px] text-violet-700">Accion: {f172aMethodology.petWorkflow.join(' | ')}</p>
           </div>
         </div>
 

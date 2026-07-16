@@ -10,6 +10,7 @@ import { GitCompareArrows } from 'lucide-react';
 import { SHIELDING_MATERIALS } from '@/lib/xcomAttenuation';
 import { buildF123MaterialDecisionMatrix } from '@/lib/f123MaterialDecisionMatrix';
 import { buildF124MaterialToolboxSummary } from '@/lib/f124MaterialToolboxConsolidation';
+import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 
 const COST: Record<string, number> = { PB: 2.5, CONCRETE: 0.15, STEEL: 1.2, GYPSUM: 0.4, POLYETHYLENE: 3.5, BPE: 8.0, TUNGSTEN: 45.0 };
 
@@ -22,6 +23,8 @@ export default function MaterialComparisonDialog() {
   const aN = parseFloat(area) || 10;
   const f123Matrix = useMemo(() => buildF123MaterialDecisionMatrix({ areaM2: aN }), [aN]);
   const f124Toolbox = useMemo(() => buildF124MaterialToolboxSummary(), []);
+  const f172aMethodology = useMemo(() => buildF172AResearchMethodology(), []);
+  const f172aMaterials = f172aMethodology.sources.find(source => source.modality === 'Materials');
 
   const data = useMemo(() => SHIELDING_MATERIALS.map(m => {
     const entry = m.data.find(d => d.energy_MeV >= eN) ?? m.data[m.data.length - 1];
@@ -63,6 +66,17 @@ export default function MaterialComparisonDialog() {
           </table>
         </div>
         <p className="text-[8px] text-slate-400 mt-2">Fila verde = menor score multi-objetivo | Costos USD/kg aprox 2024 | NIST XCOM + NCRP 147/151</p>
+        <div data-testid="f172a-material-methodology" className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-semibold text-violet-950">F172A metodologia de concretos avanzados</h3>
+              <p className="text-[9px] text-violet-800">{f172aMaterials?.reportLanguage}</p>
+            </div>
+            <Badge variant="outline" className="text-[9px] bg-white">{f172aMaterials?.adoption}</Badge>
+          </div>
+          <p className="mt-2 text-[8px] text-violet-700">{f172aMaterials?.calculationPolicy}</p>
+          <p className="mt-1 text-[8px] text-violet-700">Flujo: {f172aMethodology.materialWorkflow.join(' | ')}</p>
+        </div>
         <div data-testid="f124-material-toolbox" className="mt-4 rounded-md border border-cyan-200 bg-cyan-50 p-3">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div>

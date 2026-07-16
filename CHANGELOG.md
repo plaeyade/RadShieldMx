@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F172A (2026-07-16) - arXiv research methodology
+
+- Se indexan `2601.10336v2.pdf` y `2407.12991v2.pdf` como fuentes de investigacion no canonicas en `document_chunks`, con hash, pagina y tags de metodologia.
+- Se integra la revision de concretos avanzados al comparador/toolbox de materiales y el paper PET 511 keV al calculador AAPM TG-108 como nota QA de buildup/Monte Carlo.
+- Politica: estas fuentes apoyan metodologia, costo/estructura y advertencias; no sustituyen NCRP/IAEA/AAPM/UAQ ni cambian constantes del motor de calculo.
+- Nuevos comandos: `npm run prepare:f172a:arxiv-research` y `npm run test:f172a:arxiv-research`.
+
 ## F171 (2026-07-16) - Canvas polish predeploy
 
 - Se agrega panel visible `f171-canvas-polish-predeploy` dentro de `CanvasArea` para revisar grips, cotas, snap, seleccion, heatmap, propiedades y export antes del deploy.

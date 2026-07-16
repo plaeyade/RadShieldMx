@@ -222,6 +222,8 @@
     "test:f170b:canonical-reindex": "node scripts/check-f170b-canonical-reindex-contracts.mjs",
     "prepare:f171:canvas-polish": "node scripts/f171-canvas-polish-predeploy.mjs",
     "test:f171:canvas-polish": "node scripts/check-f171-canvas-polish-predeploy-contracts.mjs",
+    "prepare:f172a:arxiv-research": "node scripts/f172a-index-arxiv-research.mjs",
+    "test:f172a:arxiv-research": "node scripts/check-f172a-arxiv-research-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",
