@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F172 (2026-07-16) - Release candidate final
+
+- Objetivo: congelar cambios grandes, reconstruir evidencia local y declarar decision formal antes del deploy final.
+- Artefactos: `outputs/f172_release_candidate_final/f172_release_candidate_final.json` y `outputs/fase_172_release_candidate_final.md`.
+- Uso: `npm run prepare:f172:release-final` y `npm run test:f172:release-final`.
+- Criterio local: F168, F169, F170, F170B, F171, F172A, build frontend y backend deben estar listos.
+- Criterio publico: repetir F154-F158 contra URL final; si el deploy target no esta disponible, F172 puede quedar `controlled-offline-ready`.
+- Politica: despues de F172 no se agregan funcionalidades grandes salvo correcciones derivadas de smoke test.
+
 ## F172A (2026-07-16) - arXiv research methodology
 
 - Objetivo: cerrar los dos documentos arXiv pendientes e integrarlos como evidencia de investigacion/metodologia sin promoverlos a norma canonica.

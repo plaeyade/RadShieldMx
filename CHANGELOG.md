@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F172 (2026-07-16) - Release candidate final
+
+- Se agrega compuerta final de release candidate con estado `controlled-offline-ready` o `public-deploy-ready` segun evidencia local y disponibilidad del deploy target.
+- Reune F168 DB live, F169 QA numerico, F170/F170B RAG canonico, F171 canvas polish, F172A investigacion arXiv, build frontend/backend y estado F154-F167.
+- Politica: app estable para RC controlado si las compuertas locales pasan; deploy publico requiere F154-F158 contra URL final.
+- Nuevos comandos: `npm run prepare:f172:release-final` y `npm run test:f172:release-final`.
+
 ## F172A (2026-07-16) - arXiv research methodology
 
 - Se indexan `2601.10336v2.pdf` y `2407.12991v2.pdf` como fuentes de investigacion no canonicas en `document_chunks`, con hash, pagina y tags de metodologia.
