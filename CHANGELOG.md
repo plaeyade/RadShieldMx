@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F184 (2026-07-16) - Safe quality workflow
+
+- Se agrega un workflow seguro de calidad release para motor de calculo, canvas, Memoria IA, materiales, RAG y export.
+- Memoria IA incluye seccion F184 en el texto exportable y un panel visible con score/listo/parcial/faltante.
+- Evidence Pack muestra el estado F184 para decidir si el expediente esta listo antes de firma o publicacion.
+- Material Comparison agrega sintesis integrada de TVL, kg/m2, costo, dias estimados y estado estructural sin alterar el motor.
+- Guardrail: no se mueve sidebar, topbar, demo R&F ni shell del canvas en esta fase.
+- Nuevo comando: `npm run test:f184:safe-quality`.
+
 ## F181 (2026-07-16) - Deploy now handoff
 
 - Se intenta deploy por Sites usando el proyecto existente, pero el push de source queda bloqueado por `git.chatgpt-team.site:443`.

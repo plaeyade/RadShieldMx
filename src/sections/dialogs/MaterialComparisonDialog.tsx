@@ -13,6 +13,15 @@ import { buildF124MaterialToolboxSummary } from '@/lib/f124MaterialToolboxConsol
 import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 
 const COST: Record<string, number> = { PB: 2.5, CONCRETE: 0.15, STEEL: 1.2, GYPSUM: 0.4, POLYETHYLENE: 3.5, BPE: 8.0, TUNGSTEN: 45.0 };
+const INSTALL_RATE_M2_DAY: Record<string, number> = { PB: 18, CONCRETE: 8, STEEL: 12, GYPSUM: 35, POLYETHYLENE: 20, BPE: 16, TUNGSTEN: 10 };
+const STRUCTURAL_REVIEW_KG_M2 = 750;
+const STRUCTURAL_CAUTION_KG_M2 = 350;
+
+function structuralStatus(kgM2: number) {
+  if (kgM2 >= STRUCTURAL_REVIEW_KG_M2) return 'Revision estructural';
+  if (kgM2 >= STRUCTURAL_CAUTION_KG_M2) return 'Coordinar obra';
+  return 'Ligero/moderado';
+}
 
 export default function MaterialComparisonDialog() {
   const open = useAppStore(s => s.dialogs.materialComparison?.open ?? false);
@@ -32,8 +41,28 @@ export default function MaterialComparisonDialog() {
     const t2tvl = entry.tenthValueLayer_mm * 2;
     const mhvl = aN * (thvl / 1000) * m.density_g_per_cm3 * 1000;
     const m2tvl = aN * (t2tvl / 1000) * m.density_g_per_cm3 * 1000;
-    return { code: m.code, name: m.nameEs, rho: m.density_g_per_cm3, z: m.effectiveZ, hvl: thvl, tvl: entry.tenthValueLayer_mm, mhvl, m2tvl, chvl: mhvl * (COST[m.code] ?? 1), c2tvl: m2tvl * (COST[m.code] ?? 1) };
+    const kgM2 = (t2tvl / 1000) * m.density_g_per_cm3 * 1000;
+    const installRate = INSTALL_RATE_M2_DAY[m.code] ?? 14;
+    return {
+      code: m.code,
+      name: m.nameEs,
+      rho: m.density_g_per_cm3,
+      z: m.effectiveZ,
+      hvl: thvl,
+      tvl: entry.tenthValueLayer_mm,
+      mhvl,
+      m2tvl,
+      chvl: mhvl * (COST[m.code] ?? 1),
+      c2tvl: m2tvl * (COST[m.code] ?? 1),
+      kgM2,
+      installDays: Math.max(0.5, aN / installRate),
+      structuralStatus: structuralStatus(kgM2),
+    };
   }), [eN, aN]);
+  const integratedTop = useMemo(() => [...data].sort((a, b) => {
+    const statusPenalty = (value: string) => value === 'Revision estructural' ? 2 : value === 'Coordinar obra' ? 1 : 0;
+    return (a.c2tvl / 1000) + a.installDays + statusPenalty(a.structuralStatus) - ((b.c2tvl / 1000) + b.installDays + statusPenalty(b.structuralStatus));
+  }).slice(0, 4), [data]);
 
   if (!open) return null;
   return (
@@ -66,6 +95,34 @@ export default function MaterialComparisonDialog() {
           </table>
         </div>
         <p className="text-[8px] text-slate-400 mt-2">Fila verde = menor score multi-objetivo | Costos USD/kg aprox 2024 | NIST XCOM + NCRP 147/151</p>
+        <div data-testid="f184-material-integrated-summary" className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div>
+              <h3 className="text-xs font-semibold text-emerald-950">F184 lectura integrada TVL/costo/tiempo/estructura</h3>
+              <p className="text-[9px] text-emerald-800">Comparacion no destructiva para elegir material antes de aplicarlo a barreras del floorplan.</p>
+            </div>
+            <Badge variant="outline" className="text-[9px] bg-white">Area {aN} m2</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {integratedTop.map(item => (
+              <div key={item.code} data-testid="f184-material-integrated-row" className="rounded border border-emerald-100 bg-white/80 p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold text-emerald-950">{item.name}</span>
+                  <span className="text-[8px] rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-800">{item.structuralStatus}</span>
+                </div>
+                <div className="mt-1 grid grid-cols-4 gap-1 text-[8px] text-emerald-800">
+                  <span>TVL {item.tvl.toFixed(1)} mm</span>
+                  <span>{item.kgM2.toFixed(0)} kg/m2</span>
+                  <span>${item.c2tvl.toFixed(0)}</span>
+                  <span>{item.installDays.toFixed(1)} d</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[8px] text-emerald-700">
+            Guardrail: esta tabla informa decision de obra; los espesores finales siguen saliendo del motor de calculo y de evidencia normativa.
+          </p>
+        </div>
         <div data-testid="f172a-material-methodology" className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-3">
           <div className="flex items-center justify-between gap-2">
             <div>

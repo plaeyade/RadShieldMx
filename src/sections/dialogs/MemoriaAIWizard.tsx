@@ -45,6 +45,7 @@ import { buildF148MemoryProfileSelector, getF148MemoryProfile, getF148ProfileFor
 import { buildF149NormativeNumericQa, formatF149NormativeNumericQaText } from '@/lib/f149NormativeNumericQa';
 import { buildF149bFastradClinicalUtility, formatF149bFastradUtilityText } from '@/lib/f149bFastradClinicalUtility';
 import { buildF149cMonteCarloGateway, formatF149cMonteCarloGatewayText } from '@/lib/f149cMonteCarloGateway';
+import { buildF184ReleaseQualityWorkflow, formatF184ReleaseQualityWorkflowText } from '@/lib/f184ReleaseQualityWorkflow';
 import { useAppStore } from '@/stores/appStore';
 import type { FloorPlan } from '@/types/radshield';
 
@@ -207,6 +208,8 @@ export default function MemoriaAIWizard({
   const f149bFastradUtilityText = useMemo(() => formatF149bFastradUtilityText(f149bFastradUtility), [f149bFastradUtility]);
   const f149cMonteCarloGateway = useMemo(() => buildF149cMonteCarloGateway(floorPlan), [floorPlan]);
   const f149cMonteCarloGatewayText = useMemo(() => formatF149cMonteCarloGatewayText(f149cMonteCarloGateway), [f149cMonteCarloGateway]);
+  const f184ReleaseQuality = useMemo(() => buildF184ReleaseQualityWorkflow(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f184ReleaseQualityText = useMemo(() => formatF184ReleaseQualityWorkflowText(f184ReleaseQuality), [f184ReleaseQuality]);
   const f117Handoff = useMemo(() => buildF117ModalityHandoff(), []);
   const f118SuggestedEquipmentKey = f117Handoff.memoriaDefaults.recommendedEquipmentKeys.find((key) => EQUIPMENT_DB[key]) || '';
   const f102DesignPlan = useMemo(() => buildF102MemoryDesignPlan({
@@ -300,7 +303,8 @@ export default function MemoriaAIWizard({
     const f149Section = `\n7.6 QA NUMERICO NORMATIVO F149\n${f149NormativeQaText}\n`;
     const f149bSection = `\n7.7 SMOKE F149B / ANALISIS FASTRAD Y EXPORTACION\n${f149bFastradUtilityText}\n`;
     const f149cSection = `\n7.8 GATEWAY F149C / MONTE CARLO EXTERNO VALIDABLE\n${f149cMonteCarloGatewayText}\n`;
-    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}\n${improvementSection}`.trim();
+    const f184Section = `\n7.9 QA INTEGRAL F184 / MOTOR-CANVAS-MEMORIA-MATERIALES\n${f184ReleaseQualityText}\n`;
+    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}\n${improvementSection}`.trim();
     return `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO
 
 1. DATOS DEL PROYECTO
@@ -363,10 +367,11 @@ ${f148Section}
 ${f149Section}
 ${f149bSection}
 ${f149cSection}
+${f184Section}
 ${evidenceSection}
 ${improvementSection}
 `;
-  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, evidenceSection, memoriaAIPlan]);
+  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, evidenceSection, memoriaAIPlan]);
 
   // ─── Export handlers ───
   const exportPDF = useCallback(() => {
@@ -705,6 +710,19 @@ ${improvementSection}
               </div>
               <div className="mt-1 truncate">{f149cMonteCarloGateway.engines.slice(0, 4).map((engine) => engine.label).join(' | ')}</div>
               <div className="mt-1 text-[8px] text-blue-700 truncate">{f149cMonteCarloGateway.nextPhase}</div>
+            </div>
+            <div data-testid="f184-release-quality-memoria" className="col-span-6 rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-900">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-semibold">F184 calidad integral antes de memoria/reporte</div>
+                <Badge className="h-4 bg-emerald-100 text-emerald-700 text-[9px]">{f184ReleaseQuality.score}%</Badge>
+              </div>
+              <div className="mt-1 grid grid-cols-3 gap-1 text-[9px]">
+                <div className="rounded bg-white/70 border border-emerald-100 px-2 py-1">Listo: {f184ReleaseQuality.readyCount}</div>
+                <div className="rounded bg-white/70 border border-emerald-100 px-2 py-1">Parcial: {f184ReleaseQuality.partialCount}</div>
+                <div className="rounded bg-white/70 border border-emerald-100 px-2 py-1">Falta: {f184ReleaseQuality.missingCount}</div>
+              </div>
+              <div className="mt-1 truncate">{f184ReleaseQuality.items.slice(0, 4).map((item) => `${item.scope}:${item.status}`).join(' | ')}</div>
+              <div className="mt-1 text-[8px] text-emerald-700 truncate">{f184ReleaseQuality.decision}</div>
             </div>
           </div>
         </div>

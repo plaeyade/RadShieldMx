@@ -28,6 +28,7 @@ import { buildF146MaterialReportAppendix } from '@/lib/f146MaterialReportAppendi
 import { buildF149NormativeNumericQa } from '@/lib/f149NormativeNumericQa';
 import { buildF149bFastradClinicalUtility } from '@/lib/f149bFastradClinicalUtility';
 import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
+import { buildF184ReleaseQualityWorkflow } from '@/lib/f184ReleaseQualityWorkflow';
 import { IDAC_DOSE_EXTERNAL_NOTE } from '@/lib/idacDoseIntegration';
 import { REVIT_EXTERNAL_INTEGRATION_NOTE } from '@/lib/revitIntegration';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
@@ -83,6 +84,7 @@ export default function EvidencePackDialog({
   const f149NormativeQa = useMemo(() => buildF149NormativeNumericQa(), []);
   const f149bFastradUtility = useMemo(() => buildF149bFastradClinicalUtility(), []);
   const f149cMonteCarloGateway = useMemo(() => buildF149cMonteCarloGateway(floorPlan), [floorPlan]);
+  const f184ReleaseQuality = useMemo(() => buildF184ReleaseQualityWorkflow(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
 
@@ -298,6 +300,16 @@ export default function EvidencePackDialog({
               <div>Gates: {f149cMonteCarloGateway.validationGates.map((gate) => `${gate.id}:${gate.status}`).join(' | ')}</div>
               <div>RC: {f149cMonteCarloGateway.exportPackage.releaseReady ? 'gateway listo' : 'validacion requerida'}</div>
               <div className="text-[10px]">{f149cMonteCarloGateway.decision}</div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="f184-release-quality-evidence" className="border-emerald-200 bg-emerald-50">
+            <CardContent className="p-3 text-xs text-emerald-900 space-y-1">
+              <div className="font-semibold">F184 calidad integral</div>
+              <div>Score: {f184ReleaseQuality.score}%</div>
+              <div>Listos: {f184ReleaseQuality.readyCount} | Parciales: {f184ReleaseQuality.partialCount} | Faltantes: {f184ReleaseQuality.missingCount}</div>
+              <div>Scopes: {f184ReleaseQuality.items.map((item) => `${item.scope}:${item.status}`).join(' | ')}</div>
+              <div className="text-[10px]">{f184ReleaseQuality.guardrails[0]}</div>
             </CardContent>
           </Card>
 

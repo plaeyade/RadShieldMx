@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F184 (2026-07-16) - Safe quality workflow
+
+- Objetivo: mejorar motor/calidad, memoria, materiales, RAG y export sin tocar el layout sensible del canvas/sidebar.
+- Superficies: `MemoriaAIWizard`, `EvidencePackDialog`, `MaterialComparisonDialog` y `src/lib/f184ReleaseQualityWorkflow.ts`.
+- Uso: `npm run test:f184:safe-quality`.
+- Guardrail: F184 no modifica demo R&F, topbar, sidebar ni shell del canvas; las mejoras CAD visuales deben entrar en microcambios con smoke.
+- Posterior: pulir canvas profesional por incrementos pequenos: grips, cotas editables, snapping, seleccion/lasso y heatmaps con prueba visual antes/despues.
+
 ## F181 (2026-07-16) - Deploy now handoff
 
 - Objetivo: ejecutar deploy inmediato si Sites permite push; si no, dejar paquete estatico listo para publicacion alterna.

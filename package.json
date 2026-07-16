@@ -245,6 +245,7 @@
     "test:f180:static-publish": "node scripts/check-f180-static-publish-runbook-contracts.mjs",
     "prepare:f181:deploy-now": "node scripts/f181-deploy-now-handoff.mjs",
     "test:f181:deploy-now": "node scripts/check-f181-deploy-now-handoff-contracts.mjs",
+    "test:f184:safe-quality": "node scripts/check-f184-safe-quality-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",
