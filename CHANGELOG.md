@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+## F191 (2026-07-16) - pyrateShield-inspired toolbar
+
+- Se agrega toolbar CAD-clinica compacta inspirada en pyrateShield debajo de la toolbar principal.
+- La toolbar agrupa herramientas de seleccion, muro, fuente, zona, medir y pan.
+- Se agregan acciones clinicas directas: plano, escala, punto critico, material, calcular y snapshot.
+- Se agrega selector de modo visual `Plano / Heat / Iso / Estruct` usando toggles existentes sin modificar formulas.
+- Guardrail: no cambia motor de calculo, eventos base del canvas, F188 ni F189.
+- Nuevo comando: `npm run test:f191:pyrate-toolbar`.
+- Nuevo smoke visual: `npm run test:f191:pyrate-toolbar-smoke`.
+
 ## F189 (2026-07-16) - Visual smoke layout canvas/sidebar
 
 - Se agrega smoke visual Playwright para validar F188 en `1366x768` y `1920x1080`.

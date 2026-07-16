@@ -10,7 +10,8 @@ import {
   ZoomIn, ZoomOut, Maximize, Image as ImageIcon, Grid3X3,
   Upload, Calculator, Eye, EyeOff, Ruler, Crosshair,
   Box, Cpu, FileSearch, LayoutTemplate, Layers, MapPin, Stethoscope,
-  ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles, Move, X
+  ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles, Move, X,
+  MousePointer, Shield, ScanLine, Atom
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CanvasState } from '@/hooks/useCanvas';
@@ -42,9 +43,12 @@ import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
 type F188WorkflowDock = 'top' | 'right';
+type F191CanvasTool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser';
+type F191VisualMode = 'plan' | 'heat' | 'isocontours' | 'structure';
 
 const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188';
 const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
+const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: true,
   qa: true,
@@ -68,6 +72,12 @@ function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
 function loadF188WorkflowDock(): F188WorkflowDock {
   if (typeof window === 'undefined') return 'top';
   return window.localStorage.getItem(F188_WORKFLOW_DOCK_KEY) === 'right' ? 'right' : 'top';
+}
+
+function loadF191VisualMode(): F191VisualMode {
+  if (typeof window === 'undefined') return 'plan';
+  const stored = window.localStorage.getItem(F191_VISUAL_MODE_KEY);
+  return stored === 'heat' || stored === 'isocontours' || stored === 'structure' ? stored : 'plan';
 }
 
 interface CanvasAreaProps {
@@ -111,6 +121,7 @@ interface CanvasAreaProps {
   heatmapPointCount?: number;
   onRunCalculations?: () => void;
   activeTool?: string;
+  setActiveTool?: (tool: F191CanvasTool) => void;
   hoverInfo?: string | null;
   floorPlan?: FloorPlan;
   // v65: Canvas enhancements — layers, freehand, sticky notes
@@ -156,6 +167,7 @@ export default function CanvasArea({
   heatmapPointCount = 0,
   onRunCalculations,
   activeTool = 'select',
+  setActiveTool,
   hoverInfo = null,
   floorPlan,
   // v65
@@ -173,6 +185,7 @@ export default function CanvasArea({
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [panelVisibility, setPanelVisibility] = useState(loadF188PanelVisibility);
   const [workflowDock, setWorkflowDock] = useState<F188WorkflowDock>(loadF188WorkflowDock);
+  const [visualMode, setVisualMode] = useState<F191VisualMode>(loadF191VisualMode);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -326,12 +339,50 @@ export default function CanvasArea({
     window.localStorage.setItem(F188_WORKFLOW_DOCK_KEY, workflowDock);
   }, [workflowDock]);
 
+  useEffect(() => {
+    window.localStorage.setItem(F191_VISUAL_MODE_KEY, visualMode);
+  }, [visualMode]);
+
   const togglePanelVisibility = (key: F188CanvasPanelKey) => {
     setPanelVisibility((current) => ({ ...current, [key]: !current[key] }));
   };
 
   const setPanelVisible = (key: F188CanvasPanelKey, visible: boolean) => {
     setPanelVisibility((current) => ({ ...current, [key]: visible }));
+  };
+
+  const activateCanvasTool = (tool: F191CanvasTool) => {
+    setActiveTool?.(tool);
+  };
+
+  const applyVisualMode = (mode: F191VisualMode) => {
+    setVisualMode(mode);
+    if (mode === 'plan') {
+      onToggleHeatmap?.(false);
+      setShowSampleLines?.(true);
+      setShowSamplePoints?.(true);
+      setShowMaxima?.(true);
+    }
+    if (mode === 'heat') {
+      onToggleHeatmap?.(true);
+      setShowSampleLines?.(false);
+      setShowSamplePoints?.(true);
+      setShowMaxima?.(true);
+    }
+    if (mode === 'isocontours') {
+      onToggleHeatmap?.(false);
+      setShowSampleLines?.(true);
+      setShowSamplePoints?.(true);
+      setShowMaxima?.(true);
+    }
+    if (mode === 'structure') {
+      onToggleHeatmap?.(false);
+      setShowSampleLines?.(false);
+      setShowSamplePoints?.(false);
+      setShowMaxima?.(true);
+      setPanelVisible('workflow', true);
+      setWorkflowDock('right');
+    }
   };
 
   const workflowPanelClass = workflowDock === 'right'
@@ -526,6 +577,108 @@ export default function CanvasArea({
       </div>
 
       {/* ═══ CANVAS PRINCIPAL ═══ */}
+      <div
+        data-testid="f191-pyrate-inspired-toolbar"
+        className="shrink-0 min-h-8 bg-white border-b border-slate-200 flex items-center gap-2 px-2 overflow-x-auto"
+        aria-label="Toolbar CAD clinica inspirada en pyrateShield"
+      >
+        <div className="flex items-center gap-0.5 shrink-0" data-testid="f191-cad-tool-group">
+          {([
+            ['select', 'Sel', 'Seleccionar objetos del plano', MousePointer],
+            ['barrier', 'Muro', 'Dibujar muro o barrera de blindaje', Box],
+            ['source', 'Fuente', 'Colocar fuente radiologica o equipo', Atom],
+            ['region', 'Zona', 'Dibujar zona controlada u ocupada', Shield],
+            ['measure', 'Medir', 'Medir distancia o calibrar escala', Ruler],
+            ['pan', 'Pan', 'Mover vista del plano', Move],
+          ] as const).map(([tool, label, title, Icon]) => (
+            <button
+              key={tool}
+              type="button"
+              data-testid={`f191-tool-${tool}`}
+              className={`h-6 rounded-md border px-2 text-[10px] font-semibold flex items-center gap-1 transition-colors ${
+                activeTool === tool
+                  ? 'border-orange-200 bg-orange-50 text-orange-700'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white hover:text-orange-700'
+              }`}
+              onClick={() => activateCanvasTool(tool)}
+              title={title}
+              aria-label={title}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="h-4 w-px bg-slate-200 shrink-0" />
+        <div className="flex items-center gap-0.5 shrink-0" data-testid="f191-clinical-action-group">
+          {onImportFloorPlan && (
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onImportFloorPlan} title="Cargar imagen o plano base" aria-label="Cargar imagen o plano base">
+              <Upload className="h-3 w-3" /> Plano
+            </button>
+          )}
+          {onCalibrateScale && (
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onCalibrateScale} title="Calibrar escala con distancia conocida" aria-label="Calibrar escala con distancia conocida">
+              <Ruler className="h-3 w-3" /> Escala
+            </button>
+          )}
+          {onAddCriticalPoint && (
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onAddCriticalPoint} title="Agregar punto critico de evaluacion" aria-label="Agregar punto critico de evaluacion">
+              <Crosshair className="h-3 w-3" /> Punto
+            </button>
+          )}
+          {onOpenShieldingPresets && (
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onOpenShieldingPresets} title="Aplicar presets de materiales de blindaje" aria-label="Aplicar presets de materiales de blindaje">
+              <Layers className="h-3 w-3" /> Material
+            </button>
+          )}
+          {onRunCalculations && (
+            <button type="button" className="h-6 rounded-md border border-orange-200 bg-orange-50 px-2 text-[10px] font-semibold text-orange-700 hover:bg-orange-100 flex items-center gap-1" onClick={onRunCalculations} title="Calcular blindaje analitico" aria-label="Calcular blindaje analitico">
+              <Calculator className="h-3 w-3" /> Calcular
+            </button>
+          )}
+          <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onExportPNG} title="Exportar snapshot visual del canvas" aria-label="Exportar snapshot visual del canvas">
+            <ImageIcon className="h-3 w-3" /> Snapshot
+          </button>
+        </div>
+        <div className="h-4 w-px bg-slate-200 shrink-0" />
+        <div
+          data-testid="f191-visual-mode-switcher"
+          className="flex items-center gap-0.5 shrink-0 rounded-md border border-slate-200 bg-slate-50 px-1 py-0.5"
+          aria-label="Selector de modo visual del canvas"
+        >
+          {([
+            ['plan', 'Plano', 'Vista limpia del plano con puntos y maximos', LayoutTemplate],
+            ['heat', 'Heat', 'Mapa de calor de dosis', Grid3X3],
+            ['isocontours', 'Iso', 'Vista de lineas de evaluacion e isocontornos', ScanLine],
+            ['structure', 'Estruct', 'Overlay de carga estructural y materiales', Layers],
+          ] as const).map(([mode, label, title, Icon]) => (
+            <button
+              key={mode}
+              type="button"
+              data-testid={`f191-visual-mode-${mode}`}
+              className={`h-5 rounded px-1.5 text-[9px] font-semibold flex items-center gap-1 ${
+                visualMode === mode
+                  ? 'bg-white text-orange-700 shadow-sm'
+                  : 'text-slate-500 hover:bg-white hover:text-orange-700'
+              }`}
+              onClick={() => applyVisualMode(mode)}
+              title={title}
+              aria-label={title}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </button>
+          ))}
+        </div>
+        <span
+          data-testid="f191-mode-status"
+          className="ml-auto shrink-0 rounded bg-slate-100 px-2 py-0.5 text-[9px] font-mono text-slate-500"
+          title="Estado del modo visual F191"
+        >
+          F191 {visualMode} | {heatmapEnabled ? `${heatmapPointCount} heat` : 'heat off'}
+        </span>
+      </div>
+
       <div className="flex flex-1 overflow-hidden relative">
         {/* Ruler Left */}
         <div className="w-6 bg-white border-r border-slate-200 shrink-0 relative" style={{ background: 'repeating-linear-gradient(to bottom, transparent, transparent 9px, #e2e8f0 9px, #e2e8f0 10px)' }}>

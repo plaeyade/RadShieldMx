@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F191 (2026-07-16) - pyrateShield-inspired toolbar
+
+- Objetivo: adaptar el flujo operativo de pyrateShield al frontend actual sin sustituir la interfaz estable.
+- Superficies: `CanvasArea`, `ShieldingDesigner`, `UpdateAppDialog`.
+- Uso: `npm run test:f191:pyrate-toolbar` y `npm run test:f191:pyrate-toolbar-smoke`.
+- Incluye: herramientas CAD-clinicas `Sel`, `Muro`, `Fuente`, `Zona`, `Medir`, `Pan`; acciones `Plano`, `Escala`, `Punto`, `Material`, `Calcular`, `Snapshot`; y selector visual `Plano`, `Heat`, `Iso`, `Estruct`.
+- Guardrail: no cambia formulas, motor, persistencia, eventos base, demo R&F, F188 ni smoke F189.
+- Operacion: usar la banda F191 para acciones frecuentes del canvas; usar `Estruct` para revisar carga/materiales con el panel de flujo acoplado a la derecha.
+- Posterior: evaluar context menu sobre muros, inspector por objeto seleccionado y estilos de isocontorno con QA visual.
+
 ## F189 (2026-07-16) - Visual smoke layout canvas/sidebar
 
 - Objetivo: validar visualmente que F188 no rompa sidebar, canvas ni demo R&F.

@@ -250,6 +250,8 @@
     "test:f186:sidebar-materials": "node scripts/check-f186-sidebar-material-toolbox-contracts.mjs",
     "test:f188:panel-layout": "node scripts/check-f188-panel-layout-controls-contracts.mjs",
     "test:f189:visual-smoke": "playwright test e2e/f189-panel-layout-smoke.spec.ts --project=chromium",
+    "test:f191:pyrate-toolbar": "node scripts/check-f191-pyrate-toolbar-contracts.mjs",
+    "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

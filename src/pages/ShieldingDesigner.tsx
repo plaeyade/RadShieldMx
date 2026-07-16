@@ -1985,6 +1985,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   heatmapPointCount={heatmapData.length}
                   onRunCalculations={runRadShieldCalculations}
                   activeTool={activeTool}
+                  setActiveTool={(tool) => setActiveTool(tool as Tool)}
                   // v65: Canvas enhancements connected
                   layers={canvasLayers.layers}
                   freehandStrokes={freehandDraw.strokes}
