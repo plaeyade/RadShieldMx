@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F168 (2026-07-16) - DB live finalization
+
+- Se cerro la DB live real con MySQL 8.0.46, autenticacion valida, migraciones/seed aplicados y `db-live-validation` OK.
+- Se valido backup/restore probe de F153: dump con hash SHA-256, restauracion temporal 22/22 tablas y cleanup correcto.
+- Decision: la DB ya no bloquea release local/full stack; el deploy publico sigue bloqueado por F167 hasta habilitar push a `git.chatgpt-team.site:443`.
+- Siguiente paso tras URL publica: repetir F154-F158 contra HTTPS final.
+
 ## F167 (2026-07-15) - Deploy target recovery
 
 - Se intento recuperar el flujo Sites con `project_id` existente, HEAD exacto y paquete F159 `sites-deploy-ready`.

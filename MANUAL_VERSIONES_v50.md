@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F168 (2026-07-16) - DB live finalization
+
+- Artefactos: `outputs/f168_db_live_finalization/f168_db_live_finalization.json` y `outputs/fase_168_db_live_finalization.md`.
+- Resultado esperado: `db-live-ready` cuando MySQL, migracion/seed, validacion live, backup, restore probe y cleanup pasen.
+- Seguridad: no se publica password ni `DATABASE_URL`; solo host, puerto, base y presencia de credenciales.
+- Scripts: `npm run prepare:f168:db-live-final` y `npm run test:f168:db-live-final`.
+
 ## F167 (2026-07-15) - Deploy target recovery
 
 - Artefactos: `outputs/f167_deploy_target_recovery/f167_deploy_target_recovery.json` y `outputs/fase_167_deploy_target_recovery.md`.
