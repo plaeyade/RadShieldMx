@@ -200,6 +200,8 @@
     "test:f158:deploy-target": "node scripts/check-f158-deploy-target-post-smoke-contracts.mjs",
     "prepare:f159:sites-hosting": "node scripts/f159-sites-hosting-prep.mjs",
     "test:f159:sites-hosting": "node scripts/check-f159-sites-hosting-prep-contracts.mjs",
+    "prepare:f163:canvas-closure": "node scripts/f163-canvas-release-closure.mjs",
+    "test:f163:canvas-closure": "node scripts/check-f163-canvas-release-closure-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

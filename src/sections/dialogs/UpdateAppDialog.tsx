@@ -73,6 +73,7 @@ import { buildF156FinalPackage } from '@/lib/f156FinalPackage';
 import { buildF157OperationalClosure } from '@/lib/f157OperationalClosure';
 import { buildF158DeployTargetPostSmoke } from '@/lib/f158DeployTargetPostSmoke';
 import { buildF159SitesHostingPrep } from '@/lib/f159SitesHostingPrep';
+import { buildF163CanvasClosureSummary } from '@/lib/f163CanvasClosure';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -162,6 +163,7 @@ const PLATFORM_UPDATES: UpdateItem[] = [
   { name: 'F157 Cierre operativo', current: 'implemented', latest: 'local/staging release runbook', status: 'current', description: 'Congela evidencia F153-F156, runbook operativo y riesgo residual de repetir smoke al publicar en URL HTTPS externa.' },
   { name: 'F158 Deploy target', current: 'implemented', latest: 'post-deploy F154 smoke', status: 'current', description: 'Valida target local/staging post-deploy y documenta bloqueos para Sites/URL publica externa.' },
   { name: 'F159 Sites hosting prep', current: 'implemented', latest: 'hosting metadata + package', status: 'update', description: 'Crea metadata Sites y paquete compatible; deploy remoto queda pendiente hasta tener Git/source state disponible.' },
+  { name: 'F163 Canvas/floorplan cierre', current: 'implemented', latest: 'RS Designer parity + release closure', status: 'current', description: 'Cierra el canvas para release local: plano, fuentes/equipos, muros, dosis ambiente, heatmap/isocontornos y export a Memoria IA/Evidence.' },
   { name: 'F98 Unified iconography + release gaps', current: 'enabled', latest: 'canvas/equipment icons unified', status: 'current', description: 'Canvas buttons and active tool indicator now share one icon profile, while release gaps are counted explicitly for final stabilization.' },
   { name: 'F72 Canvas equipment visuals', current: 'enabled', latest: 'validated', status: 'current', description: 'Canvas renders LINAC, Gamma Knife, CT, PET/CT, HDR, cyclotron, SPECT and mammography source profiles.' },
   { name: 'Medical 3D Floor Plan', current: 'enabled', latest: 'footprint metadata', status: 'current', description: '3D scene receives equipment footprint, asset hint and RAG tags from floorplan sources.' },
@@ -372,6 +374,7 @@ export default function UpdateAppDialog({ onClose }: { onClose: () => void }) {
   const f157OperationalClosure = useMemo(() => buildF157OperationalClosure(), []);
   const f158DeployTarget = useMemo(() => buildF158DeployTargetPostSmoke(), []);
   const f159SitesHosting = useMemo(() => buildF159SitesHostingPrep(), []);
+  const f163CanvasClosure = useMemo(() => buildF163CanvasClosureSummary(), []);
   const f96Migration = useMemo(() => buildF96DropdownMigrationSummary(), []);
   const f97Migration = useMemo(() => buildF97DropdownMigrationSummary(), []);
   const f98Gaps = useMemo(() => summarizeF98ReleaseGaps(), []);
@@ -991,6 +994,16 @@ export default function UpdateAppDialog({ onClose }: { onClose: () => void }) {
         <div>Bloqueos remotos: {f159SitesHosting.remoteBlockers.join(' | ')}</div>
         <div>Siguientes: {f159SitesHosting.requiredNextSteps.join(' | ')}</div>
         <div>{f159SitesHosting.finalStatement}</div>
+      </div>
+
+      <div data-testid="f163-canvas-release-closure" className="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-[10px] text-emerald-900">
+        <div className="font-semibold text-emerald-950">F163 Canvas/floorplan cierre</div>
+        <div>Estado: {f163CanvasClosure.status}</div>
+        <div>Score: {f163CanvasClosure.score}%</div>
+        <div>RS parity: {f163CanvasClosure.references.map((item) => `${item.id}:${item.adoption}`).join(' | ')}</div>
+        <div>Gates: {f163CanvasClosure.acceptanceGates.join(' | ')}</div>
+        <div>Backlog: {f163CanvasClosure.remainingBacklog.slice(0, 3).join(' | ')}</div>
+        <div>{f163CanvasClosure.decision}</div>
       </div>
 
       <div data-testid="f96-dropdown-migration-summary" className="rounded-md border border-amber-200 bg-amber-50 p-3 text-[10px] text-amber-900">
