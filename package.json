@@ -226,6 +226,8 @@
     "test:f172a:arxiv-research": "node scripts/check-f172a-arxiv-research-contracts.mjs",
     "prepare:f172:release-final": "node scripts/f172-release-candidate-final.mjs",
     "test:f172:release-final": "node scripts/check-f172-release-candidate-final-contracts.mjs",
+    "prepare:f173:canvas-polish": "node scripts/f173-canvas-low-risk-polish.mjs",
+    "test:f173:canvas-polish": "node scripts/check-f173-canvas-low-risk-polish-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

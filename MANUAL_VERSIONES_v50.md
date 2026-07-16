@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F173 (2026-07-16) - Canvas low-risk polish
+
+- Objetivo: mejorar la lectura operativa del canvas antes del smoke visual local sin tocar calculos ni geometria.
+- Superficie: `src/sections/CanvasArea.tsx` muestra `f173-canvas-hud` con seleccion, snap, objetos, evidencia, heatmap y export.
+- Artefactos: `outputs/f173_canvas_low_risk_polish/f173_canvas_low_risk_polish.json` y `outputs/fase_173_canvas_low_risk_polish.md`.
+- Uso: `npm run prepare:f173:canvas-polish` y `npm run test:f173:canvas-polish`.
+- Guardrail: solo HUD/UX compacto; no cambia formulas, TVL, materiales ni limites regulatorios.
+
 ## F172 (2026-07-16) - Release candidate final
 
 - Objetivo: congelar cambios grandes, reconstruir evidencia local y declarar decision formal antes del deploy final.

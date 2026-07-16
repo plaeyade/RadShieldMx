@@ -36,6 +36,7 @@ import { buildF122CanvasStructuralOverlay } from '@/lib/f122CanvasStructuralOver
 import { buildF141ProfessionalCanvasSummary } from '@/lib/f141CanvasProfessionalPolish';
 import { buildF145CanvasCadProfessionalSummary } from '@/lib/f145CanvasCadProfessional';
 import { buildF171CanvasPolishPredeploy } from '@/lib/f171CanvasPolishPredeploy';
+import { buildF173CanvasLowRiskPolish } from '@/lib/f173CanvasLowRiskPolish';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 
@@ -255,6 +256,15 @@ export default function CanvasArea({
     snapToGrid: canvasState.snapToGrid,
   });
   const f171CanvasPolish = buildF171CanvasPolishPredeploy({
+    floorPlan,
+    selectedId: canvasState.selectedId,
+    selectedIds: canvasState.selectedIds,
+    barrierResults,
+    sampleLines,
+    snapToGrid: canvasState.snapToGrid,
+    heatmapPointCount,
+  });
+  const f173CanvasPolish = buildF173CanvasLowRiskPolish({
     floorPlan,
     selectedId: canvasState.selectedId,
     selectedIds: canvasState.selectedIds,
@@ -517,15 +527,46 @@ export default function CanvasArea({
             )}
 
             {/* ═══ OVERLAY: Info general — v112 compact ═══ */}
-            <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm rounded-md px-2 py-1 text-[9px] text-slate-500 border border-slate-200 shadow-sm z-10">
-              <span className="font-mono font-semibold text-slate-700">{(canvasState.scale * 100).toFixed(0)}%</span>
-              <span className="text-slate-300 mx-1">|</span>
-              <span>Ctrl+rueda zoom</span>
-              <span className="text-slate-300 mx-1">|</span>
-              <span>Alt+pan</span>
-              {canvasState.snapToGrid && (
-                <span className="text-emerald-600 font-medium ml-1">+Snap</span>
-              )}
+            <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm rounded-md px-2 py-1 text-[9px] text-slate-500 border border-slate-200 shadow-sm z-10 max-w-[440px]">
+              <div className="flex items-center gap-1 whitespace-nowrap">
+                <span className="font-mono font-semibold text-slate-700">{(canvasState.scale * 100).toFixed(0)}%</span>
+                <span className="text-slate-300">|</span>
+                <span>Ctrl+rueda zoom</span>
+                <span className="text-slate-300">|</span>
+                <span>Alt+pan</span>
+                {canvasState.snapToGrid && (
+                  <span className="text-emerald-600 font-medium">+Snap</span>
+                )}
+              </div>
+              <div
+                data-testid="f173-canvas-hud"
+                className="mt-1 flex items-center gap-1 overflow-hidden"
+                title={`${f173CanvasPolish.compactSummary}. ${f173CanvasPolish.releaseGuardrails.join(' ')}`}
+              >
+                <span className={`text-[8px] font-bold rounded border px-1 py-0.5 shrink-0 ${
+                  f173CanvasPolish.status === 'canvas-low-risk-polish-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border-amber-100'
+                }`}>
+                  F173 {f173CanvasPolish.score}%
+                </span>
+                {f173CanvasPolish.signals.map((signal) => (
+                  <span
+                    key={signal.id}
+                    data-testid={`f173-hud-${signal.id}`}
+                    className={`text-[8px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      signal.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : signal.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={signal.hint}
+                  >
+                    {signal.label}:{signal.value}
+                  </span>
+                ))}
+              </div>
             </div>
 
             {controlledZoneSummary.hasControlledZone && (

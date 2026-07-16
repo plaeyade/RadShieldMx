@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F173 (2026-07-16) - Canvas low-risk polish
+
+- Se agrega HUD compacto `f173-canvas-hud` dentro del overlay existente del canvas para mostrar seleccion, snap, objetos, evidencia, heatmap y estado de export.
+- La mejora evita nuevos paneles flotantes y no modifica formulas, constantes de materiales, limites regulatorios ni motor de snapping.
+- Nuevos comandos: `npm run prepare:f173:canvas-polish` y `npm run test:f173:canvas-polish`.
+
 ## F172 (2026-07-16) - Release candidate final
 
 - Se agrega compuerta final de release candidate con estado `controlled-offline-ready` o `public-deploy-ready` segun evidencia local y disponibilidad del deploy target.
