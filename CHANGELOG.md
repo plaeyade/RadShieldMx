@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F180 (2026-07-16) - Static publish runbook
+
+- Se agrega runbook operativo para publicar frontend estatico en `vercel-static`, `netlify-static` o `cloudflare-pages`.
+- Se mantiene `vps-fullstack` como ruta clinica para API, DB, secretos, RAG privado, backups y auditoria.
+- Se documenta politica de secretos: no publicar `.env`, `DATABASE_URL`, dumps DB, corpus privado ni documentos clinicos en hosting estatico.
+- Se define smoke posterior al deploy: configurar `PUBLIC_DEPLOY_URL` y repetir F154-F158.
+- Nuevos comandos: `npm run prepare:f180:static-publish` y `npm run test:f180:static-publish`.
+
 ## F179 (2026-07-16) - Deploy lane decision
 
 - Se formaliza el carril primario `vercel-static` para obtener una URL publica de frontend con bajo riesgo.

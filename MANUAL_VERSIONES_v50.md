@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F180 (2026-07-16) - Static publish runbook
+
+- Objetivo: convertir F179 en instrucciones operativas para publicar una URL publica de frontend.
+- Proveedores cubiertos: `vercel-static`, `netlify-static`, `cloudflare-pages` y `vps-fullstack`.
+- Artefactos: `outputs/f180_static_publish_runbook/f180_static_publish_runbook.json`, `outputs/f180_static_publish_runbook/README_F180_STATIC_PUBLISH.md` y `outputs/fase_180_static_publish_runbook.md`.
+- Uso: `npm run prepare:f180:static-publish` y `npm run test:f180:static-publish`.
+- Guardrail: el hosting estatico es solo demo/revision publica; release clinico multiusuario requiere `vps-fullstack` o equivalente.
+- Posterior: configurar `PUBLIC_DEPLOY_URL=https://<url-final>/` y repetir F154-F158.
+
 ## F179 (2026-07-16) - Deploy lane decision
 
 - Objetivo: decidir formalmente el carril de publicacion despues de F177/F178.

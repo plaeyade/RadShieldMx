@@ -241,6 +241,8 @@
     "test:f178:alternate-deploy": "node scripts/check-f178-alternate-deploy-contracts.mjs",
     "prepare:f179:deploy-lane": "node scripts/f179-deploy-lane-decision.mjs",
     "test:f179:deploy-lane": "node scripts/check-f179-deploy-lane-decision-contracts.mjs",
+    "prepare:f180:static-publish": "node scripts/f180-static-publish-runbook.mjs",
+    "test:f180:static-publish": "node scripts/check-f180-static-publish-runbook-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",
