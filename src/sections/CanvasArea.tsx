@@ -141,6 +141,8 @@ export default function CanvasArea({
   const { t } = useI18n();
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [legendCollapsed, setLegendCollapsed] = useState(false);
+  const [workspaceDockExpanded, setWorkspaceDockExpanded] = useState(false);
+  const [workflowCollapsed, setWorkflowCollapsed] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -319,12 +321,14 @@ export default function CanvasArea({
       icon: Database,
     },
   ];
+  const isEmptyCanvas = barrierCount === 0 && sourceCount === 0 && regionCount === 0 && !floorPlan.imageUrl;
+  const readyWorkflowCount = workflowSteps.filter(step => step.ready).length;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#fafaf9]" ref={containerRef}>
       {/* ═══ BREADCRUMB + TOOLBAR SUPERIOR (Recomendacion #5 + mejoras) ═══ */}
-      <div className="shrink-0 h-8 bg-white border-b border-slate-200 flex items-center px-2 gap-1">
-        <div className="flex items-center gap-1 text-[10px] text-slate-400">
+      <div className="shrink-0 min-h-8 bg-white border-b border-slate-200 flex items-center px-2 gap-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex items-center gap-1 text-[10px] text-slate-400 shrink-0">
           <span className="font-semibold text-slate-500">RadShield-MX</span>
           <span>/</span>
           <span className="text-[#f97316] font-medium">Canvas</span>
@@ -333,7 +337,7 @@ export default function CanvasArea({
         </div>
         <div className="w-px h-3.5 bg-slate-200 mx-1.5" />
         {/* Active tool indicator */}
-        <div data-testid="f98-active-canvas-tool-indicator" className="flex items-center gap-1 text-[10px] text-slate-500">
+        <div data-testid="f98-active-canvas-tool-indicator" className="flex items-center gap-1 text-[10px] text-slate-500 shrink-0">
           <ToolIcon className="w-3 h-3" style={{ color: currentTool.color }} />
           <span className="font-medium">{currentTool.label}</span>
           <span className="text-slate-400 hidden sm:inline">- {currentTool.description}</span>
@@ -343,7 +347,7 @@ export default function CanvasArea({
           <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-600" title="Fuentes">{sourceCount}F</span>
           <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" title="Zonas">{regionCount}Z</span>
         </div>
-        <div className="flex-1" />
+        <div className="flex-1 min-w-2" />
         <div className="hidden md:flex items-center gap-0.5 mr-1">
           {onImportFloorPlan && (
             <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Importar plano" title="Importar plano" onClick={onImportFloorPlan}>
@@ -476,6 +480,43 @@ export default function CanvasArea({
               style={{ zIndex: 5 }}
             />
 
+            {isEmptyCanvas && (
+              <div
+                data-testid="f182-empty-canvas-state"
+                className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center p-6"
+              >
+                <div className="pointer-events-auto w-[min(520px,calc(100%-32px))] rounded-md border border-slate-200 bg-white/90 backdrop-blur-sm shadow-sm p-4 text-center">
+                  <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-orange-50 text-[#f97316]">
+                    <LayoutTemplate className="h-5 w-5" />
+                  </div>
+                  <div className="text-sm font-semibold text-slate-800">Lienzo limpio listo para diseno</div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    Importa un plano, usa una plantilla o empieza dibujando barreras. No se carga ejemplo inicial.
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    {onImportFloorPlan && (
+                      <Button size="sm" variant="default" className="h-7 bg-[#f97316] hover:bg-[#ea580c]" onClick={onImportFloorPlan}>
+                        <Upload className="mr-1.5 h-3.5 w-3.5" />
+                        Importar plano
+                      </Button>
+                    )}
+                    {onOpenRoomTemplates && (
+                      <Button size="sm" variant="outline" className="h-7" onClick={onOpenRoomTemplates}>
+                        <LayoutTemplate className="mr-1.5 h-3.5 w-3.5" />
+                        Plantillas
+                      </Button>
+                    )}
+                    {onOpenLayers && (
+                      <Button size="sm" variant="outline" className="h-7" onClick={onOpenLayers}>
+                        <Layers className="mr-1.5 h-3.5 w-3.5" />
+                        Capas
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* v65: Sticky notes overlay */}
             {stickyNotes.map(note => {
               const noteLayer = layers.find(l => l.id === 'annotations');
@@ -596,9 +637,37 @@ export default function CanvasArea({
 
             {/* ═══ OVERLAY: Legend RadShield — v112 collapsible ═══ */}
             <div
+              data-testid="f182-canvas-workspace-dock"
+              className="absolute bottom-2 left-2 z-20 flex flex-wrap items-center gap-1 rounded-md border border-slate-200 bg-white/95 px-2 py-1.5 text-[10px] text-slate-600 shadow-sm backdrop-blur-sm"
+            >
+              <Button
+                type="button"
+                size="sm"
+                variant={workspaceDockExpanded ? 'default' : 'outline'}
+                className={`h-6 px-2 text-[10px] ${workspaceDockExpanded ? 'bg-[#f97316] hover:bg-[#ea580c]' : ''}`}
+                onClick={() => setWorkspaceDockExpanded(v => !v)}
+                aria-expanded={workspaceDockExpanded}
+              >
+                <Layers className="mr-1 h-3 w-3" />
+                CAD workspace
+              </Button>
+              <span className="rounded border border-slate-100 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px]">
+                {readyWorkflowCount}/{workflowSteps.length}
+              </span>
+              <span className={`rounded border px-1.5 py-0.5 text-[9px] ${canvasState.snapToGrid ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-slate-100 bg-slate-50 text-slate-500'}`}>
+                Snap {canvasState.snapToGrid ? 'on' : 'off'}
+              </span>
+              <span className={`rounded border px-1.5 py-0.5 text-[9px] ${heatmapEnabled ? 'border-red-100 bg-red-50 text-red-700' : 'border-slate-100 bg-slate-50 text-slate-500'}`}>
+                Heat {heatmapEnabled ? heatmapPointCount : 'off'}
+              </span>
+            </div>
+
+            {workspaceDockExpanded && (
+              <>
+            <div
               data-testid="f83-offline-continuity-panel"
               aria-label="Continuidad offline canvas RAG DB diferida"
-              className="absolute bottom-8 left-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[260px] overflow-hidden"
+              className="absolute bottom-12 left-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[260px] overflow-hidden"
             >
               <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -636,7 +705,7 @@ export default function CanvasArea({
             <div
               data-testid="f85-canvas-tools-panel"
               aria-label="Herramientas F85 calibracion puntos criticos presets snapshot"
-              className="absolute bottom-[118px] left-2 bg-white/95 backdrop-blur-sm rounded-md border border-orange-200 shadow-sm z-10 w-[260px] overflow-hidden"
+              className="absolute bottom-[122px] left-2 bg-white/95 backdrop-blur-sm rounded-md border border-orange-200 shadow-sm z-10 w-[260px] overflow-hidden"
             >
               <div className="px-2.5 py-1.5 border-b border-orange-100 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -699,10 +768,34 @@ export default function CanvasArea({
               </div>
             </div>
 
+              </>
+            )}
+
+            {workflowCollapsed ? (
+              <div
+                data-testid="f182-canvas-workflow-compact"
+                className="absolute top-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-md border border-slate-200 bg-white/95 px-2 py-1 text-[10px] text-slate-600 shadow-sm backdrop-blur-sm"
+              >
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-[10px] text-slate-700 hover:text-[#f97316]"
+                  onClick={() => setWorkflowCollapsed(false)}
+                  aria-expanded={false}
+                >
+                  <FileText className="mr-1 h-3 w-3 text-[#f97316]" />
+                  Flujo {readyWorkflowCount}/{workflowSteps.length}
+                </Button>
+                <span className="hidden rounded border border-emerald-100 bg-emerald-50 px-1.5 py-0.5 text-[9px] text-emerald-700 sm:inline">
+                  Diseno - blindaje - memoria
+                </span>
+              </div>
+            ) : (
             <div
               data-testid="canvas-workflow-panel"
               aria-label="Flujo layout blindaje memoria"
-              className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[min(560px,calc(100%-250px))] min-w-[300px]"
+              className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-20 w-[min(620px,calc(100%-48px))] min-w-[300px] max-h-[58vh] overflow-auto"
             >
               <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -710,8 +803,16 @@ export default function CanvasArea({
                   <span className="text-[10px] font-bold text-slate-700 truncate">Layout - blindaje - memoria</span>
                 </div>
                 <span className="text-[9px] text-slate-500 font-mono shrink-0">
-                  {workflowSteps.filter(step => step.ready).length}/{workflowSteps.length}
+                  {readyWorkflowCount}/{workflowSteps.length}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setWorkflowCollapsed(true)}
+                  className="rounded px-1 text-[10px] text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  aria-label="Plegar flujo del canvas"
+                >
+                  x
+                </button>
               </div>
               <div
                 data-testid="f90-e2e-qa-panel"
@@ -951,6 +1052,7 @@ export default function CanvasArea({
                 })}
               </div>
             </div>
+            )}
 
             <div className={`absolute top-2 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 transition-all ${legendCollapsed ? 'px-2 py-1' : 'px-3 py-2'}`}>
               <button

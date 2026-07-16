@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F182 (2026-07-16) - Canvas professional workspace
+
+- Objetivo: reorganizar el espacio del canvas/floorplan para que menus y paneles no tapen el layout.
+- Cambios: bienvenida inicial apagada, empty-state limpio, dock `CAD workspace`, flujo compacto, barra superior con overflow seguro.
+- Uso: abrir la app y trabajar desde el canvas vacio; importar plano o plantilla desde el empty-state sin cargar ejemplo inicial.
+- Validacion: `npm run build`, `npm run test:f182:canvas-workspace` y smoke HTTP local contra preview.
+- Guardrail: no cambia formulas, calculos, persistencia ni motor de render del canvas; solo reorganiza UX y accesos.
+
 ## F181 (2026-07-16) - Deploy now handoff
 
 - Objetivo: ejecutar deploy inmediato si Sites permite push; si no, dejar paquete estatico listo para publicacion alterna.
