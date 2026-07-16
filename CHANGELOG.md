@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F188 (2026-07-16) - Panel layout controls
+
+- Se agrega control persistente para ajustar el ancho de la sidebar expandida sin cambiar el modo colapsado.
+- El canvas permite mostrar/ocultar los paneles de flujo, QA y continuidad offline desde la barra superior.
+- Los paneles cerrados pueden restaurarse desde un control compacto dentro del canvas.
+- El panel de flujo puede moverse entre posicion superior y dock derecho para liberar el floorplan.
+- Guardrail: no cambia demo R&F, eventos del canvas, formulas, topbar ni resultados.
+- Nuevo comando: `npm run test:f188:panel-layout`.
+
 ## F186 (2026-07-16) - Sidebar estable + Mat toolbox
 
 - Se refuerza la sidebar con ancho visible estable en modo expandido y colapsado.

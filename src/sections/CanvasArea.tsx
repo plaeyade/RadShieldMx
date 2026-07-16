@@ -10,7 +10,7 @@ import {
   ZoomIn, ZoomOut, Maximize, Image as ImageIcon, Grid3X3,
   Upload, Calculator, Eye, EyeOff, Ruler, Crosshair,
   Box, Cpu, FileSearch, LayoutTemplate, Layers, MapPin, Stethoscope,
-  ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles
+  ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles, Move, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CanvasState } from '@/hooks/useCanvas';
@@ -40,6 +40,35 @@ import { buildF173CanvasLowRiskPolish } from '@/lib/f173CanvasLowRiskPolish';
 import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
+type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
+type F188WorkflowDock = 'top' | 'right';
+
+const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188';
+const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
+const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
+  workflow: true,
+  qa: true,
+  continuity: true,
+};
+
+function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
+  if (typeof window === 'undefined') return DEFAULT_F188_PANEL_VISIBILITY;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(F188_CANVAS_PANEL_STATE_KEY) || '{}') as Partial<Record<F188CanvasPanelKey, boolean>>;
+    return {
+      workflow: parsed.workflow ?? true,
+      qa: parsed.qa ?? true,
+      continuity: parsed.continuity ?? true,
+    };
+  } catch {
+    return DEFAULT_F188_PANEL_VISIBILITY;
+  }
+}
+
+function loadF188WorkflowDock(): F188WorkflowDock {
+  if (typeof window === 'undefined') return 'top';
+  return window.localStorage.getItem(F188_WORKFLOW_DOCK_KEY) === 'right' ? 'right' : 'top';
+}
 
 interface CanvasAreaProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -142,6 +171,8 @@ export default function CanvasArea({
   const { t } = useI18n();
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [legendCollapsed, setLegendCollapsed] = useState(false);
+  const [panelVisibility, setPanelVisibility] = useState(loadF188PanelVisibility);
+  const [workflowDock, setWorkflowDock] = useState<F188WorkflowDock>(loadF188WorkflowDock);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -287,6 +318,26 @@ export default function CanvasArea({
     heatmapPointCount,
   });
 
+  useEffect(() => {
+    window.localStorage.setItem(F188_CANVAS_PANEL_STATE_KEY, JSON.stringify(panelVisibility));
+  }, [panelVisibility]);
+
+  useEffect(() => {
+    window.localStorage.setItem(F188_WORKFLOW_DOCK_KEY, workflowDock);
+  }, [workflowDock]);
+
+  const togglePanelVisibility = (key: F188CanvasPanelKey) => {
+    setPanelVisibility((current) => ({ ...current, [key]: !current[key] }));
+  };
+
+  const setPanelVisible = (key: F188CanvasPanelKey, visible: boolean) => {
+    setPanelVisibility((current) => ({ ...current, [key]: visible }));
+  };
+
+  const workflowPanelClass = workflowDock === 'right'
+    ? 'absolute top-2 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[360px] max-w-[calc(100%-24px)] max-h-[calc(100%-68px)] overflow-auto'
+    : 'absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[min(560px,calc(100%-250px))] min-w-[300px] max-h-[calc(100%-84px)] overflow-auto';
+
   const formatResultNumber = (value: unknown, digits: number) => {
     const numeric = typeof value === 'number' && Number.isFinite(value) ? value : 0;
     return numeric.toFixed(digits);
@@ -357,6 +408,32 @@ export default function CanvasArea({
           <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" title="Zonas">{regionCount}Z</span>
         </div>
         <div className="flex-1" />
+        <div
+          data-testid="f188-canvas-panel-controls"
+          className="hidden xl:flex items-center gap-0.5 mr-1 rounded-md border border-slate-200 bg-slate-50 px-1 py-0.5"
+          aria-label="Mostrar u ocultar paneles del canvas"
+        >
+          {([
+            ['workflow', 'Flujo', 'Mostrar/ocultar panel de flujo layout-blindaje-memoria'],
+            ['qa', 'QA', 'Mostrar/ocultar herramientas QA del canvas'],
+            ['continuity', 'Cont', 'Mostrar/ocultar continuidad offline'],
+          ] as const).map(([key, label, title]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => togglePanelVisibility(key)}
+              title={title}
+              aria-label={title}
+              className={`h-5 rounded px-1.5 text-[9px] font-semibold transition-colors ${
+                panelVisibility[key]
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-400 hover:bg-white hover:text-slate-600'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="hidden md:flex items-center gap-0.5 mr-1">
           {onImportFloorPlan && (
             <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Importar plano" title="Importar plano" onClick={onImportFloorPlan}>
@@ -636,6 +713,7 @@ export default function CanvasArea({
             )}
 
             {/* ═══ OVERLAY: Legend RadShield — v112 collapsible ═══ */}
+            {panelVisibility.continuity && (
             <div
               data-testid="f83-offline-continuity-panel"
               aria-label="Continuidad offline canvas RAG DB diferida"
@@ -646,7 +724,18 @@ export default function CanvasArea({
                   <Sparkles className="w-3.5 h-3.5 text-[#f97316] shrink-0" />
                   <span className="text-[10px] font-bold text-slate-700 truncate">F83 continuidad sin DB live</span>
                 </div>
-                <span className="text-[8px] text-slate-400 font-mono shrink-0">offline-safe</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-[8px] text-slate-400 font-mono">offline-safe</span>
+                  <button
+                    type="button"
+                    className="h-5 w-5 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    onClick={() => setPanelVisible('continuity', false)}
+                    title="Cerrar panel de continuidad offline"
+                    aria-label="Cerrar panel de continuidad offline"
+                  >
+                    <X className="h-3 w-3 mx-auto" />
+                  </button>
+                </div>
               </div>
               <div className="p-1.5 grid grid-cols-3 gap-1">
                 {offlineContinuitySteps.map(step => {
@@ -673,7 +762,9 @@ export default function CanvasArea({
                 })}
               </div>
             </div>
+            )}
 
+            {panelVisibility.qa && (
             <div
               data-testid="f85-canvas-tools-panel"
               aria-label="Herramientas F85 calibracion puntos criticos presets snapshot"
@@ -694,6 +785,15 @@ export default function CanvasArea({
                   <span className="text-[8px] text-slate-400 font-mono">
                     {f85Readiness.filter(item => item.ready).length}/{f85Readiness.length}
                   </span>
+                  <button
+                    type="button"
+                    className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
+                    onClick={() => setPanelVisible('qa', false)}
+                    title="Cerrar panel de herramientas QA"
+                    aria-label="Cerrar panel de herramientas QA"
+                  >
+                    <X className="h-3 w-3 mx-auto" />
+                  </button>
                 </div>
               </div>
               <div className="p-1.5 grid grid-cols-4 gap-1">
@@ -739,20 +839,43 @@ export default function CanvasArea({
                 </button>
               </div>
             </div>
+            )}
 
+            {panelVisibility.workflow && (
             <div
               data-testid="canvas-workflow-panel"
               aria-label="Flujo layout blindaje memoria"
-              className="absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[min(560px,calc(100%-250px))] min-w-[300px]"
+              className={workflowPanelClass}
             >
               <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <FileText className="w-3.5 h-3.5 text-[#f97316] shrink-0" />
                   <span className="text-[10px] font-bold text-slate-700 truncate">Layout - blindaje - memoria</span>
                 </div>
-                <span className="text-[9px] text-slate-500 font-mono shrink-0">
-                  {workflowSteps.filter(step => step.ready).length}/{workflowSteps.length}
-                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-[9px] text-slate-500 font-mono">
+                    {workflowSteps.filter(step => step.ready).length}/{workflowSteps.length}
+                  </span>
+                  <button
+                    type="button"
+                    data-testid="f188-workflow-dock-button"
+                    className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
+                    onClick={() => setWorkflowDock((dock) => dock === 'top' ? 'right' : 'top')}
+                    title={workflowDock === 'top' ? 'Mover panel de flujo a la derecha' : 'Mover panel de flujo arriba'}
+                    aria-label={workflowDock === 'top' ? 'Mover panel de flujo a la derecha' : 'Mover panel de flujo arriba'}
+                  >
+                    <Move className="h-3 w-3 mx-auto" />
+                  </button>
+                  <button
+                    type="button"
+                    className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
+                    onClick={() => setPanelVisible('workflow', false)}
+                    title="Cerrar panel de flujo"
+                    aria-label="Cerrar panel de flujo"
+                  >
+                    <X className="h-3 w-3 mx-auto" />
+                  </button>
+                </div>
               </div>
               <div
                 data-testid="f90-e2e-qa-panel"
@@ -992,6 +1115,32 @@ export default function CanvasArea({
                 })}
               </div>
             </div>
+            )}
+
+            {(!panelVisibility.workflow || !panelVisibility.qa || !panelVisibility.continuity) && (
+              <div
+                data-testid="f188-hidden-panel-restore"
+                className="absolute top-10 right-2 z-20 flex flex-wrap justify-end gap-1 rounded-md border border-slate-200 bg-white/95 p-1 shadow-sm"
+                aria-label="Restaurar paneles ocultos del canvas"
+              >
+                {([
+                  ['workflow', 'Flujo'],
+                  ['qa', 'QA'],
+                  ['continuity', 'Cont'],
+                ] as const).map(([key, label]) => !panelVisibility[key] && (
+                  <button
+                    key={key}
+                    type="button"
+                    className="h-6 rounded border border-slate-200 bg-slate-50 px-2 text-[9px] font-semibold text-slate-600 hover:bg-orange-50 hover:text-orange-700"
+                    onClick={() => setPanelVisible(key, true)}
+                    title={`Restaurar panel ${label}`}
+                    aria-label={`Restaurar panel ${label}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className={`absolute top-2 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 transition-all ${legendCollapsed ? 'px-2 py-1' : 'px-3 py-2'}`}>
               <button

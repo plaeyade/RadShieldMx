@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,21 @@ import { applyShieldingPresetToBarrier, SHIELDING_PRESETS } from '@/lib/canvasF8
 import { CANVAS_TOOL_ICON_PROFILES, getCanvasToolIconProfile } from '@/lib/f98UnifiedIconography';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
+
+const SIDEBAR_WIDTH_KEY = 'radshield_sidebar_width_f188';
+const DEFAULT_SIDEBAR_WIDTH = 286;
+const MIN_SIDEBAR_WIDTH = 244;
+const MAX_SIDEBAR_WIDTH = 360;
+
+function clampSidebarWidth(value: number): number {
+  return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, value));
+}
+
+function loadSidebarWidth(): number {
+  if (typeof window === 'undefined') return DEFAULT_SIDEBAR_WIDTH;
+  const storedWidth = Number(window.localStorage.getItem(SIDEBAR_WIDTH_KEY));
+  return Number.isFinite(storedWidth) ? clampSidebarWidth(storedWidth) : DEFAULT_SIDEBAR_WIDTH;
+}
 
 /* ═══════════════════════════════════════════
    ACTION BUTTON — Enhanced visual style
@@ -206,7 +221,16 @@ export default function Sidebar({
   onRunCalculations, onUAQ, onMemoriaAI, onMazeCalculator, onDXFViewer,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
   const open = useAppStore((s) => s.open);
+
+  useEffect(() => {
+    window.localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth));
+  }, [sidebarWidth]);
+
+  const adjustSidebarWidth = (delta: number) => {
+    setSidebarWidth((current) => clampSidebarWidth(current + delta));
+  };
 
   /* ─── Quick action dispatcher ─── */
   const dispatchQuickAction = (action: string) => {
@@ -245,7 +269,12 @@ export default function Sidebar({
   }
 
   return (
-    <div className="h-full w-[286px] min-w-[286px] max-w-[286px] shrink-0 flex flex-col bg-white border-r border-gray-200" data-testid="f186-sidebar-stable-width">
+    <div
+      className="h-full shrink-0 flex flex-col bg-white border-r border-gray-200"
+      style={{ width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}
+      data-testid="f186-sidebar-stable-width"
+      data-f188-sidebar-resizable="true"
+    >
       {/* ═══ HEADER ═══ */}
       <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gradient-to-r from-[#fff7ed] to-white">
         <div className="flex items-center gap-2">
@@ -258,9 +287,36 @@ export default function Sidebar({
             <p className="text-[8px] text-gray-400 font-mono">v127 | NCRP 147/151</p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCollapsed(true)} title="Colapsar">
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <div
+            data-testid="f188-sidebar-width-controls"
+            className="flex items-center gap-0.5 rounded-md border border-orange-100 bg-white/80 px-1 py-0.5"
+            aria-label="Ajustar ancho de sidebar"
+          >
+            <button
+              type="button"
+              className="h-5 w-5 rounded text-[11px] font-bold text-slate-500 hover:bg-orange-50 hover:text-orange-600"
+              onClick={() => adjustSidebarWidth(-20)}
+              title="Reducir ancho de sidebar"
+              aria-label="Reducir ancho de sidebar"
+            >
+              -
+            </button>
+            <span className="w-9 text-center text-[8px] font-mono text-slate-400">{sidebarWidth}px</span>
+            <button
+              type="button"
+              className="h-5 w-5 rounded text-[11px] font-bold text-slate-500 hover:bg-orange-50 hover:text-orange-600"
+              onClick={() => adjustSidebarWidth(20)}
+              title="Aumentar ancho de sidebar"
+              aria-label="Aumentar ancho de sidebar"
+            >
+              +
+            </button>
+          </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCollapsed(true)} title="Colapsar">
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* ═══ CONTENT ═══ */}

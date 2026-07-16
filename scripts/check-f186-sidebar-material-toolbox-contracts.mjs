@@ -26,7 +26,11 @@ const packageJson = read('package.json');
 const changelog = read('CHANGELOG.md');
 const manual = read('MANUAL_VERSIONES_v50.md');
 
-expect('Sidebar stable expanded width', sidebar.includes('data-testid="f186-sidebar-stable-width"') && sidebar.includes('w-[286px]'));
+expect(
+  'Sidebar stable expanded width',
+  sidebar.includes('data-testid="f186-sidebar-stable-width"') &&
+    (sidebar.includes('w-[286px]') || (sidebar.includes('DEFAULT_SIDEBAR_WIDTH = 286') && sidebar.includes('data-f188-sidebar-resizable="true"')))
+);
 expect('Sidebar stable collapsed width', sidebar.includes('data-testid="f186-sidebar-collapsed-stable"') && sidebar.includes('w-12'));
 expect('Sidebar buttons expose aria labels', sidebar.includes('aria-label={`${label}: ${title}`}'));
 expect('Quick actions include Mat', sidebar.includes("label: 'Mat'") && sidebar.includes("action: 'material'"));

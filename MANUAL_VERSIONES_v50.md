@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F188 (2026-07-16) - Panel layout controls
+
+- Objetivo: recuperar area util del canvas sin eliminar funciones ni mover la arquitectura principal.
+- Superficies: `Sidebar` y `CanvasArea`.
+- Uso: `npm run test:f188:panel-layout`.
+- Incluye: ancho persistente de sidebar, botones de cierre para paneles de flujo/QA/continuidad, restaurador de paneles ocultos y dock seguro superior/derecho para el panel de flujo.
+- Guardrail: no cambia eventos del canvas, formulas, resultados, demo R&F, topbar ni modo colapsado de sidebar.
+- Operacion: usar los chips `Flujo`, `QA` y `Cont` en la barra del canvas para ocultar/mostrar paneles; usar el icono de mover del panel de flujo para alternar entre arriba y derecha.
+- Posterior: si F188 se mantiene estable, evaluar drag libre solo para paneles no criticos y con limites de viewport.
+
 ## F186 (2026-07-16) - Sidebar estable + Mat toolbox
 
 - Objetivo: mejorar operacion del espacio lateral sin mover el canvas principal.
