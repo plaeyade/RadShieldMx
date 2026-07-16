@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F179 (2026-07-16) - Deploy lane decision
+
+- Se formaliza el carril primario `vercel-static` para obtener una URL publica de frontend con bajo riesgo.
+- Se conserva `vps-fullstack` como carril clinico/multiusuario con API, DB, secretos, RAG privado, backups y auditoria.
+- `local-offline` queda como fallback validado por F175-F176 mientras Sites siga bloqueado por `git.chatgpt-team.site:443`.
+- Politica: despues de cualquier URL publica, configurar `PUBLIC_DEPLOY_URL` y repetir F154-F158.
+- Nuevos comandos: `npm run prepare:f179:deploy-lane` y `npm run test:f179:deploy-lane`.
+
 ## F178 (2026-07-16) - Alternate deploy readiness
 
 - Se agregan `vercel.json`, `netlify.toml`, `public/_redirects` y `public/_headers` para deploy estatico alterno con fallback SPA.

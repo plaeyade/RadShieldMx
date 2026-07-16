@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F179 (2026-07-16) - Deploy lane decision
+
+- Objetivo: decidir formalmente el carril de publicacion despues de F177/F178.
+- Decision: `vercel-static` como carril primario para URL publica rapida de frontend; `vps-fullstack` como carril clinico; `local-offline` como fallback.
+- Artefactos: `outputs/f179_deploy_lane_decision/f179_deploy_lane_decision.json`, `outputs/f179_deploy_lane_decision/README_F179_DEPLOY_LANE.md` y `outputs/fase_179_deploy_lane_decision.md`.
+- Uso: `npm run prepare:f179:deploy-lane` y `npm run test:f179:deploy-lane`.
+- Guardrail: no subir `.env`, `DATABASE_URL`, dumps DB, corpus RAG privado ni documentos clinicos a hosting estatico.
+- Posterior: cuando exista URL final, configurar `PUBLIC_DEPLOY_URL` y repetir F154-F158.
+
 ## F178 (2026-07-16) - Alternate deploy readiness
 
 - Objetivo: dejar lista una ruta de publicacion alterna si Sites/Git continua bloqueado por red.

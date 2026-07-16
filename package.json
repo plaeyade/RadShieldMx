@@ -239,6 +239,8 @@
     "test:f177:sites-deploy": "node scripts/check-f177-sites-deploy-retry-contracts.mjs",
     "prepare:f178:alternate-deploy": "node scripts/f178-alternate-deploy-readiness.mjs",
     "test:f178:alternate-deploy": "node scripts/check-f178-alternate-deploy-contracts.mjs",
+    "prepare:f179:deploy-lane": "node scripts/f179-deploy-lane-decision.mjs",
+    "test:f179:deploy-lane": "node scripts/check-f179-deploy-lane-decision-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",
