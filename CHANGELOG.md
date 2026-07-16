@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F165/F161 (2026-07-15) - Salidas clinicas y manuales predeploy
+
+- F161 agrega manual operativo in extenso predeploy con flujo real de proyecto, canvas, calculo, RAG/OCR, DB/deploy y control de versiones.
+- F165 cierra pendientes utiles del mapa clinico: export SVG/PNG, clasificacion de salas OCR-ready, rutas de flujo y sincronizacion 2D/3D/reportes/evidencia.
+- Se mantiene el criterio: el mapa clinico complementa el canvas CAD y no sustituye calculo normativo ni QA numerico.
+
+
 ## F73 (2026-07-12) - Documentacion, Update App y roadmap tecnico
 
 - README reemplazado por documentacion tecnica real de RadShield-MX.

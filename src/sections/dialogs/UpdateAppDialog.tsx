@@ -164,8 +164,10 @@ const PLATFORM_UPDATES: UpdateItem[] = [
   { name: 'F157 Cierre operativo', current: 'implemented', latest: 'local/staging release runbook', status: 'current', description: 'Congela evidencia F153-F156, runbook operativo y riesgo residual de repetir smoke al publicar en URL HTTPS externa.' },
   { name: 'F158 Deploy target', current: 'implemented', latest: 'post-deploy F154 smoke', status: 'current', description: 'Valida target local/staging post-deploy y documenta bloqueos para Sites/URL publica externa.' },
   { name: 'F159 Sites hosting prep', current: 'implemented', latest: 'hosting metadata + package', status: 'update', description: 'Crea metadata Sites y paquete compatible; deploy remoto queda pendiente hasta tener Git/source state disponible.' },
+  { name: 'F161 Manuales in extenso', current: 'implemented', latest: 'predeploy runbook', status: 'current', description: 'Consolida manual operativo, versiones, control de cambios, DB/deploy, RAG/OCR, canvas/floorplan y checklist antes del deploy final.' },
   { name: 'F163 Canvas/floorplan cierre', current: 'implemented', latest: 'RS Designer parity + release closure', status: 'current', description: 'Cierra el canvas para release local: plano, fuentes/equipos, muros, dosis ambiente, heatmap/isocontornos y export a Memoria IA/Evidence.' },
   { name: 'F164 Clinical project map', current: 'implemented', latest: 'NuviaTech-style map from floorplan', status: 'current', description: 'Agrega visualizacion clinica derivada del plano: departamentos, equipos, proteccion, monitoreo, residuos, construccion blindada y evidencia.' },
+  { name: 'F165 Clinical outputs closure', current: 'implemented', latest: 'SVG/PNG + OCR-ready + sync', status: 'current', description: 'Cierra pendientes utiles del mapa clinico: export visual, clasificacion de salas, rutas de flujo y sincronizacion 2D/3D/reporte/evidencia.' },
   { name: 'F98 Unified iconography + release gaps', current: 'enabled', latest: 'canvas/equipment icons unified', status: 'current', description: 'Canvas buttons and active tool indicator now share one icon profile, while release gaps are counted explicitly for final stabilization.' },
   { name: 'F72 Canvas equipment visuals', current: 'enabled', latest: 'validated', status: 'current', description: 'Canvas renders LINAC, Gamma Knife, CT, PET/CT, HDR, cyclotron, SPECT and mammography source profiles.' },
   { name: 'Medical 3D Floor Plan', current: 'enabled', latest: 'footprint metadata', status: 'current', description: '3D scene receives equipment footprint, asset hint and RAG tags from floorplan sources.' },
@@ -1016,8 +1018,18 @@ export default function UpdateAppDialog({ onClose }: { onClose: () => void }) {
         <div>Inspiracion: {f164ClinicalMap.sourceInspiration.name}</div>
         <div>Dominios: {f164ClinicalMap.nodes.filter((node) => node.ready).length}/{f164ClinicalMap.nodes.length}</div>
         <div>Exports: {f164ClinicalMap.exportTargets.join(' | ')}</div>
+        <div>F165 outputs: {f164ClinicalMap.visualExports.map((item) => item.label).join(' | ')}</div>
+        <div>Flujos: {f164ClinicalMap.flowRoutes.map((route) => `${route.routeType}:${route.ready ? 'ready' : 'draft'}`).join(' | ')}</div>
+        <div>Sync: {f164ClinicalMap.syncTargets.map((target) => target.target).join(' | ')}</div>
         <div>Warnings: {f164ClinicalMap.warnings.join(' | ') || 'ninguno'}</div>
         <div>{f164ClinicalMap.decision}</div>
+      </div>
+
+      <div data-testid="f161-f165-predeploy-manuals" className="rounded-md border border-cyan-300 bg-cyan-50 p-3 text-[10px] text-cyan-950">
+        <div className="font-semibold">F161/F165 predeploy closure</div>
+        <div>Manual: outputs/f161_manuales_in_extenso/MANUAL_OPERACION_PREDEPLOY_F161.md</div>
+        <div>Contratos: prepare/test f161 + prepare/test f165</div>
+        <div>Gate: build, paquete F159, app visual y smoke post-deploy contra URL final.</div>
       </div>
 
       <div data-testid="f96-dropdown-migration-summary" className="rounded-md border border-amber-200 bg-amber-50 p-3 text-[10px] text-amber-900">

@@ -1,4 +1,12 @@
-# RadShield-MX — Manual de Versiones
+# RadShield-MX - Manual de Versiones
+
+## F161 (2026-07-15) - Manuales in extenso predeploy
+
+- Se agrega outputs/f161_manuales_in_extenso/MANUAL_OPERACION_PREDEPLOY_F161.md como runbook unico de operacion antes del deploy final.
+- Cubre flujo operativo, canvas/floorplan, calculo/evidencia, RAG/OCR, DB/deploy, Update App y control de versiones.
+- Scripts: npm run prepare:f161:manuales y npm run test:f161:manuales.
+- Criterio de salida: manuals-ready, build productivo, F164/F165/F159 validados y smoke post-deploy contra URL final.
+
 
 ## v50.3 (2025-06-03) — Implementacion Completa Auditoria
 

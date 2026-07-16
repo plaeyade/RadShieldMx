@@ -1,5 +1,15 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F161 - Manuales in extenso predeploy
+
+F161 consolida el manual operativo antes del deploy final en `outputs/f161_manuales_in_extenso/MANUAL_OPERACION_PREDEPLOY_F161.md`.
+
+Uso recomendado:
+- Seguir el flujo real: proyecto, plano, escala, modalidad, equipos, barreras, calculo, evidencia, Memoria IA, PDF y Evidence Pack.
+- Usar el canvas/floorplan como superficie principal; el mapa clinico F164 es una salida ejecutiva derivada, no reemplaza edicion CAD ni QA numerico.
+- Repetir contratos F161/F164/F165/F159 y smoke post-deploy antes de declarar release publico.
+- Mantener `DATABASE_URL` y secretos fuera del repo y fuera de paquetes entregables.
+
 ## Estado operativo recomendado
 
 RadShield-MX puede usarse en modo local/offline para dibujar planos, colocar fuentes, calcular blindajes, generar Evidence Pack y preparar memoria analitica. La persistencia en servidor requiere habilitar backend y MySQL.

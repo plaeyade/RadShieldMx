@@ -1,9 +1,11 @@
 import type { FloorPlan } from '@/types/radshield';
-import { buildF164ClinicalProjectMap } from '@/lib/f164ClinicalProjectMap';
+import { buildF164ClinicalMapExportPlan, buildF164ClinicalProjectMap, type F164ClinicalDomain } from '@/lib/f164ClinicalProjectMap';
 
 interface ClinicalProjectMapProps {
   floorPlan?: FloorPlan;
   compact?: boolean;
+  selectedDomain?: F164ClinicalDomain | null;
+  onNodeSelect?: (domain: F164ClinicalDomain) => void;
 }
 
 const positions = [
@@ -19,10 +21,12 @@ const positions = [
   { x: 145, y: 224 },
 ];
 
-export default function ClinicalProjectMap({ floorPlan, compact = false }: ClinicalProjectMapProps) {
+export default function ClinicalProjectMap({ floorPlan, compact = false, selectedDomain, onNodeSelect }: ClinicalProjectMapProps) {
   const map = buildF164ClinicalProjectMap(floorPlan);
   const visibleNodes = compact ? map.nodes.filter((node) => node.ready).slice(0, 6) : map.nodes;
   const nodeIndex = new Map(map.nodes.map((node, index) => [node.id, positions[index]]));
+  const exportPlan = buildF164ClinicalMapExportPlan(floorPlan);
+  const activeFlows = map.flowRoutes.filter((route) => route.ready).slice(0, compact ? 2 : 4);
 
   return (
     <div data-testid="f164-clinical-project-map" className="rounded-md border border-teal-200 bg-white/95 text-slate-700 shadow-sm">
@@ -58,11 +62,36 @@ export default function ClinicalProjectMap({ floorPlan, compact = false }: Clini
               </g>
             );
           })}
+          {activeFlows.map((route, index) => {
+            const from = nodeIndex.get(route.from);
+            const to = nodeIndex.get(route.to);
+            if (!from || !to) return null;
+            const midX = (from.x + to.x) / 2;
+            const midY = (from.y + to.y) / 2 - 5 - index * 4;
+            return (
+              <g key={route.id} opacity={route.ready ? 0.95 : 0.2}>
+                <path d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`} fill="none" stroke="#14b8a6" strokeDasharray="4 3" strokeWidth="1.3" />
+                {!compact && (
+                  <text x={midX} y={midY - 2} textAnchor="middle" className="fill-teal-700 text-[6px] font-semibold">
+                    {route.routeType}
+                  </text>
+                )}
+              </g>
+            );
+          })}
           {map.nodes.map((node, index) => {
             const point = positions[index];
+            const selected = selectedDomain === node.id;
             return (
-              <g key={node.id} transform={`translate(${point.x} ${point.y})`} opacity={node.ready ? 1 : 0.36}>
-                <circle r={compact ? 13 : 16} fill={node.ready ? node.color : '#e2e8f0'} stroke="#ffffff" strokeWidth="2" />
+              <g
+                key={node.id}
+                data-domain={node.id}
+                transform={`translate(${point.x} ${point.y})`}
+                opacity={node.ready ? 1 : 0.36}
+                className={onNodeSelect ? 'cursor-pointer' : undefined}
+                onClick={() => onNodeSelect?.(node.id)}
+              >
+                <circle r={compact ? 13 : 16} fill={node.ready ? node.color : '#e2e8f0'} stroke={selected ? '#0f172a' : '#ffffff'} strokeWidth={selected ? 3 : 2} />
                 <text y="4" textAnchor="middle" className="fill-white text-[10px] font-bold">
                   {node.count || '-'}
                 </text>
@@ -78,15 +107,33 @@ export default function ClinicalProjectMap({ floorPlan, compact = false }: Clini
 
         <div className={compact ? 'mt-1 grid grid-cols-2 gap-1' : 'grid content-start gap-1'}>
           {(compact ? visibleNodes : map.nodes).map((node) => (
-            <div key={node.id} className="flex min-w-0 items-center gap-1 rounded border border-slate-100 bg-slate-50 px-1.5 py-1">
+            <button
+              key={node.id}
+              type="button"
+              data-domain={node.id}
+              onClick={() => onNodeSelect?.(node.id)}
+              className={`flex min-w-0 items-center gap-1 rounded border px-1.5 py-1 text-left ${
+                selectedDomain === node.id ? 'border-teal-300 bg-teal-50' : 'border-slate-100 bg-slate-50'
+              }`}
+            >
               <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: node.ready ? node.color : '#cbd5e1' }} />
               <span className="truncate text-[8px] font-medium">{node.label}</span>
               <span className="ml-auto text-[8px] font-mono text-slate-500">{node.count}</span>
-            </div>
+            </button>
           ))}
+          {!compact && map.roomClassifications.length > 0 && (
+            <div className="mt-1 rounded border border-blue-100 bg-blue-50 px-2 py-1 text-[8px] leading-snug text-blue-900">
+              OCR/salas: {map.roomClassifications.slice(0, 4).map((room) => `${room.name} -> ${room.inferredDomain}`).join(' | ')}
+            </div>
+          )}
+          {!compact && (
+            <div className="rounded border border-emerald-100 bg-emerald-50 px-2 py-1 text-[8px] leading-snug text-emerald-900">
+              Sync: {map.syncTargets.filter((target) => target.ready).map((target) => target.target).join(' | ')}
+            </div>
+          )}
           {!compact && (
             <div className="mt-1 rounded border border-teal-100 bg-teal-50 px-2 py-1 text-[8px] leading-snug text-teal-900">
-              Export: {map.exportTargets.join(' | ')}
+              Export: {map.visualExports.map((item) => item.label).join(' | ')} / SVG bytes {exportPlan.svg.length}
             </div>
           )}
         </div>
