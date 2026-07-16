@@ -48,10 +48,12 @@ function ActionBtn({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       title={title}
+      aria-label={`${label}: ${title}`}
       data-testid={`sidebar-action-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
-      className={`${h} ${w} flex flex-col items-center justify-center rounded-lg py-1 px-0.5 transition-all duration-150 border ${
+      className={`group relative ${h} ${w} flex flex-col items-center justify-center rounded-lg py-1 px-0.5 transition-all duration-150 border ${
         isActive
           ? 'border-white/30 shadow-md scale-[1.02]'
           : 'border-transparent hover:border-slate-200 hover:shadow-sm hover:scale-[1.02] active:scale-95'
@@ -63,6 +65,10 @@ function ActionBtn({
     >
       <Icon className={iconSize} strokeWidth={isActive ? 2.5 : 2} />
       <span className={`${fontSize} font-bold mt-0.5 leading-none tracking-tight`}>{label}</span>
+      <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 hidden w-56 -translate-y-1/2 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left text-[10px] font-medium leading-snug text-slate-700 shadow-lg group-hover:block">
+        <span className="block text-[9px] font-bold uppercase tracking-wide text-[#f97316]">{label}</span>
+        {title}
+      </span>
     </button>
   );
 }
@@ -157,6 +163,7 @@ const QUICK_ACTIONS = [
   { icon: Play,        label: 'Calc', action: 'calculate',  title: 'Calcular blindaje (F5)',            color: '#f97316', bg: '#fff7ed' },
   { icon: Calculator,  label: 'UAQ',  action: 'uaq',        title: 'Unidad de Atenuacion Cualitativa',   color: '#10b981', bg: '#ecfdf5' },
   { icon: FileSpreadsheet, label: 'Mem', action: 'memoria', title: 'Memoria Analitica AI',              color: '#8b5cf6', bg: '#f5f3ff' },
+  { icon: GitCompareArrows, label: 'Mat', action: 'materials', title: 'Toolbox unico: TVL, densidad, peso, costo, tiempo y carga estructural', color: '#0d9488', bg: '#f0fdfa' },
   { icon: Box,         label: 'DXF',  action: 'dxf',        title: 'Importar DXF AutoCAD',              color: '#ea580c', bg: '#fff7ed' },
 ];
 
@@ -212,6 +219,7 @@ export default function Sidebar({
       case 'calculate': onRunCalculations?.(); break;
       case 'uaq': onUAQ?.(); break;
       case 'memoria': onMemoriaAI?.(); break;
+      case 'materials': open('materialComparison'); break;
       case 'dxf': onDXFViewer?.(); break;
     }
   };
@@ -266,7 +274,7 @@ export default function Sidebar({
         {/* ─── QUICK ACTIONS (from QAB) ─── */}
         <div className="bg-gradient-to-r from-[#fff7ed] via-white to-[#ecfdf5] rounded-lg border border-slate-100 p-2 shadow-sm">
           <SectionHead icon={Play} label="Acciones" color="#f97316" />
-          <div className="grid grid-cols-4 gap-1 mt-1">
+          <div className="grid grid-cols-5 gap-1 mt-1">
             {QUICK_ACTIONS.map((a) => (
               <ActionBtn key={a.label} icon={a.icon} label={a.label} title={a.title}
                 color={a.color} bgColor={a.bg} size="sm"

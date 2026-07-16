@@ -64,6 +64,7 @@ interface CanvasAreaProps {
   onOpenEvidencePack?: () => void;
   onOpenMedical3D?: () => void;
   onOpenControlPoints?: () => void;
+  onLoadExampleSketch?: () => void;
   onCalibrateScale?: () => void;
   onAddCriticalPoint?: () => void;
   onOpenShieldingPresets?: () => void;
@@ -109,6 +110,7 @@ export default function CanvasArea({
   onOpenEvidencePack,
   onOpenMedical3D,
   onOpenControlPoints,
+  onLoadExampleSketch,
   onCalibrateScale,
   onAddCriticalPoint,
   onOpenShieldingPresets,
@@ -485,17 +487,39 @@ export default function CanvasArea({
                 data-testid="f182-empty-canvas-state"
                 className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center p-6"
               >
-                <div className="pointer-events-auto w-[min(520px,calc(100%-32px))] rounded-md border border-slate-200 bg-white/90 backdrop-blur-sm shadow-sm p-4 text-center">
+                <div className="pointer-events-auto w-[min(640px,calc(100%-32px))] rounded-md border border-slate-200 bg-white/90 backdrop-blur-sm shadow-sm p-4">
                   <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-orange-50 text-[#f97316]">
                     <LayoutTemplate className="h-5 w-5" />
                   </div>
-                  <div className="text-sm font-semibold text-slate-800">Lienzo limpio listo para diseno</div>
-                  <div className="mt-1 text-[11px] text-slate-500">
-                    Importa un plano, usa una plantilla o empieza dibujando barreras. No se carga ejemplo inicial.
+                  <div className="text-center text-sm font-semibold text-slate-800">Lienzo limpio listo para diseno</div>
+                  <div className="mt-1 text-center text-[11px] text-slate-500">
+                    Importa un plano, usa una plantilla o carga un croquis MA de ejemplo. No se carga ejemplo inicial automaticamente.
+                  </div>
+                  <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-2" aria-label="Croquis ejemplo memoria analitica">
+                    <svg viewBox="0 0 520 210" className="h-32 w-full" role="img">
+                      <rect x="20" y="20" width="330" height="160" fill="#fff" stroke="#334155" strokeWidth="4" />
+                      <rect x="350" y="20" width="140" height="80" fill="#ecfdf5" stroke="#059669" strokeWidth="2" strokeDasharray="7 4" />
+                      <rect x="350" y="100" width="140" height="80" fill="#eff6ff" stroke="#2563eb" strokeWidth="2" strokeDasharray="7 4" />
+                      <line x1="185" y1="20" x2="185" y2="180" stroke="#f97316" strokeWidth="5" />
+                      <circle cx="115" cy="100" r="22" fill="#fee2e2" stroke="#dc2626" strokeWidth="3" />
+                      <path d="M115 100 L185 46" stroke="#dc2626" strokeWidth="2" strokeDasharray="4 4" />
+                      <path d="M115 100 L185 156" stroke="#dc2626" strokeWidth="2" strokeDasharray="4 4" />
+                      <text x="88" y="105" fontSize="12" fill="#991b1b" fontWeight="700">LINAC</text>
+                      <text x="42" y="43" fontSize="11" fill="#334155">Sala tratamiento</text>
+                      <text x="371" y="64" fontSize="11" fill="#047857">Control T=1</text>
+                      <text x="374" y="145" fontSize="11" fill="#1d4ed8">Publico T=0.2</text>
+                      <text x="202" y="105" fontSize="10" fill="#f97316" fontWeight="700">Barrera primaria</text>
+                    </svg>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    {onLoadExampleSketch && (
+                      <Button size="sm" variant="default" className="h-7 bg-[#f97316] hover:bg-[#ea580c]" onClick={onLoadExampleSketch}>
+                        <FileText className="mr-1.5 h-3.5 w-3.5" />
+                        Cargar croquis MA
+                      </Button>
+                    )}
                     {onImportFloorPlan && (
-                      <Button size="sm" variant="default" className="h-7 bg-[#f97316] hover:bg-[#ea580c]" onClick={onImportFloorPlan}>
+                      <Button size="sm" variant="outline" className="h-7" onClick={onImportFloorPlan}>
                         <Upload className="mr-1.5 h-3.5 w-3.5" />
                         Importar plano
                       </Button>

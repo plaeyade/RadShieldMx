@@ -875,7 +875,7 @@ export default function ShieldingDesigner() {
 
   // Auto-load demo data when welcome screen is dismissed
   useEffect(() => {
-    if (!showWelcomeScreen && floorPlan.barriers.length === 0 && floorPlan.sources.length === 0) {
+    if (false && !showWelcomeScreen && floorPlan.barriers.length === 0 && floorPlan.sources.length === 0) {
       // v98: Apply NCRP 147 occupancy factors to demo barriers and regions
       const controlProfile = suggestOccupancyProfile('Control Room');
       const corridorProfile = suggestOccupancyProfile('Corridor');
@@ -913,6 +913,61 @@ Objetivo: 0.1 mSv/sem (controlado) | 0.02 mSv/sem (publico)`,
       });
     }
   }, [showWelcomeScreen]);
+
+  const loadExampleAnalyticMemorySketch = useCallback(() => {
+    const controlProfile = suggestOccupancyProfile('Control Room');
+    const publicProfile = suggestOccupancyProfile('Public Corridor');
+    const waitingProfile = suggestOccupancyProfile('Patient Waiting');
+    setFloorPlan(prev => ({
+      ...prev,
+      name: 'Croquis MA - LINAC 6 MV',
+      scale_m_per_pixel: 0.01,
+      width_pixels: 1000,
+      height_pixels: 800,
+      imageUrl: null,
+      sources: [
+        {
+          id: 'ma-linac-iso',
+          x: 230,
+          y: 290,
+          name: 'LINAC 6 MV isocentro',
+          modality: {
+            id: 'linac_6mv_ma',
+            name: 'LINAC 6 MV',
+            energies: [6],
+            typicalDose_mGy: 2000,
+            workloadDefault: 500,
+            unit: 'Gy/week',
+            description: 'Croquis base para memoria analitica de sala de tratamiento',
+          },
+          workloadValue: 500,
+          workloadUnit: 'Gy/week',
+          isocenterHeight_m: 1.25,
+          useFactor: 1,
+          workloadHoursPerWeek: 40,
+          rotationDeg: 0,
+          footprint_m: { width: 2.6, depth: 3.2 },
+          manufacturerVariant: 'generic-linac',
+        },
+      ],
+      barriers: [
+        { id: 'ma-wall-north', x1: 80, y1: 80, x2: 620, y2: 80, name: 'Muro norte - area publica', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: publicProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235', thickness_mm: 220, structuralElement: 'wall', reportNote: 'Revisar colindancia superior en visita.' },
+        { id: 'ma-wall-east', x1: 620, y1: 80, x2: 620, y2: 520, name: 'Muro este - barrera primaria', barrierType: 'primary', useFactor: 1, occupancyFactor: publicProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235', thickness_mm: 1600, structuralElement: 'wall', reportNote: 'Direccion primaria; validar carga estructural.' },
+        { id: 'ma-wall-south', x1: 80, y1: 520, x2: 620, y2: 520, name: 'Muro sur - sala espera', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: waitingProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235', thickness_mm: 350, structuralElement: 'wall' },
+        { id: 'ma-wall-west', x1: 80, y1: 80, x2: 80, y2: 520, name: 'Muro oeste - consola', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: controlProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.controlled, materialCode: 'CONCRETE235', thickness_mm: 300, structuralElement: 'wall' },
+        { id: 'ma-maze', x1: 300, y1: 520, x2: 300, y2: 650, name: 'Laberinto acceso', barrierType: 'secondary', useFactor: 0.1, occupancyFactor: publicProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235', thickness_mm: 250, structuralElement: 'wall' },
+      ],
+      occupiedRegions: [
+        { id: 'ma-region-control', name: 'Consola / zona controlada', designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.controlled, occupancyFactor: controlProfile.occupancyFactor, points: [{ x: 90, y: 90 }, { x: 210, y: 90 }, { x: 210, y: 230 }, { x: 90, y: 230 }] },
+        { id: 'ma-region-public', name: 'Pasillo publico', designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, occupancyFactor: publicProfile.occupancyFactor, points: [{ x: 635, y: 100 }, { x: 820, y: 100 }, { x: 820, y: 500 }, { x: 635, y: 500 }] },
+      ],
+      criticalPoints: [
+        { id: 'ma-cp-door', x: 305, y: 640, name: 'Puerta laberinto', occupancyFactor: publicProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, pointType: 'public', enabled: true, notes: 'Punto critico para memoria analitica.' },
+      ],
+    }));
+    setCanvasState(prev => ({ ...prev, selectedId: null, mode: 'select', scale: 1, offsetX: 0, offsetY: 0 }));
+    toast.success('Croquis MA cargado: LINAC 6 MV con barreras, regiones y punto critico');
+  }, [setFloorPlan, setCanvasState]);
 
   // v98: OpenCV wall/room detection with NCRP occupancy factors
   const handleOpenCVDetect = useCallback(async () => {
@@ -1932,7 +1987,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         ) : (
           <div className="flex flex-1 overflow-hidden" style={{ display: 'flex' }}>
             {/* Sidebar Panel */}
-            <div className="w-80 min-w-[200px] max-w-[450px] bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div data-testid="main-professional-sidebar" className="w-[340px] min-w-[280px] max-w-[380px] bg-white border-r border-gray-200 flex flex-col shrink-0">
               <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} selectedCriticalPoint={selectedCriticalPoint} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} onRunCalculations={runRadShieldCalculations} onUAQ={() => useAppStore.getState().open('shieldingCalculator')} onMemoriaAI={() => useAppStore.getState().open('memoriaAI')} onMazeCalculator={() => useAppStore.getState().open('maze')} onDXFViewer={() => useAppStore.getState().open('dxfViewer')} />
             </div>
             {/* Resize Handle */}
@@ -1966,6 +2021,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   onOpenMonteCarlo={() => useAppStore.getState().open('monteCarloIntegration')}
                   onOpenExternalConnector={() => useAppStore.getState().open('externalConnector')}
                   onOpenEvidencePack={() => useAppStore.getState().open('evidencePack')}
+                  onLoadExampleSketch={loadExampleAnalyticMemorySketch}
                   onCalibrateScale={handleCalibrateScaleQuick}
                   onAddCriticalPoint={handleAddCriticalPointDraft}
                   onOpenShieldingPresets={handleShieldingPresetApply}

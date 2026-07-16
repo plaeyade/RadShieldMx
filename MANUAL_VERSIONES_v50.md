@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F183 (2026-07-16) - CAD recovery + material toolbox
+
+- Objetivo: recuperar visibilidad operativa del canvas/sidebar y convertir el ejemplo inicial en una seleccion explicita.
+- Cambios: autocarga demo deshabilitada, croquis MA LINAC 6 MV seleccionable, sidebar con ancho minimo, leyendas hover y acceso `Mat`.
+- Materiales: `MaterialComparisonDialog` ahora resume TVL, densidad, peso, costo, dias estimados y carga estructural preliminar.
+- Uso: abrir canvas limpio; usar `Cargar croquis MA` para ejemplo de memoria o `Mat` para comparador tecnico-constructivo.
+- Validacion: contrato F182 ampliado a 8 checks, build Vite y preview HTTP local.
+
 ## F182 (2026-07-16) - Canvas professional workspace
 
 - Objetivo: reorganizar el espacio del canvas/floorplan para que menus y paneles no tapen el layout.
