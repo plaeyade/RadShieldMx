@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F175 (2026-07-16) - Local delivery + cache recovery
+
+- Objetivo: recuperar visualizacion de menus/canvas cuando un service worker viejo mezcle assets de builds distintos y cerrar paquete local antes del deploy publico.
+- Superficie: `reset-cache.html` limpia service workers y caches `radshield-*`; `index.html` ejecuta limpieza defensiva salvo `?enable-sw=1`.
+- Artefactos: `outputs/f175_local_delivery_package/f175_local_delivery_package.json`, `outputs/f175_local_delivery_package/README_F175_LOCAL_DELIVERY.md` y `outputs/fase_175_local_delivery_package.md`.
+- Uso: abrir `http://127.0.0.1:4175/reset-cache.html` si `http://127.0.0.1:4174/` queda sin menus/canvas.
+- Comandos: `npm run prepare:f175:local-package` y `npm run test:f175:local-package`.
+- Guardrail: no cambia calculos, RAG, DB, menus canonicos ni rutas de reporte; solo limpia cache y documenta entrega local.
+
 ## F174A (2026-07-16) - Predeploy low-risk hardening
 
 - Objetivo: agregar una capa pequena de seguridad antes del deploy sin cambiar metodologia validada ni schema DB.

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F175 (2026-07-16) - Local delivery + cache recovery
+
+- Se agrega `public/reset-cache.html` para desregistrar service workers antiguos y borrar caches `radshield-*` cuando desaparezcan menus/canvas tras un build.
+- `index.html` limpia service workers/caches por defecto, salvo que se abra con `?enable-sw=1`.
+- Se agrega paquete local F175 con URLs de recuperacion, evidencia F153/F156/F172/F173/F174A y artefactos de build.
+- Nuevos comandos: `npm run prepare:f175:local-package` y `npm run test:f175:local-package`.
+
 ## F174A (2026-07-16) - Predeploy low-risk hardening
 
 - Se agregan guardas no invasivas al motor: `isFinitePositive`, `clampTransmission` y `getCalculationInputWarnings`.

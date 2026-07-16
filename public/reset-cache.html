@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RadShield-MX Cache Reset</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      main {
+        width: min(560px, calc(100vw - 32px));
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 24px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+      }
+      p {
+        line-height: 1.5;
+      }
+      code {
+        background: #e2e8f0;
+        border-radius: 4px;
+        padding: 2px 5px;
+      }
+      button {
+        border: 0;
+        border-radius: 6px;
+        background: #f97316;
+        color: white;
+        cursor: pointer;
+        font-weight: 700;
+        padding: 10px 14px;
+      }
+      #status {
+        margin-top: 14px;
+        color: #475569;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>RadShield-MX cache reset</h1>
+      <p>Use this page if menus, canvas or chunks disappear after a new build.</p>
+      <p>It unregisters old service workers and deletes <code>radshield-*</code> caches, then returns to the app.</p>
+      <button id="reset">Clean cache and reload app</button>
+      <div id="status">Ready.</div>
+    </main>
+    <script>
+      async function resetRadShieldCache() {
+        var status = document.getElementById('status');
+        status.textContent = 'Cleaning service workers and caches...';
+        if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+          var registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(function (registration) { return registration.unregister(); }));
+        }
+        if ('caches' in window) {
+          var names = await caches.keys();
+          await Promise.all(
+            names
+              .filter(function (name) { return name.indexOf('radshield-') === 0; })
+              .map(function (name) { return caches.delete(name); })
+          );
+        }
+        status.textContent = 'Cache cleaned. Opening app...';
+        setTimeout(function () {
+          window.location.href = './';
+        }, 500);
+      }
+      document.getElementById('reset').addEventListener('click', function () {
+        resetRadShieldCache().catch(function (error) {
+          document.getElementById('status').textContent = 'Reset failed: ' + error.message;
+        });
+      });
+    </script>
+  </body>
+</html>
