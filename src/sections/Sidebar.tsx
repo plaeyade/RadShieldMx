@@ -50,6 +50,7 @@ function ActionBtn({
     <button
       onClick={onClick}
       title={title}
+      aria-label={`${label}: ${title}`}
       data-testid={`sidebar-action-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
       className={`${h} ${w} flex flex-col items-center justify-center rounded-lg py-1 px-0.5 transition-all duration-150 border ${
         isActive
@@ -157,6 +158,7 @@ const QUICK_ACTIONS = [
   { icon: Play,        label: 'Calc', action: 'calculate',  title: 'Calcular blindaje (F5)',            color: '#f97316', bg: '#fff7ed' },
   { icon: Calculator,  label: 'UAQ',  action: 'uaq',        title: 'Unidad de Atenuacion Cualitativa',   color: '#10b981', bg: '#ecfdf5' },
   { icon: FileSpreadsheet, label: 'Mem', action: 'memoria', title: 'Memoria Analitica AI',              color: '#8b5cf6', bg: '#f5f3ff' },
+  { icon: GitCompareArrows, label: 'Mat', action: 'material', title: 'Toolbox materiales: TVL, densidad, peso, costo, tiempo y carga estructural', color: '#ea580c', bg: '#fff7ed' },
   { icon: Box,         label: 'DXF',  action: 'dxf',        title: 'Importar DXF AutoCAD',              color: '#ea580c', bg: '#fff7ed' },
 ];
 
@@ -212,6 +214,7 @@ export default function Sidebar({
       case 'calculate': onRunCalculations?.(); break;
       case 'uaq': onUAQ?.(); break;
       case 'memoria': onMemoriaAI?.(); break;
+      case 'material': open('materialComparison'); break;
       case 'dxf': onDXFViewer?.(); break;
     }
   };
@@ -219,7 +222,7 @@ export default function Sidebar({
   /* ─── collapsed mode ─── */
   if (collapsed) {
     return (
-      <div className="h-full flex flex-col bg-white border-r border-gray-200 items-center py-2">
+      <div className="h-full w-12 min-w-12 max-w-12 shrink-0 flex flex-col bg-white border-r border-gray-200 items-center py-2" data-testid="f186-sidebar-collapsed-stable">
         <Button variant="ghost" size="icon" className="h-8 w-8 mb-2" onClick={() => setCollapsed(false)} title="Expandir">
           <ChevronRight className="w-4 h-4" />
         </Button>
@@ -227,9 +230,9 @@ export default function Sidebar({
           <Sparkles className="w-4 h-4 text-white" />
         </div>
         <Separator className="my-2" />
-        {DRAWING_TOOLS.slice(0, 5).map(({ id, icon: Icon, label, color, bg }) => (
+        {DRAWING_TOOLS.slice(0, 5).map(({ id, icon: Icon, label, color, bg, desc }) => (
           <Button key={id} variant={activeTool === id ? 'default' : 'ghost'} size="icon" className="h-8 w-8 mb-1"
-            onClick={() => setActiveTool(id)} title={label}>
+            onClick={() => setActiveTool(id)} title={desc} aria-label={`${label}: ${desc}`}>
             <Icon className="w-4 h-4" style={{ color: activeTool === id ? '#fff' : color }} />
           </Button>
         ))}
@@ -242,7 +245,7 @@ export default function Sidebar({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full w-[286px] min-w-[286px] max-w-[286px] shrink-0 flex flex-col bg-white border-r border-gray-200" data-testid="f186-sidebar-stable-width">
       {/* ═══ HEADER ═══ */}
       <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gradient-to-r from-[#fff7ed] to-white">
         <div className="flex items-center gap-2">
@@ -266,7 +269,7 @@ export default function Sidebar({
         {/* ─── QUICK ACTIONS (from QAB) ─── */}
         <div className="bg-gradient-to-r from-[#fff7ed] via-white to-[#ecfdf5] rounded-lg border border-slate-100 p-2 shadow-sm">
           <SectionHead icon={Play} label="Acciones" color="#f97316" />
-          <div className="grid grid-cols-4 gap-1 mt-1">
+          <div className="grid grid-cols-5 gap-1 mt-1" data-testid="f186-quick-actions-with-mat">
             {QUICK_ACTIONS.map((a) => (
               <ActionBtn key={a.label} icon={a.icon} label={a.label} title={a.title}
                 color={a.color} bgColor={a.bg} size="sm"

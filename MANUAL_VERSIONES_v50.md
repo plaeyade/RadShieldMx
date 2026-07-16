@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F186 (2026-07-16) - Sidebar estable + Mat toolbox
+
+- Objetivo: mejorar operacion del espacio lateral sin mover el canvas principal.
+- Superficies: `Sidebar`, `MaterialComparisonDialog`, `UpdateAppDialog`.
+- Uso: `npm run test:f186:sidebar-materials`.
+- Incluye: ancho estable, leyendas hover/accesibles, acceso rapido `Mat` y toolbox material unica con TVL, densidad, peso, costo, tiempo y carga estructural.
+- Guardrail: no cambia calculos, eventos del canvas, demo R&F ni menus superiores.
+- Posterior: validar visualmente que el ancho estable no tape el layout en 1366px/1920px antes de agregar grips/cotas reales.
+
 ## F185 (2026-07-16) - Canvas micro assist
 
 - Objetivo: mejorar el canvas profesional sin cambios destructivos de layout.

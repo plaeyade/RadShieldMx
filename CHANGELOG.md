@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F186 (2026-07-16) - Sidebar estable + Mat toolbox
+
+- Se refuerza la sidebar con ancho visible estable en modo expandido y colapsado.
+- Los botones de herramientas/sidebar exponen `title` y `aria-label` para leyendas hover/accesibilidad.
+- Se agrega acceso rapido `Mat` hacia `materialComparison`.
+- Material Comparison consolida una toolbox unica con TVL, densidad, kg/m2, peso total, costo, tiempo estimado y carga estructural.
+- Nuevo comando: `npm run test:f186:sidebar-materials`.
+
 ## F185 (2026-07-16) - Canvas micro assist
 
 - Se agrega asistencia compacta en el HUD del canvas: herramienta activa, seleccion, snap, capas, evidencia y heatmap.

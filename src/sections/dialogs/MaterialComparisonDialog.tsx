@@ -98,10 +98,10 @@ export default function MaterialComparisonDialog() {
         <div data-testid="f184-material-integrated-summary" className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div>
-              <h3 className="text-xs font-semibold text-emerald-950">F184 lectura integrada TVL/costo/tiempo/estructura</h3>
+              <h3 className="text-xs font-semibold text-emerald-950">F186 toolbox unica TVL/densidad/peso/costo/tiempo/estructura</h3>
               <p className="text-[9px] text-emerald-800">Comparacion no destructiva para elegir material antes de aplicarlo a barreras del floorplan.</p>
             </div>
-            <Badge variant="outline" className="text-[9px] bg-white">Area {aN} m2</Badge>
+            <Badge variant="outline" className="text-[9px] bg-white">Mat | Area {aN} m2</Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {integratedTop.map(item => (
@@ -122,6 +122,36 @@ export default function MaterialComparisonDialog() {
           <p className="mt-2 text-[8px] text-emerald-700">
             Guardrail: esta tabla informa decision de obra; los espesores finales siguen saliendo del motor de calculo y de evidencia normativa.
           </p>
+          <div data-testid="f186-material-toolbox-full-table" className="mt-3 overflow-x-auto rounded border border-emerald-100 bg-white/75">
+            <table className="w-full text-[8px]">
+              <thead className="bg-emerald-50 text-emerald-900">
+                <tr>
+                  <th className="text-left px-2 py-1">Material</th>
+                  <th className="text-right px-2 py-1">TVL mm</th>
+                  <th className="text-right px-2 py-1">Dens.</th>
+                  <th className="text-right px-2 py-1">kg/m2</th>
+                  <th className="text-right px-2 py-1">kg total</th>
+                  <th className="text-right px-2 py-1">Costo</th>
+                  <th className="text-right px-2 py-1">Dias</th>
+                  <th className="text-left px-2 py-1">Carga</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map(item => (
+                  <tr key={item.code} data-testid="f186-material-toolbox-row" className="border-t border-emerald-100">
+                    <td className="px-2 py-1 font-medium text-emerald-950">{item.name}</td>
+                    <td className="text-right px-2 py-1 font-mono">{item.tvl.toFixed(1)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{item.rho.toFixed(2)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{item.kgM2.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{item.m2tvl.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">${item.c2tvl.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{item.installDays.toFixed(1)}</td>
+                    <td className="px-2 py-1">{item.structuralStatus}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div data-testid="f172a-material-methodology" className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-3">
           <div className="flex items-center justify-between gap-2">
