@@ -246,6 +246,7 @@
     "prepare:f181:deploy-now": "node scripts/f181-deploy-now-handoff.mjs",
     "test:f181:deploy-now": "node scripts/check-f181-deploy-now-handoff-contracts.mjs",
     "test:f184:safe-quality": "node scripts/check-f184-safe-quality-contracts.mjs",
+    "test:f185:canvas-assist": "node scripts/check-f185-canvas-micro-assist-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

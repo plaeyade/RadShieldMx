@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F185 (2026-07-16) - Canvas micro assist
+
+- Se agrega asistencia compacta en el HUD del canvas: herramienta activa, seleccion, snap, capas, evidencia y heatmap.
+- La asistencia sugiere la siguiente accion operativa sin cambiar eventos, geometria, calculos, sidebar ni topbar.
+- Se mantiene intacto el demo R&F y el shell actual del canvas.
+- Nuevo comando: `npm run test:f185:canvas-assist`.
+
 ## F184 (2026-07-16) - Safe quality workflow
 
 - Se agrega un workflow seguro de calidad release para motor de calculo, canvas, Memoria IA, materiales, RAG y export.

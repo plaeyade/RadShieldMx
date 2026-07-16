@@ -37,6 +37,7 @@ import { buildF141ProfessionalCanvasSummary } from '@/lib/f141CanvasProfessional
 import { buildF145CanvasCadProfessionalSummary } from '@/lib/f145CanvasCadProfessional';
 import { buildF171CanvasPolishPredeploy } from '@/lib/f171CanvasPolishPredeploy';
 import { buildF173CanvasLowRiskPolish } from '@/lib/f173CanvasLowRiskPolish';
+import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 
@@ -271,6 +272,18 @@ export default function CanvasArea({
     barrierResults,
     sampleLines,
     snapToGrid: canvasState.snapToGrid,
+    heatmapPointCount,
+  });
+  const f185CanvasAssist = buildF185CanvasMicroAssist({
+    floorPlan,
+    activeTool,
+    selectedId: canvasState.selectedId,
+    selectedIds: canvasState.selectedIds,
+    snapToGrid: canvasState.snapToGrid,
+    layers,
+    barrierResults,
+    sampleLines,
+    heatmapEnabled,
     heatmapPointCount,
   });
 
@@ -566,6 +579,34 @@ export default function CanvasArea({
                     {signal.label}:{signal.value}
                   </span>
                 ))}
+              </div>
+              <div
+                data-testid="f185-canvas-micro-assist"
+                className="mt-1 flex items-center gap-1 overflow-hidden"
+                title={`${f185CanvasAssist.compactHint} Siguiente: ${f185CanvasAssist.nextAction}`}
+              >
+                <span className="text-[8px] font-bold rounded border px-1 py-0.5 shrink-0 bg-indigo-50 text-indigo-700 border-indigo-100">
+                  F185
+                </span>
+                {f185CanvasAssist.items.map((item) => (
+                  <span
+                    key={item.id}
+                    data-testid={`f185-assist-${item.id}`}
+                    className={`text-[8px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      item.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : item.status === 'active'
+                          ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                          : item.status === 'attention'
+                            ? 'bg-amber-50 text-amber-700 border-amber-100'
+                            : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={item.tooltip}
+                  >
+                    {item.label}:{item.value}
+                  </span>
+                ))}
+                <span className="text-[8px] text-slate-400 truncate">{f185CanvasAssist.nextAction}</span>
               </div>
             </div>
 

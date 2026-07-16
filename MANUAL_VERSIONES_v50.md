@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F185 (2026-07-16) - Canvas micro assist
+
+- Objetivo: mejorar el canvas profesional sin cambios destructivos de layout.
+- Superficies: `CanvasArea` y `src/lib/f185CanvasMicroAssist.ts`.
+- Uso: `npm run test:f185:canvas-assist`.
+- Incluye: herramienta activa, seleccion, snap, capas, evidencia, heatmap y siguiente accion recomendada.
+- Guardrail: no cambia eventos del canvas, geometria, formulas, topbar, sidebar ni demo R&F.
+- Posterior: si F185 se mantiene estable, avanzar a microcambios CAD reales: cotas editables, grips y snapping avanzado con smoke visual por cambio.
+
 ## F184 (2026-07-16) - Safe quality workflow
 
 - Objetivo: mejorar motor/calidad, memoria, materiales, RAG y export sin tocar el layout sensible del canvas/sidebar.
