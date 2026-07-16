@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F167 (2026-07-15) - Deploy target recovery
+
+- Artefactos: `outputs/f167_deploy_target_recovery/f167_deploy_target_recovery.json` y `outputs/fase_167_deploy_target_recovery.md`.
+- Resultado: `deploy-network-gated`; F159 esta listo, pero Codex no alcanza `git.chatgpt-team.site:443`.
+- No se guarda version ni se despliega porque el source commit no pudo empujarse al repositorio Sites.
+- Scripts: `npm run prepare:f167:deploy-target` y `npm run test:f167:deploy-target`.
+
 ## F166 (2026-07-15) - Roadmap de siguientes fases
 
 - Artefactos: `outputs/f166_next_phases_roadmap/f166_next_phases_roadmap.json` y `outputs/fase_166_next_phases_roadmap.md`.

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F167 (2026-07-15) - Deploy target recovery
+
+- Se intento recuperar el flujo Sites con `project_id` existente, HEAD exacto y paquete F159 `sites-deploy-ready`.
+- Codex obtuvo credencial temporal de escritura Sites, pero el push al repositorio remoto quedo bloqueado por salida a `git.chatgpt-team.site:443`.
+- Por seguridad, no se ejecuto `save_site_version` ni deploy porque Sites exige fuente empujada antes de guardar version.
+- Siguiente paso: habilitar egreso Codex a `git.chatgpt-team.site:443`, repetir F167, desplegar version privada y correr F154-F159 contra URL HTTPS final.
+
 ## F166 (2026-07-15) - Roadmap de siguientes fases
 
 - Se agrega roadmap versionado con fases F167-F172.
