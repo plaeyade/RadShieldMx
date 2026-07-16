@@ -20,7 +20,7 @@ import type { CanvasLayer } from '@/hooks/useCanvasLayers';
 import type { FreehandStroke } from '@/hooks/useFreehandDraw';
 import type { StickyNote } from '@/hooks/useStickyNotes';
 import { useI18n } from '@/hooks/useI18n';
-import type { FloorPlan } from '@/types/radshield';
+import type { Barrier, CriticalPoint, FloorPlan, OccupiedRegion, RadiationSource } from '@/types/radshield';
 import { getControlledZoneCanvasSummary } from '@/lib/controlledZoneCanvasUx';
 import {
   buildAuditSnapshotMetadata,
@@ -401,6 +401,80 @@ export default function CanvasArea({
   const regionCount =
     ((floorPlan as { regions?: unknown[] } | undefined)?.regions?.length ??
       (floorPlan as { occupiedRegions?: unknown[] } | undefined)?.occupiedRegions?.length) ?? 0;
+  const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
+  const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
+  const selectedCriticalPoint = floorPlan?.criticalPoints?.find((point) => point.id === canvasState.selectedId) ?? null;
+  const selectedRegion =
+    [...(floorPlan?.regions ?? []), ...(floorPlan?.occupiedRegions ?? [])].find((region) => region.id === canvasState.selectedId) ?? null;
+  const formatInspectorNumber = (value: unknown, suffix = '', digits = 2) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return 'N/D';
+    return `${value.toFixed(digits)}${suffix}`;
+  };
+  const formatInspectorThickness = (barrier: Barrier) => {
+    const value = barrier.requiredThickness_mm ?? barrier.thickness_mm;
+    if (typeof value === 'number' && Number.isFinite(value)) return `${value.toFixed(1)} mm`;
+    if (value && typeof value === 'object') {
+      const first = Object.entries(value).find(([, thickness]) => typeof thickness === 'number' && Number.isFinite(thickness));
+      if (first) return `${first[0]} ${Number(first[1]).toFixed(1)} mm`;
+    }
+    return 'pendiente';
+  };
+  const buildInspectorRows = (): Array<[string, string]> => {
+    if (selectedBarrier) {
+      return [
+        ['Tipo', selectedBarrier.barrierType],
+        ['Mat', selectedBarrier.materialCode || selectedBarrier.material || 'N/D'],
+        ['T', formatInspectorThickness(selectedBarrier)],
+        ['P', formatInspectorNumber(selectedBarrier.designGoal_mSv_per_wk, ' mSv/sem', 3)],
+      ];
+    }
+    if (selectedSource) {
+      return [
+        ['Mod', selectedSource.modality?.name ?? 'N/D'],
+        ['W', `${formatInspectorNumber(selectedSource.workloadValue, '', 1)} ${selectedSource.workloadUnit ?? ''}`.trim()],
+        ['U', formatInspectorNumber(selectedSource.useFactor, '', 2)],
+        ['Iso', formatInspectorNumber(selectedSource.isocenterHeight_m, ' m', 2)],
+      ];
+    }
+    if (selectedCriticalPoint) {
+      return [
+        ['Tipo', selectedCriticalPoint.pointType],
+        ['T', formatInspectorNumber(selectedCriticalPoint.occupancyFactor, '', 3)],
+        ['P', formatInspectorNumber(selectedCriticalPoint.designGoal_mSv_per_wk, ' mSv/sem', 3)],
+        ['Estado', selectedCriticalPoint.enabled === false ? 'off' : 'on'],
+      ];
+    }
+    if (selectedRegion) {
+      return [
+        ['Zona', 'ocupada'],
+        ['T', formatInspectorNumber(selectedRegion.occupancyFactor, '', 3)],
+        ['P', formatInspectorNumber(selectedRegion.designGoal_mSv_per_wk, ' mSv/sem', 3)],
+        ['Pts', `${selectedRegion.points?.length ?? 0}`],
+      ];
+    }
+    return [
+      ['Herr', currentTool.label],
+      ['Snap', canvasState.snapToGrid ? 'ON' : 'OFF'],
+      ['Sel', `${canvasState.selectedIds.length}`],
+      ['Capas', `${layers.filter((layer) => layer.visible).length}/${layers.length || 0}`],
+    ];
+  };
+  const selectedInspectorKind =
+    selectedBarrier ? 'Muro' :
+      selectedSource ? 'Fuente' :
+        selectedCriticalPoint ? 'Punto' :
+          selectedRegion ? 'Zona' :
+            canvasState.selectedId ? 'Objeto' : 'Sin seleccion';
+  const selectedInspectorName =
+    selectedBarrier?.name ??
+    selectedSource?.name ??
+    selectedCriticalPoint?.name ??
+    selectedRegion?.name ??
+    canvasState.selectedId ??
+    'Selecciona un objeto';
+  const selectedInspectorRows = buildInspectorRows();
+  const selectedInspectorEntity: Barrier | RadiationSource | CriticalPoint | OccupiedRegion | null =
+    selectedBarrier ?? selectedSource ?? selectedCriticalPoint ?? selectedRegion ?? null;
   const workflowSteps = [
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
@@ -670,13 +744,46 @@ export default function CanvasArea({
             </button>
           ))}
         </div>
-        <span
-          data-testid="f191-mode-status"
-          className="ml-auto shrink-0 rounded bg-slate-100 px-2 py-0.5 text-[9px] font-mono text-slate-500"
-          title="Estado del modo visual F191"
+        <div
+          data-testid="f191c-object-inspector"
+          className="ml-auto min-w-[260px] max-w-[560px] shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 flex items-center gap-1.5 overflow-hidden"
+          title={selectedInspectorEntity ? `Inspector: ${selectedInspectorKind} ${selectedInspectorName}` : 'Inspector contextual del canvas'}
+          aria-label="Inspector contextual del objeto seleccionado en canvas"
         >
-          F191 {visualMode} | {heatmapEnabled ? `${heatmapPointCount} heat` : 'heat off'}
-        </span>
+          <span
+            data-testid="f191-mode-status"
+            className="shrink-0 rounded bg-white px-1.5 py-0.5 text-[9px] font-mono text-slate-500"
+            title="Estado del modo visual F191"
+          >
+            F191 {visualMode} | {heatmapEnabled ? `${heatmapPointCount} heat` : 'heat off'}
+          </span>
+          <span
+            data-testid="f191c-inspector-type"
+            className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold ${
+              selectedInspectorEntity ? 'bg-orange-100 text-orange-700' : 'bg-slate-200 text-slate-600'
+            }`}
+          >
+            {selectedInspectorKind}
+          </span>
+          <span
+            data-testid="f191c-inspector-name"
+            className="min-w-0 max-w-[150px] truncate text-[10px] font-semibold text-slate-700"
+          >
+            {selectedInspectorName}
+          </span>
+          <div className="hidden xl:flex min-w-0 items-center gap-1 overflow-hidden">
+            {selectedInspectorRows.slice(0, 4).map(([label, value]) => (
+              <span
+                key={`${label}-${value}`}
+                data-testid="f191c-inspector-chip"
+                className="shrink-0 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-mono text-slate-600"
+                title={`${label}: ${value}`}
+              >
+                {label}:{value}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden relative">

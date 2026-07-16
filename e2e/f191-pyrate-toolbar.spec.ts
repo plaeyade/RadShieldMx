@@ -17,9 +17,12 @@ test('F191 pyrateShield-inspired toolbar is visible and changes canvas modes', a
   await expect(page.getByTestId('f191-cad-tool-group')).toBeVisible();
   await expect(page.getByTestId('f191-clinical-action-group')).toBeVisible();
   await expect(page.getByTestId('f191-visual-mode-switcher')).toBeVisible();
+  await expect(page.getByTestId('f191c-object-inspector')).toBeVisible();
+  await expect(page.getByTestId('f191c-inspector-type')).toContainText('Sin seleccion');
 
   await page.getByTestId('f191-tool-barrier').click();
   await expect(page.getByTestId('f98-active-canvas-tool-indicator')).toContainText('Dibujar barrera');
+  await expect(page.getByTestId('f191c-object-inspector')).toContainText('Herr');
 
   await page.getByTestId('f191-visual-mode-heat').click();
   await expect(page.getByTestId('f191-mode-status')).toContainText('heat');

@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F191C (2026-07-16) - Object inspector contextual
+
+- Objetivo: dar lectura inmediata del objeto seleccionado en el canvas sin abrir paneles adicionales.
+- Superficies: `CanvasArea`, smoke F191, `UpdateAppDialog`.
+- Uso: `npm run test:f191c:object-inspector` y `npm run test:f191:pyrate-toolbar-smoke`.
+- Incluye: inspector de muro/fuente/zona/punto critico con chips de material, espesor, workload, ocupacion, meta de diseno, snap y capas.
+- Guardrail: no modifica formulas, renderer, seleccion, eventos del canvas, sidebar, demo R&F ni F188/F189.
+- Operacion: seleccionar un objeto del plano y revisar la banda F191C; usar los botones de la misma banda para abrir material/calculo/evidencia si se requiere edicion profunda.
+- Posterior: convertir los chips en entradas editables solo despues de smoke visual dedicado y undo/redo fino.
+
 ## F191 (2026-07-16) - pyrateShield-inspired toolbar
 
 - Objetivo: adaptar el flujo operativo de pyrateShield al frontend actual sin sustituir la interfaz estable.

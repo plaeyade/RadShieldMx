@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+## F191C (2026-07-16) - Object inspector contextual
+
+- Se agrega inspector compacto de objeto seleccionado en la banda CAD F191.
+- El inspector identifica muro, fuente, punto critico o zona y muestra atributos clave sin abrir dialogos.
+- Para muros muestra tipo, material, espesor calculado/pendiente y meta de diseno.
+- Para fuentes muestra modalidad, workload, factor de uso e isocentro.
+- Para zonas/puntos muestra ocupacion, meta de diseno y estado.
+- En ausencia de seleccion muestra herramienta activa, snap, seleccion multiple y capas visibles.
+- Guardrail: no cambia motor de calculo, geometria, eventos del canvas, sidebar ni demo R&F.
+- Nuevo comando: `npm run test:f191c:object-inspector`.
+
 ## F191 (2026-07-16) - pyrateShield-inspired toolbar
 
 - Se agrega toolbar CAD-clinica compacta inspirada en pyrateShield debajo de la toolbar principal.
