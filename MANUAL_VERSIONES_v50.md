@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F191D (2026-07-16) - Context actions seguros
+
+- Objetivo: dar acciones inmediatas al inspector de objeto sin abrir menus flotantes sobre el canvas.
+- Superficies: `CanvasArea`, smoke F191, `UpdateAppDialog`.
+- Uso: `npm run test:f191d:context-actions` y `npm run test:f191:pyrate-toolbar-smoke`.
+- Incluye: `Mat`, `Calc`, `Evid`, `Ver` y `X` para materiales, recalculo, evidencia, centrar objeto y limpiar seleccion.
+- Guardrail: las acciones aparecen solo en ancho `2xl`; no hay borrar/duplicar hasta tener undo/redo fino, confirmacion y smoke visual dedicado.
+- Operacion: seleccionar objeto; usar `Ver` para centrarlo, `Mat` para presets/materiales, `Calc` para recalcular y `Evid` para abrir el paquete de evidencia.
+- Posterior: agregar editar propiedades/duplicar/borrar solo como F191E o posterior, con confirmacion y pruebas de recuperacion.
+
 ## F191C (2026-07-16) - Object inspector contextual
 
 - Objetivo: dar lectura inmediata del objeto seleccionado en el canvas sin abrir paneles adicionales.

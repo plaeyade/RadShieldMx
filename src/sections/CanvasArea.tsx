@@ -475,6 +475,30 @@ export default function CanvasArea({
   const selectedInspectorRows = buildInspectorRows();
   const selectedInspectorEntity: Barrier | RadiationSource | CriticalPoint | OccupiedRegion | null =
     selectedBarrier ?? selectedSource ?? selectedCriticalPoint ?? selectedRegion ?? null;
+  const selectedInspectorFocusPoint = (() => {
+    if (selectedBarrier) {
+      return { x: (selectedBarrier.x1 + selectedBarrier.x2) / 2, y: (selectedBarrier.y1 + selectedBarrier.y2) / 2 };
+    }
+    if (selectedSource) return { x: selectedSource.x, y: selectedSource.y };
+    if (selectedCriticalPoint) return { x: selectedCriticalPoint.x, y: selectedCriticalPoint.y };
+    if (selectedRegion?.points?.length) {
+      const sum = selectedRegion.points.reduce((acc, point) => ({ x: acc.x + point.x, y: acc.y + point.y }), { x: 0, y: 0 });
+      return { x: sum.x / selectedRegion.points.length, y: sum.y / selectedRegion.points.length };
+    }
+    return null;
+  })();
+  const focusSelectedInspectorEntity = () => {
+    if (!selectedInspectorFocusPoint || !canvasState.selectedId) return;
+    setCanvasState((prev) => ({
+      ...prev,
+      offsetX: canvasSize.width / 2 - selectedInspectorFocusPoint.x * prev.scale,
+      offsetY: canvasSize.height / 2 - selectedInspectorFocusPoint.y * prev.scale,
+      selectedIds: prev.selectedIds.includes(canvasState.selectedId) ? prev.selectedIds : [canvasState.selectedId],
+    }));
+  };
+  const clearInspectorSelection = () => {
+    setCanvasState((prev) => ({ ...prev, selectedId: null, selectedIds: [] }));
+  };
   const workflowSteps = [
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
@@ -782,6 +806,71 @@ export default function CanvasArea({
                 {label}:{value}
               </span>
             ))}
+          </div>
+          <div
+            data-testid="f191d-context-actions"
+            className="hidden 2xl:flex shrink-0 items-center gap-0.5 border-l border-slate-200 pl-1"
+            aria-label="Acciones contextuales seguras del objeto seleccionado"
+          >
+            {onOpenShieldingPresets && (
+              <button
+                type="button"
+                data-testid="f191d-action-material"
+                className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-orange-200 hover:text-orange-700 disabled:opacity-40"
+                onClick={onOpenShieldingPresets}
+                disabled={!selectedInspectorEntity}
+                title="Abrir materiales/presets para el objeto seleccionado"
+                aria-label="Abrir materiales para seleccion"
+              >
+                Mat
+              </button>
+            )}
+            {onRunCalculations && (
+              <button
+                type="button"
+                data-testid="f191d-action-calculate"
+                className="h-5 rounded border border-orange-200 bg-white px-1.5 text-[9px] font-semibold text-orange-700 hover:bg-orange-50"
+                onClick={onRunCalculations}
+                title="Recalcular blindaje con el contexto actual"
+                aria-label="Recalcular blindaje"
+              >
+                Calc
+              </button>
+            )}
+            {onOpenEvidencePack && (
+              <button
+                type="button"
+                data-testid="f191d-action-evidence"
+                className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-700"
+                onClick={onOpenEvidencePack}
+                title="Abrir Evidence Pack del proyecto"
+                aria-label="Abrir Evidence Pack"
+              >
+                Evid
+              </button>
+            )}
+            <button
+              type="button"
+              data-testid="f191d-action-focus"
+              className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-emerald-200 hover:text-emerald-700 disabled:opacity-40"
+              onClick={focusSelectedInspectorEntity}
+              disabled={!selectedInspectorFocusPoint}
+              title="Centrar objeto seleccionado en el canvas"
+              aria-label="Centrar seleccion"
+            >
+              Ver
+            </button>
+            <button
+              type="button"
+              data-testid="f191d-action-clear"
+              className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-red-200 hover:text-red-700 disabled:opacity-40"
+              onClick={clearInspectorSelection}
+              disabled={!canvasState.selectedId && canvasState.selectedIds.length === 0}
+              title="Limpiar seleccion del canvas"
+              aria-label="Limpiar seleccion"
+            >
+              X
+            </button>
           </div>
         </div>
       </div>

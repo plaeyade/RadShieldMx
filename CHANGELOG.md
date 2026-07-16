@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F191D (2026-07-16) - Context actions seguros
+
+- Se agrega una banda de acciones contextuales dentro del inspector F191C.
+- Acciones disponibles: materiales, recalcular, Evidence Pack, centrar seleccion y limpiar seleccion.
+- Las acciones se muestran solo en ancho `2xl` para no comprimir ni tapar el floorplan.
+- Se evita borrar o duplicar desde esta fase porque son acciones destructivas y requieren undo/redo dedicado.
+- Guardrail: no cambia motor de calculo, geometria, renderer, sidebar, topbar ni demo R&F.
+- Nuevo comando: `npm run test:f191d:context-actions`.
+
 ## F191C (2026-07-16) - Object inspector contextual
 
 - Se agrega inspector compacto de objeto seleccionado en la banda CAD F191.
