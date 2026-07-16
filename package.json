@@ -214,6 +214,8 @@
     "test:f167:deploy-target": "node scripts/check-f167-deploy-target-recovery-contracts.mjs",
     "prepare:f168:db-live-final": "node scripts/f168-db-live-finalization.mjs",
     "test:f168:db-live-final": "node scripts/check-f168-db-live-finalization-contracts.mjs",
+    "prepare:f169:numeric-db-qa": "node scripts/f169-predeploy-numeric-db-qa.mjs",
+    "test:f169:numeric-db-qa": "node scripts/check-f169-predeploy-numeric-db-qa-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F169 (2026-07-16) - Predeploy numeric QA + DB live gate
+
+- Se agrega compuerta predeploy que regenera F149, valida contratos F149/F168, ejecuta `shieldingMath.test.ts` y confirma DB live.
+- La fase bloquea deploy funcional si falla el QA numerico normativo minimo, DB live o contratos de evidencia.
+- Siguiente paso recomendado: F170 RAG/citas DB-backed o F171 canvas polish predeploy antes de reintentar deploy publico.
+
 ## F168 (2026-07-16) - DB live finalization
 
 - Se cerro la DB live real con MySQL 8.0.46, autenticacion valida, migraciones/seed aplicados y `db-live-validation` OK.

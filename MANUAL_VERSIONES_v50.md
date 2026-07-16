@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F169 (2026-07-16) - Predeploy numeric QA + DB live gate
+
+- Artefactos: `outputs/f169_predeploy_numeric_db_qa/f169_predeploy_numeric_db_qa.json` y `outputs/fase_169_predeploy_numeric_db_qa.md`.
+- Resultado esperado: `predeploy-numeric-ready` si pasan F149, F168 y pruebas `shieldingMath`.
+- Uso: `npm run prepare:f169:numeric-db-qa` y `npm run test:f169:numeric-db-qa`.
+- Criterio: bloquea deploy funcional si hay fallo numerico normativo, DB live o contrato de evidencia.
+
 ## F168 (2026-07-16) - DB live finalization
 
 - Artefactos: `outputs/f168_db_live_finalization/f168_db_live_finalization.json` y `outputs/fase_168_db_live_finalization.md`.
