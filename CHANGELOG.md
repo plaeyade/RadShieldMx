@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F178 (2026-07-16) - Alternate deploy readiness
+
+- Se agregan `vercel.json`, `netlify.toml`, `public/_redirects` y `public/_headers` para deploy estatico alterno con fallback SPA.
+- Se documentan opciones: Vercel, Netlify, Cloudflare Pages, VPS full-stack y paquete local/offline.
+- Politica: static hosting sirve para frontend/demo; release clinico multiusuario requiere backend, DB, secretos, backup y auth.
+- Nuevos comandos: `npm run prepare:f178:alternate-deploy` y `npm run test:f178:alternate-deploy`.
+
 ## F177 (2026-07-16) - Sites deploy retry
 
 - Se agrega compuerta F177 para reintentar Sites/Git hosting despues de F176.

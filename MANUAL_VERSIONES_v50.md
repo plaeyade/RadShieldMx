@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F178 (2026-07-16) - Alternate deploy readiness
+
+- Objetivo: dejar lista una ruta de publicacion alterna si Sites/Git continua bloqueado por red.
+- Superficies: `vercel.json`, `netlify.toml`, `public/_redirects` y `public/_headers`.
+- Opciones: Vercel/Netlify/Cloudflare Pages para frontend estatico; VPS para full-stack con API, MySQL, RAG y secretos.
+- Artefactos: `outputs/f178_alternate_deploy_readiness/f178_alternate_deploy_readiness.json`, `outputs/f178_alternate_deploy_readiness/README_F178_ALTERNATE_DEPLOY.md` y `outputs/fase_178_alternate_deploy_readiness.md`.
+- Uso: `npm run prepare:f178:alternate-deploy` y `npm run test:f178:alternate-deploy`.
+- Guardrail: no subir `.env`, `DATABASE_URL`, dumps DB ni corpus documental privado a proveedores estaticos.
+
 ## F177 (2026-07-16) - Sites deploy retry
 
 - Objetivo: reintentar deploy publico mediante Sites despues de F176 sin comprometer el paquete local.
