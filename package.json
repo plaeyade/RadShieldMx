@@ -208,6 +208,8 @@
     "test:f164:clinical-map": "node scripts/check-f164-clinical-project-map-contracts.mjs",
     "prepare:f165:clinical-outputs": "node scripts/f165-clinical-outputs-closure.mjs",
     "test:f165:clinical-outputs": "node scripts/check-f165-clinical-outputs-closure-contracts.mjs",
+    "prepare:f166:roadmap": "node scripts/f166-next-phases-roadmap.mjs",
+    "test:f166:roadmap": "node scripts/check-f166-next-phases-roadmap-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

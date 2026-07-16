@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F166 (2026-07-15) - Roadmap de siguientes fases
+
+- Artefactos: `outputs/f166_next_phases_roadmap/f166_next_phases_roadmap.json` y `outputs/fase_166_next_phases_roadmap.md`.
+- Fases recomendadas: F167 deploy public smoke, F168 DB live, F169 QA numerico, F170 RAG/citas live, F171 canvas clinical sync y F172 release candidate final.
+- Puntos ya implementados: F159, F161, F163, F164 y F165.
+- Scripts: `npm run prepare:f166:roadmap` y `npm run test:f166:roadmap`.
+
 ## F161 (2026-07-15) - Manuales in extenso predeploy
 
 - Se agrega outputs/f161_manuales_in_extenso/MANUAL_OPERACION_PREDEPLOY_F161.md como runbook unico de operacion antes del deploy final.

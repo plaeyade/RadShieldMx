@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F166 (2026-07-15) - Roadmap de siguientes fases
+
+- Se agrega roadmap versionado con fases F167-F172.
+- Se separa lo ya implementado (F159/F161/F163/F164/F165) de pendientes reales: deploy publico, DB live, QA numerico, RAG/citas, sync canvas/3D y export visual runtime.
+- Decision: avanzar F167 si el target Git/hosting esta listo; si no, continuar F168/F169 localmente sin bloquear estabilizacion UI.
+
 ## F165/F161 (2026-07-15) - Salidas clinicas y manuales predeploy
 
 - F161 agrega manual operativo in extenso predeploy con flujo real de proyecto, canvas, calculo, RAG/OCR, DB/deploy y control de versiones.
