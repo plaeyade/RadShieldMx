@@ -202,6 +202,8 @@
     "test:f159:sites-hosting": "node scripts/check-f159-sites-hosting-prep-contracts.mjs",
     "prepare:f163:canvas-closure": "node scripts/f163-canvas-release-closure.mjs",
     "test:f163:canvas-closure": "node scripts/check-f163-canvas-release-closure-contracts.mjs",
+    "prepare:f164:clinical-map": "node scripts/f164-clinical-project-map.mjs",
+    "test:f164:clinical-map": "node scripts/check-f164-clinical-project-map-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",

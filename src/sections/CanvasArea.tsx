@@ -35,6 +35,7 @@ import { buildF99CanvasCadReadiness } from '@/lib/f99CanvasCadReadiness';
 import { buildF122CanvasStructuralOverlay } from '@/lib/f122CanvasStructuralOverlay';
 import { buildF141ProfessionalCanvasSummary } from '@/lib/f141CanvasProfessionalPolish';
 import { buildF145CanvasCadProfessionalSummary } from '@/lib/f145CanvasCadProfessional';
+import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 
 interface CanvasAreaProps {
@@ -834,6 +835,9 @@ export default function CanvasArea({
                 <span className="text-[7px] text-slate-400 truncate">
                   Sel {f145CadProfessional.selectedCount} | Ctrl+drag lasso | snap interseccion
                 </span>
+              </div>
+              <div className="border-b border-slate-100 p-1.5">
+                <ClinicalProjectMap floorPlan={floorPlan} compact />
               </div>
               <div className="px-2.5 py-1.5 grid grid-cols-5 gap-1">
                 {workflowSteps.map(step => {
