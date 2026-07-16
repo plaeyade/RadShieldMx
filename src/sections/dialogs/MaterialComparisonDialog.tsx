@@ -13,8 +13,6 @@ import { buildF124MaterialToolboxSummary } from '@/lib/f124MaterialToolboxConsol
 import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 
 const COST: Record<string, number> = { PB: 2.5, CONCRETE: 0.15, STEEL: 1.2, GYPSUM: 0.4, POLYETHYLENE: 3.5, BPE: 8.0, TUNGSTEN: 45.0 };
-const INSTALL_RATE_M2_PER_DAY: Record<string, number> = { PB: 18, CONCRETE: 10, STEEL: 16, GYPSUM: 35, POLYETHYLENE: 22, BPE: 18, TUNGSTEN: 8 };
-const STRUCTURAL_REVIEW_KG_M2 = 750;
 
 export default function MaterialComparisonDialog() {
   const open = useAppStore(s => s.dialogs.materialComparison?.open ?? false);
@@ -34,16 +32,8 @@ export default function MaterialComparisonDialog() {
     const t2tvl = entry.tenthValueLayer_mm * 2;
     const mhvl = aN * (thvl / 1000) * m.density_g_per_cm3 * 1000;
     const m2tvl = aN * (t2tvl / 1000) * m.density_g_per_cm3 * 1000;
-    const kgM2 = aN > 0 ? m2tvl / aN : 0;
-    const installDays = Math.max(0.5, aN / (INSTALL_RATE_M2_PER_DAY[m.code] ?? 14));
-    const structuralStatus = kgM2 >= STRUCTURAL_REVIEW_KG_M2 ? 'Revision estructural' : kgM2 >= STRUCTURAL_REVIEW_KG_M2 * 0.6 ? 'Coordinar estructura' : 'Ligero/medio';
-    return { code: m.code, name: m.nameEs, rho: m.density_g_per_cm3, z: m.effectiveZ, hvl: thvl, tvl: entry.tenthValueLayer_mm, mhvl, m2tvl, kgM2, installDays, structuralStatus, chvl: mhvl * (COST[m.code] ?? 1), c2tvl: m2tvl * (COST[m.code] ?? 1) };
+    return { code: m.code, name: m.nameEs, rho: m.density_g_per_cm3, z: m.effectiveZ, hvl: thvl, tvl: entry.tenthValueLayer_mm, mhvl, m2tvl, chvl: mhvl * (COST[m.code] ?? 1), c2tvl: m2tvl * (COST[m.code] ?? 1) };
   }), [eN, aN]);
-  const bestIntegrated = useMemo(() => [...data].sort((a, b) => {
-    const scoreA = a.c2tvl / 1000 + a.kgM2 / 100 + a.installDays * 3;
-    const scoreB = b.c2tvl / 1000 + b.kgM2 / 100 + b.installDays * 3;
-    return scoreA - scoreB;
-  })[0], [data]);
 
   if (!open) return null;
   return (
@@ -76,27 +66,6 @@ export default function MaterialComparisonDialog() {
           </table>
         </div>
         <p className="text-[8px] text-slate-400 mt-2">Fila verde = menor score multi-objetivo | Costos USD/kg aprox 2024 | NIST XCOM + NCRP 147/151</p>
-        <div data-testid="f183-material-integrated-summary" className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-[10px] text-emerald-900">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h3 className="text-xs font-semibold text-emerald-950">Toolbox unico: TVL, densidad, peso, costo, tiempo y estructura</h3>
-              <p className="text-[9px] text-emerald-800">Consolida comparador, costos y revision estructural preliminar en una sola decision.</p>
-            </div>
-            <Badge variant="outline" className="text-[9px] bg-white">Preferido: {bestIntegrated?.name}</Badge>
-          </div>
-          {bestIntegrated && (
-            <div className="mt-2 grid grid-cols-2 md:grid-cols-5 gap-2">
-              <div className="rounded border border-emerald-100 bg-white/75 p-2"><div className="text-[8px] text-emerald-700">TVL</div><div className="font-mono font-semibold">{bestIntegrated.tvl.toFixed(1)} mm</div></div>
-              <div className="rounded border border-emerald-100 bg-white/75 p-2"><div className="text-[8px] text-emerald-700">Densidad</div><div className="font-mono font-semibold">{bestIntegrated.rho.toFixed(2)} g/cm3</div></div>
-              <div className="rounded border border-emerald-100 bg-white/75 p-2"><div className="text-[8px] text-emerald-700">Peso</div><div className="font-mono font-semibold">{bestIntegrated.kgM2.toFixed(1)} kg/m2</div></div>
-              <div className="rounded border border-emerald-100 bg-white/75 p-2"><div className="text-[8px] text-emerald-700">Obra</div><div className="font-mono font-semibold">{bestIntegrated.installDays.toFixed(1)} dias</div></div>
-              <div className="rounded border border-emerald-100 bg-white/75 p-2"><div className="text-[8px] text-emerald-700">Costo</div><div className="font-mono font-semibold">${bestIntegrated.c2tvl.toFixed(0)}</div></div>
-            </div>
-          )}
-          <p className="mt-2 text-[8px] text-emerald-700">
-            Gatillo estructural: {bestIntegrated?.structuralStatus}. Para memoria: adjuntar TVL/densidad/hash/ficha proveedor y validar carga con estructura cuando supere {STRUCTURAL_REVIEW_KG_M2} kg/m2.
-          </p>
-        </div>
         <div data-testid="f172a-material-methodology" className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-3">
           <div className="flex items-center justify-between gap-2">
             <div>

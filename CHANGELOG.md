@@ -1,14 +1,5 @@
 # RadShield-MX - Fases recientes
 
-## F183 (2026-07-16) - CAD recovery + material toolbox
-
-- Se desactiva la autocarga historica del demo R&F que aparecia al abrir canvas vacio.
-- Se agrega boton explicito `Cargar croquis MA` con un ejemplo LINAC 6 MV para memoria analitica.
-- Se refuerza la sidebar con ancho minimo visible y leyendas hover para herramientas/botones.
-- Se agrega acceso rapido `Mat` para abrir la toolbox unificada de materiales.
-- Se consolida en `MaterialComparisonDialog` el resumen de TVL, densidad, peso, costo, tiempo de obra y gatillo de revision estructural.
-- Validacion: `npm run test:f182:canvas-workspace`, `npm run build` y preview HTTP local.
-
 ## F182 (2026-07-16) - Canvas professional workspace
 
 - Se apaga la pantalla de bienvenida/ejemplo al abrir la app para no cubrir el floorplan.
