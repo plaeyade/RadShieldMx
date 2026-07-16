@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F170 (2026-07-16) - RAG citation governance DB-backed
+
+- Artefactos: `outputs/f170_rag_citation_governance/f170_rag_citation_governance.json` y `outputs/fase_170_rag_citation_governance.md`.
+- Resultado esperado: `rag-citation-governance-ready` con DB live, F169 y F144 listos, mas corpus minimo en `document_chunks`.
+- Uso: `npm run prepare:f170:rag-citations` y `npm run test:f170:rag-citations`.
+- Nota: un corpus `minimum-seed-corpus` permite deploy funcional, pero no reemplaza la reingesta amplia f138/f143 para memorias documentales completas.
+
 ## F169 (2026-07-16) - Predeploy numeric QA + DB live gate
 
 - Artefactos: `outputs/f169_predeploy_numeric_db_qa/f169_predeploy_numeric_db_qa.json` y `outputs/fase_169_predeploy_numeric_db_qa.md`.

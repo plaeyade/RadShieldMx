@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F170 (2026-07-16) - RAG citation governance DB-backed
+
+- Se agrega compuerta DB-backed para `document_chunks`: conteo de chunks/fuentes/modalidades, calidad de source/content/page_ref/tags y cobertura canonica NCRP/IAEA/TG/UAQ.
+- Se enlaza F168 DB live, F169 QA numerico y F144 gobierno de fuentes como prerequisitos del RAG de citas.
+- La fase diferencia corpus semilla de corpus amplio: permite deploy funcional con advertencias, pero exige re-seed f138/f143 antes de depender de citas documentales extensas.
+
 ## F169 (2026-07-16) - Predeploy numeric QA + DB live gate
 
 - Se agrega compuerta predeploy que regenera F149, valida contratos F149/F168, ejecuta `shieldingMath.test.ts` y confirma DB live.
