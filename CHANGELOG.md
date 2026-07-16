@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F176 (2026-07-16) - Local smoke final
+
+- Se agrega compuerta local sobre `LOCAL_SMOKE_URL` para validar HTML, `reset-cache.html`, assets JS/CSS y evidencias F175/F174A.
+- La fase confirma que el paquete recuperado esta listo para revision visual y para reintentar deploy publico.
+- Nuevos comandos: `npm run prepare:f176:local-smoke` y `npm run test:f176:local-smoke`.
+
 ## F175 (2026-07-16) - Local delivery + cache recovery
 
 - Se agrega `public/reset-cache.html` para desregistrar service workers antiguos y borrar caches `radshield-*` cuando desaparezcan menus/canvas tras un build.

@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F176 (2026-07-16) - Local smoke final
+
+- Objetivo: validar que el paquete local recuperado sirve el shell, reset de cache y assets actuales antes de volver al deploy publico.
+- URL por defecto: `http://127.0.0.1:4175/`; puede cambiar con `LOCAL_SMOKE_URL`.
+- Artefactos: `outputs/f176_local_smoke_final/f176_local_smoke_final.json` y `outputs/fase_176_local_smoke_final.md`.
+- Uso: `npm run prepare:f176:local-smoke` y `npm run test:f176:local-smoke`.
+- Guardrail: valida disponibilidad HTTP y evidencias, no sustituye el smoke visual humano ni F154-F158 contra URL final.
+
 ## F175 (2026-07-16) - Local delivery + cache recovery
 
 - Objetivo: recuperar visualizacion de menus/canvas cuando un service worker viejo mezcle assets de builds distintos y cerrar paquete local antes del deploy publico.

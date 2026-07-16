@@ -233,6 +233,8 @@
     "test:f174a:predeploy-hardening:unit": "node scripts/check-f174a-predeploy-hardening-unit.mjs",
     "prepare:f175:local-package": "node scripts/f175-local-delivery-package.mjs",
     "test:f175:local-package": "node scripts/check-f175-local-delivery-package-contracts.mjs",
+    "prepare:f176:local-smoke": "node scripts/f176-local-smoke-final.mjs",
+    "test:f176:local-smoke": "node scripts/check-f176-local-smoke-final-contracts.mjs",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
     "validate:release": "node scripts/run-release-validation.mjs",
