@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F195 (2026-07-17) - Base/conservative comparison gate
+
+- Se agrega `f195CalculationComparisonGate.ts` para revisar por barrera el comparador base vs conservador.
+- El gate clasifica cada barrera como `complete`, `review-required` o `missing-comparison` y asigna severidad `none/low/medium/high`.
+- La evidencia incluye espesor base, espesor conservador, delta en mm, delta porcentual, metodo dominante y recomendacion operativa.
+- `F125CalculationEvidenceGate` ahora incorpora contadores F195 y anexa la seccion del comparador en Memoria IA, Evidence Pack y PDF.
+- Nuevo comando: `npm run test:f195:comparison-gate`.
+
 ## F194 (2026-07-16) - Numeric QA NCRP/IAEA/UAQ
 
 - Se agrega `numericQaValidation.ts` como suite ejecutable de casos numericos conocidos para el motor de calculo.

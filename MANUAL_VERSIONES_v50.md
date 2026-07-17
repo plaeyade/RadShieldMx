@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F195 (2026-07-17) - Base/conservative comparison gate
+
+- Objetivo: hacer visible y auditable el comparador base vs conservador antes de emitir Memoria IA, Evidence Pack o PDF.
+- Alcance: cada resultado de barrera se cruza contra `calculationComparison` del `FloorPlan` endurecido por F193.
+- Salida tecnica: `buildF195CalculationComparisonGate()` devuelve espesor base, espesor conservador, delta, severidad, estado y recomendacion.
+- Integracion: `F125CalculationEvidenceGate` ahora reporta comparaciones faltantes y comparaciones con revision requerida.
+- Guardrail: si una barrera no tiene comparador, queda como `missing-comparison`; no se inventan margenes ni se libera automaticamente.
+- Validacion: `npm run test:f195:comparison-gate`.
+
 ## F194 (2026-07-16) - Numeric QA NCRP/IAEA/UAQ
 
 - Objetivo: convertir los casos de referencia de F193 en verificaciones ejecutables con tolerancias y resultados auditables.

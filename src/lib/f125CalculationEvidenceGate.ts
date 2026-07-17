@@ -1,5 +1,6 @@
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
 import type { FloorPlan } from '@/types/radshield';
+import { buildF195CalculationComparisonGate, buildF195CalculationComparisonSection } from './f195CalculationComparisonGate';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -23,6 +24,8 @@ export interface F125CalculationEvidenceGate {
   completeCount: number;
   reviewRequiredCount: number;
   missingResultCount: number;
+  comparisonReviewRequiredCount: number;
+  comparisonMissingCount: number;
   results: F125AuditableCalculationResult[];
   requiredFields: string[];
   surfaces: string[];
@@ -91,6 +94,7 @@ export function buildF125CalculationEvidenceGate(
   const completeCount = results.filter(result => result.status === 'complete').length;
   const reviewRequiredCount = results.filter(result => result.status === 'review-required').length;
   const missingResultCount = results.filter(result => result.status === 'missing-result').length;
+  const comparisonGate = buildF195CalculationComparisonGate(floorPlan, barrierResults);
 
   return {
     phase: 'F125',
@@ -99,12 +103,14 @@ export function buildF125CalculationEvidenceGate(
     completeCount,
     reviewRequiredCount,
     missingResultCount,
+    comparisonReviewRequiredCount: comparisonGate.reviewRequiredCount,
+    comparisonMissingCount: comparisonGate.missingComparisonCount,
     results,
     requiredFields: ['formula', 'standard', 'inputs', 'outputs', 'citation', 'evidence', 'status'],
     surfaces: ['MemoriaAIWizard', 'EvidencePackDialog', 'PDF report', 'UpdateAppDialog', 'outputs/f125_calculation_evidence_gate.json'],
     nextPhase: 'F126',
     decision:
-      'Every calculation result must carry formula, standard, inputs, outputs, citation, evidence and QA status before release-candidate reports are signed.',
+      'Every calculation result must carry formula, standard, inputs, outputs, citation, evidence, QA status and base-vs-conservative comparison before release-candidate reports are signed.',
   };
 }
 
@@ -120,6 +126,8 @@ export function buildF125CalculationEvidenceSection(
     `   Completos: ${gate.completeCount}`,
     `   Requieren revision: ${gate.reviewRequiredCount}`,
     `   Sin resultado valido: ${gate.missingResultCount}`,
+    `   Comparador F195 con revision requerida: ${gate.comparisonReviewRequiredCount}`,
+    `   Comparador F195 faltante: ${gate.comparisonMissingCount}`,
     `   Campos obligatorios: ${gate.requiredFields.join(', ')}`,
     ...gate.results.slice(0, 12).map(result => [
       `   - ${result.barrierName} [${result.status}]`,
@@ -129,6 +137,7 @@ export function buildF125CalculationEvidenceSection(
       `     Outputs: ${result.outputs.join(' | ')}`,
       `     Cita/evidencia: ${result.citation} | ${result.evidence}`,
     ].join('\n')),
+    buildF195CalculationComparisonSection(floorPlan, barrierResults),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }
