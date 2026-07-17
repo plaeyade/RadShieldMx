@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F191F (2026-07-16) - Smoke real de inline editor
+
+- Se agrega smoke Playwright dedicado para validar edicion real sobre objeto seleccionado del demo.
+- La prueba selecciona un objeto del floorplan, abre `Edit`, cambia el nombre y confirma que el inspector F191C se actualiza.
+- Tambien valida que canvas y sidebar sigan visibles despues de editar.
+- Evidencia visual: `outputs/f191f_inline_editor_smoke/f191f-inline-editor-real-selection.png`.
+- Guardrail: fase de QA; no agrega nuevas acciones destructivas ni cambia formulas.
+- Nuevos comandos: `npm run test:f191f:inline-editor-contracts` y `npm run test:f191f:inline-editor-smoke`.
+
 ## F191E (2026-07-16) - Inline editor seguro
 
 - Se agrega editor contextual compacto para propiedades basicas del objeto seleccionado.

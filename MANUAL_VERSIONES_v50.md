@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F191F (2026-07-16) - Smoke real de inline editor
+
+- Objetivo: comprobar que F191E funciona con seleccion real del floorplan antes de agregar mas CAD.
+- Superficies: Playwright, `CanvasArea`, inspector F191C/F191E y evidencia visual.
+- Uso: `npm run test:f191f:inline-editor-contracts` y `npm run test:f191f:inline-editor-smoke`.
+- Incluye: seleccion de objeto del demo, apertura de `Edit`, cambio de nombre, confirmacion del inspector y verificacion de canvas/sidebar.
+- Evidencia: `outputs/f191f_inline_editor_smoke/f191f-inline-editor-real-selection.png`.
+- Guardrail: no agrega funcionalidad nueva; es una barrera QA antes de duplicar/borrar o edicion inline mas profunda.
+
 ## F191E (2026-07-16) - Inline editor seguro
 
 - Objetivo: permitir edicion rapida de propiedades basicas desde el inspector sin redisenar el canvas.

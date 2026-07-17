@@ -254,6 +254,8 @@
     "test:f191c:object-inspector": "node scripts/check-f191c-object-inspector-contracts.mjs",
     "test:f191d:context-actions": "node scripts/check-f191d-context-actions-contracts.mjs",
     "test:f191e:inline-editor": "node scripts/check-f191e-inline-editor-contracts.mjs",
+    "test:f191f:inline-editor-contracts": "node scripts/check-f191f-inline-editor-smoke-contracts.mjs",
+    "test:f191f:inline-editor-smoke": "playwright test e2e/f191f-inline-editor-real-selection.spec.ts --project=chromium",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
