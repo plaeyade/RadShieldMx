@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F194 (2026-07-16) - Numeric QA NCRP/IAEA/UAQ
+
+- Objetivo: convertir los casos de referencia de F193 en verificaciones ejecutables con tolerancias y resultados auditables.
+- Alcance: LINAC 6 MV, LINAC 18 MV, CT/RX, Gamma Knife/Co-60, PET/NM y control local UAQ/CNSNS.
+- Salida tecnica: `runNumericQaValidationCases()` devuelve checks, estado `pass/review-required/fail`, advertencias y citas por caso.
+- Uso operativo: Memoria IA, Evidence Pack y reportes pueden distinguir referencia numerica aprobada, revision requerida y fallo de QA.
+- Guardrail: esta fase no declara Monte Carlo clinico certificado ni aprobacion regulatoria automatica; toda memoria final requiere revision de experto calificado.
+- Validacion: `npm run test:f194:numeric-qa`.
+
 ## F193 (2026-07-16) - Calculation hardening extendido
 
 - Objetivo: completar los pendientes de F192 sin cambiar formulas base ni interfaz.

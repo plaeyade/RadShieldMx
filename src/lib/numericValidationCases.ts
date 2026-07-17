@@ -1,6 +1,6 @@
 export interface KnownNumericValidationCase {
   id: string;
-  modality: 'LINAC_6MV' | 'LINAC_18MV' | 'CT_RX' | 'GAMMA_KNIFE_CO60' | 'PET_NM';
+  modality: 'LINAC_6MV' | 'LINAC_18MV' | 'CT_RX' | 'GAMMA_KNIFE_CO60' | 'PET_NM' | 'UAQ_REVIEW';
   standard: 'NCRP147' | 'NCRP151' | 'AAPM_TG108' | 'IAEA_SRS47' | 'UAQ_LOCAL';
   scenario: string;
   expectedCheck: string;
@@ -53,6 +53,15 @@ export const KNOWN_NUMERIC_VALIDATION_CASES: KnownNumericValidationCase[] = [
     expectedCheck: 'formulaId AAPM_TG108_POINT_KERNEL and energyKey 511keV for PET.',
     tolerance: 'exact route match.',
     status: 'implemented-reference',
+  },
+  {
+    id: 'uaq-local-review-gate',
+    modality: 'UAQ_REVIEW',
+    standard: 'UAQ_LOCAL',
+    scenario: 'Local analytic-memory release must remain gated by qualified RSO/medical physicist review.',
+    expectedCheck: 'clinicalReview warning must be emitted before using a result for CNSNS/UAQ submissions.',
+    tolerance: 'review warning must be present in every release-facing calculation trace.',
+    status: 'requires-physicist-review',
   },
 ];
 

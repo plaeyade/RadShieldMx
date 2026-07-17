@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F194 (2026-07-16) - Numeric QA NCRP/IAEA/UAQ
+
+- Se agrega `numericQaValidation.ts` como suite ejecutable de casos numericos conocidos para el motor de calculo.
+- Casos cubiertos: LINAC 6 MV TVL primaria, LINAC 18 MV con advertencia de neutrones, CT/RX NCRP 147, Gamma Knife/Co-60, PET/NM TG-108 y compuerta local UAQ/CNSNS.
+- Cada caso devuelve `status`, checks observables, tolerancias, advertencias y `citationIds` para alimentar Memoria IA, Evidence Pack y PDF.
+- La compuerta UAQ/CNSNS queda como `review-required`: no certifica automaticamente memorias analiticas ni reemplaza revision RSO/fisico medico.
+- Nuevo comando: `npm run test:f194:numeric-qa`.
+
 ## F193 (2026-07-16) - Calculation hardening extendido
 
 - Se agrega `unitNormalization.ts` para unificar mm/cm/m, mSv/semana, uSv/h, densidad, kg/m2, costo por m2 y carga estructural.
