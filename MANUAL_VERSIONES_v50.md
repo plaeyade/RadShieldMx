@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F191G (2026-07-16) - Duplicar/borrar con confirmacion
+
+- Objetivo: permitir duplicar y borrar objetos seleccionados desde el inspector CAD sin introducir acciones destructivas accidentales.
+- Alcance: fuentes, barreras, puntos criticos y zonas ocupadas; duplicado con desplazamiento visible y seleccion automatica de la copia.
+- Seguridad: ambas acciones piden confirmacion; borrar informa que se puede deshacer con Ctrl+Z.
+- Persistencia de estado: el borrado sincroniza `occupiedRegions` y `regions` para evitar zonas residuales en overlays.
+- Validacion: `npm run test:f191g:duplicate-delete-contracts` y `npm run test:f191g:duplicate-delete-smoke`.
+- Evidencia: `outputs/f191g_duplicate_delete_smoke/f191g-duplicate-delete-confirm.png`.
+
 ## F191F (2026-07-16) - Smoke real de inline editor
 
 - Objetivo: comprobar que F191E funciona con seleccion real del floorplan antes de agregar mas CAD.

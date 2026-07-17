@@ -108,6 +108,8 @@ interface CanvasAreaProps {
   onAddCriticalPoint?: () => void;
   onOpenShieldingPresets?: () => void;
   onUpdateSelected?: (updates: Partial<Barrier | RadiationSource | OccupiedRegion | CriticalPoint>) => void;
+  onDuplicateSelected?: () => void;
+  onDeleteSelected?: () => void;
   onAuditSnapshot?: () => void;
   sampleLines?: CanvasSampleLine[];
   barrierResults?: CanvasBarrierResult[];
@@ -155,6 +157,8 @@ export default function CanvasArea({
   onAddCriticalPoint,
   onOpenShieldingPresets,
   onUpdateSelected,
+  onDuplicateSelected,
+  onDeleteSelected,
   onAuditSnapshot,
   sampleLines = [],
   barrierResults = [],
@@ -505,6 +509,16 @@ export default function CanvasArea({
   };
   const clearInspectorSelection = () => {
     setCanvasState((prev) => ({ ...prev, selectedId: null, selectedIds: [] }));
+  };
+  const duplicateInspectorSelection = () => {
+    if (!selectedInspectorEntity || !onDuplicateSelected) return;
+    if (!window.confirm(`Duplicar ${selectedInspectorKind.toLowerCase()} "${selectedInspectorName}"?`)) return;
+    onDuplicateSelected();
+  };
+  const deleteInspectorSelection = () => {
+    if (!selectedInspectorEntity || !onDeleteSelected) return;
+    if (!window.confirm(`Borrar ${selectedInspectorKind.toLowerCase()} "${selectedInspectorName}"? Esta accion puede deshacerse con Ctrl+Z.`)) return;
+    onDeleteSelected();
   };
   const applyInspectorTextUpdate = (field: 'name' | 'materialCode' | 'manufacturerVariant' | 'notes', value: string) => {
     const nextValue = value.trim();
@@ -907,6 +921,28 @@ export default function CanvasArea({
               aria-label="Limpiar seleccion"
             >
               X
+            </button>
+            <button
+              type="button"
+              data-testid="f191g-action-duplicate"
+              className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-emerald-200 hover:text-emerald-700 disabled:opacity-40"
+              onClick={duplicateInspectorSelection}
+              disabled={!selectedInspectorEntity || !onDuplicateSelected}
+              title="Duplicar seleccion con confirmacion"
+              aria-label="Duplicar seleccion"
+            >
+              Dup
+            </button>
+            <button
+              type="button"
+              data-testid="f191g-action-delete"
+              className="h-5 rounded border border-red-100 bg-white px-1.5 text-[9px] font-semibold text-red-600 hover:border-red-300 hover:bg-red-50 disabled:opacity-40"
+              onClick={deleteInspectorSelection}
+              disabled={!selectedInspectorEntity || !onDeleteSelected}
+              title="Borrar seleccion con confirmacion y Ctrl+Z disponible"
+              aria-label="Borrar seleccion"
+            >
+              Del
             </button>
           </div>
         </div>

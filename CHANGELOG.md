@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+## F191G (2026-07-16) - Duplicar/borrar con confirmacion
+
+- El inspector contextual del canvas agrega acciones `Dup` y `Del` solo cuando existe seleccion real.
+- `Dup` crea una copia desplazada de fuentes, barreras, puntos criticos o zonas ocupadas y selecciona el duplicado.
+- `Del` reutiliza el borrado existente con confirmacion explicita y conserva el flujo de undo/redo via `setFloorPlan`.
+- Se corrige el borrado de zonas para sincronizar `occupiedRegions` y el alias `regions`.
+- Nuevo smoke visual: crea un punto critico, duplica, borra la copia y valida que canvas/sidebar sigan visibles.
+- Nuevos comandos: `npm run test:f191g:duplicate-delete-contracts` y `npm run test:f191g:duplicate-delete-smoke`.
+- Evidencia visual: `outputs/f191g_duplicate_delete_smoke/f191g-duplicate-delete-confirm.png`.
+
 ## F191F (2026-07-16) - Smoke real de inline editor
 
 - Se agrega smoke Playwright dedicado para validar edicion real sobre objeto seleccionado del demo.

@@ -1471,6 +1471,7 @@ export function useCanvas(
     const newSources = floorPlan.sources.filter(s => !ids.includes(s.id));
     const newBarriers = floorPlan.barriers.filter(b => !ids.includes(b.id));
     const newRegions = floorPlan.occupiedRegions.filter(r => !ids.includes(r.id));
+    const newAliasRegions = floorPlan.regions?.filter(r => !ids.includes(r.id));
     const newCriticalPoints = (floorPlan.criticalPoints ?? []).filter(p => !ids.includes(p.id));
 
     onFloorPlanChange({
@@ -1478,6 +1479,7 @@ export function useCanvas(
       sources: newSources,
       barriers: newBarriers,
       occupiedRegions: newRegions,
+      regions: newAliasRegions ?? floorPlan.regions,
       criticalPoints: newCriticalPoints
     });
     setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [] }));

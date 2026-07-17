@@ -1153,6 +1153,83 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     });
   }, [floorPlan, setCanvasState]);
 
+  const handleDuplicateSelected = useCallback(() => {
+    const selectedId = canvasState.selectedId;
+    if (!selectedId) {
+      toast.info('Selecciona un objeto para duplicar.');
+      return;
+    }
+    const suffix = Date.now();
+    const offset = 24;
+    const source = floorPlan.sources.find(item => item.id === selectedId);
+    const barrier = floorPlan.barriers.find(item => item.id === selectedId);
+    const criticalPoint = floorPlan.criticalPoints?.find(item => item.id === selectedId);
+    const region = floorPlan.occupiedRegions.find(item => item.id === selectedId);
+
+    if (source) {
+      const next: RadiationSource = {
+        ...source,
+        id: `${source.id}-copy-${suffix}`,
+        name: `${source.name} copia`,
+        x: source.x + offset,
+        y: source.y + offset,
+      };
+      setFloorPlan(prev => ({ ...prev, sources: [...prev.sources, next] }));
+      setCanvasState(prev => ({ ...prev, selectedId: next.id, selectedIds: [next.id] }));
+      toast.success('Fuente duplicada', { description: next.name });
+      return;
+    }
+
+    if (barrier) {
+      const next: Barrier = {
+        ...barrier,
+        id: `${barrier.id}-copy-${suffix}`,
+        name: `${barrier.name} copia`,
+        x1: barrier.x1 + offset,
+        y1: barrier.y1 + offset,
+        x2: barrier.x2 + offset,
+        y2: barrier.y2 + offset,
+      };
+      setFloorPlan(prev => ({ ...prev, barriers: [...prev.barriers, next] }));
+      setCanvasState(prev => ({ ...prev, selectedId: next.id, selectedIds: [next.id] }));
+      toast.success('Barrera duplicada', { description: next.name });
+      return;
+    }
+
+    if (criticalPoint) {
+      const next: CriticalPoint = {
+        ...criticalPoint,
+        id: `${criticalPoint.id}-copy-${suffix}`,
+        name: `${criticalPoint.name} copia`,
+        x: criticalPoint.x + offset,
+        y: criticalPoint.y + offset,
+      };
+      setFloorPlan(prev => ({ ...prev, criticalPoints: [...(prev.criticalPoints ?? []), next] }));
+      setCanvasState(prev => ({ ...prev, selectedId: next.id, selectedIds: [next.id] }));
+      toast.success('Punto critico duplicado', { description: next.name });
+      return;
+    }
+
+    if (region) {
+      const next: OccupiedRegion = {
+        ...region,
+        id: `${region.id}-copy-${suffix}`,
+        name: `${region.name} copia`,
+        points: region.points.map(point => ({ x: point.x + offset, y: point.y + offset })),
+      };
+      setFloorPlan(prev => ({
+        ...prev,
+        occupiedRegions: [...prev.occupiedRegions, next],
+        regions: prev.regions ? [...prev.regions, next] : prev.regions,
+      }));
+      setCanvasState(prev => ({ ...prev, selectedId: next.id, selectedIds: [next.id] }));
+      toast.success('Zona duplicada', { description: next.name });
+      return;
+    }
+
+    toast.error('No se pudo duplicar la seleccion actual.');
+  }, [canvasState.selectedId, floorPlan, setCanvasState, setFloorPlan]);
+
   const handleShieldingPresetApply = useCallback(() => {
     if (floorPlan.barriers.length === 0) {
       toast.info('Dibuja al menos una barrera antes de aplicar presets.');
@@ -1972,6 +2049,8 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   onAddCriticalPoint={handleAddCriticalPointDraft}
                   onOpenShieldingPresets={handleShieldingPresetApply}
                   onUpdateSelected={handleUpdateSelected}
+                  onDuplicateSelected={handleDuplicateSelected}
+                  onDeleteSelected={deleteSelected}
                   onAuditSnapshot={handleAuditSnapshot}
                   sampleLines={sampleLines}
                   barrierResults={barrierResults}
