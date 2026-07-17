@@ -3,6 +3,7 @@
 
 import {
   type Barrier,
+  type CalculationTrace,
   type RadiationSource,
   type ShieldingMaterial,
   WORKLOAD_DISTRIBUTIONS
@@ -63,6 +64,145 @@ export function getCalculationInputWarnings(input: Record<string, unknown>): Cal
   }
 
   return warnings;
+}
+
+export function getShieldingEnergyKey(source?: RadiationSource): string {
+  if (!source) return 'unknown';
+  const modality = source.modality;
+  if (modality.energyLabel?.includes('511')) return '511keV';
+  if (modality.energyLabel?.includes('140')) return '140keV';
+  if (modality.energyLabel?.includes('364')) return '364keV';
+  if (modality.id === 'gamma-knife') return 'Co60';
+  if (modality.id === 'hdr-192ir') return 'Ir192';
+  if (modality.energy_MeV && Number.isFinite(modality.energy_MeV)) {
+    return `${Math.round(modality.energy_MeV)}MV`;
+  }
+  const match = modality.id.match(/(\d+)\s*mv/i) || modality.id.match(/-(\d+)mv/i);
+  if (match?.[1]) return `${match[1]}MV`;
+  return String(Math.round(modality.energy_MeV || 6));
+}
+
+export function getShieldingFormulaId(source?: RadiationSource): string {
+  const category = source?.modality.category;
+  if (source?.modality.id === 'ct-head' || source?.modality.id === 'ct-body') return 'NCRP147_CT_DLP_ISODOSE';
+  if (category === 'diagnostic') return 'NCRP147_ARCHER';
+  if (category === 'therapy') return 'NCRP151_TVL';
+  if (category === 'nuclear') return 'AAPM_TG108_POINT_KERNEL';
+  if (category === 'cyclotron') return 'IAEA_SRS47_ENGINEERING_SCREEN';
+  return 'RADSHIELD_GENERIC_POINT_KERNEL';
+}
+
+export function getShieldingStandard(source?: RadiationSource): string {
+  if (source?.modality.standard) return source.modality.standard;
+  const category = source?.modality.category;
+  if (category === 'diagnostic') return 'NCRP147';
+  if (category === 'therapy') return 'NCRP151';
+  if (category === 'nuclear') return 'AAPM_TG108';
+  if (category === 'cyclotron') return 'IAEA_SRS47';
+  return 'RADSHIELD_INTERNAL';
+}
+
+export function getShieldingCitationIds(source?: RadiationSource): string[] {
+  const category = source?.modality.category;
+  const ids = new Set<string>();
+  if (category === 'diagnostic') ids.add('NCRP-147');
+  if (category === 'therapy') ids.add('NCRP-151');
+  if (category === 'nuclear') ids.add('AAPM-TG-108');
+  if (category === 'cyclotron') ids.add('IAEA-SRS-47');
+  if ((source?.modality.energy_MeV || 0) > 10) ids.add('NCRP-151-neutrons');
+  if (!ids.size) ids.add('RadShield-method-note');
+  return [...ids];
+}
+
+export function getCalculationAuditWarnings(params: {
+  barrier: Barrier;
+  sources: RadiationSource[];
+  scale_m_per_pixel: number;
+  maxKerma_mSv_per_wk: number;
+  materialCount: number;
+  samplePointCount: number;
+}): CalculationInputWarning[] {
+  const primarySource = params.sources[0];
+  const warnings = getCalculationInputWarnings({
+    scale_m_per_pixel: params.scale_m_per_pixel,
+    designGoal_mSv: params.barrier.designGoal_mSv_per_wk,
+    unshieldedKerma_mSv: params.maxKerma_mSv_per_wk > 0 ? params.maxKerma_mSv_per_wk : 1,
+  });
+
+  if (!params.sources.length) {
+    warnings.push({ field: 'sources', severity: 'error', message: 'No radiation source is available for shielding calculation.' });
+  }
+  if (!params.samplePointCount) {
+    warnings.push({ field: 'samplePointCount', severity: 'error', message: 'No barrier sample points were generated; check scale and barrier geometry.' });
+  }
+  if (!params.materialCount) {
+    warnings.push({ field: 'materials', severity: 'error', message: 'No shielding materials were available for thickness calculation.' });
+  }
+  if (params.barrier.occupancyFactor <= 0 || params.barrier.occupancyFactor > 1 || !Number.isFinite(params.barrier.occupancyFactor)) {
+    warnings.push({ field: 'occupancyFactor', severity: 'error', message: 'Occupancy factor T must be finite and within 0 < T <= 1.' });
+  }
+  if (params.barrier.useFactor < 0 || params.barrier.useFactor > 1 || !Number.isFinite(params.barrier.useFactor)) {
+    warnings.push({ field: 'useFactor', severity: 'warning', message: 'Use factor U is outside the expected 0..1 range.' });
+  }
+  if (primarySource && (primarySource.modality.energy_MeV || 0) > 10) {
+    warnings.push({ field: 'energy_MeV', severity: 'warning', message: 'Energy >10 MV: neutron shielding and maze/door checks are required.' });
+  }
+  if (primarySource && !primarySource.modality.standard) {
+    warnings.push({ field: 'standard', severity: 'warning', message: 'Source modality has no explicit standard; inferred standard was used.' });
+  }
+  if (params.maxKerma_mSv_per_wk <= 0) {
+    warnings.push({ field: 'maxKerma_mSv_per_wk', severity: 'warning', message: 'Maximum kerma is zero; verify source workload, scale and geometry.' });
+  }
+
+  return warnings;
+}
+
+export function buildCalculationTrace(params: {
+  barrier: Barrier;
+  sources: RadiationSource[];
+  scale_m_per_pixel: number;
+  maxKerma_mSv_per_wk: number;
+  requiredThickness_mm: Record<string, number>;
+  samplePointCount: number;
+}): CalculationTrace {
+  const primarySource = params.sources[0];
+  const category = primarySource?.modality.category || 'unknown';
+  const energyKey = getShieldingEnergyKey(primarySource);
+  const assumptions = [
+    'Point-kernel screening calculation for design iteration.',
+    `Sampling offset ${SAMPLING_DISTANCE_M} m from barrier face.`,
+    `Sampling spacing ${SAMPLING_SPACING_M} m along barrier.`,
+    'Final clinical acceptance requires qualified expert review and measurement survey.',
+  ];
+  if ((primarySource?.modality.energy_MeV || 0) > 10) assumptions.push('High-energy photon mode requires neutron and maze/door evaluation.');
+  const finiteThicknesses = Object.values(params.requiredThickness_mm).filter((value) => Number.isFinite(value) && value >= 0);
+
+  return {
+    formulaId: getShieldingFormulaId(primarySource),
+    standard: getShieldingStandard(primarySource),
+    modalityCategory: category,
+    energyKey,
+    sourceCount: params.sources.length,
+    materialCount: Object.keys(params.requiredThickness_mm).length,
+    samplePointCount: params.samplePointCount,
+    assumptions,
+    citationIds: getShieldingCitationIds(primarySource),
+    inputs: {
+      barrierId: params.barrier.id,
+      barrierType: params.barrier.barrierType,
+      materialCode: params.barrier.materialCode,
+      scale_m_per_pixel: params.scale_m_per_pixel,
+      designGoal_mSv_per_wk: params.barrier.designGoal_mSv_per_wk,
+      occupancyFactor: params.barrier.occupancyFactor,
+      useFactor: params.barrier.useFactor,
+    },
+    outputs: {
+      maxKerma_mSv_per_wk: params.maxKerma_mSv_per_wk,
+      materialCount: Object.keys(params.requiredThickness_mm).length,
+      minRequiredThickness_mm: finiteThicknesses.length ? Math.min(...finiteThicknesses) : 0,
+      maxRequiredThickness_mm: finiteThicknesses.length ? Math.max(...finiteThicknesses) : 0,
+    },
+  };
 }
 
 // ───────────────────────────────────────────────────────────────

@@ -399,6 +399,29 @@ export interface Barrier {
   shieldingPresetName?: string;
   shieldingLayers?: { materialCode: string; thickness_mm: number }[];
   shieldingPresetNote?: string;
+  // F192: optional calculation hardening evidence for reports and Memoria IA.
+  calculationTrace?: CalculationTrace;
+  calculationWarnings?: CalculationInputWarning[];
+}
+
+export interface CalculationInputWarning {
+  field: string;
+  severity: 'warning' | 'error';
+  message: string;
+}
+
+export interface CalculationTrace {
+  formulaId: string;
+  standard: string;
+  modalityCategory: ModalityCategory | 'unknown';
+  energyKey: string;
+  sourceCount: number;
+  materialCount: number;
+  samplePointCount: number;
+  assumptions: string[];
+  citationIds: string[];
+  inputs: Record<string, number | string | boolean>;
+  outputs: Record<string, number | string | boolean>;
 }
 
 export interface SamplePoint {

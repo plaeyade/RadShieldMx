@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F192 (2026-07-16) - Calculation Engine Hardening
+
+- Objetivo: endurecer el motor sin cambiar la experiencia visual ni reescribir formulas.
+- Alcance: trazabilidad por barrera con `calculationTrace`, advertencias `calculationWarnings`, normalizacion de formula/norma/energia/citas.
+- Uso operativo: los resultados calculados quedan listos para Memoria IA, Evidence Pack y PDF con fuente metodologica e inputs/outputs auditables.
+- Guardrails: no declara Monte Carlo clinico certificado; los calculos siguen siendo de diseno y requieren revision de experto calificado.
+- Validacion: `npm run test:f192:calculation-hardening`.
+
 ## F191G (2026-07-16) - Duplicar/borrar con confirmacion
 
 - Objetivo: permitir duplicar y borrar objetos seleccionados desde el inspector CAD sin introducir acciones destructivas accidentales.

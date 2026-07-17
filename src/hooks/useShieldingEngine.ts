@@ -13,6 +13,8 @@ import {
   generateSamplePoints,
   roundThickness,
   calculateHeatmapGrid,
+  buildCalculationTrace,
+  getCalculationAuditWarnings,
 } from '@/lib/shieldingMath';
 
 export function useShieldingEngine() {
@@ -54,7 +56,24 @@ export function useShieldingEngine() {
         if (thickness > 0) requiredThickness[mat.code] = thickness;
       }
 
-      return { ...b, maxKerma, requiredThickness_mm: requiredThickness };
+      const calculationTrace = buildCalculationTrace({
+        barrier: b,
+        sources,
+        scale_m_per_pixel,
+        maxKerma_mSv_per_wk: maxKerma,
+        requiredThickness_mm: requiredThickness,
+        samplePointCount: points.length,
+      });
+      const calculationWarnings = getCalculationAuditWarnings({
+        barrier: b,
+        sources,
+        scale_m_per_pixel,
+        maxKerma_mSv_per_wk: maxKerma,
+        materialCount: Object.keys(requiredThickness).length,
+        samplePointCount: points.length,
+      });
+
+      return { ...b, maxKerma, requiredThickness_mm: requiredThickness, calculationTrace, calculationWarnings };
     });
   }, []);
 

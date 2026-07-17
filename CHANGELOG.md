@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F192 (2026-07-16) - Calculation Engine Hardening
+
+- Se agrega una capa conservadora de auditoria para calculos: formula, norma, energia, citas, entradas, salidas y supuestos.
+- Cada barrera calculada por `useShieldingEngine` puede incluir `calculationTrace` y `calculationWarnings` sin romper reportes existentes.
+- Se normalizan formula/estandar por modalidad: NCRP 147, NCRP 151, AAPM TG-108 e IAEA SRS-47.
+- Se agregan advertencias para entradas no finitas, escala invalida, T/U fuera de rango, ausencia de fuentes/materiales/puntos y energia >10 MV.
+- Nuevo comando: `npm run test:f192:calculation-hardening`.
+
 ## F191G (2026-07-16) - Duplicar/borrar con confirmacion
 
 - El inspector contextual del canvas agrega acciones `Dup` y `Del` solo cuando existe seleccion real.
