@@ -7,22 +7,7 @@ import { useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useIndexedDB } from './useIndexedDB';
 import type { FloorPlan } from '@/types/radshield';
-
-/** Hash simple del floorplan para cache key */
-function hashFloorPlan(fp: FloorPlan): string {
-  const data = JSON.stringify({
-    b: fp.barriers.map(b => [b.x1, b.y1, b.x2, b.y2, b.materialCode, b.designGoal_mSv_per_wk]),
-    s: fp.sources.map(s => [s.x, s.y, s.workloadValue, s.useFactor]),
-    scale: fp.scale_m_per_pixel,
-  });
-  // FNV-1a hash
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < data.length; i++) {
-    hash ^= data.charCodeAt(i);
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-  }
-  return 'calc:' + (hash >>> 0).toString(36);
-}
+import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 
 interface CachedBarrierResult {
   barrierId: string;
@@ -56,7 +41,7 @@ export function useCalculationCache() {
   /** Intentar recuperar resultados cacheados */
   const getCached = useCallback(async (floorPlan: FloorPlan): Promise<{ barrierResults: CachedBarrierResult[]; sampleLines: CachedSampleLine[] } | null> => {
     if (!indexedDB.isAvailable) return null;
-    const hash = hashFloorPlan(floorPlan);
+    const hash = buildCalculationCacheKey(floorPlan);
     try {
       const cached = await indexedDB.getCachedResult(hash);
       const entry = (((cached as any)?.result ?? cached) as CacheEntry | null);
@@ -77,7 +62,7 @@ export function useCalculationCache() {
   /** Guardar resultados en cache */
   const setCached = useCallback(async (floorPlan: FloorPlan, barrierResults: CachedBarrierResult[], sampleLines: CachedSampleLine[]): Promise<void> => {
     if (!indexedDB.isAvailable) return;
-    const hash = hashFloorPlan(floorPlan);
+    const hash = buildCalculationCacheKey(floorPlan);
     try {
       await indexedDB.saveResult({
         id: hash,

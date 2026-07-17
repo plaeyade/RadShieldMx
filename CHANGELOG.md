@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+## F193 (2026-07-16) - Calculation hardening extendido
+
+- Se agrega `unitNormalization.ts` para unificar mm/cm/m, mSv/semana, uSv/h, densidad, kg/m2, costo por m2 y carga estructural.
+- El cache de calculo usa `calculationCacheKey.ts` con hash que invalida por escala, geometria, material, fuente, modalidad, P/T/U/W, regiones y puntos criticos.
+- `useShieldingEngine` agrega `calculationUnitSnapshot`, `calculationComparison` y `calculationCacheKey` por barrera.
+- `shieldingEngine.ts` y `shieldingWorker.ts` reciben validacion numerica y advertencias clinicas para cubrir caminos legacy/worker.
+- Se agregan casos conocidos de referencia en `numericValidationCases.ts`: LINAC 6 MV, LINAC 18 MV, CT/RX, Gamma Knife/Co-60 y PET/NM.
+- Advertencias nuevas: distancia <0.3 m, TVL no versionado, densidad de material no validada y revision RSO/fisico medico.
+- Nuevo comando: `npm run test:f193:calculation-hardening-extended`.
+
 ## F192 (2026-07-16) - Calculation Engine Hardening
 
 - Se agrega una capa conservadora de auditoria para calculos: formula, norma, energia, citas, entradas, salidas y supuestos.

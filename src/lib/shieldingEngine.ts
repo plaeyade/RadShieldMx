@@ -12,7 +12,15 @@
  */
 import type { Barrier, RadiationSource, Material } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
-import { inverseArcher, tvlThickness } from './shieldingMath';
+import {
+  buildCalculationTrace,
+  buildCalculationUnitSnapshot,
+  buildConservativeCalculationComparison,
+  getCalculationAuditWarnings,
+  getShieldingEnergyKey,
+  inverseArcher,
+  tvlThickness,
+} from './shieldingMath';
 
 // ─── Spatial Hash Grid ───
 /** 
@@ -91,6 +99,10 @@ export interface CalcResult {
   location: string;
   pass: boolean;
   designGoal: number;
+  calculationTrace?: any;
+  calculationWarnings?: any[];
+  calculationComparison?: any;
+  calculationUnitSnapshot?: any;
 }
 
 export interface SamplePoint {
@@ -210,6 +222,7 @@ export class ShieldingEngine {
     let globalMaxThickPb = 0;
     let globalMaxThickConc = 0;
     let maxLoc = 'N/A';
+    let minSourceDistance_m = Infinity;
 
     const allPoints: SamplePoint[] = [];
     let maxKPt: SamplePoint | null = null;
@@ -238,6 +251,7 @@ export class ShieldingEngine {
           const src = nearbySources[s];
           const distSq = cachedDistSq(px, py, src.x, src.y, scale);
           if (distSq < 0.01) continue;
+          minSourceDistance_m = Math.min(minSourceDistance_m, Math.sqrt(distSq));
           kerma += src.workloadValue * (src.useFactor || 0.25) / distSq;
         }
 
@@ -270,6 +284,18 @@ export class ShieldingEngine {
       }
     }
 
+    const selectedMaterial = MATERIALS.find(m => m.code === (barrier.materialCode || 'CONCRETE235')) || concMat || MATERIALS[0];
+    const energyKey = getShieldingEnergyKey(allSources[0]);
+    const unitSnapshot = buildCalculationUnitSnapshot({
+      barrier,
+      sources: allSources,
+      material: selectedMaterial,
+      scale_m_per_pixel: scale,
+      maxKerma_mSv_per_wk: globalMaxK,
+      selectedThickness_mm: globalMaxThickPb,
+      minSourceDistance_m,
+    });
+
     const result: CalcResult = {
       barrierId: barrier.id,
       barrierName: barrier.name + (sides.length > 1 ? ' (main side)' : ''),
@@ -280,6 +306,47 @@ export class ShieldingEngine {
       location: maxLoc,
       pass: globalMaxK * (barrier.occupancyFactor || 0.2) <= (barrier.designGoal_mSv_per_wk || 0.02),
       designGoal: barrier.designGoal_mSv_per_wk || 0.02,
+      calculationTrace: buildCalculationTrace({
+        barrier,
+        sources: allSources,
+        scale_m_per_pixel: scale,
+        maxKerma_mSv_per_wk: globalMaxK,
+        requiredThickness_mm: { PB: globalMaxThickPb, CONCRETE235: globalMaxThickConc },
+        samplePointCount: allPoints.length,
+      }),
+      calculationWarnings: getCalculationAuditWarnings({
+        barrier,
+        sources: allSources,
+        scale_m_per_pixel: scale,
+        maxKerma_mSv_per_wk: globalMaxK,
+        materialCount: 2,
+        samplePointCount: allPoints.length,
+        materials: [leadMat, concMat].filter(Boolean) as Material[],
+        energyKey,
+        minSourceDistance_m,
+      }),
+      calculationComparison: buildConservativeCalculationComparison({
+        baseThickness_mm: globalMaxThickPb,
+        maxKerma_mSv_per_wk: globalMaxK,
+        designGoal_mSv_per_wk: barrier.designGoal_mSv_per_wk || 0.02,
+        material: selectedMaterial,
+        energyKey,
+      }),
+      calculationUnitSnapshot: {
+        scale_m_per_pixel: unitSnapshot.length.scale_m_per_pixel,
+        barrierLength_m: unitSnapshot.length.barrierLength_m,
+        sampleOffset_m: unitSnapshot.length.sampleOffset_m,
+        minSourceDistance_m: unitSnapshot.length.minSourceDistance_m,
+        maxKerma_mSv_per_wk: unitSnapshot.dose.maxKerma_mSv_per_wk,
+        maxKerma_uSv_per_h_40h: unitSnapshot.dose.maxKerma_uSv_per_h_40h,
+        selectedThickness_mm: unitSnapshot.material.selectedThickness_mm,
+        selectedThickness_cm: unitSnapshot.material.selectedThickness_cm,
+        density_g_cm3: unitSnapshot.material.density_g_cm3,
+        density_kg_m3: unitSnapshot.material.density_kg_m3,
+        mass_kg_per_m2: unitSnapshot.material.mass_kg_per_m2,
+        cost_per_m2: unitSnapshot.material.cost_per_m2,
+        structuralLoad_kPa: unitSnapshot.material.structuralLoad_kPa,
+      },
     };
 
     const sampleLine: SampleLine = {

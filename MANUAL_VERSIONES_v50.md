@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F193 (2026-07-16) - Calculation hardening extendido
+
+- Objetivo: completar los pendientes de F192 sin cambiar formulas base ni interfaz.
+- Incluye: normalizacion de unidades, hash seguro de cache, casos numericos conocidos, advertencias clinicas especificas, comparador base/conservador y cobertura en worker/motor legacy.
+- Salidas nuevas por barrera: `calculationUnitSnapshot`, `calculationComparison`, `calculationCacheKey`, ademas de `calculationTrace` y `calculationWarnings`.
+- Casos de referencia: LINAC 6 MV, LINAC 18 MV, CT/RX, Gamma Knife/Co-60 y PET/NM.
+- Guardrail: el comparador conservador es screening; no reemplaza validacion NCRP/IAEA/UAQ ni revision de RSO/fisico medico.
+- Validacion: `npm run test:f193:calculation-hardening-extended`.
+
 ## F192 (2026-07-16) - Calculation Engine Hardening
 
 - Objetivo: endurecer el motor sin cambiar la experiencia visual ni reescribir formulas.

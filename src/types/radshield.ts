@@ -402,6 +402,9 @@ export interface Barrier {
   // F192: optional calculation hardening evidence for reports and Memoria IA.
   calculationTrace?: CalculationTrace;
   calculationWarnings?: CalculationInputWarning[];
+  calculationComparison?: CalculationComparison;
+  calculationUnitSnapshot?: CalculationUnitSnapshot;
+  calculationCacheKey?: string;
 }
 
 export interface CalculationInputWarning {
@@ -422,6 +425,32 @@ export interface CalculationTrace {
   citationIds: string[];
   inputs: Record<string, number | string | boolean>;
   outputs: Record<string, number | string | boolean>;
+}
+
+export interface CalculationComparison {
+  method: 'base-vs-conservative';
+  baseThickness_mm: number;
+  conservativeThickness_mm: number;
+  delta_mm: number;
+  deltaPercent: number;
+  dominant: 'base' | 'conservative';
+  note: string;
+}
+
+export interface CalculationUnitSnapshot {
+  scale_m_per_pixel: number;
+  barrierLength_m: number;
+  sampleOffset_m: number;
+  minSourceDistance_m: number;
+  maxKerma_mSv_per_wk: number;
+  maxKerma_uSv_per_h_40h: number;
+  selectedThickness_mm: number;
+  selectedThickness_cm: number;
+  density_g_cm3: number;
+  density_kg_m3: number;
+  mass_kg_per_m2: number;
+  cost_per_m2: number;
+  structuralLoad_kPa: number;
 }
 
 export interface SamplePoint {

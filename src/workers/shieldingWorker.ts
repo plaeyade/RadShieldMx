@@ -28,6 +28,27 @@ function tvlThickness(K: number, P: number, tvlMm: number): number {
   return -tvlMm * Math.log10(B);
 }
 
+function finitePositive(value: any): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+function validateWorkerCalculationInput(input: Record<string, any>): any[] {
+  const warnings: any[] = [];
+  for (const field of ['scale', 'designGoal', 'occupancyFactor']) {
+    if (field in input && !finitePositive(input[field])) {
+      warnings.push({ field, severity: 'error', message: `${field} must be finite and positive.` });
+    }
+  }
+  if ('useFactor' in input && (!Number.isFinite(input.useFactor) || input.useFactor < 0 || input.useFactor > 1)) {
+    warnings.push({ field: 'useFactor', severity: 'warning', message: 'Use factor U should be within 0..1.' });
+  }
+  if ('minDistance_m' in input && Number.isFinite(input.minDistance_m) && input.minDistance_m < 0.3) {
+    warnings.push({ field: 'distance_m', severity: 'warning', message: 'Distance less than 0.3 m: verify nearest occupancy.' });
+  }
+  warnings.push({ field: 'clinicalReview', severity: 'warning', message: 'Preliminary worker result: requires RSO/qualified medical physicist review.' });
+  return warnings;
+}
+
 interface WorkerMessage {
   id: string;
   type: 'barrier-calculation' | 'dose-grid' | 'gamma-index';
@@ -106,6 +127,7 @@ function calculateBarriers(
     const pt = designGoal / occFactor;
 
     let maxK = 0, maxT = 0;
+    let minDistance_m = Infinity;
     const points: any[] = [];
 
     for (let i = 0; i <= nPoints; i++) {
@@ -119,6 +141,7 @@ function calculateBarriers(
         const dy = (py - src.y) * scale;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 0.1) continue;
+        minDistance_m = Math.min(minDistance_m, dist);
         const wf = src.workloadValue * (src.useFactor || 0.25);
         kerma += wf / (dist * dist);
       }
@@ -137,6 +160,20 @@ function calculateBarriers(
       barrierName: barrier.name,
       maxKerma: maxK,
       maxThickness: maxT,
+      calculationWarnings: validateWorkerCalculationInput({
+        scale,
+        designGoal,
+        occupancyFactor: occFactor,
+        useFactor: barrier.useFactor ?? 0.25,
+        minDistance_m,
+      }),
+      calculationComparison: {
+        method: 'base-vs-conservative',
+        baseThickness_mm: maxT,
+        conservativeThickness_mm: tvlThickness(maxK, designGoal * 0.8, 55),
+        delta_mm: Math.max(0, tvlThickness(maxK, designGoal * 0.8, 55) - maxT),
+        dominant: tvlThickness(maxK, designGoal * 0.8, 55) > maxT ? 'conservative' : 'base',
+      },
       points,
     });
   }

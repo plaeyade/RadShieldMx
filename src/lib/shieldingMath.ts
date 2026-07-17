@@ -3,12 +3,14 @@
 
 import {
   type Barrier,
+  type CalculationComparison,
   type CalculationTrace,
   type RadiationSource,
   type ShieldingMaterial,
   WORKLOAD_DISTRIBUTIONS
 } from '@/types/radshield';
 import { type CTIsodosisProfile, getCTIsodosisFactor, DEFAULT_CT_ISODOSIS } from '@/types/ctIsodosis';
+import { normalizeCalculationUnits, type NormalizedCalculationUnits } from './unitNormalization';
 
 export const SAMPLING_DISTANCE_M = 0.3;
 export const SAMPLING_SPACING_M = 0.2;
@@ -121,6 +123,9 @@ export function getCalculationAuditWarnings(params: {
   maxKerma_mSv_per_wk: number;
   materialCount: number;
   samplePointCount: number;
+  materials?: ShieldingMaterial[];
+  energyKey?: string;
+  minSourceDistance_m?: number;
 }): CalculationInputWarning[] {
   const primarySource = params.sources[0];
   const warnings = getCalculationInputWarnings({
@@ -153,6 +158,27 @@ export function getCalculationAuditWarnings(params: {
   if (params.maxKerma_mSv_per_wk <= 0) {
     warnings.push({ field: 'maxKerma_mSv_per_wk', severity: 'warning', message: 'Maximum kerma is zero; verify source workload, scale and geometry.' });
   }
+  if (Number.isFinite(params.minSourceDistance_m) && (params.minSourceDistance_m ?? Infinity) < SAMPLING_DISTANCE_M) {
+    warnings.push({ field: 'distance_m', severity: 'warning', message: `Distance less than ${SAMPLING_DISTANCE_M} m: verify nearest occupancy and barrier sampling point.` });
+  }
+
+  for (const material of params.materials ?? []) {
+    if (!Number.isFinite(material.density) || material.density <= 0) {
+      warnings.push({ field: `material.${material.code}.density`, severity: 'warning', message: `Material ${material.code} has no validated positive density.` });
+    }
+    const energyKey = params.energyKey || getShieldingEnergyKey(primarySource);
+    const hasTvl = Boolean(material.TVL_mm?.[energyKey]);
+    const needsTvl = primarySource?.modality.category !== 'diagnostic';
+    if (needsTvl && !hasTvl) {
+      warnings.push({ field: `material.${material.code}.TVL`, severity: 'warning', message: `TVL not versioned for ${material.code} at ${energyKey}; fallback or alternate evidence may be used.` });
+    }
+  }
+
+  warnings.push({
+    field: 'clinicalReview',
+    severity: 'warning',
+    message: 'Preliminary shielding result: requires RSO/qualified medical physicist review before clinical or regulatory use.',
+  });
 
   return warnings;
 }
@@ -202,6 +228,55 @@ export function buildCalculationTrace(params: {
       minRequiredThickness_mm: finiteThicknesses.length ? Math.min(...finiteThicknesses) : 0,
       maxRequiredThickness_mm: finiteThicknesses.length ? Math.max(...finiteThicknesses) : 0,
     },
+  };
+}
+
+export function buildCalculationUnitSnapshot(params: {
+  barrier: Barrier;
+  sources: RadiationSource[];
+  material?: ShieldingMaterial;
+  scale_m_per_pixel: number;
+  maxKerma_mSv_per_wk: number;
+  selectedThickness_mm: number;
+  minSourceDistance_m: number;
+}): NormalizedCalculationUnits {
+  return normalizeCalculationUnits({
+    barrier: params.barrier,
+    sources: params.sources,
+    material: params.material,
+    scale_m_per_pixel: params.scale_m_per_pixel,
+    maxKerma_mSv_per_wk: params.maxKerma_mSv_per_wk,
+    selectedThickness_mm: params.selectedThickness_mm,
+    sampleOffset_m: SAMPLING_DISTANCE_M,
+    minSourceDistance_m: params.minSourceDistance_m,
+  });
+}
+
+export function buildConservativeCalculationComparison(params: {
+  baseThickness_mm: number;
+  maxKerma_mSv_per_wk: number;
+  designGoal_mSv_per_wk: number;
+  material: ShieldingMaterial;
+  energyKey: string;
+}): CalculationComparison {
+  const conservativeGoal = params.designGoal_mSv_per_wk * 0.8;
+  const conservativeThickness_mm = tvlThickness(
+    params.maxKerma_mSv_per_wk,
+    conservativeGoal,
+    params.material,
+    params.energyKey,
+  );
+  const baseThickness_mm = Math.max(0, params.baseThickness_mm || 0);
+  const delta_mm = Math.max(0, conservativeThickness_mm - baseThickness_mm);
+  const deltaPercent = baseThickness_mm > 0 ? (delta_mm / baseThickness_mm) * 100 : 0;
+  return {
+    method: 'base-vs-conservative',
+    baseThickness_mm,
+    conservativeThickness_mm,
+    delta_mm,
+    deltaPercent,
+    dominant: conservativeThickness_mm > baseThickness_mm ? 'conservative' : 'base',
+    note: 'Conservative check applies 20% lower design goal as a screening margin; it does not replace formal NCRP/IAEA review.',
   };
 }
 
