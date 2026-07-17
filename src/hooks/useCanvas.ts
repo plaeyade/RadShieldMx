@@ -1512,6 +1512,18 @@ export function useCanvas(
         p.id === id ? { ...p, ...updates } as CriticalPoint : p
       );
       onFloorPlanChange({ ...floorPlan, criticalPoints: newCriticalPoints });
+      return;
+    }
+
+    const region = floorPlan.occupiedRegions.find(r => r.id === id);
+    if (region) {
+      const newRegions = floorPlan.occupiedRegions.map(r =>
+        r.id === id ? { ...r, ...updates } as OccupiedRegion : r
+      );
+      const newAliasRegions = floorPlan.regions?.map(r =>
+        r.id === id ? { ...r, ...updates } as OccupiedRegion : r
+      );
+      onFloorPlanChange({ ...floorPlan, occupiedRegions: newRegions, regions: newAliasRegions ?? floorPlan.regions });
     }
   }, [canvasState.selectedId, floorPlan, onFloorPlanChange]);
 

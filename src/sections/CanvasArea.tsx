@@ -107,6 +107,7 @@ interface CanvasAreaProps {
   onCalibrateScale?: () => void;
   onAddCriticalPoint?: () => void;
   onOpenShieldingPresets?: () => void;
+  onUpdateSelected?: (updates: Partial<Barrier | RadiationSource | OccupiedRegion | CriticalPoint>) => void;
   onAuditSnapshot?: () => void;
   sampleLines?: CanvasSampleLine[];
   barrierResults?: CanvasBarrierResult[];
@@ -153,6 +154,7 @@ export default function CanvasArea({
   onCalibrateScale,
   onAddCriticalPoint,
   onOpenShieldingPresets,
+  onUpdateSelected,
   onAuditSnapshot,
   sampleLines = [],
   barrierResults = [],
@@ -186,6 +188,7 @@ export default function CanvasArea({
   const [panelVisibility, setPanelVisibility] = useState(loadF188PanelVisibility);
   const [workflowDock, setWorkflowDock] = useState<F188WorkflowDock>(loadF188WorkflowDock);
   const [visualMode, setVisualMode] = useState<F191VisualMode>(loadF191VisualMode);
+  const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -343,6 +346,10 @@ export default function CanvasArea({
     window.localStorage.setItem(F191_VISUAL_MODE_KEY, visualMode);
   }, [visualMode]);
 
+  useEffect(() => {
+    setInspectorEditOpen(false);
+  }, [canvasState.selectedId]);
+
   const togglePanelVisibility = (key: F188CanvasPanelKey) => {
     setPanelVisibility((current) => ({ ...current, [key]: !current[key] }));
   };
@@ -499,6 +506,25 @@ export default function CanvasArea({
   const clearInspectorSelection = () => {
     setCanvasState((prev) => ({ ...prev, selectedId: null, selectedIds: [] }));
   };
+  const applyInspectorTextUpdate = (field: 'name' | 'materialCode' | 'manufacturerVariant' | 'notes', value: string) => {
+    const nextValue = value.trim();
+    if (!nextValue || !onUpdateSelected) return;
+    onUpdateSelected({ [field]: nextValue } as Partial<Barrier | RadiationSource | CriticalPoint>);
+    toast.success('Propiedad actualizada', { description: `${field}: ${nextValue}` });
+  };
+  const applyInspectorNumberUpdate = (
+    field: 'workloadValue' | 'useFactor' | 'occupancyFactor' | 'designGoal_mSv_per_wk' | 'isocenterHeight_m',
+    value: string,
+  ) => {
+    if (!onUpdateSelected) return;
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      toast.error('Valor numerico no valido');
+      return;
+    }
+    onUpdateSelected({ [field]: numeric } as Partial<Barrier | RadiationSource | OccupiedRegion | CriticalPoint>);
+    toast.success('Parametro actualizado', { description: `${field}: ${numeric}` });
+  };
   const workflowSteps = [
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
@@ -534,7 +560,7 @@ export default function CanvasArea({
   ];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#fafaf9]" ref={containerRef}>
+    <div className="relative flex-1 flex flex-col overflow-hidden bg-[#fafaf9]" ref={containerRef}>
       {/* ═══ BREADCRUMB + TOOLBAR SUPERIOR (Recomendacion #5 + mejoras) ═══ */}
       <div className="shrink-0 h-8 bg-white border-b border-slate-200 flex items-center px-2 gap-1">
         <div className="flex items-center gap-1 text-[10px] text-slate-400">
@@ -812,6 +838,17 @@ export default function CanvasArea({
             className="hidden 2xl:flex shrink-0 items-center gap-0.5 border-l border-slate-200 pl-1"
             aria-label="Acciones contextuales seguras del objeto seleccionado"
           >
+            <button
+              type="button"
+              data-testid="f191e-action-edit"
+              className="h-5 rounded border border-slate-200 bg-white px-1.5 text-[9px] font-semibold text-slate-600 hover:border-violet-200 hover:text-violet-700 disabled:opacity-40"
+              onClick={() => setInspectorEditOpen((open) => !open)}
+              disabled={!selectedInspectorEntity || !onUpdateSelected}
+              title="Editar propiedades basicas del objeto seleccionado"
+              aria-label="Editar propiedades de seleccion"
+            >
+              Edit
+            </button>
             {onOpenShieldingPresets && (
               <button
                 type="button"
@@ -874,6 +911,120 @@ export default function CanvasArea({
           </div>
         </div>
       </div>
+
+      {inspectorEditOpen && selectedInspectorEntity && onUpdateSelected && (
+        <div
+          data-testid="f191e-inline-editor"
+          className="absolute right-3 top-20 z-30 w-[360px] max-w-[calc(100%-24px)] rounded-md border border-violet-200 bg-white/95 p-3 shadow-lg backdrop-blur"
+          aria-label="Editor contextual seguro del objeto seleccionado"
+        >
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-violet-600">F191E editor</div>
+              <div className="truncate text-xs font-semibold text-slate-800">{selectedInspectorKind}: {selectedInspectorName}</div>
+            </div>
+            <button
+              type="button"
+              data-testid="f191e-editor-close"
+              className="h-6 w-6 rounded border border-slate-200 text-xs font-bold text-slate-500 hover:border-red-200 hover:text-red-600"
+              onClick={() => setInspectorEditOpen(false)}
+              title="Cerrar editor contextual"
+              aria-label="Cerrar editor contextual"
+            >
+              X
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="col-span-2 text-[10px] font-semibold text-slate-500">
+              Nombre
+              <input
+                data-testid="f191e-editor-name"
+                className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                defaultValue={selectedInspectorName}
+                onBlur={(event) => applyInspectorTextUpdate('name', event.currentTarget.value)}
+              />
+            </label>
+            {selectedBarrier && (
+              <label className="text-[10px] font-semibold text-slate-500">
+                Material
+                <input
+                  data-testid="f191e-editor-material"
+                  className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                  defaultValue={selectedBarrier.materialCode || selectedBarrier.material || ''}
+                  onBlur={(event) => applyInspectorTextUpdate('materialCode', event.currentTarget.value)}
+                />
+              </label>
+            )}
+            {selectedSource && (
+              <>
+                <label className="text-[10px] font-semibold text-slate-500">
+                  Workload
+                  <input
+                    data-testid="f191e-editor-workload"
+                    className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                    type="number"
+                    defaultValue={selectedSource.workloadValue}
+                    onBlur={(event) => applyInspectorNumberUpdate('workloadValue', event.currentTarget.value)}
+                  />
+                </label>
+                <label className="text-[10px] font-semibold text-slate-500">
+                  Isocentro m
+                  <input
+                    data-testid="f191e-editor-isocenter"
+                    className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                    type="number"
+                    step="0.01"
+                    defaultValue={selectedSource.isocenterHeight_m}
+                    onBlur={(event) => applyInspectorNumberUpdate('isocenterHeight_m', event.currentTarget.value)}
+                  />
+                </label>
+              </>
+            )}
+            {(selectedBarrier || selectedSource) && (
+              <label className="text-[10px] font-semibold text-slate-500">
+                U
+                <input
+                  data-testid="f191e-editor-use-factor"
+                  className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                  type="number"
+                  step="0.01"
+                  defaultValue={(selectedBarrier ?? selectedSource)?.useFactor ?? 1}
+                  onBlur={(event) => applyInspectorNumberUpdate('useFactor', event.currentTarget.value)}
+                />
+              </label>
+            )}
+            {(selectedBarrier || selectedRegion || selectedCriticalPoint) && (
+              <>
+                <label className="text-[10px] font-semibold text-slate-500">
+                  T
+                  <input
+                    data-testid="f191e-editor-occupancy"
+                    className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                    type="number"
+                    step="0.001"
+                    defaultValue={(selectedBarrier ?? selectedRegion ?? selectedCriticalPoint)?.occupancyFactor ?? 1}
+                    onBlur={(event) => applyInspectorNumberUpdate('occupancyFactor', event.currentTarget.value)}
+                  />
+                </label>
+                <label className="text-[10px] font-semibold text-slate-500">
+                  P mSv/sem
+                  <input
+                    data-testid="f191e-editor-design-goal"
+                    className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                    type="number"
+                    step="0.001"
+                    defaultValue={(selectedBarrier ?? selectedRegion ?? selectedCriticalPoint)?.designGoal_mSv_per_wk ?? 0.02}
+                    onBlur={(event) => applyInspectorNumberUpdate('designGoal_mSv_per_wk', event.currentTarget.value)}
+                  />
+                </label>
+              </>
+            )}
+          </div>
+          <div className="mt-2 rounded bg-violet-50 px-2 py-1 text-[10px] text-violet-700">
+            Cambios al perder foco. Acciones destructivas siguen fuera de F191E.
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Ruler Left */}

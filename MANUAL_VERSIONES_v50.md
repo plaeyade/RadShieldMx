@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F191E (2026-07-16) - Inline editor seguro
+
+- Objetivo: permitir edicion rapida de propiedades basicas desde el inspector sin redisenar el canvas.
+- Superficies: `CanvasArea`, `ShieldingDesigner`, `useCanvas`, smoke F191 y `UpdateAppDialog`.
+- Uso: `npm run test:f191e:inline-editor` y `npm run test:f191:pyrate-toolbar-smoke`.
+- Incluye: boton `Edit`, editor contextual compacto, nombre, material, workload, isocentro, U, T y P.
+- Guardrail: no hay borrar/duplicar; los cambios aplican al perder foco; numeros invalidos se rechazan con toast.
+- Operacion: seleccionar objeto, abrir `Edit`, ajustar campos y salir del campo para aplicar. Para cambios profundos usar sidebar o dialogos especializados.
+- Posterior: F191F podria agregar borrar/duplicar con confirmacion, historial undo/redo y prueba visual dedicada.
+
 ## F191D (2026-07-16) - Context actions seguros
 
 - Objetivo: dar acciones inmediatas al inspector de objeto sin abrir menus flotantes sobre el canvas.

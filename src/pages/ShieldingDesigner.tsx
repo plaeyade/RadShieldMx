@@ -1,6 +1,6 @@
 import { useState, useCallback, Suspense, lazy, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import type { CriticalPoint, FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
+import type { CriticalPoint, FloorPlan, Barrier, RadiationSource, OccupiedRegion } from '@/types/radshield';
 import { MATERIALS, MODALITIES } from '@/types/radshield';
 import { useShieldingEngine } from '@/hooks/useShieldingEngine';
 import { useCanvas } from '@/hooks/useCanvas';
@@ -1654,7 +1654,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'MC Macro Generation', format: mcConfig.format }); }
   }, [floorPlan, mcConfig]);
 
-  const handleUpdateSelected = useCallback((props: Partial<Barrier> | Partial<RadiationSource> | Partial<CriticalPoint>) => { updateSelected(props); }, [updateSelected]);
+  const handleUpdateSelected = useCallback((props: Partial<Barrier> | Partial<RadiationSource> | Partial<CriticalPoint> | Partial<OccupiedRegion>) => { updateSelected(props); }, [updateSelected]);
 
   // v10.1: PDF generation
   const handleGeneratePDF = useCallback(() => {
@@ -1971,6 +1971,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   onCalibrateScale={handleCalibrateScaleQuick}
                   onAddCriticalPoint={handleAddCriticalPointDraft}
                   onOpenShieldingPresets={handleShieldingPresetApply}
+                  onUpdateSelected={handleUpdateSelected}
                   onAuditSnapshot={handleAuditSnapshot}
                   sampleLines={sampleLines}
                   barrierResults={barrierResults}

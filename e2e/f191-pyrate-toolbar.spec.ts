@@ -20,6 +20,8 @@ test('F191 pyrateShield-inspired toolbar is visible and changes canvas modes', a
   await expect(page.getByTestId('f191c-object-inspector')).toBeVisible();
   await expect(page.getByTestId('f191c-inspector-type')).toContainText('Sin seleccion');
   await expect(page.getByTestId('f191d-context-actions')).toBeVisible();
+  await expect(page.getByTestId('f191e-action-edit')).toBeVisible();
+  await expect(page.getByTestId('f191e-action-edit')).toBeDisabled();
   await expect(page.getByTestId('f191d-action-calculate')).toBeVisible();
   await expect(page.getByTestId('f191d-action-focus')).toBeDisabled();
 

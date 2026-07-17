@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F191E (2026-07-16) - Inline editor seguro
+
+- Se agrega editor contextual compacto para propiedades basicas del objeto seleccionado.
+- El editor se abre desde `Edit` en la action rail F191D y permanece cerrado por defecto.
+- Campos soportados: nombre, material de barrera, workload/isocentro de fuente, U, T y P.
+- `useCanvas.updateSelected` ahora tambien actualiza regiones ocupadas, manteniendo alias `regions` cuando existe.
+- Guardrail: no agrega borrar, duplicar ni edicion destructiva; los cambios se aplican al perder foco y validan numeros finitos.
+- Nuevo comando: `npm run test:f191e:inline-editor`.
+
 ## F191D (2026-07-16) - Context actions seguros
 
 - Se agrega una banda de acciones contextuales dentro del inspector F191C.
