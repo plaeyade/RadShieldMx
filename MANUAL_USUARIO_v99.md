@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F198 - Validacion de menus canonicos
+
+La barra superior queda organizada por flujo real:
+
+- Diseno: plano, escala, DXF, 3D medico, nube de puntos y deteccion de barreras.
+- Equipos: biblioteca de equipos/fuentes, Gamma Knife, braquiterapia, CBCT/IGRT, medicina nuclear y ciclotron.
+- Blindaje: calculo global, UAQ, barrera rapida, suelo/techo, multilayer, neutrones, skyshine y blindajes por modalidad.
+- Verificacion: NCRP/IAEA/UAQ, cross-validation, sensibilidad, incertidumbre, mapas de dosis y performance.
+- Reportes: Memoria IA, PDF analitico, Reporte CNSNS, dashboard, costos, checklist y puente a Evidence Pack.
+- Evidencia: Evidence Pack, RAG deep dive, biblioteca, bibliografia, auditoria, logs y revision de fuentes IA.
+- Integraciones: performance, auditoria tecnica, CAD/MC, agentes y conversiones controladas.
+
+F198 valida que abrir cada grupo no oculte sidebar, canvas ni toolbar CAD. Archivo se conserva como unico menu legacy visible para operaciones de proyecto/import/export/ayuda.
+
 ## Addendum F197 - Recuperacion visual de menus, sidebar y canvas
 
 Si al abrir la app no aparece el canvas, la sidebar o los botones, primero use el flujo de recuperacion F197 antes de asumir fallo del motor grafico:

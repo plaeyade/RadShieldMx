@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F198 (2026-07-18) - Full menu function QA
+
+- Se agrega matriz F198 para validar funcion por funcion los grupos canonicos: Diseno, Equipos, Blindaje, Verificacion, Reportes, Evidencia e Integraciones.
+- Nuevo contrato revisa que cada trigger/menu exista, que sus funciones criticas sigan en el toolbar y que Archivo permanezca como unico legacy visible.
+- Nuevo smoke visual abre cada dropdown canonico en el build `dist`, valida funciones criticas y confirma que sidebar, canvas principal y toolbar CAD F191 sigan visibles despues de cada grupo.
+- Esta fase no elimina fallbacks ni mueve layout; prepara F199 para smoke de export/reportes.
+- Nuevos comandos: `npm run test:f198:menus` y `npm run test:f198:menus-smoke`.
+
 ## F197 (2026-07-18) - Menu/canvas/output QA
 
 - Se agrega una compuerta F197 para diagnosticar por que podrian no verse menus, sidebar, canvas o botones despues de cambios de layout.

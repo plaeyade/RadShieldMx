@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F198 (2026-07-18) - Full menu function QA
+
+- Objetivo: validar todos los grupos canonicos por funcion antes de tocar reportes/exportacion o eliminar fallbacks.
+- Alcance: Diseno, Equipos, Blindaje, Verificacion, Reportes, Evidencia e Integraciones.
+- Superficies: `Toolbar`, `F92_REAL_WORKFLOW`, menu triggers F96/F97/F107/F108/F109/F110/F116, sidebar F186, canvas F100 y toolbar CAD F191.
+- Smoke visual: abre cada dropdown en `dist`, valida labels criticos y comprueba que canvas/sidebar no desaparezcan despues de cada grupo.
+- Guardrail: no se abre cada dialogo pesado en esta fase; F198 valida visibilidad/ruta superficial. F199 queda para export, Memoria IA, PDF y Evidence Pack.
+- Validacion: `npm run test:f198:menus` y `npm run test:f198:menus-smoke`.
+
 ## F197 (2026-07-18) - Menu/canvas/output QA
 
 - Objetivo: revisar el primer menu funcion por funcion y cerrar el diagnostico de canvas/sidebar/botones invisibles antes de seguir con QA de release.
