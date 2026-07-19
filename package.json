@@ -307,6 +307,8 @@
     "prepare:f229:canvas-e2e": "node scripts/f229-canvas-cad-e2e-harness.mjs",
     "test:f229:canvas-e2e-contracts": "node scripts/check-f229-canvas-cad-e2e-harness-contracts.mjs",
     "test:f229:canvas-e2e": "playwright test e2e/canvas-cad-e2e-harness.spec.ts --project=chromium",
+    "prepare:f230:post-f229-gate": "node scripts/f230-post-f229-coverage-gate.mjs",
+    "test:f230:post-f229-gate": "node scripts/check-f230-post-f229-coverage-gate-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

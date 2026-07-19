@@ -1,5 +1,32 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F230 - Gate post-F229 para renderer base y eventos
+
+F230 define cuando se puede modificar el renderer base y la logica de eventos del canvas.
+
+Regla operativa:
+
+- No tocar renderer base ni eventos si falla F198, F207, F229 o F200.
+- Si los gates pasan, iniciar cambios pequenos en F231+ con feature flag y rollback a `useCanvas`.
+- Despues de cada cambio de renderer/eventos, repetir F198 menus/botones, F207 flujo funcional, F229 canvas E2E y F200 release estatico.
+- Si desaparecen canvas, sidebar, toolbar CAD o paneles de workflow, revertir solo el ultimo cambio de renderer/eventos y volver a correr F229.
+
+Que valida F230:
+
+- Menus y botones canonicos: Diseño, Equipos, Blindaje, Verificacion, Reportes, Evidencia e Integraciones.
+- Funciones criticas: Archivo, import DXF, canvas, Memoria IA, PDF, Evidence Pack y CNSNS.
+- Canvas CAD: dibujo, seleccion, lasso, modos visuales y export visual.
+- Manuales, changelog, control de cambios, manual HTML y Update Center actualizados a la fase vigente.
+
+Cobertura pendiente despues de F230:
+
+- F231: baseline visual con pixel-diff para desktop/mobile.
+- F232: fixture DXF/DWG dedicado dentro del E2E CAD.
+- F233: grip drag y snapping por coordenadas exactas.
+- F234: isocontornos numericos con etiquetas regulatorias.
+- F235: sincronizacion 2D/3D de equipos, espesores, zonas y snapshots.
+- F236: smoke post-deploy contra URL publica final.
+
 ## Addendum F229 - Canvas CAD E2E Harness
 
 F229 agrega un arnes E2E dedicado para validar que el canvas profesional siga operativo despues de los cambios de renderer, botones y paneles.

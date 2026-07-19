@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F230 (2026-07-19) - post-f229-coverage-gate
+
+- Objetivo: cerrar el criterio de seguridad posterior a F229 antes de modificar renderer base o eventos.
+- Nuevo: `f230PostF229CoverageGate.ts` con gates F198, F207, F229, F200, shell y documentacion.
+- UI: fila F230 en canvas muestra si menus, funcionalidad, canvas E2E, release, shell y docs estan listos.
+- Scripts: `npm run prepare:f230:post-f229-gate` y `npm run test:f230:post-f229-gate`.
+- Decision: renderer base y logica de eventos solo deben cambiarse en F231+ con feature flag, rollback y repeticion de F198/F207/F229/F200.
+- Pendientes siguientes: pixel-diff, fixture DXF/DWG, grip/snap exacto, isocontornos numericos, sync 2D/3D y smoke post-deploy.
+
 ## F229 (2026-07-19) - canvas-cad-e2e-harness
 
 - Objetivo: cubrir el canvas profesional con un E2E dedicado antes de seguir tocando renderer/eventos.

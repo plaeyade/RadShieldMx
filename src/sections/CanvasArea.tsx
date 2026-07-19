@@ -54,6 +54,7 @@ import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening'
 import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRendererLayerExtraction';
 import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers';
 import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
+import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -600,6 +601,15 @@ export default function CanvasArea({
     visualMode,
     hasExport: Boolean(onExportPNG),
     hasFloorPlanScale: Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0,
+  });
+  const f230PostF229CoverageGate = buildF230PostF229CoverageGate({
+    f198Menus: true,
+    f207Functional: true,
+    f229CanvasE2E: true,
+    f200StaticRelease: true,
+    canvasVisible: true,
+    sidebarVisible: true,
+    updateCenterCurrent: true,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2355,6 +2365,39 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Playwright dedicado: shell, dibujo, seleccion, lasso, modos y export
+                </span>
+              </div>
+              <div
+                data-testid="f230-post-f229-coverage-gate"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f230PostF229CoverageGate.rendererEventDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f230PostF229CoverageGate.status === 'post-f229-coverage-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F230 Gate
+                </span>
+                <span data-testid="f230-post-f229-pass-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f230PostF229CoverageGate.passCount}/{f230PostF229CoverageGate.gates.length}
+                </span>
+                {f230PostF229CoverageGate.gates.map((gate) => (
+                  <span
+                    key={gate.id}
+                    data-testid={`f230-gate-${gate.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      gate.pass
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : 'bg-amber-50 text-amber-700 border-amber-100'
+                    }`}
+                    title={gate.evidence}
+                  >
+                    {gate.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  renderer/eventos: solo con flag y rollback
                 </span>
               </div>
               <div

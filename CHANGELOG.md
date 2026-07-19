@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F230 (2026-07-19) - post-F229 coverage gate
+
+- Se agrega `f230PostF229CoverageGate.ts` para decidir cuando es seguro modificar renderer base y logica de eventos.
+- Criterio obligatorio antes de tocar renderer/eventos: F198 menus/botones, F207 flujo funcional, F229 canvas E2E y F200 release estatico deben estar en verde.
+- Canvas muestra fila `F230 Gate` con estado de menus, funcional, canvas E2E, release, shell y documentacion.
+- Update Center, manuales, control de cambios y `public/manual_usuario.html` documentan la version vigente.
+- Pendientes convertidos en fases: F231 pixel-diff visual, F232 fixture DXF/DWG, F233 grip/snap exacto, F234 isocontornos numericos, F235 sync 2D/3D y F236 post-deploy URL smoke.
+
 ## F229 (2026-07-19) - Canvas CAD E2E Harness
 
 - Se agrega `e2e/canvas-cad-e2e-harness.spec.ts` como arnes Playwright dedicado para el canvas profesional.

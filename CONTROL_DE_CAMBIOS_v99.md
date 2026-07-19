@@ -1,5 +1,12 @@
 # RadShield-MX — Control de Cambios Completo v1-v99
 
+## F230 (2026-07-19) - Gate post-F229 renderer/eventos
+
+- Se formaliza que renderer base y logica de eventos del canvas solo pueden modificarse despues de pasar F198, F207, F229 y F200.
+- Se agrega fila F230 en canvas para mostrar estado de menus/botones, flujo funcional, canvas E2E, release, shell y documentacion.
+- Se actualizan Update Center, changelog, manual de usuario, manual de versiones y `public/manual_usuario.html`.
+- Pendientes siguientes: F231 pixel-diff visual, F232 DXF/DWG fixture, F233 grip/snap exacto, F234 isocontornos numericos, F235 sync 2D/3D y F236 post-deploy.
+
 ## Estadisticas del Proyecto (v99)
 
 | Metrica | Valor |
