@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F209 (2026-07-18) - canvas-dimension-schedule
+
+- Objetivo: mejorar el canvas como plano CAD revisable con agenda de cotas y capas.
+- Alcance: longitud total de barreras, filas por muro, material, espesor, escala m/pixel y cobertura de resultados por barrera.
+- Guardrail: no modifica el editor ni el renderer; es una capa de lectura para QA y reporte.
+- Validacion: `npm run test:f209:canvas-dimensions`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F208 (2026-07-18) - canvas-reporting-layer
 
 - Objetivo: convertir el canvas/floorplan en evidencia exportable para Memoria IA, PDF y Evidence Pack.

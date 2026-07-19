@@ -40,6 +40,7 @@ import { buildF171CanvasPolishPredeploy } from '@/lib/f171CanvasPolishPredeploy'
 import { buildF173CanvasLowRiskPolish } from '@/lib/f173CanvasLowRiskPolish';
 import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
+import { buildF209CanvasDimensionSchedule } from '@/lib/f209CanvasDimensionSchedule';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -351,6 +352,7 @@ export default function CanvasArea({
     layerCount: layers.length,
     visibleLayerCount: layers.filter((layer) => layer.visible).length,
   });
+  const f209DimensionSchedule = buildF209CanvasDimensionSchedule(floorPlan, barrierResults, layers);
 
   useEffect(() => {
     window.localStorage.setItem(F188_CANVAS_PANEL_STATE_KEY, JSON.stringify(panelVisibility));
@@ -1688,6 +1690,40 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Memoria/PDF/Evidence export
+                </span>
+              </div>
+              <div
+                data-testid="f209-canvas-dimension-schedule"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f209DimensionSchedule.warnings.join(' | ') || f209DimensionSchedule.decision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f209DimensionSchedule.status === 'canvas-dimension-schedule-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F209 {f209DimensionSchedule.resultCoveragePct}%
+                </span>
+                <span data-testid="f209-dimension-total-length" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  L {f209DimensionSchedule.totalLengthM.toFixed(1)}m
+                </span>
+                <span data-testid="f209-dimension-barrier-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  Muros {f209DimensionSchedule.barrierCount}
+                </span>
+                {f209DimensionSchedule.rows.slice(0, 4).map((row) => (
+                  <span
+                    key={row.id}
+                    data-testid="f209-dimension-row"
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      row.hasResult ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-sky-50 text-sky-700 border-sky-100'
+                    }`}
+                    title={`${row.label}: ${row.barrierType}, ${row.material}, ${row.lengthM.toFixed(2)} m, ${row.thicknessMm.toFixed(1)} mm`}
+                  >
+                    {row.label.slice(0, 10)} {row.lengthM.toFixed(1)}m
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Escala {f209DimensionSchedule.scale_m_per_pixel || 0} m/px
                 </span>
               </div>
               <div className="border-b border-slate-100 p-1.5">

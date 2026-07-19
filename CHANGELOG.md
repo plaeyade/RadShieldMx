@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F209 (2026-07-18) - Canvas Dimension Schedule
+
+- Se agrega agenda CAD de cotas/capas en el canvas: longitud total, numero de muros, escala, filas por barrera, material, espesor y cobertura de calculo.
+- La mejora es solo de lectura/reportabilidad; no cambia eventos de dibujo, seleccion, snapping ni layout principal.
+- Nuevo comando: `npm run test:f209:canvas-dimensions`.
+
 ## F208 (2026-07-18) - Canvas Reporting Layer
 
 - Se agrega capa F208 para volver reportable el canvas sin mover layout: plano, cotas/lineas 0.3m, capas, simbolos de equipo, heatmap/isocontornos y export visual.

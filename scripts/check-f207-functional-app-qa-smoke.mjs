@@ -180,6 +180,7 @@ try {
   await page.waitForTimeout(1400);
   record('welcome screen does not block normal startup', !(await page.locator('.welcome-panel').isVisible().catch(() => false)));
   await guardShell(page, 'startup');
+  record('F209 dimension schedule visible on canvas', await visible(page, 'f209-canvas-dimension-schedule'));
   await page.screenshot({ path: result.screenshots.initial, fullPage: false });
 
   await page.getByRole('button', { name: /Archivo/i }).click();

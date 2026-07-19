@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F209 - Agenda de cotas del canvas
+
+F209 muestra una agenda compacta de cotas dentro del panel del canvas. Permite revisar rapidamente cuantas barreras hay, la longitud total del blindaje, la escala activa, el material/espesor de cada muro y si cada barrera ya tiene resultado de calculo.
+
+Interpretacion rapida:
+
+- `F209 100%`: todas las barreras listadas tienen resultado asociado.
+- `L`: longitud total estimada en metros.
+- `Muros`: numero de barreras del floorplan.
+- Cada chip de muro muestra nombre corto y longitud; verde indica que ya tiene resultado.
+
+Si F209 queda en revision, revise escala, barreras de longitud cero o calculos faltantes antes de anexar el plano a una memoria.
+
 ## Addendum F208 - Canvas reportable
 
 F208 agrega una capa de revision para saber si el plano ya puede anexarse a una memoria analitica. El panel resume seis rubros: plano, cotas, capas, simbolos, heatmap/isocontornos y export. Cada rubro puede estar listo, parcial o faltante.
