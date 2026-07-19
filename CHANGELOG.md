@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F219 (2026-07-19) - Canvas Post-Deploy QA
+
+- Se agrega matriz F219 para validar la URL publica, canvas, DXF, escenas F217 y handoff F218 despues del deploy.
+- Se identifican pendientes reales del canvas por prioridad: edicion directa, snapping avanzado, cotas editables, lasso, isocontornos, footprints y 3D.
+- La fase genera artefactos en `outputs/f219_canvas_post_deploy_qa/` y `outputs/fase_219_canvas_post_deploy_qa.md`.
+- Nuevos comandos: `npm run prepare:f219:canvas-postdeploy` y `npm run test:f219:canvas-postdeploy`.
+
 ## F218 (2026-07-19) - Visual Report Handoff
 
 - Se agrega contrato F218 para declarar que snapshots F217 deben adjuntarse a Memoria IA, PDF, Evidence Pack y anexo estructural.

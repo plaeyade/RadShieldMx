@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F219 (2026-07-19) - canvas-post-deploy-qa
+
+- Objetivo: cerrar QA visual post-deploy y ordenar pendientes reales del canvas antes de seguir modificando UI.
+- Alcance: URL publica, canvas/sidebar/toolbar, DXF aplicado, escenas F217, handoff F218 y checklist de operador.
+- Pendientes priorizados: `cad-direct-edit`, `advanced-snapping`, `editable-dimensions`, `lasso-multiselect`, `true-isocontours`, `equipment-footprints`, `visual-3d-inspection`.
+- Guardrail: F219 no toca renderer, eventos, geometria, DXF, calculos, DB ni sidebar; solo genera matriz y contrato.
+- Validacion: `npm run prepare:f219:canvas-postdeploy` y `npm run test:f219:canvas-postdeploy`.
+
 ## F218 (2026-07-19) - report-handoff
 
 - Objetivo: cerrar el puente entre canvas y entregables indicando que snapshots visuales deben anexarse.

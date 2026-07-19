@@ -1,5 +1,30 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F219 - QA visual post-deploy y pendientes del canvas
+
+F219 es la lista de control posterior al deploy publico. Su objetivo es confirmar que la version publicada conserve canvas, sidebar, toolbar, DXF, escenas F217 y handoff F218, y separar las mejoras de canvas que aun faltan de las que ya estan estabilizadas.
+
+Checklist rapido en Vercel:
+
+- Abrir `https://radshield-mx-static-dist.vercel.app/` y confirmar que no hay pantalla blanca ni cache viejo.
+- Confirmar sidebar izquierda, viewport principal y toolbar CAD-clinica.
+- Abrir Archivo, importar un DXF y usar `Aplicar al canvas`.
+- Preparar escenas `Planta`, `Heat`, `Iso` y `Estruct`.
+- Abrir Memoria IA, PDF Report y Evidence Pack para revisar F218.
+- Guardar captura final del canvas como evidencia manual del operador.
+
+Pendientes del canvas priorizados:
+
+- P0: edicion CAD directa.
+- P0: snapping avanzado visual.
+- P0: cotas persistentes, editables y exportables.
+- P1: seleccion multiple/lasso con hover preselection.
+- P1: isocontornos reales con etiquetas y leyenda regulatoria.
+- P1: simbolos de equipo con footprints y variantes por fabricante.
+- P2: inspeccion 3D con recorrido, acabados, espesores y export visual.
+
+Regla de seguridad: cada mejora debe entrar en microfase con smoke visual antes/despues. Si el canvas, sidebar o toolbar desaparecen, detener y aplicar recuperacion F197/F204 antes de seguir.
+
 ## Addendum F218 - Handoff visual a reportes
 
 F218 ayuda a cerrar una memoria o expediente con evidencia visual explicita. Toma las escenas preparadas en F217 y muestra si cada captura requerida esta lista, falta o requiere revision.
