@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F220 (2026-07-19) - canvas-cad-priority-actions
+
+- Objetivo: convertir los pendientes P0-P2 del canvas en acciones visibles y seguras.
+- Alcance: panel F220 en el flujo del canvas con botones `P0 Edit`, `P0 Snap`, `P0 Cotas`, `P1 Sel`, `P1 Iso`, `P1 Eq` y `P2 3D`.
+- Guardrail: usa funciones existentes; no cambia renderer, eventos base, calculos, DXF, DB ni sidebar.
+- Siguientes microfases: F221 snapping avanzado, F222 cotas editables, F223 lasso, F224 isocontornos reales, F225 footprints, F226 inspeccion 3D.
+- Validacion: `npm run prepare:f220:canvas-cad-actions` y `npm run test:f220:canvas-cad-actions`.
+
 ## F219 (2026-07-19) - canvas-post-deploy-qa
 
 - Objetivo: cerrar QA visual post-deploy y ordenar pendientes reales del canvas antes de seguir modificando UI.

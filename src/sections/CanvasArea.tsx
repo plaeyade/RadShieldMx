@@ -48,6 +48,7 @@ import { buildF214SketchUpCanvasReorg } from '@/lib/f214SketchUpCanvasReorg';
 import { buildF215CanvasScenePresets } from '@/lib/f215CanvasScenePresets';
 import { buildF216MiniViewManager, type F216SavedCanvasView } from '@/lib/f216MiniViewManager';
 import { buildF217VisualExportByScene, type F217VisualExportSceneId } from '@/lib/f217VisualExportByScene';
+import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/f220CanvasCadPriorityActions';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -541,6 +542,17 @@ export default function CanvasArea({
     sampleLineCount: sampleLines.length,
     barrierCount,
   });
+  const f220CanvasCadActions = buildF220CanvasCadPriorityActions({
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+    snapToGrid: canvasState.snapToGrid,
+    dimensionRowCount: f209DimensionSchedule.rows.length,
+    sampleLineCount: sampleLines.length,
+    samplePointCount: sampleLines.reduce((count, line) => count + line.points.length, 0),
+    sourceCount,
+    barrierCount,
+    hasResults,
+    hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
+  });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
   const selectedCriticalPoint = floorPlan?.criticalPoints?.find((point) => point.id === canvasState.selectedId) ?? null;
@@ -638,6 +650,44 @@ export default function CanvasArea({
   };
   const clearInspectorSelection = () => {
     setCanvasState((prev) => ({ ...prev, selectedId: null, selectedIds: [] }));
+  };
+  const runF220CanvasAction = (actionId: F220CadActionKey) => {
+    if (actionId === 'direct-edit') {
+      if (!selectedInspectorEntity || !onUpdateSelected) {
+        toast.info('Selecciona una barrera, fuente, zona o punto critico para editar.');
+        activateCanvasTool('select');
+        return;
+      }
+      setInspectorEditOpen(true);
+      return;
+    }
+    if (actionId === 'advanced-snap') {
+      onToggleSnap();
+      return;
+    }
+    if (actionId === 'editable-dimensions') {
+      if (onCalibrateScale) onCalibrateScale();
+      else activateCanvasTool('measure');
+      return;
+    }
+    if (actionId === 'lasso-select') {
+      activateCanvasTool('select');
+      toast.info('F220 prepara seleccion multiple; F223 agregara ventana/lasso real.');
+      return;
+    }
+    if (actionId === 'isocontours') {
+      applyVisualMode('isocontours');
+      return;
+    }
+    if (actionId === 'equipment-footprints') {
+      activateCanvasTool('source');
+      return;
+    }
+    if (actionId === 'medical-3d') {
+      if (onOpenMedical3D) onOpenMedical3D();
+      else if (onOpen3DViewer) onOpen3DViewer();
+      else toast.info('Conecta el visor 3D medico para abrir recorrido desde floorplan.');
+    }
   };
   const duplicateInspectorSelection = () => {
     if (!selectedInspectorEntity || !onDuplicateSelected) return;
@@ -2047,6 +2097,44 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Memoria/PDF/Evidence export
+                </span>
+              </div>
+              <div
+                data-testid="f220-canvas-cad-priority-actions"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f220CanvasCadActions.decision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f220CanvasCadActions.status === 'cad-priority-actions-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100'
+                }`}>
+                  F220 P0-P2
+                </span>
+                <span data-testid="f220-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f220CanvasCadActions.readyCount}/{f220CanvasCadActions.actions.length}
+                </span>
+                {f220CanvasCadActions.actions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    data-testid={`f220-cad-action-${action.id}`}
+                    className={`h-5 rounded border px-1.5 text-[7px] font-semibold whitespace-nowrap ${
+                      action.status === 'ready'
+                        ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-white'
+                        : action.status === 'partial'
+                          ? 'border-sky-100 bg-sky-50 text-sky-700 hover:bg-white'
+                          : 'border-slate-100 bg-slate-50 text-slate-600 hover:bg-white hover:text-fuchsia-700'
+                    }`}
+                    onClick={() => runF220CanvasAction(action.id)}
+                    title={`${action.priority} ${action.label}: ${action.evidence}. ${action.guardrail}`}
+                    aria-label={`${action.priority} ${action.actionLabel}`}
+                  >
+                    {action.priority} {action.shortLabel}
+                  </button>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  {f220CanvasCadActions.prioritySummary.P0}
                 </span>
               </div>
               <div

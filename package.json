@@ -294,6 +294,8 @@
     "test:f218:report-handoff": "node scripts/check-f218-report-handoff-contracts.mjs",
     "prepare:f219:canvas-postdeploy": "node scripts/f219-canvas-post-deploy-qa.mjs",
     "test:f219:canvas-postdeploy": "node scripts/check-f219-canvas-post-deploy-qa-contracts.mjs",
+    "prepare:f220:canvas-cad-actions": "node scripts/f220-canvas-cad-priority-actions.mjs",
+    "test:f220:canvas-cad-actions": "node scripts/check-f220-canvas-cad-priority-actions-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

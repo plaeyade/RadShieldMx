@@ -1,5 +1,29 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F220 - Acciones CAD P0 a P2
+
+F220 agrega una fila compacta dentro del panel de flujo del canvas. Su objetivo es que los pendientes CAD ya identificados no queden como lista abstracta: cada grupo tiene un boton operativo o una entrada segura hacia la siguiente microfase.
+
+Botones F220:
+
+- `P0 Edit`: abre el editor inline F191E para el objeto seleccionado.
+- `P0 Snap`: activa o desactiva el snap actual. El snapping avanzado endpoint/midpoint/perpendicular se reserva para F221.
+- `P0 Cotas`: abre calibracion/medicion para preparar cotas editables F222.
+- `P1 Sel`: vuelve al modo seleccion y prepara el flujo de seleccion multiple/lasso F223.
+- `P1 Iso`: cambia a vista de isocontornos para revisar lineas de muestreo y preparar F224.
+- `P1 Eq`: cambia a colocacion de equipo/fuente para completar footprints F225.
+- `P2 3D`: abre la inspeccion 3D medica si el conector esta disponible.
+
+Uso recomendado:
+
+1. Seleccionar una barrera, fuente, zona o punto critico.
+2. Usar `P0 Edit` para cambiar propiedades simples.
+3. Usar `P0 Snap` y `P0 Cotas` antes de dibujar o validar dimensiones.
+4. Usar `P1 Iso` despues de calcular para preparar evidencia visual.
+5. Usar `P2 3D` solo como inspeccion avanzada, no como sustituto del calculo ni de la memoria analitica.
+
+Regla de seguridad: F220 no introduce lasso real, snapping geometrico avanzado ni interpolacion de isocontornos; solo crea entradas operativas seguras. Esas funciones profundas se implementan gradualmente en F221-F226.
+
 ## Addendum F219 - QA visual post-deploy y pendientes del canvas
 
 F219 es la lista de control posterior al deploy publico. Su objetivo es confirmar que la version publicada conserve canvas, sidebar, toolbar, DXF, escenas F217 y handoff F218, y separar las mejoras de canvas que aun faltan de las que ya estan estabilizadas.

@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F220 (2026-07-19) - Canvas CAD Priority Actions P0-P2
+
+- Se agrega panel F220 dentro del flujo del canvas con acciones P0, P1 y P2.
+- P0: abrir editor inline, alternar snap y calibrar/medir cotas usando herramientas existentes.
+- P1: preparar seleccion, vista isocontornos y colocacion de equipos/footprints.
+- P2: abrir inspeccion medica 3D cuando exista conector disponible.
+- No se reescribe renderer, eventos base, calculos, DXF, DB ni sidebar.
+- Nuevos comandos: `npm run prepare:f220:canvas-cad-actions` y `npm run test:f220:canvas-cad-actions`.
+
 ## F219 (2026-07-19) - Canvas Post-Deploy QA
 
 - Se agrega matriz F219 para validar la URL publica, canvas, DXF, escenas F217 y handoff F218 despues del deploy.
