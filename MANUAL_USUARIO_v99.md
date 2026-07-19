@@ -1,5 +1,25 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F214 - Canvas tipo SketchUp / estudio CAD medico
+
+F214 reorganiza el area del floorplan para que se lea como una mesa de trabajo CAD tipo SketchUp: fondo gris de estudio, reglas superior/lateral, chips de escena, cubo de vista y triada XYZ. Es una mejora visual y de orientacion; no cambia escala, calculos, importacion DXF ni eventos de dibujo.
+
+Elementos nuevos:
+
+1. `F214 Studio`: muestra escena activa, estilo visual, snap, capas visibles y conteo de objetos.
+2. `Cubo de vista`: orienta la planta con etiquetas TOP/N/E para preparar revision 2D y futura inspeccion 3D.
+3. `Ejes XYZ`: X este, Y norte y Z altura/espesor; util para hablar de espesores, recorridos y acabados.
+4. `Reglas`: refuerzan lectura metrica del canvas sin reemplazar cotas editables ni calibracion de escala.
+5. `Controles flotantes`: zoom extents, acercar, alejar, snap y export PNG ahora explican su funcion al posicionar el cursor.
+
+Uso recomendado:
+
+- Empiece con `Plano` o `Importar DXF` y confirme que el cubo/triada no obstruyen barreras ni menus.
+- Use `Ajustar vista` para recuperar el floorplan si queda fuera de pantalla.
+- Active `Snap` al trazar muros, cotas, equipos o puntos de control.
+- Cambie entre `Plano`, `Heat`, `Iso` y `Estruct` para comparar el mismo layout con distintas lecturas.
+- Exporte PNG cuando necesite evidencia visual para Memoria IA, PDF, Evidence Pack o revision CNSNS/UAQ.
+
 ## Addendum F213 - Mapeo DXF y leyendas de botones CAD
 
 F213 agrega una revision de capas al visor DXF antes de aplicar el plano al canvas. Cada capa se clasifica como muro/barrera, equipo, zona, cota, referencia, texto o no mapeada. Solo LINE/LWPOLYLINE utilizables se aplican como barreras; equipos, zonas y cotas quedan como referencia para que el usuario los coloque o valide.

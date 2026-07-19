@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F214 (2026-07-18) - SketchUp-inspired Canvas Reorg
+
+- Se reorganiza visualmente el canvas como estudio CAD medico: mesa gris, reglas tipo dibujo, chips de escena, cubo de vista y ejes XYZ.
+- La mejora no toca el renderer, eventos de dibujo, importacion DXF, sidebar ni calculos; agrega orientacion visual y lectura de estado.
+- Se traducen tooltips de zoom/snap/export para explicar su funcion en diseno de areas, memoria analitica y Evidence Pack.
+- Nuevo comando: `npm run test:f214:sketchup-canvas`.
+
 ## F213 (2026-07-18) - DXF Layer Mapping QA + tooltips CAD
 
 - Se agrega panel F213 al visor DXF para clasificar capas como muros/barreras, equipos, zonas, cotas, referencias, texto o no mapeadas.

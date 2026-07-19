@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F214 (2026-07-18) - sketchup-canvas-reorg
+
+- Objetivo: reorganizar el area de trabajo del canvas con una apariencia tipo SketchUp/CAD sin alterar la operacion estable.
+- Alcance: viewport con mesa gris, reglas mas visibles, chips de escena, cubo de vista, triada XYZ y tooltips de controles flotantes.
+- Guardrail: no cambia renderer, handlers de mouse/touch, import DXF, sidebar, calculos ni persistencia; es una capa visual de orientacion.
+- Validacion: `npm run test:f214:sketchup-canvas`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F213 (2026-07-18) - dxf-layer-mapping-qa
 
 - Objetivo: hacer transparente como se interpretan las capas DXF antes de aplicarlas al floorplan.

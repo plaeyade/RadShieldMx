@@ -44,6 +44,7 @@ import { buildF209CanvasDimensionSchedule } from '@/lib/f209CanvasDimensionSched
 import { buildF210CanvasLayerManagerPolish } from '@/lib/f210CanvasLayerManagerPolish';
 import { buildF211CanvasEquipmentSymbolSchedule } from '@/lib/f211CanvasEquipmentSymbolSchedule';
 import { buildF212HeatmapRegulatoryLegend } from '@/lib/f212HeatmapRegulatoryLegend';
+import { buildF214SketchUpCanvasReorg } from '@/lib/f214SketchUpCanvasReorg';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -446,6 +447,18 @@ export default function CanvasArea({
   const regionCount =
     ((floorPlan as { regions?: unknown[] } | undefined)?.regions?.length ??
       (floorPlan as { occupiedRegions?: unknown[] } | undefined)?.occupiedRegions?.length) ?? 0;
+  const f214SketchUpCanvas = buildF214SketchUpCanvasReorg({
+    visualMode,
+    activeTool,
+    scale: canvasState.scale,
+    snapToGrid: canvasState.snapToGrid,
+    barrierCount,
+    sourceCount,
+    regionCount,
+    layerCount: layers.length,
+    visibleLayerCount: layers.filter((layer) => layer.visible).length,
+    heatmapEnabled,
+  });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
   const selectedCriticalPoint = floorPlan?.criticalPoints?.find((point) => point.id === canvasState.selectedId) ?? null;
@@ -608,7 +621,7 @@ export default function CanvasArea({
   ];
 
   return (
-    <div className="relative flex-1 flex flex-col overflow-hidden bg-[#fafaf9]" ref={containerRef}>
+    <div className="relative flex-1 flex flex-col overflow-hidden bg-[#f3f4f1]" ref={containerRef}>
       {/* ═══ BREADCRUMB + TOOLBAR SUPERIOR (Recomendacion #5 + mejoras) ═══ */}
       <div className="shrink-0 h-8 bg-white border-b border-slate-200 flex items-center px-2 gap-1">
         <div className="flex items-center gap-1 text-[10px] text-slate-400">
@@ -1105,15 +1118,23 @@ export default function CanvasArea({
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Ruler Left */}
-        <div className="w-6 bg-white border-r border-slate-200 shrink-0 relative" style={{ background: 'repeating-linear-gradient(to bottom, transparent, transparent 9px, #e2e8f0 9px, #e2e8f0 10px)' }}>
+        <div className="w-6 bg-[#f7f4ee] border-r border-stone-300 shrink-0 relative" style={{ background: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.55), rgba(255,255,255,0.55) 9px, #d6d3d1 9px, #d6d3d1 10px)' }}>
           <span className="absolute bottom-1 left-0.5 text-[7px] text-slate-400 rotate-90 origin-left">m</span>
         </div>
         <div className="flex-1 flex flex-col relative">
           {/* Ruler Top */}
-          <div className="h-5 bg-white border-b border-slate-200 shrink-0 relative" style={{ background: 'repeating-linear-gradient(to right, transparent, transparent 9px, #e2e8f0 9px, #e2e8f0 10px)' }}>
+          <div className="h-5 bg-[#f7f4ee] border-b border-stone-300 shrink-0 relative" style={{ background: 'repeating-linear-gradient(to right, rgba(255,255,255,0.55), rgba(255,255,255,0.55) 9px, #d6d3d1 9px, #d6d3d1 10px)' }}>
             <span className="absolute bottom-0.5 left-1 text-[7px] text-slate-400">m</span>
           </div>
-          <div className="flex-1 relative overflow-hidden">
+          <div
+            data-testid="f214-sketchup-viewport-frame"
+            className="flex-1 relative overflow-hidden bg-[#e9edf0] shadow-inner"
+            style={{
+              backgroundImage:
+                'linear-gradient(135deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 36%), radial-gradient(circle at 12px 12px, rgba(15,23,42,0.06) 1px, transparent 1px)',
+              backgroundSize: '100% 100%, 24px 24px',
+            }}
+          >
             {/* Main floor plan canvas */}
             <canvas
               ref={canvasRef}
@@ -1142,6 +1163,70 @@ export default function CanvasArea({
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ zIndex: 5 }}
             />
+
+            <div
+              data-testid="f214-sketchup-canvas-reorg"
+              className="pointer-events-none absolute top-2 left-[456px] z-10 hidden max-w-[520px] items-center gap-1 rounded-md border border-stone-300 bg-[#f8f5ef]/95 px-2 py-1 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:flex"
+              title={`${f214SketchUpCanvas.viewportTitle}. ${f214SketchUpCanvas.warnings.join(' ') || 'Vista tipo estudio organizada.'}`}
+            >
+              <span className={`rounded px-1.5 py-0.5 font-bold ${
+                f214SketchUpCanvas.status === 'sketchup-canvas-reorg-ready'
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-amber-50 text-amber-700'
+              }`}>
+                F214 Studio
+              </span>
+              {f214SketchUpCanvas.chips.map((chip) => (
+                <span
+                  key={chip.id}
+                  data-testid={`f214-sketchup-chip-${chip.id}`}
+                  className={`rounded border px-1 py-0.5 whitespace-nowrap ${
+                    chip.tone === 'ready'
+                      ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
+                      : chip.tone === 'active'
+                        ? 'border-orange-100 bg-orange-50 text-orange-700'
+                        : chip.tone === 'attention'
+                          ? 'border-amber-100 bg-amber-50 text-amber-700'
+                          : 'border-slate-100 bg-slate-50 text-slate-500'
+                  }`}
+                >
+                  {chip.label}:{chip.value}
+                </span>
+              ))}
+            </div>
+
+            <div
+              data-testid="f214-view-cube"
+              className="pointer-events-none absolute right-2 top-[148px] z-10 hidden h-[58px] w-[58px] rotate-[-8deg] rounded-md border border-stone-300 bg-white/90 text-[9px] font-bold text-slate-500 shadow-md backdrop-blur-sm lg:block"
+              title="Cubo de vista tipo SketchUp: orientacion de planta para inspeccion medica 2D/3D"
+            >
+              <div className="absolute left-2 top-2 h-8 w-8 skew-y-[-18deg] rounded-sm border border-slate-300 bg-[#f8fafc] shadow-inner" />
+              <div className="absolute right-2 top-3 h-8 w-5 skew-y-[26deg] rounded-sm border border-slate-300 bg-[#eef2f7]" />
+              <span className="absolute left-3 top-3 text-orange-600">{f214SketchUpCanvas.viewCubeLabels[0]}</span>
+              <span className="absolute bottom-1 left-2 text-emerald-600">{f214SketchUpCanvas.viewCubeLabels[1]}</span>
+              <span className="absolute bottom-1 right-2 text-red-500">{f214SketchUpCanvas.viewCubeLabels[2]}</span>
+            </div>
+
+            <div
+              data-testid="f214-axis-triad"
+              className="pointer-events-none absolute bottom-16 right-14 z-10 hidden rounded-md border border-stone-300 bg-white/90 px-2 py-1.5 shadow-sm backdrop-blur-sm lg:block"
+              title="Ejes XYZ de orientacion: X este, Y norte, Z altura/espesor para inspeccion 3D"
+            >
+              <div className="relative h-12 w-16">
+                <div className="absolute bottom-2 left-4 h-0.5 w-9 origin-left rotate-[-12deg]" style={{ backgroundColor: f214SketchUpCanvas.axes[0].color }} />
+                <div className="absolute bottom-2 left-4 h-9 w-0.5 origin-bottom rotate-[22deg]" style={{ backgroundColor: f214SketchUpCanvas.axes[1].color }} />
+                <div className="absolute bottom-2 left-4 h-8 w-0.5 origin-bottom rotate-[-48deg]" style={{ backgroundColor: f214SketchUpCanvas.axes[2].color }} />
+                {f214SketchUpCanvas.axes.map((axis, index) => (
+                  <span
+                    key={axis.axis}
+                    className={`absolute text-[9px] font-bold ${index === 0 ? 'bottom-0 right-0' : index === 1 ? 'top-0 left-8' : 'bottom-7 left-0'}`}
+                    style={{ color: axis.color }}
+                  >
+                    {axis.axis}
+                  </span>
+                ))}
+              </div>
+            </div>
 
             {/* v65: Sticky notes overlay */}
             {stickyNotes.map(note => {
@@ -1960,22 +2045,22 @@ export default function CanvasArea({
 
             {/* ═══ FLOATING CONTROLS ═══ */}
             <div className="absolute bottom-16 right-2 flex flex-col gap-1 z-10">
-              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Zoom to fit" onClick={onZoomToFit}>
+              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Ajustar vista: centra todo el plano como Zoom Extents CAD/SketchUp" onClick={onZoomToFit}>
                 <Maximize className="w-4 h-4" />
               </Button>
-              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Zoom in"
+              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Acercar vista del floorplan sin modificar escala real del proyecto"
                 onClick={() => setCanvasState((p: CanvasState) => ({ ...p, scale: Math.min(10, p.scale * 1.2) }))}>
                 <ZoomIn className="w-4 h-4" />
               </Button>
-              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Zoom out"
+              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Alejar vista para revisar layout, zonas controladas y rutas de acceso"
                 onClick={() => setCanvasState((p: CanvasState) => ({ ...p, scale: Math.max(0.1, p.scale / 1.2) }))}>
                 <ZoomOut className="w-4 h-4" />
               </Button>
               <Button size="icon" variant={canvasState.snapToGrid ? "default" : "secondary"} className="h-8 w-8 shadow-md"
-                title="Toggle snap" onClick={onToggleSnap}>
+                title="Activar/desactivar snap a grilla para muros, cotas, equipos y puntos de control" onClick={onToggleSnap}>
                 <Grid3X3 className="w-4 h-4" />
               </Button>
-              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Export PNG" onClick={onExportPNG}>
+              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Exportar vista PNG del canvas para memoria analitica, QA o Evidence Pack" onClick={onExportPNG}>
                 <ImageIcon className="w-4 h-4" />
               </Button>
             </div>
