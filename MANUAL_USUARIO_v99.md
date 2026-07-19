@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F212 - Leyenda regulatoria de heatmap/isocontornos
+
+F212 agrega una leyenda compacta para interpretar mapas de calor e isocontornos en el canvas. Resume umbrales ALARA, publico y controlado, metas minima/maxima del proyecto, niveles de color y el valor maximo proxy semanal detectado.
+
+Uso recomendado:
+
+1. Ejecute calculos o active heatmap.
+2. Revise el chip `F212 Heat`.
+3. Confirme que existan lineas 0.3 m e isocontornos antes de anexar la imagen a una memoria.
+4. Si aparece advertencia, complete resultados, heatmap o lineas de muestreo.
+5. Use la leyenda como apoyo de QA visual; la validacion final sigue requiriendo revision del fisico medico/RSO.
+
+F212 no certifica mediciones ni cambia limites regulatorios. Ordena la evidencia visual para Memoria IA, PDF y Evidence Pack.
+
 ## Addendum F211 - Agenda de simbolos de equipos
 
 F211 resume los equipos y fuentes colocados en el floorplan. Muestra modalidad, norma/metodologia, variante o fabricante, footprint, rotacion y workload. Su proposito es detectar metadatos faltantes antes de generar inspeccion 3D, Memoria IA o anexos visuales.

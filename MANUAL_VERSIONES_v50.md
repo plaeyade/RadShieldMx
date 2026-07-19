@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F212 (2026-07-18) - heatmap-regulatory-legend
+
+- Objetivo: hacer reportable la lectura de heatmap/isocontornos con umbrales regulatorios visibles.
+- Alcance: ALARA, publico, controlado, P min/max proyecto, niveles de color, maximo proxy semanal y columnas de export.
+- Guardrail: no modifica renderer, calculos ni limites normativos; solo agrega leyenda de QA/exportabilidad.
+- Validacion: `npm run test:f212:heatmap-legend`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F211 (2026-07-18) - canvas-equipment-symbol-schedule
 
 - Objetivo: auditar simbolos/equipos colocados en el floorplan antes de inspeccion 3D o memoria analitica.

@@ -43,6 +43,7 @@ import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF209CanvasDimensionSchedule } from '@/lib/f209CanvasDimensionSchedule';
 import { buildF210CanvasLayerManagerPolish } from '@/lib/f210CanvasLayerManagerPolish';
 import { buildF211CanvasEquipmentSymbolSchedule } from '@/lib/f211CanvasEquipmentSymbolSchedule';
+import { buildF212HeatmapRegulatoryLegend } from '@/lib/f212HeatmapRegulatoryLegend';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -357,6 +358,7 @@ export default function CanvasArea({
   const f209DimensionSchedule = buildF209CanvasDimensionSchedule(floorPlan, barrierResults, layers);
   const f210LayerManager = buildF210CanvasLayerManagerPolish(layers, activeLayer);
   const f211EquipmentSchedule = buildF211CanvasEquipmentSymbolSchedule(floorPlan);
+  const f212HeatmapLegend = buildF212HeatmapRegulatoryLegend(floorPlan, barrierResults, sampleLines, heatmapPointCount);
 
   useEffect(() => {
     window.localStorage.setItem(F188_CANVAS_PANEL_STATE_KEY, JSON.stringify(panelVisibility));
@@ -1805,6 +1807,39 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Simbolos/equipos para 3D y memoria
+                </span>
+              </div>
+              <div
+                data-testid="f212-heatmap-regulatory-legend"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f212HeatmapLegend.warnings.join(' | ') || f212HeatmapLegend.decision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f212HeatmapLegend.status === 'heatmap-regulatory-legend-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F212 Heat {f212HeatmapLegend.heatmapPointCount}
+                </span>
+                <span data-testid="f212-heatmap-max-proxy" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  Max {f212HeatmapLegend.maxWeeklyProxy_mSv.toFixed(3)}
+                </span>
+                <span data-testid="f212-isocontour-line-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  Iso {f212HeatmapLegend.sampleLineCount}/{f212HeatmapLegend.samplePointCount}
+                </span>
+                {f212HeatmapLegend.levels.map((level) => (
+                  <span
+                    key={level.id}
+                    data-testid="f212-regulatory-level"
+                    className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-white text-slate-700 border-slate-100"
+                    title={`${level.label}: ${level.exportLabel}`}
+                  >
+                    <span className="inline-block h-1.5 w-1.5 rounded-full mr-1 align-middle" style={{ backgroundColor: level.color }} />
+                    {level.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Leyenda regulatoria exportable
                 </span>
               </div>
               <div className="border-b border-slate-100 p-1.5">

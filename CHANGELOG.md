@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F212 (2026-07-18) - Heatmap Regulatory Legend
+
+- Se agrega leyenda regulatoria compacta para heatmap/isocontornos: ALARA, publico, controlado, P min/max del proyecto, niveles de color y maximo proxy semanal.
+- La leyenda queda preparada para export visual, Memoria IA, PDF y Evidence Pack con columnas de reporte.
+- La mejora es de lectura/QA; no cambia calculos, renderer de heatmap ni limites normativos.
+- Nuevo comando: `npm run test:f212:heatmap-legend`.
+
 ## F211 (2026-07-18) - Canvas Equipment Symbol Schedule
 
 - Se agrega agenda compacta de equipos/fuentes en el canvas: modalidad, norma, fabricante/variante, footprint, rotacion y workload.
