@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F229 (2026-07-19) - canvas-cad-e2e-harness
+
+- Objetivo: cubrir el canvas profesional con un E2E dedicado antes de seguir tocando renderer/eventos.
+- Nuevo: `e2e/canvas-cad-e2e-harness.spec.ts` valida shell, dibujo, seleccion, lasso, modos visuales y superficie de export.
+- Nuevo: `f229CanvasCadE2EHarness.ts` declara cobertura y pendientes posteriores.
+- UI: fila F229 en canvas muestra conteo de cobertura y chips `shell/sidebar`, `dibujar muro`, `seleccion`, `snap/lasso`, `modos`, `export` y `escala`.
+- Guardrail: el arnes no sustituye el renderer, no cambia eventos base y no reorganiza sidebar/toolbar.
+- Validacion: `npm run prepare:f229:canvas-e2e`, `npm run test:f229:canvas-e2e-contracts` y `npm run test:f229:canvas-e2e`.
+
 ## F228 (2026-07-19) - static-render-helpers
 
 - Objetivo: extraer helpers puros de render para capas estaticas/HUD.

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F229 (2026-07-19) - Canvas CAD E2E Harness
+
+- Se agrega `e2e/canvas-cad-e2e-harness.spec.ts` como arnes Playwright dedicado para el canvas profesional.
+- Cobertura: canvas/sidebar/toolbar visibles, filas F221-F229, superficie no vacia, dibujo de muro, seleccion/inspector, ventana/lasso, modos Plano/Heat/Iso/Estructura y controles F217 de export visual.
+- Se agrega `src/lib/f229CanvasCadE2EHarness.ts` y fila F229 en el canvas para auditar cobertura E2E y pendientes.
+- Artefactos: `outputs/f229_canvas_cad_e2e_harness/f229_canvas_cad_e2e_harness.json` y `outputs/fase_229_canvas_cad_e2e_harness.md`.
+- Pendiente posterior: pixel-diff visual, fixture DXF dedicado, grip drag con coordenadas exactas, isocontornos numericos y sync 2D/3D.
+
 ## F228 (2026-07-19) - Static render helpers
 
 - Se agrega `src/lib/canvas/renderStaticHelpers.ts` con helpers puros `drawCanvasBackgroundGrid`, `drawFloorPlanImageLayer` y `drawCanvasScaleHud`.

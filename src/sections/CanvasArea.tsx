@@ -53,6 +53,7 @@ import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections'
 import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening';
 import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRendererLayerExtraction';
 import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers';
+import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -589,6 +590,16 @@ export default function CanvasArea({
     hasFloorPlanImage: Boolean(floorPlan?.imageUrl),
     scale: canvasState.scale,
     scale_m_per_pixel: floorPlan.scale_m_per_pixel,
+  });
+  const f229CanvasCadE2EHarness = buildF229CanvasCadE2EHarness({
+    barrierCount,
+    sourceCount,
+    regionCount,
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+    snapToGrid: canvasState.snapToGrid,
+    visualMode,
+    hasExport: Boolean(onExportPNG),
+    hasFloorPlanScale: Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2309,6 +2320,41 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   grid/imagen/HUD extraidos; eventos intactos
+                </span>
+              </div>
+              <div
+                data-testid="f229-canvas-cad-e2e-harness"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f229CanvasCadE2EHarness.nextCoverage.join(' ')}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f229CanvasCadE2EHarness.status === 'canvas-cad-e2e-harness-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F229 E2E
+                </span>
+                <span data-testid="f229-canvas-e2e-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f229CanvasCadE2EHarness.readyCount}/{f229CanvasCadE2EHarness.coverage.length}
+                </span>
+                {f229CanvasCadE2EHarness.coverage.map((row) => (
+                  <span
+                    key={row.id}
+                    data-testid={`f229-e2e-${row.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      row.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : row.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={row.evidence}
+                  >
+                    {row.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Playwright dedicado: shell, dibujo, seleccion, lasso, modos y export
                 </span>
               </div>
               <div

@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F229 - Canvas CAD E2E Harness
+
+F229 agrega un arnes E2E dedicado para validar que el canvas profesional siga operativo despues de los cambios de renderer, botones y paneles.
+
+Que cubre:
+
+- Canvas, sidebar y toolbar CAD visibles al abrir la app.
+- Filas F221, F222-F226, F227, F228 y F229 visibles como continuidad de QA.
+- Superficie del canvas no vacia.
+- Dibujo real de un muro con la herramienta `Muro`.
+- Seleccion segura con inspector contextual.
+- Gestos de ventana/lasso sin ocultar el layout.
+- Modos visuales `Plano`, `Heat`, `Iso` y `Estruct`.
+- Controles F217 para preparar export visual por escena.
+
+Uso operativo: si el canvas, sidebar o botones desaparecen, primero ejecutar `npm run test:f229:canvas-e2e` y revisar las capturas en `outputs/f229_canvas_cad_e2e_harness/`. Esta prueba es el primer filtro antes de volver a modificar eventos base, grips o renderer.
+
+Lo que aun falta cubrir despues de F229: baseline visual con pixel-diff, fixture DXF dedicado, validacion exacta de grip drag/snap por coordenada, isocontornos numericos y sincronizacion bidireccional 2D/3D.
+
 ## Addendum F228 - Helpers estaticos del renderer
 
 F228 extrae helpers reales para el renderer sin cambiar la interaccion del canvas.
