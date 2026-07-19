@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F211 - Agenda de simbolos de equipos
+
+F211 resume los equipos y fuentes colocados en el floorplan. Muestra modalidad, norma/metodologia, variante o fabricante, footprint, rotacion y workload. Su proposito es detectar metadatos faltantes antes de generar inspeccion 3D, Memoria IA o anexos visuales.
+
+Uso recomendado:
+
+1. Coloque o importe el equipo/fuente en el plano.
+2. Revise el chip `F211 Eq`.
+3. Si `FP` no cubre todos los equipos, agregue footprint real antes de inspeccion 3D.
+4. Si `Fab` esta incompleto, seleccione variante/fabricante para mejorar citas, simbolo y memoria.
+5. Verifique rotacion CAD antes de exportar imagen o anexo.
+
+F211 no cambia calculos; ayuda a evitar memorias con equipos mal identificados o sin dimensiones reales.
+
 ## Addendum F210 - Gestor compacto de capas
 
 F210 muestra un resumen de capas directamente en el panel del canvas. Permite confirmar si el plano, blindajes, fuentes, heatmap, anotaciones y UI estan visibles, bloqueados o con baja opacidad.

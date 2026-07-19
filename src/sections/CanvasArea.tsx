@@ -42,6 +42,7 @@ import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF209CanvasDimensionSchedule } from '@/lib/f209CanvasDimensionSchedule';
 import { buildF210CanvasLayerManagerPolish } from '@/lib/f210CanvasLayerManagerPolish';
+import { buildF211CanvasEquipmentSymbolSchedule } from '@/lib/f211CanvasEquipmentSymbolSchedule';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -355,6 +356,7 @@ export default function CanvasArea({
   });
   const f209DimensionSchedule = buildF209CanvasDimensionSchedule(floorPlan, barrierResults, layers);
   const f210LayerManager = buildF210CanvasLayerManagerPolish(layers, activeLayer);
+  const f211EquipmentSchedule = buildF211CanvasEquipmentSymbolSchedule(floorPlan);
 
   useEffect(() => {
     window.localStorage.setItem(F188_CANVAS_PANEL_STATE_KEY, JSON.stringify(panelVisibility));
@@ -1767,6 +1769,42 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Capas CAD sin abrir dialogo
+                </span>
+              </div>
+              <div
+                data-testid="f211-canvas-equipment-symbol-schedule"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f211EquipmentSchedule.warnings.join(' | ') || f211EquipmentSchedule.decision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f211EquipmentSchedule.status === 'canvas-equipment-symbols-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>F211 Eq {f211EquipmentSchedule.sourceCount}</span>
+                <span data-testid="f211-equipment-footprint-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  FP {f211EquipmentSchedule.withFootprintCount}/{f211EquipmentSchedule.sourceCount}
+                </span>
+                <span data-testid="f211-equipment-manufacturer-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  Fab {f211EquipmentSchedule.withManufacturerCount}/{f211EquipmentSchedule.sourceCount}
+                </span>
+                {f211EquipmentSchedule.rows.slice(0, 4).map((row) => (
+                  <span
+                    key={row.id}
+                    data-testid="f211-equipment-row"
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      row.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : row.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-amber-50 text-amber-700 border-amber-100'
+                    }`}
+                    title={`${row.label}: ${row.modality}, ${row.standard}, ${row.manufacturerVariant}, ${row.footprint}, rot ${row.rotationDeg}deg, ${row.workload}`}
+                  >
+                    {row.label.slice(0, 10)} {row.standard}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Simbolos/equipos para 3D y memoria
                 </span>
               </div>
               <div className="border-b border-slate-100 p-1.5">

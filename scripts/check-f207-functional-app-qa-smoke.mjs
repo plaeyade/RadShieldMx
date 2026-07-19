@@ -182,6 +182,7 @@ try {
   await guardShell(page, 'startup');
   record('F209 dimension schedule visible on canvas', await visible(page, 'f209-canvas-dimension-schedule'));
   record('F210 layer manager visible on canvas', await visible(page, 'f210-canvas-layer-manager'));
+  record('F211 equipment symbol schedule visible on canvas', await visible(page, 'f211-canvas-equipment-symbol-schedule'));
   await page.screenshot({ path: result.screenshots.initial, fullPage: false });
 
   await page.getByRole('button', { name: /Archivo/i }).click();

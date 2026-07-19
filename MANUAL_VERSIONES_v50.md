@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F211 (2026-07-18) - canvas-equipment-symbol-schedule
+
+- Objetivo: auditar simbolos/equipos colocados en el floorplan antes de inspeccion 3D o memoria analitica.
+- Alcance: modalidad, norma, variante/fabricante, footprint, rotacion CAD y workload por fuente.
+- Guardrail: no modifica fuentes, calculos, renderer ni eventos CAD; solo agrega agenda de QA visual.
+- Validacion: `npm run test:f211:equipment-symbols`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F210 (2026-07-18) - canvas-layer-manager-polish
 
 - Objetivo: hacer mas claro el estado de capas CAD sin abrir dialogos ni tapar el plano.

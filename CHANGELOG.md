@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F211 (2026-07-18) - Canvas Equipment Symbol Schedule
+
+- Se agrega agenda compacta de equipos/fuentes en el canvas: modalidad, norma, fabricante/variante, footprint, rotacion y workload.
+- Advierte si faltan metadatos necesarios para inspeccion 3D, memoria analitica o anexo visual de equipos.
+- La mejora es de lectura/QA; no cambia colocacion de fuentes, calculos ni eventos CAD.
+- Nuevo comando: `npm run test:f211:equipment-symbols`.
+
 ## F210 (2026-07-18) - Canvas Layer Manager Polish
 
 - Se agrega resumen compacto de capas CAD dentro del canvas: activa, visibles/totales, bloqueadas, opacidad, color y estado por capa.
