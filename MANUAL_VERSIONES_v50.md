@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F210 (2026-07-18) - canvas-layer-manager-polish
+
+- Objetivo: hacer mas claro el estado de capas CAD sin abrir dialogos ni tapar el plano.
+- Alcance: capa activa, visibles/totales, bloqueadas, opacidad, color, rol y advertencias por capa.
+- Guardrail: no modifica renderer, eventos CAD, geometria, DXF ni calculos; solo agrega lectura operacional.
+- Validacion: `npm run test:f210:canvas-layers`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F209 (2026-07-18) - canvas-dimension-schedule
 
 - Objetivo: mejorar el canvas como plano CAD revisable con agenda de cotas y capas.

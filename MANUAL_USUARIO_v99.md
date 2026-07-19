@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F210 - Gestor compacto de capas
+
+F210 muestra un resumen de capas directamente en el panel del canvas. Permite confirmar si el plano, blindajes, fuentes, heatmap, anotaciones y UI estan visibles, bloqueados o con baja opacidad.
+
+Uso recomendado:
+
+1. Si el canvas parece vacio, revise primero F210.
+2. Confirme que `Blindaje` y `Fuentes` no esten ocultos.
+3. Si una capa aparece con opacidad baja, abra el panel de capas para ajustarla.
+4. Use el chip `Activa` para saber en que capa esta trabajando antes de editar.
+
+F210 no edita capas directamente; sirve como indicador rapido para evitar perder contexto del floorplan.
+
 ## Addendum F209 - Agenda de cotas del canvas
 
 F209 muestra una agenda compacta de cotas dentro del panel del canvas. Permite revisar rapidamente cuantas barreras hay, la longitud total del blindaje, la escala activa, el material/espesor de cada muro y si cada barrera ya tiene resultado de calculo.

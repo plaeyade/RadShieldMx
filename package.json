@@ -283,6 +283,7 @@
     "test:f207:functional-app-qa-smoke": "node scripts/check-f207-functional-app-qa-smoke.mjs",
     "test:f208:canvas-reporting": "node scripts/check-f208-canvas-reporting-layer-contracts.mjs",
     "test:f209:canvas-dimensions": "node scripts/check-f209-canvas-dimension-schedule-contracts.mjs",
+    "test:f210:canvas-layers": "node scripts/check-f210-canvas-layer-manager-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

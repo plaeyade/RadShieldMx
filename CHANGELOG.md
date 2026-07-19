@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F210 (2026-07-18) - Canvas Layer Manager Polish
+
+- Se agrega resumen compacto de capas CAD dentro del canvas: activa, visibles/totales, bloqueadas, opacidad, color y estado por capa.
+- Advierte si blindaje/fuentes quedan ocultos para evitar diagnosticar falsamente que el floorplan desaparecio.
+- La mejora es de lectura y QA visual; no cambia eventos de dibujo, seleccion, importacion DXF ni layout principal.
+- Nuevo comando: `npm run test:f210:canvas-layers`.
+
 ## F209 (2026-07-18) - Canvas Dimension Schedule
 
 - Se agrega agenda CAD de cotas/capas en el canvas: longitud total, numero de muros, escala, filas por barrera, material, espesor y cobertura de calculo.
