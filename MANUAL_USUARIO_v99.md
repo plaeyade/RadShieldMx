@@ -1,5 +1,25 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F216 - Mini View Manager
+
+F216 agrega un gestor compacto de vistas dentro del canvas. Sirve para regresar rapidamente a un encuadre de trabajo sin perder tiempo buscando el plano despues de zoom, pan, heatmap o revision estructural.
+
+Funciones:
+
+1. `Z`: muestra el zoom actual en porcentaje.
+2. `Pan`: muestra el desplazamiento actual del viewport.
+3. `+A`, `+B`, `+C`: guarda la vista actual en uno de tres slots locales.
+4. `Ir`: restaura una vista guardada con su modo visual, zoom y pan.
+5. `x`: borra el slot de vista guardada.
+
+Uso recomendado:
+
+- Guarde `A` como vista general de planta.
+- Guarde `B` como vista de barrera critica o acceso.
+- Guarde `C` como vista de heatmap/isodosis o estructura.
+- Si el canvas parece vacio, use primero `Extents`; despues guarde una vista nueva.
+- Las vistas se guardan en el navegador local; no son parte de la DB ni reemplazan el guardado del proyecto.
+
 ## Addendum F215 - Presets de escena del canvas
 
 F215 agrega una tira de escenas dentro del viewport para cambiar rapidamente la lectura del floorplan sin abrir menus adicionales. Los presets reutilizan funciones ya existentes, por lo que no alteran escala, calculo, DXF ni trazado.

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F216 (2026-07-19) - Mini View Manager
+
+- Se agrega panel F216 para mostrar zoom, pan, escena activa y hasta tres vistas guardadas A/B/C.
+- Permite guardar, restaurar y borrar vistas locales del canvas para recuperar rapidamente layout, heatmap, isodosis o estructura.
+- Usa `localStorage`; no toca DB, calculos, geometria, importacion DXF ni renderer.
+- Nuevo comando: `npm run test:f216:mini-view-manager`.
+
 ## F215 (2026-07-19) - Canvas Scene Presets
 
 - Se agrega tira F215 de escenas tipo SketchUp dentro del viewport: Planta, Heat, Iso, Estruct y Extents.

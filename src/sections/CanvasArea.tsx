@@ -46,6 +46,7 @@ import { buildF211CanvasEquipmentSymbolSchedule } from '@/lib/f211CanvasEquipmen
 import { buildF212HeatmapRegulatoryLegend } from '@/lib/f212HeatmapRegulatoryLegend';
 import { buildF214SketchUpCanvasReorg } from '@/lib/f214SketchUpCanvasReorg';
 import { buildF215CanvasScenePresets } from '@/lib/f215CanvasScenePresets';
+import { buildF216MiniViewManager, type F216SavedCanvasView } from '@/lib/f216MiniViewManager';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -57,6 +58,7 @@ const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188';
 const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
 const F201_WORKFLOW_COMPACT_KEY = 'radshield_canvas_workflow_compact_f201';
 const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
+const F216_SAVED_VIEWS_KEY = 'radshield_canvas_saved_views_f216';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: true,
   qa: true,
@@ -92,6 +94,22 @@ function loadF191VisualMode(): F191VisualMode {
   if (typeof window === 'undefined') return 'plan';
   const stored = window.localStorage.getItem(F191_VISUAL_MODE_KEY);
   return stored === 'heat' || stored === 'isocontours' || stored === 'structure' ? stored : 'plan';
+}
+
+function loadF216SavedViews(): F216SavedCanvasView[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(F216_SAVED_VIEWS_KEY) || '[]') as F216SavedCanvasView[];
+    return parsed.filter((view) =>
+      (view.id === 'A' || view.id === 'B' || view.id === 'C') &&
+      typeof view.label === 'string' &&
+      typeof view.scale === 'number' &&
+      typeof view.offsetX === 'number' &&
+      typeof view.offsetY === 'number'
+    ).slice(0, 3);
+  } catch {
+    return [];
+  }
 }
 
 interface CanvasAreaProps {
@@ -207,6 +225,7 @@ export default function CanvasArea({
   const [workflowDock, setWorkflowDock] = useState<F188WorkflowDock>(loadF188WorkflowDock);
   const [workflowCompact, setWorkflowCompact] = useState(loadF201WorkflowCompact);
   const [visualMode, setVisualMode] = useState<F191VisualMode>(loadF191VisualMode);
+  const [savedViews, setSavedViews] = useState<F216SavedCanvasView[]>(loadF216SavedViews);
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
@@ -379,6 +398,10 @@ export default function CanvasArea({
   }, [visualMode]);
 
   useEffect(() => {
+    window.localStorage.setItem(F216_SAVED_VIEWS_KEY, JSON.stringify(savedViews));
+  }, [savedViews]);
+
+  useEffect(() => {
     setInspectorEditOpen(false);
   }, [canvasState.selectedId]);
 
@@ -429,6 +452,39 @@ export default function CanvasArea({
     }
   };
 
+  const saveCurrentView = (slotId: F216SavedCanvasView['id']) => {
+    const view: F216SavedCanvasView = {
+      id: slotId,
+      label: `Vista ${slotId}`,
+      visualMode,
+      scale: canvasState.scale,
+      offsetX: canvasState.offsetX,
+      offsetY: canvasState.offsetY,
+      savedAt: new Date().toISOString(),
+    };
+    setSavedViews((current) => {
+      const next = current.filter((item) => item.id !== slotId);
+      return [...next, view].sort((a, b) => a.id.localeCompare(b.id));
+    });
+    toast.success(`Vista ${slotId} guardada`);
+  };
+
+  const restoreSavedView = (view: F216SavedCanvasView) => {
+    applyVisualMode(view.visualMode);
+    setCanvasState((prev) => ({
+      ...prev,
+      scale: view.scale,
+      offsetX: view.offsetX,
+      offsetY: view.offsetY,
+    }));
+    toast.success(`${view.label} restaurada`);
+  };
+
+  const clearSavedView = (slotId: F216SavedCanvasView['id']) => {
+    setSavedViews((current) => current.filter((view) => view.id !== slotId));
+    toast.info(`Vista ${slotId} eliminada`);
+  };
+
   const workflowPanelClass =
     workflowDock === 'right'
       ? 'absolute top-14 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-30 w-[360px] max-w-[calc(100%-24px)] max-h-[calc(100%-128px)] overflow-auto'
@@ -468,6 +524,13 @@ export default function CanvasArea({
     regionCount,
     sampleLineCount: sampleLines.length,
     heatmapPointCount,
+  });
+  const f216MiniViewManager = buildF216MiniViewManager({
+    visualMode,
+    scale: canvasState.scale,
+    offsetX: canvasState.offsetX,
+    offsetY: canvasState.offsetY,
+    savedViews,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -1242,6 +1305,77 @@ export default function CanvasArea({
                   {preset.shortLabel}
                 </button>
               ))}
+            </div>
+
+            <div
+              data-testid="f216-mini-view-manager"
+              className="absolute bottom-16 left-2 z-10 hidden max-w-[440px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:block"
+              title={`${f216MiniViewManager.activeViewLabel}: zoom ${f216MiniViewManager.zoomPercent}%, pan ${f216MiniViewManager.panLabel}. ${f216MiniViewManager.warnings.join(' ') || 'Mini View Manager listo.'}`}
+            >
+              <div className="flex items-center gap-1">
+                <span className={`rounded px-1.5 py-0.5 font-bold ${
+                  f216MiniViewManager.status === 'mini-view-manager-ready'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-amber-50 text-amber-700'
+                }`}>
+                  F216 View
+                </span>
+                <span data-testid="f216-view-zoom" className="rounded border border-slate-100 bg-slate-50 px-1 py-0.5 font-mono">
+                  Z {f216MiniViewManager.zoomPercent}%
+                </span>
+                <span data-testid="f216-view-pan" className="rounded border border-slate-100 bg-slate-50 px-1 py-0.5 font-mono">
+                  Pan {f216MiniViewManager.panLabel}
+                </span>
+                <span data-testid="f216-view-active" className="rounded border border-orange-100 bg-orange-50 px-1 py-0.5 font-semibold text-orange-700">
+                  {f216MiniViewManager.activeViewLabel}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center gap-1">
+                {(['A', 'B', 'C'] as const).map((slotId) => {
+                  const savedView = savedViews.find((view) => view.id === slotId);
+                  return (
+                    <div key={slotId} className="flex items-center gap-0.5 rounded border border-slate-100 bg-slate-50 px-1 py-0.5">
+                      <button
+                        type="button"
+                        data-testid={`f216-save-view-${slotId}`}
+                        className="rounded px-1 font-bold text-slate-600 hover:bg-white hover:text-orange-700"
+                        onClick={() => saveCurrentView(slotId)}
+                        title={`Guardar vista actual en slot ${slotId}`}
+                        aria-label={`Guardar vista actual en slot ${slotId}`}
+                      >
+                        +{slotId}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid={`f216-restore-view-${slotId}`}
+                        className={`rounded px-1 font-semibold ${
+                          savedView ? 'text-emerald-700 hover:bg-white' : 'cursor-not-allowed text-slate-300'
+                        }`}
+                        onClick={() => savedView && restoreSavedView(savedView)}
+                        disabled={!savedView}
+                        title={savedView ? `Restaurar ${savedView.label}: ${Math.round(savedView.scale * 100)}% ${savedView.visualMode}` : `Slot ${slotId} vacio`}
+                        aria-label={savedView ? `Restaurar vista ${slotId}` : `Slot ${slotId} vacio`}
+                      >
+                        {savedView ? 'Ir' : '--'}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid={`f216-clear-view-${slotId}`}
+                        className={`rounded px-1 ${savedView ? 'text-slate-400 hover:bg-white hover:text-red-600' : 'cursor-not-allowed text-slate-300'}`}
+                        onClick={() => savedView && clearSavedView(slotId)}
+                        disabled={!savedView}
+                        title={savedView ? `Eliminar vista ${slotId}` : `Slot ${slotId} sin vista guardada`}
+                        aria-label={savedView ? `Eliminar vista ${slotId}` : `Slot ${slotId} sin vista guardada`}
+                      >
+                        x
+                      </button>
+                    </div>
+                  );
+                })}
+                <span className="truncate text-[7px] text-slate-400">
+                  {f216MiniViewManager.savedViewCount}/{f216MiniViewManager.maxSavedViews} guardadas
+                </span>
+              </div>
             </div>
 
             <div

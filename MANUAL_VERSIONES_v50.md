@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F216 (2026-07-19) - mini-view-manager
+
+- Objetivo: permitir guardar y recuperar vistas del canvas sin alterar el floorplan.
+- Alcance: panel F216 con zoom, pan, escena activa, slots A/B/C, guardar, restaurar y borrar.
+- Guardrail: persistencia local en navegador; no cambia calculos, DB, DXF, geometria, sidebar, renderer ni eventos CAD.
+- Validacion: `npm run test:f216:mini-view-manager`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F215 (2026-07-19) - canvas-scene-presets
 
 - Objetivo: facilitar navegacion visual tipo SketchUp con presets de escena dentro del viewport.

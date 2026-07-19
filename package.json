@@ -289,6 +289,7 @@
     "test:f213:dxf-layer-mapping": "node scripts/check-f213-dxf-layer-mapping-qa-contracts.mjs",
     "test:f214:sketchup-canvas": "node scripts/check-f214-sketchup-canvas-reorg-contracts.mjs",
     "test:f215:canvas-scenes": "node scripts/check-f215-canvas-scene-presets-contracts.mjs",
+    "test:f216:mini-view-manager": "node scripts/check-f216-mini-view-manager-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

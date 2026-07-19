@@ -187,6 +187,9 @@ try {
   record('F214 SketchUp canvas reorg visible on canvas', await visible(page, 'f214-sketchup-canvas-reorg'));
   record('F215 canvas scene presets visible on canvas', await visible(page, 'f215-canvas-scene-presets'));
   record('F215 plan/extents scene buttons visible', await visible(page, 'f215-scene-preset-plan') && await visible(page, 'f215-scene-preset-extents'));
+  record('F216 mini view manager visible on canvas', await visible(page, 'f216-mini-view-manager'));
+  record('F216 zoom/pan indicators visible', await visible(page, 'f216-view-zoom') && await visible(page, 'f216-view-pan'));
+  record('F216 save/restore view buttons visible', await visible(page, 'f216-save-view-A') && await visible(page, 'f216-restore-view-A'));
   await page.screenshot({ path: result.screenshots.initial, fullPage: false });
 
   await page.getByRole('button', { name: /Archivo/i }).click();
