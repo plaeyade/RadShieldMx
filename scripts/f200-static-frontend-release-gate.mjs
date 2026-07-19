@@ -141,14 +141,14 @@ const manifest = {
   },
   postDeployValidation: [
     'Set PUBLIC_DEPLOY_URL to the final HTTPS URL.',
-    'Repeat F154-F158 or the newer F200 public URL smoke against that URL.',
+    'Run F202 public Vercel smoke against that URL; if Codex network is blocked, keep the network-gated evidence and validate from an unrestricted browser.',
     'Validate canvas/sidebar, menus, Memoria IA, PDF, Evidence Pack and CNSNS outputs in the hosted build.',
     'Do not publish secrets, DB dumps, private PDFs or RAG corpus.',
   ],
   blockers,
   nextRecommendedPhase:
     blockers.length === 0
-      ? 'F201 public URL smoke against deployed Vercel/Netlify URL'
+      ? 'F202 public URL smoke against deployed Vercel/Netlify URL or network-gated browser verification'
       : 'Fix missing gates, rerun F197-F199, rebuild dist, then rerun F200',
 };
 

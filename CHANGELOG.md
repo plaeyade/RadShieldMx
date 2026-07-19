@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F202 (2026-07-18) - public Vercel smoke
+
+- Se agrega smoke F202 contra `https://radshield-mx-static-dist.vercel.app/` o `PUBLIC_DEPLOY_URL`.
+- La compuerta valida URL HTTPS, respuesta publica, sidebar estable, canvas, toolbar CAD, panel Layout-blindaje-memoria movible/compactable, menus canonicos y salidas Memoria IA/PDF/Evidence/CNSNS.
+- Si el runner bloquea la salida publica, la evidencia queda como `public-vercel-smoke-network-gated` y se puede exigir fallo estricto con `F202_STRICT_PUBLIC_SMOKE=1`.
+- El paquete F200 ahora apunta a F202 como smoke publico post-deploy, no al texto historico F201.
+- Nuevos comandos: `npm run test:f202:public-vercel-contracts` y `npm run test:f202:public-vercel-smoke`.
+
 ## F201 (2026-07-18) - Workflow panel controls
 
 - El panel `Layout - blindaje - memoria` agrega controles explicitos para desplazar, compactar/expandir y cerrar.

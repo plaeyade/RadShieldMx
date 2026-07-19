@@ -59,7 +59,7 @@ const requiredTokens = [
   'radshield-mx-static-dist.vercel.app',
   'prepare:f200:static-release-gate',
   'test:f200:static-release-gate',
-  'F201 public URL smoke',
+  'F202 public URL smoke',
 ];
 
 const missingTokens = requiredTokens.filter((token) => !combinedText.includes(token));

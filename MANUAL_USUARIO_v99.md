@@ -1,5 +1,16 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F202 - Smoke publico Vercel
+
+F202 valida la app publicada como frontend estatico en `https://radshield-mx-static-dist.vercel.app/`. La prueba abre la URL real en navegador, confirma que el canvas, sidebar, toolbar CAD y panel Layout-blindaje-memoria se rendericen, y abre las salidas principales: Memoria IA, PDF analitico, Evidence Pack y Reporte CNSNS.
+
+Comandos de validacion:
+
+- `npm run test:f202:public-vercel-contracts`
+- `npm run test:f202:public-vercel-smoke`
+
+Si se publica en otra URL, definir `PUBLIC_DEPLOY_URL` antes de ejecutar el smoke. Si el entorno de Codex bloquea la salida a internet, el resultado queda como `public-vercel-smoke-network-gated`; para forzar fallo duro usar `F202_STRICT_PUBLIC_SMOKE=1`. Esta fase no sustituye el deploy full-stack con DB live; confirma que el frontend publico estable no perdio menus, canvas ni salidas criticas.
+
 ## Addendum F201 - Panel Layout Blindaje Memoria
 
 El panel `Layout - blindaje - memoria` ahora puede desplazarse para no tapar el plano. Use el boton con icono de mover en la cabecera para alternar entre arriba, derecha y abajo. Use el boton de flecha para compactar o expandir el panel. Use la X para cerrarlo; si se cierra, el restaurador de paneles permite volver a mostrar `Flujo`.

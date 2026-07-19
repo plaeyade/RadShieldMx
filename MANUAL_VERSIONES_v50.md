@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F202 (2026-07-18) - public Vercel smoke
+
+- Objetivo: validar el frontend publicado en Vercel sin depender de backend ni DB live.
+- URL por defecto: `https://radshield-mx-static-dist.vercel.app/`; se puede sustituir con `PUBLIC_DEPLOY_URL`.
+- Alcance: respuesta HTTPS, sidebar/canvas/toolbar CAD visibles, panel Layout-blindaje-memoria desplazable/compactable y menus canonicos de Diseno, Reportes y Evidencia.
+- Salidas verificadas: Memoria IA, PDF analitico, Evidence Pack y Reporte CNSNS desde controles e2e.
+- Si Codex/Playwright no puede salir a internet, la fase se documenta como `public-vercel-smoke-network-gated`; para tratarlo como fallo duro usar `F202_STRICT_PUBLIC_SMOKE=1`.
+- Validacion: `npm run test:f202:public-vercel-contracts` y `npm run test:f202:public-vercel-smoke`.
+
 ## F201 (2026-07-18) - Workflow panel controls
 
 - Objetivo: evitar que el panel `Layout - blindaje - memoria` obstruya el canvas.
