@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F227 - Renderer por capas
+
+F227 inicia la mejora real del renderer con un registro de capas. Esto permite ordenar el dibujo y planear extracciones sin tocar los eventos que hacen funcionar seleccion, grips, lasso y snapping.
+
+Capas definidas:
+
+- `background-grid`: mesa, grid y base visual.
+- `floorplan-image`: imagen del plano importado.
+- `regions-zones`: zonas ocupadas/controladas.
+- `barriers`: muros/barreras y etiquetas.
+- `equipment-sources`: equipos/fuentes, footprint y rotacion.
+- `heatmap`: mapa de dosis/kerma.
+- `sample-lines`: lineas de muestreo/isocontornos.
+- `cad-overlays`: preview de dibujo y snap.
+- `selection-grips`: seleccion, grips, ventana y lasso.
+- `hud-scale`: escala, HUD y datos de vista.
+
+Uso operativo: la fila F227 del canvas muestra cuantas capas hay, cuantas ya estan listas para migrar, cuantas son helpers extraibles y cuantas siguen protegidas. Las primeras candidatas a extraer son `background-grid`, `floorplan-image` y `equipment-sources`. Las capas `cad-overlays` y `selection-grips` no deben migrarse hasta tener pruebas E2E.
+
 ## Addendum F222-F226 - Hardening seguro del canvas profesional
 
 F222-F226 continua el canvas profesional sin cambiar de golpe el renderer ni los eventos base. La fila `F222-F226` del canvas resume el estado de cada frente.

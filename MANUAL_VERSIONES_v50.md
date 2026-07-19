@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F227 (2026-07-19) - renderer-layer-extraction
+
+- Objetivo: iniciar la mejora real del renderer sin romper eventos ni dibujo.
+- Nuevo: `renderLayerRegistry.ts` define capas, orden, dirty triggers, estado de migracion y guardrails.
+- Capas: `background-grid`, `floorplan-image`, `regions-zones`, `barriers`, `equipment-sources`, `heatmap`, `sample-lines`, `cad-overlays`, `selection-grips`, `hud-scale`.
+- UI: fila F227 en canvas con total de capas, listas, helpers extraibles y protegidas.
+- Guardrail: `cad-overlays` y `selection-grips` siguen en `useCanvas` hasta tener E2E de drag/snap/lasso.
+- Validacion: `npm run prepare:f227:renderer-layers` y `npm run test:f227:renderer-layers`.
+
 ## F222-F226 (2026-07-19) - canvas-hardening
 
 - Objetivo: continuar F222 a F226 sin romper canvas, sidebar ni toolbar.

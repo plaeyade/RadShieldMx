@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F227 (2026-07-19) - Renderer layer extraction
+
+- Se agrega `src/lib/canvas/renderLayerRegistry.ts` como primer corte real del renderer por capas.
+- El registro define orden, grupo, dirty triggers, estado de migracion y guardrails para `background-grid`, `floorplan-image`, `regions-zones`, `barriers`, `equipment-sources`, `heatmap`, `sample-lines`, `cad-overlays`, `selection-grips` y `hud-scale`.
+- Se agrega `f227CanvasRendererLayerExtraction.ts` y una fila F227 en el canvas para mostrar capas listas, helpers extraibles y capas protegidas.
+- Decision: `background-grid`, `floorplan-image` y `equipment-sources` son candidatas iniciales; `cad-overlays` y `selection-grips` permanecen en `useCanvas` hasta E2E de drag/snap/lasso.
+- Artefactos: `outputs/f227_renderer_layer_extraction/f227_renderer_layer_extraction.json` y `outputs/fase_227_renderer_layer_extraction.md`.
+
 ## F222-F226 (2026-07-19) - Canvas hardening bridge
 
 - Se agrega `f222ToF226CanvasHardening.ts` para organizar el cierre del canvas profesional en cinco frentes: renderer layers, event controller gate, E2E CAD, isocontornos/footprints y sincronizacion 3D.

@@ -51,6 +51,7 @@ import { buildF217VisualExportByScene, type F217VisualExportSceneId } from '@/li
 import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/f220CanvasCadPriorityActions';
 import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections';
 import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening';
+import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRendererLayerExtraction';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -574,6 +575,14 @@ export default function CanvasArea({
     hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
     hasExport: Boolean(onExportPNG),
     visualMode,
+  });
+  const f227RendererLayerExtraction = buildF227CanvasRendererLayerExtraction({
+    barrierCount,
+    sourceCount,
+    regionCount,
+    hasHeatmap: heatmapEnabled || heatmapPointCount > 0,
+    hasSampleLines: sampleLines.length > 0,
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2227,6 +2236,44 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   renderer/helpers, events flag, E2E, iso/3D
+                </span>
+              </div>
+              <div
+                data-testid="f227-renderer-layer-extraction"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f227RendererLayerExtraction.nextImplementation}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f227RendererLayerExtraction.status === 'renderer-layer-extraction-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F227 Layers
+                </span>
+                <span data-testid="f227-layer-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f227RendererLayerExtraction.registry.layerCount} capas
+                </span>
+                <span data-testid="f227-layer-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-100">
+                  {f227RendererLayerExtraction.registry.readyCount} listas
+                </span>
+                <span data-testid="f227-layer-extractable-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-sky-50 text-sky-700 border-sky-100">
+                  {f227RendererLayerExtraction.registry.extractableCount} helpers
+                </span>
+                <span data-testid="f227-layer-guarded-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-500 border-slate-100">
+                  {f227RendererLayerExtraction.registry.guardedCount} guardadas
+                </span>
+                {f227RendererLayerExtraction.safeFirstLayers.slice(0, 3).map((layerId) => (
+                  <span
+                    key={layerId}
+                    data-testid={`f227-safe-layer-${layerId}`}
+                    className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-100"
+                    title="Capa candidata para helper puro sin tocar eventos base"
+                  >
+                    {layerId}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  overlays/grips siguen protegidos
                 </span>
               </div>
               <div
