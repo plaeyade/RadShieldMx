@@ -281,6 +281,7 @@
     "test:f204:canvas-dxf-smoke": "node scripts/check-f204-canvas-dxf-recovery-smoke.mjs",
     "test:f207:functional-app-qa": "node scripts/check-f207-functional-app-qa-contracts.mjs",
     "test:f207:functional-app-qa-smoke": "node scripts/check-f207-functional-app-qa-smoke.mjs",
+    "test:f208:canvas-reporting": "node scripts/check-f208-canvas-reporting-layer-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

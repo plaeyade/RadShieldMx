@@ -13,6 +13,7 @@ import { buildF146MaterialReportAppendix, formatF146MaterialAppendixText } from 
 import { buildF149NormativeNumericQa } from '@/lib/f149NormativeNumericQa';
 import { buildF149bFastradClinicalUtility } from '@/lib/f149bFastradClinicalUtility';
 import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
+import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import type { FloorPlan } from '@/types/radshield';
 import { FileText, Download, BookOpen, Building2, User, Calendar, Shield } from 'lucide-react';
 
@@ -47,6 +48,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
   const f149NormativeQa = buildF149NormativeNumericQa();
   const f149bFastradUtility = buildF149bFastradClinicalUtility();
   const f149cMonteCarloGateway = buildF149cMonteCarloGateway(floorPlan);
+  const f208CanvasReporting = buildF208CanvasReportingLayer(floorPlan);
   const reportTemplates = TEMPLATES.some((item) => item.id === f117Handoff.reportDefaults.templateId)
     ? TEMPLATES
     : [
@@ -84,6 +86,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
       f149_normative_numeric_qa: f149NormativeQa,
       f149b_fastrad_export_smoke: f149bFastradUtility,
       f149c_monte_carlo_gateway: f149cMonteCarloGateway,
+      f208_canvas_reporting_layer: f208CanvasReporting,
       f117_profile_handoff: {
         activeProfile: f117Handoff.activeProfile,
         reportDefaults: f117Handoff.reportDefaults,
@@ -228,8 +231,21 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
                   Guardrail: {f149bFastradUtility.rejectedForRadShield.join(' | ') || 'Monte Carlo externo si se requiere validacion avanzada.'}
                 </p>
               </div>
+              <div data-testid="f208-canvas-reporting-pdf" className="mt-2 rounded border border-cyan-200 bg-cyan-50 p-2">
+                <p className="font-semibold text-cyan-900">9. Canvas reportable F208</p>
+                <p className="text-cyan-900">
+                  Estado {f208CanvasReporting.status}, score {f208CanvasReporting.score}%,
+                  {' '}listos/parciales/faltantes {f208CanvasReporting.readyCount}/{f208CanvasReporting.partialCount}/{f208CanvasReporting.missingCount}.
+                </p>
+                <p className="mt-1 text-[8px] text-cyan-800">
+                  {f208CanvasReporting.items.map((item) => `${item.label}:${item.status}`).join(' | ')}
+                </p>
+                <p className="mt-1 text-[8px] text-cyan-800">
+                  Anexos: {f208CanvasReporting.exportArtifacts.join(', ')}
+                </p>
+              </div>
               <div data-testid="f149c-monte-carlo-gateway-pdf" className="mt-2 rounded border border-blue-200 bg-blue-50 p-2">
-                <p className="font-semibold text-blue-900">9. Gateway F149c Monte Carlo externo</p>
+                <p className="font-semibold text-blue-900">10. Gateway F149c Monte Carlo externo</p>
                 <p className="text-blue-900">
                   Paquete {f149cMonteCarloGateway.exportPackage.packageSchema};
                   {' '}fingerprint {f149cMonteCarloGateway.exportPackage.projectFingerprint};

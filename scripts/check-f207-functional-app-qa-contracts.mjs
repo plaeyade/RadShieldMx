@@ -30,6 +30,9 @@ const expectations = [
   ['Memoria surface', smoke.checks?.some((check) => check.name === 'memoria-ai signal memoria-evidence-snapshot' && check.ok)],
   ['PDF surface', smoke.checks?.some((check) => check.name === 'pdf-report signal pdf-report-dialog' && check.ok)],
   ['Evidence surface', smoke.checks?.some((check) => check.name === 'evidence-pack signal f125-calculation-evidence-gate' && check.ok)],
+  ['F208 memoria surface', smoke.checks?.some((check) => check.name === 'memoria-ai signal f208-canvas-reporting-memoria' && check.ok)],
+  ['F208 pdf surface', smoke.checks?.some((check) => check.name === 'pdf-report signal f208-canvas-reporting-pdf' && check.ok)],
+  ['F208 evidence surface', smoke.checks?.some((check) => check.name === 'evidence-pack signal f208-canvas-reporting-evidence' && check.ok)],
 ];
 
 const failedExpectations = expectations.filter(([, ok]) => !ok).map(([name]) => name);

@@ -39,6 +39,7 @@ import { buildF145CanvasCadProfessionalSummary } from '@/lib/f145CanvasCadProfes
 import { buildF171CanvasPolishPredeploy } from '@/lib/f171CanvasPolishPredeploy';
 import { buildF173CanvasLowRiskPolish } from '@/lib/f173CanvasLowRiskPolish';
 import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
+import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -344,6 +345,11 @@ export default function CanvasArea({
     sampleLines,
     heatmapEnabled,
     heatmapPointCount,
+  });
+  const f208CanvasReporting = buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines, {
+    heatmapPointCount,
+    layerCount: layers.length,
+    visibleLayerCount: layers.filter((layer) => layer.visible).length,
   });
 
   useEffect(() => {
@@ -1650,6 +1656,38 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Canvas polish predeploy | no cambia calculos
+                </span>
+              </div>
+              <div
+                data-testid="f208-canvas-reporting-layer"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f208CanvasReporting.nextActions.join(' | ')}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f208CanvasReporting.status === 'canvas-reporting-layer-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-cyan-50 text-cyan-700 border border-cyan-100'
+                }`}>
+                  F208 {f208CanvasReporting.score}%
+                </span>
+                {f208CanvasReporting.items.map((item) => (
+                  <span
+                    key={item.id}
+                    data-testid={`f208-report-${item.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      item.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : item.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={`${item.evidence} ${item.reportUse}`}
+                  >
+                    {item.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Memoria/PDF/Evidence export
                 </span>
               </div>
               <div className="border-b border-slate-100 p-1.5">

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F208 (2026-07-18) - Canvas Reporting Layer
+
+- Se agrega capa F208 para volver reportable el canvas sin mover layout: plano, cotas/lineas 0.3m, capas, simbolos de equipo, heatmap/isocontornos y export visual.
+- F208 aparece en el canvas, Memoria IA, PDF analitico y Evidence Pack con score, estado y acciones pendientes.
+- Los smokes F199/F207 ahora validan que F208 no desaparezca de las salidas criticas.
+- Nuevo comando: `npm run test:f208:canvas-reporting`.
+
 ## F207 (2026-07-18) - Functional App QA
 
 - Se agrega una compuerta funcional integrada sobre el build `dist`: arranque sin bienvenida bloqueante, sidebar/canvas/toolbar, Archivo, DXF aplicado al floorplan, Reportes, Memoria IA, PDF y Evidence Pack.

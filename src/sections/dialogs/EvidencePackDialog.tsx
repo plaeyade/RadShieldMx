@@ -29,6 +29,7 @@ import { buildF149NormativeNumericQa } from '@/lib/f149NormativeNumericQa';
 import { buildF149bFastradClinicalUtility } from '@/lib/f149bFastradClinicalUtility';
 import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
 import { buildF184ReleaseQualityWorkflow } from '@/lib/f184ReleaseQualityWorkflow';
+import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { IDAC_DOSE_EXTERNAL_NOTE } from '@/lib/idacDoseIntegration';
 import { REVIT_EXTERNAL_INTEGRATION_NOTE } from '@/lib/revitIntegration';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
@@ -85,6 +86,7 @@ export default function EvidencePackDialog({
   const f149bFastradUtility = useMemo(() => buildF149bFastradClinicalUtility(), []);
   const f149cMonteCarloGateway = useMemo(() => buildF149cMonteCarloGateway(floorPlan), [floorPlan]);
   const f184ReleaseQuality = useMemo(() => buildF184ReleaseQualityWorkflow(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f208CanvasReporting = useMemo(() => buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
 
@@ -334,6 +336,17 @@ export default function EvidencePackDialog({
               <div data-testid="evidence-pack-f86-critical-points">Puntos criticos F86: {calculationSnapshot.criticalPoints}</div>
               <div data-testid="evidence-pack-f86-preset-coverage">Presets F86: {calculationSnapshot.presetBarriers} ({calculationSnapshot.presetCoveragePct}%)</div>
               <div>Max espesor: {calculationSnapshot.maxThickness.toFixed(1)} mm</div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="f208-canvas-reporting-evidence" className="border-cyan-200 bg-cyan-50">
+            <CardContent className="p-3 text-xs text-cyan-900 space-y-1">
+              <div className="font-semibold">F208 canvas reportable</div>
+              <div>Estado: {f208CanvasReporting.status}</div>
+              <div>Score: {f208CanvasReporting.score}%</div>
+              <div>Listos/parciales/faltantes: {f208CanvasReporting.readyCount}/{f208CanvasReporting.partialCount}/{f208CanvasReporting.missingCount}</div>
+              <div>{f208CanvasReporting.items.map((item) => `${item.label}:${item.status}`).join(' | ')}</div>
+              <div className="text-[10px]">{f208CanvasReporting.decision}</div>
             </CardContent>
           </Card>
 

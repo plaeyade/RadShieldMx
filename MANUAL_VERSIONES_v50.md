@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F208 (2026-07-18) - canvas-reporting-layer
+
+- Objetivo: convertir el canvas/floorplan en evidencia exportable para Memoria IA, PDF y Evidence Pack.
+- Alcance: plano, cotas, capas, simbolos, heatmap/isocontornos, export PNG/CAD JSON y acciones faltantes antes de reporte firmable.
+- Superficies: CanvasArea, MemoriaAIWizard, PdfReportDialog y EvidencePackDialog.
+- Guardrail: no modifica geometria ni eventos CAD; solo agrega trazabilidad visual/reportable.
+- Validacion: `npm run test:f208:canvas-reporting`, `npm run test:f199:outputs-smoke` y `npm run test:f207:functional-app-qa-smoke`.
+
 ## F207 (2026-07-18) - functional-app-qa
 
 - Objetivo: confirmar que el frontend estatico es funcional como app de revision antes de nuevo deploy publico.

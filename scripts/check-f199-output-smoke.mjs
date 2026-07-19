@@ -40,12 +40,12 @@ const surfaces = [
   {
     id: 'memoria-ai',
     opener: 'e2e-open-memoria-ai',
-    signals: ['memoria-evidence-snapshot', 'f125-memoria-evidence-gate', 'f146-material-report-appendix-memoria', 'f149-normative-numeric-qa-memoria', 'f149c-monte-carlo-gateway-memoria'],
+    signals: ['memoria-evidence-snapshot', 'f125-memoria-evidence-gate', 'f146-material-report-appendix-memoria', 'f149-normative-numeric-qa-memoria', 'f149c-monte-carlo-gateway-memoria', 'f208-canvas-reporting-memoria'],
   },
   {
     id: 'pdf-report',
     opener: 'e2e-open-pdf-report',
-    signals: ['pdf-report-dialog', 'pdf-report-evidence-f76', 'f146-material-report-appendix', 'f149-f149b-pdf-export-smoke', 'f149c-monte-carlo-gateway-pdf'],
+    signals: ['pdf-report-dialog', 'pdf-report-evidence-f76', 'f146-material-report-appendix', 'f149-f149b-pdf-export-smoke', 'f149c-monte-carlo-gateway-pdf', 'f208-canvas-reporting-pdf'],
   },
   {
     id: 'cnsns-report',
@@ -55,7 +55,7 @@ const surfaces = [
   {
     id: 'evidence-pack',
     opener: 'e2e-open-evidence-pack',
-    signals: ['f93-citation-ledger-summary', 'f125-calculation-evidence-gate', 'f126-release-evidence-hardening', 'f149c-monte-carlo-gateway-evidence'],
+    signals: ['f93-citation-ledger-summary', 'f125-calculation-evidence-gate', 'f126-release-evidence-hardening', 'f149c-monte-carlo-gateway-evidence', 'f208-canvas-reporting-evidence'],
   },
   {
     id: 'cnsns-checklist',

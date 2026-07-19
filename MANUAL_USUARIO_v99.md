@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F208 - Canvas reportable
+
+F208 agrega una capa de revision para saber si el plano ya puede anexarse a una memoria analitica. El panel resume seis rubros: plano, cotas, capas, simbolos, heatmap/isocontornos y export. Cada rubro puede estar listo, parcial o faltante.
+
+Uso recomendado:
+
+1. Dibujar o importar el plano.
+2. Colocar el equipo/fuente.
+3. Verificar cotas, lineas 0.3 m y puntos de evaluacion.
+4. Activar capas necesarias y revisar heatmap/isocontornos.
+5. Exportar PNG/CAD JSON o abrir Memoria IA/PDF/Evidence Pack.
+
+Si F208 marca parcial, la app todavia puede usarse para revision, pero no conviene firmar o entregar una memoria hasta cerrar las advertencias indicadas.
+
 ## Addendum F207 - QA funcional antes de publicar
 
 F207 valida el recorrido minimo que debe funcionar para considerar la app usable como frontend estatico: abrir al canvas, mantener sidebar y toolbar CAD, abrir Archivo, importar un DXF y aplicarlo al floorplan, abrir Reportes y verificar Memoria IA, PDF analitico y Evidence Pack.
