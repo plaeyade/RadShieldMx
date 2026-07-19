@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F215 (2026-07-19) - canvas-scene-presets
+
+- Objetivo: facilitar navegacion visual tipo SketchUp con presets de escena dentro del viewport.
+- Alcance: botones compactos `Planta`, `Heat`, `Iso`, `Estruct` y `Extents`, conectados al modo visual F191 y a zoom-to-fit.
+- Guardrail: no cambia renderer, handlers, calculos, DXF ni sidebar; solo reutiliza acciones existentes con una entrada mas ergonomica.
+- Validacion: `npm run test:f215:canvas-scenes`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F214 (2026-07-18) - sketchup-canvas-reorg
 
 - Objetivo: reorganizar el area de trabajo del canvas con una apariencia tipo SketchUp/CAD sin alterar la operacion estable.

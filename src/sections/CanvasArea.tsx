@@ -45,6 +45,7 @@ import { buildF210CanvasLayerManagerPolish } from '@/lib/f210CanvasLayerManagerP
 import { buildF211CanvasEquipmentSymbolSchedule } from '@/lib/f211CanvasEquipmentSymbolSchedule';
 import { buildF212HeatmapRegulatoryLegend } from '@/lib/f212HeatmapRegulatoryLegend';
 import { buildF214SketchUpCanvasReorg } from '@/lib/f214SketchUpCanvasReorg';
+import { buildF215CanvasScenePresets } from '@/lib/f215CanvasScenePresets';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -458,6 +459,15 @@ export default function CanvasArea({
     layerCount: layers.length,
     visibleLayerCount: layers.filter((layer) => layer.visible).length,
     heatmapEnabled,
+  });
+  const f215ScenePresets = buildF215CanvasScenePresets({
+    visualMode,
+    hasResults,
+    barrierCount,
+    sourceCount,
+    regionCount,
+    sampleLineCount: sampleLines.length,
+    heatmapPointCount,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -1192,6 +1202,45 @@ export default function CanvasArea({
                 >
                   {chip.label}:{chip.value}
                 </span>
+              ))}
+            </div>
+
+            <div
+              data-testid="f215-canvas-scene-presets"
+              className="absolute top-10 left-[456px] z-10 hidden max-w-[560px] items-center gap-1 rounded-md border border-stone-300 bg-white/92 px-2 py-1 shadow-sm backdrop-blur-sm xl:flex"
+              title={`${f215ScenePresets.readyPresetCount}/${f215ScenePresets.totalPresetCount} escenas listas. ${f215ScenePresets.warnings.join(' ') || 'Presets de vista listos para diseno y revision.'}`}
+            >
+              <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${
+                f215ScenePresets.status === 'canvas-scene-presets-ready'
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-amber-50 text-amber-700'
+              }`}>
+                F215 Scenes
+              </span>
+              {f215ScenePresets.presets.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  data-testid={`f215-scene-preset-${preset.id}`}
+                  className={`h-5 rounded border px-1.5 text-[8px] font-semibold transition-colors ${
+                    preset.id === f215ScenePresets.activeScene
+                      ? 'border-orange-200 bg-orange-50 text-orange-700 shadow-sm'
+                      : preset.ready
+                        ? 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white hover:text-orange-700'
+                        : 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-white'
+                  }`}
+                  onClick={() => {
+                    if (preset.action === 'zoom-extents') {
+                      onZoomToFit();
+                    } else {
+                      applyVisualMode(preset.id as F191VisualMode);
+                    }
+                  }}
+                  title={`${preset.label}: ${preset.description}`}
+                  aria-label={`${preset.label}: ${preset.description}`}
+                >
+                  {preset.shortLabel}
+                </button>
               ))}
             </div>
 

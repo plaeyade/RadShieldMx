@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F215 (2026-07-19) - Canvas Scene Presets
+
+- Se agrega tira F215 de escenas tipo SketchUp dentro del viewport: Planta, Heat, Iso, Estruct y Extents.
+- Los presets reutilizan el selector visual existente y `Zoom Extents`; no cambian renderer, eventos, calculos ni importacion DXF.
+- El panel advierte si faltan geometria o resultados para que heatmap/isodosis tengan evidencia clinica.
+- Nuevo comando: `npm run test:f215:canvas-scenes`.
+
 ## F214 (2026-07-18) - SketchUp-inspired Canvas Reorg
 
 - Se reorganiza visualmente el canvas como estudio CAD medico: mesa gris, reglas tipo dibujo, chips de escena, cubo de vista y ejes XYZ.

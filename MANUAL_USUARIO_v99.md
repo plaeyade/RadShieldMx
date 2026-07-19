@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F215 - Presets de escena del canvas
+
+F215 agrega una tira de escenas dentro del viewport para cambiar rapidamente la lectura del floorplan sin abrir menus adicionales. Los presets reutilizan funciones ya existentes, por lo que no alteran escala, calculo, DXF ni trazado.
+
+Presets disponibles:
+
+1. `Planta`: vista limpia para dibujar barreras, colocar equipos, zonas y puntos criticos.
+2. `Heat`: activa la lectura de mapa de calor para revisar intensidad relativa y maxima proxy semanal.
+3. `Iso`: muestra lineas/isocontornos de evaluacion para revisar gradientes y puntos maximos.
+4. `Estruct`: prioriza material, espesor, peso y carga estructural del blindaje.
+5. `Extents`: centra todo el plano cuando el layout parece fuera de pantalla o la vista quedo desplazada.
+
+Flujo recomendado:
+
+- Use `Planta` al iniciar el croquis o al revisar un DXF importado.
+- Use `Extents` inmediatamente si no ve el canvas, si cargo un plano grande o si hizo zoom/pan excesivo.
+- Use `Heat` e `Iso` despues de calcular blindaje para preparar Memoria IA y Evidence Pack.
+- Use `Estruct` cuando compare plomo, concreto, tabiques HD, TM/Nipoll, multilayer, peso, costo y tiempos de obra.
+
 ## Addendum F214 - Canvas tipo SketchUp / estudio CAD medico
 
 F214 reorganiza el area del floorplan para que se lea como una mesa de trabajo CAD tipo SketchUp: fondo gris de estudio, reglas superior/lateral, chips de escena, cubo de vista y triada XYZ. Es una mejora visual y de orientacion; no cambia escala, calculos, importacion DXF ni eventos de dibujo.

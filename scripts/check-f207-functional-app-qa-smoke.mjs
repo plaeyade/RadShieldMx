@@ -185,6 +185,8 @@ try {
   record('F211 equipment symbol schedule visible on canvas', await visible(page, 'f211-canvas-equipment-symbol-schedule'));
   record('F212 heatmap regulatory legend visible on canvas', await visible(page, 'f212-heatmap-regulatory-legend'));
   record('F214 SketchUp canvas reorg visible on canvas', await visible(page, 'f214-sketchup-canvas-reorg'));
+  record('F215 canvas scene presets visible on canvas', await visible(page, 'f215-canvas-scene-presets'));
+  record('F215 plan/extents scene buttons visible', await visible(page, 'f215-scene-preset-plan') && await visible(page, 'f215-scene-preset-extents'));
   await page.screenshot({ path: result.screenshots.initial, fullPage: false });
 
   await page.getByRole('button', { name: /Archivo/i }).click();
