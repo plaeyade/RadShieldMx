@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F203 (2026-07-18) - manual-public-verification
+
+- Objetivo: completar la verificacion publica cuando F202 no puede salir a Vercel desde Codex.
+- Artefactos: `outputs/f203_manual_public_verification/f203_manual_public_verification.json`, `CHECKLIST_OPERADOR_F203_PUBLICO.md` y plantilla JSON editable.
+- Alcance: URL HTTPS, shell, sidebar, canvas/floorplan, toolbar CAD, panel Layout-blindaje-memoria, menus canonicos y salidas Memoria IA/PDF/Evidence/CNSNS.
+- Estado esperado si F202 sigue bloqueado por red: `manual-public-verification-required`.
+- Validacion: `npm run prepare:f203:manual-public-verification` y `npm run test:f203:manual-public-verification`.
+
 ## F202 (2026-07-18) - public Vercel smoke
 
 - Objetivo: validar el frontend publicado en Vercel sin depender de backend ni DB live.

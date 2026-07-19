@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+## F203 (2026-07-18) - Verificacion publica manual
+
+- Se agrega una compuerta manual para cerrar el caso `public-vercel-smoke-network-gated` de F202.
+- Genera checklist del operador para revisar en navegador sin bloqueo: URL HTTPS, shell, sidebar, canvas, toolbar CAD, panel Layout-blindaje-memoria, menus canonicos y salidas Memoria IA/PDF/Evidence/CNSNS.
+- Nuevos comandos: `npm run prepare:f203:manual-public-verification` y `npm run test:f203:manual-public-verification`.
+
 ## F202 (2026-07-18) - public Vercel smoke
 
 - Se agrega smoke F202 contra `https://radshield-mx-static-dist.vercel.app/` o `PUBLIC_DEPLOY_URL`.

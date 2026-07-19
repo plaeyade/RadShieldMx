@@ -148,7 +148,7 @@ const manifest = {
   blockers,
   nextRecommendedPhase:
     blockers.length === 0
-      ? 'F202 public URL smoke against deployed Vercel/Netlify URL or network-gated browser verification'
+      ? 'F203 manual public verification if F202 remains network-gated, otherwise F204 low-risk functional improvements'
       : 'Fix missing gates, rerun F197-F199, rebuild dist, then rerun F200',
 };
 

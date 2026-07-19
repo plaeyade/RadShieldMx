@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F203 - Verificacion publica manual
+
+Cuando F202 queda como `public-vercel-smoke-network-gated`, el operador debe abrir la URL publica desde un navegador sin bloqueo y completar `outputs/f203_manual_public_verification/CHECKLIST_OPERADOR_F203_PUBLICO.md`.
+
+La lista pide evidencia de: URL HTTPS, barra superior, sidebar, canvas/floorplan, toolbar CAD, panel Layout-blindaje-memoria movible/compactable, menus canonicos y salidas Memoria IA, PDF analitico, Evidence Pack y CNSNS.
+
+Comandos:
+
+- `npm run prepare:f203:manual-public-verification`
+- `npm run test:f203:manual-public-verification`
+
+La decision final se registra como `GO-static-frontend`, `GO-with-minor-notes` o `NO-GO-fix-required`.
+
 ## Addendum F202 - Smoke publico Vercel
 
 F202 valida la app publicada como frontend estatico en `https://radshield-mx-static-dist.vercel.app/`. La prueba abre la URL real en navegador, confirma que el canvas, sidebar, toolbar CAD y panel Layout-blindaje-memoria se rendericen, y abre las salidas principales: Memoria IA, PDF analitico, Evidence Pack y Reporte CNSNS.
