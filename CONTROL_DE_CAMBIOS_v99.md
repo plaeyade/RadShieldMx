@@ -7,6 +7,15 @@
 - Se actualizan Update Center, changelog, manual de usuario, manual de versiones y `public/manual_usuario.html`.
 - Pendientes siguientes: F231 pixel-diff visual, F232 DXF/DWG fixture, F233 grip/snap exacto, F234 isocontornos numericos, F235 sync 2D/3D y F236 post-deploy.
 
+## F231-F236 (2026-07-19) - Canvas Release Coverage
+
+- F231 baseline visual: capturas F229/F207 para prevenir canvas blanco, sidebar oculta y menus superpuestos.
+- F232 DXF/DWG fixture: DXF validado por smoke; DWG sigue como conversion externa.
+- F233 grip/snap: interaccion CAD cubierta por E2E; coordenadas exactas pasan a event controller v2 con flag.
+- F234 isocontornos: superficie visual/leyenda exportable validada; interpolacion numerica queda separada.
+- F235 sync 2D/3D: handoff de planta/equipos/espesores/snapshots listo; sincronizacion bidireccional queda aislada.
+- F236 post-deploy: paquete y URL publica listos para repetir F154-F158/F202.
+
 ## Estadisticas del Proyecto (v99)
 
 | Metrica | Valor |

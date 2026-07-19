@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F231-F236 - Cierre Canvas Release Coverage
+
+F231-F236 completa la cobertura pendiente posterior a F229 sin reescribir de golpe el renderer ni los eventos del canvas.
+
+Fases cerradas:
+
+- F231 `pixel-diff`: usa capturas F229/F207 como baseline visual para detectar canvas blanco, sidebar perdida, botones ausentes o menus que tapen el layout.
+- F232 `DXF/DWG`: valida importacion DXF real con fixture sintetico. DWG sigue siendo conversion externa a DXF/SVG antes de importar.
+- F233 `grip/snap`: mantiene cubierta la interaccion CAD por F229 E2E. El siguiente nivel es validar coordenadas exactas con event controller v2 bajo feature flag.
+- F234 `isocontornos`: valida modo visual, leyenda y export. Para evidencia clinica firmable falta interpolacion numerica con unidades, umbrales y cita normativa.
+- F235 `2D/3D`: consolida handoff de planta, equipos, espesores, zonas y snapshots. La sincronizacion bidireccional completa queda como incremento aislado.
+- F236 `post-deploy`: deja paquete y URL publica para repetir smoke F154-F158/F202 despues de subir un nuevo `dist`.
+
+Motor de calculo - mejoras recomendadas:
+
+- Trazabilidad kernel-calculo: cada resultado debe devolver formulaId, norma, inputs, outputs, supuestos, warnings y citationIds. Impacto: Memoria IA, PDF y Evidence Pack podran sustentar cada espesor sin reconstruir manualmente la evidencia.
+- Normalizacion unica de unidades: centralizar mm/cm/m, mSv/wk, Gy/wk, uSv/h, kg/m2, costos y carga estructural. Impacto: reduce errores silenciosos al comparar materiales y espesores.
+- TVL/HVL versionado por fuente: cada material debe apuntar a documento, pagina, hash y vigencia. Impacto: permite comparar NCRP/IAEA/UAQ/proveedor y justificar plomo, concreto, TM Nipoll, bloques HD o multilayer.
+- Comparador base/conservador: mostrar metodo base vs chequeo conservador por barrera. Impacto: identifica si domina primaria, fuga, scatter, neutrones o fuente puntual.
+- QA numerico por modalidad: casos conocidos para LINAC, CT/RX, Gamma Knife, PET/NM y HDR. Impacto: aumenta confianza antes de declarar release clinico.
+
 ## Addendum F230 - Gate post-F229 para renderer base y eventos
 
 F230 define cuando se puede modificar el renderer base y la logica de eventos del canvas.

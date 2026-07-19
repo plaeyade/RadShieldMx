@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F231-F236 (2026-07-19) - canvas-release-coverage
+
+- F231: baseline visual con screenshots F229/F207 para evitar regresiones de canvas blanco, sidebar oculta o menus superpuestos.
+- F232: fixture DXF/DWG cubierto por F207; DWG se mantiene como conversion externa a DXF/SVG.
+- F233: grip/snap cubierto por F229 E2E; coordenadas exactas se dejan para event controller v2 con flag.
+- F234: isocontornos/leyenda exportable validados como superficie visual; interpolacion numerica queda como mejora siguiente.
+- F235: handoff 2D/3D consolidado con escenas, equipos, espesores y snapshots; sync bidireccional queda como incremento aislado.
+- F236: paquete post-deploy listo con F200 y URL publica para repetir F154-F158/F202.
+- Validacion: `npm run prepare:f231-f236:canvas-release-coverage` y `npm run test:f231-f236:canvas-release-coverage`.
+
 ## F230 (2026-07-19) - post-f229-coverage-gate
 
 - Objetivo: cerrar el criterio de seguridad posterior a F229 antes de modificar renderer base o eventos.

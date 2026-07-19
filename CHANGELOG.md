@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+## F231-F236 (2026-07-19) - Canvas release coverage
+
+- F231: se consolidan baselines visuales con capturas F229/F207 para detectar canvas blanco, sidebar perdida o menus sobrepuestos.
+- F232: se cierra fixture DXF/DWG mediante smoke F207; DWG permanece como conversion externa a DXF/SVG.
+- F233: se cubre grip/snap con F229 E2E; coordenadas exactas quedan para event controller v2 con feature flag.
+- F234: se valida superficie de isocontornos/leyenda exportable; interpolacion numerica firmable queda como mejora del motor.
+- F235: se consolida handoff 2D/3D con escenas, equipos, espesores y snapshots; sync bidireccional queda aislado.
+- F236: se deja paquete post-deploy con F200 y URL publica para repetir F154-F158/F202.
+- Se agregan recomendaciones priorizadas para motor de calculo: trazabilidad, unidades, TVL/HVL versionados, comparador conservador y QA numerico por modalidad.
+
 ## F230 (2026-07-19) - post-F229 coverage gate
 
 - Se agrega `f230PostF229CoverageGate.ts` para decidir cuando es seguro modificar renderer base y logica de eventos.

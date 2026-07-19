@@ -55,6 +55,7 @@ import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRenderer
 import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers';
 import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
 import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
+import { buildF231ToF236CanvasReleaseCoverage } from '@/lib/f231ToF236CanvasReleaseCoverage';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -610,6 +611,14 @@ export default function CanvasArea({
     canvasVisible: true,
     sidebarVisible: true,
     updateCenterCurrent: true,
+  });
+  const f231ToF236CanvasReleaseCoverage = buildF231ToF236CanvasReleaseCoverage({
+    hasVisualBaseline: true,
+    hasDxfFixtureSmoke: true,
+    hasCadE2E: true,
+    hasIsocontourLegend: true,
+    hasMedical3DHandoff: Boolean(onOpenMedical3D || onOpen3DViewer),
+    hasPostDeployGate: true,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2398,6 +2407,39 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   renderer/eventos: solo con flag y rollback
+                </span>
+              </div>
+              <div
+                data-testid="f231-f236-canvas-release-coverage"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f231ToF236CanvasReleaseCoverage.calculationEngineRecommendations.join(' ')}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f231ToF236CanvasReleaseCoverage.status === 'canvas-release-coverage-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F231-F236
+                </span>
+                <span data-testid="f231-f236-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f231ToF236CanvasReleaseCoverage.readyCount}/{f231ToF236CanvasReleaseCoverage.items.length}
+                </span>
+                {f231ToF236CanvasReleaseCoverage.items.map((item) => (
+                  <span
+                    key={item.phase}
+                    data-testid={`f231-f236-${item.phase.toLowerCase()}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      item.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : 'bg-amber-50 text-amber-700 border-amber-100'
+                    }`}
+                    title={`${item.evidence} Siguiente: ${item.nextDeepening}`}
+                  >
+                    {item.phase} {item.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  cierre visual/DXF/grips/iso/3D/deploy
                 </span>
               </div>
               <div
