@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
 import { importDXFToFloorPlan, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
+import { buildF213DxfLayerMappingQa } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -34,6 +35,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [lastContent, setLastContent] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const f213LayerMapping = buildF213DxfLayerMappingQa(parsed);
 
   // Handle file upload
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +145,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs">
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs" title="Importar archivo DXF exportado desde AutoCAD/Revit/ODA para revisar capas y aplicar barreras al canvas">
                 <Upload className="w-3 h-3 mr-1" /> Importar DXF
               </Button>
               <Button
@@ -153,10 +155,11 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 disabled={!parsed}
                 data-testid="dxf-apply-to-canvas"
                 className="text-xs bg-orange-600 hover:bg-orange-700"
+                title="Aplicar LINE/LWPOLYLINE clasificadas como barreras al floorplan principal; equipos, zonas y cotas quedan como referencia de QA"
               >
                 <SendToBack className="w-3 h-3 mr-1" /> Aplicar al canvas
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+              <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} title="Cerrar visor DXF sin aplicar cambios al canvas">
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -168,10 +171,10 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
           <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700 bg-slate-800 flex-shrink-0">
-              <Button variant="ghost" size="sm" onClick={zoomIn} className="text-slate-300 hover:text-white h-7 text-xs">
+              <Button variant="ghost" size="sm" onClick={zoomIn} className="text-slate-300 hover:text-white h-7 text-xs" title="Acercar vista previa DXF sin modificar escala del floorplan">
                 <ZoomIn className="w-3 h-3 mr-1" /> Acercar
               </Button>
-              <Button variant="ghost" size="sm" onClick={zoomOut} className="text-slate-300 hover:text-white h-7 text-xs">
+              <Button variant="ghost" size="sm" onClick={zoomOut} className="text-slate-300 hover:text-white h-7 text-xs" title="Alejar vista previa DXF sin modificar escala del floorplan">
                 <ZoomOut className="w-3 h-3 mr-1" /> Alejar
               </Button>
               <div className="h-4 w-px bg-slate-600 mx-1" />
@@ -179,11 +182,12 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 <Label className="text-xs text-slate-400">Grosor:</Label>
                 <input type="range" min="0.5" max="3" step="0.5" value={lineWidth}
                   onChange={e => setLineWidth(parseFloat(e.target.value))}
-                  className="w-16 h-1" />
+                  className="w-16 h-1"
+                  title="Cambiar grosor visual de lineas en el preview; no altera el archivo DXF ni el canvas" />
               </div>
               <div className="h-4 w-px bg-slate-600 mx-1" />
               <div className="flex items-center gap-2">
-                <Switch id="labels" checked={showLabels} onCheckedChange={setShowLabels} />
+                <Switch id="labels" checked={showLabels} onCheckedChange={setShowLabels} title="Mostrar u ocultar etiquetas de capas en el preview DXF" />
                 <Label htmlFor="labels" className="text-xs text-slate-400 cursor-pointer">Etiquetas</Label>
               </div>
               <div className="flex-1" />
@@ -249,6 +253,48 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   ))}
                 </div>
               </ScrollArea>
+
+              <div
+                data-testid="f213-dxf-layer-mapping-qa"
+                className="border-t bg-slate-50 p-2"
+                title={f213LayerMapping.warnings.join(' | ') || f213LayerMapping.decision}
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                    F213 Mapeo DXF
+                  </div>
+                  <Badge variant="outline" className="h-4 text-[9px]">
+                    {f213LayerMapping.status === 'dxf-layer-mapping-ready' ? 'listo' : 'revision'}
+                  </Badge>
+                </div>
+                <div className="mb-1 flex flex-wrap gap-1">
+                  <Badge data-testid="f213-dxf-barrier-layer-count" variant="outline" className="h-4 text-[9px]">Muros {f213LayerMapping.mappedBarrierLayers}</Badge>
+                  <Badge data-testid="f213-dxf-equipment-layer-count" variant="outline" className="h-4 text-[9px]">Eq {f213LayerMapping.equipmentLayers}</Badge>
+                  <Badge data-testid="f213-dxf-zone-layer-count" variant="outline" className="h-4 text-[9px]">Zonas {f213LayerMapping.zoneLayers}</Badge>
+                  <Badge data-testid="f213-dxf-unmapped-layer-count" variant="outline" className="h-4 text-[9px]">Rev {f213LayerMapping.unmappedLayers}</Badge>
+                </div>
+                <div className="max-h-24 overflow-auto space-y-0.5">
+                  {f213LayerMapping.rows.slice(0, 8).map((row) => (
+                    <div
+                      key={row.name}
+                      data-testid="f213-dxf-layer-row"
+                      className="flex items-center gap-1 rounded bg-white px-1.5 py-1 text-[9px] text-slate-600"
+                      title={`${row.name}: ${row.canvasUse}${row.warning ? ` ${row.warning}` : ''}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${
+                        row.role === 'barrier' ? 'bg-emerald-500' :
+                          row.role === 'equipment' ? 'bg-red-500' :
+                            row.role === 'zone' ? 'bg-sky-500' :
+                              row.role === 'dimension' ? 'bg-violet-500' :
+                                row.role === 'reference' ? 'bg-slate-400' :
+                                  row.role === 'text' ? 'bg-amber-500' : 'bg-slate-300'
+                      }`} />
+                      <span className="truncate flex-1">{row.name}</span>
+                      <span className="shrink-0 uppercase text-[8px] text-slate-400">{row.role}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* File info */}
               {fileName && (

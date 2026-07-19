@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F213 - Mapeo DXF y leyendas de botones CAD
+
+F213 agrega una revision de capas al visor DXF antes de aplicar el plano al canvas. Cada capa se clasifica como muro/barrera, equipo, zona, cota, referencia, texto o no mapeada. Solo LINE/LWPOLYLINE utilizables se aplican como barreras; equipos, zonas y cotas quedan como referencia para que el usuario los coloque o valide.
+
+Logica recomendada para diseno de areas:
+
+1. `Plano`: cargue imagen, PDF raster o DXF para iniciar el floorplan.
+2. `Escala`: calibre con una distancia conocida antes de calcular espesores.
+3. `Muro`: trace barreras primarias/secundarias o revise las importadas desde DXF.
+4. `Fuente`: coloque equipo o fuente radiologica con modalidad, workload, fabricante y footprint.
+5. `Zona`: marque zona controlada, publica u ocupada para definir objetivo P y ocupacion T.
+6. `Punto`: agregue puntos criticos en accesos, colindancias o areas sensibles.
+7. `Material`: asigne concreto, plomo, acero, tabiques HD o configuraciones multilayer.
+8. `Calcular`: ejecute el motor analitico con geometria, escala, fuente, P/T/U/W y material.
+9. `Heat`/`Iso`: revise mapa de calor, lineas 0.3 m, maximos y leyenda regulatoria.
+10. `Snapshot`: exporte evidencia visual para Memoria IA, PDF o Evidence Pack.
+
+Uso del visor DXF:
+
+- `Importar DXF`: carga el archivo y muestra capas, entidades y vista previa.
+- `F213 Mapeo DXF`: indica que capas se trataran como muros, equipos, zonas, cotas o referencia.
+- `Aplicar al canvas`: aplica las barreras detectadas al floorplan principal.
+- Si hay capas `Rev` o no mapeadas, revise el nombre de capa o convierta/remapee en CAD antes de usar el plano como base firmable.
+
+Las leyendas al posicionarse sobre cada boton explican su funcion y el momento recomendado dentro del flujo de diseno.
+
 ## Addendum F212 - Leyenda regulatoria de heatmap/isocontornos
 
 F212 agrega una leyenda compacta para interpretar mapas de calor e isocontornos en el canvas. Resume umbrales ALARA, publico y controlado, metas minima/maxima del proyecto, niveles de color y el valor maximo proxy semanal detectado.

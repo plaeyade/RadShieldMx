@@ -659,52 +659,52 @@ export default function CanvasArea({
         </div>
         <div className="hidden md:flex items-center gap-0.5 mr-1">
           {onImportFloorPlan && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Importar plano" title="Importar plano" onClick={onImportFloorPlan}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Importar plano base para trazar muros y zonas" title="Importar plano base para trazar muros, zonas controladas y equipos antes de calcular blindaje" onClick={onImportFloorPlan}>
               <Upload className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenRoomTemplates && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Smart rooms" title="Smart rooms" onClick={onOpenRoomTemplates}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Plantillas de salas clinicas" title="Abrir plantillas de salas para iniciar un layout DX/TX/NM/CY con geometria base" onClick={onOpenRoomTemplates}>
               <LayoutTemplate className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenLayers && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Capas del canvas" title="Capas del canvas" onClick={onOpenLayers}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Capas del canvas" title="Abrir capas para mostrar/ocultar arquitectura, blindaje, fuentes, heatmap y anotaciones" onClick={onOpenLayers}>
               <Layers className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenControlPoints && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Puntos de control" title="Puntos de control" onClick={onOpenControlPoints}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Puntos de control" title="Gestionar puntos de control donde se evalua dosis semanal y cumplimiento por zona" onClick={onOpenControlPoints}>
               <MapPin className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpen3DViewer && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Visor 3D" title="Visor 3D" onClick={onOpen3DViewer}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Visor 3D" title="Abrir visor 3D general para inspeccionar geometria, espesores y equipos del floorplan" onClick={onOpen3DViewer}>
               <Box className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenMedical3D && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Medical 3D Floor Plan" title="Medical 3D Floor Plan" onClick={onOpenMedical3D}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Medical 3D Floor Plan" title="Inspeccion medica 3D del bunker/sala con equipos, zonas, acabados y espesores de blindaje" onClick={onOpenMedical3D}>
               <Stethoscope className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenDoseMap3D && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Dose map 3D" title="Dose map 3D" onClick={onOpenDoseMap3D}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Dose map 3D" title="Abrir mapa 3D de dosis/isodosis para revisar distribucion espacial del blindaje" onClick={onOpenDoseMap3D}>
               <Grid3X3 className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenMonteCarlo && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Monte Carlo" title="Monte Carlo" onClick={onOpenMonteCarlo}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Monte Carlo" title="Abrir modulo Monte Carlo/QA para simulaciones avanzadas y comparacion contra calculo analitico" onClick={onOpenMonteCarlo}>
               <Cpu className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenExternalConnector && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Conexiones externas" title="Conexiones externas" onClick={onOpenExternalConnector}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Conexiones externas" title="Abrir conectores externos para CAD/BIM, conversiones, evidencia o servicios auxiliares" onClick={onOpenExternalConnector}>
               <FileSearch className="w-3.5 h-3.5" />
             </Button>
           )}
           {onOpenEvidencePack && (
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Evidence pack" title="Evidence pack" onClick={onOpenEvidencePack}>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Evidence pack" title="Abrir Evidence Pack con plano, calculos, citas, anexos y trazabilidad de la memoria analitica" onClick={onOpenEvidencePack}>
               <FileSearch className="w-3.5 h-3.5" />
             </Button>
           )}
@@ -713,6 +713,8 @@ export default function CanvasArea({
         <div className="flex items-center gap-0.5">
           {setShowSampleLines && (
             <Button size="sm" variant={showSampleLines ? "default" : "outline"} className="h-6 text-[10px] px-2 bg-[#f97316] hover:bg-[#ea580c] border-none"
+              title="Mostrar u ocultar lineas de evaluacion a 0.3 m para revisar dosis fuera de cada barrera"
+              aria-label="Mostrar u ocultar lineas de evaluacion a 0.3 metros"
               onClick={() => setShowSampleLines(!showSampleLines)}>
               {showSampleLines ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
               Lineas 0.3m
@@ -720,6 +722,8 @@ export default function CanvasArea({
           )}
           {setShowSamplePoints && (
             <Button size="sm" variant={showSamplePoints ? "default" : "outline"} className="h-6 text-[10px] px-2"
+              title="Mostrar u ocultar puntos de muestreo usados para identificar maximos de dosis/espesor"
+              aria-label="Mostrar u ocultar puntos de muestreo"
               onClick={() => setShowSamplePoints(!showSamplePoints)}>
               {showSamplePoints ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
               Puntos
@@ -727,6 +731,8 @@ export default function CanvasArea({
           )}
           {setShowMaxima && (
             <Button size="sm" variant={showMaxima ? "default" : "outline"} className="h-6 text-[10px] px-2"
+              title="Mostrar u ocultar marcadores de maximo espesor o maxima dosis por barrera"
+              aria-label="Mostrar u ocultar maximos de calculo"
               onClick={() => setShowMaxima(!showMaxima)}>
               {showMaxima ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
               Maximos
@@ -739,7 +745,8 @@ export default function CanvasArea({
               variant={heatmapEnabled ? "default" : "outline"}
               className={`h-6 text-[10px] px-2 ${heatmapEnabled ? 'bg-red-600 hover:bg-red-700 border-none' : ''}`}
               onClick={() => onToggleHeatmap(!heatmapEnabled)}
-              title={heatmapPointCount > 0 ? `${heatmapPointCount} puntos de heat map` : 'Activar mapa de calor de dosis'}
+              title={heatmapPointCount > 0 ? `Mostrar mapa de calor con ${heatmapPointCount} puntos y leyenda regulatoria F212` : 'Activar mapa de calor de dosis para revisar zonas calientes e isocontornos'}
+              aria-label="Activar o desactivar mapa de calor de dosis"
             >
               {heatmapEnabled ? <Grid3X3 className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
               Heatmap
@@ -756,12 +763,12 @@ export default function CanvasArea({
       >
         <div className="flex items-center gap-0.5 shrink-0" data-testid="f191-cad-tool-group">
           {([
-            ['select', 'Sel', 'Seleccionar objetos del plano', MousePointer],
-            ['barrier', 'Muro', 'Dibujar muro o barrera de blindaje', Box],
-            ['source', 'Fuente', 'Colocar fuente radiologica o equipo', Atom],
-            ['region', 'Zona', 'Dibujar zona controlada u ocupada', Shield],
-            ['measure', 'Medir', 'Medir distancia o calibrar escala', Ruler],
-            ['pan', 'Pan', 'Mover vista del plano', Move],
+            ['select', 'Sel', 'Seleccionar muros, fuentes, zonas o puntos para revisar/editar propiedades', MousePointer],
+            ['barrier', 'Muro', 'Dibujar muro o barrera; despues asignar tipo, material, P/T/U y espesor calculado', Box],
+            ['source', 'Fuente', 'Colocar fuente radiologica o equipo clinico que alimenta el calculo de blindaje', Atom],
+            ['region', 'Zona', 'Dibujar zona controlada, publica u ocupada para definir meta de dosis y ocupacion', Shield],
+            ['measure', 'Medir', 'Medir distancias y apoyar calibracion de escala antes de calcular o exportar', Ruler],
+            ['pan', 'Pan', 'Desplazar la vista del plano sin mover objetos ni cambiar la geometria', Move],
           ] as const).map(([tool, label, title, Icon]) => (
             <button
               key={tool}
@@ -784,31 +791,31 @@ export default function CanvasArea({
         <div className="h-4 w-px bg-slate-200 shrink-0" />
         <div className="flex items-center gap-0.5 shrink-0" data-testid="f191-clinical-action-group">
           {onImportFloorPlan && (
-            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onImportFloorPlan} title="Cargar imagen o plano base" aria-label="Cargar imagen o plano base">
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onImportFloorPlan} title="Cargar imagen, PDF raster o plano base para trazar el layout de blindaje" aria-label="Cargar imagen o plano base para trazar layout">
               <Upload className="h-3 w-3" /> Plano
             </button>
           )}
           {onCalibrateScale && (
-            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onCalibrateScale} title="Calibrar escala con distancia conocida" aria-label="Calibrar escala con distancia conocida">
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onCalibrateScale} title="Calibrar escala con una distancia conocida; hacerlo antes de calcular espesores" aria-label="Calibrar escala con distancia conocida antes de calcular">
               <Ruler className="h-3 w-3" /> Escala
             </button>
           )}
           {onAddCriticalPoint && (
-            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onAddCriticalPoint} title="Agregar punto critico de evaluacion" aria-label="Agregar punto critico de evaluacion">
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onAddCriticalPoint} title="Agregar punto critico para evaluar dosis en accesos, colindancias o zonas sensibles" aria-label="Agregar punto critico de evaluacion de dosis">
               <Crosshair className="h-3 w-3" /> Punto
             </button>
           )}
           {onOpenShieldingPresets && (
-            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onOpenShieldingPresets} title="Aplicar presets de materiales de blindaje" aria-label="Aplicar presets de materiales de blindaje">
+            <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onOpenShieldingPresets} title="Seleccionar material/preset de blindaje: plomo, concreto, acero, tabiques HD o multilayer" aria-label="Aplicar material o preset de blindaje">
               <Layers className="h-3 w-3" /> Material
             </button>
           )}
           {onRunCalculations && (
-            <button type="button" className="h-6 rounded-md border border-orange-200 bg-orange-50 px-2 text-[10px] font-semibold text-orange-700 hover:bg-orange-100 flex items-center gap-1" onClick={onRunCalculations} title="Calcular blindaje analitico" aria-label="Calcular blindaje analitico">
+            <button type="button" className="h-6 rounded-md border border-orange-200 bg-orange-50 px-2 text-[10px] font-semibold text-orange-700 hover:bg-orange-100 flex items-center gap-1" onClick={onRunCalculations} title="Ejecutar calculo analitico de blindaje con geometria, fuente, material, P/T/U/W y escala actuales" aria-label="Calcular blindaje analitico del plano actual">
               <Calculator className="h-3 w-3" /> Calcular
             </button>
           )}
-          <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onExportPNG} title="Exportar snapshot visual del canvas" aria-label="Exportar snapshot visual del canvas">
+          <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onExportPNG} title="Exportar captura visual del canvas para Memoria IA, PDF o Evidence Pack" aria-label="Exportar snapshot visual del canvas para reportes">
             <ImageIcon className="h-3 w-3" /> Snapshot
           </button>
         </div>
@@ -819,10 +826,10 @@ export default function CanvasArea({
           aria-label="Selector de modo visual del canvas"
         >
           {([
-            ['plan', 'Plano', 'Vista limpia del plano con puntos y maximos', LayoutTemplate],
-            ['heat', 'Heat', 'Mapa de calor de dosis', Grid3X3],
-            ['isocontours', 'Iso', 'Vista de lineas de evaluacion e isocontornos', ScanLine],
-            ['structure', 'Estruct', 'Overlay de carga estructural y materiales', Layers],
+            ['plan', 'Plano', 'Vista limpia del plano para trazar muros, equipos, zonas y puntos', LayoutTemplate],
+            ['heat', 'Heat', 'Mapa de calor de dosis con leyenda regulatoria F212', Grid3X3],
+            ['isocontours', 'Iso', 'Lineas de evaluacion/isocontornos para revisar maxima dosis por barrera', ScanLine],
+            ['structure', 'Estruct', 'Overlay de carga estructural, material, peso y espesor de blindaje', Layers],
           ] as const).map(([mode, label, title, Icon]) => (
             <button
               key={mode}

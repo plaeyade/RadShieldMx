@@ -159,6 +159,8 @@ try {
   await page.waitForTimeout(900);
   record('DXF apply button enabled', await page.getByTestId('dxf-apply-to-canvas').isEnabled().catch(() => false));
   record('DXF mapped barrier count visible', await page.getByText(/barreras/i).first().isVisible().catch(() => false));
+  record('F213 DXF layer mapping QA visible', await visible(page, 'f213-dxf-layer-mapping-qa'));
+  record('F213 barrier layer count visible', await visible(page, 'f213-dxf-barrier-layer-count'));
   await page.getByTestId('dxf-apply-to-canvas').click();
   await page.waitForTimeout(1200);
 

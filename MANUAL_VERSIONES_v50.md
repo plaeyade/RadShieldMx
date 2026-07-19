@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F213 (2026-07-18) - dxf-layer-mapping-qa
+
+- Objetivo: hacer transparente como se interpretan las capas DXF antes de aplicarlas al floorplan.
+- Alcance: clasificacion por capa en muros/barreras, equipos, zonas, cotas, referencias, texto o no mapeadas; tooltips CAD mas explicativos.
+- Guardrail: no cambia parser DXF, geometria importada ni calculos; agrega QA visible y documentacion de uso.
+- Validacion: `npm run test:f213:dxf-layer-mapping`, `npm run test:f204:canvas-dxf-smoke`.
+
 ## F212 (2026-07-18) - heatmap-regulatory-legend
 
 - Objetivo: hacer reportable la lectura de heatmap/isocontornos con umbrales regulatorios visibles.

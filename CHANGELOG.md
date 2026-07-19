@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F213 (2026-07-18) - DXF Layer Mapping QA + tooltips CAD
+
+- Se agrega panel F213 al visor DXF para clasificar capas como muros/barreras, equipos, zonas, cotas, referencias, texto o no mapeadas.
+- El visor DXF muestra conteos por rol y advertencias antes de aplicar LINE/LWPOLYLINE al canvas.
+- Se refuerzan leyendas hover en botones principales del canvas y toolbar CAD para explicar funcion y logica de uso.
+- Nuevo comando: `npm run test:f213:dxf-layer-mapping`.
+
 ## F212 (2026-07-18) - Heatmap Regulatory Legend
 
 - Se agrega leyenda regulatoria compacta para heatmap/isocontornos: ALARA, publico, controlado, P min/max del proyecto, niveles de color y maximo proxy semanal.
