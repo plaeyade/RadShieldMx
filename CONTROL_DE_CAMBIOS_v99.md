@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F237
+# RadShield-MX — Control de Cambios Completo v1-F247
+
+## F238-F247 (2026-07-19) - Release Execution
+
+- F238-F247 cierra el bloque pre-deploy con manual F247, smoke estatico, CAD bajo riesgo, renderer con feature flag, DXF/equipos, paquete frontend, ledger TVL/HVL, QA numerico, auditoria material y checklist de anexos.
+- Se agrega `src/lib/f238ToF247ReleaseExecution.ts` con funciones reutilizables para ledger TVL/HVL, auditoria de materiales y anexos.
+- F125 agrega la seccion F238-F247 para que reportes y Memoria IA reciban el checklist de salida.
+- Decision: deploy frontend estatico despues de F200/F230/F237/F238-F247; fullstack solo tras DB live restore probe.
 
 ## F237 (2026-07-19) - Calculation Engine Governance
 

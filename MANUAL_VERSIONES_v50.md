@@ -1,5 +1,18 @@
 # RadShield-MX - Manual de Versiones
 
+# F238-F247 (2026-07-19) - release-execution-cad-calculation-report
+
+- F238: QA visual/documental final y manual con cobertura v1-F247.
+- F239: smoke de deploy estatico; frontend listo despues de gates, fullstack condicionado a DB live restore probe.
+- F240: canvas CAD bajo riesgo: propiedades, cotas, seleccion, etiquetas y helpers sin reescritura del renderer.
+- F241: renderer/event controller solo detras de feature flag y rollback.
+- F242: import DXF/DWG-convertido y simbolos de equipos con footprint, rotacion y variante de fabricante.
+- F243: paquete frontend estatico listo para Vercel/static host despues de smoke.
+- F244: ledger TVL/HVL versionado por material/energia/fuente/hash.
+- F245: matriz QA numerica por modalidad.
+- F246: auditoria material de densidad, costo, tiempo/carga estructural y estado de evidencia.
+- F247: checklist de anexos para Memoria IA, PDF y Evidence Pack.
+
 # F237 (2026-07-19) - calculation-engine-governance
 
 - Cierre documental de la brecha detectada en el manual HTML: la cobertura visible se actualiza de v1-v116 a v1-F237.

@@ -1,5 +1,25 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F238-F247 - Cierre Pre-Deploy CAD, Calculo Y Reportes
+
+F238-F247 ejecuta el cierre previo a deploy funcional sin reescribir de golpe el canvas ni declarar soporte fullstack antes de DB live.
+
+Fases cerradas:
+- F238: QA visual/documental final; el manual HTML debe mostrar cobertura `v1-F247`.
+- F239: smoke de deploy estatico; repetir F200/F230/F237/F238-F247 antes de subir `dist`.
+- F240: mejoras CAD bajo riesgo: propiedades, cotas, seleccion, etiquetas y helpers sin tocar eventos base.
+- F241: renderer/eventos solo con feature flag, rollback y repeticion F198/F207/F229/F200.
+- F242: DXF/DWG-convertido y simbolos de equipo; DWG nativo no se promete en navegador.
+- F243: release frontend estatico; fullstack queda condicionado a DB live/restore probe.
+- F244: ledger TVL/HVL versionado por material, energia, fuente, page hint, hash y estado de revision.
+- F245: QA numerico por modalidad: LINAC, CT/RX, Gamma Knife, PET/NM y UAQ.
+- F246: auditoria material: densidad, costo, masa, carga estructural, TVL/HVL y evidencia.
+- F247: checklist de anexos para Memoria IA/PDF/Evidence: formula, norma, inputs, outputs, material ledger, unidades, comparador, warnings y hashes.
+
+Decision de deploy:
+- Frontend estatico: puede publicarse cuando pasen los gates estaticos y smoke URL.
+- Fullstack/API/DB: no debe declararse productivo hasta validar DB live, restore probe, secretos y persistencia.
+
 ## Addendum F237 - Gobierno del Motor de Calculo
 
 F237 consolida las mejoras recomendadas al motor de calculo en una capa unica de gobierno antes de Memoria IA, PDF, Evidence Pack o entrega regulatoria.

@@ -312,6 +312,8 @@
     "test:f230:post-f229-gate": "node scripts/check-f230-post-f229-coverage-gate-contracts.mjs",
     "prepare:f231-f236:canvas-release-coverage": "node scripts/f231-f236-canvas-release-coverage.mjs",
     "test:f231-f236:canvas-release-coverage": "node scripts/check-f231-f236-canvas-release-coverage-contracts.mjs",
+    "prepare:f238-f247:release-execution": "node scripts/f238-f247-release-execution.mjs",
+    "test:f238-f247:release-execution": "node scripts/check-f238-f247-release-execution-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

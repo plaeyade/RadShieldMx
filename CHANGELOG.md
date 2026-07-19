@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F238-F247 (2026-07-19) - Release execution CAD/calculation/report gates
+
+- F238: manual HTML y documentos pasan a cobertura v1-F247.
+- F239/F243: se declara frontend estatico listo tras smoke F200/F230/F237/F238-F247; fullstack sigue bloqueado hasta DB live restore probe.
+- F240/F241/F242: se formaliza mejora CAD bajo riesgo, renderer/eventos detras de feature flag y DWG solo por conversion externa a DXF/SVG con simbolos de equipo versionables.
+- F244: se crea ledger TVL/HVL versionado con fuente, prioridad, page hint, hash y estado de revision por material/energia.
+- F245: matriz numerica LINAC/CT/Gamma Knife/PET/UAQ queda conectada al cierre.
+- F246: auditoria de materiales resume densidad, costo, carga estructural, TVL/HVL y revision de fuente.
+- F247: checklist de anexos para PDF, Memoria IA y Evidence Pack: formula, norma, inputs, outputs, TVL/HVL, unidades, comparador, warnings y hashes.
+
 # F237 (2026-07-19) - Calculation engine governance
 
 - Se agrega `src/lib/f237CalculationEngineGovernance.ts` como capa unica de gobierno para el motor de calculo.

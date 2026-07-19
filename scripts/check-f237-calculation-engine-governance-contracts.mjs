@@ -32,7 +32,10 @@ expect('Package exposes F237 contract', pkg.scripts?.['test:f237:calculation-gov
 expect('Changelog documents F237', changelog.includes('F237'));
 expect('Manual versions documents F237', manualVersions.includes('F237'));
 expect('Manual user documents F237', manualUser.includes('F237'));
-expect('Manual HTML coverage is F236/F237 aware', manualHtml.includes('Cobertura de versiones: v1 - F237') && manualHtml.includes('F237'));
+expect(
+  'Manual HTML coverage includes F237 within current release range',
+  /Cobertura de versiones: v1 - F(23[7-9]|24[0-9])/.test(manualHtml) && manualHtml.includes('F237'),
+);
 expect('Update Center documents F237', update.includes('F237 Calculation governance'));
 
 const failed = checks.filter((check) => !check.condition);
