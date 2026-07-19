@@ -262,6 +262,7 @@
     "test:f193:calculation-hardening-extended": "node scripts/check-f193-calculation-hardening-extended-contracts.mjs",
     "test:f194:numeric-qa": "node scripts/check-f194-numeric-qa-contracts.mjs",
     "test:f195:comparison-gate": "node scripts/check-f195-calculation-comparison-gate-contracts.mjs",
+    "test:f196:cache": "node scripts/check-f196-calculation-cache-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

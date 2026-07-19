@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F196 (2026-07-18) - Safe calculation cache
+
+- Objetivo: evitar resultados obsoletos cuando cambian escala, geometria, material, fuente, norma, P/T/U/W, regiones o puntos criticos.
+- Alcance: `calculationCacheKey.ts` versiona la cache como `f196-cache-v1` y conserva marcador legacy F193 para trazabilidad.
+- Salida tecnica: cada entrada IndexedDB guarda `cacheVersion`, `payload`, resultados, sample lines y timestamp.
+- Diagnostico: `explainCalculationCacheInvalidation()` reporta categorias y rutas cambiadas; `useCalculationCache().lastAudit()` expone el ultimo dictamen.
+- Guardrail: entradas sin payload F196 o con version distinta no se aceptan como hit; se recalcula antes de usar en Memoria IA/PDF/Evidence.
+- Validacion: `npm run test:f196:cache`.
+
 ## F195 (2026-07-17) - Base/conservative comparison gate
 
 - Objetivo: hacer visible y auditable el comparador base vs conservador antes de emitir Memoria IA, Evidence Pack o PDF.

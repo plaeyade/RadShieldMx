@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F196 (2026-07-18) - Safe calculation cache
+
+- Se actualiza la cache de calculo a `f196-cache-v1` con payload auditable por escala, geometria, materiales, fuentes, normas, P/T/U/W, regiones y puntos criticos.
+- `calculationCacheKey.ts` agrega explicacion de invalidacion con categorias: scale, geometry, material, source, norms, P/T/U/W, regions y criticalPoints.
+- `useCalculationCache` guarda `cacheVersion` y `payload` junto al resultado y rechaza hits sin metadatos F196 o con payload no coincidente.
+- La cache expone `lastAudit()` para diagnosticar si un resultado vino de cache o fue invalidado por cambios del plano.
+- Nuevo comando: `npm run test:f196:cache`.
+
 ## F195 (2026-07-17) - Base/conservative comparison gate
 
 - Se agrega `f195CalculationComparisonGate.ts` para revisar por barrera el comparador base vs conservador.
