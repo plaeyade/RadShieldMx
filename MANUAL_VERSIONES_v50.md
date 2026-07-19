@@ -1,11 +1,20 @@
 # RadShield-MX - Manual de Versiones
 
+## F221 (2026-07-19) - canvas-real-connections
+
+- Objetivo: verificar que las modificaciones del canvas sean funcionales y no solo cosmeticas.
+- Alcance: fila F221 en el canvas con chips para grips arrastrables, snap CAD, ventana/lasso, editor inline, footprints, isocontornos, 3D medico y export visual.
+- Estado real: grips, snapping avanzado, seleccion ventana/lasso, editor inline, footprints y export visual quedan conectados a funciones existentes.
+- Estado parcial: isocontornos son proxy visual pendiente de interpolacion regulatoria; 3D medico tiene handoff pero requiere sincronizacion bidireccional y QA visual.
+- Artefactos: `outputs/f221_canvas_real_connections/f221_canvas_real_connections.json` y `outputs/fase_221_canvas_real_connections.md`.
+- Guardrail renderer/eventos: primero extraer helpers/capas de render; despues normalizar eventos detras de feature flag con smoke de drag/snap/lasso.
+
 ## F220 (2026-07-19) - canvas-cad-priority-actions
 
 - Objetivo: convertir los pendientes P0-P2 del canvas en acciones visibles y seguras.
 - Alcance: panel F220 en el flujo del canvas con botones `P0 Edit`, `P0 Snap`, `P0 Cotas`, `P1 Sel`, `P1 Iso`, `P1 Eq` y `P2 3D`.
 - Guardrail: usa funciones existentes; no cambia renderer, eventos base, calculos, DXF, DB ni sidebar.
-- Siguientes microfases: F221 snapping avanzado, F222 cotas editables, F223 lasso, F224 isocontornos reales, F225 footprints, F226 inspeccion 3D.
+- Siguientes microfases: hardening de cotas editables persistentes, isocontornos interpolados, footprints por fabricante, inspeccion 3D bidireccional y pruebas E2E de eventos.
 - Validacion: `npm run prepare:f220:canvas-cad-actions` y `npm run test:f220:canvas-cad-actions`.
 
 ## F219 (2026-07-19) - canvas-post-deploy-qa

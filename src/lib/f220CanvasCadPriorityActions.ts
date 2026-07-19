@@ -67,10 +67,10 @@ export function buildF220CanvasCadPriorityActions(input: F220CanvasCadPriorityAc
       priority: 'P0',
       label: 'Snapping avanzado visual',
       shortLabel: 'Snap',
-      status: input.snapToGrid ? 'partial' : 'planned',
-      evidence: input.snapToGrid ? 'snap simple activo' : 'snap desactivado',
+      status: input.snapToGrid ? 'ready' : 'partial',
+      evidence: input.snapToGrid ? 'snap CAD activo' : 'motor CAD disponible; snap desactivado',
       actionLabel: input.snapToGrid ? 'Alternar snap' : 'Activar snap',
-      guardrail: 'F220 solo gobierna entrada segura; endpoint/midpoint/perpendicular quedan para F221.',
+      guardrail: 'Endpoint, midpoint, perpendicular, interseccion, centro-equipo y angle15 ya existen; F221 los documenta y prueba.',
     },
     {
       id: 'editable-dimensions',
@@ -87,10 +87,10 @@ export function buildF220CanvasCadPriorityActions(input: F220CanvasCadPriorityAc
       priority: 'P1',
       label: 'Seleccion multiple/lasso',
       shortLabel: 'Sel',
-      status: input.selectedCount > 1 ? 'partial' : 'planned',
-      evidence: input.selectedCount > 1 ? `${input.selectedCount} seleccionados` : 'seleccion simple actual',
+      status: 'ready',
+      evidence: input.selectedCount > 1 ? `${input.selectedCount} seleccionados` : 'ventana/lasso disponibles en modo seleccion',
       actionLabel: 'Modo seleccion',
-      guardrail: 'No reemplaza seleccion actual; F223 debe ser aditivo y cancelable con Esc.',
+      guardrail: 'Arrastre en vacio crea ventana; Ctrl/Meta+arrastre crea lasso; Shift+click agrega/quita seleccion.',
     },
     {
       id: 'isocontours',
@@ -100,17 +100,17 @@ export function buildF220CanvasCadPriorityActions(input: F220CanvasCadPriorityAc
       status: input.hasResults || input.sampleLineCount > 0 ? 'partial' : 'planned',
       evidence: `${input.hasResults ? 'resultados' : 'sin resultados'}, ${countPoints(input.samplePointCount, input.sampleLineCount)}`,
       actionLabel: 'Vista Iso',
-      guardrail: 'F220 activa vista; interpolacion/etiquetas reales quedan para F224 con QA numerico.',
+      guardrail: 'La vista actual es proxy visual con leyenda; interpolacion/etiquetas regulatorias reales quedan para hardening posterior.',
     },
     {
       id: 'equipment-footprints',
       priority: 'P1',
       label: 'Footprints de equipos',
       shortLabel: 'Eq',
-      status: input.sourceCount > 0 ? 'partial' : 'planned',
+      status: input.sourceCount > 0 ? 'ready' : 'partial',
       evidence: `${input.sourceCount} equipo(s)/fuente(s)`,
       actionLabel: input.sourceCount > 0 ? 'Agregar equipo' : 'Colocar equipo',
-      guardrail: 'Mantiene simbolo generico si falta fabricante; variantes ricas quedan para F225.',
+      guardrail: 'Footprints y rotacion por modalidad ya visibles; variantes ricas por fabricante quedan para hardening posterior.',
     },
     {
       id: 'medical-3d',
@@ -142,6 +142,6 @@ export function buildF220CanvasCadPriorityActions(input: F220CanvasCadPriorityAc
       P2: 'Luego: recorrido 3D medico y snapshots avanzados.',
     },
     decision:
-      'F220 convierte los pendientes P0-P2 en acciones visibles y seguras dentro del canvas. Usa funciones existentes y reserva cambios profundos de geometria para microfases F221-F226.',
+      'F220 convierte los pendientes P0-P2 en acciones visibles y seguras dentro del canvas. Usa funciones existentes; F221 verifica cuales conexiones ya son reales y cuales requieren hardening.',
   };
 }

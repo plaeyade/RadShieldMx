@@ -49,6 +49,7 @@ import { buildF215CanvasScenePresets } from '@/lib/f215CanvasScenePresets';
 import { buildF216MiniViewManager, type F216SavedCanvasView } from '@/lib/f216MiniViewManager';
 import { buildF217VisualExportByScene, type F217VisualExportSceneId } from '@/lib/f217VisualExportByScene';
 import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/f220CanvasCadPriorityActions';
+import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -553,6 +554,15 @@ export default function CanvasArea({
     hasResults,
     hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
   });
+  const f221CanvasRealConnections = buildF221CanvasRealConnections({
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+    snapToGrid: canvasState.snapToGrid,
+    sourceCount,
+    barrierCount,
+    hasResults,
+    hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
+    hasExport: Boolean(onExportPNG),
+  });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
   const selectedCriticalPoint = floorPlan?.criticalPoints?.find((point) => point.id === canvasState.selectedId) ?? null;
@@ -672,7 +682,7 @@ export default function CanvasArea({
     }
     if (actionId === 'lasso-select') {
       activateCanvasTool('select');
-      toast.info('F220 prepara seleccion multiple; F223 agregara ventana/lasso real.');
+      toast.info('Seleccion CAD activa', { description: 'Arrastre en vacio para ventana, Ctrl/Meta+arrastre para lasso y Shift+click para multiseleccion.' });
       return;
     }
     if (actionId === 'isocontours') {
@@ -2135,6 +2145,41 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   {f220CanvasCadActions.prioritySummary.P0}
+                </span>
+              </div>
+              <div
+                data-testid="f221-canvas-real-connections"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f221CanvasRealConnections.rendererUpgradeDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f221CanvasRealConnections.status === 'canvas-real-connections-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F221 Real
+                </span>
+                <span data-testid="f221-real-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f221CanvasRealConnections.readyCount}/{f221CanvasRealConnections.connections.length}
+                </span>
+                {f221CanvasRealConnections.connections.map((connection) => (
+                  <span
+                    key={connection.id}
+                    data-testid={`f221-real-${connection.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      connection.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : connection.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={`${connection.evidence}. Uso: ${connection.operatorUse} Siguiente: ${connection.nextHardening}`}
+                  >
+                    {connection.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  Renderer: capas primero, eventos con flag
                 </span>
               </div>
               <div

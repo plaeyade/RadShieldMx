@@ -1,5 +1,22 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F221 - Conexiones reales del canvas
+
+F221 verifica que las modificaciones principales del canvas esten conectadas a funciones reales, no solo a botones o textos.
+
+Uso operativo:
+
+- Grips arrastrables: seleccione un muro o fuente. En muros puede arrastrar vertices y punto medio; en fuentes puede mover el centro o usar el grip `R` para rotar.
+- Snapping CAD: active Snap y dibuje cerca de endpoints, midpoints, perpendiculares, intersecciones, centros de equipo o angulos de 15 grados.
+- Seleccion multiple: en modo seleccion, arrastre en vacio para ventana; use Ctrl/Meta+arrastre para lasso; use Shift+click para agregar o quitar objetos.
+- Edicion inline: seleccione un objeto y use el inspector compacto para nombre, material, workload, T, P o isocentro.
+- Footprints: coloque equipos/fuentes; el canvas muestra footprint y rotacion por modalidad. Las variantes detalladas por fabricante quedan para hardening posterior.
+- Export visual: use export por escena para alimentar Memoria IA, PDF, Evidence Pack o anexos.
+
+Limites actuales: los isocontornos siguen siendo una visualizacion proxy y requieren interpolacion regulatoria real antes de usarse como evidencia clinica final. La inspeccion 3D ya recibe handoff desde el floorplan, pero falta sincronizacion bidireccional completa de medidas, materiales y snapshots.
+
+Renderer/eventos base: ya se pueden mejorar despues de pasar F221 y smoke funcional, pero de forma escalonada. Primero se extraen helpers/capas de render sin cambiar eventos; despues se introduce un event controller detras de feature flag y con rollback al `useCanvas` actual.
+
 ## Addendum F220 - Acciones CAD P0 a P2
 
 F220 agrega una fila compacta dentro del panel de flujo del canvas. Su objetivo es que los pendientes CAD ya identificados no queden como lista abstracta: cada grupo tiene un boton operativo o una entrada segura hacia la siguiente microfase.
@@ -7,11 +24,11 @@ F220 agrega una fila compacta dentro del panel de flujo del canvas. Su objetivo 
 Botones F220:
 
 - `P0 Edit`: abre el editor inline F191E para el objeto seleccionado.
-- `P0 Snap`: activa o desactiva el snap actual. El snapping avanzado endpoint/midpoint/perpendicular se reserva para F221.
+- `P0 Snap`: activa o desactiva el snap CAD actual: endpoint, midpoint, perpendicular, interseccion, centro de equipo y angle15.
 - `P0 Cotas`: abre calibracion/medicion para preparar cotas editables F222.
-- `P1 Sel`: vuelve al modo seleccion y prepara el flujo de seleccion multiple/lasso F223.
+- `P1 Sel`: vuelve al modo seleccion; arrastre en vacio para ventana, Ctrl/Meta+arrastre para lasso y Shift+click para multiseleccion.
 - `P1 Iso`: cambia a vista de isocontornos para revisar lineas de muestreo y preparar F224.
-- `P1 Eq`: cambia a colocacion de equipo/fuente para completar footprints F225.
+- `P1 Eq`: cambia a colocacion de equipo/fuente con footprint y rotacion por modalidad.
 - `P2 3D`: abre la inspeccion 3D medica si el conector esta disponible.
 
 Uso recomendado:
@@ -22,7 +39,7 @@ Uso recomendado:
 4. Usar `P1 Iso` despues de calcular para preparar evidencia visual.
 5. Usar `P2 3D` solo como inspeccion avanzada, no como sustituto del calculo ni de la memoria analitica.
 
-Regla de seguridad: F220 no introduce lasso real, snapping geometrico avanzado ni interpolacion de isocontornos; solo crea entradas operativas seguras. Esas funciones profundas se implementan gradualmente en F221-F226.
+Regla de seguridad: F220 crea accesos operativos y F221 confirma las conexiones reales ya presentes. Lo que sigue como hardening es interpolacion real de isocontornos, cotas persistentes editables completas, variantes de equipos por fabricante y QA E2E de eventos.
 
 ## Addendum F219 - QA visual post-deploy y pendientes del canvas
 

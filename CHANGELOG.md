@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F221 (2026-07-19) - Canvas real connections
+
+- Se agrega `f221CanvasRealConnections.ts` para auditar conexiones reales del canvas.
+- El canvas muestra una fila F221 con estado de grips arrastrables, snapping CAD, seleccion ventana/lasso, editor inline, footprints, isocontornos, 3D y export visual.
+- Se corrige F220 para no tratar como pendiente lo que ya existe en `useCanvas.ts`: endpoint, midpoint, perpendicular, interseccion, centro-equipo, angle15, ventana/lasso y footprints por modalidad.
+- Quedan marcados como parciales: isocontornos por interpolacion regulatoria real y sincronizacion 3D bidireccional.
+- Decision renderer/eventos base: se pueden mejorar despues de pasar F221, pero primero extraer capas de render y despues event controller con feature flag; no reescribir renderer y eventos juntos.
+- Artefactos: `outputs/f221_canvas_real_connections/f221_canvas_real_connections.json` y `outputs/fase_221_canvas_real_connections.md`.
+
 ## F220 (2026-07-19) - Canvas CAD Priority Actions P0-P2
 
 - Se agrega panel F220 dentro del flujo del canvas con acciones P0, P1 y P2.
