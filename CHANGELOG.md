@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F207 (2026-07-18) - Functional App QA
+
+- Se agrega una compuerta funcional integrada sobre el build `dist`: arranque sin bienvenida bloqueante, sidebar/canvas/toolbar, Archivo, DXF aplicado al floorplan, Reportes, Memoria IA, PDF y Evidence Pack.
+- La prueba no mueve layout ni modifica calculos; sirve para detectar regresiones antes de volver a publicar en Vercel.
+- Estado esperado: `functional-app-qa-pass`.
+- Nuevos comandos: `npm run test:f207:functional-app-qa-smoke` y `npm run test:f207:functional-app-qa`.
+
 ## F204 (2026-07-18) - Canvas visible y DXF aplicado al floorplan
 
 - El canvas/floorplan abre por defecto en usuarios nuevos; la pantalla de bienvenida solo aparece si `radshield_force_welcome=true`.

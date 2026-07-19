@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F207 (2026-07-18) - functional-app-qa
+
+- Objetivo: confirmar que el frontend estatico es funcional como app de revision antes de nuevo deploy publico.
+- Alcance: arranque directo al canvas, sidebar estable, toolbar CAD, menu Archivo, importacion DXF aplicada al floorplan, Reportes, Memoria IA, PDF analitico y Evidence Pack.
+- Estado esperado: `functional-app-qa-pass`.
+- Guardrail: no certifica uso clinico ni backend live; confirma que el shell principal y las salidas tecnicas no desaparecen ni se bloquean.
+- Validacion: `npm run test:f207:functional-app-qa-smoke` y `npm run test:f207:functional-app-qa`.
+
 ## F204 (2026-07-18) - canvas-dxf-recovery
 
 - Objetivo: resolver el bloqueo reportado de canvas no visible e importacion DXF que no afectaba el floorplan.

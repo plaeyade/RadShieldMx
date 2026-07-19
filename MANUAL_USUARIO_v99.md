@@ -1,5 +1,16 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F207 - QA funcional antes de publicar
+
+F207 valida el recorrido minimo que debe funcionar para considerar la app usable como frontend estatico: abrir al canvas, mantener sidebar y toolbar CAD, abrir Archivo, importar un DXF y aplicarlo al floorplan, abrir Reportes y verificar Memoria IA, PDF analitico y Evidence Pack.
+
+Comandos:
+
+- `npm run test:f207:functional-app-qa-smoke`
+- `npm run test:f207:functional-app-qa`
+
+Si F207 falla, no conviene subir un nuevo ZIP a Vercel. Primero revise el check fallido en `outputs/f207_functional_app_qa_smoke_result.json` y la captura correspondiente en `outputs/f207_functional_app_qa_*.png`.
+
 ## Addendum F204 - Canvas y DXF al floorplan
 
 La app abre directamente el canvas/floorplan para evitar que la pantalla de bienvenida o cache impidan ver el plano. Si se requiere mostrar bienvenida para capacitacion, definir `radshield_force_welcome=true` en localStorage.
