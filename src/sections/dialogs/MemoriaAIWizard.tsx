@@ -47,6 +47,7 @@ import { buildF149bFastradClinicalUtility, formatF149bFastradUtilityText } from 
 import { buildF149cMonteCarloGateway, formatF149cMonteCarloGatewayText } from '@/lib/f149cMonteCarloGateway';
 import { buildF184ReleaseQualityWorkflow, formatF184ReleaseQualityWorkflowText } from '@/lib/f184ReleaseQualityWorkflow';
 import { buildF208CanvasReportingLayer, formatF208CanvasReportingLayerText } from '@/lib/f208CanvasReportingLayer';
+import { buildF218ReportHandoff, formatF218ReportHandoffText } from '@/lib/f218ReportHandoff';
 import { useAppStore } from '@/stores/appStore';
 import type { FloorPlan } from '@/types/radshield';
 
@@ -213,6 +214,8 @@ export default function MemoriaAIWizard({
   const f184ReleaseQualityText = useMemo(() => formatF184ReleaseQualityWorkflowText(f184ReleaseQuality), [f184ReleaseQuality]);
   const f208CanvasReporting = useMemo(() => buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f208CanvasReportingText = useMemo(() => formatF208CanvasReportingLayerText(f208CanvasReporting), [f208CanvasReporting]);
+  const f218ReportHandoff = useMemo(() => buildF218ReportHandoff(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f218ReportHandoffText = useMemo(() => formatF218ReportHandoffText(f218ReportHandoff), [f218ReportHandoff]);
   const f117Handoff = useMemo(() => buildF117ModalityHandoff(), []);
   const f118SuggestedEquipmentKey = f117Handoff.memoriaDefaults.recommendedEquipmentKeys.find((key) => EQUIPMENT_DB[key]) || '';
   const f102DesignPlan = useMemo(() => buildF102MemoryDesignPlan({
@@ -308,7 +311,8 @@ export default function MemoriaAIWizard({
     const f149cSection = `\n7.8 GATEWAY F149C / MONTE CARLO EXTERNO VALIDABLE\n${f149cMonteCarloGatewayText}\n`;
     const f184Section = `\n7.9 QA INTEGRAL F184 / MOTOR-CANVAS-MEMORIA-MATERIALES\n${f184ReleaseQualityText}\n`;
     const f208Section = `\n7.10 CANVAS REPORTABLE F208\n${f208CanvasReportingText}\n`;
-    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}\n${improvementSection}`.trim();
+    const f218Section = `\n7.11 HANDOFF VISUAL F218\n${f218ReportHandoffText}\n`;
+    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}\n${improvementSection}`.trim();
     return `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO
 
 1. DATOS DEL PROYECTO
@@ -373,10 +377,11 @@ ${f149bSection}
 ${f149cSection}
 ${f184Section}
 ${f208Section}
+${f218Section}
 ${evidenceSection}
 ${improvementSection}
 `;
-  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, evidenceSection, memoriaAIPlan]);
+  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, evidenceSection, memoriaAIPlan]);
 
   // ─── Export handlers ───
   const exportPDF = useCallback(() => {
@@ -703,6 +708,19 @@ ${improvementSection}
                 ))}
               </div>
               <div className="mt-1 truncate">{f208CanvasReporting.nextActions.join(' | ')}</div>
+            </div>
+            <div data-testid="f218-report-handoff-memoria" className="col-span-6 rounded border border-teal-100 bg-teal-50 px-2 py-1 text-teal-900">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-semibold">F218 handoff visual para cierre documental</div>
+                <Badge className="h-4 bg-teal-100 text-teal-700 text-[9px]">{f218ReportHandoff.status}</Badge>
+              </div>
+              <div className="mt-1 grid grid-cols-4 gap-1 text-[9px]">
+                <div className="rounded bg-white/70 border border-teal-100 px-2 py-1">Listos: {f218ReportHandoff.readyCount}</div>
+                <div className="rounded bg-white/70 border border-teal-100 px-2 py-1">Revision: {f218ReportHandoff.reviewCount}</div>
+                <div className="rounded bg-white/70 border border-teal-100 px-2 py-1">Faltantes: {f218ReportHandoff.missingCount}</div>
+                <div className="rounded bg-white/70 border border-teal-100 px-2 py-1">Total: {f218ReportHandoff.total}</div>
+              </div>
+              <div className="mt-1 truncate">{f218ReportHandoff.requiredAttachments.join(' | ')}</div>
             </div>
             <div data-testid="f149b-fastrad-export-smoke-memoria" className="col-span-6 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-slate-900">
               <div className="flex items-center justify-between gap-2">

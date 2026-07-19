@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F218 (2026-07-19) - report-handoff
+
+- Objetivo: cerrar el puente entre canvas y entregables indicando que snapshots visuales deben anexarse.
+- Alcance: Memoria IA, PDF Report y Evidence Pack muestran capturas listas, en revision y faltantes.
+- Adjuntos: `01-planta-clinica`, `02-heatmap-regulatorio`, `03-isodosis-lineas-muestreo`, `04-material-peso-carga`.
+- Guardrail: reutiliza F217; no cambia renderer, floorplan, DXF, DB, calculos ni sidebar.
+- Validacion: `npm run test:f218:report-handoff`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F217 (2026-07-19) - visual-export-by-scene
 
 - Objetivo: convertir las vistas del canvas en evidencia visual lista para documentos.

@@ -233,9 +233,9 @@ try {
   await outputsPage.goto(result.url, { waitUntil: 'networkidle', timeout: 30000 });
   await outputsPage.waitForTimeout(900);
   const surfaces = [
-    { id: 'memoria-ai', opener: 'e2e-open-memoria-ai', signals: ['memoria-evidence-snapshot', 'f146-material-report-appendix-memoria', 'f208-canvas-reporting-memoria'] },
-    { id: 'pdf-report', opener: 'e2e-open-pdf-report', signals: ['pdf-report-dialog', 'f146-material-report-appendix', 'f208-canvas-reporting-pdf'] },
-    { id: 'evidence-pack', opener: 'e2e-open-evidence-pack', signals: ['f93-citation-ledger-summary', 'f125-calculation-evidence-gate', 'f208-canvas-reporting-evidence'] },
+    { id: 'memoria-ai', opener: 'e2e-open-memoria-ai', signals: ['memoria-evidence-snapshot', 'f146-material-report-appendix-memoria', 'f208-canvas-reporting-memoria', 'f218-report-handoff-memoria'] },
+    { id: 'pdf-report', opener: 'e2e-open-pdf-report', signals: ['pdf-report-dialog', 'f146-material-report-appendix', 'f208-canvas-reporting-pdf', 'f218-report-handoff-pdf'] },
+    { id: 'evidence-pack', opener: 'e2e-open-evidence-pack', signals: ['f93-citation-ledger-summary', 'f125-calculation-evidence-gate', 'f208-canvas-reporting-evidence', 'f218-report-handoff-evidence'] },
   ];
   for (const surface of surfaces) {
     await guardShell(outputsPage, `${surface.id} before`);

@@ -33,6 +33,9 @@ const expectations = [
   ['F208 memoria surface', smoke.checks?.some((check) => check.name === 'memoria-ai signal f208-canvas-reporting-memoria' && check.ok)],
   ['F208 pdf surface', smoke.checks?.some((check) => check.name === 'pdf-report signal f208-canvas-reporting-pdf' && check.ok)],
   ['F208 evidence surface', smoke.checks?.some((check) => check.name === 'evidence-pack signal f208-canvas-reporting-evidence' && check.ok)],
+  ['F218 memoria handoff', smoke.checks?.some((check) => check.name === 'memoria-ai signal f218-report-handoff-memoria' && check.ok)],
+  ['F218 pdf handoff', smoke.checks?.some((check) => check.name === 'pdf-report signal f218-report-handoff-pdf' && check.ok)],
+  ['F218 evidence handoff', smoke.checks?.some((check) => check.name === 'evidence-pack signal f218-report-handoff-evidence' && check.ok)],
 ];
 
 const failedExpectations = expectations.filter(([, ok]) => !ok).map(([name]) => name);
@@ -60,6 +63,7 @@ const requiredTokens = [
   'DXF',
   'Memoria IA',
   'Evidence Pack',
+  'F218',
 ];
 
 const missingTokens = requiredTokens.filter((token) => !combinedText.includes(token));

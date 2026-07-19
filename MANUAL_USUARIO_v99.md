@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F218 - Handoff visual a reportes
+
+F218 ayuda a cerrar una memoria o expediente con evidencia visual explicita. Toma las escenas preparadas en F217 y muestra si cada captura requerida esta lista, falta o requiere revision.
+
+Uso recomendado:
+
+- En el canvas, preparar las escenas `Planta`, `Heat`, `Iso` y `Estruct`.
+- Exportar PNG por escena cuando el plano, calculo, cotas o barreras esten listos.
+- Abrir Memoria IA para revisar la seccion 7.11 `HANDOFF VISUAL F218`.
+- Abrir PDF Report para confirmar que el JSON incluya `f218_report_handoff`.
+- Abrir Evidence Pack y verificar que el panel F218 no tenga faltantes antes de cerrar expediente.
+
+Logica de adjuntos:
+
+- `01-planta-clinica`: plano base con barreras, equipos, zonas y escala para Memoria IA.
+- `02-heatmap-regulatorio`: mapa visual de dosis/umbrales para Evidence Pack.
+- `03-isodosis-lineas-muestreo`: isocontornos y lineas de evaluacion para PDF.
+- `04-material-peso-carga`: material, espesor, peso y carga para anexo estructural.
+
+Advertencia: F218 no recalcula ni certifica resultados. Es un control documental para evitar entregar memorias sin capturas visuales trazables.
+
 ## Addendum F217 - Export visual por escena
 
 F217 organiza la exportacion de imagenes del canvas por escena. Su objetivo es producir evidencia visual consistente para Memoria IA, PDF, Evidence Pack y anexos estructurales.

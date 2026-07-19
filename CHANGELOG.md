@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F218 (2026-07-19) - Visual Report Handoff
+
+- Se agrega contrato F218 para declarar que snapshots F217 deben adjuntarse a Memoria IA, PDF, Evidence Pack y anexo estructural.
+- Memoria IA incluye la seccion 7.11 con estado de adjuntos listos, en revision y faltantes.
+- PDF Report exporta `f218_report_handoff` dentro del JSON y muestra la lista de capturas requeridas.
+- Evidence Pack muestra el cierre visual F218 antes de cerrar expediente.
+- Nuevo comando: `npm run test:f218:report-handoff`.
+
 ## F217 (2026-07-19) - Visual Export by Scene
 
 - Se agrega panel F217 para preparar/exportar PNG por escena: Planta, Heat, Iso y Estruct.

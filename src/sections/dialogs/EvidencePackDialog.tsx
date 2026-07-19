@@ -30,6 +30,7 @@ import { buildF149bFastradClinicalUtility } from '@/lib/f149bFastradClinicalUtil
 import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
 import { buildF184ReleaseQualityWorkflow } from '@/lib/f184ReleaseQualityWorkflow';
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
+import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
 import { IDAC_DOSE_EXTERNAL_NOTE } from '@/lib/idacDoseIntegration';
 import { REVIT_EXTERNAL_INTEGRATION_NOTE } from '@/lib/revitIntegration';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
@@ -87,6 +88,7 @@ export default function EvidencePackDialog({
   const f149cMonteCarloGateway = useMemo(() => buildF149cMonteCarloGateway(floorPlan), [floorPlan]);
   const f184ReleaseQuality = useMemo(() => buildF184ReleaseQualityWorkflow(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f208CanvasReporting = useMemo(() => buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f218ReportHandoff = useMemo(() => buildF218ReportHandoff(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
 
@@ -347,6 +349,17 @@ export default function EvidencePackDialog({
               <div>Listos/parciales/faltantes: {f208CanvasReporting.readyCount}/{f208CanvasReporting.partialCount}/{f208CanvasReporting.missingCount}</div>
               <div>{f208CanvasReporting.items.map((item) => `${item.label}:${item.status}`).join(' | ')}</div>
               <div className="text-[10px]">{f208CanvasReporting.decision}</div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="f218-report-handoff-evidence" className="border-teal-200 bg-teal-50">
+            <CardContent className="p-3 text-xs text-teal-900 space-y-1">
+              <div className="font-semibold">F218 handoff visual</div>
+              <div>Estado: {f218ReportHandoff.status}</div>
+              <div>Listos/revision/faltantes: {f218ReportHandoff.readyCount}/{f218ReportHandoff.reviewCount}/{f218ReportHandoff.missingCount}</div>
+              <div>{f218ReportHandoff.items.map((item) => `${item.requiredSnapshot}:${item.status}`).join(' | ')}</div>
+              <div className="text-[10px]">Adjuntos: {f218ReportHandoff.requiredAttachments.join(' | ')}</div>
+              <div className="text-[10px]">{f218ReportHandoff.decision}</div>
             </CardContent>
           </Card>
 
