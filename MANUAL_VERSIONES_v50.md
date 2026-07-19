@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F201 (2026-07-18) - Workflow panel controls
+
+- Objetivo: evitar que el panel `Layout - blindaje - memoria` obstruya el canvas.
+- Controles: desplazar arriba/derecha/abajo, compactar/expandir y cerrar.
+- Persistencia: posicion en `radshield_canvas_workflow_dock_f188`, visibilidad en `radshield_canvas_panels_f188` y compacto en `radshield_canvas_workflow_compact_f201`.
+- Guardrail: no cambia herramientas de dibujo, geometria, calculos, floorplan ni estados de seleccion.
+- Validacion: `npm run test:f201:workflow-panel` y `npm run test:f201:workflow-panel-smoke`.
+
 ## F200 (2026-07-18) - Static frontend release gate
 
 - Objetivo: cerrar un release candidate estatico del frontend con artefacto reproducible.

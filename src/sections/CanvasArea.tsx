@@ -42,12 +42,13 @@ import { buildF185CanvasMicroAssist } from '@/lib/f185CanvasMicroAssist';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
-type F188WorkflowDock = 'top' | 'right';
+type F188WorkflowDock = 'top' | 'right' | 'bottom';
 type F191CanvasTool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser';
 type F191VisualMode = 'plan' | 'heat' | 'isocontours' | 'structure';
 
 const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188';
 const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
+const F201_WORKFLOW_COMPACT_KEY = 'radshield_canvas_workflow_compact_f201';
 const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: true,
@@ -71,7 +72,13 @@ function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
 
 function loadF188WorkflowDock(): F188WorkflowDock {
   if (typeof window === 'undefined') return 'top';
-  return window.localStorage.getItem(F188_WORKFLOW_DOCK_KEY) === 'right' ? 'right' : 'top';
+  const stored = window.localStorage.getItem(F188_WORKFLOW_DOCK_KEY);
+  return stored === 'right' || stored === 'bottom' ? stored : 'top';
+}
+
+function loadF201WorkflowCompact(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.localStorage.getItem(F201_WORKFLOW_COMPACT_KEY) === 'true';
 }
 
 function loadF191VisualMode(): F191VisualMode {
@@ -191,6 +198,7 @@ export default function CanvasArea({
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [panelVisibility, setPanelVisibility] = useState(loadF188PanelVisibility);
   const [workflowDock, setWorkflowDock] = useState<F188WorkflowDock>(loadF188WorkflowDock);
+  const [workflowCompact, setWorkflowCompact] = useState(loadF201WorkflowCompact);
   const [visualMode, setVisualMode] = useState<F191VisualMode>(loadF191VisualMode);
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -347,6 +355,10 @@ export default function CanvasArea({
   }, [workflowDock]);
 
   useEffect(() => {
+    window.localStorage.setItem(F201_WORKFLOW_COMPACT_KEY, String(workflowCompact));
+  }, [workflowCompact]);
+
+  useEffect(() => {
     window.localStorage.setItem(F191_VISUAL_MODE_KEY, visualMode);
   }, [visualMode]);
 
@@ -360,6 +372,11 @@ export default function CanvasArea({
 
   const setPanelVisible = (key: F188CanvasPanelKey, visible: boolean) => {
     setPanelVisibility((current) => ({ ...current, [key]: visible }));
+  };
+
+  const cycleWorkflowDock = () => {
+    setWorkflowDock((dock) => (dock === 'top' ? 'right' : dock === 'right' ? 'bottom' : 'top'));
+    setWorkflowCompact(false);
   };
 
   const activateCanvasTool = (tool: F191CanvasTool) => {
@@ -396,9 +413,12 @@ export default function CanvasArea({
     }
   };
 
-  const workflowPanelClass = workflowDock === 'right'
-    ? 'absolute top-2 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[360px] max-w-[calc(100%-24px)] max-h-[calc(100%-68px)] overflow-auto'
-    : 'absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-10 w-[min(560px,calc(100%-250px))] min-w-[300px] max-h-[calc(100%-84px)] overflow-auto';
+  const workflowPanelClass =
+    workflowDock === 'right'
+      ? 'absolute top-14 right-2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-30 w-[360px] max-w-[calc(100%-24px)] max-h-[calc(100%-128px)] overflow-auto'
+      : workflowDock === 'bottom'
+        ? 'absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-30 w-[min(720px,calc(100%-28px))] min-w-[300px] max-h-[42%] overflow-auto'
+        : 'absolute top-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-md border border-slate-200 shadow-sm z-30 w-[min(560px,calc(100%-250px))] min-w-[300px] max-h-[calc(100%-84px)] overflow-auto';
 
   const formatResultNumber = (value: unknown, digits: number) => {
     const numeric = typeof value === 'number' && Number.isFinite(value) ? value : 0;
@@ -1396,14 +1416,25 @@ export default function CanvasArea({
                     type="button"
                     data-testid="f188-workflow-dock-button"
                     className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
-                    onClick={() => setWorkflowDock((dock) => dock === 'top' ? 'right' : 'top')}
-                    title={workflowDock === 'top' ? 'Mover panel de flujo a la derecha' : 'Mover panel de flujo arriba'}
-                    aria-label={workflowDock === 'top' ? 'Mover panel de flujo a la derecha' : 'Mover panel de flujo arriba'}
+                    onClick={cycleWorkflowDock}
+                    title={`Desplazar panel: actual ${workflowDock === 'top' ? 'arriba' : workflowDock === 'right' ? 'derecha' : 'abajo'}`}
+                    aria-label="Desplazar panel de flujo layout blindaje memoria"
                   >
                     <Move className="h-3 w-3 mx-auto" />
                   </button>
                   <button
                     type="button"
+                    data-testid="f201-workflow-compact-button"
+                    className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
+                    onClick={() => setWorkflowCompact((value) => !value)}
+                    title={workflowCompact ? 'Expandir panel de flujo' : 'Compactar panel de flujo para liberar canvas'}
+                    aria-label={workflowCompact ? 'Expandir panel de flujo' : 'Compactar panel de flujo para liberar canvas'}
+                  >
+                    {workflowCompact ? <ChevronDown className="h-3 w-3 mx-auto" /> : <ChevronUp className="h-3 w-3 mx-auto" />}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="f201-workflow-close-button"
                     className="h-5 w-5 rounded text-slate-400 hover:bg-orange-50 hover:text-orange-700"
                     onClick={() => setPanelVisible('workflow', false)}
                     title="Cerrar panel de flujo"
@@ -1413,6 +1444,8 @@ export default function CanvasArea({
                   </button>
                 </div>
               </div>
+              {!workflowCompact && (
+              <>
               <div
                 data-testid="f90-e2e-qa-panel"
                 className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
@@ -1650,6 +1683,8 @@ export default function CanvasArea({
                   );
                 })}
               </div>
+              </>
+              )}
             </div>
             )}
 

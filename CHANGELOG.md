@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F201 (2026-07-18) - Workflow panel controls
+
+- El panel `Layout - blindaje - memoria` agrega controles explicitos para desplazar, compactar/expandir y cerrar.
+- El control de mover ahora alterna entre posiciones arriba, derecha y abajo para liberar visibilidad del canvas.
+- La posicion derecha baja a `top-14` para evitar colision con la leyenda del canvas.
+- El modo compacto se persiste en `radshield_canvas_workflow_compact_f201` y deja visible solo la cabecera hasta expandir.
+- Nuevos comandos: `npm run test:f201:workflow-panel` y `npm run test:f201:workflow-panel-smoke`.
+
 ## F200 (2026-07-18) - Static frontend release gate
 
 - Se agrega compuerta F200 para congelar el frontend estatico como release candidate controlado.

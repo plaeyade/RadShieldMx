@@ -1,5 +1,11 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F201 - Panel Layout Blindaje Memoria
+
+El panel `Layout - blindaje - memoria` ahora puede desplazarse para no tapar el plano. Use el boton con icono de mover en la cabecera para alternar entre arriba, derecha y abajo. Use el boton de flecha para compactar o expandir el panel. Use la X para cerrarlo; si se cierra, el restaurador de paneles permite volver a mostrar `Flujo`.
+
+El modo compacto deja visible solo la cabecera con el avance del flujo. Es util cuando se requiere revisar cotas, muros, equipos o heatmaps sin perder la referencia de progreso.
+
 ## Addendum F200 - Release estatico del frontend
 
 F200 deja el frontend como release candidate estatico: el paquete se puede publicar en Vercel, Netlify u otro hosting SPA que sirva el directorio `dist`. La URL sugerida para validacion es `https://radshield-mx-static-dist.vercel.app/`, salvo que el operador defina otra con `PUBLIC_DEPLOY_URL`.
