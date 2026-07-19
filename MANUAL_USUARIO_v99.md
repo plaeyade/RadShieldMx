@@ -1,5 +1,17 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F222-F226 - Hardening seguro del canvas profesional
+
+F222-F226 continua el canvas profesional sin cambiar de golpe el renderer ni los eventos base. La fila `F222-F226` del canvas resume el estado de cada frente.
+
+- F222 Renderer layers: el siguiente trabajo seguro es extraer el dibujo por capas: grid, floorplan, muros, fuentes/equipos, zonas, heatmap, cotas, grips y overlays. Esto mejora mantenibilidad sin cambiar la forma de seleccionar o arrastrar.
+- F223 Events flag: el nuevo controlador de eventos solo debe activarse con `VITE_CANVAS_EVENT_CONTROLLER_V2`. Si algo falla, la app vuelve al `useCanvas` actual.
+- F224 E2E CAD: antes de tocar eventos base, deben existir pruebas de grip drag, snap endpoint/midpoint/interseccion, lasso, seleccion multiple, pan/zoom y export.
+- F225 Isocontornos/footprints: los footprints por modalidad y la vista isocontours existen. Para evidencia firmable falta convertir isocontornos proxy en polilineas interpoladas con etiquetas regulatorias.
+- F226 3D medico: el visor 3D puede recibir muros, equipos, zonas y export OBJ. Falta cerrar sincronizacion bidireccional de medidas, materiales, snapshots y hash de escena.
+
+Regla operativa: si desaparece canvas, sidebar o toolbar, no continuar con renderer/eventos. Primero ejecutar smoke F207/F200 y revisar F222-F226; solo despues seguir.
+
 ## Addendum F221 - Conexiones reales del canvas
 
 F221 verifica que las modificaciones principales del canvas esten conectadas a funciones reales, no solo a botones o textos.

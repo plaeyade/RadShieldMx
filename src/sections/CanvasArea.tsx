@@ -50,6 +50,7 @@ import { buildF216MiniViewManager, type F216SavedCanvasView } from '@/lib/f216Mi
 import { buildF217VisualExportByScene, type F217VisualExportSceneId } from '@/lib/f217VisualExportByScene';
 import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/f220CanvasCadPriorityActions';
 import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections';
+import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -562,6 +563,17 @@ export default function CanvasArea({
     hasResults,
     hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
     hasExport: Boolean(onExportPNG),
+  });
+  const f222ToF226CanvasHardening = buildF222ToF226CanvasHardening({
+    barrierCount,
+    sourceCount,
+    regionCount,
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+    snapToGrid: canvasState.snapToGrid,
+    hasResults,
+    hasMedical3D: Boolean(onOpenMedical3D || onOpen3DViewer),
+    hasExport: Boolean(onExportPNG),
+    visualMode,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2180,6 +2192,41 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   Renderer: capas primero, eventos con flag
+                </span>
+              </div>
+              <div
+                data-testid="f222-f226-canvas-hardening"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={`${f222ToF226CanvasHardening.nextRendererStep} ${f222ToF226CanvasHardening.eventBaseDecision}`}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f222ToF226CanvasHardening.status === 'canvas-hardening-bridge-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F222-F226
+                </span>
+                <span data-testid="f222-f226-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f222ToF226CanvasHardening.readyCount}R/{f222ToF226CanvasHardening.partialCount}P/{f222ToF226CanvasHardening.guardedCount}G
+                </span>
+                {f222ToF226CanvasHardening.items.map((item) => (
+                  <span
+                    key={item.id}
+                    data-testid={`f222-f226-${item.phase.toLowerCase()}-${item.id}`}
+                    className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                      item.status === 'ready'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : item.status === 'partial'
+                          ? 'bg-sky-50 text-sky-700 border-sky-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                    }`}
+                    title={`${item.phase}: ${item.evidence} Accion segura: ${item.safeAction} Guardrail: ${item.releaseGuardrail}`}
+                  >
+                    {item.phase} {item.label}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  renderer/helpers, events flag, E2E, iso/3D
                 </span>
               </div>
               <div

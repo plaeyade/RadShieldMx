@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+## F222-F226 (2026-07-19) - Canvas hardening bridge
+
+- Se agrega `f222ToF226CanvasHardening.ts` para organizar el cierre del canvas profesional en cinco frentes: renderer layers, event controller gate, E2E CAD, isocontornos/footprints y sincronizacion 3D.
+- El canvas muestra una fila `F222-F226` con chips auditables para cada frente y su estado `ready`, `partial` o `guarded`.
+- F222: registra la ruta segura para extraer helpers/capas de render sin tocar eventos.
+- F223: deja el event controller futuro condicionado a `VITE_CANVAS_EVENT_CONTROLLER_V2`, con rollback al `useCanvas` actual.
+- F224: fija la matriz E2E requerida para grip drag, snap, lasso, seleccion y export.
+- F225: consolida hardening de isocontornos y footprints; los isocontornos firmables siguen requiriendo interpolacion y QA numerico.
+- F226: consolida handoff 3D medico con scene builder/OBJ y deja pendiente la sincronizacion bidireccional completa.
+- Artefactos: `outputs/f222_f226_canvas_hardening/f222_f226_canvas_hardening.json` y `outputs/fase_222_226_canvas_hardening.md`.
+
 ## F221 (2026-07-19) - Canvas real connections
 
 - Se agrega `f221CanvasRealConnections.ts` para auditar conexiones reales del canvas.

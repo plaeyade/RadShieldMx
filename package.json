@@ -298,6 +298,8 @@
     "test:f220:canvas-cad-actions": "node scripts/check-f220-canvas-cad-priority-actions-contracts.mjs",
     "prepare:f221:canvas-real-connections": "node scripts/f221-canvas-real-connections.mjs",
     "test:f221:canvas-real-connections": "node scripts/check-f221-canvas-real-connections-contracts.mjs",
+    "prepare:f222-f226:canvas-hardening": "node scripts/f222-f226-canvas-hardening.mjs",
+    "test:f222-f226:canvas-hardening": "node scripts/check-f222-f226-canvas-hardening-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

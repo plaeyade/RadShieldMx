@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+## F222-F226 (2026-07-19) - canvas-hardening
+
+- Objetivo: continuar F222 a F226 sin romper canvas, sidebar ni toolbar.
+- F222 renderer layers: separar responsabilidades de render en grid, floorplan, muros, fuentes, zonas, heatmap, cotas, grips y overlays antes de sustituir `useCanvas.draw()`.
+- F223 event controller gate: cualquier controlador nuevo debe ir detras de `VITE_CANVAS_EVENT_CONTROLLER_V2` y conservar rollback al flujo actual.
+- F224 E2E CAD: matriz obligatoria para grip drag, snap endpoint/midpoint/interseccion, lasso, seleccion multiple, pan/zoom y export.
+- F225 iso/footprints: isocontornos proxy y footprints por modalidad se mantienen; isocontornos firmables requieren interpolacion, etiquetas regulatorias y QA numerico.
+- F226 3D sync: escena 3D recibe muros, equipos, zonas y OBJ; queda pendiente sincronizacion bidireccional completa.
+- Artefactos: `outputs/f222_f226_canvas_hardening/f222_f226_canvas_hardening.json` y `outputs/fase_222_226_canvas_hardening.md`.
+- Validacion: `npm run prepare:f222-f226:canvas-hardening` y `npm run test:f222-f226:canvas-hardening`.
+
 ## F221 (2026-07-19) - canvas-real-connections
 
 - Objetivo: verificar que las modificaciones del canvas sean funcionales y no solo cosmeticas.
