@@ -263,6 +263,7 @@
     "test:f194:numeric-qa": "node scripts/check-f194-numeric-qa-contracts.mjs",
     "test:f195:comparison-gate": "node scripts/check-f195-calculation-comparison-gate-contracts.mjs",
     "test:f196:cache": "node scripts/check-f196-calculation-cache-contracts.mjs",
+    "test:f237:calculation-governance": "node scripts/check-f237-calculation-engine-governance-contracts.mjs",
     "test:f197:menu-canvas": "node scripts/check-f197-menu-canvas-contracts.mjs",
     "test:f197:menu-canvas-smoke": "node scripts/check-f197-menu-canvas-smoke.mjs",
     "test:f198:menus": "node scripts/check-f198-full-menu-function-contracts.mjs",

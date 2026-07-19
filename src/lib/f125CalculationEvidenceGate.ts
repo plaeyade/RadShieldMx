@@ -1,6 +1,7 @@
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
 import type { FloorPlan } from '@/types/radshield';
 import { buildF195CalculationComparisonGate, buildF195CalculationComparisonSection } from './f195CalculationComparisonGate';
+import { buildF237CalculationEngineGovernanceSection } from './f237CalculationEngineGovernance';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -138,6 +139,7 @@ export function buildF125CalculationEvidenceSection(
       `     Cita/evidencia: ${result.citation} | ${result.evidence}`,
     ].join('\n')),
     buildF195CalculationComparisonSection(floorPlan, barrierResults),
+    buildF237CalculationEngineGovernanceSection(floorPlan),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F237 - Gobierno del Motor de Calculo
+
+F237 consolida las mejoras recomendadas al motor de calculo en una capa unica de gobierno antes de Memoria IA, PDF, Evidence Pack o entrega regulatoria.
+
+Que valida:
+- Trazabilidad: `formulaId`, norma, modalidad, energia, entradas, salidas, supuestos y `citationIds`.
+- Unidades: mm/cm/m, mSv/sem, uSv/h, densidad, kg/m2, costo/m2 y carga estructural.
+- Advertencias: distancia menor a 0.3 m, energia >10 MV con neutrones, TVL no versionado, densidad no validada y revision RSO/fisico medico.
+- Comparador: espesor base vs chequeo conservador por barrera.
+- Cache: llave F196 por escala, geometria, fuentes, normas, materiales y P/T/U/W.
+- QA numerico: referencias pequenas para LINAC 6 MV, LINAC 18 MV, CT/RX, Gamma Knife, PET/NM y revision UAQ.
+
+Impacto operativo:
+- Disminuye errores silenciosos por unidades mezcladas.
+- Permite que cada resultado de Memoria IA tenga formula, norma, input, output y cita.
+- Evita reportes firmados cuando falte comparador, cache, cita o advertencia clinica.
+- Prepara el camino para mejorar kernels especificos sin tocar el canvas ni el renderer base.
+
+Cobertura documental posterior a v116:
+- F117-F130: perfiles de modalidad, menus por flujo, impacto estructural/materiales, evidencia y DB live.
+- F131-F150: RAG/OCR/documentos, materiales TM Nipoll/bloques HD, Memoria IA, perfiles DX/TX/NM/CY, anexos y release candidate.
+- F151-F180: Monte Carlo externo, restore probe, deploy local/static, Git/hosting, manuales, app estable y canvas recovery.
+- F181-F200: hardening predeploy, Vercel/static dist, recuperacion canvas/DXF, menus, outputs y release gate.
+- F201-F230: paneles movibles, import DXF, Canvas CAD E2E, tooltips, layout SketchUp-like, QA renderer/eventos y gate post-F229.
+- F231-F237: release coverage visual/DXF/grips/isocontornos/3D/deploy y gobierno del motor de calculo.
+
 ## Addendum F231-F236 - Cierre Canvas Release Coverage
 
 F231-F236 completa la cobertura pendiente posterior a F229 sin reescribir de golpe el renderer ni los eventos del canvas.

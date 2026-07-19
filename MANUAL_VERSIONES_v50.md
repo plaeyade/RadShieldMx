@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F237 (2026-07-19) - calculation-engine-governance
+
+- Cierre documental de la brecha detectada en el manual HTML: la cobertura visible se actualiza de v1-v116 a v1-F237.
+- Se agrega gobierno de motor de calculo para validar trazabilidad, unidades, advertencias, comparador, cache y casos numericos antes de salida regulatoria.
+- F125 incorpora el resumen F237 para Memoria IA, PDF y Evidence Pack.
+- Prioridad deploy: frontend estatico puede publicarse cuando F200/F230/F231-F236/F237 pasen; fullstack requiere DB live validada.
+
 ## F231-F236 (2026-07-19) - canvas-release-coverage
 
 - F231: baseline visual con screenshots F229/F207 para evitar regresiones de canvas blanco, sidebar oculta o menus superpuestos.

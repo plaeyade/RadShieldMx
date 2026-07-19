@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F237 (2026-07-19) - Calculation engine governance
+
+- Se agrega `src/lib/f237CalculationEngineGovernance.ts` como capa unica de gobierno para el motor de calculo.
+- La fase verifica trazabilidad formula/norma/input/output/citas, normalizacion de unidades, advertencias clinicas, comparador base/conservador, cache F196 y casos numericos conocidos.
+- F125 ahora incluye la seccion F237 para que Memoria IA, PDF y Evidence Pack puedan reportar si un resultado esta listo, requiere revision o queda bloqueado.
+- Se corrige el manual HTML: la cobertura visible ya no termina en v116; queda marcada como v1-F237 y se documentan las fases posteriores.
+- Impacto: menos riesgo de resultados sin fuente, unidades mezcladas, TVL no versionado o reportes firmados sin revision RSO/fisico medico.
+
 ## F231-F236 (2026-07-19) - Canvas release coverage
 
 - F231: se consolidan baselines visuales con capturas F229/F207 para detectar canvas blanco, sidebar perdida o menus sobrepuestos.

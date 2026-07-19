@@ -1,4 +1,12 @@
-# RadShield-MX — Control de Cambios Completo v1-v99
+# RadShield-MX — Control de Cambios Completo v1-F237
+
+## F237 (2026-07-19) - Calculation Engine Governance
+
+- Se implementa una capa unica de gobierno para el motor de calculo.
+- Verifica formula, norma, inputs, outputs, supuestos, warnings, citas, snapshot de unidades, comparador base/conservador y cache F196.
+- F125 agrega la seccion F237 para que Memoria IA, Evidence Pack y PDF no queden desconectados del motor.
+- Se corrige el manual HTML para cubrir v1-F237, incluyendo las fases posteriores a v116.
+- Decision: frontend estatico puede pasar a deploy cuando F200/F230/F231-F236/F237 pasen; fullstack espera DB live/restore probe.
 
 ## F230 (2026-07-19) - Gate post-F229 renderer/eventos
 
