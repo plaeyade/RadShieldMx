@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F197 (2026-07-18) - Menu/canvas/output QA
+
+- Objetivo: revisar el primer menu funcion por funcion y cerrar el diagnostico de canvas/sidebar/botones invisibles antes de seguir con QA de release.
+- Alcance: menu Archivo, sidebar estable F186, canvas principal F100, toolbar CAD F191, paneles movibles/restaurables F188 y salidas Memoria IA/Evidence/PDF.
+- Correccion puntual: `Nuevo Proyecto` en Archivo ahora ejecuta reset seguro de floorplan y seleccion, cierra welcome y mantiene el canvas listo.
+- Diagnostico visual: el smoke F197 elimina estados locales `radshield_canvas_panels_f188`, `radshield_canvas_workflow_dock_f188` y `radshield_sidebar_width_f188` antes de validar; si la UI reaparece, el problema era estado persistido y no perdida del renderer.
+- Guardrail: no se mueve layout ni se eliminan fallbacks; la validacion completa de todos los grupos queda para F198.
+- Validacion: `npm run test:f197:menu-canvas` y `npm run test:f197:menu-canvas-smoke`.
+
 ## F196 (2026-07-18) - Safe calculation cache
 
 - Objetivo: evitar resultados obsoletos cuando cambian escala, geometria, material, fuente, norma, P/T/U/W, regiones o puntos criticos.

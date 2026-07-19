@@ -1,5 +1,17 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F197 - Recuperacion visual de menus, sidebar y canvas
+
+Si al abrir la app no aparece el canvas, la sidebar o los botones, primero use el flujo de recuperacion F197 antes de asumir fallo del motor grafico:
+
+- Recargar la app despues de abrir `reset-cache.html` cuando se use paquete estatico/local.
+- Confirmar que el splash/welcome se cerro con `Continuar` o `Nuevo Proyecto en Blanco`.
+- Si persiste, limpiar estados locales de paneles: `radshield_canvas_panels_f188`, `radshield_canvas_workflow_dock_f188` y `radshield_sidebar_width_f188`.
+- Volver a abrir Archivo y ejecutar `Nuevo Proyecto`; esto reinicia el floorplan sin borrar codigo ni configuracion global.
+- Validar que se vean: sidebar izquierda, canvas principal, toolbar CAD-clinica F191 y panel de flujo o boton restaurar paneles.
+
+F197 no cambia formulas ni layout principal. Su funcion es distinguir entre estado persistido oculto, onboarding/cache y fallo real de render.
+
 ## Addendum F161 - Manuales in extenso predeploy
 
 F161 consolida el manual operativo antes del deploy final en `outputs/f161_manuales_in_extenso/MANUAL_OPERACION_PREDEPLOY_F161.md`.

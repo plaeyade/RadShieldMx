@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+## F197 (2026-07-18) - Menu/canvas/output QA
+
+- Se agrega una compuerta F197 para diagnosticar por que podrian no verse menus, sidebar, canvas o botones despues de cambios de layout.
+- `Nuevo Proyecto` en Archivo queda conectado al reset seguro de proyecto/lienzo y deja de depender de un handler ausente.
+- Nuevo contrato valida el primer menu funcion por funcion: proyecto, importar/exportar, auditoria, glosario y acerca de.
+- Nuevo smoke visual limpia estados persistidos F188/sidebar/welcome antes de comprobar sidebar, canvas principal, toolbar CAD F191 y restauracion de paneles.
+- `f197OutputIntegrationQa.ts` vincula F125/F195/F196 con Memoria IA, Evidence Pack, PDF, Update Center y manuales.
+- Nuevos comandos: `npm run test:f197:menu-canvas` y `npm run test:f197:menu-canvas-smoke`.
+
 ## F196 (2026-07-18) - Safe calculation cache
 
 - Se actualiza la cache de calculo a `f196-cache-v1` con payload auditable por escala, geometria, materiales, fuentes, normas, P/T/U/W, regiones y puntos criticos.
