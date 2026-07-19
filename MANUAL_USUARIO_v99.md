@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F217 - Export visual por escena
+
+F217 organiza la exportacion de imagenes del canvas por escena. Su objetivo es producir evidencia visual consistente para Memoria IA, PDF, Evidence Pack y anexos estructurales.
+
+Escenas:
+
+1. `Planta`: layout, escala, barreras, equipos, zonas y puntos criticos. Destino principal: Memoria IA.
+2. `Heat`: mapa de calor, maximo proxy, umbrales regulatorios y leyenda F212. Destino principal: Evidence Pack.
+3. `Iso`: lineas de muestreo/isodosis, gradientes y puntos maximos. Destino principal: PDF.
+4. `Estruct`: material, espesor, peso, carga estructural y comparador costo/tiempo. Destino principal: anexo estructural.
+
+Uso recomendado:
+
+- Prepare la escena con el boton de su nombre.
+- Verifique escala, leyenda y que el panel no tape una barrera critica.
+- Use `PNG` para exportar la imagen.
+- Adjunte la imagen exportada en Memoria IA, PDF o Evidence Pack segun el destino sugerido.
+- F217 no recalcula ni certifica resultados; solo ordena la evidencia visual.
+
 ## Addendum F216 - Mini View Manager
 
 F216 agrega un gestor compacto de vistas dentro del canvas. Sirve para regresar rapidamente a un encuadre de trabajo sin perder tiempo buscando el plano despues de zoom, pan, heatmap o revision estructural.

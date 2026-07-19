@@ -47,6 +47,7 @@ import { buildF212HeatmapRegulatoryLegend } from '@/lib/f212HeatmapRegulatoryLeg
 import { buildF214SketchUpCanvasReorg } from '@/lib/f214SketchUpCanvasReorg';
 import { buildF215CanvasScenePresets } from '@/lib/f215CanvasScenePresets';
 import { buildF216MiniViewManager, type F216SavedCanvasView } from '@/lib/f216MiniViewManager';
+import { buildF217VisualExportByScene, type F217VisualExportSceneId } from '@/lib/f217VisualExportByScene';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -531,6 +532,14 @@ export default function CanvasArea({
     offsetX: canvasState.offsetX,
     offsetY: canvasState.offsetY,
     savedViews,
+  });
+  const f217VisualExport = buildF217VisualExportByScene({
+    visualMode,
+    hasGeometry: barrierCount + sourceCount + regionCount > 0,
+    hasResults,
+    heatmapPointCount,
+    sampleLineCount: sampleLines.length,
+    barrierCount,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -1375,6 +1384,73 @@ export default function CanvasArea({
                 <span className="truncate text-[7px] text-slate-400">
                   {f216MiniViewManager.savedViewCount}/{f216MiniViewManager.maxSavedViews} guardadas
                 </span>
+              </div>
+            </div>
+
+            <div
+              data-testid="f217-visual-export-by-scene"
+              className="absolute bottom-16 left-[460px] z-10 hidden max-w-[540px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:block"
+              title={`${f217VisualExport.readySceneCount}/${f217VisualExport.scenes.length} escenas listas. ${f217VisualExport.warnings.join(' ') || 'Export visual por escena listo.'}`}
+            >
+              <div className="flex items-center gap-1">
+                <span className={`rounded px-1.5 py-0.5 font-bold ${
+                  f217VisualExport.status === 'visual-export-by-scene-ready'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-amber-50 text-amber-700'
+                }`}>
+                  F217 Export
+                </span>
+                <span data-testid="f217-export-ready-count" className="rounded border border-slate-100 bg-slate-50 px-1 py-0.5 font-mono">
+                  {f217VisualExport.readySceneCount}/{f217VisualExport.scenes.length}
+                </span>
+                <span className="truncate text-[7px] text-slate-400">
+                  Memoria IA / PDF / Evidence Pack
+                </span>
+              </div>
+              <div className="mt-1 grid grid-cols-4 gap-1">
+                {f217VisualExport.scenes.map((scene) => (
+                  <div
+                    key={scene.id}
+                    data-testid={`f217-export-scene-${scene.id}`}
+                    className={`rounded border px-1 py-0.5 ${
+                      scene.id === f217VisualExport.activeScene
+                        ? 'border-orange-200 bg-orange-50'
+                        : scene.ready
+                          ? 'border-emerald-100 bg-emerald-50'
+                          : 'border-amber-100 bg-amber-50'
+                    }`}
+                    title={`${scene.exportLabel}: ${scene.requiredEvidence}${scene.warning ? `. ${scene.warning}` : ''}`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <button
+                        type="button"
+                        data-testid={`f217-prepare-scene-${scene.id}`}
+                        className={`rounded px-1 font-bold ${
+                          scene.id === f217VisualExport.activeScene ? 'text-orange-700' : 'text-slate-600 hover:bg-white hover:text-orange-700'
+                        }`}
+                        onClick={() => applyVisualMode(scene.id as F217VisualExportSceneId)}
+                        title={`Preparar escena ${scene.label} para export visual`}
+                        aria-label={`Preparar escena ${scene.label} para export visual`}
+                      >
+                        {scene.label}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid={`f217-export-png-${scene.id}`}
+                        className="rounded px-1 font-semibold text-slate-500 hover:bg-white hover:text-orange-700"
+                        onClick={() => {
+                          applyVisualMode(scene.id as F217VisualExportSceneId);
+                          window.setTimeout(onExportPNG, 60);
+                        }}
+                        title={`Exportar PNG ${scene.exportLabel} para ${scene.target}`}
+                        aria-label={`Exportar PNG ${scene.label} para ${scene.target}`}
+                      >
+                        PNG
+                      </button>
+                    </div>
+                    <div className="truncate text-[7px] text-slate-500">{scene.target}</div>
+                  </div>
+                ))}
               </div>
             </div>
 

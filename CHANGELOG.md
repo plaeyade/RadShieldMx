@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F217 (2026-07-19) - Visual Export by Scene
+
+- Se agrega panel F217 para preparar/exportar PNG por escena: Planta, Heat, Iso y Estruct.
+- Cada escena queda asociada a un destino documental: Memoria IA, Evidence Pack, PDF o anexo estructural.
+- Reutiliza `onExportPNG` y modos visuales existentes; no cambia renderer, calculos, geometria, DXF ni DB.
+- Nuevo comando: `npm run test:f217:visual-export-scenes`.
+
 ## F216 (2026-07-19) - Mini View Manager
 
 - Se agrega panel F216 para mostrar zoom, pan, escena activa y hasta tres vistas guardadas A/B/C.

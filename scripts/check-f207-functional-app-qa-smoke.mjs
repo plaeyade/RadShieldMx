@@ -190,6 +190,9 @@ try {
   record('F216 mini view manager visible on canvas', await visible(page, 'f216-mini-view-manager'));
   record('F216 zoom/pan indicators visible', await visible(page, 'f216-view-zoom') && await visible(page, 'f216-view-pan'));
   record('F216 save/restore view buttons visible', await visible(page, 'f216-save-view-A') && await visible(page, 'f216-restore-view-A'));
+  record('F217 visual export by scene visible on canvas', await visible(page, 'f217-visual-export-by-scene'));
+  record('F217 plan/heat scene export rows visible', await visible(page, 'f217-export-scene-plan') && await visible(page, 'f217-export-scene-heat'));
+  record('F217 PNG export buttons visible', await visible(page, 'f217-export-png-plan') && await visible(page, 'f217-export-png-structure'));
   await page.screenshot({ path: result.screenshots.initial, fullPage: false });
 
   await page.getByRole('button', { name: /Archivo/i }).click();

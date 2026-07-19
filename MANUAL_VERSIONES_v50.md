@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+## F217 (2026-07-19) - visual-export-by-scene
+
+- Objetivo: convertir las vistas del canvas en evidencia visual lista para documentos.
+- Alcance: panel F217 con escenas `Planta`, `Heat`, `Iso`, `Estruct`, destino documental y botones `PNG`.
+- Guardrail: usa export PNG y modos visuales existentes; no cambia renderer, calculos, floorplan, DXF, DB ni report generator.
+- Validacion: `npm run test:f217:visual-export-scenes`, `npm run test:f207:functional-app-qa-smoke`.
+
 ## F216 (2026-07-19) - mini-view-manager
 
 - Objetivo: permitir guardar y recuperar vistas del canvas sin alterar el floorplan.
