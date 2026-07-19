@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F248-F250 (2026-07-19) - static-release-candidate-final
+
+- F248: smoke publico/static contra la URL final; si Codex queda network-gated, aplicar F203 manual desde navegador con red abierta.
+- F249: decision fullstack: frontend estatico puede publicarse, pero DB/API/RAG multiusuario requiere F153/F168 restore probe, secretos y smoke backend.
+- F250: release candidate final estatico con manual v1-F250, Update Center actualizado y scope freeze.
+- CAD alto riesgo post-RC: renderer/eventos base, DWG nativo, sync 2D/3D bidireccional, booleanas solidas y heatmaps GPU/WebGL.
+- Regla: no aplicar esas mejoras antes del deploy estatico salvo bugfix pequeno cubierto por F197/F207/F229/F200.
+
 # F238-F247 (2026-07-19) - release-execution-cad-calculation-report
 
 - F238: QA visual/documental final y manual con cobertura v1-F247.

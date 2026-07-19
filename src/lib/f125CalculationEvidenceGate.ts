@@ -3,6 +3,7 @@ import type { FloorPlan } from '@/types/radshield';
 import { buildF195CalculationComparisonGate, buildF195CalculationComparisonSection } from './f195CalculationComparisonGate';
 import { buildF237CalculationEngineGovernanceSection } from './f237CalculationEngineGovernance';
 import { buildF238ToF247ReportSection } from './f238ToF247ReleaseExecution';
+import { buildF248ToF250ReportSection } from './f248ToF250ReleaseCandidate';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -142,6 +143,7 @@ export function buildF125CalculationEvidenceSection(
     buildF195CalculationComparisonSection(floorPlan, barrierResults),
     buildF237CalculationEngineGovernanceSection(floorPlan),
     buildF238ToF247ReportSection(),
+    buildF248ToF250ReportSection(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

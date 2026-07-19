@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F247
+# RadShield-MX — Control de Cambios Completo v1-F250
+
+## F248-F250 (2026-07-19) - Release Candidate Final
+
+- F248 define la repeticion del smoke contra URL publica/static y el fallback F203 manual si la red de Codex impide validar Vercel.
+- F249 deja la decision formal: frontend estatico listo tras smoke; fullstack/API/DB/RAG privado bloqueado hasta restore probe real, secretos y smoke backend.
+- F250 congela el release candidate final estatico y actualiza manuales/Update Center a cobertura v1-F250.
+- CAD alto riesgo se difiere a post-RC con feature flag: renderer/eventos base, DWG nativo, sync 2D/3D bidireccional, booleanas CAD y heatmaps GPU/WebGL.
 
 ## F238-F247 (2026-07-19) - Release Execution
 

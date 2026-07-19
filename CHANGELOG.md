@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F248-F250 (2026-07-19) - Release candidate final estatico
+
+- F248: se formaliza smoke contra URL publica/static; repetir F200 y F202/F203 despues de subir `dist` a Vercel/static host.
+- F249: se separa frontend estable de fullstack real; DB/API/RAG privado quedan bloqueados hasta restore probe, secretos productivos y smoke backend.
+- F250: se congela release candidate final estatico con manual v1-F250 y checklist de publicacion.
+- Las mejoras CAD de alto riesgo quedan diferidas a rama/feature flag post-RC: rewrite renderer/eventos, DWG nativo, sync 2D/3D bidireccional, booleanas solidas y heatmaps GPU.
+
 # F238-F247 (2026-07-19) - Release execution CAD/calculation/report gates
 
 - F238: manual HTML y documentos pasan a cobertura v1-F247.

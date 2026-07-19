@@ -61,7 +61,7 @@ for (const phase of ['F238', 'F239', 'F240', 'F241', 'F242', 'F243', 'F244', 'F2
 
 expect('F125 includes F238-F247 report section', f125.includes('buildF238ToF247ReportSection'));
 expect('Update Center documents F238-F247', update.includes('F238-F247 Release execution'));
-expect('manual html coverage is F247', html.includes('Cobertura de versiones: v1 - F247'));
+expect('manual html coverage includes F247 within current range', /Cobertura de versiones: v1 - F(24[7-9]|25[0-9])/.test(html));
 expect('manual user documents F238-F247', manual.includes('F238-F247'));
 expect('manual versions documents F238-F247', versions.includes('F238-F247'));
 expect('changelog documents F238-F247', changelog.includes('F238-F247'));

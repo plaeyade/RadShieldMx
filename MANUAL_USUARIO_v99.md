@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F248-F250 - Release Candidate Final Y CAD Alto Riesgo
+
+F248-F250 cierra el release candidate estatico sin mezclarlo con promesas fullstack. El frontend puede publicarse como demo/revision publica cuando el build y smoke pasen; DB/API/RAG privado sigue condicionado a restore probe real y secretos productivos.
+
+Fases:
+- F248: validar URL publica/static. Use `PUBLIC_DEPLOY_URL` con F202 o aplique F203 manual si la red de Codex esta bloqueada.
+- F249: decision DB/fullstack. No declarar multiusuario ni persistencia clinica hasta F153/F168, restore probe, backup, secretos y smoke backend.
+- F250: congelar release candidate final, manual v1-F250, Update Center y checklist de entrega.
+
+Mejoras CAD de alto riesgo que siguen, pero no antes del RC:
+- Reescritura del renderer base y del controlador de eventos.
+- DWG nativo en navegador; por ahora debe seguir como conversion externa a DXF/SVG/IFC.
+- Sincronizacion 2D/3D bidireccional en tiempo real.
+- Booleanas/solidos CAD para puertas, penetraciones y recortes.
+- Heatmaps/isocontornos GPU/WebGL con validacion numerica.
+
+Cuando aplicarlas: despues de F250, en rama o feature flag, con rollback y repeticion de F197, F207, F229, F231-F236 y F200 antes/despues.
+
 ## Addendum F238-F247 - Cierre Pre-Deploy CAD, Calculo Y Reportes
 
 F238-F247 ejecuta el cierre previo a deploy funcional sin reescribir de golpe el canvas ni declarar soporte fullstack antes de DB live.
