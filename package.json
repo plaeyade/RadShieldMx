@@ -277,6 +277,8 @@
     "test:f202:public-vercel-smoke": "node scripts/check-f202-public-vercel-smoke.mjs",
     "prepare:f203:manual-public-verification": "node scripts/f203-manual-public-verification.mjs",
     "test:f203:manual-public-verification": "node scripts/check-f203-manual-public-verification-contracts.mjs",
+    "test:f204:canvas-dxf-recovery": "node scripts/check-f204-canvas-dxf-recovery-contracts.mjs",
+    "test:f204:canvas-dxf-smoke": "node scripts/check-f204-canvas-dxf-recovery-smoke.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

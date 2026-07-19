@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F204 (2026-07-18) - Canvas visible y DXF aplicado al floorplan
+
+- El canvas/floorplan abre por defecto en usuarios nuevos; la pantalla de bienvenida solo aparece si `radshield_force_welcome=true`.
+- El visor DXF deja de ser solo visor: agrega `Aplicar al canvas`, mapea LINE/LWPOLYLINE a barreras mediante el puente CAD/BIM existente y refresca el floorplan principal.
+- DWG se mantiene como flujo honesto de conversion externa a DXF; no se promete parser DWG nativo en navegador.
+- Nuevos comandos: `npm run test:f204:canvas-dxf-recovery` y `npm run test:f204:canvas-dxf-smoke`.
+
 ## F203 (2026-07-18) - Verificacion publica manual
 
 - Se agrega una compuerta manual para cerrar el caso `public-vercel-smoke-network-gated` de F202.

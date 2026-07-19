@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F204 - Canvas y DXF al floorplan
+
+La app abre directamente el canvas/floorplan para evitar que la pantalla de bienvenida o cache impidan ver el plano. Si se requiere mostrar bienvenida para capacitacion, definir `radshield_force_welcome=true` en localStorage.
+
+Para importar DXF:
+
+1. Abrir `Archivo > Importar DXF` o el acceso DXF.
+2. Seleccionar archivo `.dxf`.
+3. Revisar entidades/capas/barreras detectadas.
+4. Pulsar `Aplicar al canvas`.
+
+El sistema convierte LINE y LWPOLYLINE en barreras del floorplan. Para DWG, convertir primero a DXF con AutoCAD, ODA File Converter u otra herramienta CAD; RadShield-MX no declara soporte DWG nativo en navegador.
+
 ## Addendum F203 - Verificacion publica manual
 
 Cuando F202 queda como `public-vercel-smoke-network-gated`, el operador debe abrir la URL publica desde un navegador sin bloqueo y completar `outputs/f203_manual_public_verification/CHECKLIST_OPERADOR_F203_PUBLICO.md`.

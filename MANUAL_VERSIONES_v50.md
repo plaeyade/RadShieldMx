@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F204 (2026-07-18) - canvas-dxf-recovery
+
+- Objetivo: resolver el bloqueo reportado de canvas no visible e importacion DXF que no afectaba el floorplan.
+- Cambio UX: la app abre directo al canvas/floorplan salvo que el operador fuerce bienvenida con `radshield_force_welcome=true`.
+- Cambio DXF: el visor incorpora `Aplicar al canvas`, genera barreras desde LINE/LWPOLYLINE y reemplaza el floorplan activo con el plano importado.
+- DWG: se mantiene por conversion externa a DXF; no hay promesa de DWG nativo browser.
+- Validacion: `npm run test:f204:canvas-dxf-recovery` y `npm run test:f204:canvas-dxf-smoke`.
+
 ## F203 (2026-07-18) - manual-public-verification
 
 - Objetivo: completar la verificacion publica cuando F202 no puede salir a Vercel desde Codex.

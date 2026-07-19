@@ -487,7 +487,12 @@ export default function ShieldingDesigner() {
   
   
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(() => {
-    try { const dismissed = localStorage.getItem('radshield_welcome_dismissed'); const saved = localStorage.getItem('radshield_v15_welcome'); return !saved && !dismissed; } catch { return true; }
+    try {
+      const forced = localStorage.getItem('radshield_force_welcome');
+      return forced === 'true';
+    } catch {
+      return false;
+    }
   });
   // v15: Status bar state
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -1094,6 +1099,23 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const [showMaxima, setShowMaxima] = useState(true);
 
   const { canvasRef, canvasState, setCanvasState, hoverInfo, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
+
+  useEffect(() => {
+    const handleDxfImported = (event: Event) => {
+      const customEvent = event as CustomEvent<{ floorPlan?: FloorPlan; summary?: { mappedBarriers?: number; warnings?: string[]; fileName?: string } }>;
+      const nextPlan = customEvent.detail?.floorPlan;
+      if (!nextPlan) return;
+      resetFloorPlan(nextPlan);
+      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
+      setShowWelcomeScreen(false);
+      const mapped = customEvent.detail?.summary?.mappedBarriers ?? nextPlan.barriers.length;
+      const warnings = customEvent.detail?.summary?.warnings ?? [];
+      toast.success(`DXF aplicado al canvas: ${mapped} barreras detectadas`);
+      warnings.forEach((warning) => toast.warning(warning));
+    };
+    window.addEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
+    return () => window.removeEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
+  }, [resetFloorPlan, setCanvasState]);
 
   const computeCurrentHeatmap = useCallback(async () => {
     if (floorPlan.sources.length === 0) {

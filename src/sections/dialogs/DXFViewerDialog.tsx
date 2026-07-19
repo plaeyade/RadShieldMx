@@ -12,8 +12,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, Move, FileUp, Info, X } from 'lucide-react';
+import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
+import { importDXFToFloorPlan, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -29,6 +30,8 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [zoom, setZoom] = useState(1);
   const [lineWidth, setLineWidth] = useState(1);
   const [showLabels, setShowLabels] = useState(true);
+  const [importSummary, setImportSummary] = useState<CadBimImportSummary | null>(null);
+  const [lastContent, setLastContent] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,10 +51,13 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       const content = e.target?.result as string;
       try {
         const result = parseDXF(content);
+        const bridge = importDXFToFloorPlan(content, file.name);
         setParsed(result);
+        setImportSummary(bridge.summary);
+        setLastContent(content);
         setFileName(file.name);
         setZoom(1);
-        toast.success(`DXF cargado: ${result.entities.length} entidades, ${result.layers.size} capas`);
+        toast.success(`DXF cargado: ${result.entities.length} entidades, ${bridge.summary.mappedBarriers} barreras detectadas`);
       } catch (err: any) {
         toast.error('Error al parsear DXF: ' + err.message);
       }
@@ -97,6 +103,20 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   // Zoom handlers
   const zoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
   const zoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
+  const applyToCanvas = () => {
+    if (!lastContent || !fileName) {
+      toast.error('Importe primero un archivo DXF');
+      return;
+    }
+    try {
+      const bridge = importDXFToFloorPlan(lastContent, fileName);
+      window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
+      toast.success(`Plano DXF aplicado al canvas: ${bridge.summary.mappedBarriers} barreras`);
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error('No se pudo aplicar el DXF al canvas: ' + err.message);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,6 +145,16 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
               />
               <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs">
                 <Upload className="w-3 h-3 mr-1" /> Importar DXF
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={applyToCanvas}
+                disabled={!parsed}
+                data-testid="dxf-apply-to-canvas"
+                className="text-xs bg-orange-600 hover:bg-orange-700"
+              >
+                <SendToBack className="w-3 h-3 mr-1" /> Aplicar al canvas
               </Button>
               <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
                 <X className="w-4 h-4" />
@@ -161,6 +191,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Badge variant="outline" className="text-[10px] h-5">{parsed.entities.length} entidades</Badge>
                   <Badge variant="outline" className="text-[10px] h-5">{parsed.layers.size} capas</Badge>
+                  {importSummary && <Badge variant="outline" className="text-[10px] h-5">{importSummary.mappedBarriers} barreras</Badge>}
                   <Badge variant="outline" className="text-[10px] h-5">{parsed.unit}</Badge>
                 </div>
               )}
@@ -228,6 +259,11 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                       <>Dimensiones: {(parsed.bounds.maxX - parsed.bounds.minX).toFixed(1)} x {(parsed.bounds.maxY - parsed.bounds.minY).toFixed(1)} {parsed.unit}</>
                     )}
                   </div>
+                  {importSummary && (
+                    <div className="mt-1 text-[10px] text-slate-600">
+                      Barreras mapeadas al canvas: {importSummary.mappedBarriers}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
