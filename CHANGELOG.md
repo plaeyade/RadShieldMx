@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F200 (2026-07-18) - Static frontend release gate
+
+- Se agrega compuerta F200 para congelar el frontend estatico como release candidate controlado.
+- F200 consolida F197, F198 y F199, valida configuracion Vercel/Netlify/SPA, empaqueta `dist` y deja artefacto `radshield-mx-f200-static-dist.zip`.
+- La fase declara alcance: frontend estatico listo para revision publica; backend, DB live y uso clinico certificado siguen fuera de este gate.
+- Siguiente paso recomendado: F201 public URL smoke contra `https://radshield-mx-static-dist.vercel.app/` o la URL final definida en `PUBLIC_DEPLOY_URL`.
+- Nuevos comandos: `npm run prepare:f200:static-release-gate` y `npm run test:f200:static-release-gate`.
+
 ## F199 (2026-07-18) - Output smoke QA
 
 - Se agrega matriz `f199OutputSmokeQa.ts` para validar salidas release-facing: Memoria IA, PDF analitico, Reporte CNSNS, Evidence Pack, Checklist CNSNS, Regulatory Report y Batch Report Exporter.

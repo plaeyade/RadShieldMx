@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F200 - Release estatico del frontend
+
+F200 deja el frontend como release candidate estatico: el paquete se puede publicar en Vercel, Netlify u otro hosting SPA que sirva el directorio `dist`. La URL sugerida para validacion es `https://radshield-mx-static-dist.vercel.app/`, salvo que el operador defina otra con `PUBLIC_DEPLOY_URL`.
+
+Antes de considerar estable la publicacion, F200 exige que hayan pasado las compuertas de recuperacion visual/menu/canvas, menus canonicos y salidas principales. Esta fase no activa backend, MySQL ni DB clinica; para multiusuario serio y trazabilidad DB-backed falta release full-stack.
+
+Comandos para repetir la compuerta:
+
+- `npm run prepare:f200:static-release-gate`
+- `npm run test:f200:static-release-gate`
+
+Despues de publicar, continuar con F201 public URL smoke para abrir la URL real y validar canvas, menus, Memoria IA, PDF, Evidence Pack y CNSNS en produccion.
+
 ## Addendum F199 - Validacion de salidas
 
 F199 agrega una prueba de salida para confirmar que las pantallas de entrega se abren correctamente antes de publicar o empacar la app. Las superficies cubiertas son Memoria IA, PDF analitico, Reporte CNSNS, Evidence Pack, Checklist CNSNS, Regulatory Report y Batch Report Exporter.

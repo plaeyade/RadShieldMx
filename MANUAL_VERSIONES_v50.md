@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+## F200 (2026-07-18) - Static frontend release gate
+
+- Objetivo: cerrar un release candidate estatico del frontend con artefacto reproducible.
+- Gate: F197 menu/canvas, F198 menus canonicos, F199 salidas Memoria/PDF/CNSNS/Evidence, configuracion Vercel/Netlify y paquete `dist`.
+- Estado esperado: `static-frontend-release-ready`.
+- Alcance: no incluye API, MySQL, seeds RAG live ni certificacion clinica; esos quedan para release full-stack.
+- URL sugerida: `https://radshield-mx-static-dist.vercel.app/` o la URL final en `PUBLIC_DEPLOY_URL`.
+- Validacion: `npm run prepare:f200:static-release-gate` y `npm run test:f200:static-release-gate`.
+- Siguiente fase: F201 public URL smoke.
+
 ## F199 (2026-07-18) - Output smoke QA
 
 - Objetivo: validar salidas criticas antes de release o deploy estatico/full stack.
