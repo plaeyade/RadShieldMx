@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+## F199 (2026-07-18) - Output smoke QA
+
+- Se agrega matriz `f199OutputSmokeQa.ts` para validar salidas release-facing: Memoria IA, PDF analitico, Reporte CNSNS, Evidence Pack, Checklist CNSNS, Regulatory Report y Batch Report Exporter.
+- Se agregan controles e2e ocultos para abrir CNSNS, Checklist y Batch Exporter sin depender de menus pesados; solo aparecen con `radshield-e2e-controls=true`.
+- El smoke de navegador abre cada salida en una pagina fresca, valida senales de evidencia/citas/anexos/QA y confirma que sidebar, canvas y toolbar CAD sigan montados.
+- Nuevos comandos: `npm run test:f199:outputs` y `npm run test:f199:outputs-smoke`.
+
 ## F198 (2026-07-18) - Full menu function QA
 
 - Se agrega matriz F198 para validar funcion por funcion los grupos canonicos: Diseno, Equipos, Blindaje, Verificacion, Reportes, Evidencia e Integraciones.

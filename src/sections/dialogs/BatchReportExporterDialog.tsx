@@ -11,7 +11,7 @@ import { useCanvasStore } from '@/stores/canvasStore';
 import { FileDown, FileText, Download, CheckCircle } from 'lucide-react';
 
 export default function BatchReportExporterDialog() {
-  const open = useAppStore(s => s.dialogs.batchReportExporter?.open ?? false);
+  const open = useAppStore(s => Boolean(s.dialogs.batchReportExporter));
   const close = () => useAppStore.getState().close('batchReportExporter');
   const floorPlan = useCanvasStore(s => s.floorPlan);
   const [format, setFormat] = useState<'json' | 'csv'>('json');
@@ -64,7 +64,7 @@ export default function BatchReportExporterDialog() {
   if (!open) return null;
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" data-testid="batch-report-exporter-dialog">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
             <FileDown className="w-4 h-4 text-pink-500" /> Batch Report Exporter (v107)

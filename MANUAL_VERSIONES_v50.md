@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+## F199 (2026-07-18) - Output smoke QA
+
+- Objetivo: validar salidas criticas antes de release o deploy estatico/full stack.
+- Superficies: Memoria IA, PDF analitico, Reporte CNSNS, Evidence Pack, Checklist CNSNS, Regulatory Report y Batch Report Exporter.
+- Evidencia minima: cards F125/F146/F149/F149c en Memoria/PDF/Evidence, bloque F76 en reportes regulatorios y titulos CNSNS/Batch.
+- Guardrail: F199 no descarga archivos ni cambia la metodologia de calculo; solo confirma que los dialogos y evidencia se montan sin perder canvas/sidebar.
+- Validacion: `npm run test:f199:outputs` y `npm run test:f199:outputs-smoke`.
+
 ## F198 (2026-07-18) - Full menu function QA
 
 - Objetivo: validar todos los grupos canonicos por funcion antes de tocar reportes/exportacion o eliminar fallbacks.

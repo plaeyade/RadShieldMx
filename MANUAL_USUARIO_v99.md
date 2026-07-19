@@ -1,5 +1,16 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F199 - Validacion de salidas
+
+F199 agrega una prueba de salida para confirmar que las pantallas de entrega se abren correctamente antes de publicar o empacar la app. Las superficies cubiertas son Memoria IA, PDF analitico, Reporte CNSNS, Evidence Pack, Checklist CNSNS, Regulatory Report y Batch Report Exporter.
+
+La validacion busca evidencia visible o montada: snapshot de calculo, gate calculo-memoria-evidencia, anexo de materiales, QA numerico normativo, gateway Monte Carlo, evidencia F76 y checklist CNSNS. Esta fase no sustituye la revision profesional del fisico medico/RSO; es una puerta tecnica para evitar entregar reportes sin secciones criticas.
+
+Comandos para operadores tecnicos:
+
+- `npm run test:f199:outputs`
+- `npm run test:f199:outputs-smoke`
+
 ## Addendum F198 - Validacion de menus canonicos
 
 La barra superior queda organizada por flujo real:
