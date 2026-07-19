@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+## F228 (2026-07-19) - Static render helpers
+
+- Se agrega `src/lib/canvas/renderStaticHelpers.ts` con helpers puros `drawCanvasBackgroundGrid`, `drawFloorPlanImageLayer` y `drawCanvasScaleHud`.
+- `useCanvas.draw()` ahora usa esos helpers para grid/base, imagen del plano y HUD de escala.
+- Se agrega `f228StaticRendererHelpers.ts` y fila F228 en el canvas para auditar helpers activos y calibracion.
+- Guardrail: no se mueven barreras, seleccion, grips, lasso, overlays CAD ni eventos base.
+- Artefactos: `outputs/f228_static_render_helpers/f228_static_render_helpers.json` y `outputs/fase_228_static_render_helpers.md`.
+
 ## F227 (2026-07-19) - Renderer layer extraction
 
 - Se agrega `src/lib/canvas/renderLayerRegistry.ts` como primer corte real del renderer por capas.

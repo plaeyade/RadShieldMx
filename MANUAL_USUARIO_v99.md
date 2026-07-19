@@ -1,5 +1,17 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F228 - Helpers estaticos del renderer
+
+F228 extrae helpers reales para el renderer sin cambiar la interaccion del canvas.
+
+- `drawCanvasBackgroundGrid`: dibuja base y reticula del viewport.
+- `drawFloorPlanImageLayer`: dibuja la imagen del plano importado con opacidad controlada.
+- `drawCanvasScaleHud`: dibuja la escala/HUD del canvas.
+
+Estos helpers ya son usados por `useCanvas.draw()`. La seleccion, los grips, el lasso, el preview de dibujo y los eventos base siguen en `useCanvas`, por seguridad.
+
+Uso operativo: si la fila F228 muestra `escala OK`, la calibracion del plano esta lista para usar cotas/reportes. Si muestra `calibrar`, primero use la herramienta de calibracion antes de confiar en longitudes y escala.
+
 ## Addendum F227 - Renderer por capas
 
 F227 inicia la mejora real del renderer con un registro de capas. Esto permite ordenar el dibujo y planear extracciones sin tocar los eventos que hacen funcionar seleccion, grips, lasso y snapping.

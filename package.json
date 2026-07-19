@@ -302,6 +302,8 @@
     "test:f222-f226:canvas-hardening": "node scripts/check-f222-f226-canvas-hardening-contracts.mjs",
     "prepare:f227:renderer-layers": "node scripts/f227-renderer-layer-extraction.mjs",
     "test:f227:renderer-layers": "node scripts/check-f227-renderer-layer-extraction-contracts.mjs",
+    "prepare:f228:static-render-helpers": "node scripts/f228-static-render-helpers.mjs",
+    "test:f228:static-render-helpers": "node scripts/check-f228-static-render-helpers-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

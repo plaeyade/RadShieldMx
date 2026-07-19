@@ -7,6 +7,7 @@ import {
   isControlledZoneRegion,
 } from '@/lib/controlledZoneCanvasUx';
 import { getBarrierLayerDisplay, getBarrierRiskColor, getBarrierRiskLevel } from '@/lib/canvasF85Workflow';
+import { drawCanvasBackgroundGrid, drawCanvasScaleHud, drawFloorPlanImageLayer } from '@/lib/canvas/renderStaticHelpers';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -315,44 +316,15 @@ export function useCanvas(
     // Clear
     ctx.clearRect(0, 0, w, h);
 
-    // Background
-    ctx.fillStyle = '#f7fafc';
-    ctx.fillRect(0, 0, w, h);
+    const viewportRenderState = {
+      scale: canvasState.scale,
+      offsetX: canvasState.offsetX,
+      offsetY: canvasState.offsetY,
+      scale_m_per_pixel: floorPlan.scale_m_per_pixel,
+    };
 
-    // Grid
-    const gridSize = 50 * canvasState.scale;
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 0.5;
-    const startGridX = ((canvasState.offsetX % gridSize) + gridSize) % gridSize;
-    const startGridY = ((canvasState.offsetY % gridSize) + gridSize) % gridSize;
-    for (let x = startGridX; x < w; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
-      ctx.stroke();
-    }
-    for (let y = startGridY; y < h; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
-    }
-
-    // Background image
-    if (backgroundImageRef.current) {
-      const img = backgroundImageRef.current;
-      const imgW = img.width * canvasState.scale;
-      const imgH = img.height * canvasState.scale;
-      ctx.globalAlpha = 0.6;
-      ctx.drawImage(
-        img,
-        canvasState.offsetX,
-        canvasState.offsetY,
-        imgW,
-        imgH
-      );
-      ctx.globalAlpha = 1.0;
-    }
+    drawCanvasBackgroundGrid(ctx, viewportRenderState, { width: w, height: h });
+    drawFloorPlanImageLayer(ctx, backgroundImageRef.current, viewportRenderState);
 
     // Occupied regions
     for (const region of floorPlan.occupiedRegions) {
@@ -1117,29 +1089,7 @@ export function useCanvas(
       ctx.restore();
     }
 
-    // Scale bar
-    const sbX = w - 120;
-    const sbY = h - 40;
-    const sbLengthPx = 1 / floorPlan.scale_m_per_pixel * canvasState.scale; // 1 meter in pixels
-    ctx.fillStyle = '#2d3748';
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Escala: ${floorPlan.scale_m_per_pixel > 0 ? (1/floorPlan.scale_m_per_pixel).toFixed(0) + ' px/m' : 'Sin calibrar'}`, sbX, sbY - 10);
-    ctx.strokeStyle = '#2d3748';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(sbX, sbY);
-    ctx.lineTo(sbX + Math.min(sbLengthPx, 100), sbY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(sbX, sbY - 3);
-    ctx.lineTo(sbX, sbY + 3);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(sbX + Math.min(sbLengthPx, 100), sbY - 3);
-    ctx.lineTo(sbX + Math.min(sbLengthPx, 100), sbY + 3);
-    ctx.stroke();
-    ctx.fillText('1 m', sbX + Math.min(sbLengthPx, 100) / 2 - 10, sbY + 15);
+    drawCanvasScaleHud(ctx, viewportRenderState, { width: w, height: h });
   }, [floorPlan, canvasState, drawingState, worldToScreen, sampleLines, ghostPos, activeTool, selectionWindow, lassoPath]);
 
   // Redraw when state changes

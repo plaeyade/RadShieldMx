@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+## F228 (2026-07-19) - static-render-helpers
+
+- Objetivo: extraer helpers puros de render para capas estaticas/HUD.
+- Nuevo: `renderStaticHelpers.ts` con `drawCanvasBackgroundGrid`, `drawFloorPlanImageLayer` y `drawCanvasScaleHud`.
+- Integracion: `useCanvas.draw()` usa los helpers para grid/base, imagen de plano y HUD de escala.
+- UI: fila F228 en canvas muestra helpers activos y estado de calibracion.
+- Guardrail: no toca barreras, seleccion, lasso, grips, overlays CAD ni eventos base.
+- Validacion: `npm run prepare:f228:static-render-helpers` y `npm run test:f228:static-render-helpers`.
+
 ## F227 (2026-07-19) - renderer-layer-extraction
 
 - Objetivo: iniciar la mejora real del renderer sin romper eventos ni dibujo.

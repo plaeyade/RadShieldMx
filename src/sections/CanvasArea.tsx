@@ -52,6 +52,7 @@ import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/
 import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections';
 import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening';
 import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRendererLayerExtraction';
+import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -583,6 +584,11 @@ export default function CanvasArea({
     hasHeatmap: heatmapEnabled || heatmapPointCount > 0,
     hasSampleLines: sampleLines.length > 0,
     selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+  });
+  const f228StaticRendererHelpers = buildF228StaticRendererHelpers({
+    hasFloorPlanImage: Boolean(floorPlan?.imageUrl),
+    scale: canvasState.scale,
+    scale_m_per_pixel: floorPlan.scale_m_per_pixel,
   });
   const selectedBarrier = floorPlan?.barriers?.find((barrier) => barrier.id === canvasState.selectedId) ?? null;
   const selectedSource = floorPlan?.sources?.find((source) => source.id === canvasState.selectedId) ?? null;
@@ -2274,6 +2280,35 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   overlays/grips siguen protegidos
+                </span>
+              </div>
+              <div
+                data-testid="f228-static-renderer-helpers"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f228StaticRendererHelpers.nextRendererStep}
+              >
+                <span className="text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  F228 Static
+                </span>
+                {f228StaticRendererHelpers.helpers.map((helper) => (
+                  <span
+                    key={helper}
+                    data-testid={`f228-helper-${helper}`}
+                    className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-100"
+                    title="Helper puro activo desde useCanvas.draw"
+                  >
+                    {helper.replace('drawCanvas', '').replace('drawFloorPlan', '')}
+                  </span>
+                ))}
+                <span data-testid="f228-calibration-ready" className={`text-[7px] rounded border px-1 py-0.5 whitespace-nowrap ${
+                  f228StaticRendererHelpers.calibrationReady
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border-amber-100'
+                }`}>
+                  {f228StaticRendererHelpers.calibrationReady ? 'escala OK' : 'calibrar'}
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  grid/imagen/HUD extraidos; eventos intactos
                 </span>
               </div>
               <div
