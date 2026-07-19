@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F250
+# RadShield-MX — Control de Cambios Completo v1-F255
+
+## F251-F255 (2026-07-19) - High-Risk CAD Gate
+
+- Se aplica el RC/deploy estatico como baseline de rollback antes de iniciar CAD alto riesgo.
+- Se agregan flags apagados por defecto: `VITE_CANVAS_HIGH_RISK_CAD` y `VITE_CANVAS_EVENT_CONTROLLER_V2`.
+- F251-F255 organiza renderer/event controller v2, DWG externo, sync 2D/3D, booleanas CAD y heatmaps GPU.
+- Regla de control: repetir F197/F207/F229/F231-F236/F200 antes y despues; si falla, apagar flags y volver al artefacto F250.
 
 ## F248-F250 (2026-07-19) - Release Candidate Final
 

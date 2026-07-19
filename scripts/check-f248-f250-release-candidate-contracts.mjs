@@ -53,7 +53,7 @@ for (const phase of ['F248', 'F249', 'F250']) {
   expect(`docs missing ${phase}`, joined.includes(phase));
 }
 
-expect('manual html coverage is F250', joined.includes('Cobertura de versiones: v1 - F250'));
+expect('manual html coverage includes F250 within current range', /Cobertura de versiones: v1 - F25[0-9]/.test(joined));
 expect('Update Center documents F248-F250', joined.includes('F248-F250 Release candidate'));
 expect('F125 includes F248-F250 report section', joined.includes('buildF248ToF250ReportSection'));
 expect('package exposes prepare script', pkg.scripts?.['prepare:f248-f250:release-candidate'] === 'node scripts/f248-f250-release-candidate.mjs');

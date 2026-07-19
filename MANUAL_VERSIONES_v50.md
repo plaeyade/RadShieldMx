@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F251-F255 (2026-07-19) - high-risk-cad-feature-flag-gate
+
+- F251: renderer/event controller v2 queda como staging-only bajo `VITE_CANVAS_EVENT_CONTROLLER_V2`.
+- F252: DWG se mantiene como pipeline de conversion externa a DXF/SVG/IFC, no DWG nativo de navegador.
+- F253: sync 2D/3D bidireccional queda detras de `VITE_CANVAS_HIGH_RISK_CAD`.
+- F254: booleanas/solidos CAD quedan bloqueados hasta QA geometrica/unidades/hash.
+- F255: heatmaps/isocontornos GPU quedan bloqueados hasta comparacion CPU y export QA.
+- Antes y despues de activar cualquier flag se deben repetir F197, F207, F229, F231-F236 y F200.
+- Rollback: apagar flags, limpiar `radshield_feature_flags`, regresar al artefacto F250 y repetir los gates.
+
 # F248-F250 (2026-07-19) - static-release-candidate-final
 
 - F248: smoke publico/static contra la URL final; si Codex queda network-gated, aplicar F203 manual desde navegador con red abierta.

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>RadShield-MX F250 — Manual de Usuario y Control de Versiones</title>
+<title>RadShield-MX F255 — Manual de Usuario y Control de Versiones</title>
 <style>
 body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
 @page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
@@ -108,11 +108,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="toc-title">Contenido</div>
   <ul class="toc">
     <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
-    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F250</a></li>
+    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F255</a></li>
     <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
     <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
 
-    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F250)</a></li>
+    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F255)</a></li>
     <li class="toc-l1"><a href="#sec4">4. Control de Cambios Completo</a></li>
 
     <li class="toc-part"><a href="#part3">PARTE III: METODOLOGIA CIENTIFICA</a></li>
@@ -170,12 +170,12 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <!-- ==================== PARTE I ==================== -->
 <div class="part-divider" id="part1">PARTE I<br><span style="font-size:14pt;font-weight:400;">Introduccion y Fundamentos</span></div>
 
-<h1 id="sec1">1. Introduccion a RadShield-MX F250</h1>
+<h1 id="sec1">1. Introduccion a RadShield-MX F255</h1>
 
 <p>RadShield-MX es una plataforma integral de codigo abierto para el diseno, calculo y optimizacion de blindajes radiologicos en instalaciones medicas e industriales. Desarrollada en Mexico, cumple con la normativa de la Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS) asi como con estandares internacionales.</p>
 
 <div class="info-box">
-<span class="info-box-title">Version F250 — Estadisticas del proyecto:</span>
+<span class="info-box-title">Version F255 — Estadisticas del proyecto:</span>
 <table style="margin:0.3cm 0;font-size:10pt">
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Modulos:</strong></td><td>4,062+ modulos TypeScript/React</td></tr>
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Dialogos:</strong></td><td>220+ componentes de interfaz</td></tr>
@@ -211,7 +211,7 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 <h1 id="sec3">3. Interfaz de Usuario y Navegacion</h1>
 
 <h3>3.1. Estructura de la interfaz</h3>
-<p>La interfaz F250 se organiza en tres areas principales:</p>
+<p>La interfaz F255 se organiza en tres areas principales:</p>
 <ol>
   <li><strong>Toolbar superior</strong>: 18 botones de acceso rapido agrupados en 6 categorias (NCRP, Analisis, Herramientas, I/O, Canvas, Auth).</li>
   <li><strong>Canvas central</strong>: Area de dibujo interactivo con plano arquitectonico, barreras, fuentes y regiones. Incluye sidebar derecho colapsable con los 18 botones de acceso rapido.</li>
@@ -247,15 +247,17 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 
 
 <!-- ==================== PARTE II ==================== -->
-<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F250)</span></div>
+<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F255)</span></div>
 
-<h1 id="sec4">4. Control de Cambios Completo v1-F250</h1>
+<h1 id="sec4">4. Control de Cambios Completo v1-F255</h1>
 
-<p>El siguiente historial documenta todas las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F250, julio 2026). No se omite ninguna version; las fases sin cambios significativos se agrupan por periodo.</p>
+<p>El siguiente historial documenta todas las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F255, julio 2026). No se omite ninguna version; las fases sin cambios significativos se agrupan por periodo.</p>
 
 <table class="version-table">
 <thead><tr><th style="width:10%">Fase</th><th style="width:12%">Version</th><th style="width:18%">Fecha</th><th>Modulos principales implementados</th></tr></thead>
 <tbody>
+
+<tr><td><strong>F251-F255</strong></td><td>High-Risk CAD Gate</td><td>2026-07-19</td><td>RC/deploy estatico queda como baseline. Se agregan flags apagados por defecto para CAD alto riesgo: renderer/event controller v2, DWG externo, sync 2D/3D, booleanas CAD y heatmaps GPU. Repetir F197/F207/F229/F231-F236/F200 antes y despues; rollback apagando flags y limpiando localStorage.</td></tr>
 
 <tr><td><strong>F248-F250</strong></td><td>Release Candidate Final</td><td>2026-07-19</td><td>F248 smoke publico/static contra URL final; F249 decision DB/fullstack con bloqueo hasta restore probe real, secretos y smoke backend; F250 release candidate final estatico. CAD alto riesgo queda post-RC: renderer/eventos, DWG nativo, sync 2D/3D, booleanas y heatmaps GPU.</td></tr>
 
@@ -542,7 +544,7 @@ Costos USD/kg (2024):
 
 <h2 id="sec8-1">8.1. Pantalla de Bienvenida</h2>
 
-<p class="screenshot-desc">Al abrir RadShield-MX F250, se muestra la pantalla de bienvenida con KPIs superiores (220+ modulos, 90+ referencias, 5 capas AI), acciones rapidas, proyectos recientes, templates y acceso al tutorial.</p>
+<p class="screenshot-desc">Al abrir RadShield-MX F255, se muestra la pantalla de bienvenida con KPIs superiores (220+ modulos, 90+ referencias, 5 capas AI), acciones rapidas, proyectos recientes, templates y acceso al tutorial.</p>
 
 <ol class="steps">
 <li>Haga clic en <strong>RadShield-MX</strong> en el logo superior para acceder a la pantalla de bienvenida.</li>
@@ -1820,11 +1822,11 @@ radshield-mx/
 
 <div class="version-info">
 Documento integrado: Manual de Usuario + Control de Versiones RadShield-MX<br>
-Version del manual: F250 (sincronizado con codigo fuente)<br>
+Version del manual: F255 (sincronizado con codigo fuente)<br>
 Fecha de generacion: Julio 2026<br>
 Total de secciones: 25 + 6 Apendices (A-F)<br>
 Total de referencias bibliograficas: 90 (R1-R90)<br>
-Cobertura de versiones: v1 - F250 (inclusive)<br>
+Cobertura de versiones: v1 - F255 (inclusive)<br>
 </div>
 
 </body>

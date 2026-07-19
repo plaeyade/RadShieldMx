@@ -6,6 +6,8 @@ export interface FeatureFlags {
   webgpuHeatmap: boolean;
   advancedMonteCarlo: boolean;
   experimentalCV: boolean;
+  canvasHighRiskCad: boolean;
+  canvasEventControllerV2: boolean;
   realTimeCollaboration: boolean;
   aiPredictions: boolean;
   debugMode: boolean;
@@ -15,6 +17,10 @@ const DEFAULT: FeatureFlags = {
   webgpuHeatmap: false,
   advancedMonteCarlo: false,
   experimentalCV: false,
+  canvasHighRiskCad: import.meta.env.VITE_CANVAS_HIGH_RISK_CAD === 'true',
+  canvasEventControllerV2:
+    import.meta.env.VITE_CANVAS_HIGH_RISK_CAD === 'true' &&
+    import.meta.env.VITE_CANVAS_EVENT_CONTROLLER_V2 === 'true',
   realTimeCollaboration: false,
   aiPredictions: true,
   debugMode: import.meta.env.DEV,

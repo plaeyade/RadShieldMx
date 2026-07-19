@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F251-F255 - CAD Alto Riesgo Con Feature Flag Y Rollback
+
+El release candidate estatico F250 queda como baseline estable. Las mejoras CAD de alto riesgo se preparan sin activarse por defecto:
+
+- `VITE_CANVAS_HIGH_RISK_CAD=false`
+- `VITE_CANVAS_EVENT_CONTROLLER_V2=false`
+
+Flujo obligatorio:
+1. Ejecutar gates antes: F197, F207, F229, F231-F236 y F200.
+2. Activar flags solo en staging o rama experimental.
+3. Aplicar una mejora CAD a la vez.
+4. Repetir los mismos gates despues.
+5. Si falla canvas, sidebar, toolbar, DXF o reporte, apagar flags, limpiar `localStorage.radshield_feature_flags` y volver al artefacto F250.
+
+Mejoras del carril:
+- F251 renderer/event controller v2.
+- F252 DWG por conversion externa.
+- F253 sincronizacion 2D/3D bidireccional.
+- F254 booleanas/solidos CAD.
+- F255 heatmaps/isocontornos GPU/WebGL.
+
 ## Addendum F248-F250 - Release Candidate Final Y CAD Alto Riesgo
 
 F248-F250 cierra el release candidate estatico sin mezclarlo con promesas fullstack. El frontend puede publicarse como demo/revision publica cuando el build y smoke pasen; DB/API/RAG privado sigue condicionado a restore probe real y secretos productivos.

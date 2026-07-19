@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F251-F255 (2026-07-19) - High-risk CAD feature-flag gate
+
+- Se agrega el carril CAD alto riesgo con `VITE_CANVAS_HIGH_RISK_CAD=false` y `VITE_CANVAS_EVENT_CONTROLLER_V2=false` por defecto.
+- F251-F255 prepara renderer/event controller v2, DWG externo, sync 2D/3D bidireccional, booleanas CAD y heatmaps GPU sin alterar el canvas estable del RC.
+- Rollback: apagar ambos flags, limpiar `localStorage.radshield_feature_flags`, volver al artefacto F250 y repetir F197/F207/F229/F231-F236/F200.
+- Se repitieron gates base antes de abrir el carril: F197, F207, F229, F231-F236 y F200.
+
 # F248-F250 (2026-07-19) - Release candidate final estatico
 
 - F248: se formaliza smoke contra URL publica/static; repetir F200 y F202/F203 despues de subir `dist` a Vercel/static host.
