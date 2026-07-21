@@ -5,6 +5,7 @@ import { buildF237CalculationEngineGovernanceSection } from './f237CalculationEn
 import { buildF238ToF247ReportSection } from './f238ToF247ReleaseExecution';
 import { buildF248ToF250ReportSection } from './f248ToF250ReleaseCandidate';
 import { buildF251ToF255HighRiskCadReportSection } from './f251ToF255HighRiskCadGate';
+import { buildF256ToF260RoadmapSection } from './f256ToF260NextPhaseRoadmap';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -146,6 +147,7 @@ export function buildF125CalculationEvidenceSection(
     buildF238ToF247ReportSection(),
     buildF248ToF250ReportSection(),
     buildF251ToF255HighRiskCadReportSection(),
+    buildF256ToF260RoadmapSection(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

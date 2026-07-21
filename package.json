@@ -318,6 +318,8 @@
     "test:f248-f250:release-candidate": "node scripts/check-f248-f250-release-candidate-contracts.mjs",
     "prepare:f251-f255:high-risk-cad": "node scripts/f251-f255-high-risk-cad-gate.mjs",
     "test:f251-f255:high-risk-cad": "node scripts/check-f251-f255-high-risk-cad-gate-contracts.mjs",
+    "prepare:f256-f260:roadmap": "node scripts/f256-f260-next-phase-roadmap.mjs",
+    "test:f256-f260:roadmap": "node scripts/check-f256-f260-next-phase-roadmap-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

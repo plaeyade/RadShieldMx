@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F256-F260 (2026-07-21) - Next phase roadmap post-RC
+
+- Se define el orden posterior a F255: F256 smoke publico del ZIP actual, F257 staging con flags CAD, F258 spike renderer/event controller v2, F259 proveedor DWG externo y F260 regreso a DB/fullstack.
+- Decision: publicar/verificar frontend estatico primero; CAD alto riesgo solo en staging/feature flag; fullstack solo con DB restore probe y backend smoke.
+- F125 agrega la seccion F256-F260 para que Memoria IA/PDF/Evidence conozcan el estado del roadmap.
+
 # F251-F255 (2026-07-19) - High-risk CAD feature-flag gate
 
 - Se agrega el carril CAD alto riesgo con `VITE_CANVAS_HIGH_RISK_CAD=false` y `VITE_CANVAS_EVENT_CONTROLLER_V2=false` por defecto.

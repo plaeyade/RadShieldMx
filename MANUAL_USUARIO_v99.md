@@ -1,5 +1,17 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F256-F260 - Que Sigue Despues Del RC Estatico
+
+Despues de F255, el orden recomendado es:
+
+1. F256: subir el ZIP estatico actual a Vercel/Netlify y repetir smoke publico. Si Codex no tiene red, usar F203 manual.
+2. F257: crear staging CAD con `VITE_CANVAS_HIGH_RISK_CAD=true`, sin activar todavia `VITE_CANVAS_EVENT_CONTROLLER_V2`.
+3. F258: probar renderer/event controller v2 en staging con F229 antes y despues.
+4. F259: definir proveedor externo para DWG a DXF/SVG/IFC; mantener DXF como ruta canonica.
+5. F260: retomar DB/fullstack con `DATABASE_URL`, backup, restore probe, backend smoke y RAG privado.
+
+Regla operativa: no mezclar deploy estatico, cambios profundos del canvas y DB fullstack en la misma fase. Si se rompe algo, volver al ZIP F255/F256 y apagar flags CAD.
+
 ## Addendum F251-F255 - CAD Alto Riesgo Con Feature Flag Y Rollback
 
 El release candidate estatico F250 queda como baseline estable. Las mejoras CAD de alto riesgo se preparan sin activarse por defecto:

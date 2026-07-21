@@ -1,4 +1,13 @@
-# RadShield-MX — Control de Cambios Completo v1-F255
+# RadShield-MX — Control de Cambios Completo v1-F260
+
+## F256-F260 (2026-07-21) - Next Phase Roadmap
+
+- F256: smoke publico del ZIP estatico actual contra URL final.
+- F257: staging CAD con flags, manteniendo el RC estable como rollback.
+- F258: spike renderer/event controller v2 sin reemplazar `useCanvas` por defecto.
+- F259: proveedor externo DWG->DXF/SVG/IFC; DXF sigue como ruta canonica.
+- F260: retomar DB/fullstack con restore probe, backend smoke, RAG privado y secretos productivos.
+- Decision: no mezclar deploy estatico, CAD alto riesgo y DB fullstack en una sola fase.
 
 ## F251-F255 (2026-07-19) - High-Risk CAD Gate
 

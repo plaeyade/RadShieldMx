@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F256-F260 (2026-07-21) - next-phase-roadmap-post-rc
+
+- F256: subir/verificar el ZIP estatico actual contra URL publica y repetir F202 o F203 manual.
+- F257: activar staging CAD con `VITE_CANVAS_HIGH_RISK_CAD=true` sin activar aun el event controller v2.
+- F258: prototipo renderer/event controller v2 solo en staging, con F229 antes/despues.
+- F259: proveedor externo DWG->DXF/SVG/IFC con auditoria de archivos y fallback DXF.
+- F260: retomar DB/fullstack: backup, restore probe, backend smoke, RAG privado y secretos productivos.
+- Regla: no mezclar publicacion estatica, renderer alto riesgo y DB fullstack en una sola fase.
+
 # F251-F255 (2026-07-19) - high-risk-cad-feature-flag-gate
 
 - F251: renderer/event controller v2 queda como staging-only bajo `VITE_CANVAS_EVENT_CONTROLLER_V2`.
