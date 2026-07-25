@@ -6,6 +6,7 @@
 - Se agrega `prepare:f279:local-free-ocr` para detectar herramientas gratuitas/locales: PDF.js, Poppler, Tesseract y OCRmyPDF.
 - Las memorias escaneadas se mantienen locales; el pipeline recomendado es extraer texto embebido, renderizar paginas si hace falta, correr Tesseract y generar JSONL por pagina antes de seed.
 - Cloud OCR queda solo como excepcion con aprobacion de costo y privacidad.
+- F280 ejecuta smoke OCR local solo en primeras paginas para revisar calidad antes de procesar documentos completos.
 
 # F273-F278 (2026-07-25) - live readiness
 

@@ -57,6 +57,15 @@ El gate revisa si estan disponibles PDF.js, Poppler, Tesseract y OCRmyPDF. La ru
 
 Google Document AI y Amazon Textract quedan como excepcion: usarlos solo si OCR local falla en calidad y se aprueba costo/privacidad.
 
+Para una prueba local real de bajo riesgo:
+
+```powershell
+npm run prepare:f280:local-ocr-smoke
+npm run test:f280:local-ocr-smoke
+```
+
+F280 procesa solo las primeras paginas de cada memoria pendiente y genera `outputs/f280_local_ocr_smoke/f280_local_ocr_pages.jsonl`. Ese archivo es borrador: revisar calidad antes de OCR completo y antes de sembrar en DB/RAG.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.

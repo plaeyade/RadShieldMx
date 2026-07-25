@@ -7,15 +7,34 @@ const root = process.cwd();
 const outputDir = path.join(root, 'outputs', 'f279_local_free_ocr_gate');
 fs.mkdirSync(outputDir, { recursive: true });
 
+const commonWindowsTools = {
+  pdftoppm: [
+    'C:/Users/carlo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/poppler/Library/bin/pdftoppm.exe',
+    'C:/Program Files/Calibre2/app/bin/pdftoppm.exe',
+  ],
+  pdftotext: [
+    'C:/Users/carlo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/poppler/Library/bin/pdftotext.exe',
+    'C:/Program Files/Calibre2/app/bin/pdftotext.exe',
+  ],
+  tesseract: [
+    'C:/Program Files/Tesseract-OCR/tesseract.exe',
+    'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe',
+    `${process.env.LOCALAPPDATA ?? ''}/Programs/Tesseract-OCR/tesseract.exe`,
+  ],
+};
+
 const which = (name) => {
+  for (const candidate of commonWindowsTools[name] ?? []) {
+    if (candidate && fs.existsSync(candidate)) return candidate;
+  }
   const probe = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', [name], { encoding: 'utf8' });
-  if (probe.status !== 0) return undefined;
-  return probe.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)[0];
+  if (probe.status === 0) return probe.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)[0];
+  return undefined;
 };
 const versionOf = (command, args = ['--version']) => {
   const found = which(command);
   if (!found) return undefined;
-  const probe = spawnSync(command, args, { encoding: 'utf8' });
+  const probe = spawnSync(found, args, { encoding: 'utf8' });
   return (probe.stdout || probe.stderr || '').split(/\r?\n/)[0]?.trim();
 };
 const hashFile = (filePath) => {

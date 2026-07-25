@@ -6,6 +6,7 @@
 - Se agrega gate F279 para probar OCR libre/local con PDF.js, Poppler (`pdftotext`/`pdftoppm`), Tesseract y OCRmyPDF.
 - Las dos memorias pendientes de OCR siguen como fixtures, pero no se envian a nube ni se procesan automaticamente.
 - Regla nueva: usar OCR local/free primero; usar cloud OCR solo como excepcion aprobada si la calidad local falla.
+- F280 agrega smoke OCR local de bajo riesgo: renderiza las primeras paginas de las memorias pendientes, corre Tesseract y genera JSONL draft para revision.
 
 # F273-F278 (2026-07-25) - validacion live controlada
 
