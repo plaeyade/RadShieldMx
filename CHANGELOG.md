@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F263 (2026-07-24) - APS DWG adapter gate
+
+- Se agrega `api/cad-router.ts` con procedimientos `cad.apsDwgStatus` y `cad.apsDwgPlan` para preparar la ruta DWG->APS->DXF->importador DXF existente.
+- Se agrega `api/lib/dwgApsDesignAutomationAdapter.ts` como adaptador backend seguro: calcula estado, fixtures faltantes, hashes de entrada y plan de conversion sin exponer secretos en frontend.
+- Se agrega `src/lib/dwgApsDesignAutomationContract.ts` para documentar el contrato F263 en Memoria IA/Evidence/Update Center.
+- La conversion live queda diferida a F264 hasta contar con `DWG_CONVERSION_PROVIDER=aps-design-automation`, credenciales APS, fixtures DWG no sensibles, validacion de capas/escala y confirmacion del operador.
+
 # F261-F262 (2026-07-24) - DWG provider selection and fixture gate
 
 - Se selecciona **Autodesk Platform Services Design Automation** como proveedor primario recomendado para DWG->DXF por fidelidad AutoCAD/capas/bloques.

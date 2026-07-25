@@ -11,6 +11,7 @@ import { mlRouter } from "./ml-router";
 import { agentRouter } from "./agent-router";
 import { dosimetryRouter } from "./dosimetry-router";
 import { controlledZoneRouter } from "./controlled-zone-router";
+import { cadRouter } from "./cad-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -28,6 +29,7 @@ export const appRouter = createRouter({
   agent: agentRouter,
   dosimetry: dosimetryRouter,
   controlledZone: controlledZoneRouter,
+  cad: cadRouter,
 });
 
 export type AppRouter = typeof appRouter;

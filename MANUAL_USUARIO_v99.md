@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F263 - Adaptador APS DWG Seguro
+
+F263 agrega el puente backend para usar Autodesk Platform Services Design Automation como proveedor DWG->DXF sin prometer DWG nativo en navegador.
+
+Flujo operativo:
+
+1. Configurar `DWG_CONVERSION_PROVIDER=aps-design-automation` solo en backend.
+2. Configurar `APS_CLIENT_ID`, `APS_CLIENT_SECRET` y `APS_BUCKET_KEY` solo como secretos de servidor.
+3. Colocar DWG no sensibles en `fixtures/dwg/`.
+4. Ejecutar `npm run prepare:f263:aps-dwg` y `npm run test:f263:aps-dwg`.
+5. Revisar hashes, capas, unidades y escala antes de aplicar el DXF convertido al canvas.
+
+La app mantiene fallback manual DXF. Si el proveedor falla, el floorplan activo no se modifica.
+
 ## Addendum F261-F262 - Proveedor DWG Y Fixtures
 
 Proveedor recomendado:

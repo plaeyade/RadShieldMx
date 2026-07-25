@@ -11,6 +11,7 @@ import { getCanvasEventControllerV2Status } from './canvas/eventControllerV2';
 import { summarizeDwgExternalProviderContract } from './dwgExternalProviderGate';
 import { summarizeDwgFixtureGate } from './dwgFixtureGate';
 import { summarizeDwgProviderSelection } from './dwgProviderSelection';
+import { buildApsDwgAdapterPublicSummary } from './dwgApsDesignAutomationContract';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -158,6 +159,7 @@ export function buildF125CalculationEvidenceSection(
     summarizeDwgExternalProviderContract(),
     summarizeDwgProviderSelection(),
     summarizeDwgFixtureGate(),
+    buildApsDwgAdapterPublicSummary('adapter-ready-waiting-for-credentials-and-fixtures'),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

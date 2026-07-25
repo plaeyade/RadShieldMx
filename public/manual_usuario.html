@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>RadShield-MX F260 — Manual de Usuario y Control de Versiones</title>
+<title>RadShield-MX F263 — Manual de Usuario y Control de Versiones</title>
 <style>
 body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
 @page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
@@ -89,7 +89,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="cover-accent"></div>
   <div class="cover-accent2"></div>
   <div class="cover-content">
-    <div class="cover-version">VERSION 110</div>
+    <div class="cover-version">VERSION F263</div>
     <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
     <p class="cover-subtitle">Manual de Usuario y Control de Versiones</p>
     <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Professional Radiation Shielding Calculation Platform</p>
@@ -108,11 +108,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="toc-title">Contenido</div>
   <ul class="toc">
     <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
-    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F260</a></li>
+    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F263</a></li>
     <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
     <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
 
-    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F260)</a></li>
+    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F263)</a></li>
     <li class="toc-l1"><a href="#sec4">4. Control de Cambios Completo</a></li>
 
     <li class="toc-part"><a href="#part3">PARTE III: METODOLOGIA CIENTIFICA</a></li>
@@ -170,12 +170,12 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <!-- ==================== PARTE I ==================== -->
 <div class="part-divider" id="part1">PARTE I<br><span style="font-size:14pt;font-weight:400;">Introduccion y Fundamentos</span></div>
 
-<h1 id="sec1">1. Introduccion a RadShield-MX F260</h1>
+<h1 id="sec1">1. Introduccion a RadShield-MX F263</h1>
 
 <p>RadShield-MX es una plataforma integral de codigo abierto para el diseno, calculo y optimizacion de blindajes radiologicos en instalaciones medicas e industriales. Desarrollada en Mexico, cumple con la normativa de la Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS) asi como con estandares internacionales.</p>
 
 <div class="info-box">
-<span class="info-box-title">Version F260 — Estadisticas del proyecto:</span>
+<span class="info-box-title">Version F263 — Estadisticas del proyecto:</span>
 <table style="margin:0.3cm 0;font-size:10pt">
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Modulos:</strong></td><td>4,062+ modulos TypeScript/React</td></tr>
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Dialogos:</strong></td><td>220+ componentes de interfaz</td></tr>
@@ -200,6 +200,7 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 <table class="version-table">
 <thead><tr><th>Componente</th><th>Minimo</th><th>Recomendado</th></tr></thead>
 <tbody>
+
 <tr><td><strong>Navegador</strong></td><td>Chrome 90+, Firefox 88+, Edge 90+</td><td>Chrome 120+ (optimizado WebGPU)</td></tr>
 <tr><td><strong>RAM</strong></td><td>4 GB</td><td>8 GB+ (MC 10^7, ONNX inference)</td></tr>
 <tr><td><strong>Resolucion</strong></td><td>1366 x 768</td><td>1920 x 1080 o superior</td></tr>
@@ -211,7 +212,7 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 <h1 id="sec3">3. Interfaz de Usuario y Navegacion</h1>
 
 <h3>3.1. Estructura de la interfaz</h3>
-<p>La interfaz F260 se organiza en tres areas principales:</p>
+<p>La interfaz F263 se organiza en tres areas principales:</p>
 <ol>
   <li><strong>Toolbar superior</strong>: 18 botones de acceso rapido agrupados en 6 categorias (NCRP, Analisis, Herramientas, I/O, Canvas, Auth).</li>
   <li><strong>Canvas central</strong>: Area de dibujo interactivo con plano arquitectonico, barreras, fuentes y regiones. Incluye sidebar derecho colapsable con los 18 botones de acceso rapido.</li>
@@ -223,6 +224,7 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 <table class="version-table">
 <thead><tr><th>#</th><th>Boton</th><th>Icono</th><th>Color</th><th>Funcion</th><th>Version</th></tr></thead>
 <tbody>
+
 <tr><td>1</td><td>Prim</td><td>ShieldPlus</td><td style="color:#c00">Rojo</td><td>Barrera primaria B=Pd^2/(WUT)</td><td>v99</td></tr>
 <tr><td>2</td><td>Sec</td><td>ShieldAlert</td><td style="color:#e65100">Naranja</td><td>Barrera secundaria scatter+leakage</td><td>v99</td></tr>
 <tr><td>3</td><td>Neut</td><td>Atom</td><td style="color:#1565c0">Azul</td><td>Blindaje neutronico >10 MV</td><td>v99</td></tr>
@@ -247,16 +249,19 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 
 
 <!-- ==================== PARTE II ==================== -->
-<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F260)</span></div>
+<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F263)</span></div>
 
-<h1 id="sec4">4. Control de Cambios Completo v1-F260</h1>
+<h1 id="sec4">4. Control de Cambios Completo v1-F263</h1>
 
-<p>El siguiente historial documenta todas las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F260, julio 2026). No se omite ninguna version; las fases sin cambios significativos se agrupan por periodo.</p>
+<p>El siguiente historial documenta todas las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F263, julio 2026). No se omite ninguna version; las fases sin cambios significativos se agrupan por periodo.</p>
 
 <table class="version-table">
 <thead><tr><th style="width:10%">Fase</th><th style="width:12%">Version</th><th style="width:18%">Fecha</th><th>Modulos principales implementados</th></tr></thead>
 <tbody>
 
+
+
+<tr><td><strong>F263</strong></td><td>APS DWG Adapter</td><td>2026-07-24</td><td>Agrega adaptador backend seguro para Autodesk Platform Services Design Automation con `cad.apsDwgStatus` y `cad.apsDwgPlan`. Prepara DWG-&gt;DXF con hashes, timeout, limite de tamano, validacion de capas/escala y fallback DXF. Conversion live diferida a F264 hasta credenciales y fixtures DWG no sensibles.</td></tr>
 <tr><td><strong>F261-F262</strong></td><td>DWG Provider + Fixtures</td><td>2026-07-24</td><td>Selecciona APS Design Automation como proveedor primario DWG->DXF; ODA queda como ruta privada enterprise; CloudConvert solo preview; DXF manual como fallback. Crea fixtures/dwg y requiere small-architectural-plan.dwg + equipment-layout.dwg antes de aplicar conversion real al canvas.</td></tr>
 
 <tr><td><strong>F258-F260</strong></td><td>Executable Lanes</td><td>2026-07-24</td><td>F258 agrega event controller v2 aislado y apagado por defecto; F259 agrega contrato externo DWG->DXF/SVG/IFC con fallback DXF; F260 agrega manifest DB/fullstack con DATABASE_URL, TCP, backup, restore probe y backend URL. El frontend estatico puede publicarse sin activar CAD alto riesgo ni DB.</td></tr>
@@ -420,6 +425,7 @@ Donde:
 <table class="version-table">
 <thead><tr><th>Perfil</th><th>T</th><th>Descripcion</th><th>Ejemplos</th></tr></thead>
 <tbody>
+
 <tr><td>Control Room</td><td>1.0</td><td>Totalmente ocupado — personal tiempo completo</td><td>Sala control RX, CT, LINAC</td></tr>
 <tr><td>Administrative</td><td>1.0</td><td>Oficinas administrativas</td><td>Oficina fisico medico, secretaria</td></tr>
 <tr><td>Patient Room</td><td>1.0</td><td>Pacientes internados</td><td>Hospitalizacion, UCI</td></tr>
@@ -552,7 +558,7 @@ Costos USD/kg (2024):
 
 <h2 id="sec8-1">8.1. Pantalla de Bienvenida</h2>
 
-<p class="screenshot-desc">Al abrir RadShield-MX F260, se muestra la pantalla de bienvenida con KPIs superiores (220+ modulos, 90+ referencias, 5 capas AI), acciones rapidas, proyectos recientes, templates y acceso al tutorial.</p>
+<p class="screenshot-desc">Al abrir RadShield-MX F263, se muestra la pantalla de bienvenida con KPIs superiores (220+ modulos, 90+ referencias, 5 capas AI), acciones rapidas, proyectos recientes, templates y acceso al tutorial.</p>
 
 <ol class="steps">
 <li>Haga clic en <strong>RadShield-MX</strong> en el logo superior para acceder a la pantalla de bienvenida.</li>
@@ -641,6 +647,7 @@ Costos USD/kg (2024):
 <table class="version-table">
 <thead><tr><th>Herramienta</th><th>Accion</th><th>Resultado</th></tr></thead>
 <tbody>
+
 <tr><td><strong>Seleccionar</strong> (V)</td><td>Clic y arrastre</td><td>Selecciona barreras, fuentes o regiones</td></tr>
 <tr><td><strong>Barrera</strong> (B)</td><td>Dos clics (inicio y fin)</td><td>Dibuja una linea de barrera</td></tr>
 <tr><td><strong>Fuente</strong> (S)</td><td>Clic en posicion</td><td>Coloca una fuente de radiacion</td></tr>
@@ -1830,11 +1837,11 @@ radshield-mx/
 
 <div class="version-info">
 Documento integrado: Manual de Usuario + Control de Versiones RadShield-MX<br>
-Version del manual: F260 (sincronizado con codigo fuente)<br>
+Version del manual: F263 (sincronizado con codigo fuente)<br>
 Fecha de generacion: Julio 2026<br>
 Total de secciones: 25 + 6 Apendices (A-F)<br>
 Total de referencias bibliograficas: 90 (R1-R90)<br>
-Cobertura de versiones: v1 - F260 (inclusive)<br>
+Cobertura de versiones: v1 - F263 (inclusive)<br>
 </div>
 
 </body>

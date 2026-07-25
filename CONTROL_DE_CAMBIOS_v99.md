@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F260
+# RadShield-MX — Control de Cambios Completo v1-F263
+
+## F263 (2026-07-24) - APS DWG Adapter Gate
+
+- Se agrega router backend `cad` con `apsDwgStatus` y `apsDwgPlan`.
+- Se agrega adaptador APS DWG seguro en backend para preparar DWG->DXF con hash, limite de tamano, timeout y validaciones.
+- Se integra F263 a F125, Update Center, manuales y manifest ejecutable.
+- No se habilita conversion live hasta F264 con credenciales APS, fixtures DWG no sensibles y smoke de capas/escala.
 
 ## F261-F262 (2026-07-24) - DWG Provider Selection And Fixture Gate
 

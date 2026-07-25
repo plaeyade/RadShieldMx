@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F263 (2026-07-24) - aps-dwg-adapter
+
+- Se integra `cad.apsDwgStatus` y `cad.apsDwgPlan` en el backend para preparar conversion DWG->DXF con Autodesk Platform Services Design Automation.
+- El adaptador solo genera estado/plan y hashes; no ejecuta conversion live sin credenciales, fixtures y confirmacion.
+- Regla de seguridad: `APS_CLIENT_ID`, `APS_CLIENT_SECRET` y `APS_BUCKET_KEY` viven solo en backend. Nunca en variables `VITE_`.
+- Siguiente fase: F264 smoke live con DWG no sensible y verificacion de capas/escala antes de aplicar al canvas.
+
 # F261-F262 (2026-07-24) - dwg-provider-fixtures
 
 - F261: proveedor recomendado para DWG->DXF: Autodesk Platform Services Design Automation, ejecutado desde backend con secretos seguros.
