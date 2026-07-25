@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F273-F278 (2026-07-25) - live readiness
+
+- F273 valida credenciales con salida redacted y sin escribir secretos en logs.
+- F274 queda como preflight OCR: requiere SDK/adaptador backend antes de procesar los dos PDFs pendientes.
+- F275 queda listo para smoke APS DWG: fixtures hasheados y credenciales revisadas; no se sube DWG sin autorizacion live.
+- F276 queda listo para consultas bibliograficas; Crossref/Semantic Scholar solo crean candidatos de cita.
+- F277 valida GATE/OpenGATE como runner inmediato; Geant4 y EGSnrc quedan pendientes para fase posterior.
+- F278 se mantiene esperando salidas live de OCR, APS, literatura y runner antes de QA integrado.
+
 # F269-F272 (2026-07-25) - gates externos ejecutables
 
 - F269 cierra el diseno de OCR cloud: Google Document AI como ruta primaria, Amazon Textract como fallback, dos memorias pendientes y salidas con pagina/confianza/hash.

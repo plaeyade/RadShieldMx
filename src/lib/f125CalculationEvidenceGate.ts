@@ -19,6 +19,7 @@ import { summarizeF269OcrCloudAdapterGate } from './f269OcrCloudAdapterGate';
 import { summarizeF270ApsDwgFixtureSmoke } from './f270ApsDwgFixtureSmoke';
 import { summarizeF271LiteratureDeepDiveGate } from './f271LiteratureDeepDiveGate';
 import { summarizeF272ExternalMonteCarloRunnerGate } from './f272ExternalMonteCarloRunnerGate';
+import { summarizeF273ToF278LiveIntegrationReadiness } from './f273ToF278LiveIntegrationReadiness';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -174,6 +175,7 @@ export function buildF125CalculationEvidenceSection(
     summarizeF270ApsDwgFixtureSmoke(),
     summarizeF271LiteratureDeepDiveGate(),
     summarizeF272ExternalMonteCarloRunnerGate(),
+    summarizeF273ToF278LiveIntegrationReadiness(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

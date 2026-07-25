@@ -350,6 +350,8 @@
     "test:f271:literature-deep-dive": "node scripts/check-f271-literature-deep-dive-contracts.mjs",
     "prepare:f272:external-mc-runner": "node scripts/f272-external-mc-runner-gate.mjs",
     "test:f272:external-mc-runner": "node scripts/check-f272-external-mc-runner-contracts.mjs",
+    "prepare:f273-f278:live-integrations": "node scripts/f273-f278-live-integration-readiness.mjs",
+    "test:f273-f278:live-integrations": "node scripts/check-f273-f278-live-integration-readiness-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

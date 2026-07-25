@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F273-F278 (2026-07-25) - validacion live controlada
+
+- Agrega gate consolidado para validar credenciales OCR, APS/DWG, literatura y runners sin imprimir secretos.
+- Confirma que Google/AWS/APS/Semantic/Crossref/GATE se revisan desde `.env`; Geant4 y EGSnrc quedan diferidos por decision operativa.
+- No procesa PDFs, no sube DWG y no ejecuta Monte Carlo automaticamente; solo hace preflight y probe seguro de health cuando hay URL de GATE.
+- Detecta dependencias faltantes de servidor para OCR live: `@google-cloud/documentai` y `@aws-sdk/client-textract`.
+
 # F269-F272 (2026-07-25) - OCR, DWG, literatura y Monte Carlo externo
 
 - F269 agrega gate OCR cloud para Google Document AI y Amazon Textract sobre las dos memorias reales pendientes de OCR, sin llamadas live ni secretos en frontend.

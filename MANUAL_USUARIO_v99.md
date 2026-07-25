@@ -31,6 +31,19 @@ F271 prepara busquedas bibliograficas. Crossref y Semantic Scholar ayudan a enco
 
 F272 prepara Monte Carlo externo. La app exportara geometria, materiales, fuentes y scoring para GATE/OpenGATE, Geant4 o EGSnrc/egs_brachy; luego importara dosis, incertidumbre y manifiesto. No es un motor clinico certificado dentro del frontend: todo resultado requiere revision del fisico/RSO y QA numerico.
 
+## Addendum F273-F278 - Validacion De Credenciales Y Runners
+
+Para revisar credenciales sin exponerlas, ejecute:
+
+```powershell
+npm run prepare:f273-f278:live-integrations
+npm run test:f273-f278:live-integrations
+```
+
+El resultado queda en `outputs/f273_f278_live_integration_readiness/`. La salida nunca imprime valores secretos: solo lista variables configuradas o faltantes. Si Google Document AI y Textract estan configurados pero los SDKs backend no estan instalados, el estado correcto es `waiting-for-sdk`; eso significa que la credencial existe, pero aun no se debe procesar un PDF.
+
+Geant4 y EGSnrc/egs_brachy quedan diferidos. En esta etapa solo se valida GATE/OpenGATE si `GATE_RUNNER_URL` responde `/health`. El QA integrado F278 se cierra hasta contar con salidas reales de OCR, DWG, literatura y runner.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.
