@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F261-F262 (2026-07-24) - DWG provider selection and fixture gate
+
+- Se selecciona **Autodesk Platform Services Design Automation** como proveedor primario recomendado para DWG->DXF por fidelidad AutoCAD/capas/bloques.
+- Se deja **ODA self-hosted** como ruta privada/enterprise de mediano plazo y **CloudConvert** solo como preview SVG/PDF/PNG, no como geometria canonica para calculo.
+- Se conserva **manual DXF fallback** como ruta inmediata y rollback.
+- Se agregan `dwgProviderSelection.ts`, `dwgFixtureGate.ts`, `fixtures/dwg/README.md` y scripts `prepare:f261-f262:dwg` / `test:f261-f262:dwg`.
+- F262 queda esperando 2 DWG no sensibles: `small-architectural-plan.dwg` y `equipment-layout.dwg`.
+
 # F258-F260 (2026-07-24) - Staging CAD, DWG boundary and DB gate
 
 - F258 agrega `src/lib/canvas/eventControllerV2.ts`: controlador de eventos aislado para select/drag/snap/lasso/pan/zoom/delete/undo; por defecto enruta al `useCanvas` estable.

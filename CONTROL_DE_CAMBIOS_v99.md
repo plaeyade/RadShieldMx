@@ -1,5 +1,13 @@
 # RadShield-MX — Control de Cambios Completo v1-F260
 
+## F261-F262 (2026-07-24) - DWG Provider Selection And Fixture Gate
+
+- Se selecciona APS Design Automation como proveedor primario recomendado para DWG->DXF.
+- Se deja ODA como ruta privada/enterprise y CloudConvert solo para preview.
+- Se crea gate de fixtures DWG no sensibles en `fixtures/dwg/`.
+- Se integra F261/F262 a F125 para Memoria IA/Evidence.
+- Se agregan scripts `prepare:f261-f262:dwg` y `test:f261-f262:dwg`.
+
 ## F258-F260 (2026-07-24) - Staging CAD, DWG Boundary And DB Gate
 
 - Se agrega event controller v2 aislado para staging; el canvas estable no se sustituye por defecto.

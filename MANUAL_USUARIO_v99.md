@@ -1,5 +1,22 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F261-F262 - Proveedor DWG Y Fixtures
+
+Proveedor recomendado:
+
+- Primario: Autodesk Platform Services Design Automation para convertir DWG a DXF desde backend.
+- Ruta privada futura: ODA self-hosted/private cloud si se necesita control total de planos sensibles.
+- Preview: CloudConvert solo para SVG/PDF/PNG de referencia, no para calculo si no entrega capas DXF verificadas.
+- Fallback: convertir manualmente a DXF con AutoCAD/ODA/local CAD y usar el importador DXF actual.
+
+Antes de activar conversion real se requieren fixtures no sensibles en `fixtures/dwg/`:
+
+1. `small-architectural-plan.dwg`: plano pequeno con capas de muros y escala conocida.
+2. `equipment-layout.dwg`: plano con bloques o simbolos de equipos.
+3. Opcional: `known-bad-or-empty.dwg` para validar fallo seguro.
+
+Nunca aplicar un DWG directo al canvas. Flujo correcto: DWG -> proveedor backend -> DXF/SVG/IFC -> hash -> validacion de capas -> confirmacion de escala -> aplicar al canvas.
+
 ## Addendum F258-F260 - Activacion Por Carriles
 
 F258-F260 queda implementado como carriles separados:

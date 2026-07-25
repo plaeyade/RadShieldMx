@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F261-F262 (2026-07-24) - dwg-provider-fixtures
+
+- F261: proveedor recomendado para DWG->DXF: Autodesk Platform Services Design Automation, ejecutado desde backend con secretos seguros.
+- Alternativas: ODA self-hosted para privacidad enterprise; CloudConvert solo preview/overlay; DXF manual como fallback.
+- F262: se crea `fixtures/dwg/` y manifest de fixtures. Se requieren dos DWG no sensibles antes de activar conversion real.
+- Nuevos comandos: `npm run prepare:f261-f262:dwg` y `npm run test:f261-f262:dwg`.
+- Regla: ningun DWG se aplica al canvas sin hash, conversion, validacion de capas, confirmacion de escala y confirmacion del operador.
+
 # F258-F260 (2026-07-24) - staging-cad-dwg-db-gates
 
 - F258: se agrega controlador de eventos v2 aislado. No sustituye el canvas estable; solo reporta/rutea acciones cuando el flag esta activo.

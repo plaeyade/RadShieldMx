@@ -9,6 +9,8 @@ import { buildF256ToF260RoadmapSection } from './f256ToF260NextPhaseRoadmap';
 import { buildF257ToF260FullExecutionSection } from './f257ToF260FullExecution';
 import { getCanvasEventControllerV2Status } from './canvas/eventControllerV2';
 import { summarizeDwgExternalProviderContract } from './dwgExternalProviderGate';
+import { summarizeDwgFixtureGate } from './dwgFixtureGate';
+import { summarizeDwgProviderSelection } from './dwgProviderSelection';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -154,6 +156,8 @@ export function buildF125CalculationEvidenceSection(
     buildF257ToF260FullExecutionSection(),
     `F258 Event controller v2 enabled: ${getCanvasEventControllerV2Status().enabled ? 'yes' : 'no'}; rollback: ${getCanvasEventControllerV2Status().rollback}`,
     summarizeDwgExternalProviderContract(),
+    summarizeDwgProviderSelection(),
+    summarizeDwgFixtureGate(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

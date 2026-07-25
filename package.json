@@ -324,6 +324,8 @@
     "test:f257-f260:full": "node scripts/check-f257-f260-full-execution-contracts.mjs",
     "test:f258-f260:full": "node scripts/check-f258-f260-full-contracts.mjs",
     "prepare:f260:db-gate": "node scripts/f260-fullstack-db-gate.mjs",
+    "prepare:f261-f262:dwg": "node scripts/f261-f262-dwg-provider-fixture.mjs",
+    "test:f261-f262:dwg": "node scripts/check-f261-f262-dwg-provider-fixture-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
