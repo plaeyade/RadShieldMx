@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F264
+# RadShield-MX — Control de Cambios Completo v1-F265
+
+## F265 (2026-07-24) - Real App Testing Protocol
+
+- Se crea protocolo operativo de pruebas reales por perfiles DX/TX/NM/CY.
+- Se agregan pasos obligatorios para plano, equipo, material, calculo, evidencia, exportes y desviaciones.
+- Se integra F265 a Update Center, manuales y manifest ejecutable.
+- Criterio de cierre: DX/TX/NM reales sin desviaciones blocker/major antes de salida clinica firmada; CY puede quedar gated.
 
 ## F264 (2026-07-24) - Real Clinical Trial Gate
 
@@ -562,3 +569,4 @@
 *Documento generado el 2026-06-08*
 *Version: v99*
 *RadShield-MX — Professional Radiation Shielding Design*
+

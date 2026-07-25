@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F265 (2026-07-24) - real-app-testing-protocol
+
+- Se formaliza protocolo de pruebas reales de la app despues de F264.
+- Perfiles obligatorios antes de release clinico firmado: DX, TX y NM; CY queda gated hasta contar con datos reales de ciclotron.
+- Cada prueba debe capturar canvas con escala/zonas, snapshot de fuente/equipo, material con TVL/densidad/peso/costo/carga, traza de calculo, comparador conservador, Memoria IA, PDF, Evidence Pack y bitacora de desviaciones.
+- Si aparece desviacion blocker/major, no se firma reporte: se corrige, se documenta o se marca como limitacion explicita.
+
 # F264 (2026-07-24) - real-clinical-trial-gate
 
 - Se habilita gate de prueba real controlada para el motor de calculo con escenarios DX/TX/NM: LINAC 6 MV, LINAC 18 MV, CT, PET F-18, Gamma Knife Co-60 y HDR Ir-192.

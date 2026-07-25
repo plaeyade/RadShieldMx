@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F265 (2026-07-24) - Real app testing protocol
+
+- Se agrega `src/lib/f265RealAppTestingProtocol.ts` para convertir F264 en protocolo operativo de pruebas reales por perfil DX/TX/NM/CY.
+- Se definen pasos verificables: plano/escala/zonas, equipo/fuente, material, evidencia de calculo, Memoria IA/PDF/Evidence Pack y bitacora de desviaciones.
+- Se agregan `prepare:f265:real-app-testing` y `test:f265:real-app-testing` para generar manifiesto JSON/Markdown antes de probar proyectos reales.
+- Regla de release: no salida clinica firmada hasta probar DX/TX/NM reales sin desviaciones blocker/major; CY puede quedar gated si no hay caso real disponible.
+
 # F264 (2026-07-24) - Real clinical trial gate and calculation engine hardening
 
 - Se agrega `src/lib/realClinicalTrialCases.ts` con casos sinteticos de prueba real para LINAC 6 MV, LINAC 18 MV, CT, PET F-18, Gamma Knife Co-60 y HDR Ir-192.

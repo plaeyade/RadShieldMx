@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F265 - Protocolo de Pruebas Reales
+
+F265 convierte el gate tecnico F264 en una ruta operativa para probar RadShield-MX con proyectos reales. La prueba minima antes de llamar estable una salida clinica debe cubrir al menos un caso DX, un caso TX y un caso NM. CY/ciclotron puede permanecer como gated si aun no hay datos reales completos.
+
+Paso a paso por caso:
+
+1. Cargar o dibujar plano, fijar escala y declarar zonas controladas/publicas.
+2. Colocar equipo/fuente y confirmar modalidad, energia, workload, U, T, P y distancias.
+3. Seleccionar material y validar TVL/HVL, densidad, peso kg/m2, carga kPa, costo/m2, tiempo estimado y cita/hash.
+4. Ejecutar calculo y revisar formula, norma, inputs, outputs, supuestos, citationIds, warnings clinicos, comparador base/conservador y cache F196.
+5. Generar Memoria IA, PDF y Evidence Pack.
+6. Comparar contra memoria analitica previa o criterio firmado.
+7. Registrar desviaciones como calculation, data, floorplan, material, citation, report o ui, con severidad blocker/major/minor/observation.
+
+Regla: si existe una desviacion blocker o major sin resolver, el resultado no debe usarse como memoria firmada. Debe corregirse, documentarse como limitacion o pasar a revision de fisico medico/RSO.
+
 ## Addendum F264 - Pruebas Reales Controladas Del Motor
 
 F264 permite empezar pruebas reales de la app con un arnes de calculo que simula casos clinicos representativos antes de usar proyectos firmados.
