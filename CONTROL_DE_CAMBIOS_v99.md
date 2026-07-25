@@ -1,5 +1,15 @@
 # RadShield-MX — Control de Cambios Completo v1-F260
 
+## F257-F260 (2026-07-24) - Full Execution Gate
+
+- Se agrega `src/lib/f257ToF260FullExecution.ts` para convertir F257-F260 en evidencia ejecutable.
+- Se agrega `.env.staging-cad.example` para activar CAD de alto riesgo solo en staging, dejando `VITE_CANVAS_EVENT_CONTROLLER_V2=false` al inicio.
+- F257 queda ejecutado como paquete staging y rollback documentado.
+- F258 queda listo para event controller v2 solo con feature flag y E2E F229.
+- F259 queda bloqueado correctamente hasta seleccionar proveedor externo DWG.
+- F260 queda bloqueado correctamente hasta DB live con restore probe, backend smoke y secretos productivos.
+- Se agregan scripts `prepare:f257-f260:full` y `test:f257-f260:full`.
+
 ## F256-F260 (2026-07-21) - Next Phase Roadmap
 
 - F256: smoke publico del ZIP estatico actual contra URL final.

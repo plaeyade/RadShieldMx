@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F257-F260 - Ejecucion Completa Segura
+
+F257-F260 ya no queda solo como lista de pendientes: ahora existe un gate ejecutable con manifest, staging CAD y bloqueos claros para DWG/DB.
+
+Estado por fase:
+
+1. F257 ejecutado: se agrega `.env.staging-cad.example` para pruebas CAD de alto riesgo en staging. La app publica conserva los flags apagados.
+2. F258 listo para staging: el renderer/event controller v2 solo puede activarse con `VITE_CANVAS_EVENT_CONTROLLER_V2=true` despues de tener patch aislado y E2E F229.
+3. F259 bloqueado por proveedor: DWG debe entrar por conversion externa auditada a DXF/SVG/IFC, con fallback DXF.
+4. F260 bloqueado por DB live: requiere `DATABASE_URL`, backup autorizado, restore probe, backend health y smoke fullstack antes de declarar persistencia productiva.
+
+Comandos:
+
+- `npm run prepare:f257-f260:full`
+- `npm run test:f257-f260:full`
+
+Regla de uso: publicar/verificar frontend estatico primero; probar CAD de alto riesgo solo en staging; retomar DB/fullstack en un carril separado.
+
 ## Addendum F256-F260 - Que Sigue Despues Del RC Estatico
 
 Despues de F255, el orden recomendado es:

@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F257-F260 (2026-07-24) - full-execution-gate
+
+- F257: queda ejecutado el paquete staging CAD con `.env.staging-cad.example`; produccion conserva flags apagados.
+- F258: renderer/event controller v2 queda preparado para implementar solo con `VITE_CANVAS_EVENT_CONTROLLER_V2=true`, sin reemplazar `useCanvas` por defecto.
+- F259: DWG se mantiene como conversion externa, con contrato de proveedor, auditoria, hash, timeout y fallback DXF.
+- F260: DB/fullstack queda listo para volver cuando existan credenciales y permisos; no se declara produccion multiusuario sin backup hash, restore probe y smoke backend.
+- Validacion nueva: `npm run prepare:f257-f260:full` y `npm run test:f257-f260:full`.
+- Regla de operacion: deploy estatico, CAD alto riesgo y DB/fullstack son tres carriles separados.
+
 # F256-F260 (2026-07-21) - next-phase-roadmap-post-rc
 
 - F256: subir/verificar el ZIP estatico actual contra URL publica y repetir F202 o F203 manual.

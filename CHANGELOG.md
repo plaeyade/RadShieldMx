@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F257-F260 (2026-07-24) - Full execution gate
+
+- F257 se ejecuta como paquete staging: `.env.staging-cad.example` activa `VITE_CANVAS_HIGH_RISK_CAD=true` y mantiene `VITE_CANVAS_EVENT_CONTROLLER_V2=false`.
+- F258 queda listo para spike aislado de renderer/event controller v2, pero solo con E2E F229 y rollback a `useCanvas`.
+- F259 define el limite seguro para proveedor externo DWG->DXF/SVG/IFC: hash, timeout, limite de archivo, auditoria y fallback DXF.
+- F260 queda listo como gate DB/fullstack, pero bloqueado hasta `DATABASE_URL`, permisos de backup/restore probe, health backend y smoke live.
+- Se agrega manifest ejecutable `outputs/f257_f260_full_execution/f257_f260_full_execution.json` y evidencia markdown `outputs/fase_257_260_full_execution.md`.
+- Decision: frontend estatico queda como carril estable; CAD alto riesgo y DB/fullstack no se mezclan con el deploy publico.
+
 # F256-F260 (2026-07-21) - Next phase roadmap post-RC
 
 - Se define el orden posterior a F255: F256 smoke publico del ZIP actual, F257 staging con flags CAD, F258 spike renderer/event controller v2, F259 proveedor DWG externo y F260 regreso a DB/fullstack.
