@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F267 (2026-07-25) - Real case smoke execution
+
+- Se agrega `src/lib/f267RealCaseSmokeExecution.ts` para ejecutar smoke DX/TX/NM sobre el protocolo F265 y el kit F266.
+- Se genera `outputs/f267_real_case_smoke_execution/real_case_smoke_deviation_log.csv` con filas iniciales para CT, LINAC 6 MV y PET F-18.
+- Las filas usan baseline sintetico F264 y quedan marcadas para reemplazo por memoria analitica firmada antes de release clinico.
+
 # F266 (2026-07-24) - Real case evidence kit
 
 - Se agrega `src/lib/f266RealCaseEvidenceKit.ts` con checklist por perfil, evidencia minima, stop rules y plantilla CSV para desviaciones reales.

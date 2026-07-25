@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F266
+# RadShield-MX — Control de Cambios Completo v1-F267
+
+## F267 (2026-07-25) - Real Case Smoke Execution
+
+- Se ejecuta smoke DX/TX/NM con baseline sintetico derivado de F264.
+- Se genera CSV de desviaciones smoke para sustituir despues por memorias firmadas.
+- Se integra F267 a Update Center, manuales y manifest ejecutable.
+- Decision: continuar pruebas reales de app; salida clinica firmada sigue condicionada a reemplazar baseline sintetico por evidencia real.
 
 ## F266 (2026-07-24) - Real Case Evidence Kit
 

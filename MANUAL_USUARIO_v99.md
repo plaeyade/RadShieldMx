@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F267 - Smoke de Casos Reales DX/TX/NM
+
+F267 ejecuta una primera corrida operativa con tres perfiles: DX, TX y NM. Usa casos representativos derivados de F264 para poblar el CSV `outputs/f267_real_case_smoke_execution/real_case_smoke_deviation_log.csv`.
+
+Importante: F267 no valida clinicamente la app contra una memoria firmada. Su valor es comprobar que el flujo de captura, calculo, evidencia y desviaciones ya esta listo. Antes de usar una salida firmada, el operador debe reemplazar:
+
+- `sourceDocument`: cambiar `synthetic-F264-baseline-replace-with-signed-memory` por la memoria/reporte real.
+- `expectedFromSignedMemory`: colocar el valor real esperado.
+- `difference`: recalcular diferencia absoluta/relativa.
+- `severity` y `disposition`: clasificar y cerrar desviaciones.
+
+La siguiente prueba real debe iniciar con un caso tuyo DX, TX o NM y llenar el CSV F267/F266 con evidencia real.
+
 ## Addendum F266 - Kit de Evidencia Para Casos Reales
 
 F266 agrega el paquete de captura para pruebas reales. El archivo `outputs/f266_real_case_evidence_kit/real_case_deviation_log_template.csv` se usa para registrar diferencias entre RadShield-MX y una memoria analitica previa, reporte firmado o criterio profesional.

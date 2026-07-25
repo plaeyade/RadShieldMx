@@ -1,5 +1,11 @@
 # RadShield-MX - Manual de Versiones
 
+# F267 (2026-07-25) - real-case-smoke-execution
+
+- Se ejecuta smoke DX/TX/NM con casos representativos CT, LINAC 6 MV y PET F-18.
+- Se crea CSV `real_case_smoke_deviation_log.csv` con baseline sintetico F264.
+- Regla: el smoke permite continuar pruebas de app, pero no sustituye memorias reales firmadas. Antes de release clinico, reemplazar `expectedFromSignedMemory` y `sourceDocument`.
+
 # F266 (2026-07-24) - real-case-evidence-kit
 
 - Se agrega kit operativo para capturar pruebas reales: checklist por perfil, evidencia minima y CSV de desviaciones.
