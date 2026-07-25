@@ -86,6 +86,15 @@ F281 usa un flujo hibrido:
 
 La DB no se siembra automaticamente. Primero se debe revisar calidad OCR, deduplicacion, paginas, hashes y citas. Si Tesseract no lista `spa` en `--list-langs`, el resultado se considera borrador revisable; para seed final en espanol debe quedar visible `spa.traineddata` o configurarse `TESSDATA_PREFIX` hacia la carpeta correcta.
 
+Si `spa.traineddata` esta en Ubuntu/WSL, exponga la carpeta `tessdata` a Windows o ejecute con una ruta visible:
+
+```powershell
+$env:F281_TESSDATA_DIR='\\wsl.localhost\Ubuntu\usr\share\tesseract-ocr\5\tessdata'
+npm run prepare:f281:full-local-ocr
+```
+
+Tambien funciona `TESSDATA_PREFIX` si apunta al padre de `tessdata` o a la carpeta `tessdata` directamente. El manifiesto F281 registra `tessdataSource` y `tessdataCandidates` para auditar que modelo se uso.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.

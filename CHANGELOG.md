@@ -9,6 +9,7 @@
 - F280 agrega smoke OCR local de bajo riesgo: renderiza las primeras paginas de las memorias pendientes, corre Tesseract y genera JSONL draft para revision.
 - F281 agrega OCR local completo/hibrido para memorias reales: usa texto nativo cuando el PDF ya es searchable y Tesseract solo en paginas escaneadas o con texto insuficiente. La salida no siembra DB automaticamente y queda como evidencia revisable para QA/dedupe/RAG.
 - Nota operativa: Tesseract debe listar `spa` para considerar operativo el OCR en espanol. Si solo lista `eng/osd`, F281 sigue siendo util como borrador, pero no como seed final sin revision.
+- F281 agrega soporte para `F281_TESSDATA_DIR`/`TESSDATA_PREFIX` y rutas WSL UNC comunes, de modo que puede usar `spa.traineddata`/`tessdata_best` instalado en Ubuntu cuando Windows lo exponga.
 
 # F273-F278 (2026-07-25) - validacion live controlada
 

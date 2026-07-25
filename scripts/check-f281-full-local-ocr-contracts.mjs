@@ -17,6 +17,8 @@ expect('F281 status', manifest.status === 'full-local-ocr-draft');
 expect('No paid cloud OCR', manifest.paidCloudOcrUsed === false);
 expect('No automatic DB seed', manifest.seedDbAutomatically === false);
 expect('Tool policy tracks Spanish OCR visibility', Object.hasOwn(manifest.tools, 'spanishOcrOperational'));
+expect('Tessdata candidates are tracked', Array.isArray(manifest.tools.tesseract.tessdataCandidates));
+expect('Tessdata source is tracked', typeof manifest.tools.tesseract.tessdataSource === 'string');
 expect('Documents tracked', manifest.documents.length >= 6);
 expect('Pages extracted/OCRed', pages.length > 10);
 expect('Page records keep source hash', pages.every((page) => page.documentId && page.sourceHash && page.page > 0));

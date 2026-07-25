@@ -59,6 +59,63 @@ const which = (name) => {
   return undefined;
 };
 
+const normalizeMaybeDir = (candidate) => {
+  if (!candidate) return undefined;
+  const normalized = candidate.replace(/\\/g, '/');
+  if (normalized.toLowerCase().endsWith('/tessdata')) return normalized;
+  if (fs.existsSync(path.join(candidate, 'tessdata'))) return path.join(candidate, 'tessdata').replace(/\\/g, '/');
+  return normalized;
+};
+
+const tessdataCandidates = [
+  process.env.F281_TESSDATA_DIR,
+  process.env.TESSDATA_PREFIX,
+  'C:/Program Files/Tesseract-OCR/tessdata',
+  'C:/Program Files (x86)/Tesseract-OCR/tessdata',
+  `${process.env.LOCALAPPDATA ?? ''}/Programs/Tesseract-OCR/tessdata`,
+  '//wsl.localhost/Ubuntu/usr/share/tesseract-ocr/5/tessdata',
+  '//wsl.localhost/Ubuntu-22.04/usr/share/tesseract-ocr/5/tessdata',
+  '//wsl.localhost/Ubuntu-24.04/usr/share/tesseract-ocr/5/tessdata',
+  '//wsl$/Ubuntu/usr/share/tesseract-ocr/5/tessdata',
+  '//wsl$/Ubuntu-22.04/usr/share/tesseract-ocr/5/tessdata',
+  '//wsl$/Ubuntu-24.04/usr/share/tesseract-ocr/5/tessdata',
+].map(normalizeMaybeDir).filter(Boolean);
+
+const listTesseractLanguages = (tesseractPath, tessdataDir) => {
+  if (!tesseractPath) return { languages: [], probeStatus: undefined, stderr: undefined };
+  const args = tessdataDir ? ['--tessdata-dir', tessdataDir, '--list-langs'] : ['--list-langs'];
+  const probe = run(tesseractPath, args);
+  const languages = probe.status === 0
+    ? probe.stdout.split(/\r?\n/).map((line) => line.trim()).filter((line) => line && !line.toLowerCase().includes('list of'))
+    : [];
+  return { languages, probeStatus: probe.status, stderr: probe.stderr };
+};
+
+const resolveTessdataDir = (tesseractPath) => {
+  const defaultProbe = listTesseractLanguages(tesseractPath);
+  if (defaultProbe.languages.includes('spa')) {
+    return { tessdataDir: undefined, languages: defaultProbe.languages, source: 'default-tesseract' };
+  }
+
+  for (const candidate of tessdataCandidates) {
+    if (!candidate || !fs.existsSync(candidate)) continue;
+    const probe = listTesseractLanguages(tesseractPath, candidate);
+    if (probe.languages.includes('spa')) {
+      return { tessdataDir: candidate, languages: probe.languages, source: candidate };
+    }
+  }
+
+  for (const candidate of tessdataCandidates) {
+    if (!candidate || !fs.existsSync(candidate)) continue;
+    const probe = listTesseractLanguages(tesseractPath, candidate);
+    if (probe.languages.length > 0) {
+      return { tessdataDir: candidate, languages: probe.languages, source: candidate };
+    }
+  }
+
+  return { tessdataDir: undefined, languages: defaultProbe.languages, source: 'default-tesseract' };
+};
+
 const sha256 = (filePath) => {
   const hash = crypto.createHash('sha256');
   hash.update(fs.readFileSync(filePath));
@@ -89,10 +146,8 @@ const pdftotext = which('pdftotext');
 const pdftoppm = which('pdftoppm');
 const tesseract = which('tesseract');
 const tesseractVersion = tesseract ? (run(tesseract, ['--version']).stdout || '').split(/\r?\n/)[0]?.trim() : undefined;
-const languageProbe = tesseract ? run(tesseract, ['--list-langs']) : undefined;
-const languages = languageProbe?.status === 0
-  ? languageProbe.stdout.split(/\r?\n/).map((line) => line.trim()).filter((line) => line && !line.toLowerCase().includes('list of'))
-  : [];
+const tessdataResolution = resolveTessdataDir(tesseract);
+const languages = tessdataResolution.languages;
 const language = languages.includes('spa') && languages.includes('eng') ? 'spa+eng'
   : languages.includes('spa') ? 'spa'
   : languages.includes('eng') ? 'eng'
@@ -130,7 +185,8 @@ const renderPage = (sourcePath, documentId, page) => {
 const ocrImage = (imagePath, page) => {
   if (!tesseract) return { text: '', warning: 'tesseract-missing' };
   if (!language) return { text: '', warning: 'tesseract-language-missing' };
-  const ocr = run(tesseract, [imagePath, 'stdout', '-l', language, '--psm', '6']);
+  const tessdataArgs = tessdataResolution.tessdataDir ? ['--tessdata-dir', tessdataResolution.tessdataDir] : [];
+  const ocr = run(tesseract, [imagePath, 'stdout', ...tessdataArgs, '-l', language, '--psm', '6']);
   if (ocr.status !== 0) return { text: '', warning: `tesseract-page-${page}-failed:${ocr.stderr || ocr.stdout}`.slice(0, 220) };
   return repairMojibake(ocr.stdout);
 };
@@ -293,7 +349,15 @@ const manifest = {
     pdfinfo: { available: Boolean(pdfinfo), path: pdfinfo },
     pdftotext: { available: Boolean(pdftotext), path: pdftotext },
     pdftoppm: { available: Boolean(pdftoppm), path: pdftoppm },
-    tesseract: { available: Boolean(tesseract), path: tesseract, version: tesseractVersion, languages },
+    tesseract: {
+      available: Boolean(tesseract),
+      path: tesseract,
+      version: tesseractVersion,
+      languages,
+      tessdataDir: tessdataResolution.tessdataDir,
+      tessdataSource: tessdataResolution.source,
+      tessdataCandidates,
+    },
     spanishOcrOperational: languages.includes('spa'),
   },
   documents: documentResults,

@@ -9,6 +9,7 @@
 - F280 ejecuta smoke OCR local solo en primeras paginas para revisar calidad antes de procesar documentos completos.
 - F281 ejecuta OCR/text completo local sobre memorias reales, deduplica por hash, guarda texto por documento y JSONL por pagina, y mantiene `seedDbAutomatically=false`.
 - Si Tesseract no muestra `spa` en `--list-langs`, los resultados quedan como borrador revisable; instalar o enrutar `spa.traineddata` es requisito antes de seed RAG productivo.
+- F281 ahora acepta `F281_TESSDATA_DIR`/`TESSDATA_PREFIX` y registra `tessdataSource`; esto permite usar modelos `tessdata_best` instalados en Ubuntu/WSL si Windows puede leer la ruta UNC.
 
 # F273-F278 (2026-07-25) - live readiness
 
