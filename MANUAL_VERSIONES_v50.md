@@ -1,5 +1,11 @@
 # RadShield-MX - Manual de Versiones
 
+# F266 (2026-07-24) - real-case-evidence-kit
+
+- Se agrega kit operativo para capturar pruebas reales: checklist por perfil, evidencia minima y CSV de desviaciones.
+- Evidencia minima: captura canvas/escala/zonas, inputs de equipo, material TVL/densidad/carga, trace de calculo, comparador, Memoria IA, PDF, Evidence Pack y log de desviaciones.
+- Stop rules: blocker/major abierto, escala ausente, material sin evidencia, calculo sin formula/norma/cita o exportes incompletos.
+
 # F265 (2026-07-24) - real-app-testing-protocol
 
 - Se formaliza protocolo de pruebas reales de la app despues de F264.

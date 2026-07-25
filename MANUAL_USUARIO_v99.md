@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F266 - Kit de Evidencia Para Casos Reales
+
+F266 agrega el paquete de captura para pruebas reales. El archivo `outputs/f266_real_case_evidence_kit/real_case_deviation_log_template.csv` se usa para registrar diferencias entre RadShield-MX y una memoria analitica previa, reporte firmado o criterio profesional.
+
+Evidencia minima por caso:
+
+- Captura del canvas con escala, barreras, equipos y zonas.
+- Snapshot de inputs del equipo/fuente.
+- Material con TVL/HVL, densidad, peso kg/m2, carga kPa, costo y cita/hash.
+- Traza de calculo con formula, norma, inputs, outputs, supuestos y citationIds.
+- Comparador base/conservador.
+- Memoria IA exportada.
+- PDF.
+- Evidence Pack.
+- CSV de desviaciones.
+
+Stop rule: si el CSV tiene una desviacion `blocker` o `major` con disposition `open`, no se considera cerrada la prueba real y no debe emitirse salida clinica firmada.
+
 ## Addendum F265 - Protocolo de Pruebas Reales
 
 F265 convierte el gate tecnico F264 en una ruta operativa para probar RadShield-MX con proyectos reales. La prueba minima antes de llamar estable una salida clinica debe cubrir al menos un caso DX, un caso TX y un caso NM. CY/ciclotron puede permanecer como gated si aun no hay datos reales completos.

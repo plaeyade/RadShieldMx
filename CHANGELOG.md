@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F266 (2026-07-24) - Real case evidence kit
+
+- Se agrega `src/lib/f266RealCaseEvidenceKit.ts` con checklist por perfil, evidencia minima, stop rules y plantilla CSV para desviaciones reales.
+- Se generan `outputs/f266_real_case_evidence_kit/f266_real_case_evidence_kit.json` y `real_case_deviation_log_template.csv`.
+- Se define que una desviacion blocker/major abierta detiene release clinico firmado, aunque el frontend estatico siga estable.
+
 # F265 (2026-07-24) - Real app testing protocol
 
 - Se agrega `src/lib/f265RealAppTestingProtocol.ts` para convertir F264 en protocolo operativo de pruebas reales por perfil DX/TX/NM/CY.

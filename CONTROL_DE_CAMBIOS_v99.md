@@ -1,4 +1,10 @@
-# RadShield-MX — Control de Cambios Completo v1-F265
+# RadShield-MX — Control de Cambios Completo v1-F266
+
+## F266 (2026-07-24) - Real Case Evidence Kit
+
+- Se crea kit de evidencia para pruebas reales con checklist por modalidad y CSV de desviaciones.
+- Se agregan stop rules explicitas para impedir release clinico firmado si quedan desviaciones blocker/major abiertas.
+- Se integra F266 a Update Center, manuales y manifest ejecutable.
 
 ## F265 (2026-07-24) - Real App Testing Protocol
 
