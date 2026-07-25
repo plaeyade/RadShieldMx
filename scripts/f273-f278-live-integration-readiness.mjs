@@ -68,7 +68,8 @@ const f270 = fs.existsSync(f270Path) ? JSON.parse(fs.readFileSync(f270Path, 'utf
 const dwgFixtures = f270?.fixtures ?? [];
 const gateProbe = await probeHttpHealth(process.env.GATE_RUNNER_URL, process.env.GATE_RUNNER_TOKEN);
 const googleServiceAccount = readGoogleCredentialState();
-const googleCredentialReady = googleNames.every(envHas)
+const cloudOcrRollbackByCost = true;
+const googleCredentialReady = cloudOcrRollbackByCost ? false : googleNames.every(envHas)
   && googleServiceAccount.fileExists
   && googleServiceAccount.jsonValid
   && googleServiceAccount.hasClientEmail
@@ -91,6 +92,7 @@ const manifest = {
     geant4: false,
     egsnrc: false,
   },
+  cloudOcrRollbackByCost,
   credentials: {
     googleDocumentAi: {
       env: redactState(googleNames),
@@ -126,14 +128,14 @@ const manifest = {
     {
       phase: 'F273',
       label: 'Credential validation',
-      status: googleCredentialReady && apsNames.every(envHas) && literatureNames.every(envHas) ? 'ready' : 'review-required',
-      evidence: ['redacted-env-present', 'google-service-account-file-check', 'aps-fixture-check', 'runner-url-check'],
+      status: apsNames.every(envHas) && literatureNames.every(envHas) ? 'ready' : 'review-required',
+      evidence: ['redacted-env-present', 'paid-ocr-rollback-by-cost', 'aps-fixture-check', 'runner-url-check'],
     },
     {
       phase: 'F274',
-      label: 'OCR live smoke preflight',
-      status: hasDep('@google-cloud/documentai') && hasDep('@aws-sdk/client-textract') ? 'ready-for-live-fixture' : 'waiting-for-sdk',
-      evidence: ['no-document-processed', 'google-service-account-validated-if-present', 'provider-sdk-check'],
+      label: 'OCR free/local preflight',
+      status: 'local-free-ocr-preflight',
+      evidence: ['no-document-processed', 'google-amazon-paid-ocr-deferred', 'run-f279-local-free-ocr-first'],
     },
     {
       phase: 'F275',
@@ -161,14 +163,16 @@ const manifest = {
     },
   ],
   blockers: [
-    ...(!googleCredentialReady ? ['Google Document AI service-account JSON path is configured but not fully readable/valid from this process.'] : []),
-    ...(!hasDep('@google-cloud/documentai') ? ['Install server-side @google-cloud/documentai before live Google Document AI OCR.'] : []),
-    ...(!hasDep('@aws-sdk/client-textract') ? ['Install server-side @aws-sdk/client-textract before live Textract fallback.'] : []),
     ...(gateProbe.attempted && !gateProbe.ok ? [`GATE runner health probe failed: ${gateProbe.reason ?? gateProbe.status}`] : []),
+  ],
+  paidOcrRollback: [
+    'Google Document AI disabled/deferred because it may create per-page cloud cost.',
+    'Amazon Textract disabled/deferred because it may create per-page cloud cost.',
+    'Use F279 local/free OCR before any paid exception.',
   ],
   deferred: ['Geant4 live runner smoke deferred by operator request.', 'EGSnrc/egs_brachy live runner smoke deferred by operator request.'],
   releaseDecision:
-    'F273-F278 confirms credentials are configured and live lanes are gated. No OCR, DWG upload, external literature query or MC run was executed except optional GATE /health probe.',
+    'F273-F278 confirms non-OCR live lanes are gated and rolls back paid OCR by cost. No OCR, DWG upload, external literature query or MC run was executed except optional GATE /health probe.',
 };
 
 fs.writeFileSync(path.join(outputDir, 'f273_f278_live_integration_readiness.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
@@ -185,6 +189,9 @@ fs.writeFileSync(
     '',
     '## Blockers',
     ...(manifest.blockers.length ? manifest.blockers.map((blocker) => `- ${blocker}`) : ['- none']),
+    '',
+    '## Paid OCR Rollback',
+    ...manifest.paidOcrRollback.map((item) => `- ${item}`),
     '',
     '## Deferred',
     ...manifest.deferred.map((item) => `- ${item}`),

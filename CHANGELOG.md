@@ -1,11 +1,18 @@
 # RadShield-MX - Fases recientes
 
+# F279 (2026-07-25) - rollback OCR cloud por costo y ruta libre/local
+
+- Google Document AI y Amazon Textract quedan desactivados/deferidos para OCR inicial porque pueden generar costo por pagina.
+- Se agrega gate F279 para probar OCR libre/local con PDF.js, Poppler (`pdftotext`/`pdftoppm`), Tesseract y OCRmyPDF.
+- Las dos memorias pendientes de OCR siguen como fixtures, pero no se envian a nube ni se procesan automaticamente.
+- Regla nueva: usar OCR local/free primero; usar cloud OCR solo como excepcion aprobada si la calidad local falla.
+
 # F273-F278 (2026-07-25) - validacion live controlada
 
 - Agrega gate consolidado para validar credenciales OCR, APS/DWG, literatura y runners sin imprimir secretos.
 - Confirma que Google/AWS/APS/Semantic/Crossref/GATE se revisan desde `.env`; Geant4 y EGSnrc quedan diferidos por decision operativa.
 - No procesa PDFs, no sube DWG y no ejecuta Monte Carlo automaticamente; solo hace preflight y probe seguro de health cuando hay URL de GATE.
-- Detecta dependencias faltantes de servidor para OCR live: `@google-cloud/documentai` y `@aws-sdk/client-textract`.
+- OCR cloud queda deferido por costo. La prueba recomendada pasa a F279 local/free OCR.
 
 # F269-F272 (2026-07-25) - OCR, DWG, literatura y Monte Carlo externo
 

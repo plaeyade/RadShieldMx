@@ -40,9 +40,22 @@ npm run prepare:f273-f278:live-integrations
 npm run test:f273-f278:live-integrations
 ```
 
-El resultado queda en `outputs/f273_f278_live_integration_readiness/`. La salida nunca imprime valores secretos: solo lista variables configuradas o faltantes. Si Google Document AI y Textract estan configurados pero los SDKs backend no estan instalados, el estado correcto es `waiting-for-sdk`; eso significa que la credencial existe, pero aun no se debe procesar un PDF.
+El resultado queda en `outputs/f273_f278_live_integration_readiness/`. La salida nunca imprime valores secretos: solo lista variables configuradas o faltantes. Google Document AI y Textract quedan deferidos por costo; no se deben usar como primer pase OCR.
 
 Geant4 y EGSnrc/egs_brachy quedan diferidos. En esta etapa solo se valida GATE/OpenGATE si `GATE_RUNNER_URL` responde `/health`. El QA integrado F278 se cierra hasta contar con salidas reales de OCR, DWG, literatura y runner.
+
+## Addendum F279 - OCR Libre/Local
+
+Para evitar costo por pagina, use primero OCR local:
+
+```powershell
+npm run prepare:f279:local-free-ocr
+npm run test:f279:local-free-ocr
+```
+
+El gate revisa si estan disponibles PDF.js, Poppler, Tesseract y OCRmyPDF. La ruta recomendada es: extraer texto embebido, renderizar paginas con Poppler si el PDF es escaneado, correr Tesseract local con `spa+eng`, generar JSONL por pagina y solo sembrar chunks revisados.
+
+Google Document AI y Amazon Textract quedan como excepcion: usarlos solo si OCR local falla en calidad y se aprueba costo/privacidad.
 
 ## Archivo Menu Closure - Uso Del Menu Archivo
 

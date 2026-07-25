@@ -46,7 +46,7 @@ const manifest = {
     {
       id: 'google-document-ai',
       role: 'primary-layout-ocr',
-      status: googleSecrets.every((name) => Boolean(process.env[name])) ? 'ready-to-smoke' : 'server-only-waiting-for-credentials',
+      status: 'deferred-cost-rollback',
       requiredSecrets: googleSecrets,
       envStatus: secretState(googleSecrets),
       acceptedInputs: ['pdf', 'tiff', 'png'],
@@ -55,11 +55,20 @@ const manifest = {
     {
       id: 'amazon-textract',
       role: 'fallback-table-form-ocr',
-      status: textractSecrets.every((name) => Boolean(process.env[name])) ? 'ready-to-smoke' : 'server-only-waiting-for-credentials',
+      status: 'deferred-cost-rollback',
       requiredSecrets: textractSecrets,
       envStatus: secretState(textractSecrets),
       acceptedInputs: ['pdf', 'tiff', 'png', 'jpg'],
       expectedOutputs: ['text', 'tables', 'forms', 'confidence', 'blocks-json', 'source-page-map'],
+    },
+    {
+      id: 'local-free-ocr',
+      role: 'primary-layout-ocr',
+      status: 'local-free-preferred',
+      requiredSecrets: [],
+      envStatus: { configured: [], missing: [] },
+      acceptedInputs: ['pdf', 'png', 'tiff', 'jpg'],
+      expectedOutputs: ['text', 'page-map', 'confidence-if-available', 'source-hash', 'ocr-engine-version'],
     },
   ],
   pendingDocuments: pendingDocs.map((doc) => {
@@ -70,18 +79,18 @@ const manifest = {
       exists,
       sizeBytes: stats?.size ?? 0,
       sha256: hashFile(doc.sourcePath),
-      canonicalAction: 'Generate OCR draft, preserve page/confidence, then re-run dedupe and seed as reviewed chunks.',
+      canonicalAction: 'Generate local/free OCR draft, preserve page/confidence when available, then re-run dedupe and seed as reviewed chunks.',
     };
   }),
   smokePolicy: [
     'No live OCR call is made by this preparation script.',
-    'Google Document AI is primary for layout/page map; Textract is fallback/comparison for tables/forms.',
+    'Local/free OCR is primary. Google Document AI and Textract are deferred because they can create per-page cloud cost.',
     'OCR result must be reviewed before it becomes canonical RAG content.',
     'No PHI/private document is sent from the static frontend.',
   ],
   outputContracts: ['ocr-draft.json', 'ocr-pages.jsonl', 'ocr-confidence.csv', 'document_chunks_db_draft.json'],
   releaseDecision:
-    'F269 is ready for a credentialed backend smoke. Current static build remains stable and does not include OCR secrets or provider payloads.',
+    'F269 cloud OCR is rolled back for cost control. Current static build remains stable and local/free OCR should be tested first.',
 };
 
 fs.writeFileSync(path.join(outputDir, 'f269_ocr_cloud_adapter_gate.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');

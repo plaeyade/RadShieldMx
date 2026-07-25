@@ -1,9 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F279 (2026-07-25) - OCR libre/local
+
+- Se revierte la ruta OCR cloud como primera opcion por posible costo de Google Document AI y Amazon Textract.
+- Se agrega `prepare:f279:local-free-ocr` para detectar herramientas gratuitas/locales: PDF.js, Poppler, Tesseract y OCRmyPDF.
+- Las memorias escaneadas se mantienen locales; el pipeline recomendado es extraer texto embebido, renderizar paginas si hace falta, correr Tesseract y generar JSONL por pagina antes de seed.
+- Cloud OCR queda solo como excepcion con aprobacion de costo y privacidad.
+
 # F273-F278 (2026-07-25) - live readiness
 
 - F273 valida credenciales con salida redacted y sin escribir secretos en logs.
-- F274 queda como preflight OCR: requiere SDK/adaptador backend antes de procesar los dos PDFs pendientes.
+- F274 queda redirigida a OCR libre/local por rollback de costo; no requiere SDK Google/AWS.
 - F275 queda listo para smoke APS DWG: fixtures hasheados y credenciales revisadas; no se sube DWG sin autorizacion live.
 - F276 queda listo para consultas bibliograficas; Crossref/Semantic Scholar solo crean candidatos de cita.
 - F277 valida GATE/OpenGATE como runner inmediato; Geant4 y EGSnrc quedan pendientes para fase posterior.

@@ -7,6 +7,7 @@ export interface F273ToF278PhaseSummary {
     | 'ready'
     | 'ready-without-live-call'
     | 'waiting-for-sdk'
+    | 'local-free-ocr-preflight'
     | 'waiting-for-runner'
     | 'deferred-by-operator'
     | 'review-required';
@@ -36,10 +37,10 @@ export function buildF273ToF278LiveIntegrationReadiness(): F273ToF278LiveIntegra
       },
       {
         phase: 'F274',
-        label: 'OCR live smoke preflight',
-        status: 'waiting-for-sdk',
-        evidence: ['Google/AWS credentials can be present', 'Live OCR requires provider SDK/adapter and explicit document-processing approval'],
-        nextAction: 'Install server-side OCR adapters, then run a non-PHI fixture before processing real analytic memories.',
+        label: 'OCR local/free preflight',
+        status: 'local-free-ocr-preflight',
+        evidence: ['Google/AWS cloud OCR rolled back because of cost', 'Local/free OCR route should be tested first'],
+        nextAction: 'Test Tesseract/OCRmyPDF/Poppler locally before any cloud OCR exception.',
       },
       {
         phase: 'F275',
@@ -73,12 +74,12 @@ export function buildF273ToF278LiveIntegrationReadiness(): F273ToF278LiveIntegra
     safetyRules: [
       'Do not print or commit secrets.',
       'Do not send PHI/private plans to public frontend.',
-      'Cloud OCR and APS conversion require explicit live-run approval because they may cost money and transmit documents.',
+      'Cloud OCR is deferred by cost-control rollback. APS conversion still requires explicit live-run approval because it may cost money and transmit drawings.',
       'Geant4 and EGSnrc remain deferred for this lane.',
       'External Monte Carlo is verification/research support until numeric QA and physicist/RSO review are complete.',
     ],
     releaseDecision:
-      'F273-F278 can validate configuration and prepare live smokes now. Actual OCR/DWG/MC execution must run from backend/operator adapters, not from the static frontend.',
+      'F273-F278 keeps paid OCR rolled back and prepares free/local OCR first. Actual DWG/MC execution must run from backend/operator adapters, not from the static frontend.',
   };
 }
 
