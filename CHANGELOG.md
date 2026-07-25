@@ -11,6 +11,8 @@
 - Nota operativa: Tesseract debe listar `spa` para considerar operativo el OCR en espanol. Si solo lista `eng/osd`, F281 sigue siendo util como borrador, pero no como seed final sin revision.
 - F281 agrega soporte para `F281_TESSDATA_DIR`/`TESSDATA_PREFIX` y rutas WSL UNC comunes, de modo que puede usar `spa.traineddata`/`tessdata_best` instalado en Ubuntu cuando Windows lo exponga.
 - F282 prepara chunks RAG desde F281 con hash de documento, pagina, modalidad inferida, hash de chunk y estado de revision. La DB sigue sin seed automatico hasta QA de paginas y gobierno de fuentes.
+- F283 agrega QA de OCR/chunks: puntua paginas, selecciona muestras por documento, separa chunks listos para seed draft y chunks que requieren revision, sin activar seed automatico.
+- F284 prepara un corpus candidato para `document_chunks` usando solo chunks seed-draft-ready y exporta aparte los chunks excluidos. No ejecuta escrituras live en DB.
 
 # F273-F278 (2026-07-25) - validacion live controlada
 

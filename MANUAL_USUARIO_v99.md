@@ -106,6 +106,28 @@ npm run test:f282:ocr-rag-readiness
 
 F282 no siembra la base de datos. Crea `outputs/f282_ocr_rag_readiness/f282_rag_chunks.jsonl` con chunks por pagina, cada uno con `documentId`, `sourceHash`, `page`, `modality`, `chunkHash`, `reviewStatus` y texto. Ese archivo es el puente correcto para revisar muestras de OCR, deduplicar citas y despues decidir seed controlado a `document_chunks`.
 
+## Addendum F283 - QA De OCR Y Chunks Antes De DB
+
+Antes de alimentar la DB/RAG, ejecute:
+
+```powershell
+npm run prepare:f283:ocr-chunk-qa
+npm run test:f283:ocr-chunk-qa
+```
+
+F283 genera `outputs/f283_ocr_chunk_qa/f283_ocr_chunk_qa.json` con muestras de paginas por documento, puntaje de calidad, banderas de OCR y particion de chunks: `chunk-seed-draft-ready`, `chunk-needs-ocr-page-qa`, `chunk-needs-sample-qa` o `chunk-blocked-page-qa`. Solo los chunks de seed draft deben considerarse para la siguiente fase de seed controlado; las paginas OCR con baja calidad o senales debiles se revisan contra el PDF original.
+
+## Addendum F284 - Corpus Candidato Para Seed RAG
+
+Para preparar el paquete que podria alimentar `document_chunks`:
+
+```powershell
+npm run prepare:f284:rag-seed-candidate
+npm run test:f284:rag-seed-candidate
+```
+
+F284 crea `outputs/f284_rag_seed_candidate/f284_document_chunks_seed_candidate.jsonl` solo con chunks `chunk-seed-draft-ready`. Tambien crea `f284_review_excluded_chunks.jsonl` con lo que no debe sembrarse todavia. Esta fase no escribe en MySQL; la escritura live requiere una fase posterior con aprobacion explicita y respaldo de DB.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.

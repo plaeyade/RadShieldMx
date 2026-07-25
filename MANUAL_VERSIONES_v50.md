@@ -11,6 +11,8 @@
 - Si Tesseract no muestra `spa` en `--list-langs`, los resultados quedan como borrador revisable; instalar o enrutar `spa.traineddata` es requisito antes de seed RAG productivo.
 - F281 ahora acepta `F281_TESSDATA_DIR`/`TESSDATA_PREFIX` y registra `tessdataSource`; esto permite usar modelos `tessdata_best` instalados en Ubuntu/WSL si Windows puede leer la ruta UNC.
 - F282 transforma F281 en corpus RAG draft: chunks por pagina con documentId, sourceHash, page, modality, chunkHash y reviewStatus. El seed DB sigue bloqueado hasta QA.
+- F283 agrega QA de OCR/chunks: muestra paginas representativas, calcula score de calidad, separa seed draft vs revision y bloquea chunks dudosos antes de `document_chunks`.
+- F284 genera paquete de seed candidato para `document_chunks` sin escribir DB: incluye solo chunks `chunk-seed-draft-ready` y conserva excluidos para revision.
 
 # F273-F278 (2026-07-25) - live readiness
 
