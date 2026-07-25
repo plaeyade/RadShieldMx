@@ -10,6 +10,7 @@
 - F281 ejecuta OCR/text completo local sobre memorias reales, deduplica por hash, guarda texto por documento y JSONL por pagina, y mantiene `seedDbAutomatically=false`.
 - Si Tesseract no muestra `spa` en `--list-langs`, los resultados quedan como borrador revisable; instalar o enrutar `spa.traineddata` es requisito antes de seed RAG productivo.
 - F281 ahora acepta `F281_TESSDATA_DIR`/`TESSDATA_PREFIX` y registra `tessdataSource`; esto permite usar modelos `tessdata_best` instalados en Ubuntu/WSL si Windows puede leer la ruta UNC.
+- F282 transforma F281 en corpus RAG draft: chunks por pagina con documentId, sourceHash, page, modality, chunkHash y reviewStatus. El seed DB sigue bloqueado hasta QA.
 
 # F273-F278 (2026-07-25) - live readiness
 

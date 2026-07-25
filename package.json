@@ -358,6 +358,8 @@
     "test:f280:local-ocr-smoke": "node scripts/check-f280-local-ocr-smoke-contracts.mjs",
     "prepare:f281:full-local-ocr": "node scripts/f281-full-local-ocr.mjs",
     "test:f281:full-local-ocr": "node scripts/check-f281-full-local-ocr-contracts.mjs",
+    "prepare:f282:ocr-rag-readiness": "node scripts/f282-ocr-rag-readiness.mjs",
+    "test:f282:ocr-rag-readiness": "node scripts/check-f282-ocr-rag-readiness-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

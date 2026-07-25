@@ -95,6 +95,17 @@ npm run prepare:f281:full-local-ocr
 
 Tambien funciona `TESSDATA_PREFIX` si apunta al padre de `tessdata` o a la carpeta `tessdata` directamente. El manifiesto F281 registra `tessdataSource` y `tessdataCandidates` para auditar que modelo se uso.
 
+## Addendum F282 - Preparacion RAG Desde OCR
+
+Despues de F281, prepare el corpus revisable para RAG:
+
+```powershell
+npm run prepare:f282:ocr-rag-readiness
+npm run test:f282:ocr-rag-readiness
+```
+
+F282 no siembra la base de datos. Crea `outputs/f282_ocr_rag_readiness/f282_rag_chunks.jsonl` con chunks por pagina, cada uno con `documentId`, `sourceHash`, `page`, `modality`, `chunkHash`, `reviewStatus` y texto. Ese archivo es el puente correcto para revisar muestras de OCR, deduplicar citas y despues decidir seed controlado a `document_chunks`.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.
