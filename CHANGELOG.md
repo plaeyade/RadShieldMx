@@ -7,6 +7,8 @@
 - Las dos memorias pendientes de OCR siguen como fixtures, pero no se envian a nube ni se procesan automaticamente.
 - Regla nueva: usar OCR local/free primero; usar cloud OCR solo como excepcion aprobada si la calidad local falla.
 - F280 agrega smoke OCR local de bajo riesgo: renderiza las primeras paginas de las memorias pendientes, corre Tesseract y genera JSONL draft para revision.
+- F281 agrega OCR local completo/hibrido para memorias reales: usa texto nativo cuando el PDF ya es searchable y Tesseract solo en paginas escaneadas o con texto insuficiente. La salida no siembra DB automaticamente y queda como evidencia revisable para QA/dedupe/RAG.
+- Nota operativa: Tesseract debe listar `spa` para considerar operativo el OCR en espanol. Si solo lista `eng/osd`, F281 sigue siendo util como borrador, pero no como seed final sin revision.
 
 # F273-F278 (2026-07-25) - validacion live controlada
 

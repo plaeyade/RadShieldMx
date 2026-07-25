@@ -22,6 +22,7 @@ import { summarizeF272ExternalMonteCarloRunnerGate } from './f272ExternalMonteCa
 import { summarizeF273ToF278LiveIntegrationReadiness } from './f273ToF278LiveIntegrationReadiness';
 import { summarizeF279LocalFreeOcrGate } from './f279LocalFreeOcrGate';
 import { summarizeF280LocalOcrSmoke } from './f280LocalOcrSmoke';
+import { summarizeF281FullLocalOcr } from './f281FullLocalOcr';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -180,6 +181,7 @@ export function buildF125CalculationEvidenceSection(
     summarizeF273ToF278LiveIntegrationReadiness(),
     summarizeF279LocalFreeOcrGate(),
     summarizeF280LocalOcrSmoke(),
+    summarizeF281FullLocalOcr(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

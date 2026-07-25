@@ -66,6 +66,26 @@ npm run test:f280:local-ocr-smoke
 
 F280 procesa solo las primeras paginas de cada memoria pendiente y genera `outputs/f280_local_ocr_smoke/f280_local_ocr_pages.jsonl`. Ese archivo es borrador: revisar calidad antes de OCR completo y antes de sembrar en DB/RAG.
 
+## Addendum F281 - OCR Completo Local De Memorias Reales
+
+Para procesar las memorias reales completas sin costo cloud:
+
+```powershell
+npm run prepare:f281:full-local-ocr
+npm run test:f281:full-local-ocr
+```
+
+F281 usa un flujo hibrido:
+
+1. Detecta duplicados por SHA256.
+2. Cuenta paginas con Poppler.
+3. Extrae texto nativo cuando el PDF ya es searchable.
+4. Renderiza y corre Tesseract solo en paginas escaneadas o con texto insuficiente.
+5. Guarda texto por documento en `outputs/f281_full_local_ocr/text/`.
+6. Guarda evidencia por pagina en `outputs/f281_full_local_ocr/f281_full_local_ocr_pages.jsonl`.
+
+La DB no se siembra automaticamente. Primero se debe revisar calidad OCR, deduplicacion, paginas, hashes y citas. Si Tesseract no lista `spa` en `--list-langs`, el resultado se considera borrador revisable; para seed final en espanol debe quedar visible `spa.traineddata` o configurarse `TESSDATA_PREFIX` hacia la carpeta correcta.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.
