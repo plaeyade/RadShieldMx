@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F268-F268A (2026-07-25) - Real memories and external API readiness
+
+- F268 agrega ingesta controlada de memorias analiticas reales desde Downloads: Versa HD 15 MV, Gamma Knife, Braqui Co-60 y Ciclotron/KIUBE.
+- F268 deduplica por SHA256, conserva documentos canonicos, prepara chunks RAG y draft `document_chunks` sin sembrar live salvo `F268_SEED_LIVE=1`.
+- F268A agrega gate de readiness para Google Document AI, Amazon Textract, Crossref, Semantic Scholar, ODA Drawings SDK, APS Design Automation, GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy.
+- Regla: memorias reales son ejemplos/evidencia; normas NCRP/IAEA/UAQ siguen siendo canonicas para formulas. APIs/motores externos quedan backend/runner-only, sin secretos en frontend.
+
 # Archivo Menu Closure (2026-07-25) - cierre funcional de Archivo
 
 - Se cierra el menu Archivo como utilidad superior estable para frontend estatico.

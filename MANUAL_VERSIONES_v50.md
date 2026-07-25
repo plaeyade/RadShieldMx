@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F268-F268A (2026-07-25) - memorias reales y APIs externas
+
+- F268 ingesta memorias analiticas reales de LINAC Versa HD, Gamma Knife, Braqui Co-60 y Ciclotron/KIUBE desde Downloads.
+- Se detectan duplicados por SHA256 y solo se chunkearn documentos canonicos para RAG/DB draft.
+- F268A prepara proveedores: Google Document AI y Amazon Textract para OCR; Crossref y Semantic Scholar para literatura; APS/ODA para CAD/DWG; GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy para Monte Carlo externo validado.
+- Las llamadas live quedan apagadas hasta configurar secretos backend, fixtures no sensibles, hashes y smoke por proveedor.
+- Siguientes fases: F269 OCR cloud, F270 APS DWG smoke, F271 literature deep dive y F272 MC external runner.
+
 # Archivo Menu Closure (2026-07-25) - cierre funcional de Archivo
 
 - Archivo queda cerrado para frontend estatico como menu de proyecto, importacion, exportacion, auditoria y ayuda.

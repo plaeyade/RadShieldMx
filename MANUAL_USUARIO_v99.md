@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F268-F268A - Memorias Reales Y APIs Externas
+
+F268 permite agregar memorias analiticas reales como evidencia y ejemplos para Memoria IA. Las memorias se deduplican por SHA256, se extrae texto searchable, se generan chunks RAG y se prepara un draft para `document_chunks`. Si una memoria no tiene texto, queda marcada para OCR cloud en F269.
+
+Uso recomendado:
+
+1. Colocar PDFs de memorias reales en Downloads.
+2. Ejecutar `npm run prepare:f268:real-memory-ingestion`.
+3. Revisar duplicados, documentos canonicos y chunks generados.
+4. Sembrar live solo con `DATABASE_URL` y `F268_SEED_LIVE=1`, si se aprueba.
+5. Usar esas memorias como ejemplos/evidencia. No reemplazan formulas normativas.
+
+F268A prepara APIs y motores externos sin activarlos en frontend: Google Document AI, Amazon Textract, Crossref, Semantic Scholar, ODA Drawings SDK, Autodesk APS, GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy. Todos los secretos deben vivir en backend o runner externo, nunca en `VITE_*`.
+
+Fases siguientes recomendadas:
+
+- F269: OCR cloud con Google Document AI y Textract fallback.
+- F270: smoke APS DWG con fixture no sensible.
+- F271: deep dive bibliografico con Crossref y Semantic Scholar.
+- F272: runner externo Monte Carlo GATE/OpenGATE/Geant4/EGSnrc.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.
