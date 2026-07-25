@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F264 (2026-07-24) - real-clinical-trial-gate
+
+- Se habilita gate de prueba real controlada para el motor de calculo con escenarios DX/TX/NM: LINAC 6 MV, LINAC 18 MV, CT, PET F-18, Gamma Knife Co-60 y HDR Ir-192.
+- Cada escenario debe producir traza, norma, cita, unidades normalizadas, carga estructural, comparador conservador, cache F196 y warnings clinicos.
+- Se agrega validacion de unidades: mm/cm, g/cm3->kg/m3, kg/m2, kPa, uSv/h y espesor negativo/cero.
+- Esta fase permite empezar pruebas reales manuales de la app sin seguir modificando el canvas de alto riesgo.
+
 # F263 (2026-07-24) - aps-dwg-adapter
 
 - Se integra `cad.apsDwgStatus` y `cad.apsDwgPlan` en el backend para preparar conversion DWG->DXF con Autodesk Platform Services Design Automation.

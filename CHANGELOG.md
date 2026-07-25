@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F264 (2026-07-24) - Real clinical trial gate and calculation engine hardening
+
+- Se agrega `src/lib/realClinicalTrialCases.ts` con casos sinteticos de prueba real para LINAC 6 MV, LINAC 18 MV, CT, PET F-18, Gamma Knife Co-60 y HDR Ir-192.
+- Se agrega validacion unificada de unidades en `unitNormalization.ts`: mm/cm, densidad, kg/m2, kPa, uSv/h y espesor negativo/cero.
+- Se valida que cada caso tenga trazabilidad formula/norma/input/output, citas, comparador base-vs-conservador, cache F196, carga estructural y advertencias clinicas.
+- Se agregan `prepare:f264:real-trial` y `test:f264:real-trial` para iniciar pruebas reales controladas sin tocar el canvas estable.
+
 # F263 (2026-07-24) - APS DWG adapter gate
 
 - Se agrega `api/cad-router.ts` con procedimientos `cad.apsDwgStatus` y `cad.apsDwgPlan` para preparar la ruta DWG->APS->DXF->importador DXF existente.

@@ -328,6 +328,8 @@
     "test:f261-f262:dwg": "node scripts/check-f261-f262-dwg-provider-fixture-contracts.mjs",
     "prepare:f263:aps-dwg": "node scripts/f263-aps-dwg-adapter.mjs",
     "test:f263:aps-dwg": "node scripts/check-f263-aps-dwg-adapter-contracts.mjs",
+    "prepare:f264:real-trial": "node scripts/f264-real-clinical-trial-gate.mjs",
+    "test:f264:real-trial": "node scripts/check-f264-real-clinical-trial-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

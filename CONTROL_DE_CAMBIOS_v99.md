@@ -1,4 +1,11 @@
-# RadShield-MX — Control de Cambios Completo v1-F263
+# RadShield-MX — Control de Cambios Completo v1-F264
+
+## F264 (2026-07-24) - Real Clinical Trial Gate
+
+- Se agregan casos clinicos sinteticos ejecutables para validar el motor antes de pruebas reales.
+- Se refuerza normalizacion y validacion de unidades/carga estructural.
+- Se conecta F264 a F125, Update Center, manuales y manifest ejecutable.
+- Se mantiene el canvas estable: los cambios son de calculo, QA y evidencia.
 
 ## F263 (2026-07-24) - APS DWG Adapter Gate
 

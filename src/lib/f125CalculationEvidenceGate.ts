@@ -12,6 +12,7 @@ import { summarizeDwgExternalProviderContract } from './dwgExternalProviderGate'
 import { summarizeDwgFixtureGate } from './dwgFixtureGate';
 import { summarizeDwgProviderSelection } from './dwgProviderSelection';
 import { buildApsDwgAdapterPublicSummary } from './dwgApsDesignAutomationContract';
+import { summarizeF264RealClinicalTrialGate } from './realClinicalTrialCases';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -160,6 +161,7 @@ export function buildF125CalculationEvidenceSection(
     summarizeDwgProviderSelection(),
     summarizeDwgFixtureGate(),
     buildApsDwgAdapterPublicSummary('adapter-ready-waiting-for-credentials-and-fixtures'),
+    summarizeF264RealClinicalTrialGate(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

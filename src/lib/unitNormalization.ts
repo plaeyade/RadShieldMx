@@ -30,6 +30,12 @@ export interface NormalizedCalculationUnits {
   };
 }
 
+export interface UnitNormalizationWarning {
+  field: string;
+  severity: 'warning' | 'error';
+  message: string;
+}
+
 export function mmToCm(value: number): number {
   return Number.isFinite(value) ? value / 10 : 0;
 }
@@ -120,4 +126,50 @@ export function normalizeCalculationUnits(params: {
       maxWorkloadHoursPerWeek: Math.max(0, ...params.sources.map((source) => source.workloadHoursPerWeek ?? 0)),
     },
   };
+}
+
+function closeEnough(a: number, b: number, tolerance: number): boolean {
+  return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= tolerance;
+}
+
+export function validateNormalizedCalculationUnits(snapshot: NormalizedCalculationUnits): UnitNormalizationWarning[] {
+  const warnings: UnitNormalizationWarning[] = [];
+  const requiredPositive: Array<[string, number]> = [
+    ['length.scale_m_per_pixel', snapshot.length.scale_m_per_pixel],
+    ['length.barrierLength_m', snapshot.length.barrierLength_m],
+    ['dose.designGoal_mSv_per_wk', snapshot.dose.designGoal_mSv_per_wk],
+    ['material.density_g_cm3', snapshot.material.density_g_cm3],
+  ];
+
+  for (const [field, value] of requiredPositive) {
+    if (!Number.isFinite(value) || value <= 0) {
+      warnings.push({ field, severity: 'error', message: `${field} must be finite and positive for release-facing calculations.` });
+    }
+  }
+
+  if (!closeEnough(snapshot.material.selectedThickness_cm, mmToCm(snapshot.material.selectedThickness_mm), 1e-6)) {
+    warnings.push({ field: 'material.selectedThickness_cm', severity: 'error', message: 'Thickness cm/mm conversion mismatch.' });
+  }
+  if (!closeEnough(snapshot.material.density_kg_m3, gCm3ToKgM3(snapshot.material.density_g_cm3), 1e-6)) {
+    warnings.push({ field: 'material.density_kg_m3', severity: 'error', message: 'Density g/cm3 to kg/m3 conversion mismatch.' });
+  }
+  const expectedMass = kgM2FromDensityThickness(snapshot.material.density_g_cm3, snapshot.material.selectedThickness_mm);
+  if (!closeEnough(snapshot.material.mass_kg_per_m2, expectedMass, 1e-6)) {
+    warnings.push({ field: 'material.mass_kg_per_m2', severity: 'error', message: 'Mass per area does not match density and thickness.' });
+  }
+  const expectedLoad = structuralLoadKPaFromKgM2(snapshot.material.mass_kg_per_m2);
+  if (!closeEnough(snapshot.material.structuralLoad_kPa, expectedLoad, 1e-6)) {
+    warnings.push({ field: 'material.structuralLoad_kPa', severity: 'error', message: 'Structural load does not match mass per area.' });
+  }
+  if (snapshot.material.selectedThickness_mm < 0) {
+    warnings.push({ field: 'material.selectedThickness_mm', severity: 'error', message: 'Negative shielding thickness is not valid.' });
+  }
+  if (snapshot.material.selectedThickness_mm === 0 && snapshot.dose.maxKerma_mSv_per_wk > snapshot.dose.designGoal_mSv_per_wk) {
+    warnings.push({ field: 'material.selectedThickness_mm', severity: 'warning', message: 'Zero thickness with kerma above design goal requires review.' });
+  }
+  if (!Number.isFinite(snapshot.dose.maxKerma_uSv_per_h_40h) || snapshot.dose.maxKerma_uSv_per_h_40h < 0) {
+    warnings.push({ field: 'dose.maxKerma_uSv_per_h_40h', severity: 'error', message: 'Dose-rate normalization to uSv/h is invalid.' });
+  }
+
+  return warnings;
 }

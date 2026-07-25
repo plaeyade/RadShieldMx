@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F264 - Pruebas Reales Controladas Del Motor
+
+F264 permite empezar pruebas reales de la app con un arnes de calculo que simula casos clinicos representativos antes de usar proyectos firmados.
+
+Casos cubiertos:
+
+1. LINAC 6 MV: barrera primaria a area publica.
+2. LINAC 18 MV: barrera secundaria con advertencia de neutrones/puerta/laberinto.
+3. CT cuerpo: barrera hacia area publica.
+4. PET F-18: sala de captacion/inyeccion.
+5. Gamma Knife Co-60: barrera primaria de cribado.
+6. HDR Ir-192: barrera hacia consola/control.
+
+Cada caso verifica formula, norma, inputs, outputs, citas, unidades, carga estructural, comparador conservador, cache F196 y advertencias clinicas. La salida puede usarse para pruebas de flujo, pero no reemplaza la revision del fisico medico/RSO antes de firmar una memoria.
+
 ## Addendum F263 - Adaptador APS DWG Seguro
 
 F263 agrega el puente backend para usar Autodesk Platform Services Design Automation como proveedor DWG->DXF sin prometer DWG nativo en navegador.
