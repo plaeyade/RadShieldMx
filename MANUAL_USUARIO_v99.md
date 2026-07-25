@@ -21,6 +21,16 @@ Fases siguientes recomendadas:
 - F271: deep dive bibliografico con Crossref y Semantic Scholar.
 - F272: runner externo Monte Carlo GATE/OpenGATE/Geant4/EGSnrc.
 
+## Addendum F269-F272 - Como Usar Los Gates Externos
+
+F269 no ejecuta OCR por si solo. Sirve para confirmar que los documentos pendientes estan identificados, que los proveedores cloud quedan del lado backend y que el resultado esperado tenga texto, pagina, confianza y hash. Cuando se configuren credenciales, ejecutar `npm run prepare:f269:ocr-cloud` y despues revisar el manifiesto antes de sembrar nuevos chunks.
+
+F270 no importa DWG nativo en navegador. Prepara fixtures DWG para convertirlos por Autodesk APS en backend/runner y entregar al canvas DXF/SVG con auditoria de capas y escala. El usuario final seguira usando Importar DXF hasta que el smoke APS pase.
+
+F271 prepara busquedas bibliograficas. Crossref y Semantic Scholar ayudan a encontrar candidatos de cita, pero una cita candidata no cambia calculos. Toda referencia aceptada debe quedar con DOI/URL, fecha, hash y estado de revision.
+
+F272 prepara Monte Carlo externo. La app exportara geometria, materiales, fuentes y scoring para GATE/OpenGATE, Geant4 o EGSnrc/egs_brachy; luego importara dosis, incertidumbre y manifiesto. No es un motor clinico certificado dentro del frontend: todo resultado requiere revision del fisico/RSO y QA numerico.
+
 ## Archivo Menu Closure - Uso Del Menu Archivo
 
 El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.

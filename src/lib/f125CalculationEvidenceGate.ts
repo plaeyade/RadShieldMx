@@ -15,6 +15,10 @@ import { buildApsDwgAdapterPublicSummary } from './dwgApsDesignAutomationContrac
 import { summarizeF264RealClinicalTrialGate } from './realClinicalTrialCases';
 import { summarizeF268RealAnalyticMemoryIngestion } from './f268RealAnalyticMemoryIngestion';
 import { summarizeF268aExternalApiReadiness } from './f268aExternalApiReadiness';
+import { summarizeF269OcrCloudAdapterGate } from './f269OcrCloudAdapterGate';
+import { summarizeF270ApsDwgFixtureSmoke } from './f270ApsDwgFixtureSmoke';
+import { summarizeF271LiteratureDeepDiveGate } from './f271LiteratureDeepDiveGate';
+import { summarizeF272ExternalMonteCarloRunnerGate } from './f272ExternalMonteCarloRunnerGate';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -166,6 +170,10 @@ export function buildF125CalculationEvidenceSection(
     summarizeF264RealClinicalTrialGate(),
     summarizeF268RealAnalyticMemoryIngestion(),
     summarizeF268aExternalApiReadiness(),
+    summarizeF269OcrCloudAdapterGate(),
+    summarizeF270ApsDwgFixtureSmoke(),
+    summarizeF271LiteratureDeepDiveGate(),
+    summarizeF272ExternalMonteCarloRunnerGate(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F269-F272 (2026-07-25) - OCR, DWG, literatura y Monte Carlo externo
+
+- F269 agrega gate OCR cloud para Google Document AI y Amazon Textract sobre las dos memorias reales pendientes de OCR, sin llamadas live ni secretos en frontend.
+- F270 agrega smoke de fixtures DWG para APS Design Automation: archivos DWG locales hasheados, ruta esperada a DXF/SVG, layer-map y scale-audit.
+- F271 agrega deep-dive bibliografico con Crossref y Semantic Scholar como candidatos de evidencia; no modifica formulas, TVL ni constantes sin QA normativo.
+- F272 agrega contrato de runners externos Monte Carlo para GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy con forward/reverse MC, hashes, version de motor, fisica, seed, historias e incertidumbre.
+- Regla: estas fases preparan integracion backend/runner; el frontend publico sigue estable y sin proveedores vivos.
+
 # F268-F268A (2026-07-25) - Real memories and external API readiness
 
 - F268 agrega ingesta controlada de memorias analiticas reales desde Downloads: Versa HD 15 MV, Gamma Knife, Braqui Co-60 y Ciclotron/KIUBE.

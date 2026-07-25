@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F269-F272 (2026-07-25) - gates externos ejecutables
+
+- F269 cierra el diseno de OCR cloud: Google Document AI como ruta primaria, Amazon Textract como fallback, dos memorias pendientes y salidas con pagina/confianza/hash.
+- F270 deja DWG listo para smoke APS: fixtures locales detectados/hasheados, contrato DWG->DXF/SVG, auditoria de capas/escala y ODA como opcion privada posterior.
+- F271 estructura investigacion profunda con Crossref/Semantic Scholar para Memoria IA y Evidence Pack, manteniendo normas NCRP/IAEA/UAQ y documentos versionados como fuente superior.
+- F272 formaliza Monte Carlo externo: GATE/OpenGATE para medicina nuclear/radioterapia, Geant4 para transporte/ingenieria y EGSnrc/egs_brachy para fotones/electrones/braqui.
+- Validacion: `prepare:test` por fase, build, F200 static release gate y commit limpio antes de publicar otro dist.
+
 # F268-F268A (2026-07-25) - memorias reales y APIs externas
 
 - F268 ingesta memorias analiticas reales de LINAC Versa HD, Gamma Knife, Braqui Co-60 y Ciclotron/KIUBE desde Downloads.
