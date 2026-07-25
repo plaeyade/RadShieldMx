@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# Archivo Menu Closure (2026-07-25) - cierre funcional de Archivo
+
+- Archivo queda cerrado para frontend estatico como menu de proyecto, importacion, exportacion, auditoria y ayuda.
+- Submenus cubiertos: Nuevo Proyecto, Abrir Proyecto, Guardar, Importar CSV, Importar DXF, Importar STEP/IGES, Exportar CSV, Exportar PDF, Compartir resultados, Exportar Reporte CNSNS, Especificaciones Tecnicas, Audit Trail, Analisis de Logs, Glosario y Acerca de.
+- Validacion asociada: F197, F198, F204, F207 y F200.
+- Limitaciones: persistencia DB multiusuario y conversion DWG live no forman parte del cierre de Archivo; DWG se convierte externamente a DXF antes de importar.
+
 # F267 (2026-07-25) - real-case-smoke-execution
 
 - Se ejecuta smoke DX/TX/NM con casos representativos CT, LINAC 6 MV y PET F-18.

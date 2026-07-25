@@ -686,13 +686,13 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <DropdownMenuSeparator />
                   <SectionLabel label={t('file.export')} color="text-slate-400" />
                   <SmartItem icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={onExport} />
-                  <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF (fallback F109)" onClick={onPDF} desc="Generate analytical report PDF" />
+                  <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={onPDF} desc="Generar memoria analitica PDF" />
                   <SmartItem icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={onShare} desc="Web Share API — enviar a apps nativas" />
-                  <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS (fallback F109)" onClick={onCNSNS} />
+                  <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={onCNSNS} desc="Salida regulatoria con evidencia del proyecto" />
                   <DropdownMenuSeparator />
-                  <SmartItem icon={Settings} iconColor={c.file} label={`${t('file.techSpecs')} (fallback F110)`} onClick={onTechSpecs} />
-                  <SmartItem icon={Activity} iconColor={c.file} label={`${t('file.auditTrail')} (fallback F110)`} onClick={onAuditTrail} />
-                  <SmartItem icon={FileBarChart} iconColor={c.file} label={`${t('file.logAnalysis')} (fallback F110)`} onClick={onLogFileAnalysis} />
+                  <SmartItem icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={onTechSpecs} desc="Especificaciones tecnicas auditables" />
+                  <SmartItem icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={onAuditTrail} desc="Trazabilidad del proyecto y cambios" />
+                  <SmartItem icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={onLogFileAnalysis} desc="Revision de logs y diagnostico" />
                   <DropdownMenuSeparator />
                   <SectionLabel label="Ayuda" color="text-slate-400" />
                   <SmartItem icon={BookOpen} iconColor={c.file} label="Glosario" onClick={onGlossary} desc="Terminologia de blindaje radiologico" />

@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Archivo Menu Closure - Uso Del Menu Archivo
+
+El menu Archivo queda cerrado como entrada principal para operaciones de proyecto, importacion, exportacion, auditoria y ayuda.
+
+Flujo recomendado:
+
+1. Use Nuevo Proyecto para reiniciar el plano con un estado limpio.
+2. Use Abrir Proyecto para gestionar proyectos guardados.
+3. Use Guardar para persistir el trabajo disponible en el modo actual.
+4. Use Importar CSV para cargas batch.
+5. Use Importar DXF para llevar un plano CAD al floorplan y mapear lineas/capas a barreras.
+6. Use Importar STEP/IGES solo como compatibilidad geometrica.
+7. Use Exportar CSV, Exportar PDF o Exportar Reporte CNSNS segun la salida requerida.
+8. Use Compartir resultados cuando el navegador permita Web Share API.
+9. Use Especificaciones Tecnicas, Audit Trail y Analisis de Logs para evidencia y trazabilidad.
+10. Use Glosario y Acerca de para apoyo operativo.
+
+Notas de alcance: DWG no se importa nativamente en navegador; debe convertirse externamente a DXF antes de usar Importar DXF. La persistencia multiusuario con DB real pertenece al carril backend/fullstack, no al cierre de Archivo frontend.
+
 ## Addendum F267 - Smoke de Casos Reales DX/TX/NM
 
 F267 ejecuta una primera corrida operativa con tres perfiles: DX, TX y NM. Usa casos representativos derivados de F264 para poblar el CSV `outputs/f267_real_case_smoke_execution/real_case_smoke_deviation_log.csv`.

@@ -282,6 +282,8 @@
     "test:f204:canvas-dxf-smoke": "node scripts/check-f204-canvas-dxf-recovery-smoke.mjs",
     "test:f207:functional-app-qa": "node scripts/check-f207-functional-app-qa-contracts.mjs",
     "test:f207:functional-app-qa-smoke": "node scripts/check-f207-functional-app-qa-smoke.mjs",
+    "prepare:archivo-menu-closure": "node scripts/archivo-menu-closure.mjs",
+    "test:archivo-menu-closure": "node scripts/check-archivo-menu-closure-contracts.mjs",
     "test:f208:canvas-reporting": "node scripts/check-f208-canvas-reporting-layer-contracts.mjs",
     "test:f209:canvas-dimensions": "node scripts/check-f209-canvas-dimension-schedule-contracts.mjs",
     "test:f210:canvas-layers": "node scripts/check-f210-canvas-layer-manager-contracts.mjs",
