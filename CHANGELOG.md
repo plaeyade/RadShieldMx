@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F258-F260 (2026-07-24) - Staging CAD, DWG boundary and DB gate
+
+- F258 agrega `src/lib/canvas/eventControllerV2.ts`: controlador de eventos aislado para select/drag/snap/lasso/pan/zoom/delete/undo; por defecto enruta al `useCanvas` estable.
+- F259 agrega `src/lib/dwgExternalProviderGate.ts`: contrato ejecutable para proveedor externo DWG->DXF/SVG/IFC, sin prometer DWG nativo en navegador.
+- F260 agrega `scripts/f260-fullstack-db-gate.mjs`: manifest de DB/fullstack que valida `DATABASE_URL`, TCP, permisos de backup/restore probe y backend URL.
+- Se agrega `test:f258-f260:full` y `prepare:f260:db-gate`.
+- F125 incluye F258/F259 para que Memoria IA/Evidence reporte estado de event controller y boundary DWG.
+
 # F257-F260 (2026-07-24) - Full execution gate
 
 - F257 se ejecuta como paquete staging: `.env.staging-cad.example` activa `VITE_CANVAS_HIGH_RISK_CAD=true` y mantiene `VITE_CANVAS_EVENT_CONTROLLER_V2=false`.

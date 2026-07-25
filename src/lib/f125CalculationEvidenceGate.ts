@@ -7,6 +7,8 @@ import { buildF248ToF250ReportSection } from './f248ToF250ReleaseCandidate';
 import { buildF251ToF255HighRiskCadReportSection } from './f251ToF255HighRiskCadGate';
 import { buildF256ToF260RoadmapSection } from './f256ToF260NextPhaseRoadmap';
 import { buildF257ToF260FullExecutionSection } from './f257ToF260FullExecution';
+import { getCanvasEventControllerV2Status } from './canvas/eventControllerV2';
+import { summarizeDwgExternalProviderContract } from './dwgExternalProviderGate';
 
 export type F125EvidenceStatus = 'complete' | 'review-required' | 'missing-result';
 
@@ -150,6 +152,8 @@ export function buildF125CalculationEvidenceSection(
     buildF251ToF255HighRiskCadReportSection(),
     buildF256ToF260RoadmapSection(),
     buildF257ToF260FullExecutionSection(),
+    `F258 Event controller v2 enabled: ${getCanvasEventControllerV2Status().enabled ? 'yes' : 'no'}; rollback: ${getCanvasEventControllerV2Status().rollback}`,
+    summarizeDwgExternalProviderContract(),
     `   Decision: ${gate.decision}`,
   ].join('\n');
 }

@@ -257,6 +257,8 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 <thead><tr><th style="width:10%">Fase</th><th style="width:12%">Version</th><th style="width:18%">Fecha</th><th>Modulos principales implementados</th></tr></thead>
 <tbody>
 
+<tr><td><strong>F258-F260</strong></td><td>Executable Lanes</td><td>2026-07-24</td><td>F258 agrega event controller v2 aislado y apagado por defecto; F259 agrega contrato externo DWG->DXF/SVG/IFC con fallback DXF; F260 agrega manifest DB/fullstack con DATABASE_URL, TCP, backup, restore probe y backend URL. El frontend estatico puede publicarse sin activar CAD alto riesgo ni DB.</td></tr>
+
 <tr><td><strong>F257-F260</strong></td><td>Full Execution Gate</td><td>2026-07-24</td><td>F257 ejecuta staging CAD con .env.staging-cad.example; F258 queda listo solo con VITE_CANVAS_EVENT_CONTROLLER_V2; F259 define proveedor externo DWG con fallback DXF; F260 queda bloqueado hasta DATABASE_URL, backup, restore probe y backend smoke. Staging full sin feature flags no es recomendable porque elimina rollback.</td></tr>
 
 <tr><td><strong>F256-F260</strong></td><td>Next Phase Roadmap</td><td>2026-07-21</td><td>Orden post-RC: F256 smoke publico del ZIP estatico; F257 staging CAD con flags; F258 renderer/event controller v2 en staging; F259 proveedor DWG externo; F260 DB/fullstack con restore probe y backend smoke. No mezclar deploy, CAD alto riesgo y DB en una sola fase.</td></tr>

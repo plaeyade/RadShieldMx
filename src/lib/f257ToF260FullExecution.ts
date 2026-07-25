@@ -70,6 +70,7 @@ export function buildF257ToF260FullExecution(): F257F260FullExecution {
         enabledByDefault: false,
         productionSafe: true,
         deliverables: [
+          'src/lib/canvas/eventControllerV2.ts provides the isolated event router contract',
           'event controller v2 remains isolated behind VITE_CANVAS_EVENT_CONTROLLER_V2',
           'no default replacement of useCanvas event mutation',
           'F229 E2E harness is the required acceptance surface for drag/snap/lasso/pan/zoom/delete/undo',
@@ -91,6 +92,7 @@ export function buildF257ToF260FullExecution(): F257F260FullExecution {
         enabledByDefault: false,
         productionSafe: true,
         deliverables: [
+          'src/lib/dwgExternalProviderGate.ts defines the provider boundary',
           'DWG remains external conversion only; no native browser DWG claim',
           'provider contract requires file size limit, timeout, conversion hash, audit trail and DXF fallback',
           'DXF layer mapping stays canonical until converted DWG fixtures pass smoke',
@@ -112,6 +114,7 @@ export function buildF257ToF260FullExecution(): F257F260FullExecution {
         enabledByDefault: false,
         productionSafe: true,
         deliverables: [
+          'scripts/f260-fullstack-db-gate.mjs writes a DB/fullstack readiness manifest',
           'static frontend remains separate from DB/private RAG',
           'DATABASE_URL, backup permission, restore probe permission and backend health URL are required',
           'no multiuser/fullstack claim is allowed without backup hash, restore probe OK and backend smoke OK',

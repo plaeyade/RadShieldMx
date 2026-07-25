@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F258-F260 (2026-07-24) - staging-cad-dwg-db-gates
+
+- F258: se agrega controlador de eventos v2 aislado. No sustituye el canvas estable; solo reporta/rutea acciones cuando el flag esta activo.
+- F259: se agrega contrato de proveedor DWG externo con salida DXF/SVG/IFC, hashes, timeout, auditoria de capas y fallback seguro.
+- F260: se agrega manifest DB/fullstack para validar URL MySQL, alcance TCP, permisos de backup/restore probe y URL backend.
+- Nuevos comandos: `npm run test:f258-f260:full` y `npm run prepare:f260:db-gate`.
+- Publicacion estatica: sigue permitida. Fullstack productivo: sigue bloqueado hasta que F260 sea `fullstack-db-gate-ready-to-smoke`.
+
 # F257-F260 (2026-07-24) - full-execution-gate
 
 - F257: queda ejecutado el paquete staging CAD con `.env.staging-cad.example`; produccion conserva flags apagados.

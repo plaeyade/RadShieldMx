@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F258-F260 - Activacion Por Carriles
+
+F258-F260 queda implementado como carriles separados:
+
+- Canvas CAD staging: el event controller v2 existe en codigo, pero el canvas estable sigue usando `useCanvas` si el flag esta apagado.
+- DWG: la app no promete abrir DWG nativo; se usa proveedor externo controlado y salida DXF/SVG/IFC con auditoria.
+- DB/fullstack: existe preflight F260; si faltan `DATABASE_URL`, backup, restore probe o backend URL, la salida correcta es `blocked-by-db-live-gates`.
+
+Comandos utiles:
+
+- `npm run test:f258-f260:full`
+- `npm run prepare:f260:db-gate`
+
+Para publicar frontend estatico no se requiere activar DB ni CAD alto riesgo. Para publicar fullstack si se requiere F260 listo.
+
 ## Addendum F257-F260 - Ejecucion Completa Segura
 
 F257-F260 ya no queda solo como lista de pendientes: ahora existe un gate ejecutable con manifest, staging CAD y bloqueos claros para DWG/DB.

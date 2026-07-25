@@ -1,5 +1,13 @@
 # RadShield-MX — Control de Cambios Completo v1-F260
 
+## F258-F260 (2026-07-24) - Staging CAD, DWG Boundary And DB Gate
+
+- Se agrega event controller v2 aislado para staging; el canvas estable no se sustituye por defecto.
+- Se agrega contrato DWG externo, manteniendo DXF como ruta canonica.
+- Se agrega gate DB/fullstack F260 con salida `blocked-by-db-live-gates` cuando faltan variables o permisos.
+- F125 reporta estado F258/F259 para Memoria IA/Evidence.
+- Se agregan scripts `test:f258-f260:full` y `prepare:f260:db-gate`.
+
 ## F257-F260 (2026-07-24) - Full Execution Gate
 
 - Se agrega `src/lib/f257ToF260FullExecution.ts` para convertir F257-F260 en evidencia ejecutable.
