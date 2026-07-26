@@ -1,5 +1,17 @@
 # RadShield-MX - Manual de Versiones
 
+# F301-F306 (2026-07-25) - Functional release close
+
+- Artefactos: `outputs/f301_f306_functional_release_close/f301_f306_functional_release_close.json`, `external_engines_3d_process_preview.html` y `outputs/fase_301_306_functional_release_close.md`.
+- F301: panel docking real y persistente, manteniendo sidebar visible y paneles pesados controlados.
+- F302: renderer/eventos base solo bajo gate E2E y rollback; no se reemplaza `useCanvas` sin smoke antes/despues.
+- F303: E2E visual completo para toolbar, sidebar, DXF/floorplan, escala, capas, cotas, equipos, heatmap y export.
+- F304: Memoria IA de caso completo: plano, equipo, material, calculo, citas, advertencias, PDF y Evidence Pack.
+- F305: DB/RAG readback final: hashes, paginas, deduplicacion, OCR aprobado y prioridad de fuentes.
+- F306: release/deploy final: frontend estatico listo tras smoke; fullstack clinico gated por DB, secretos, API y RAG readback.
+- 3D realista: Three.js/R3F es primario; Babylon.js/WebGPU/WebXR queda como fase 2; Unity WebGL solo como visor externo pesado.
+- Scripts: `npm run prepare:f301-f306:functional-release-close` y `npm run test:f301-f306:functional-release-close`.
+
 # F296-F300 (2026-07-25) - Canvas 3D workbench
 
 - Artefactos: `outputs/f296_f300_canvas_3d_workbench/f296_f300_canvas_3d_workbench.json`, `medical_3d_navigable_preview.html` y `outputs/fase_296_300_canvas_3d_workbench.md`.

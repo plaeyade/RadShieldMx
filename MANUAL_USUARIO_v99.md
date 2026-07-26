@@ -1737,3 +1737,21 @@ Los motores externos se conectan como runners o adapters, no como calculo automa
 4. APS/ODA para convertir DWG a DXF/SVG/GLTF antes de importar al canvas.
 
 Cada runner debe devolver version, dataset, hash de entrada, hash de salida, log, incertidumbre y estado de revision profesional antes de aparecer en memoria analitica o Evidence Pack.
+
+## Addendum F301-F306 - Cierre Funcional y 3D Realista
+
+F301-F306 organiza el cierre funcional antes de publicar otra version. El objetivo no es agregar mas botones, sino asegurar que el canvas, la Memoria IA, la evidencia, la DB/RAG y el deploy funcionen como un flujo completo.
+
+Flujo recomendado:
+1. Cargar o dibujar floorplan.
+2. Calibrar escala y capas.
+3. Colocar equipo con footprint real.
+4. Seleccionar material con TVL, densidad, peso, costo, tiempo y carga estructural.
+5. Ejecutar calculo con trazabilidad de formula, norma, inputs, outputs y advertencias.
+6. Revisar heatmap/isocontornos y vista 3D.
+7. Generar Memoria IA, PDF y Evidence Pack con citas por pagina/hash.
+8. Cerrar desviaciones antes de usar la salida como documento profesional.
+
+Para 3D realista, la ruta primaria es mantener React Three Fiber/Three.js porque ya vive dentro del frontend React. Babylon.js con WebGPU/WebXR puede ser fase posterior si se quiere mas potencia visual o recorrido XR. Unity WebGL es posible, pero debe manejarse como visor externo embebido o enlazado, porque genera un build pesado y requiere configuracion de servidor, compresion y bridge de datos con la app.
+
+El proceso de motores externos queda asi: canvas exporta geometria/materiales/equipo, la API arma un paquete reproducible, el runner externo ejecuta GATE/OpenGATE, EGSnrc, Geant4 o conversion APS/ODA, y la app reimporta resultados con log, hash, version e incertidumbre para Evidence Pack.

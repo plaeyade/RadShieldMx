@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F301-F306 (2026-07-25) - Functional release close
+
+- Adds final six-phase closure plan: panel docking, renderer/event gate, canvas E2E, Memoria IA full case, DB/RAG readback and release/deploy decision.
+- Documents realistic 3D strategy: Three.js/R3F as primary, Babylon.js/WebGPU/WebXR as phase 2, Unity WebGL as optional external heavy viewer and Unreal Pixel Streaming outside static release scope.
+- Adds external motor process preview: floorplan, materials, case pack, runner, results and evidence.
+- Keeps high-risk CAD renderer work behind future E2E/rollback path.
+- Scripts: `npm run prepare:f301-f306:functional-release-close` and `npm run test:f301-f306:functional-release-close`.
+
 # F296-F300 (2026-07-25) - Canvas 3D workbench
 
 - Main sidebar now starts visible with bounded workspace width: 260 px default, 244 px minimum and 300 px maximum.
