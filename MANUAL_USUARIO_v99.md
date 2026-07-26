@@ -1,5 +1,47 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F341 - Centro Neuro con escala 1:100
+
+F341 toma los datos iniciales del usuario para preparar una prueba mas cercana al uso real:
+
+1. Escala de plano: `1:100`.
+2. Fuentes/equipos: ciclotron, Gamma Knife y LINAC.
+3. Material inicial: concreto alta densidad.
+4. Penetraciones: pendientes de marcar en canvas.
+5. Ocupacion: pendiente de confirmar por areas adyacentes.
+
+La escala 1:100 permite una conversion provisional del render: `0.01693333 m/px` si el PDF fue ploteado fielmente a 150 dpi. Esta conversion ayuda a preparar el trazado, pero antes de memoria firmable debe comprobarse contra una dimension conocida del plano o contra archivo CAD/DXF/DWG.
+
+Fuentes a completar:
+
+1. Ciclotron: modelo, energia de protones, corriente, targets, workload, self-shielding y reporte de termino fuente del proveedor.
+2. Gamma Knife/LGK: modelo, numero de fuentes, actividad Co-60, fecha de referencia, decaimiento, pacientes/semana e isocentro.
+3. LINAC: modelo, energia MV, workload Gy/semana, factores de uso, ocupacion, isocentro, laberinto y puerta.
+
+Materiales:
+
+1. Usar `Concreto alta densidad` como valor de arranque.
+2. Seleccionar la ficha exacta antes del calculo: baritado, magnetita, TM NIPOLL, CONTUPLEX, Nelco/VeriShield u otro.
+3. Adjuntar TVL/HVL, densidad, costo, tiempo de obra, peso/carga estructural y fuente documental.
+
+Penetraciones a revisar:
+
+1. Ductos HVAC.
+2. Charolas electricas y conduits.
+3. Gases/plomeria.
+4. Cables hacia control.
+5. Marcos de puerta/laberinto.
+6. Pasos piso/techo.
+7. Lineas de target/extraccion del ciclotron.
+
+Ocupacion:
+
+1. No se debe adivinar para calculo final.
+2. Como borrador se pueden marcar control/consultorios/salas de espera como ocupacion alta, pasillos como ocupacion parcial, escaleras/transito como baja y exteriores/servicio como menor.
+3. Cada zona debe quedar trazada con factor `T`, limite de diseno `P`, clasificacion controlada/supervisada/publica y cita normativa.
+
+Regla de seguridad: F341 sigue siendo preflight. El sistema debe mantener resultados como preliminares mientras falten penetraciones, ocupacion, TVL/densidad versionada o termino fuente completo.
+
 ## Addendum F340 - Prueba operativa Centro Neuro
 
 F340 transforma el caso real de F339 en una secuencia de trabajo para probar la app con el plano Centro Neuro. La prueba no cambia el motor de calculo; organiza la captura y evita que se produzcan resultados firmables sin datos completos.

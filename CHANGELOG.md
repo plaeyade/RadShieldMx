@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F341 (2026-07-25) - Centro Neuro calibrated trial
+
+- Accepts the user-provided 1:100 scale for the Centro Neuro real-case dry run and derives a provisional 0.01693333 m/px render scale at 150 dpi.
+- Adds source-term templates for Cyclotron/CY, Gamma Knife-LGK/TX and LINAC/TX.
+- Sets `Concreto alta densidad` as the draft default material while keeping TVL/density evidence gated before signed calculations.
+- Adds explicit penetration and occupancy TODOs instead of guessing final values.
+- Adds a browser smoke for shell, canvas and Update Center evidence.
+- Scripts: `npm run prepare:f341:centro-neuro-calibrated-trial`, `npm run test:f341:centro-neuro-calibrated-trial` and `npm run test:f341:browser-smoke`.
+
 # F340 (2026-07-25) - Centro Neuro operator trial
 
 - Converts the F339 seed into an operator dry-run package for canvas import, scale calibration, room tracing, equipment placement, calculation preflight, Medical 3D snapshots and report exports.

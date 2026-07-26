@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F341 (2026-07-25) - Centro Neuro con escala/material/fuentes
+
+- Artefactos: `outputs/f341_centro_neuro_calibrated_trial/f341_centro_neuro_calibrated_trial.json`, `f341_source_terms.json`, `f341_penetrations_occupancy_todo.json`, `f341_operator_inputs.csv` y `outputs/fase_341_centro_neuro_calibrated_trial.md`.
+- Escala recibida: `1:100`. Escala provisional del render: `0.01693333 m/px` a 150 dpi.
+- Fuentes preparadas: ciclotron/CY, Gamma Knife-LGK/TX y LINAC/TX.
+- Material por defecto de prueba: concreto alta densidad, con TVL/densidad versionada pendiente antes de calculo firmable.
+- Penetraciones y ocupacion quedan abiertas como entradas obligatorias de operador.
+- Scripts: `npm run prepare:f341:centro-neuro-calibrated-trial`, `npm run test:f341:centro-neuro-calibrated-trial` y `npm run test:f341:browser-smoke`.
+
 # F340 (2026-07-25) - Prueba operativa Centro Neuro
 
 - Artefactos: `outputs/f340_centro_neuro_operator_trial/f340_centro_neuro_operator_trial.json`, `f340_canvas_import_plan.json`, `f340_calculation_dry_runs.csv`, `f340_centro_neuro_overlay.svg` y `outputs/fase_340_centro_neuro_operator_trial.md`.
