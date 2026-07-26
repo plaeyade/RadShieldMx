@@ -1,5 +1,19 @@
 # RadShield-MX - Fases recientes
 
+# F349 (2026-07-26) - Evidence surface QA close
+
+- Adds QA closure for the F348 app/report evidence surfaces.
+- Verifies five surfaces, twenty bindings, visual artifacts, docs/update-center readiness and unsigned calculation status.
+- Generates `f349_evidence_surface_qa.svg` and QA checks CSV.
+- Scripts: `npm run prepare:f349:evidence-surface-qa-close` and `npm run test:f349:evidence-surface-qa-close`.
+
+# F348 (2026-07-26) - App surface evidence handoff
+
+- Binds F347 evidence blocks to Canvas, Memoria IA, Evidence Pack, PDF draft and Medical 3D inspection surfaces.
+- Creates 20 preliminary bindings: 4 evidence blocks x 5 app/report surfaces.
+- Generates `f348_app_surface_handoff.svg`, `f348_app_surface_handoff.html` and `f348_surface_bindings.csv`.
+- Scripts: `npm run prepare:f348:app-surface-evidence-handoff` and `npm run test:f348:app-surface-evidence-handoff`.
+
 # F347 (2026-07-26) - Memoria IA evidence blocks
 
 - Converts F346 standard-parameter rows into preliminary Memoria IA evidence blocks for LINAC, Gamma Knife, cyclotron and radiofarmacia/hot lab.

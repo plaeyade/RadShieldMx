@@ -1,5 +1,19 @@
 # RadShield-MX - Manual de Versiones
 
+# F349 (2026-07-26) - QA cierre superficies de evidencia
+
+- Artefactos: `outputs/f349_evidence_surface_qa_close/f349_evidence_surface_qa_close.json`, `f349_qa_checks.csv`, `f349_evidence_surface_qa.svg` y `outputs/fase_349_evidence_surface_qa_close.md`.
+- Valida manifiesto F348, cinco superficies, veinte bindings, Canvas, Memoria IA, Evidence Pack, visuales y ausencia de calculo firmado.
+- Resultado esperado: `evidence-surface-qa-ready`.
+- Scripts: `npm run prepare:f349:evidence-surface-qa-close` y `npm run test:f349:evidence-surface-qa-close`.
+
+# F348 (2026-07-26) - Handoff a superficies de app/reporte
+
+- Artefactos: `outputs/f348_app_surface_evidence_handoff/f348_app_surface_evidence_handoff.json`, `f348_surface_bindings.csv`, `f348_app_surface_handoff.svg`, `f348_app_surface_handoff.html` y `outputs/fase_348_app_surface_evidence_handoff.md`.
+- Conecta F347 a cinco superficies: Canvas evidence sidebar, Memoria IA, Evidence Pack, PDF draft y Medical 3D.
+- Genera veinte bindings preliminares no firmables.
+- Scripts: `npm run prepare:f348:app-surface-evidence-handoff` y `npm run test:f348:app-surface-evidence-handoff`.
+
 # F347 (2026-07-26) - Bloques de evidencia para Memoria IA
 
 - Artefactos: `outputs/f347_memoria_evidence_blocks/f347_memoria_evidence_blocks.json`, `f347_memoria_blocks.csv`, `f347_memoria_checklist.csv`, `f347_memoria_evidence_visual.svg`, `f347_memoria_evidence_visual.html` y `outputs/fase_347_memoria_evidence_blocks.md`.

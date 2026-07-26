@@ -1,5 +1,33 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F349 - QA cierre de superficies de evidencia
+
+F349 verifica que el handoff F348 este listo antes de smoke visual/browser:
+
+1. Manifiesto F348 presente.
+2. Cinco superficies enlazadas.
+3. Veinte bindings listos.
+4. Canvas evidence sidebar definido.
+5. Memoria IA definida.
+6. Evidence Pack definido.
+7. Visuales HTML/SVG presentes.
+8. Sin calculo firmado.
+9. Update Center/documentacion actualizados.
+
+Resultado: la app queda lista para una fase siguiente de smoke visual/browser sobre Canvas, Memoria IA, Evidence Pack, PDF y Medical 3D.
+
+## Addendum F348 - Superficies de app y reporte
+
+F348 conecta los bloques F347 con las superficies donde el usuario debe ver la evidencia:
+
+1. Canvas evidence sidebar: muestra bloque seleccionado, advertencias y citas pendientes.
+2. Memoria IA wizard: arma secciones preliminares.
+3. Evidence Pack: empaqueta hash, supuestos, warnings y checklist.
+4. PDF report draft: render preliminar con marca no firmable.
+5. Medical 3D inspection: muestra contexto visual por sala/equipo.
+
+Uso correcto: revisar el visual F348, confirmar que cada equipo aparece en todas las superficies y no interpretar ningun resultado como espesor firmado.
+
 ## Addendum F347 - Bloques de evidencia para Memoria IA
 
 F347 toma los parametros estandar de F346 y los convierte en bloques narrativos que Memoria IA puede usar para preparar una memoria preliminar.
