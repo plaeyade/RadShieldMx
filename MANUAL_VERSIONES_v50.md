@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F325-F330 (2026-07-25) - Medical 3D photoreal readiness
+
+- Artefactos: `outputs/f325_f330_medical_3d_photoreal/f325_f330_medical_3d_photoreal.json` y `outputs/fase_325_330_medical_3d_photoreal.md`.
+- F325: recorrido WASD con colisiones contra muros y equipos para no atravesar barreras.
+- F326: perfiles PBR por familia de material: plomo, acero, vidrio plomado, mamposteria alta densidad y concreto.
+- F327: presets de iluminacion clinica, inspeccion y recorrido.
+- F328: contrato de assets `GLB/GLTF/PNG/SVG` para equipos y handoff de visor.
+- F329: recorrido fotoreal dentro de Three/R3F, sin activar Babylon todavia.
+- F330: evidencia visual con `sceneHash` para Memoria IA, PDF y Evidence Pack.
+- Scripts: `npm run prepare:f325-f330:medical-3d-photoreal` y `npm run test:f325-f330:medical-3d-photoreal`.
+
 # F324 (2026-07-25) - Pointer-lock walkthrough
 
 - Artefactos: `outputs/f324_pointer_lock_walkthrough/f324_pointer_lock_walkthrough.json` y `outputs/fase_324_pointer_lock_walkthrough.md`.

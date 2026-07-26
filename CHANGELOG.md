@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F325-F330 (2026-07-25) - Medical 3D photoreal readiness
+
+- Adds collision-aware WASD walkthrough for walls and equipment in Medical 3D.
+- Adds material PBR profiles, clinical/inspection/warm lighting presets and a photoreal walkthrough toggle on the stable Three/R3F path.
+- Adds `sceneHash`, `visualEvidence` and `assetPipeline` fields to Medical 3D review JSON for Memoria IA, PDF and Evidence Pack traceability.
+- Keeps Babylon as a retry-after-install path; no Babylon runtime is bundled until dependencies install and visual smoke passes.
+- Scripts: `npm run prepare:f325-f330:medical-3d-photoreal` and `npm run test:f325-f330:medical-3d-photoreal`.
+
 # F324 (2026-07-25) - Pointer-lock walkthrough
 
 - Adds optional mouse-look for Medical 3D walkthrough: enable `Recorrido WASD`, then enable `Mouse-look` and click inside the scene.

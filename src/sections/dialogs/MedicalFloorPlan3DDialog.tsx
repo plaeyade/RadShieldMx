@@ -48,10 +48,58 @@ const materialColors: Record<string, string> = {
 };
 
 type TextureKind = 'floor' | 'concrete' | 'lead' | 'steel' | 'glass' | 'ceiling' | 'equipment';
+type Medical3DLightingPreset = 'clinical' | 'inspection' | 'warm';
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
   | { type: 'zone'; id: string; title: string; details: string[] };
+
+const lightingPresets: Record<Medical3DLightingPreset, { ambient: number; key: number; cool: number; warm: number; label: string }> = {
+  clinical: { ambient: 0.68, key: 0.95, cool: 0.46, warm: 0.28, label: 'Clinica balanceada' },
+  inspection: { ambient: 0.52, key: 1.18, cool: 0.72, warm: 0.18, label: 'Inspeccion tecnica' },
+  warm: { ambient: 0.74, key: 0.72, cool: 0.28, warm: 0.54, label: 'Recorrido calido' },
+};
+
+function stableSceneHash(value: unknown): string {
+  const text = JSON.stringify(value);
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `scene-${(hash >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+function medicalPbrProfile(materialCode: string) {
+  const normalized = materialCode.toLowerCase();
+  if (normalized.includes('plomo')) return { color: '#424853', roughness: 0.42, metalness: 0.18, opacity: 0.96, category: 'lead-shield' };
+  if (normalized.includes('acero')) return { color: '#9aa5b1', roughness: 0.33, metalness: 0.42, opacity: 0.95, category: 'steel-structure' };
+  if (normalized.includes('vidrio')) return { color: '#93c5c2', roughness: 0.18, metalness: 0.02, opacity: 0.48, category: 'leaded-glass' };
+  if (normalized.includes('baritado') || normalized.includes('alta') || normalized.includes('hd')) {
+    return { color: '#9b9488', roughness: 0.7, metalness: 0.04, opacity: 0.94, category: 'high-density-masonry' };
+  }
+  return { color: '#d2cec5', roughness: 0.66, metalness: 0.04, opacity: 0.93, category: 'concrete-shield' };
+}
+
+function pointHitsWall(x: number, z: number, wall: MedicalScene['walls'][number], radius = 0.28) {
+  const dx = x - wall.center[0];
+  const dz = z - wall.center[2];
+  const cos = Math.cos(-wall.rotationY);
+  const sin = Math.sin(-wall.rotationY);
+  const localX = dx * cos - dz * sin;
+  const localZ = dx * sin + dz * cos;
+  return Math.abs(localX) <= wall.size[0] / 2 + radius && Math.abs(localZ) <= wall.size[2] / 2 + radius;
+}
+
+function pointHitsEquipment(x: number, z: number, item: MedicalScene['equipment'][number], radius = 0.34) {
+  const dx = x - item.position[0];
+  const dz = z - item.position[2];
+  return Math.abs(dx) <= item.footprint_m[0] / 2 + radius && Math.abs(dz) <= item.footprint_m[1] / 2 + radius;
+}
+
+function isWalkthroughBlocked(scene: MedicalScene, x: number, z: number) {
+  return scene.walls.some((wall) => pointHitsWall(x, z, wall)) || scene.equipment.some((item) => pointHitsEquipment(x, z, item));
+}
 
 function makeProceduralTexture(kind: TextureKind) {
   const canvas = document.createElement('canvas');
@@ -152,16 +200,19 @@ function wallColor(materialCode: string, mode: Medical3DMode) {
 function MedicalWall({
   wall,
   mode,
+  photoreal,
   inspect,
   onInspect,
 }: {
   wall: MedicalScene['walls'][number];
   mode: Medical3DMode;
+  photoreal: boolean;
   inspect: boolean;
   onInspect?: (target: InspectionTarget) => void;
 }) {
-  const color = wallColor(wall.materialCode, mode);
-  const opacity = mode === 'presentation' ? 0.92 : 0.78;
+  const pbr = medicalPbrProfile(wall.materialCode);
+  const color = photoreal ? pbr.color : wallColor(wall.materialCode, mode);
+  const opacity = photoreal ? pbr.opacity : mode === 'presentation' ? 0.92 : 0.78;
   const materialKind: TextureKind = wall.materialCode.includes('plomo')
     ? 'lead'
     : wall.materialCode.includes('acero')
@@ -191,8 +242,8 @@ function MedicalWall({
         <SurfaceMaterial
           kind={materialKind}
           color={color}
-          roughness={0.62}
-          metalness={wall.materialCode.includes('acero') ? 0.35 : 0.05}
+          roughness={photoreal ? pbr.roughness : 0.62}
+          metalness={photoreal ? pbr.metalness : wall.materialCode.includes('acero') ? 0.35 : 0.05}
           opacity={opacity}
         />
       </Box>
@@ -467,7 +518,15 @@ function InspectionStationRig({ station }: { station?: F147InspectionStation }) 
   return null;
 }
 
-function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: boolean }) {
+function WalkthroughRig({
+  scene,
+  enabled,
+  collisionEnabled,
+}: {
+  scene: MedicalScene;
+  enabled: boolean;
+  collisionEnabled: boolean;
+}) {
   const { camera } = useThree();
   const keys = useRef(new Set<string>());
   const yaw = useRef(0);
@@ -520,12 +579,17 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
     if (keys.current.has('f')) eyeHeight.current = Math.max(1.05, eyeHeight.current - heightSpeed);
     const forward = new THREE.Vector3(Math.sin(yaw.current), 0, Math.cos(yaw.current));
     const right = new THREE.Vector3(forward.z, 0, -forward.x);
-    if (keys.current.has('w') || keys.current.has('arrowup')) camera.position.addScaledVector(forward, moveSpeed);
-    if (keys.current.has('s') || keys.current.has('arrowdown')) camera.position.addScaledVector(forward, -moveSpeed);
-    if (keys.current.has('a')) camera.position.addScaledVector(right, -moveSpeed);
-    if (keys.current.has('d')) camera.position.addScaledVector(right, moveSpeed);
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
+    const nextPosition = camera.position.clone();
+    if (keys.current.has('w') || keys.current.has('arrowup')) nextPosition.addScaledVector(forward, moveSpeed);
+    if (keys.current.has('s') || keys.current.has('arrowdown')) nextPosition.addScaledVector(forward, -moveSpeed);
+    if (keys.current.has('a')) nextPosition.addScaledVector(right, -moveSpeed);
+    if (keys.current.has('d')) nextPosition.addScaledVector(right, moveSpeed);
+    nextPosition.x = THREE.MathUtils.clamp(nextPosition.x, minX, maxX);
+    nextPosition.z = THREE.MathUtils.clamp(nextPosition.z, minZ, maxZ);
+    if (!collisionEnabled || !isWalkthroughBlocked(scene, nextPosition.x, nextPosition.z)) {
+      camera.position.x = nextPosition.x;
+      camera.position.z = nextPosition.z;
+    }
     camera.position.y = eyeHeight.current;
     camera.lookAt(
       camera.position.x + forward.x,
@@ -543,6 +607,9 @@ function RoomScene({
   showCeiling,
   showClinicalDetail,
   walkthrough,
+  collisionEnabled,
+  photorealWalkthrough,
+  lightingPreset,
   showInspection,
   activeStation,
   onInspect,
@@ -552,22 +619,27 @@ function RoomScene({
   showCeiling: boolean;
   showClinicalDetail: boolean;
   walkthrough: boolean;
+  collisionEnabled: boolean;
+  photorealWalkthrough: boolean;
+  lightingPreset: Medical3DLightingPreset;
   showInspection: boolean;
   activeStation?: F147InspectionStation;
   onInspect?: (target: InspectionTarget) => void;
 }) {
   const [cx, , cz] = scene.bounds.center;
-  const floorColor = mode === 'presentation' ? '#dce3e6' : '#e5e7eb';
+  const visualMode = photorealWalkthrough ? 'presentation' : mode;
+  const lighting = lightingPresets[lightingPreset];
+  const floorColor = visualMode === 'presentation' ? '#dce3e6' : '#e5e7eb';
 
   return (
     <>
-      <ambientLight intensity={mode === 'presentation' ? 0.7 : 0.55} />
-      <directionalLight position={[6, 8, 4]} intensity={0.9} castShadow />
-      <pointLight position={[cx - 2, 2.8, cz + 2]} intensity={0.5} color="#e0f2fe" />
-      <pointLight position={[cx + 2, 2.6, cz - 2]} intensity={0.35} color="#fff7ed" />
+      <ambientLight intensity={lighting.ambient} />
+      <directionalLight position={[6, 8, 4]} intensity={lighting.key} castShadow />
+      <pointLight position={[cx - 2, 2.8, cz + 2]} intensity={lighting.cool} color="#e0f2fe" />
+      <pointLight position={[cx + 2, 2.6, cz - 2]} intensity={lighting.warm} color="#fff7ed" />
       <CameraRig scene={scene} walkthrough={walkthrough} />
       <InspectionStationRig station={activeStation} />
-      <WalkthroughRig scene={scene} enabled={walkthrough} />
+      <WalkthroughRig scene={scene} enabled={walkthrough} collisionEnabled={collisionEnabled} />
 
       <mesh position={[cx, -0.04, cz]} receiveShadow>
         <boxGeometry args={[scene.bounds.width, 0.08, scene.bounds.depth]} />
@@ -580,11 +652,20 @@ function RoomScene({
         </mesh>
       )}
 
-      <ZoneOverlays scene={scene} visible={showInspection || mode === 'technical'} onInspect={onInspect} />
-      {scene.walls.map((wall) => <MedicalWall key={wall.id} wall={wall} mode={mode} inspect={showInspection} onInspect={onInspect} />)}
+      <ZoneOverlays scene={scene} visible={showInspection || visualMode === 'technical'} onInspect={onInspect} />
+      {scene.walls.map((wall) => (
+        <MedicalWall
+          key={wall.id}
+          wall={wall}
+          mode={visualMode}
+          photoreal={photorealWalkthrough}
+          inspect={showInspection}
+          onInspect={onInspect}
+        />
+      ))}
       {scene.equipment.map((item) => <Equipment key={item.id} item={item} onInspect={onInspect} />)}
-      {showClinicalDetail && <ClinicalFixtures scene={scene} mode={mode} />}
-      <DoseOverlays scene={scene} visible={mode === 'dose'} />
+      {showClinicalDetail && <ClinicalFixtures scene={scene} mode={visualMode} />}
+      <DoseOverlays scene={scene} visible={mode === 'dose' && !photorealWalkthrough} />
 
       <gridHelper args={[Math.max(scene.bounds.width, scene.bounds.depth) + 2, 24, '#94a3b8', '#d1d5db']} position={[cx, 0.01, cz]} />
       {!walkthrough && <OrbitControls target={[cx, 1.2, cz]} maxPolarAngle={Math.PI / 2.05} minDistance={2.5} maxDistance={42} makeDefault />}
@@ -608,6 +689,9 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [showClinicalDetail, setShowClinicalDetail] = useState(true);
   const [showInspection, setShowInspection] = useState(true);
   const [walkthrough, setWalkthrough] = useState(false);
+  const [collisionEnabled, setCollisionEnabled] = useState(true);
+  const [photorealWalkthrough, setPhotorealWalkthrough] = useState(false);
+  const [lightingPreset, setLightingPreset] = useState<Medical3DLightingPreset>('clinical');
   const [mouseLookEnabled, setMouseLookEnabled] = useState(false);
   const [mouseLookLocked, setMouseLookLocked] = useState(false);
   const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
@@ -624,6 +708,17 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const f147Inspection = useMemo(() => buildF147Medical3DInspection(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
+  const sceneHash = useMemo(
+    () => stableSceneHash({
+      scene,
+      preset,
+      mode,
+      photorealWalkthrough,
+      lightingPreset,
+      cadSummary: cadSummary ? { kind: cadSummary.kind, entities: cadSummary.sourceEntities, layers: cadSummary.detectedLayers } : null,
+    }),
+    [cadSummary, lightingPreset, mode, photorealWalkthrough, preset, scene],
+  );
   const activeStation = useMemo(
     () => f147Inspection.stations.find((station) => station.id === activeStationId),
     [activeStationId, f147Inspection.stations],
@@ -659,6 +754,28 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         importSummary: cadSummary,
         bounds: scene.bounds,
         review: scene.review,
+        sceneHash,
+        visualEvidence: {
+          schema: 'radshield-mx.medical3d.visualEvidence.v1',
+          sceneHash,
+          captureTargets: ['Memoria IA', 'PDF report', 'Evidence Pack', 'CNSNS/UAQ anexos'],
+          cameraBookmarkPolicy: 'Use F147 stations plus user snapshot for final visual evidence.',
+          visualOnlyDisclaimer: 'La escena 3D es evidencia visual de revision; los calculos firmables se toman del motor de blindaje y sus citas.',
+          lightingPreset,
+          photorealWalkthrough,
+        },
+        assetPipeline: {
+          schema: 'radshield-mx.medical3d.assetPipeline.v1',
+          acceptedStaticAssets: ['glb', 'gltf', 'png', 'svg'],
+          nativeCadFlow: ['DXF/IFC import summary', 'ODA/Forge external conversion pending', 'GLB handoff for viewer engines'],
+          equipmentAssets: scene.equipment.map((item) => ({
+            id: item.id,
+            name: item.name,
+            preferredAsset: item.assetHint || `${item.kind}.glb`,
+            footprint_m: item.footprint_m,
+            ragTags: item.ragTags,
+          })),
+        },
         equipment: scene.equipment.map((item) => ({
           id: item.id,
           name: item.name,
@@ -931,6 +1048,36 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <Switch checked={mouseLookEnabled} onCheckedChange={setMouseLookEnabled} disabled={!walkthrough} />
             </div>
 
+            <div className="space-y-2 rounded border border-slate-200 bg-white p-2" data-testid="f325-f330-photoreal-controls">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+                  <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+                  Colisiones
+                </span>
+                <Switch checked={collisionEnabled} onCheckedChange={setCollisionEnabled} disabled={!walkthrough} />
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  Recorrido fotoreal
+                </span>
+                <Switch checked={photorealWalkthrough} onCheckedChange={setPhotorealWalkthrough} disabled={!walkthrough} />
+              </div>
+              <Select value={lightingPreset} onValueChange={(value) => setLightingPreset(value as Medical3DLightingPreset)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clinical">Luz clinica</SelectItem>
+                  <SelectItem value="inspection">Luz inspeccion</SelectItem>
+                  <SelectItem value="warm">Luz recorrido</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="rounded bg-slate-50 px-2 py-1 text-[10px] leading-relaxed text-slate-600">
+                {lightingPresets[lightingPreset].label}. Hash visual: <span className="font-mono">{sceneHash}</span>
+              </div>
+            </div>
+
             <div
               data-testid="f92-3d-inspection-readiness"
               className="rounded border border-teal-100 bg-teal-50 p-2 text-xs text-teal-900 space-y-1"
@@ -1120,6 +1267,9 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                     showCeiling={showCeiling}
                     showClinicalDetail={showClinicalDetail}
                     walkthrough={walkthrough}
+                    collisionEnabled={collisionEnabled}
+                    photorealWalkthrough={photorealWalkthrough && walkthrough}
+                    lightingPreset={lightingPreset}
                     showInspection={showInspection}
                     activeStation={activeStation}
                     onInspect={setInspectionTarget}
@@ -1152,8 +1302,21 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                 {walkthrough ? 'Limites de sala activos' : 'Inspeccion por click'}
               </Badge>
+              {walkthrough && collisionEnabled && (
+                <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                  Colisiones activas
+                </Badge>
+              )}
+              {photorealWalkthrough && walkthrough && (
+                <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                  PBR + {lightingPresets[lightingPreset].label}
+                </Badge>
+              )}
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                 {renderStrategy.status === 'active' ? 'Render activo R3F' : `${renderStrategy.label}: adapter`}
+              </Badge>
+              <Badge className="bg-white/90 text-slate-700 border shadow-sm font-mono" variant="outline">
+                {sceneHash}
               </Badge>
             </div>
 

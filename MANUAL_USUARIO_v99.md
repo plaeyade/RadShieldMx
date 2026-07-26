@@ -1,5 +1,29 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F325-F330 - Recorrido 3D realista y evidencia visual
+
+F325-F330 mejora el visor `Medical 3D Floor Plan` sin cambiar el motor de calculo. La escena conserva Three/R3F como renderer estable y agrega controles para revisar una sala como recorrido interno.
+
+Uso recomendado:
+
+1. Abrir `Medical 3D Floor Plan`.
+2. Elegir perfil de sala: LINAC, PET/CT, CT, Gamma Knife, HDR o Radiofarmacia.
+3. Activar `Recorrido WASD`.
+4. Mantener `Colisiones` activo para evitar atravesar muros o equipos.
+5. Activar `Recorrido fotoreal` cuando se quiera inspeccionar materiales y acabados.
+6. Elegir luz `Clinica`, `Inspeccion` o `Recorrido`.
+7. Activar `Mouse-look` y hacer click en la escena si se desea navegar con mouse.
+8. Exportar `JSON` para guardar `sceneHash`, assets esperados y evidencia visual asociada a Memoria IA/PDF/Evidence Pack.
+
+Interpretacion:
+
+- `Colisiones` ayuda a detectar recorridos poco realistas o equipos que bloquean paso.
+- `Recorrido fotoreal` usa perfiles PBR procedurales por material: plomo, acero, vidrio plomado, concreto y mamposteria alta densidad.
+- `sceneHash` identifica la version visual de la escena que debe corresponder con capturas, memoria analitica y anexos.
+- `assetPipeline` prepara la futura sustitucion de modelos genericos por equipos `GLB/GLTF` reales sin romper el esquema.
+
+Limitacion importante: esta visualizacion es apoyo de inspeccion y evidencia grafica. Los espesores firmables, advertencias clinicas, citas y justificacion normativa siguen saliendo del motor de calculo, RAG y reportes.
+
 ## Addendum F324 - Pointer-lock walkthrough
 
 F324 mejora el recorrido 3D para que se sienta como visita interna. El modo sigue siendo opcional y no cambia calculos ni evidencia normativa.

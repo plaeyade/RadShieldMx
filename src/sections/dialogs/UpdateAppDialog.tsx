@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F325-F330 Medical 3D photoreal readiness', current: 'enabled', latest: 'collisions + PBR + visual evidence', status: 'current', description: 'Medical 3D adds collision-aware WASD, PBR material profiles, clinical/inspection/warm lighting, photoreal walkthrough, GLB asset pipeline contract and sceneHash evidence for Memoria IA/PDF/Evidence Pack.' },
   { name: 'F324 Pointer-lock walkthrough', current: 'enabled', latest: 'mouse-look + Esc release', status: 'current', description: 'Medical 3D now supports optional pointer-lock mouse-look inside WASD walkthrough, with Shift/Ctrl speed, R/F eye height, room bounds and OrbitControls fallback outside walkthrough.' },
   { name: 'F317-F323 Medical 3D release line', current: '3D closure staged', latest: 'Three/R3F modality smoke + Babylon/Unity/report path', status: 'current', description: 'Three/R3F remains stable, WASD gains speed/precision/height/bounds, Babylon remains gated by npm EACCES, Unity is ready as external URL handoff, and 3D exports are mapped to Memoria IA/PDF/Evidence Pack.' },
   { name: 'F316 Babylon dependency diagnostics', current: 'blocked by npm EACCES', latest: 'diagnostic manifest + stable fallback', status: 'blocked', description: 'Babylon code path is ready, but dependency installation is blocked by EACCES on registry.npmjs.org. Three/R3F remains active and no partial dependency changes are committed.' },
