@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F294 (2026-07-25) - Smoke guiado real
+
+- Artefactos: `outputs/f294_real_guided_smoke/f294_real_guided_smoke.json`, `f294_operator_evidence_checklist.csv`, `f294_deviation_log_template.csv` y `outputs/fase_294_real_guided_smoke.md`.
+- Selecciona por defecto `TX-LINAC-6MV-001`, porque F291 lo marco como caso listo para prueba real.
+- Convierte el protocolo F293 en una compuerta de evidencia: canvas visible, plano/import, escala, trazado, equipo, materiales, calculo, visuales, reportes y cierre de desviaciones.
+- No ejecuta escrituras live en DB ni certifica uso clinico automaticamente.
+- Scripts: `npm run prepare:f294:real-guided-smoke` y `npm run test:f294:real-guided-smoke`.
+
 # F293 (2026-07-25) - Refresh release estatico y protocolo de prueba real
 
 - Artefactos: `outputs/f293_static_release_refresh_real_trial/f293_static_release_refresh_real_trial.json`, `f293_real_trial_operator_protocol.csv` y `outputs/fase_293_static_release_refresh_real_trial.md`.

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F294 (2026-07-25) - Real guided smoke
+
+- Added F294 guided smoke package for the first real operator-run case.
+- Selects `TX-LINAC-6MV-001` by default because F291 marks it ready.
+- Generates operator evidence checklist and deviation log template without DB live writes.
+- Keeps output blocked from clinical certification until qualified review closes deviations.
+
 # F293 (2026-07-25) - Static release refresh + real trial protocol
 
 - Added F293 release refresh gate over F200/F291/F292.

@@ -1684,3 +1684,21 @@ Secuencia operativa F293:
 8. Revisar heatmap/isocontornos.
 9. Exportar Memoria IA, PDF, Evidence Pack y 3D.
 10. Cerrar desviaciones con decision del fisico/RSO.
+
+## Addendum F294 - Smoke guiado real con evidencia del operador
+
+La fase F294 toma el protocolo de F293 y lo convierte en una compuerta ejecutable. Por defecto usa el caso `TX-LINAC-6MV-001`, porque F291 lo marco como listo para prueba real. Otros casos pueden seleccionarse con `F294_CASE_ID`, pero deben estar en estado `ready`; si el caso requiere entrada del operador, no debe usarse para cerrar esta compuerta.
+
+Evidencia minima para cerrar F294:
+1. Caso, modalidad, operador y fecha.
+2. Captura donde canvas, sidebar y herramientas esten visibles.
+3. Plano cargado o DXF convertido con hash/fuente.
+4. Escala calibrada con valor y referencia.
+5. Barreras, zonas, puertas y puntos criticos trazados.
+6. Equipo/fuente colocado con footprint, isocentro y workload.
+7. Material seleccionado con TVL, densidad, peso, costo, tiempo y carga estructural.
+8. Calculo con formula, norma, inputs, outputs, advertencias, comparador y cache.
+9. Heatmap/isocontornos con leyenda regulatoria exportable.
+10. Memoria IA/PDF/Evidence Pack/snapshot 3D y bitacora de desviaciones.
+
+F294 no certifica uso clinico por si solo. La salida firmada requiere revision de fisico medico/RSO, cierre de desviaciones y fuentes trazables por pagina/hash.
