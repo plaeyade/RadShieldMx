@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F350-F355 (2026-07-26) - Real preliminary test package
+
+- Builds an operator-ready preliminary package from F347 evidence blocks and F349 QA.
+- Applies real/provider source labels where available, 1:100 traced-geometry placeholder, standard or memory-derived penetrations, and candidate TVL/density fingerprints.
+- Explicitly bypasses FM/RSO only for workflow testing while keeping `signedCalculationProduced=false`.
+- Generates visual smoke HTML/SVG, preliminary Memoria IA draft, missing-data closeout CSV, report evidence draft, consistency matrix and operator package ZIP.
+- Scripts: `npm run prepare:f350-f355:real-test-package` and `npm run test:f350-f355:real-test-package`.
+
 # F349 (2026-07-26) - Evidence surface QA close
 
 - Adds QA closure for the F348 app/report evidence surfaces.

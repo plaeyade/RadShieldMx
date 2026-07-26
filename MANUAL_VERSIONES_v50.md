@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F350-F355 (2026-07-26) - Paquete real preliminar de operador
+
+- Artefactos: `outputs/f350_f355_real_test_package/f350_f355_real_test_package.json`, `f350_f355_visual_smoke.svg`, `f350_f355_visual_smoke.html`, `f351_memoria_preliminar.md`, `f352_missing_data_closeout.csv`, `f353_report_evidence_draft.html`, `f354_consistency_matrix.csv`, `f355_operator_package_manifest.csv` y `radshield_f350_f355_real_test_package.zip`.
+- Usa etiquetas fuente/proveedor reales cuando estan disponibles, geometria de flujo Centro Neuro 1:100, TVL/densidad candidata con hash y penetraciones estandar derivadas de memorias.
+- La revision FM/RSO queda omitida solo para prueba de flujo; bloquea memoria firmada y mantiene `signedCalculationProduced=false`.
+- Resultado esperado: `real-test-package-ready-preliminary-not-certified`.
+- Scripts: `npm run prepare:f350-f355:real-test-package` y `npm run test:f350-f355:real-test-package`.
+
 # F349 (2026-07-26) - QA cierre superficies de evidencia
 
 - Artefactos: `outputs/f349_evidence_surface_qa_close/f349_evidence_surface_qa_close.json`, `f349_qa_checks.csv`, `f349_evidence_surface_qa.svg` y `outputs/fase_349_evidence_surface_qa_close.md`.

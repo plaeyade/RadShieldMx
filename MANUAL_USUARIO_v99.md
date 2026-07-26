@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F350-F355 - Paquete real preliminar Centro Neuro
+
+F350-F355 empaqueta la prueba operativa del caso Centro Neuro usando los bloques de evidencia F347 y el cierre QA F349.
+
+Incluye:
+
+1. Visual smoke del flujo Canvas/Floorplan, Memoria IA, Evidence Pack, PDF draft, Medical 3D y Update Center.
+2. Memoria preliminar marcada como **NO CERTIFICADO**.
+3. Cierre de datos faltantes con valores estandar o derivados de memorias analiticas.
+4. Matriz de consistencia para confirmar que cada superficie muestra el mismo estado.
+5. ZIP de operador para revisar el paquete antes de continuar.
+
+Uso correcto: abrir el HTML visual, revisar por equipo la fuente/proveedor, geometria, material, TVL, densidad, penetraciones y estado. En esta fase la revision FM/RSO se omite solo para no detener la prueba, pero esto no habilita memoria firmada ni espesores certificados.
+
+Regla operativa: si un dato aparece como candidato, estandar o derivado, debe sustituirse por dato versionado con documento, pagina y hash antes de emitir memoria analitica final.
+
 ## Addendum F349 - QA cierre de superficies de evidencia
 
 F349 verifica que el handoff F348 este listo antes de smoke visual/browser:
