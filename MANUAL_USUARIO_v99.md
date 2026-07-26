@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F331-F338 - Cierre de release estatico
+
+F331-F338 agrupa el cierre operativo antes de probar la app con un caso real. No agrega calculos nuevos; confirma que el frontend estatico, Medical 3D, canvas, materiales, RAG/documentos y reportes tienen contratos de evidencia listos para validacion.
+
+Flujo recomendado:
+
+1. Revisar Medical 3D en seis perfiles: LINAC, Gamma Knife, HDR, CT, PET/CT y Radiofarmacia.
+2. Confirmar que `sceneHash`, `visualEvidence` y `assetPipeline` aparecen en el JSON exportado desde Medical 3D.
+3. Usar las capturas 3D como apoyo visual en Memoria IA, PDF y Evidence Pack.
+4. Revisar materiales y estructura en la toolbox consolidada antes de seleccionar espesores finales.
+5. Confirmar que RAG/documentos conserva `sourceHash`, `chunkHash`, pagina y fuente canonica.
+6. Repetir el gate de canvas/floorplan antes de cargar un caso real.
+7. Publicar o subir el paquete `outputs/f331_f338_static_release_close/radshield-mx-f338-static-release.zip` solo despues de build y gates verdes.
+
+Decision de arquitectura: el release publico actual es frontend estatico. DB/API/RAG live quedan fuera del host publico hasta tener restore probe, secretos productivos y smoke fullstack. Babylon tambien queda fuera hasta resolver instalacion npm y pasar smoke visual.
+
+Siguiente uso real: F339 debe tomar un caso del usuario, cargar plano/croquis, colocar equipo, calcular, generar Memoria IA/PDF/Evidence Pack y cerrar desviaciones con revision calificada.
+
 ## Addendum F325-F330 - Recorrido 3D realista y evidencia visual
 
 F325-F330 mejora el visor `Medical 3D Floor Plan` sin cambiar el motor de calculo. La escena conserva Three/R3F como renderer estable y agrega controles para revisar una sala como recorrido interno.

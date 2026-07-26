@@ -1,5 +1,18 @@
 # RadShield-MX - Manual de Versiones
 
+# F331-F338 (2026-07-25) - Static release close
+
+- Artefactos: `outputs/f331_f338_static_release_close/f331_f338_static_release_close.json`, `outputs/f331_f338_static_release_close/f331_f338_modality_visual_qa.csv`, `outputs/f331_f338_static_release_close/radshield-mx-f338-static-release.zip` y `outputs/fase_331_338_static_release_close.md`.
+- F331: QA visual Medical 3D por modalidad.
+- F332: contrato de capturas/`sceneHash` hacia Memoria IA, PDF y Evidence Pack.
+- F333: cola de QA numerico clinico antes de uso firmado.
+- F334: consolidacion materiales + estructura para release.
+- F335: cierre RAG/documentos con hashes y chunks.
+- F336: superficies finales de reportes y evidencia.
+- F337: gate canvas/floorplan con F229/F231-F236.
+- F338: paquete estatico listo para deploy/manual upload.
+- Scripts: `npm run prepare:f331-f338:static-release-close` y `npm run test:f331-f338:static-release-close`.
+
 # F325-F330 (2026-07-25) - Medical 3D photoreal readiness
 
 - Artefactos: `outputs/f325_f330_medical_3d_photoreal/f325_f330_medical_3d_photoreal.json` y `outputs/fase_325_330_medical_3d_photoreal.md`.

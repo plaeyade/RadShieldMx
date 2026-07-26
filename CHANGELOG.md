@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F331-F338 (2026-07-25) - Static release close
+
+- Adds a release-close manifest for Medical 3D modality QA, 3D visual evidence, calculation QA queue, material/structural readiness, RAG/document closure, reports, canvas QA and static package.
+- Copies the current F200 static package as `outputs/f331_f338_static_release_close/radshield-mx-f338-static-release.zip` when the F200 gate is ready.
+- Records six modality checks: LINAC, Gamma Knife, HDR, CT, PET/CT and Radiofarmacia.
+- Keeps DB/API/RAG live outside the public static host until restore probe, secrets and fullstack smoke pass.
+- Scripts: `npm run prepare:f331-f338:static-release-close` and `npm run test:f331-f338:static-release-close`.
+
 # F325-F330 (2026-07-25) - Medical 3D photoreal readiness
 
 - Adds collision-aware WASD walkthrough for walls and equipment in Medical 3D.
