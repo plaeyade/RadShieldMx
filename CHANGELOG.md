@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F343 (2026-07-25) - Centro Neuro source/occupancy preflight
+
+- Adds an operator preflight for the real Centro Neuro case using the provided equipment set: Elekta Versa HD 15 MeV, Elekta Gamma Knife Esprit and IBA Cyclone KIUBE 18 MeV.
+- Uses maximum workload only as a conservative planning assumption; no signed shielding calculation is emitted.
+- Adds equipment, occupancy and penetration worksheets plus material evidence gates for high-density concrete.
+- Requires source-term report, approved occupancy, penetration markup, versioned TVL/density, scale check and qualified review before final calculations.
+- Scripts: `npm run prepare:f343:centro-neuro-preflight` and `npm run test:f343:centro-neuro-preflight`.
+
 # F342 (2026-07-25) - Centro Neuro visual evidence
 
 - Adds a visual review HTML for the Centro Neuro case using the F340 overlay, F341 scale/material/source data and pending inputs.

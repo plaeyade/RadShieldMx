@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F343 - Preflight Centro Neuro con equipos reales
+
+F343 toma los datos confirmados por el usuario y arma la hoja de entrada operativa antes del calculo:
+
+1. LINAC: Elekta Versa HD, energia maxima 15 MeV.
+2. Gamma Knife: Elekta Gamma Knife Esprit.
+3. Ciclotron: IBA Cyclone KIUBE, energia 18 MeV.
+4. Material preliminar: concreto alta densidad.
+5. Carga maxima: supuesto conservador para preflight, no resultado firmable.
+
+Uso en el flujo de diseno:
+
+1. Importar el plano Centro Neuro y confirmar escala 1:100 contra una cota conocida.
+2. Colocar cada equipo en su sala con isocentro, footprint y orientacion.
+3. Trazar zonas controladas, supervisadas y publicas alrededor de cada barrera.
+4. Registrar ocupacion `T` y limite de diseno `P` por area adyacente.
+5. Marcar penetraciones como objetos propios: HVAC, electricidad, gases, cableado, puerta, laberinto y pasos especiales.
+6. Seleccionar material real y anexar TVL/HVL, densidad, costo, tiempo de obra, peso/carga estructural y cita/hash.
+7. Correr calculos preliminares solo cuando las compuertas esten completas.
+
+Advertencias activas:
+
+1. Versa HD 15 MeV requiere revision de neutrones.
+2. Cyclone KIUBE 18 MeV requiere revision de neutrones, activacion, ductos y exhaust.
+3. Gamma Knife Esprit requiere actividad Co-60, fecha de referencia y decaimiento.
+4. Distancias menores a 0.3 m deben bloquearse o justificarse.
+5. TVL sin version, pagina y hash no debe alimentar memoria final.
+6. Todo resultado queda preliminar hasta revision RSO/fisico medico.
+
 ## Addendum F342 - Evidencia visual Centro Neuro
 
 F342 genera resultados visuales para revisar el caso Centro Neuro antes de ingresar datos finales. La fase produce una lamina HTML y capturas del navegador para verificar que la app conserva canvas, menus, Medical 3D, Memoria IA y Evidence Pack.

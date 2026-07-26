@@ -424,6 +424,8 @@
     "prepare:f342:centro-neuro-visual-evidence": "node scripts/f342-centro-neuro-visual-evidence.mjs",
     "test:f342:centro-neuro-visual-evidence": "node scripts/check-f342-centro-neuro-visual-evidence-contracts.mjs",
     "test:f342:browser-smoke": "playwright test e2e/f342-centro-neuro-visual-smoke.spec.ts --project=chromium",
+    "prepare:f343:centro-neuro-preflight": "node scripts/f343-centro-neuro-preflight.mjs",
+    "test:f343:centro-neuro-preflight": "node scripts/check-f343-centro-neuro-preflight-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

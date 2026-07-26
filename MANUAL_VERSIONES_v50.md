@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F343 (2026-07-25) - Preflight Centro Neuro con equipos reales
+
+- Artefactos: `outputs/f343_centro_neuro_preflight/f343_centro_neuro_preflight.json`, `f343_equipment_preflight.csv`, `f343_occupancy_penetration_worksheet.csv` y `outputs/fase_343_centro_neuro_preflight.md`.
+- Equipos recibidos: Elekta Versa HD con energia maxima 15 MeV, Elekta Gamma Knife Esprit e IBA Cyclone KIUBE 18 MeV.
+- Carga maxima: se usa solo como supuesto conservador de planeacion; no genera memoria firmable.
+- Compuertas obligatorias: termino fuente, ocupacion, penetraciones, TVL/densidad versionada, escala verificada y revision RSO/fisico medico.
+- Material inicial: concreto alta densidad en estado draft, pendiente de ficha TVL/densidad/peso/costo/tiempo/cita/hash.
+- Scripts: `npm run prepare:f343:centro-neuro-preflight` y `npm run test:f343:centro-neuro-preflight`.
+
 # F342 (2026-07-25) - Evidencia visual Centro Neuro
 
 - Artefactos: `outputs/f342_centro_neuro_visual_evidence/f342_centro_neuro_visual_evidence.json`, `f342_visual_review.html`, `outputs/fase_342_centro_neuro_visual_evidence.md` y capturas en `outputs/f342_centro_neuro_browser_smoke/`.
