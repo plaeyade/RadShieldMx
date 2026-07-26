@@ -1,5 +1,28 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F345 - Paquete draft visual de calculo
+
+F345 convierte el marcado de F344 en una matriz draft de calculo por barrera. El objetivo es ver el avance y preparar la entrada para Memoria IA/PDF/Evidence Pack sin inventar espesores.
+
+Que genera:
+
+1. 24 filas de barrera: norte, sur, este, oeste, piso y techo por area.
+2. Metodos sugeridos por modalidad:
+   - Versa HD 15 MeV: NCRP 151 primario/secundario y revision de neutrones.
+   - Gamma Knife Esprit: Co-60, actividad, decaimiento y TVL por material.
+   - Cyclone KIUBE 18 MeV: neutrones, gamma prompt, activacion, ductos y exhaust.
+   - Radiofarmacia/hot lab: inventario NM, hot cells y flujo controlado.
+3. Una vista visual HTML/SVG con salas, compuertas y estado del paquete.
+
+Como usarlo:
+
+1. Abrir el visual `f345_visual_progress.html` para revisar que las areas y compuertas coinciden con el caso.
+2. Usar `f345_barrier_draft_calculation_matrix.csv` como lista de captura en canvas.
+3. Completar para cada barrera: geometria, distancia, rol de barrera, penetraciones, material, TVL/densidad y cita.
+4. Mantener el resultado como draft hasta que las compuertas pasen.
+
+Regla: F345 prepara calculo, pero no calcula espesor firmable.
+
 ## Addendum F344 - Colindancias publico en general
 
 F344 permite avanzar el trazado del caso Centro Neuro con los criterios ya indicados:

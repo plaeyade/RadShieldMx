@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F345 (2026-07-25) - Centro Neuro draft calculation packet
+
+- Adds a visual-first draft calculation packet for Centro Neuro with 24 barrier rows across LINAC, Gamma Knife, cyclotron and radiofarmacia/hot lab context.
+- Carries `1:100`, `publico en general` and `T=1` into calculation inputs while keeping every thickness blocked.
+- Adds method IDs for NCRP 151 LINAC, Co-60/Gamma Knife, 18 MeV cyclotron and nuclear medicine hot lab checks.
+- Generates visual progress artifacts: `f345_visual_progress.svg` and `f345_visual_progress.html`.
+- Scripts: `npm run prepare:f345:centro-neuro-draft-calculation-packet` and `npm run test:f345:centro-neuro-draft-calculation-packet`.
+
 # F344 (2026-07-25) - Centro Neuro public occupancy markup
 
 - Confirms the Centro Neuro scale as `1:100` for draft canvas markup while keeping final calculation scale check explicit.

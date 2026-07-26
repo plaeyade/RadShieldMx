@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F345 (2026-07-25) - Paquete draft de calculo visual
+
+- Artefactos: `outputs/f345_centro_neuro_draft_calculation_packet/f345_centro_neuro_draft_calculation_packet.json`, `f345_barrier_draft_calculation_matrix.csv`, `f345_calculation_gate_status.csv`, `f345_visual_progress.svg`, `f345_visual_progress.html` y `outputs/fase_345_centro_neuro_draft_calculation_packet.md`.
+- Crea 24 filas draft de barrera: norte, sur, este, oeste, piso y techo para LINAC, Gamma Knife, ciclotron y radiofarmacia/hot lab.
+- Cada fila incluye escala, colindancia, ocupacion, metodo, norma, entradas requeridas, advertencias y estado de salida.
+- No produce espesor firmable; fuente, material, geometria, penetraciones y revision final siguen como compuertas.
+- Scripts: `npm run prepare:f345:centro-neuro-draft-calculation-packet` y `npm run test:f345:centro-neuro-draft-calculation-packet`.
+
 # F344 (2026-07-25) - Marcado de colindancias publico en general
 
 - Artefactos: `outputs/f344_centro_neuro_public_occupancy_markup/f344_centro_neuro_public_occupancy_markup.json`, `f344_canvas_layers.csv`, `f344_barrier_public_adjacencies.csv` y `outputs/fase_344_centro_neuro_public_occupancy_markup.md`.

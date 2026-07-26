@@ -428,6 +428,8 @@
     "test:f343:centro-neuro-preflight": "node scripts/check-f343-centro-neuro-preflight-contracts.mjs",
     "prepare:f344:centro-neuro-public-occupancy-markup": "node scripts/f344-centro-neuro-public-occupancy-markup.mjs",
     "test:f344:centro-neuro-public-occupancy-markup": "node scripts/check-f344-centro-neuro-public-occupancy-markup-contracts.mjs",
+    "prepare:f345:centro-neuro-draft-calculation-packet": "node scripts/f345-centro-neuro-draft-calculation-packet.mjs",
+    "test:f345:centro-neuro-draft-calculation-packet": "node scripts/check-f345-centro-neuro-draft-calculation-packet-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
