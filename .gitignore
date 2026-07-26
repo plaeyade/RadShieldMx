@@ -46,3 +46,4 @@ coverage/
 outputs/
 test-results/
 .docker-cli-config/
+.npm-cache-*/

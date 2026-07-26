@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F316 Babylon dependency diagnostics', current: 'blocked by npm EACCES', latest: 'diagnostic manifest + stable fallback', status: 'blocked', description: 'Babylon code path is ready, but dependency installation is blocked by EACCES on registry.npmjs.org. Three/R3F remains active and no partial dependency changes are committed.' },
   { name: 'F315 Unity external viewer bridge', current: 'bridge ready', latest: 'external URL launcher + handoff JSON', status: 'current', description: 'Medical 3D now exports a Unity launch packet and can open a configured Unity WebGL URL. Unity remains external and visual-only; Three/R3F remains the stable fallback.' },
   { name: 'F314 Babylon runtime loader', current: 'loader ready', latest: 'dynamic import + fallback', status: 'current', description: 'Se agrega cargador runtime Babylon con import dinamico y fallback obligatorio a Three/R3F. El intento npm install no completo en este entorno; la app queda estable y lista para activar cuando los paquetes existan.' },
   { name: 'F313 NIST XCOM mixture', current: 'ready', latest: 'mixtures + RAG seed candidate', status: 'current', description: 'NIST XCOM queda como fuente de apoyo para atenuacion fotonica y mezclas por fraccion en peso. El dialogo XCOM muestra TVL de mezcla y genera seed candidato con hashes; NCRP/IAEA/UAQ siguen como metodologia de diseno.' },

@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F316 - Babylon dependency diagnostics
+
+F316 registra el estado real de Babylon. La app ya tiene adapter y loader dinamico, pero los paquetes `@babylonjs/core` y `@babylonjs/loaders` no estan instalados porque npm devuelve `EACCES` al consultar `registry.npmjs.org`.
+
+Que significa para el usuario:
+
+1. El visor 3D integrado sigue funcionando con Three/R3F.
+2. Unity externo puede usarse por handoff/URL si existe un build publicado.
+3. Babylon queda preparado para PBR/WebGPU/WebXR, pero no se activa hasta instalar dependencias.
+4. No hay cambios parciales en dependencias ni lockfiles.
+
+Para activar Babylon se debe corregir la salida npm o proxy hacia `https://registry.npmjs.org`, instalar los paquetes, compilar y repetir smoke visual del visor Medical 3D.
+
 ## Addendum F315 - Unity external viewer bridge
 
 F315 agrega el puente operativo para abrir un visor Unity WebGL externo desde el dialogo Medical 3D. La app no instala Unity ni lo mete al bundle principal: exporta un paquete JSON con escena, muros, equipos, zonas, espesores y reglas clinicas, y solo abre Unity si se configura una URL externa.

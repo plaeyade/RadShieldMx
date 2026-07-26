@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F316 (2026-07-25) - Babylon dependency diagnostics
+
+- Artefactos: `outputs/f316_babylon_install_diagnostics/f316_babylon_install_diagnostics.json` y `outputs/fase_316_babylon_install_diagnostics.md`.
+- Se agrega diagnostico repetible para activar Babylon sin dejar cambios parciales si npm falla.
+- Estado actual: el loader y adapter estan listos, pero la instalacion de paquetes queda bloqueada por `EACCES` hacia `registry.npmjs.org`.
+- Accion requerida: corregir salida npm/registry o proxy, instalar `@babylonjs/core` y `@babylonjs/loaders`, repetir F314/F316/build/smoke visual.
+- Scripts: `npm run prepare:f316:babylon-install-diagnostics` y `npm run test:f316:babylon-install-diagnostics`.
+
 # F315 (2026-07-25) - Unity external viewer bridge
 
 - Artefactos: `outputs/f315_unity_external_viewer_bridge/f315_unity_external_viewer_bridge.json` y `outputs/fase_315_unity_external_viewer_bridge.md`.

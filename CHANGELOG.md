@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F316 (2026-07-25) - Babylon dependency diagnostics
+
+- Adds an explicit diagnostics phase for Babylon dependency activation.
+- Confirms the code path is ready but package installation is currently blocked by `EACCES` on `https://registry.npmjs.org/*`.
+- Keeps Three/R3F as the active stable fallback and avoids partial dependency changes.
+- Scripts: `npm run prepare:f316:babylon-install-diagnostics` and `npm run test:f316:babylon-install-diagnostics`.
+
 # F315 (2026-07-25) - Unity external viewer bridge
 
 - Adds `src/lib/medical3D/unityExternalViewerBridge.ts` to build a Unity launch packet and optional external viewer URL.
