@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F287 (2026-07-25) - Seed RAG solo aprobados
+
+- Artefactos: `outputs/f287_approved_only_rag_seed/f287_approved_only_rag_seed.json`, `outputs/f287_approved_only_rag_seed/f287_document_chunks_approved_only.jsonl`, `outputs/f287_approved_only_rag_seed/f287_excluded_by_review.jsonl` y `outputs/fase_287_approved_only_rag_seed.md`.
+- Resultado esperado: `approved-only-rag-seed-dry-run` salvo seed live autorizado.
+- Politica: se excluyen decisiones F286 `needs-reocr`, `needs-redaction` y `reject`; se conservan chunks F285 QA-ready no excluidos.
+- Live DB: requiere `F287_SEED_LIVE=1`, `F287_CONFIRM_APPROVED_ONLY=1`, `DATABASE_URL`, backup/restore probe y validacion F170 posterior.
+- Scripts: `npm run prepare:f287:approved-only-rag-seed` y `npm run test:f287:approved-only-rag-seed`.
+
 # F286 (2026-07-25) - Revision humana OCR
 
 - Artefactos: `outputs/f286_ocr_human_review_packet/f286_ocr_human_review_packet.json`, `outputs/f286_ocr_human_review_packet/f286_review_decisions_template.csv`, `outputs/f286_ocr_human_review_packet/f286_sample_review_pages.json`, `outputs/f286_ocr_human_review_packet/f286_blocked_pages.json` y `outputs/fase_286_ocr_human_review_packet.md`.

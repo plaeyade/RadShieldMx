@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F287 (2026-07-25) - Approved-only RAG seed
+
+- Added an approved-only seed lane after F286 review.
+- F286 rows marked `needs-reocr`, `needs-redaction` or `reject` are excluded from insertion.
+- F285 QA-ready chunks remain prepared for local/private RAG when not explicitly excluded by review.
+- Live DB writes remain gated by `F287_SEED_LIVE=1`, `F287_CONFIRM_APPROVED_ONLY=1` and `DATABASE_URL`.
+
 # F286 (2026-07-25) - OCR human review packet
 
 - Added an operator review packet before any live RAG seed from OCR memories.

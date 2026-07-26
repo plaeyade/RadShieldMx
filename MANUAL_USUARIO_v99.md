@@ -1,5 +1,19 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F287 - Seed RAG solo aprobados
+
+F287 aplica la instruccion operativa de continuar solo con contenido aprobado. Las paginas F286 marcadas `needs-reocr`, `needs-redaction` o `reject` quedan fuera. Los chunks F285 que ya estaban `chunk-seed-draft-ready` y no fueron excluidos se conservan como corpus tecnico para RAG local/privado.
+
+Uso:
+
+1. Ejecutar `npm run prepare:f287:approved-only-rag-seed`.
+2. Revisar `outputs/f287_approved_only_rag_seed/f287_approved_only_rag_seed.json`.
+3. Confirmar que `f287_excluded_by_review.jsonl` contiene las paginas no aprobadas.
+4. Ejecutar live seed solo en ambiente privado con `F287_SEED_LIVE=1`, `F287_CONFIRM_APPROVED_ONLY=1` y `DATABASE_URL`.
+5. Correr F170 despues del seed para validar citas, hashes y conteos.
+
+Nota: la presencia de acentos rotos o mojibake no cambia automaticamente constantes ni metodologia. Ese texto puede ayudar como evidencia/ejemplo, pero las citas normativas siguen saliendo de fuentes canonicas y versionadas.
+
 ## Addendum F286 - Revision humana OCR
 
 F286 crea el paquete de revision previa al seed real de memorias OCR. El objetivo es evitar que paginas con mala calidad, datos privados o texto dudoso entren a `document_chunks` sin una decision documentada.
