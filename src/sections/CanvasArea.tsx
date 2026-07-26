@@ -446,7 +446,7 @@ export default function CanvasArea({
     setActiveTool?.(tool);
   };
 
-  const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
@@ -1362,6 +1362,7 @@ export default function CanvasArea({
           <div
             data-testid="f214-sketchup-viewport-frame"
             className="flex-1 relative overflow-hidden bg-[#e9edf0] shadow-inner"
+            onContextMenu={handleCanvasContextMenu}
             style={{
               backgroundImage:
                 'linear-gradient(135deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 36%), radial-gradient(circle at 12px 12px, rgba(15,23,42,0.06) 1px, transparent 1px)',

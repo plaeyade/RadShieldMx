@@ -500,7 +500,7 @@ function Content({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
             <Input placeholder="Buscar..." value={q} onChange={e => setQ(e.target.value)} className="pl-9 w-56 h-8 text-xs"/>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}><X className="w-4 h-4"/></Button>
+          <Button variant="ghost" size="sm" aria-label="Cerrar Manual de Usuario" onClick={() => onOpenChange(false)}><X className="w-4 h-4"/></Button>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">

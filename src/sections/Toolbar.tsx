@@ -456,14 +456,14 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                 data-testid="f295-primary-file-dropdown"
                 variant="ghost"
                 size="sm"
-                className="flex shrink-0 text-[11px] h-8 px-2 text-slate-700 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-semibold border border-slate-100 bg-slate-50/70"
+                className="flex shrink-0 text-[10px] h-7 px-2 text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 gap-1 font-semibold border border-slate-100"
               >
                 <MiniIcon icon={FolderOpen} color={c.file} />
                 <span className="hidden sm:inline">{t('menu.file')}</span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" sideOffset={5} collisionPadding={12} className="w-72 max-w-[calc(100vw-24px)] bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
+            <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" side="bottom" sideOffset={5} collisionPadding={12} className="w-64 max-w-[calc(100vw-24px)] bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
               <SectionLabel label={t('sidebar.project')} color="text-slate-400" />
               <SmartItem icon={Plus} iconColor={c.file} label={t('file.new')} onClick={invoke(onNewProject)} desc="Crear proyecto desde cero" />
               <SmartItem icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={invoke(onProjects, 'projects')} desc="Abrir o administrar proyectos" />
@@ -956,7 +956,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <SmartItem icon={Activity} iconColor="bg-indigo-500" label="Continuous Tests (fallback F108)" onClick={onNCRPValidation} desc="CI-style performance regression tests" />
                 </>
               )},
-            ].filter((menu) => [t('menu.file')].includes(String(menu.label))).map((menu, i) => (
+            ].filter(() => false).map((menu, i) => (
               <DropdownMenu key={i}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-[11px] h-8 px-2 text-slate-600 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-medium">
@@ -1003,22 +1003,22 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
 
             {/* Quick Actions */}
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Undo" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={onUndo}><Undo className="w-4 h-4" /></Button>
+              <Button aria-label="Undo" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onUndo)}><Undo className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Undo</TooltipContent></Tooltip>
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Redo" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={onRedo}><Redo className="w-4 h-4" /></Button>
+              <Button aria-label="Redo" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onRedo)}><Redo className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Redo</TooltipContent></Tooltip>
 
             <Separator orientation="vertical" className="h-5 bg-slate-200" />
 
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Command Palette" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={onCommandPalette}><Keyboard className="w-4 h-4" /></Button>
+              <Button aria-label="Command Palette" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onCommandPalette, 'commandPalette')}><Keyboard className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Cmd Palette</TooltipContent></Tooltip>
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Tour" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={onOnboardingTour}><HelpCircle className="w-4 h-4" /></Button>
+              <Button aria-label="Tour" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onOnboardingTour, 'onboardingTour')}><HelpCircle className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Tour</TooltipContent></Tooltip>
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Manual" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={onManual}><BookOpen className="w-4 h-4" /></Button>
+              <Button aria-label="Manual" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onManual, 'manual')}><BookOpen className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Manual</TooltipContent></Tooltip>
             {/* v79: Update Center */}
             <Tooltip><TooltipTrigger asChild>
@@ -1121,31 +1121,31 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
           <Separator orientation="vertical" className="h-4 bg-slate-200 mx-1 hidden 2xl:block" />
           {/* v64: Canvas tool buttons */}
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-teal-600 hover:bg-teal-50" onClick={onToggleLayers}><Layers className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-teal-600 hover:bg-teal-50" onClick={invoke(onToggleLayers, 'layersPanel')}><Layers className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Capas del canvas</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-violet-600 hover:bg-violet-50" onClick={onToggleShapeLibrary}><Shapes className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-violet-600 hover:bg-violet-50" onClick={invoke(onToggleShapeLibrary)}><Shapes className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Libreria de formas</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-rose-600 hover:bg-rose-50" onClick={onToggleFreehand}><PenTool className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-rose-600 hover:bg-rose-50" onClick={invoke(onToggleFreehand)}><PenTool className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Dibujo libre</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-amber-600 hover:bg-amber-50" onClick={onToggleStickyNotes}><MessageSquare className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-amber-600 hover:bg-amber-50" onClick={invoke(onToggleStickyNotes)}><MessageSquare className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Notas adhesivas</TooltipContent></Tooltip>
           {/* v80: Smart Rooms + Dimension Lines */}
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-emerald-600 hover:bg-emerald-50" onClick={onToggleRoomTemplates}><LayoutTemplate className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-emerald-600 hover:bg-emerald-50" onClick={invoke(onToggleRoomTemplates, 'roomTemplates')}><LayoutTemplate className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Smart Rooms</TooltipContent></Tooltip>
           {/* v83: Canvas clear + new map */}
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-50" onClick={onClearCanvas}><Trash2 className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-50" onClick={invoke(onClearCanvas)}><Trash2 className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Borrar mapa</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:bg-green-50" onClick={onNewMap}><FilePlus className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:bg-green-50" onClick={invoke(onNewMap)}><FilePlus className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>Nuevo mapa</TooltipContent></Tooltip>
           <Separator orientation="vertical" className="h-4 bg-slate-200 mx-1" />
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-50" onClick={onEmergency}><Siren className="w-3.5 h-3.5" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:bg-red-50" onClick={invoke(onEmergency, 'emergencyProcedures')}><Siren className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent>{t('tools.emergency')}</TooltipContent></Tooltip>
           <Separator orientation="vertical" className="h-4 bg-slate-200 mx-1" />
           {/* v92: Auth UI */}

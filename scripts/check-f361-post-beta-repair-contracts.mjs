@@ -24,11 +24,14 @@ expect('Beta explicitly marked incomplete until repair validation', manifest.bet
 expect('KIUBE PDF hash present', typeof manifest.sourcePdf.sha256 === 'string' && manifest.sourcePdf.sha256.length === 64);
 expect('KIUBE modeled/code dedupe decision present', manifest.sourcePdf.dedupeDecision.includes('rag-evidence'));
 expect('Canvas context menu exists', canvas.includes('data-testid="canvas-context-menu"'));
+expect('Canvas viewport handles right click', canvas.includes('onContextMenu={handleCanvasContextMenu}') && canvas.includes('f214-sketchup-viewport-frame'));
 expect('Canvas context menu has calculate/evidence/3D actions', canvas.includes('Calcular blindaje') && canvas.includes('Abrir evidencia') && canvas.includes('Inspeccion 3D medica'));
 expect('Dialog shell draggable controls exist', shell.includes('data-testid="draggable-dialog-shell"') && shell.includes('data-dialog-minimized') && shell.includes('data-dialog-maximized'));
-expect('Toolbar file menu alignment hardened', toolbar.includes('data-testid="f295-primary-file-menu"') && toolbar.includes('w-72 max-w-[calc(100vw-24px)]'));
+expect('Toolbar file menu alignment hardened', toolbar.includes('data-testid="f295-primary-file-menu"') && toolbar.includes('w-64 max-w-[calc(100vw-24px)]'));
+expect('Legacy Archivo menu disabled', toolbar.includes('data-testid="f114-deduped-legacy-menu-zone"') && toolbar.includes('.filter(() => false)'));
 expect('Toolbar quick access uses valid Update Center fallback', toolbar.includes("invoke(onUpdate, 'updateCenter')"));
 expect('Toolbar File/DXF/PDF fallbacks exist', toolbar.includes("invoke(onDXFViewer, 'dxfViewer')") && toolbar.includes("invoke(onPDF, 'pdfReport')"));
+expect('Toolbar direct icon fallbacks exist', toolbar.includes("invoke(onCommandPalette, 'commandPalette')") && toolbar.includes("invoke(onOnboardingTour, 'onboardingTour')") && toolbar.includes("invoke(onToggleLayers, 'layersPanel')"));
 expect('Update Center documents F361', update.includes('F361 Post-beta repair'));
 expect('Changelog documents F361', changelog.includes('F361'));
 expect('Manual versions documents F361', versions.includes('F361'));

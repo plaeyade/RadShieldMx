@@ -1891,6 +1891,10 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onToggleShapeLibrary={() => setShowShapeLibrary(prev => !prev)}
           onToggleFreehand={() => freehandDraw.toggleEnabled()}
           onToggleStickyNotes={() => setShowStickyNotesPanel(prev => !prev)}
+          onUndo={undo}
+          onRedo={redo}
+          onCommandPalette={() => useAppStore.getState().open('commandPalette')}
+          onOnboardingTour={() => useAppStore.getState().open('onboardingTour')}
           // v82: Update Center
           onUpdate={() => useAppStore.getState().open('updateCenter')}
           onFloorPlanFeatures={() => useAppStore.getState().open('floorPlanFeatures')}
