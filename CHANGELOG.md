@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F315 (2026-07-25) - Unity external viewer bridge
+
+- Adds `src/lib/medical3D/unityExternalViewerBridge.ts` to build a Unity launch packet and optional external viewer URL.
+- Medical 3D now exposes Unity readiness, export `medical_3d_unity_handoff_*.json` and an `Abrir Unity` action gated by `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+- Unity remains outside the React bundle and cannot replace calculations, citations, warnings, PDF or Evidence Pack.
+- Scripts: `npm run prepare:f315:unity-external-viewer-bridge` and `npm run test:f315:unity-external-viewer-bridge`.
+
 # F314 (2026-07-25) - Babylon runtime loader
 
 - Adds `src/lib/medical3D/babylonRuntimeLoader.ts` with dynamic runtime loading and mandatory fallback to Three/R3F.

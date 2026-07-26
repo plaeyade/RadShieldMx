@@ -28,6 +28,7 @@ import {
   getMedical3DRenderStrategy,
   type Medical3DRenderEngine,
 } from '@/lib/medical3D/renderStrategy';
+import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExternalViewerBridge';
 
 interface Props {
   open: boolean;
@@ -592,6 +593,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const f92Inspection = useMemo(() => buildF923DInspectionSummary(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const f147Inspection = useMemo(() => buildF147Medical3DInspection(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
+  const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const activeStation = useMemo(
     () => f147Inspection.stations.find((station) => station.id === activeStationId),
     [activeStationId, f147Inspection.stations],
@@ -691,6 +693,19 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
       }, null, 2),
       'application/json',
     );
+  };
+
+  const handleExportUnityHandoff = () => {
+    downloadText(
+      `medical_3d_unity_handoff_${safePlanName}.json`,
+      JSON.stringify(unityLaunchPacket, null, 2),
+      'application/json',
+    );
+  };
+
+  const handleOpenUnityExternalViewer = () => {
+    if (!unityLaunchPacket.viewer.url) return;
+    window.open(unityLaunchPacket.viewer.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleSnapshot = () => {
@@ -803,6 +818,31 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportEngineHandoff}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Exportar handoff 3D
               </Button>
+              <div
+                className="rounded border bg-white p-2 text-[10px] leading-relaxed text-slate-600"
+                data-testid="f315-unity-external-viewer-bridge"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="font-semibold text-slate-800">Unity externo</span>
+                  <Badge variant="outline" className="text-[9px]">{unityLaunchPacket.readiness}</Badge>
+                </div>
+                <div>{unityLaunchPacket.viewer.url || 'URL pendiente por VITE_MEDICAL_3D_UNITY_WEBGL_URL'}</div>
+                <div className="mt-1 text-amber-700">Three/R3F queda como fallback clinico visual.</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="h-8 justify-start text-xs bg-white" onClick={handleExportUnityHandoff}>
+                  <Download className="w-3.5 h-3.5 mr-2" /> Unity JSON
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 justify-start text-xs bg-white"
+                  onClick={handleOpenUnityExternalViewer}
+                  disabled={!unityLaunchPacket.viewer.url}
+                >
+                  <MonitorCog className="w-3.5 h-3.5 mr-2" /> Abrir Unity
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between rounded border p-2">

@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F315 - Unity external viewer bridge
+
+F315 agrega el puente operativo para abrir un visor Unity WebGL externo desde el dialogo Medical 3D. La app no instala Unity ni lo mete al bundle principal: exporta un paquete JSON con escena, muros, equipos, zonas, espesores y reglas clinicas, y solo abre Unity si se configura una URL externa.
+
+Uso recomendado:
+
+1. Abrir `Medical 3D Floor Plan`.
+2. Seleccionar sala y modo de inspeccion.
+3. Revisar el panel `Motor 3D`.
+4. Usar `Unity JSON` para entregar el paquete al visor externo.
+5. Configurar `VITE_MEDICAL_3D_UNITY_WEBGL_URL` cuando exista un build Unity publicado.
+6. Usar `Abrir Unity` para recorrido externo; si no hay URL, continuar con Three/R3F.
+
+Limite clinico: Unity es visualizacion, entrenamiento y demo. Los calculos, formulas, citas, advertencias, Memoria IA, PDF y Evidence Pack siguen saliendo de RadShield-MX.
+
 ## Addendum F314 - Babylon runtime loader
 
 F314 deja listo el cargador runtime de Babylon. Si el entorno tiene instalados `@babylonjs/core` y `@babylonjs/loaders`, y las flags estan activas, el loader puede cargar Babylon por import dinamico. Si falla, la app conserva Three/R3F como visor activo.
