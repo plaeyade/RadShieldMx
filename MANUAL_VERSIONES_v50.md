@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F310 (2026-07-25) - Real operator Three/R3F trial
+
+- Artefactos: `outputs/f310_real_operator_trial_three_r3f/f310_real_operator_trial_three_r3f.json`, `f310_operator_checklist.csv` y `outputs/fase_310_real_operator_three_r3f.md`.
+- Objetivo: preparar una corrida operativa real del visor Medical 3D manteniendo Three.js/React Three Fiber como motor activo.
+- Checklist: cargar plano/proyecto, calibrar escala, sembrar equipo, asignar material, calcular blindaje, revisar 3D, exportar PNG/OBJ/JSON/handoff y generar Memoria IA/PDF/Evidence Pack.
+- Babylon.js se instala despues en rama/flag con dynamic import, fallback a Three/R3F y smoke visual.
+- Unity WebGL queda como visor externo final con bridge JSON/GLTF; no se instala dentro del frontend estable.
+- Scripts: `npm run prepare:f310:real-operator-three-r3f` y `npm run test:f310:real-operator-three-r3f`.
+
 # F307-F309 (2026-07-25) - 3D engine release
 
 - Artefactos: `outputs/f307_f309_3d_engine_release/f307_f309_3d_engine_release.json`, `f307_f309_3d_engine_strategy_preview.html` y `outputs/fase_307_309_3d_engine_release.md`.

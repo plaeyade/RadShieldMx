@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F310 - Ensayo operativo Three/R3F
+
+F310 prepara el primer ensayo real del visor Medical 3D sin introducir dependencias de mayor riesgo. El motor activo sigue siendo Three.js/React Three Fiber.
+
+Flujo recomendado:
+
+1. Abrir la app estable y confirmar que menus, sidebar y canvas estan visibles.
+2. Crear o cargar un proyecto real de prueba.
+3. Calibrar escala y revisar unidades.
+4. Colocar o validar equipo: LINAC, CT, PET, Gamma Knife, HDR o ciclotron.
+5. Asignar materiales con TVL, densidad, peso, costo y fuente.
+6. Ejecutar calculo y revisar advertencias clinicas.
+7. Abrir Medical 3D Floor Plan con Three/R3F activo.
+8. Revisar espesores, zonas controladas, heatmap y recorrido visual.
+9. Exportar PNG, OBJ, JSON y handoff 3D.
+10. Generar Memoria IA, PDF y Evidence Pack con citas y hashes.
+
+Babylon.js debe activarse despues como adaptador aislado, con fallback a Three/R3F. Unity WebGL se deja como visor externo final, no como motor de calculo ni como dependencia directa del frontend estable.
+
 ## Addendum F290 - Matriz de pruebas reales
 
 F290 define las pruebas reales antes de llamar estable a la app en uso clinico. Cubre DX, TX, NM y CY con plano, equipo, calculo, memoria, PDF y Evidence Pack.

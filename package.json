@@ -392,6 +392,8 @@
     "test:f301-f306:functional-release-close": "node scripts/check-f301-f306-functional-release-close-contracts.mjs",
     "prepare:f307-f309:3d-engine-release": "node scripts/f307-f309-3d-engine-release.mjs",
     "test:f307-f309:3d-engine-release": "node scripts/check-f307-f309-3d-engine-release-contracts.mjs",
+    "prepare:f310:real-operator-three-r3f": "node scripts/f310-real-operator-three-r3f.mjs",
+    "test:f310:real-operator-three-r3f": "node scripts/check-f310-real-operator-three-r3f-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F310 Real operator Three/R3F', current: 'ready', latest: 'operator checklist + staged Babylon/Unity', status: 'current', description: 'Medical 3D queda listo para una prueba operativa real con Three/R3F activo. Babylon se mantiene como adapter futuro y Unity WebGL como visor externo final para no afectar estabilidad.' },
   { name: 'F81 DB gate', current: 'superseded by F130/F131', latest: 'Windows MySQL live ready', status: 'current', description: 'The earlier Docker/MySQL blocker was resolved by direct Windows MySQL. F130 validated DB live; F131 validates full-stack API/frontend smoke.' },
   { name: 'F82 DB-deferred mode', current: 'enabled', latest: 'continue offline-safe phases', status: 'current', description: 'The app can continue UI, canvas, RAG manifests, documentation, render and QA work while live MySQL is deferred.' },
   { name: 'F83 Canvas continuity panel', current: 'enabled', latest: 'offline workflow visible', status: 'current', description: 'Canvas shows a direct bridge to 3D inspection, Evidence/RAG and deferred DB state so stabilization can continue without MySQL live.' },

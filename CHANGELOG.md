@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F310 (2026-07-25) - Real operator Three/R3F trial
+
+- Adds an operator-ready trial gate for the Medical 3D viewer with Three/R3F as the active engine.
+- Generates a real-use checklist covering project load, scale, equipment, materials, shielding calculation, 3D inspection, exports, Memoria IA, PDF and Evidence Pack.
+- Keeps Babylon.js and Unity WebGL out of the runtime bundle for now; Babylon remains the next staged adapter and Unity remains a final external viewer.
+- Scripts: `npm run prepare:f310:real-operator-three-r3f` and `npm run test:f310:real-operator-three-r3f`.
+
 # F307-F309 (2026-07-25) - 3D engine release
 
 - Adds `src/lib/medical3D/renderStrategy.ts` with ordered engine strategy: Three/R3F active, Babylon PBR/WebGPU/WebXR adapter-ready and Unity WebGL deferred.
