@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F286 (2026-07-25) - OCR human review packet
+
+- Added an operator review packet before any live RAG seed from OCR memories.
+- Exports sample-review pages, blocked pages and a CSV decision template with source/page/chunk hashes.
+- Keeps F287 live seed blocked until all review rows are documented as approve, reject, needs-redaction or needs-reocr.
+- Outputs: `outputs/f286_ocr_human_review_packet/f286_ocr_human_review_packet.json`, `f286_review_decisions_template.csv`, `f286_sample_review_pages.json` and `f286_blocked_pages.json`.
+
 # F285 (2026-07-25) - Controlled RAG seed gate
 
 - Added a controlled `document_chunks` seed phase for the F284 OCR/RAG candidate corpus.

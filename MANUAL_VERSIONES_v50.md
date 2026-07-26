@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F286 (2026-07-25) - Revision humana OCR
+
+- Artefactos: `outputs/f286_ocr_human_review_packet/f286_ocr_human_review_packet.json`, `outputs/f286_ocr_human_review_packet/f286_review_decisions_template.csv`, `outputs/f286_ocr_human_review_packet/f286_sample_review_pages.json`, `outputs/f286_ocr_human_review_packet/f286_blocked_pages.json` y `outputs/fase_286_ocr_human_review_packet.md`.
+- Resultado esperado: `ocr-human-review-packet-ready`.
+- Seguridad: F287 seed live queda bloqueado hasta documentar decision para cada pagina de muestra o bloqueada.
+- Decisiones permitidas: `approve`, `reject`, `needs-redaction`, `needs-reocr`.
+- Scripts: `npm run prepare:f286:ocr-human-review` y `npm run test:f286:ocr-human-review`.
+
 # F285 (2026-07-25) - Seed RAG controlado
 
 - Artefactos: `outputs/f285_controlled_rag_seed/f285_controlled_rag_seed.json`, `outputs/f285_controlled_rag_seed/f285_document_chunks_db_rows.jsonl`, `outputs/f285_controlled_rag_seed/f285_seed_report.json` y `outputs/fase_285_controlled_rag_seed.md`.

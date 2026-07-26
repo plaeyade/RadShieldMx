@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F286 - Revision humana OCR
+
+F286 crea el paquete de revision previa al seed real de memorias OCR. El objetivo es evitar que paginas con mala calidad, datos privados o texto dudoso entren a `document_chunks` sin una decision documentada.
+
+Archivos de trabajo:
+
+1. `outputs/f286_ocr_human_review_packet/f286_review_decisions_template.csv`: lista editable de decisiones.
+2. `outputs/f286_ocr_human_review_packet/f286_sample_review_pages.json`: paginas de muestra que deben revisarse.
+3. `outputs/f286_ocr_human_review_packet/f286_blocked_pages.json`: paginas bloqueadas por baja calidad o banderas.
+
+Como usarlo:
+
+1. Abrir el CSV de decisiones.
+2. Cambiar `pending` por `approve`, `reject`, `needs-redaction` o `needs-reocr`.
+3. Usar `approve` solo si la pagina es legible, trazable y no expone datos que no deban entrar al RAG.
+4. Usar `needs-reocr` si hay mojibake, tablas ilegibles o perdida de formulas.
+5. Usar `needs-redaction` si se conserva valor tecnico pero requiere ocultar informacion sensible.
+6. No ejecutar F287 ni F285 live hasta cerrar todas las filas.
+
+Regla de memoria analitica: las memorias OCR son evidencia/ejemplo local; no reemplazan normas canonicas NCRP/IAEA/UAQ ni autorizan constantes nuevas sin QA numerico.
+
 ## Addendum F285 - Seed RAG controlado
 
 F285 prepara la insercion de memorias OCR al RAG sin activar escritura automatica. La salida principal es una tabla JSONL compatible con `document_chunks`; cada fila conserva modalidad, pagina, hash de fuente, hash de chunk, estado QA y localizador de cita.
