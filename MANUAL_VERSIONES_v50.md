@@ -1,5 +1,23 @@
 # RadShield-MX - Manual de Versiones
 
+# F290 (2026-07-25) - Matriz de pruebas reales
+
+- Artefactos: `outputs/f290_real_clinical_testing_matrix/f290_real_clinical_testing_matrix.json`, `outputs/f290_real_clinical_testing_matrix/f290_real_case_matrix.csv` y `outputs/fase_290_real_clinical_testing_matrix.md`.
+- Cubre perfiles DX/TX/NM/CY y exige plano, equipo, calculo trazable, citas y cierre de desviaciones.
+- Scripts: `npm run prepare:f290:real-clinical-matrix` y `npm run test:f290:real-clinical-matrix`.
+
+# F289 (2026-07-25) - Handoff Memoria IA/RAG
+
+- Artefactos: `outputs/f289_memoria_ia_rag_handoff/f289_memoria_ia_rag_handoff.json`, `f289_citation_index.jsonl`, `f289_profile_bundles.json` y `outputs/fase_289_memoria_ia_rag_handoff.md`.
+- Genera bundles DX/TX/NM/CY y policy de citas con prioridad normativa.
+- Scripts: `npm run prepare:f289:memoria-rag-handoff` y `npm run test:f289:memoria-rag-handoff`.
+
+# F288 (2026-07-25) - Validacion RAG approved-only
+
+- Artefactos: `outputs/f288_rag_approved_validation/f288_rag_approved_validation.json`, `f288_retrieval_smoke.json` y `outputs/fase_288_rag_approved_validation.md`.
+- Valida filas F287, exclusiones F286, duplicados, trazabilidad y smoke retrieval. No escribe DB.
+- Scripts: `npm run prepare:f288:rag-approved-validation` y `npm run test:f288:rag-approved-validation`.
+
 # F287 (2026-07-25) - Seed RAG solo aprobados
 
 - Artefactos: `outputs/f287_approved_only_rag_seed/f287_approved_only_rag_seed.json`, `outputs/f287_approved_only_rag_seed/f287_document_chunks_approved_only.jsonl`, `outputs/f287_approved_only_rag_seed/f287_excluded_by_review.jsonl` y `outputs/fase_287_approved_only_rag_seed.md`.

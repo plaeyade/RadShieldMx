@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F290 - Matriz de pruebas reales
+
+F290 define las pruebas reales antes de llamar estable a la app en uso clinico. Cubre DX, TX, NM y CY con plano, equipo, calculo, memoria, PDF y Evidence Pack.
+
+Reglas de salida:
+
+1. Cada caso debe tener plano real o plantilla confirmada con escala.
+2. Cada calculo debe mostrar formula, norma, entradas, salidas, supuestos y advertencias.
+3. Cada reporte debe incluir `citationId`, pagina, `sourceHash` y `chunkHash`.
+4. Las desviaciones blocker/major impiden salida clinica firmada.
+
+## Addendum F289 - Memoria IA con RAG approved-only
+
+F289 genera el indice de citas que Memoria IA debe consumir. Cada cita incluye `citationId`, fuente, pagina, modalidad, `sourceHash`, `chunkHash` y una vista previa. Las memorias OCR se usan como evidencia o ejemplo; las constantes y formulas siguen saliendo de NCRP/IAEA/UAQ y fuentes canonicas.
+
+Flujo recomendado:
+
+1. Elegir perfil DX/TX/NM/CY.
+2. Confirmar plano, escala, equipo y workload/actividad.
+3. Ejecutar calculo trazable.
+4. Adjuntar citas canonicas primero y evidencia approved-only despues.
+5. Exportar Memoria IA/PDF/Evidence con hashes y advertencias.
+
+## Addendum F288 - Validacion RAG approved-only
+
+F288 valida el corpus F287 antes de conectarlo a Memoria IA o DB live. Revisa que no haya filas invalidas, duplicados, falta de paginas/hash, o perdida de exclusiones F286. Tambien ejecuta busquedas smoke para ciclotron, LINAC, Gamma Knife y Braqui.
+
+DB readback es opcional y solo lectura: usar `F288_DB_READBACK=1` despues de un seed live controlado.
+
 ## Addendum F287 - Seed RAG solo aprobados
 
 F287 aplica la instruccion operativa de continuar solo con contenido aprobado. Las paginas F286 marcadas `needs-reocr`, `needs-redaction` o `reject` quedan fuera. Los chunks F285 que ya estaban `chunk-seed-draft-ready` y no fueron excluidos se conservan como corpus tecnico para RAG local/privado.

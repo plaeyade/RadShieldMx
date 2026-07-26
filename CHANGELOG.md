@@ -1,5 +1,22 @@
 # RadShield-MX - Fases recientes
 
+# F290 (2026-07-25) - Real clinical testing matrix
+
+- Added DX/TX/NM/CY real-case testing matrix with floorplan/equipment/report acceptance criteria.
+- Keeps clinical signed release blocked until real signed memories, citations and blocker/major deviations are closed.
+
+# F289 (2026-07-25) - Memoria IA RAG handoff
+
+- Added citation index and modality bundles for Memoria IA using F287 approved-only evidence.
+- Each citation keeps `citationId`, `pageRef`, `sourceHash` and `chunkHash`.
+- NCRP/IAEA/UAQ remain canonical; OCR memories are examples/evidence only.
+
+# F288 (2026-07-25) - RAG approved validation
+
+- Added approved-only corpus validation for F287 rows without writing DB.
+- Checks traceability, duplicates, review exclusions and retrieval smoke by modality.
+- DB readback is optional/read-only with `F288_DB_READBACK=1`.
+
 # F287 (2026-07-25) - Approved-only RAG seed
 
 - Added an approved-only seed lane after F286 review.
