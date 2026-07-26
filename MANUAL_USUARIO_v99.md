@@ -1668,3 +1668,19 @@ Flujo recomendado para una memoria analitica:
 6. Ejecutar calculo.
 7. Revisar heatmap/isocontornos, warnings y comparador.
 8. Exportar Memoria IA, PDF, Evidence Pack y snapshots 3D.
+
+## Addendum F293 - Prueba real guiada y paquete estatico
+
+La fase F293 refresca el paquete estatico y deja un protocolo de 10 pasos para probar la app con un caso real. No cambia el alcance clinico: el frontend puede revisarse publicamente, pero una memoria firmada requiere evidencia completa, cita por pagina/hash y revision profesional.
+
+Secuencia operativa F293:
+1. Seleccionar caso real de la matriz F290/F291.
+2. Cargar plano base o DXF convertido.
+3. Calibrar escala.
+4. Trazar layout y zonas.
+5. Colocar equipo/fuente.
+6. Asignar materiales, metas P/T/U/W y notas estructurales.
+7. Ejecutar calculo y revisar trace/warnings/comparador/cache.
+8. Revisar heatmap/isocontornos.
+9. Exportar Memoria IA, PDF, Evidence Pack y 3D.
+10. Cerrar desviaciones con decision del fisico/RSO.

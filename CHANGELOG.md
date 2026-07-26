@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F293 (2026-07-25) - Static release refresh + real trial protocol
+
+- Added F293 release refresh gate over F200/F291/F292.
+- Freezes static package evidence and adds a 10-step operator protocol for the first real guided project test.
+- Keeps publish path static/frontend-only and requires post-deploy public smoke before clinical/regulatory use.
+
 # F292 (2026-07-25) - Real project floorplan QA
 
 - Added floorplan QA gate for real project entry before renderer/event-controller changes.

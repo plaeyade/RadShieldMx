@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F293 (2026-07-25) - Refresh release estatico y protocolo de prueba real
+
+- Artefactos: `outputs/f293_static_release_refresh_real_trial/f293_static_release_refresh_real_trial.json`, `f293_real_trial_operator_protocol.csv` y `outputs/fase_293_static_release_refresh_real_trial.md`.
+- Verifica F200/F291/F292, paquete estatico, dist, URL publica y protocolo operativo para primera prueba real guiada.
+- Mantiene alcance frontend estatico; backend/DB/uso clinico firmado siguen sujetos a smoke publico, citas DB y revision profesional.
+- Scripts: `npm run prepare:f293:static-release-refresh` y `npm run test:f293:static-release-refresh`.
+
 # F292 (2026-07-25) - QA floorplan para proyecto real
 
 - Artefactos: `outputs/f292_real_project_floorplan_qa/f292_real_project_floorplan_qa.json`, `f292_floorplan_operator_checklist.csv` y `outputs/fase_292_real_project_floorplan_qa.md`.

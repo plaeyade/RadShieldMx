@@ -380,6 +380,8 @@
     "test:f291:calculation-real-case-hardening": "node scripts/check-f291-calculation-real-case-hardening-contracts.mjs",
     "prepare:f292:real-project-floorplan-qa": "node scripts/f292-real-project-floorplan-qa.mjs",
     "test:f292:real-project-floorplan-qa": "node scripts/check-f292-real-project-floorplan-qa-contracts.mjs",
+    "prepare:f293:static-release-refresh": "node scripts/f293-static-release-refresh-real-trial.mjs",
+    "test:f293:static-release-refresh": "node scripts/check-f293-static-release-refresh-real-trial-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
