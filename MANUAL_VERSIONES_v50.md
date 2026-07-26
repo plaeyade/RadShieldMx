@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F285 (2026-07-25) - Seed RAG controlado
+
+- Artefactos: `outputs/f285_controlled_rag_seed/f285_controlled_rag_seed.json`, `outputs/f285_controlled_rag_seed/f285_document_chunks_db_rows.jsonl`, `outputs/f285_controlled_rag_seed/f285_seed_report.json` y `outputs/fase_285_controlled_rag_seed.md`.
+- Resultado esperado: `controlled-rag-seed-dry-run` hasta que el operador confirme revision documental.
+- Seguridad: la app no escribe en `document_chunks` sin `F285_SEED_LIVE=1`, `F285_CONFIRM_REVIEWED=1` y `DATABASE_URL`.
+- Uso recomendado: revisar muestras F283, respaldar/restaurar DB, ejecutar seed live solo en ambiente privado y luego correr F170 para gobierno de citas.
+- Scripts: `npm run prepare:f285:controlled-rag-seed` y `npm run test:f285:controlled-rag-seed`.
+
 # F279 (2026-07-25) - OCR libre/local
 
 - Se revierte la ruta OCR cloud como primera opcion por posible costo de Google Document AI y Amazon Textract.

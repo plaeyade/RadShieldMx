@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F285 - Seed RAG controlado
+
+F285 prepara la insercion de memorias OCR al RAG sin activar escritura automatica. La salida principal es una tabla JSONL compatible con `document_chunks`; cada fila conserva modalidad, pagina, hash de fuente, hash de chunk, estado QA y localizador de cita.
+
+Flujo operativo:
+
+1. Revisar primero el muestreo F283 y los chunks excluidos por baja calidad.
+2. Confirmar que los documentos privados no se usaran en un host publico estatico.
+3. Hacer backup y restore probe de MySQL antes de cualquier seed.
+4. Ejecutar `npm run prepare:f285:controlled-rag-seed` para dry-run.
+5. Ejecutar live seed solo con `F285_SEED_LIVE=1`, `F285_CONFIRM_REVIEWED=1` y `DATABASE_URL`.
+6. Despues del seed live, correr F170 para validar conteos, hashes, fuentes y citas en `document_chunks`.
+
+Este paso alimenta Memoria IA y Evidence Pack con ejemplos reales, pero no reemplaza fuentes canonicas NCRP/IAEA/UAQ ni cambia constantes clinicas sin QA numerico.
+
 ## Addendum F268-F268A - Memorias Reales Y APIs Externas
 
 F268 permite agregar memorias analiticas reales como evidencia y ejemplos para Memoria IA. Las memorias se deduplican por SHA256, se extrae texto searchable, se generan chunks RAG y se prepara un draft para `document_chunks`. Si una memoria no tiene texto, queda marcada para OCR cloud en F269.

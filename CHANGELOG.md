@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F285 (2026-07-25) - Controlled RAG seed gate
+
+- Added a controlled `document_chunks` seed phase for the F284 OCR/RAG candidate corpus.
+- The default path is dry-run only and prepares DB-compatible rows with source/page/chunk hashes, modality and citation tags.
+- Live DB writes require all three operator conditions: `F285_SEED_LIVE=1`, `F285_CONFIRM_REVIEWED=1` and `DATABASE_URL`.
+- Outputs: `outputs/f285_controlled_rag_seed/f285_controlled_rag_seed.json`, `f285_document_chunks_db_rows.jsonl` and `f285_seed_report.json`.
+
 # F279 (2026-07-25) - rollback OCR cloud por costo y ruta libre/local
 
 - Google Document AI y Amazon Textract quedan desactivados/deferidos para OCR inicial porque pueden generar costo por pagina.
