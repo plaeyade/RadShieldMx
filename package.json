@@ -440,6 +440,8 @@
     "test:f349:evidence-surface-qa-close": "node scripts/check-f349-evidence-surface-qa-close-contracts.mjs",
     "prepare:f350-f355:real-test-package": "node scripts/f350-f355-real-test-package.mjs",
     "test:f350-f355:real-test-package": "node scripts/check-f350-f355-real-test-package-contracts.mjs",
+    "prepare:f356-f360:beta-release": "node scripts/f356-f360-beta-release.mjs",
+    "test:f356-f360:beta-release": "node scripts/check-f356-f360-beta-release-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

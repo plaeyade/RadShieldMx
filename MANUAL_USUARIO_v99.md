@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F356-F360 - Prueba real y release beta
+
+F356-F360 cambia el modo de trabajo: deja de agregar fases por inercia y prepara la app para prueba real de usuario.
+
+Flujo:
+
+1. **F356:** abrir la app y revisar menu Archivo, carga de plano, canvas, sidebar, Memoria IA, Evidence Pack, Medical 3D y reportes.
+2. **F357:** completar datos faltantes: geometria definitiva, fuente/proveedor, workload, TVL/densidad, penetraciones, costo/estructura y condiciones de uso.
+3. **F358:** generar calculo preliminar trazable. Cada calculo debe conservar formula, norma, inputs, outputs, supuestos, advertencias y hash.
+4. **F359:** preparar memoria beta preliminar con marca **NO CERTIFICADO**.
+5. **F360:** liberar como beta operativa para pruebas reales, no como release clinico/constructivo final.
+
+Uso permitido: probar el flujo completo con un plano real, revisar donde fallan menus/canvas/reportes, capturar datos faltantes y producir borradores tecnicos.
+
+Uso bloqueado: emitir memoria analitica firmada, espesores certificados, dictamen final o liberacion clinica/constructiva sin revision profesional.
+
 ## Addendum F350-F355 - Paquete real preliminar Centro Neuro
 
 F350-F355 empaqueta la prueba operativa del caso Centro Neuro usando los bloques de evidencia F347 y el cierre QA F349.

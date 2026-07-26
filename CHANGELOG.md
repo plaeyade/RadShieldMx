@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F356-F360 (2026-07-26) - Beta release gate
+
+- Closes the current stabilization line as an operational beta, not a certified clinical/engineering release.
+- Adds F356 user-test checklist, F357 missing-data capture, F358 traceable preliminary calculations, F359 beta Memoria draft and F360 beta release decision.
+- Keeps all calculations unsigned with no final thickness output until geometry, workload, citations, penetrations and final professional review are locked.
+- Generates visual HTML/SVG, CSV gates, beta Memoria draft and `radshield_f356_f360_beta_release.zip`.
+- Scripts: `npm run prepare:f356-f360:beta-release` and `npm run test:f356-f360:beta-release`.
+
 # F350-F355 (2026-07-26) - Real preliminary test package
 
 - Builds an operator-ready preliminary package from F347 evidence blocks and F349 QA.

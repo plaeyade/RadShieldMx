@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F356-F360 (2026-07-26) - Release beta operativo
+
+- Artefactos: `outputs/f356_f360_beta_release/f356_f360_beta_release.json`, `f356_f360_beta_release_visual.svg`, `f356_f360_beta_release.html`, `f356_user_test_checklist.csv`, `f357_missing_data_capture.csv`, `f358_traceable_preliminary_calculations.csv`, `f359_memoria_beta_preliminar.md` y `radshield_f356_f360_beta_release.zip`.
+- F356 define la prueba real de usuario: abrir app, menu Archivo, carga de plano, canvas, Memoria IA, Evidence Pack, Medical 3D y reportes.
+- F357 lista datos faltantes que el usuario debe completar: geometria definitiva, fuente, workload, TVL/densidad, penetraciones, estructura y revision final.
+- F358 genera calculos preliminares trazables con formula, norma, inputs, outputs, supuestos, advertencias y hash, sin espesor firmado.
+- F359 prepara memoria beta preliminar y F360 formaliza release como beta operativa no certificada.
+- Scripts: `npm run prepare:f356-f360:beta-release` y `npm run test:f356-f360:beta-release`.
+
 # F350-F355 (2026-07-26) - Paquete real preliminar de operador
 
 - Artefactos: `outputs/f350_f355_real_test_package/f350_f355_real_test_package.json`, `f350_f355_visual_smoke.svg`, `f350_f355_visual_smoke.html`, `f351_memoria_preliminar.md`, `f352_missing_data_closeout.csv`, `f353_report_evidence_draft.html`, `f354_consistency_matrix.csv`, `f355_operator_package_manifest.csv` y `radshield_f350_f355_real_test_package.zip`.
