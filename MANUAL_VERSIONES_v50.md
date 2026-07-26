@@ -1,5 +1,22 @@
 # RadShield-MX - Manual de Versiones
 
+# F314 (2026-07-25) - Babylon runtime loader
+
+- Artefactos: `outputs/f314_babylon_runtime_loader/f314_babylon_runtime_loader.json` y `outputs/fase_314_babylon_runtime_loader.md`.
+- Se agrega `src/lib/medical3D/babylonRuntimeLoader.ts` con carga dinamica y fallback obligatorio a Three/R3F.
+- Intento de instalacion: `npm install @babylonjs/core @babylonjs/loaders`; no completo en este entorno restringido.
+- Activacion futura: instalar paquetes, activar `VITE_MEDICAL_3D_BABYLON_ADAPTER=true` y `VITE_MEDICAL_3D_BABYLON_RUNTIME=true`, repetir smoke visual.
+- Scripts: `npm run prepare:f314:babylon-runtime-loader` y `npm run test:f314:babylon-runtime-loader`.
+
+# F313 (2026-07-25) - NIST XCOM mixture/RAG
+
+- Artefactos: `outputs/f313_nist_xcom_mixture_rag/f313_nist_xcom_mixture_rag.json`, `f313_xcom_rag_seed_candidate.jsonl` y `outputs/fase_313_nist_xcom_mixture_rag.md`.
+- `src/lib/xcomAttenuation.ts` agrega `XCOM_SOURCE_TRACE`, normalizacion de fracciones por peso y calculo de mezcla XCOM.
+- `NistXcomDialog` muestra comparador de mezcla con densidad, `mu/rho`, `mu` lineal y TVL derivado.
+- Uso permitido: apoyo de atenuacion fotonica, comparacion de materiales y evidencia RAG con hash.
+- Uso no permitido: reemplazar metodologia NCRP/IAEA/UAQ o certificar TVL broad-beam MV sin validacion normativa.
+- Scripts: `npm run prepare:f313:nist-xcom-mixture-rag` y `npm run test:f313:nist-xcom-mixture-rag`.
+
 # F312 (2026-07-25) - Unity external handoff
 
 - Artefactos: `outputs/f312_unity_external_handoff/f312_unity_external_handoff.json` y `outputs/fase_312_unity_external_handoff.md`.

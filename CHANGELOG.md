@@ -1,5 +1,19 @@
 # RadShield-MX - Fases recientes
 
+# F314 (2026-07-25) - Babylon runtime loader
+
+- Adds `src/lib/medical3D/babylonRuntimeLoader.ts` with dynamic runtime loading and mandatory fallback to Three/R3F.
+- Records the Babylon install command and activation flags while keeping the current build stable if packages are unavailable.
+- `npm install @babylonjs/core @babylonjs/loaders` was attempted but did not complete in this restricted environment.
+- Scripts: `npm run prepare:f314:babylon-runtime-loader` and `npm run test:f314:babylon-runtime-loader`.
+
+# F313 (2026-07-25) - NIST XCOM mixture/RAG
+
+- Adds NIST XCOM source trace and mixture attenuation helpers for weight-fraction material comparisons.
+- NIST XCOM dialog now exposes a mixture panel with density, mass attenuation, linear attenuation and mixture TVL.
+- Generates a hashed RAG/DB seed candidate for XCOM source policy and mixture method without writing to live DB.
+- Scripts: `npm run prepare:f313:nist-xcom-mixture-rag` and `npm run test:f313:nist-xcom-mixture-rag`.
+
 # F312 (2026-07-25) - Unity external handoff
 
 - Adds `src/lib/medical3D/unityWebglHandoff.ts` as the Unity WebGL external viewer contract.

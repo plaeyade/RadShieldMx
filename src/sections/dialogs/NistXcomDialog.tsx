@@ -10,7 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SHIELDING_MATERIALS, findMaterial, calculateRequiredThickness, calculateTransmission, interpolateAttenuation, getMaterialOptions } from '@/lib/xcomAttenuation';
+import {
+  SHIELDING_MATERIALS,
+  XCOM_SOURCE_TRACE,
+  buildXcomMixtureAttenuation,
+  findMaterial,
+  calculateRequiredThickness,
+  calculateTransmission,
+  interpolateAttenuation,
+  getMaterialOptions,
+} from '@/lib/xcomAttenuation';
 import { useAppStore } from '@/stores/appStore';
 import { Atom, Calculator, ArrowRight, Database, BookOpen } from 'lucide-react';
 
@@ -22,6 +31,11 @@ export default function NistXcomDialog() {
   const [energyInput, setEnergyInput] = useState('0.1');
   const [thicknessInput, setThicknessInput] = useState('2');
   const [targetB, setTargetB] = useState('0.001');
+  const [mixA, setMixA] = useState('CONCRETE');
+  const [mixB, setMixB] = useState('PB');
+  const [mixAFraction, setMixAFraction] = useState('0.90');
+  const [mixBFraction, setMixBFraction] = useState('0.10');
+  const [mixDensity, setMixDensity] = useState('');
 
   const mat = findMaterial(selectedMaterial);
   const energy_MeV = parseFloat(energyInput) || 0;
@@ -40,6 +54,18 @@ export default function NistXcomDialog() {
     if (!mat || energy_MeV <= 0) return null;
     return calculateRequiredThickness(selectedMaterial, energy_MeV, parseFloat(targetB) || 0.001);
   }, [selectedMaterial, energy_MeV, targetB]);
+
+  const mixture = useMemo(() => {
+    if (energy_MeV <= 0) return null;
+    return buildXcomMixtureAttenuation(
+      [
+        { materialCode: mixA, weightFraction: parseFloat(mixAFraction) || 0 },
+        { materialCode: mixB, weightFraction: parseFloat(mixBFraction) || 0 },
+      ],
+      energy_MeV,
+      mixDensity.trim() ? parseFloat(mixDensity) : undefined,
+    );
+  }, [energy_MeV, mixA, mixAFraction, mixB, mixBFraction, mixDensity]);
 
   if (!open) return null;
 
@@ -105,6 +131,55 @@ export default function NistXcomDialog() {
           </div>
         )}
 
+        <div className="border rounded-md p-3 mb-3 bg-white">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h4 className="text-[11px] font-semibold text-slate-700 flex items-center gap-1">
+              <Database className="w-3 h-3" /> Mezcla XCOM por fraccion en peso
+            </h4>
+            <Badge variant="outline" className="text-[9px]">{XCOM_SOURCE_TRACE.id}</Badge>
+          </div>
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            <Select value={mixA} onValueChange={setMixA}>
+              <SelectTrigger className="text-[10px] h-7"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {getMaterialOptions().map(o => <SelectItem key={o.code} value={o.code} className="text-[11px]">{o.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input type="number" step="0.01" value={mixAFraction} onChange={e => setMixAFraction(e.target.value)} className="text-[11px] h-7" />
+            <Select value={mixB} onValueChange={setMixB}>
+              <SelectTrigger className="text-[10px] h-7"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {getMaterialOptions().map(o => <SelectItem key={o.code} value={o.code} className="text-[11px]">{o.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input type="number" step="0.01" value={mixBFraction} onChange={e => setMixBFraction(e.target.value)} className="text-[11px] h-7" />
+            <Input type="number" step="0.01" value={mixDensity} onChange={e => setMixDensity(e.target.value)} placeholder="rho g/cm3" className="text-[11px] h-7" />
+          </div>
+          {mixture && (
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-slate-50 rounded-md p-2 text-center">
+                <div className="text-[9px] text-slate-500">rho mezcla</div>
+                <div className="text-sm font-bold text-slate-700">{mixture.density_g_per_cm3.toFixed(3)}</div>
+              </div>
+              <div className="bg-emerald-50 rounded-md p-2 text-center">
+                <div className="text-[9px] text-slate-500">mu/rho</div>
+                <div className="text-sm font-bold text-emerald-700">{mixture.mu_cm2_per_g.toFixed(4)}</div>
+              </div>
+              <div className="bg-blue-50 rounded-md p-2 text-center">
+                <div className="text-[9px] text-slate-500">mu lineal</div>
+                <div className="text-sm font-bold text-blue-700">{mixture.mu_1_per_cm.toFixed(4)}</div>
+              </div>
+              <div className="bg-red-50 rounded-md p-2 text-center">
+                <div className="text-[9px] text-slate-500">TVL mezcla</div>
+                <div className="text-sm font-bold text-red-700">{mixture.tenthValueLayer_mm.toFixed(2)} mm</div>
+              </div>
+            </div>
+          )}
+          {mixture?.warnings.map((warning) => (
+            <p key={warning} className="text-[9px] text-amber-700 mt-1">{warning}</p>
+          ))}
+        </div>
+
         {/* Calculators */}
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="border rounded-md p-3">
@@ -166,7 +241,7 @@ export default function NistXcomDialog() {
         </Table>
 
         <p className="text-[8px] text-slate-400 mt-2">
-          Fuente: NIST Standard Reference Database 8 (XCOM) | Berger et al. (2010) | NCRP 147 Table A.2, NCRP 151 Table B.1
+          Fuente: {XCOM_SOURCE_TRACE.title} | {XCOM_SOURCE_TRACE.url} | NCRP/IAEA/UAQ siguen como metodologia de diseno.
         </p>
       </DialogContent>
     </Dialog>

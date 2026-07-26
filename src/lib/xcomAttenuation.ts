@@ -15,6 +15,82 @@ export interface AttenuationEntry {
   tenthValueLayer_mm: number; // TVL in mm
 }
 
+export function normalizeWeightFractions(components: XcomMixtureComponent[]): XcomMixtureComponent[] {
+  const clean = components
+    .filter((component) => Number.isFinite(component.weightFraction) && component.weightFraction > 0)
+    .map((component) => ({ ...component, weightFraction: Number(component.weightFraction) }));
+  const sum = clean.reduce((acc, component) => acc + component.weightFraction, 0);
+  if (sum <= 0) return [];
+  return clean.map((component) => ({
+    ...component,
+    weightFraction: component.weightFraction / sum,
+  }));
+}
+
+export function buildXcomMixtureAttenuation(
+  components: XcomMixtureComponent[],
+  energy_MeV: number,
+  density_g_per_cm3?: number,
+): XcomMixtureResult | null {
+  if (!Number.isFinite(energy_MeV) || energy_MeV <= 0) return null;
+
+  const normalized = normalizeWeightFractions(components);
+  if (!normalized.length) return null;
+
+  const warnings: string[] = [];
+  const enriched = normalized.map((component) => {
+    const material = findMaterial(component.materialCode);
+    const attenuation = interpolateAttenuation(component.materialCode, energy_MeV);
+    if (!material || !attenuation) return null;
+    return {
+      ...component,
+      materialName: material.nameEs,
+      density_g_per_cm3: material.density_g_per_cm3,
+      mu_cm2_per_g: attenuation.mu_cm2_per_g,
+    };
+  });
+
+  if (enriched.some((item) => item === null)) {
+    warnings.push('Uno o mas materiales no tienen datos XCOM locales para esta energia.');
+  }
+
+  const valid = enriched.filter((item): item is NonNullable<typeof item> => Boolean(item));
+  if (!valid.length) return null;
+
+  const inputSum = components.reduce((acc, component) => acc + (Number.isFinite(component.weightFraction) ? component.weightFraction : 0), 0);
+  if (Math.abs(inputSum - 1) > 1e-6) {
+    warnings.push('Las fracciones por peso fueron renormalizadas a 1.0, siguiendo el comportamiento descrito para mezclas XCOM.');
+  }
+
+  const mu_cm2_per_g = valid.reduce((acc, component) => acc + component.weightFraction * component.mu_cm2_per_g, 0);
+  const density =
+    Number.isFinite(density_g_per_cm3) && density_g_per_cm3 && density_g_per_cm3 > 0
+      ? density_g_per_cm3
+      : valid.reduce((acc, component) => acc + component.weightFraction * component.density_g_per_cm3, 0);
+  const mu_1_per_cm = mu_cm2_per_g * density;
+
+  if (energy_MeV > 1.5) {
+    warnings.push('Para haces MV y geometria broad-beam, use XCOM como apoyo de material; valide TVL clinico con NCRP/IAEA/UAQ.');
+  }
+
+  return {
+    energy_MeV,
+    density_g_per_cm3: density,
+    normalizedComponents: valid.map(({ materialCode, weightFraction, materialName, mu_cm2_per_g }) => ({
+      materialCode,
+      weightFraction,
+      materialName,
+      mu_cm2_per_g,
+    })),
+    mu_cm2_per_g,
+    mu_1_per_cm,
+    halfValueLayer_mm: (Math.log(2) / mu_1_per_cm) * 10,
+    tenthValueLayer_mm: (Math.log(10) / mu_1_per_cm) * 10,
+    source: XCOM_SOURCE_TRACE,
+    warnings,
+  };
+}
+
 export interface ShieldingMaterial {
   code: string;
   name: string;
@@ -25,6 +101,52 @@ export interface ShieldingMaterial {
   ncrpRef: string;
   data: AttenuationEntry[];
 }
+
+export interface XcomSourceTrace {
+  id: 'NIST-XCOM-SRD8';
+  title: string;
+  url: string;
+  accessed: string;
+  scope: string[];
+  limitations: string[];
+}
+
+export interface XcomMixtureComponent {
+  materialCode: string;
+  weightFraction: number;
+}
+
+export interface XcomMixtureResult {
+  energy_MeV: number;
+  density_g_per_cm3: number;
+  normalizedComponents: Array<XcomMixtureComponent & {
+    materialName: string;
+    mu_cm2_per_g: number;
+  }>;
+  mu_cm2_per_g: number;
+  mu_1_per_cm: number;
+  halfValueLayer_mm: number;
+  tenthValueLayer_mm: number;
+  source: XcomSourceTrace;
+  warnings: string[];
+}
+
+export const XCOM_SOURCE_TRACE: XcomSourceTrace = {
+  id: 'NIST-XCOM-SRD8',
+  title: 'NIST XCOM Photon Cross Sections Database, Standard Reference Database 8',
+  url: 'https://physics.nist.gov/PhysRefData/Xcom/html/xcom1.html',
+  accessed: '2026-07-25',
+  scope: [
+    'Photon mass attenuation coefficients for elements, compounds and mixtures.',
+    'Material mixtures by weight fraction with automatic normalization.',
+    'Reference support for diagnostic energy attenuation, material comparison and RAG evidence.',
+  ],
+  limitations: [
+    'Not a standalone NCRP/IAEA shielding methodology.',
+    'Megavoltage broad-beam TVL and clinical barrier design still require NCRP/IAEA/UAQ method checks.',
+    'Local values must be reviewed against source pages before certified clinical use.',
+  ],
+};
 
 /** NIST XCOM data for common shielding materials (key energies) */
 export const SHIELDING_MATERIALS: ShieldingMaterial[] = [

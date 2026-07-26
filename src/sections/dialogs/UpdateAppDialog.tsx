@@ -92,6 +92,8 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F314 Babylon runtime loader', current: 'loader ready', latest: 'dynamic import + fallback', status: 'current', description: 'Se agrega cargador runtime Babylon con import dinamico y fallback obligatorio a Three/R3F. El intento npm install no completo en este entorno; la app queda estable y lista para activar cuando los paquetes existan.' },
+  { name: 'F313 NIST XCOM mixture', current: 'ready', latest: 'mixtures + RAG seed candidate', status: 'current', description: 'NIST XCOM queda como fuente de apoyo para atenuacion fotonica y mezclas por fraccion en peso. El dialogo XCOM muestra TVL de mezcla y genera seed candidato con hashes; NCRP/IAEA/UAQ siguen como metodologia de diseno.' },
   { name: 'F312 Unity external handoff', current: 'deferred external', latest: 'URL/iframe contract', status: 'current', description: 'Unity WebGL queda definido como visor externo: recibe handoff JSON/OBJ/futuro GLTF y devuelve evidencia visual. No se instala en React ni sustituye calculos, citas, PDF o Evidence Pack.' },
   { name: 'F311 Babylon safe adapter', current: 'staged', latest: 'runtime-free contract + flags', status: 'current', description: 'Babylon queda preparado como adapter PBR/WebGPU/WebXR sin instalar paquetes ni cargar runtime. Se activara solo con flags, dynamic import, fallback a Three/R3F y smoke visual dedicado.' },
   { name: 'F310 Real operator Three/R3F', current: 'ready', latest: 'operator checklist + staged Babylon/Unity', status: 'current', description: 'Medical 3D queda listo para una prueba operativa real con Three/R3F activo. Babylon se mantiene como adapter futuro y Unity WebGL como visor externo final para no afectar estabilidad.' },

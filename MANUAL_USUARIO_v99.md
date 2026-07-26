@@ -1,5 +1,33 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F314 - Babylon runtime loader
+
+F314 deja listo el cargador runtime de Babylon. Si el entorno tiene instalados `@babylonjs/core` y `@babylonjs/loaders`, y las flags estan activas, el loader puede cargar Babylon por import dinamico. Si falla, la app conserva Three/R3F como visor activo.
+
+Para activar Babylon en una prueba futura:
+
+1. Ejecutar `npm install @babylonjs/core @babylonjs/loaders`.
+2. Configurar `VITE_MEDICAL_3D_BABYLON_ADAPTER=true`.
+3. Configurar `VITE_MEDICAL_3D_BABYLON_RUNTIME=true`.
+4. Recompilar y ejecutar smoke visual del visor.
+5. Confirmar que Three/R3F sigue disponible como fallback.
+
+En este entorno el intento de instalacion no completo, asi que Babylon queda preparado pero no empaquetado. La estabilidad del frontend queda preservada.
+
+## Addendum F313 - NIST XCOM y mezclas
+
+F313 agrega NIST XCOM como fuente de apoyo para atenuacion fotonica y comparacion de mezclas. En el dialogo NIST XCOM se puede elegir una mezcla por fraccion en peso, energia y densidad de mezcla opcional.
+
+Logica aplicada:
+
+1. Normalizar fracciones por peso positivas.
+2. Interpolar `mu/rho` por material y energia.
+3. Combinar `mu/rho` por suma ponderada.
+4. Multiplicar por densidad de mezcla para obtener `mu` lineal.
+5. Calcular HVL y TVL como `ln(2)/mu` y `ln(10)/mu`.
+
+Uso correcto: comparar materiales, estimar impacto de mezclas, alimentar Material Toolbox y respaldar Memoria IA con evidencia de fuente/hash. Uso restringido: no sustituye NCRP/IAEA/UAQ para diseno clinico, especialmente en haces MV broad-beam, neutrones, laberintos o puertas.
+
 ## Addendum F312 - Unity WebGL externo
 
 F312 define como se conectaria Unity WebGL sin romper la app principal. Unity no se instala dentro del frontend estable. Se usa como visor externo, embebido o abierto en otra pestana, y recibe un paquete exportado desde Medical 3D.

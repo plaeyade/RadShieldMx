@@ -25,6 +25,16 @@ export interface BabylonAdapterContract {
   warnings: string[];
 }
 
+export interface BabylonRuntimeStatus {
+  schema: 'radshield-mx.medical-3d.babylon-runtime-status.v1';
+  enabled: boolean;
+  runtimeLoaded: boolean;
+  mode: 'disabled' | 'dynamic-import-ready' | 'dynamic-import-failed';
+  packages: string[];
+  fallbackEngine: 'three-r3f';
+  message: string;
+}
+
 export function buildBabylonAdapterContract(scene: MedicalScene): BabylonAdapterContract {
   const hasThicknessData = scene.walls.some((wall) => wall.requiredThickness_mm > 0 || wall.thickness_m > 0);
   const hasControlledZones = scene.zones.some((zone) => zone.controlled);
