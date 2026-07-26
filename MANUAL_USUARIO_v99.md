@@ -1,5 +1,30 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F339 - Caso real Centro Neuro
+
+F339 usa el plano `CENTRO NEURO PLANTA BAJA 040626.pdf` como primer caso real de operador. El archivo se trata como plano visual generado desde AutoCAD: se renderiza a PNG para fondo de canvas y se registra con hash. El texto extraido no es la fuente principal; la evidencia viene del PDF, la imagen renderizada y la trazabilidad del operador.
+
+Zonas preparadas:
+
+1. `CYCLOTRON`: perfil CY para boveda de ciclotron, neutrones/gamma, activacion, laberinto, penetraciones y relacion con radiofarmacia.
+2. `RADIOFARMACIA`: perfil NM como contexto de hot lab, areas controladas, flujo operativo y adyacencias.
+3. `LGK (GAMAKNIFE)`: perfil TX para Gamma Knife, inventario Co-60, fuga/dispersion, carga estructural y anexos.
+4. `LINAC`: perfil TX para NCRP 151, primaria/secundaria, neutrones si energia mayor a 10 MV, laberinto/puerta y evidencia 3D.
+
+Flujo recomendado:
+
+1. Ejecutar F339 o abrir el PNG renderizado `outputs/f339_real_case_centro_neuro/centro_neuro_page-1.png`.
+2. Importar la imagen como fondo de canvas/floorplan.
+3. Calibrar escala con una dimension arquitectonica conocida antes de calcular.
+4. Trazar habitaciones y barreras en capas separadas.
+5. Colocar simbolos de ciclotron, Gamma Knife y LINAC con huella, orientacion, peso y punto fuente/isocentro.
+6. Asignar materiales desde la toolbox: TVL, densidad, peso, costo, tiempo y carga estructural.
+7. Ejecutar calculos por modalidad solo cuando esten confirmados workload, ocupacion, energia/actividad y fuente normativa.
+8. Abrir Medical 3D para revisar espesores, equipos, zonas controladas y generar `sceneHash`.
+9. Generar Memoria IA, PDF y Evidence Pack con citas, advertencias y checklist de revision.
+
+Regla de seguridad: F339 no certifica blindajes desde imagen. Cualquier resultado se mantiene preliminar hasta tener escala calibrada, terminos fuente, ocupacion, materiales versionados y revision por fisico medico/RSO.
+
 ## Addendum F331-F338 - Cierre de release estatico
 
 F331-F338 agrupa el cierre operativo antes de probar la app con un caso real. No agrega calculos nuevos; confirma que el frontend estatico, Medical 3D, canvas, materiales, RAG/documentos y reportes tienen contratos de evidencia listos para validacion.

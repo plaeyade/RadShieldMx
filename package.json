@@ -414,6 +414,8 @@
     "test:f325-f330:medical-3d-photoreal": "node scripts/check-f325-f330-medical-3d-photoreal-contracts.mjs",
     "prepare:f331-f338:static-release-close": "node scripts/f331-f338-static-release-close.mjs",
     "test:f331-f338:static-release-close": "node scripts/check-f331-f338-static-release-close-contracts.mjs",
+    "prepare:f339:real-case-centro-neuro": "node scripts/f339-real-case-centro-neuro.mjs",
+    "test:f339:real-case-centro-neuro": "node scripts/check-f339-real-case-centro-neuro-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

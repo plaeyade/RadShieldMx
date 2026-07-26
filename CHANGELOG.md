@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F339 (2026-07-25) - Centro Neuro real case trial
+
+- Adds a real-case operator package from `CENTRO NEURO PLANTA BAJA 040626.pdf`.
+- Renders the AutoCAD PDF to a canvas background seed and records source SHA256, PDF metadata and render evidence.
+- Defines three trial scenarios: cyclotron/CY, Gamma Knife-LGK/TX and LINAC/TX, with Radiofarmacia as NM workflow context.
+- Captures visible structural load clues from the plan: LGK 36,502 kg and LINAC 3,341 kg.
+- Keeps calculations gated until scale, source terms, occupancy, materials and qualified review are confirmed.
+- Scripts: `npm run prepare:f339:real-case-centro-neuro` and `npm run test:f339:real-case-centro-neuro`.
+
 # F331-F338 (2026-07-25) - Static release close
 
 - Adds a release-close manifest for Medical 3D modality QA, 3D visual evidence, calculation QA queue, material/structural readiness, RAG/document closure, reports, canvas QA and static package.

@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F339 (2026-07-25) - Caso real Centro Neuro
+
+- Artefactos: `outputs/f339_real_case_centro_neuro/f339_real_case_centro_neuro.json`, `f339_floorplan_seed_candidate.json`, `f339_trial_scenarios.csv`, `centro_neuro_page-1.png` y `outputs/fase_339_real_case_centro_neuro.md`.
+- Fuente: `CENTRO NEURO PLANTA BAJA 040626.pdf`, PDF AutoCAD de una pagina.
+- SHA256 esperado: `52b5fb7179fd62b849abcbcc1bf94c807dae71a58f219c6095a713e0a32c713c`.
+- Escenarios preparados: ciclotron/CY, Gamma Knife-LGK/TX y LINAC/TX.
+- Radiofarmacia queda como contexto NM para flujo de area controlada, hot lab y adyacencias.
+- Uso permitido: prueba operativa de importacion visual, trazado, equipos, Medical 3D, Memoria IA y Evidence Pack.
+- Uso no permitido: emitir espesores firmables sin calibracion de escala, source terms, ocupacion, materiales y revision calificada.
+- Scripts: `npm run prepare:f339:real-case-centro-neuro` y `npm run test:f339:real-case-centro-neuro`.
+
 # F331-F338 (2026-07-25) - Static release close
 
 - Artefactos: `outputs/f331_f338_static_release_close/f331_f338_static_release_close.json`, `outputs/f331_f338_static_release_close/f331_f338_modality_visual_qa.csv`, `outputs/f331_f338_static_release_close/radshield-mx-f338-static-release.zip` y `outputs/fase_331_338_static_release_close.md`.
