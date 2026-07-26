@@ -1,5 +1,30 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F344 - Colindancias publico en general
+
+F344 permite avanzar el trazado del caso Centro Neuro con los criterios ya indicados:
+
+1. Escala del plano: `1:100`.
+2. Colindancias preliminares: `publico en general`.
+3. Factor de ocupacion conservador inicial: `T=1`.
+4. Revision FM/RSO: al final, antes de memoria firmable y entrega regulatoria.
+
+Uso en canvas:
+
+1. Mantener el PDF base bloqueado.
+2. Dibujar salas/equipos en la capa `Rooms and equipment footprints`.
+3. Dibujar barreras norte, sur, este, oeste, piso y techo por cada sala.
+4. Asignar a cada barrera la colindancia `publico en general`.
+5. Marcar penetraciones en capa separada: HVAC, charolas/conduits, gases, puerta/laberinto y exhaust del ciclotron.
+6. Mantener citas, supuestos, formulas y hashes en la capa de evidencia.
+
+Interpretacion:
+
+1. Este criterio permite dibujar y preparar el calculo draft.
+2. No sustituye el termino fuente del proveedor, TVL/densidad versionada, ni el workload clinico real.
+3. No produce espesor firmable.
+4. La revision FM/RSO queda como gate final para memoria analitica, construccion y entrega CNSNS/UAQ.
+
 ## Addendum F343 - Preflight Centro Neuro con equipos reales
 
 F343 toma los datos confirmados por el usuario y arma la hoja de entrada operativa antes del calculo:

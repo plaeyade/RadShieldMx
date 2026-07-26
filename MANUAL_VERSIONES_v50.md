@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F344 (2026-07-25) - Marcado de colindancias publico en general
+
+- Artefactos: `outputs/f344_centro_neuro_public_occupancy_markup/f344_centro_neuro_public_occupancy_markup.json`, `f344_canvas_layers.csv`, `f344_barrier_public_adjacencies.csv` y `outputs/fase_344_centro_neuro_public_occupancy_markup.md`.
+- Escala: `1:100` confirmada para trazado y preflight. La verificacion con cota conocida sigue recomendada antes de calculo firmable.
+- Colindancia por defecto: `publico en general`.
+- Ocupacion draft: `T=1` para criterio conservador inicial.
+- Revision FM/RSO: se difiere al gate final y no bloquea el dibujo, las capas ni el marcado operativo.
+- Scripts: `npm run prepare:f344:centro-neuro-public-occupancy-markup` y `npm run test:f344:centro-neuro-public-occupancy-markup`.
+
 # F343 (2026-07-25) - Preflight Centro Neuro con equipos reales
 
 - Artefactos: `outputs/f343_centro_neuro_preflight/f343_centro_neuro_preflight.json`, `f343_equipment_preflight.csv`, `f343_occupancy_penetration_worksheet.csv` y `outputs/fase_343_centro_neuro_preflight.md`.

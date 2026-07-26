@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F344 Centro Neuro public markup', current: 'markup-ready', latest: '1:100 + publico en general', status: 'current', description: 'Confirma escala 1:100 para trazado draft, aplica colindancias publico en general con T=1 como criterio conservador inicial y mueve la revision FM/RSO al gate final de memoria firmable.' },
   { name: 'F343 Centro Neuro preflight', current: 'draft-blocked', latest: 'Versa HD 15 MeV + LGK Esprit + KIUBE 18 MeV', status: 'current', description: 'Prepara entrada operativa para Versa HD 15 MeV, Gamma Knife Esprit y Cyclone KIUBE 18 MeV con cargas maximas conservadoras. Mantiene el calculo bloqueado hasta fuente, ocupacion, penetraciones, TVL/densidad y revision calificada.' },
   { name: 'F342 Centro Neuro visual evidence', current: 'ready', latest: 'Canvas + 3D + reports screenshots', status: 'current', description: 'Genera tablero visual del caso Centro Neuro y smoke con capturas de canvas, Update Center, Medical 3D, Memoria IA y Evidence Pack. Los visuales son evidencia de revision, no certificacion de blindaje.' },
   { name: 'F341 Centro Neuro calibrated trial', current: 'scale/material seeded', latest: '1:100 + concrete HD + source templates', status: 'current', description: 'Integra la escala 1:100 del plano real, deriva escala provisional 0.01693333 m/px, define fuentes para ciclotron/Gamma Knife/LINAC, usa concreto alta densidad como material draft y deja penetraciones/ocupacion como entradas obligatorias antes de calcular.' },

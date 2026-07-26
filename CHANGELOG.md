@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F344 (2026-07-25) - Centro Neuro public occupancy markup
+
+- Confirms the Centro Neuro scale as `1:100` for draft canvas markup while keeping final calculation scale check explicit.
+- Applies all unknown adjacencies as `publico en general` with conservative draft `T=1`.
+- Moves FM/RSO review to the final signed-calculation release gate; it does not block drawing, layer setup or operator markup.
+- Adds canvas layer, room and barrier draft artifacts for Versa HD, Gamma Knife Esprit, KIUBE and radiofarmacia/hot lab context.
+- Scripts: `npm run prepare:f344:centro-neuro-public-occupancy-markup` and `npm run test:f344:centro-neuro-public-occupancy-markup`.
+
 # F343 (2026-07-25) - Centro Neuro source/occupancy preflight
 
 - Adds an operator preflight for the real Centro Neuro case using the provided equipment set: Elekta Versa HD 15 MeV, Elekta Gamma Knife Esprit and IBA Cyclone KIUBE 18 MeV.
