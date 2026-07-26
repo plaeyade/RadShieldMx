@@ -1,11 +1,19 @@
 # RadShield-MX - Fases recientes
 
+# F296-F300 (2026-07-25) - Canvas 3D workbench
+
+- Main sidebar now starts visible with bounded workspace width: 260 px default, 244 px minimum and 300 px maximum.
+- Keeps clean canvas startup: workflow, QA and continuity panels hidden by default, with quick CAD rail collapsed.
+- Adds a local navigable medical 3D preview with room, shielded walls, equipment footprint, controlled zone, dose heatmap and camera sliders.
+- Defines external runner contracts for GATE/OpenGATE, EGSnrc/egs_brachy, Geant4 standalone and APS/ODA DWG conversion.
+- Adds F296-F300 manifest and contracts for the next renderer/event redesign pass.
+
 # F295 (2026-07-25) - Canvas redesign smoke
 
 - Moved `Archivo` to the beginning of the main toolbar and hid the legacy duplicated menu zone.
 - Changed canvas startup to a clean workspace: workflow, QA and continuity panels are hidden by default and recoverable from compact chips.
 - Collapsed the quick CAD sidebar by default to protect floorplan visibility.
-- Collapsed the main sidebar by default while preserving its stable expand rail.
+- Superseded by F296: the main sidebar now starts visible with bounded width and still preserves manual collapse.
 - Added F295 manifest, contract and a static medical 3D preview for the next redesign pass.
 
 # F294 (2026-07-25) - Real guided smoke

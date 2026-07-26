@@ -23,7 +23,7 @@ expect('Legacy menu hidden', toolbar.includes('data-testid="f114-deduped-legacy-
 expect('Canvas clean storage key', canvas.includes('radshield_canvas_panels_f188_f295_clean_workspace'));
 expect('Canvas clean defaults', canvas.includes('workflow: false') && canvas.includes('qa: false') && canvas.includes('continuity: false'));
 expect('Quick sidebar collapsed by default', sidebar.includes('useState(true)'));
-expect('Main sidebar collapsed by default', mainSidebar.includes('const [collapsed, setCollapsed] = useState(true)') && mainSidebar.includes('const DEFAULT_SIDEBAR_WIDTH = 244'));
+expect('Main sidebar visible by default and bounded', mainSidebar.includes('const [collapsed, setCollapsed] = useState(false)') && mainSidebar.includes('const DEFAULT_SIDEBAR_WIDTH = 260') && mainSidebar.includes('const MAX_SIDEBAR_WIDTH = 300'));
 expect('Preview includes 3D concepts', preview.includes('Inspeccion 3D') && preview.includes('Barrera primaria') && preview.includes('GATE, EGSnrc, Geant4'));
 expect('External engines listed', ['GATE / OpenGATE', 'EGSnrc / egs_brachy', 'Geant4 standalone', 'APS/ODA DWG conversion'].every((engine) => JSON.stringify(manifest).includes(engine)));
 expect('Update Center documents F295', update.includes('F295 Canvas redesign smoke'));

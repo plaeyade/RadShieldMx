@@ -32,9 +32,9 @@ import { CANVAS_TOOL_ICON_PROFILES, getCanvasToolIconProfile } from '@/lib/f98Un
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
 const SIDEBAR_WIDTH_KEY = 'radshield_sidebar_width_f188';
-const DEFAULT_SIDEBAR_WIDTH = 244;
+const DEFAULT_SIDEBAR_WIDTH = 260;
 const MIN_SIDEBAR_WIDTH = 244;
-const MAX_SIDEBAR_WIDTH = 360;
+const MAX_SIDEBAR_WIDTH = 300;
 
 function clampSidebarWidth(value: number): number {
   return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, value));
@@ -220,7 +220,7 @@ export default function Sidebar({
   selectedSource, selectedBarrier, selectedCriticalPoint, updateSelected, deleteSelected, resetView, onImageUpload,
   onRunCalculations, onUAQ, onMemoriaAI, onMazeCalculator, onDXFViewer,
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
   const open = useAppStore((s) => s.open);
 

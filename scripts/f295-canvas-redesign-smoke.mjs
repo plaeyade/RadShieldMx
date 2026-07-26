@@ -68,7 +68,7 @@ const canvasRedesignDecisions = [
   'Canvas abre en modo limpio: workflow, QA y continuidad ocultos por defecto.',
   'Paneles pesados siguen recuperables desde chips compactos.',
   'Sidebar rapida CAD inicia colapsada para liberar area de plano.',
-  'Sidebar principal inicia colapsada con ancho minimo estable y boton de expansion.',
+  'Sidebar principal inicia visible con ancho estable acotado al area de trabajo; conserva modo colapsado manual.',
   'Redisenio de renderer/eventos queda para F296-F300 con harness visual dedicado.',
 ];
 
@@ -78,7 +78,7 @@ const gates = [
   { id: 'legacy-menu-hidden', pass: toolbar.includes('data-testid="f114-deduped-legacy-menu-zone" className="hidden"'), evidence: 'src/sections/Toolbar.tsx' },
   { id: 'clean-canvas-defaults', pass: canvasArea.includes('radshield_canvas_panels_f188_f295_clean_workspace') && canvasArea.includes('workflow: false') && canvasArea.includes('qa: false') && canvasArea.includes('continuity: false'), evidence: 'src/sections/CanvasArea.tsx' },
   { id: 'quick-sidebar-collapsed-default', pass: quickSidebar.includes('useState(true)') && quickSidebar.includes('Colapsar herramientas CAD rapidas'), evidence: 'src/sections/CanvasQuickActionsSidebar.tsx' },
-  { id: 'main-sidebar-collapsed-default', pass: sidebar.includes('const [collapsed, setCollapsed] = useState(true)') && sidebar.includes('const DEFAULT_SIDEBAR_WIDTH = 244'), evidence: 'src/sections/Sidebar.tsx' },
+  { id: 'main-sidebar-visible-default', pass: sidebar.includes('const [collapsed, setCollapsed] = useState(false)') && sidebar.includes('const DEFAULT_SIDEBAR_WIDTH = 260') && sidebar.includes('const MAX_SIDEBAR_WIDTH = 300'), evidence: 'src/sections/Sidebar.tsx' },
   { id: 'advanced-3d-existing', pass: medical3d.includes('@react-three/fiber') && medical3d.includes('buildMedicalScene') && medical3d.includes('OrbitControls'), evidence: 'src/sections/dialogs/MedicalFloorPlan3DDialog.tsx' },
 ];
 

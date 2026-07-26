@@ -1721,3 +1721,19 @@ Motores externos:
 4. APS/ODA: conversion DWG a DXF/SVG/GLTF antes de entrar al canvas.
 
 Estos motores deben conectarse como runners externos con datasets versionados, hashes, logs y revision profesional; no deben ejecutarse como certificacion automatica desde el frontend.
+
+## Addendum F296-F300 - Canvas, Sidebar y Escena 3D
+
+La sidebar principal vuelve a iniciar visible para que las herramientas basicas esten disponibles desde el primer momento. Su ancho queda acotado al area de trabajo: 260 px iniciales, con ajuste entre 244 y 300 px. Si se necesita mas espacio de plano, puede colapsarse manualmente.
+
+La barra rapida CAD lateral se mantiene colapsada al inicio para no cubrir el floorplan. Los paneles grandes de workflow, QA y continuidad siguen cerrados por defecto y se recuperan desde sus chips o controles compactos.
+
+La inspeccion 3D medica se usa como vista de revision: muestra muros, espesores, materiales, equipo, zonas controladas, heatmap, ruta visual y capturas para evidencia. El ejemplo local esta en `outputs/f296_f300_canvas_3d_workbench/medical_3d_navigable_preview.html`.
+
+Los motores externos se conectan como runners o adapters, no como calculo automatico dentro del navegador:
+1. GATE/OpenGATE para NM/PET/SPECT y geometria Geant4 controlada.
+2. EGSnrc/egs_brachy para fotones, electrones y braquiterapia.
+3. Geant4 standalone para ciclotron, neutrones, activacion y validacion independiente.
+4. APS/ODA para convertir DWG a DXF/SVG/GLTF antes de importar al canvas.
+
+Cada runner debe devolver version, dataset, hash de entrada, hash de salida, log, incertidumbre y estado de revision profesional antes de aparecer en memoria analitica o Evidence Pack.

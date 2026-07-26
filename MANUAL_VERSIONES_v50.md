@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F296-F300 (2026-07-25) - Canvas 3D workbench
+
+- Artefactos: `outputs/f296_f300_canvas_3d_workbench/f296_f300_canvas_3d_workbench.json`, `medical_3d_navigable_preview.html` y `outputs/fase_296_300_canvas_3d_workbench.md`.
+- Sidebar principal inicia visible con ancho acotado al area de trabajo: 260 px por defecto, minimo 244 px y maximo 300 px.
+- Canvas conserva arranque limpio: paneles workflow/QA/continuidad cerrados por defecto y barra rapida CAD colapsada.
+- Preview 3D navegable con sala, muros, equipo, barrera primaria, zona controlada, heatmap y controles de camara.
+- Contrato externo: GATE/OpenGATE para NM/PET/SPECT, EGSnrc/egs_brachy para fotones/electrones/braqui, Geant4 para neutrones/ciclotron/activacion y APS/ODA para conversion DWG.
+- Scripts: `npm run prepare:f296-f300:canvas-3d-workbench` y `npm run test:f296-f300:canvas-3d-workbench`.
+
 # F295 (2026-07-25) - Smoke de rediseno de canvas
 
 - Artefactos: `outputs/f295_canvas_redesign_smoke/f295_canvas_redesign_smoke.json`, `f295_medical_3d_preview.html` y `outputs/fase_295_canvas_redesign_smoke.md`.
@@ -7,7 +16,7 @@
 - Oculta la zona legacy de menus para eliminar duplicidad visible.
 - Canvas inicia en modo limpio: paneles workflow/QA/continuidad cerrados por defecto y recuperables.
 - Sidebar rapida CAD inicia colapsada para no cubrir el layout.
-- Sidebar principal inicia colapsada con ancho estable y boton de expansion.
+- Supersedida por F296: sidebar principal inicia visible con ancho estable acotado y conserva boton de colapso manual.
 - Deja arquitectura para conectar GATE/OpenGATE, EGSnrc/egs_brachy, Geant4 y conversion DWG APS/ODA mediante runners/proveedores externos.
 - Scripts: `npm run prepare:f295:canvas-redesign-smoke` y `npm run test:f295:canvas-redesign-smoke`.
 
