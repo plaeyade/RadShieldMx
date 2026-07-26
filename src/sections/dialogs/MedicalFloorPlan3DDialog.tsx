@@ -22,6 +22,12 @@ import { CADX_STUDIO_EXTERNAL_NOTE, buildCadxRenderBrief } from '@/lib/cadxStudi
 import { CAD_CODE_VERIFY_EXTERNAL_NOTE, buildCadCodeVerificationPack } from '@/lib/cadCodeVerify';
 import { buildF923DInspectionSummary } from '@/lib/f92RealWorkflow';
 import { buildF147Medical3DInspection, type F147InspectionStation } from '@/lib/f147Medical3DInspection';
+import {
+  MEDICAL_3D_RENDER_STRATEGIES,
+  buildMedical3DEngineHandoff,
+  getMedical3DRenderStrategy,
+  type Medical3DRenderEngine,
+} from '@/lib/medical3D/renderStrategy';
 
 interface Props {
   open: boolean;
@@ -573,6 +579,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [showClinicalDetail, setShowClinicalDetail] = useState(true);
   const [showInspection, setShowInspection] = useState(true);
   const [walkthrough, setWalkthrough] = useState(false);
+  const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
   const [activeStationId, setActiveStationId] = useState<string | null>(null);
   const [inspectionTarget, setInspectionTarget] = useState<InspectionTarget | null>(null);
   const [importedFloorPlan, setImportedFloorPlan] = useState<FloorPlan | null>(null);
@@ -584,6 +591,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const scene = useMemo(() => buildMedicalScene(activeFloorPlan, preset), [activeFloorPlan, preset]);
   const f92Inspection = useMemo(() => buildF923DInspectionSummary(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const f147Inspection = useMemo(() => buildF147Medical3DInspection(scene, activeFloorPlan), [activeFloorPlan, scene]);
+  const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const activeStation = useMemo(
     () => f147Inspection.stations.find((station) => station.id === activeStationId),
     [activeStationId, f147Inspection.stations],
@@ -666,6 +674,25 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     );
   };
 
+  const handleExportEngineHandoff = () => {
+    downloadText(
+      `medical_3d_engine_handoff_${safePlanName}.json`,
+      JSON.stringify({
+        ...buildMedical3DEngineHandoff(renderEngine),
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneSummary: {
+          walls: scene.walls.length,
+          equipment: scene.equipment.length,
+          zones: scene.zones.length,
+          bounds: scene.bounds,
+          maxRequiredThickness_mm: scene.review.maxRequiredThickness_mm,
+        },
+      }, null, 2),
+      'application/json',
+    );
+  };
+
   const handleSnapshot = () => {
     const canvas = canvasWrapperRef.current?.querySelector('canvas');
     if (!canvas) return;
@@ -711,7 +738,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             </span>
             <span className="flex items-center gap-2">
               <Badge variant="outline" className="text-[10px]">Offline</Badge>
-              <Badge variant="outline" className="text-[10px]">Three.js</Badge>
+              <Badge variant="outline" className="text-[10px]">{renderStrategy.label}</Badge>
               <Badge variant="outline" className="text-[10px]">CAD/BIM Fase 42</Badge>
             </span>
           </DialogTitle>
@@ -751,6 +778,31 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+            </div>
+
+            <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="f307-f309-render-engine-selector">
+              <div className="text-[11px] font-semibold text-slate-500 uppercase">Motor 3D</div>
+              <Select value={renderEngine} onValueChange={(value) => setRenderEngine(value as Medical3DRenderEngine)}>
+                <SelectTrigger className="h-8 text-xs bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MEDICAL_3D_RENDER_STRATEGIES.map((strategy) => (
+                    <SelectItem key={strategy.id} value={strategy.id}>{strategy.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="rounded border bg-white p-2 text-[10px] leading-relaxed text-slate-600">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="font-semibold text-slate-800">{renderStrategy.status}</span>
+                  <Badge variant="outline" className="text-[9px]">{renderStrategy.id}</Badge>
+                </div>
+                <div>{renderStrategy.role}</div>
+                <div className="mt-1 text-amber-700">{renderStrategy.activationGate}</div>
+              </div>
+              <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportEngineHandoff}>
+                <Download className="w-3.5 h-3.5 mr-2" /> Exportar handoff 3D
+              </Button>
             </div>
 
             <div className="flex items-center justify-between rounded border p-2">
@@ -983,6 +1035,9 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </Badge>
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                 {walkthrough ? 'Q/E: girar' : 'Zoom: scroll'}
+              </Badge>
+              <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                {renderStrategy.status === 'active' ? 'Render activo R3F' : `${renderStrategy.label}: adapter`}
               </Badge>
             </div>
 

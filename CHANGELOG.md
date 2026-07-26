@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F307-F309 (2026-07-25) - 3D engine release
+
+- Adds `src/lib/medical3D/renderStrategy.ts` with ordered engine strategy: Three/R3F active, Babylon PBR/WebGPU/WebXR adapter-ready and Unity WebGL deferred.
+- Medical 3D dialog now exposes a render engine selector and exports a 3D handoff JSON for external viewers/adapters.
+- Babylon is intentionally not bundled yet; it is a future feature-flag adapter with fallback to Three/R3F.
+- Unity WebGL is explicitly deferred to the final stage as an external heavy viewer, not a clinical calculation engine.
+- Scripts: `npm run prepare:f307-f309:3d-engine-release` and `npm run test:f307-f309:3d-engine-release`.
+
 # F301-F306 (2026-07-25) - Functional release close
 
 - Adds final six-phase closure plan: panel docking, renderer/event gate, canvas E2E, Memoria IA full case, DB/RAG readback and release/deploy decision.

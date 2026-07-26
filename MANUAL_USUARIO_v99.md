@@ -1755,3 +1755,13 @@ Flujo recomendado:
 Para 3D realista, la ruta primaria es mantener React Three Fiber/Three.js porque ya vive dentro del frontend React. Babylon.js con WebGPU/WebXR puede ser fase posterior si se quiere mas potencia visual o recorrido XR. Unity WebGL es posible, pero debe manejarse como visor externo embebido o enlazado, porque genera un build pesado y requiere configuracion de servidor, compresion y bridge de datos con la app.
 
 El proceso de motores externos queda asi: canvas exporta geometria/materiales/equipo, la API arma un paquete reproducible, el runner externo ejecuta GATE/OpenGATE, EGSnrc, Geant4 o conversion APS/ODA, y la app reimporta resultados con log, hash, version e incertidumbre para Evidence Pack.
+
+## Addendum F307-F309 - Estrategia De Motores 3D
+
+Medical 3D ahora incluye un selector de motor. La opcion activa es Three.js/React Three Fiber, porque ya renderiza dentro de la app y permite revisar sala, equipo, barreras, zonas, heatmap, recorrido y export PNG/OBJ/JSON.
+
+Babylon.js PBR/WebGPU/WebXR queda como adapter futuro. Debe activarse solo con feature flag, E2E visual y fallback automatico a Three/R3F, porque WebGPU/WebXR dependen del navegador y del dispositivo.
+
+Unity WebGL queda al final. Su uso recomendado es como visor externo pesado para recorridos fotorealistas o demostraciones, no como motor regulatorio. Si se usa, debe recibir un case pack JSON/GLTF desde la app y devolver snapshots o recorridos, nunca resultados clinicos firmados sin revision profesional.
+
+El boton `Exportar handoff 3D` genera el paquete de estrategia para conectar el visor activo o un adapter externo.

@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F307-F309 (2026-07-25) - 3D engine release
+
+- Artefactos: `outputs/f307_f309_3d_engine_release/f307_f309_3d_engine_release.json`, `f307_f309_3d_engine_strategy_preview.html` y `outputs/fase_307_309_3d_engine_release.md`.
+- F307: Three.js/React Three Fiber queda como motor activo en `MedicalFloorPlan3DDialog`.
+- F308: Babylon.js PBR/WebGPU/WebXR queda como adapter futuro, no cargado en el bundle principal hasta feature flag y E2E.
+- F309: Unity WebGL queda al final como visor externo pesado con bridge JSON/GLTF; no sustituye calculo ni reporte regulatorio.
+- Medical 3D agrega selector de motor y export `medical_3d_engine_handoff_*.json`.
+- Scripts: `npm run prepare:f307-f309:3d-engine-release` y `npm run test:f307-f309:3d-engine-release`.
+
 # F301-F306 (2026-07-25) - Functional release close
 
 - Artefactos: `outputs/f301_f306_functional_release_close/f301_f306_functional_release_close.json`, `external_engines_3d_process_preview.html` y `outputs/fase_301_306_functional_release_close.md`.
