@@ -1,5 +1,33 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F312 - Unity WebGL externo
+
+F312 define como se conectaria Unity WebGL sin romper la app principal. Unity no se instala dentro del frontend estable. Se usa como visor externo, embebido o abierto en otra pestana, y recibe un paquete exportado desde Medical 3D.
+
+Reglas de uso:
+
+1. RadShield-MX calcula, cita, advierte y genera reportes.
+2. Unity solo visualiza: recorrido, acabados, camara, entrenamiento o demo.
+3. La conexion requiere `VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER=true`.
+4. La URL se define con `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+5. Si Unity falla, Three/R3F sigue disponible como fallback.
+
+Antes de activarlo se requiere un build Unity WebGL externo, headers correctos para assets comprimidos y smoke visual que confirme carga, camara, geometria, equipos, zonas y snapshots.
+
+## Addendum F311 - Babylon safe adapter
+
+F311 prepara Babylon.js sin instalarlo todavia en el frontend estable. La app mantiene Three/R3F como visor activo y deja un contrato tecnico para que Babylon consuma la misma escena cuando se autorice.
+
+Condiciones para activar Babylon:
+
+1. F310 debe pasar con un proyecto real.
+2. Instalar `@babylonjs/core` y `@babylonjs/loaders` en rama o entorno de prueba.
+3. Activar `VITE_MEDICAL_3D_BABYLON_ADAPTER=true` y `VITE_MEDICAL_3D_BABYLON_RUNTIME=true`.
+4. Usar carga dinamica y fallback automatico a Three/R3F.
+5. Repetir smoke visual desktop/mobile y revisar peso de bundle.
+
+Babylon aporta PBR, WebGPU y WebXR para inspeccion avanzada. No reemplaza calculos, normas, Memoria IA ni Evidence Pack.
+
 ## Addendum F310 - Ensayo operativo Three/R3F
 
 F310 prepara el primer ensayo real del visor Medical 3D sin introducir dependencias de mayor riesgo. El motor activo sigue siendo Three.js/React Three Fiber.

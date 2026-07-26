@@ -1,5 +1,19 @@
 # RadShield-MX - Fases recientes
 
+# F312 (2026-07-25) - Unity external handoff
+
+- Adds `src/lib/medical3D/unityWebglHandoff.ts` as the Unity WebGL external viewer contract.
+- Adds explicit external-viewer flags: `VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER` and `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+- Keeps Unity outside the React bundle; Unity can receive JSON/OBJ/future GLTF and return snapshots/camera bookmarks only after dedicated visual smoke.
+- Scripts: `npm run prepare:f312:unity-external-handoff` and `npm run test:f312:unity-external-handoff`.
+
+# F311 (2026-07-25) - Babylon safe adapter
+
+- Adds `src/lib/medical3D/babylonAdapter.ts` as a runtime-free Babylon integration contract.
+- Adds explicit feature flags for future Babylon activation: `VITE_MEDICAL_3D_BABYLON_ADAPTER` and `VITE_MEDICAL_3D_BABYLON_RUNTIME`.
+- Keeps Babylon packages out of `package.json` until the real Three/R3F operator trial passes and a dedicated visual smoke is available.
+- Scripts: `npm run prepare:f311:babylon-safe-adapter` and `npm run test:f311:babylon-safe-adapter`.
+
 # F310 (2026-07-25) - Real operator Three/R3F trial
 
 - Adds an operator-ready trial gate for the Medical 3D viewer with Three/R3F as the active engine.

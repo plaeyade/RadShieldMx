@@ -1,5 +1,22 @@
 # RadShield-MX - Manual de Versiones
 
+# F312 (2026-07-25) - Unity external handoff
+
+- Artefactos: `outputs/f312_unity_external_handoff/f312_unity_external_handoff.json` y `outputs/fase_312_unity_external_handoff.md`.
+- Se agrega `src/lib/medical3D/unityWebglHandoff.ts` para definir el puente externo Unity WebGL.
+- Unity no se instala en el frontend ni en `package.json`; debe publicarse como build externo y consumirse por URL.
+- Flags futuros: `VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER=true` y `VITE_MEDICAL_3D_UNITY_WEBGL_URL=<url-del-build>`.
+- RadShield-MX sigue siendo la fuente de verdad para calculos, citas, advertencias, Memoria IA, PDF y Evidence Pack.
+- Scripts: `npm run prepare:f312:unity-external-handoff` y `npm run test:f312:unity-external-handoff`.
+
+# F311 (2026-07-25) - Babylon safe adapter
+
+- Artefactos: `outputs/f311_babylon_safe_adapter/f311_babylon_safe_adapter.json` y `outputs/fase_311_babylon_safe_adapter.md`.
+- Se agrega `src/lib/medical3D/babylonAdapter.ts` como contrato de integracion sin importar Babylon en runtime.
+- Flags futuros: `VITE_MEDICAL_3D_BABYLON_ADAPTER=true` y `VITE_MEDICAL_3D_BABYLON_RUNTIME=true`.
+- Politica: instalar `@babylonjs/core` y `@babylonjs/loaders` solo despues de F310 operativo, en rama/flag, con fallback obligatorio a Three/R3F.
+- Scripts: `npm run prepare:f311:babylon-safe-adapter` y `npm run test:f311:babylon-safe-adapter`.
+
 # F310 (2026-07-25) - Real operator Three/R3F trial
 
 - Artefactos: `outputs/f310_real_operator_trial_three_r3f/f310_real_operator_trial_three_r3f.json`, `f310_operator_checklist.csv` y `outputs/fase_310_real_operator_three_r3f.md`.

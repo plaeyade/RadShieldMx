@@ -8,6 +8,8 @@ export interface FeatureFlags {
   experimentalCV: boolean;
   canvasHighRiskCad: boolean;
   canvasEventControllerV2: boolean;
+  medical3DBabylonAdapter: boolean;
+  medical3DUnityExternalViewer: boolean;
   realTimeCollaboration: boolean;
   aiPredictions: boolean;
   debugMode: boolean;
@@ -21,6 +23,12 @@ const DEFAULT: FeatureFlags = {
   canvasEventControllerV2:
     import.meta.env.VITE_CANVAS_HIGH_RISK_CAD === 'true' &&
     import.meta.env.VITE_CANVAS_EVENT_CONTROLLER_V2 === 'true',
+  medical3DBabylonAdapter:
+    import.meta.env.VITE_MEDICAL_3D_BABYLON_ADAPTER === 'true' &&
+    import.meta.env.VITE_MEDICAL_3D_BABYLON_RUNTIME === 'true',
+  medical3DUnityExternalViewer:
+    import.meta.env.VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER === 'true' &&
+    Boolean(import.meta.env.VITE_MEDICAL_3D_UNITY_WEBGL_URL),
   realTimeCollaboration: false,
   aiPredictions: true,
   debugMode: import.meta.env.DEV,

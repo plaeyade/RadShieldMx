@@ -92,6 +92,8 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F312 Unity external handoff', current: 'deferred external', latest: 'URL/iframe contract', status: 'current', description: 'Unity WebGL queda definido como visor externo: recibe handoff JSON/OBJ/futuro GLTF y devuelve evidencia visual. No se instala en React ni sustituye calculos, citas, PDF o Evidence Pack.' },
+  { name: 'F311 Babylon safe adapter', current: 'staged', latest: 'runtime-free contract + flags', status: 'current', description: 'Babylon queda preparado como adapter PBR/WebGPU/WebXR sin instalar paquetes ni cargar runtime. Se activara solo con flags, dynamic import, fallback a Three/R3F y smoke visual dedicado.' },
   { name: 'F310 Real operator Three/R3F', current: 'ready', latest: 'operator checklist + staged Babylon/Unity', status: 'current', description: 'Medical 3D queda listo para una prueba operativa real con Three/R3F activo. Babylon se mantiene como adapter futuro y Unity WebGL como visor externo final para no afectar estabilidad.' },
   { name: 'F81 DB gate', current: 'superseded by F130/F131', latest: 'Windows MySQL live ready', status: 'current', description: 'The earlier Docker/MySQL blocker was resolved by direct Windows MySQL. F130 validated DB live; F131 validates full-stack API/frontend smoke.' },
   { name: 'F82 DB-deferred mode', current: 'enabled', latest: 'continue offline-safe phases', status: 'current', description: 'The app can continue UI, canvas, RAG manifests, documentation, render and QA work while live MySQL is deferred.' },
