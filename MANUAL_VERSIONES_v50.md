@@ -1,5 +1,19 @@
 # RadShield-MX - Manual de Versiones
 
+# F292 (2026-07-25) - QA floorplan para proyecto real
+
+- Artefactos: `outputs/f292_real_project_floorplan_qa/f292_real_project_floorplan_qa.json`, `f292_floorplan_operator_checklist.csv` y `outputs/fase_292_real_project_floorplan_qa.md`.
+- Valida la ruta operativa de proyecto real: importar plano/DXF convertido, calibrar escala, trazar areas, sembrar equipos, asignar materiales, calcular, revisar heatmap/isocontornos y exportar evidencia.
+- Bloquea reescrituras de renderer/event controller hasta que canvas/sidebar/import/escala/capas/cotas/simbolos/export/3D esten listos.
+- Scripts: `npm run prepare:f292:real-project-floorplan-qa` y `npm run test:f292:real-project-floorplan-qa`.
+
+# F291 (2026-07-25) - Hardening de calculo contra casos reales
+
+- Artefactos: `outputs/f291_calculation_real_case_hardening/f291_calculation_real_case_hardening.json`, `f291_case_deviation_guardrails.csv` y `outputs/fase_291_calculation_real_case_hardening.md`.
+- Cruza F290 con F192-F196/F237: validacion numerica, normalizacion de unidades, comparador base/conservador, cache segura, trazabilidad y warnings.
+- Mantiene DX/NM en `operator-input-required` cuando falta memoria/plano firmado, sin inventar evidencia.
+- Scripts: `npm run prepare:f291:calculation-real-case-hardening` y `npm run test:f291:calculation-real-case-hardening`.
+
 # F290 (2026-07-25) - Matriz de pruebas reales
 
 - Artefactos: `outputs/f290_real_clinical_testing_matrix/f290_real_clinical_testing_matrix.json`, `outputs/f290_real_clinical_testing_matrix/f290_real_case_matrix.csv` y `outputs/fase_290_real_clinical_testing_matrix.md`.

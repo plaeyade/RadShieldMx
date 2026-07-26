@@ -1632,3 +1632,39 @@ El factor kappa varia 82% entre marcas. Usar el modelo especifico mejora la prec
 *Manual generado el 2026-06-08*
 *Version: v104*
 *Para soporte tecnico: incluir version v104 y captura de pantalla*
+
+---
+
+## Addendum F291 - Hardening de calculo contra casos reales
+
+La fase F291 conecta la matriz de pruebas reales con el motor de calculo endurecido. Para cada caso DX/TX/NM/CY la app exige: entradas finitas, unidades normalizadas, trazabilidad formula/norma/inputs/outputs/citas, comparador base-conservador, cache segura y advertencias clinicas.
+
+Uso recomendado:
+1. Seleccionar modalidad DX/TX/NM/CY.
+2. Cargar plano real o plantilla con escala.
+3. Ingresar equipo, workload, P/T/U/W y material.
+4. Ejecutar calculo.
+5. Revisar warnings y evidencia antes de Memoria IA/PDF.
+
+DX y NM pueden quedar como `operator-input-required` si aun falta memoria firmada, plano real o evidencia aprobada. Eso es intencional: evita que el sistema promueva una salida clinica sin datos suficientes.
+
+## Addendum F292 - QA de floorplan para proyecto real
+
+La fase F292 valida que el canvas este listo para pruebas reales antes de tocar renderer de alto riesgo. El operador debe confirmar:
+- Sidebar y canvas visibles.
+- Importacion de plano o DXF convertido.
+- Calibracion de escala.
+- Capas, cotas y simbolos de equipo visibles.
+- Heatmap/isocontornos con leyenda.
+- Export visual y handoff a Memoria IA/PDF/Evidence/3D.
+- Panel Layout Blindaje Memoria movible, compacto o cerrable.
+
+Flujo recomendado para una memoria analitica:
+1. Importar plano o DXF convertido.
+2. Calibrar escala.
+3. Trazar zonas controladas y areas adyacentes.
+4. Colocar equipo/fuente con footprint real.
+5. Asignar materiales, P/T/U/W y metas de diseno.
+6. Ejecutar calculo.
+7. Revisar heatmap/isocontornos, warnings y comparador.
+8. Exportar Memoria IA, PDF, Evidence Pack y snapshots 3D.

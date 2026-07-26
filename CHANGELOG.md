@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+# F292 (2026-07-25) - Real project floorplan QA
+
+- Added floorplan QA gate for real project entry before renderer/event-controller changes.
+- Checks canvas/sidebar visibility, plan/DXF import path, scale calibration, layers, dimensions, equipment symbols, heatmap/isocontour legend, visual export, medical 3D handoff and movable workflow panels.
+
+# F291 (2026-07-25) - Calculation real-case hardening
+
+- Added real-case calculation hardening layer over F290 matrix.
+- Maps each DX/TX/NM/CY test case to numeric QA cases, required warnings, evidence policy and release decision.
+- Keeps DX/NM operator-input-required where signed floorplan/memory evidence is still missing.
+
 # F290 (2026-07-25) - Real clinical testing matrix
 
 - Added DX/TX/NM/CY real-case testing matrix with floorplan/equipment/report acceptance criteria.
