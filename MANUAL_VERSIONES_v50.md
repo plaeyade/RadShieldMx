@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F361 (2026-07-26) - Reparacion post-beta
+
+- Artefactos: `outputs/f361_post_beta_repair/f361_post_beta_repair.json`, `f361_kiube_document_chunks.jsonl`, `f361_kiube_document_chunks_db_draft.json` y `f361_manual_update_matrix.csv`.
+- Repara menu contextual de canvas con boton derecho, ventanas arrastrables/minimizables/expandibles, fallbacks de acceso rapido y alineacion del menu Archivo.
+- El boton Update Center debe abrir `updateCenter`; no usar `updateApp` como dialog name.
+- El PDF Cyclone KIUBE MID 55672 Rev G se conserva como evidencia RAG cuando el modelo tecnico ya existe en codigo, evitando duplicar calculos.
+- La beta F356-F360 queda condicionada a validar F361 en navegador antes de llamarla beta publicable.
+- Scripts: `npm run prepare:f361:post-beta-repair` y `npm run test:f361:post-beta-repair`.
+
 # F356-F360 (2026-07-26) - Release beta operativo
 
 - Artefactos: `outputs/f356_f360_beta_release/f356_f360_beta_release.json`, `f356_f360_beta_release_visual.svg`, `f356_f360_beta_release.html`, `f356_user_test_checklist.csv`, `f357_missing_data_capture.csv`, `f358_traceable_preliminary_calculations.csv`, `f359_memoria_beta_preliminar.md` y `radshield_f356_f360_beta_release.zip`.

@@ -442,6 +442,8 @@
     "test:f350-f355:real-test-package": "node scripts/check-f350-f355-real-test-package-contracts.mjs",
     "prepare:f356-f360:beta-release": "node scripts/f356-f360-beta-release.mjs",
     "test:f356-f360:beta-release": "node scripts/check-f356-f360-beta-release-contracts.mjs",
+    "prepare:f361:post-beta-repair": "node scripts/f361-post-beta-repair.mjs",
+    "test:f361:post-beta-repair": "node scripts/check-f361-post-beta-repair-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

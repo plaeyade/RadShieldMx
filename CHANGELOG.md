@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F361 (2026-07-26) - Reparacion post-beta: canvas, ventanas, Archivo, RAG y manuales
+
+- Corrige regresiones visibles de la beta: boton derecho del canvas ahora abre menu contextual CAD con seleccionar, barrera, fuente, medicion, ajustar vista, exportar PNG, calcular, evidencia, 3D, duplicar y borrar seleccionado.
+- `DialogShell` agrega arrastre por encabezado, minimizar, expandir/restaurar y cerrar para que las ventanas no bloqueen permanentemente el floorplan.
+- Accesos rapidos y chips F112 usan fallback al registro real de dialogs; se corrige `updateApp` por `updateCenter`.
+- Menu Archivo F295 usa ancho estable, colision con viewport y fallbacks para Abrir, DXF, STEP, PDF, CNSNS, auditoria, logs, glosario y acerca de.
+- El PDF `MID_55672_F_Cyclone_KIUBE_SRG_Rev G_No drawings.pdf` se deduplica por SHA-256 e indexa como evidencia RAG/chunks si contiene texto extraible.
+- Actualiza `MANUAL_USUARIO_v99.md`, `MANUAL_VERSIONES_v50.md` y Update Center con cobertura F99-F360 y reparacion F361.
+- Scripts: `npm run prepare:f361:post-beta-repair` y `npm run test:f361:post-beta-repair`.
+
 # F356-F360 (2026-07-26) - Beta release gate
 
 - Closes the current stabilization line as an operational beta, not a certified clinical/engineering release.

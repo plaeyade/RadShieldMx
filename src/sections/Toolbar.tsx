@@ -399,11 +399,18 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
   const f112ZoneCount = f112Plan?.regions?.length ?? f112Plan?.occupiedRegions?.length ?? 0;
   const f112ResultCount = Array.isArray(barrierResults) ? barrierResults.length : 0;
   const f112LayoutReady = Boolean(f112Plan?.imageUrl) || f112BarrierCount > 0;
+  const invoke = (handler?: () => void, fallbackDialog?: string) => () => {
+    if (typeof handler === 'function') {
+      handler();
+      return;
+    }
+    if (fallbackDialog) openDialog(fallbackDialog as any);
+  };
   const f112Favorites = useMemo(() => [
-    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: onMemoriaAI, tip: 'Memoria IA' },
-    { id: 'evidence' as const, label: 'Evidencia', icon: FileSearch, className: 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-100', onClick: onEvidencePack, tip: 'Evidence Pack' },
-    { id: 'validate' as const, label: 'Validar', icon: ShieldCheck, className: 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-100', onClick: onNCRPValidation, tip: 'NCRP Validation' },
-    { id: 'heatmap' as const, label: 'Heatmap', icon: Crosshair, className: 'text-red-700 bg-red-50 hover:bg-red-100 border-red-100', onClick: onDoseMap, tip: 'Mapa de dosis/isodosis' },
+    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: invoke(onMemoriaAI, 'memoriaAI'), tip: 'Memoria IA' },
+    { id: 'evidence' as const, label: 'Evidencia', icon: FileSearch, className: 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-100', onClick: invoke(onEvidencePack, 'evidencePack'), tip: 'Evidence Pack' },
+    { id: 'validate' as const, label: 'Validar', icon: ShieldCheck, className: 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-100', onClick: invoke(onNCRPValidation, 'ncrpValidation'), tip: 'NCRP Validation' },
+    { id: 'heatmap' as const, label: 'Heatmap', icon: Crosshair, className: 'text-red-700 bg-red-50 hover:bg-red-100 border-red-100', onClick: invoke(onDoseMap, 'doseMap'), tip: 'Mapa de dosis/isodosis' },
   ], [onDoseMap, onEvidencePack, onMemoriaAI, onNCRPValidation]);
 
   const toggleF112Favorite = (id: F112FavoriteId) => {
@@ -449,37 +456,37 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                 data-testid="f295-primary-file-dropdown"
                 variant="ghost"
                 size="sm"
-                className="flex text-[11px] h-8 px-2 text-slate-700 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-semibold border border-slate-100 bg-slate-50/70"
+                className="flex shrink-0 text-[11px] h-8 px-2 text-slate-700 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-semibold border border-slate-100 bg-slate-50/70"
               >
                 <MiniIcon icon={FolderOpen} color={c.file} />
                 <span className="hidden sm:inline">{t('menu.file')}</span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" className="w-60 bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
+            <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" sideOffset={5} collisionPadding={12} className="w-72 max-w-[calc(100vw-24px)] bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
               <SectionLabel label={t('sidebar.project')} color="text-slate-400" />
-              <SmartItem icon={Plus} iconColor={c.file} label={t('file.new')} onClick={onNewProject} desc="Crear proyecto desde cero" />
-              <SmartItem icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={onProjects} desc="Abrir o administrar proyectos" />
-              <SmartItem icon={Save} iconColor={c.file} label={t('btn.save')} shortcut="Ctrl+S" onClick={onSaveProject} />
+              <SmartItem icon={Plus} iconColor={c.file} label={t('file.new')} onClick={invoke(onNewProject)} desc="Crear proyecto desde cero" />
+              <SmartItem icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={invoke(onProjects, 'projects')} desc="Abrir o administrar proyectos" />
+              <SmartItem icon={Save} iconColor={c.file} label={t('btn.save')} shortcut="Ctrl+S" onClick={invoke(onSaveProject)} />
               <DropdownMenuSeparator />
               <SectionLabel label={t('file.import')} color="text-slate-400" />
-              <SmartItem icon={Upload} iconColor={c.file} label={t('file.import.csv')} onClick={onBatchImport} desc="Importacion batch de barreras/datos" />
-              <SmartItem icon={Layers} iconColor={c.file} label={t('file.import.dxf')} onClick={onDXFViewer} desc="DXF o conversion DWG externa" />
-              <SmartItem icon={FileBox} iconColor={c.file} label={t('file.import.step')} onClick={onSTEPImporter} desc="STEP/IGES para geometria 3D" />
+              <SmartItem icon={Upload} iconColor={c.file} label={t('file.import.csv')} onClick={invoke(onBatchImport, 'batchImport')} desc="Importacion batch de barreras/datos" />
+              <SmartItem icon={Layers} iconColor={c.file} label={t('file.import.dxf')} onClick={invoke(onDXFViewer, 'dxfViewer')} desc="DXF o conversion DWG externa" />
+              <SmartItem icon={FileBox} iconColor={c.file} label={t('file.import.step')} onClick={invoke(onSTEPImporter, 'stepImporter')} desc="STEP/IGES para geometria 3D" />
               <DropdownMenuSeparator />
               <SectionLabel label={t('file.export')} color="text-slate-400" />
-              <SmartItem icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={onExport} />
-              <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={onPDF} desc="Memoria analitica PDF" />
-              <SmartItem icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={onShare} desc="Web Share API" />
-              <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={onCNSNS} desc="Salida regulatoria" />
+              <SmartItem icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={invoke(onExport, 'export')} />
+              <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={invoke(onPDF, 'pdfReport')} desc="Memoria analitica PDF" />
+              <SmartItem icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={invoke(onShare)} desc="Web Share API" />
+              <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={invoke(onCNSNS, 'cnsns')} desc="Salida regulatoria" />
               <DropdownMenuSeparator />
-              <SmartItem icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={onTechSpecs} desc="Especificaciones tecnicas" />
-              <SmartItem icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={onAuditTrail} desc="Trazabilidad" />
-              <SmartItem icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={onLogFileAnalysis} desc="Diagnostico de eventos" />
+              <SmartItem icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={invoke(onTechSpecs, 'techSpecs')} desc="Especificaciones tecnicas" />
+              <SmartItem icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={invoke(onAuditTrail, 'auditTrail')} desc="Trazabilidad" />
+              <SmartItem icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={invoke(onLogFileAnalysis, 'logFileAnalysis')} desc="Diagnostico de eventos" />
               <DropdownMenuSeparator />
               <SectionLabel label="Ayuda" color="text-slate-400" />
-              <SmartItem icon={BookOpen} iconColor={c.file} label="Glosario" onClick={onGlossary} desc="Terminologia de blindaje" />
-              <SmartItem icon={Info} iconColor={c.file} label="Acerca de" onClick={onAbout} desc="Version y creditos" />
+              <SmartItem icon={BookOpen} iconColor={c.file} label="Glosario" onClick={invoke(onGlossary, 'glossary')} desc="Terminologia de blindaje" />
+              <SmartItem icon={Info} iconColor={c.file} label="Acerca de" onClick={invoke(onAbout, 'about')} desc="Version y creditos" />
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -1015,10 +1022,10 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             </TooltipTrigger><TooltipContent>Manual</TooltipContent></Tooltip>
             {/* v79: Update Center */}
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Update Center" variant="ghost" size="icon" className="h-8 w-8 text-teal-600 hover:text-teal-700 hover:bg-teal-50" onClick={onUpdate}><RefreshCw className="w-4 h-4" /></Button>
+              <Button aria-label="Update Center" variant="ghost" size="icon" className="h-8 w-8 text-teal-600 hover:text-teal-700 hover:bg-teal-50" onClick={invoke(onUpdate, 'updateCenter')}><RefreshCw className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Update Center</TooltipContent></Tooltip>
             <Tooltip><TooltipTrigger asChild>
-              <Button aria-label="Floor Plan Tools" variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={onFloorPlanFeatures}><Shapes className="w-4 h-4" /></Button>
+              <Button aria-label="Floor Plan Tools" variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" onClick={invoke(onFloorPlanFeatures, 'floorPlanFeatures')}><Shapes className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Floor Plan Tools</TooltipContent></Tooltip>
           </div>
         </div>
@@ -1096,17 +1103,17 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
           <span className="text-[9px] text-slate-400 hidden lg:inline">Herramientas completas en panel lateral</span>
           <div className="flex-1" />
           <div data-testid="f112-smart-status-chips" className="hidden 2xl:flex items-center gap-1">
-            <button type="button" onClick={onFloorPlanFeatures} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${f112LayoutReady ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+            <button type="button" onClick={invoke(onFloorPlanFeatures, 'floorPlanFeatures')} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${f112LayoutReady ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
               Layout {f112BarrierCount}B/{f112SourceCount}F/{f112ZoneCount}Z
             </button>
-            <button type="button" onClick={onEvidencePack} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${f112ResultCount > 0 ? 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100' : 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
+            <button type="button" onClick={invoke(onEvidencePack, 'evidencePack')} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${f112ResultCount > 0 ? 'border-violet-100 bg-violet-50 text-violet-700 hover:bg-violet-100' : 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
               RAG {f112ResultCount > 0 ? 'listo' : 'tras calcular'}
             </button>
-            <button type="button" onClick={onDoseMap} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${heatmapEnabled ? 'border-red-100 bg-red-50 text-red-700 hover:bg-red-100' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+            <button type="button" onClick={invoke(onDoseMap, 'doseMap')} className={`h-5 rounded border px-1.5 text-[8px] font-semibold ${heatmapEnabled ? 'border-red-100 bg-red-50 text-red-700 hover:bg-red-100' : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
               Heat {heatmapEnabled ? 'ON' : 'OFF'}
             </button>
-            <button type="button" onClick={onUpdate} className="h-5 rounded border border-red-100 bg-red-50 px-1.5 text-[8px] font-semibold text-red-700 hover:bg-red-100">DB diferida</button>
-            <button type="button" onClick={onUpdate} className="h-5 rounded border border-amber-100 bg-amber-50 px-1.5 text-[8px] font-semibold text-amber-700 hover:bg-amber-100">Smoke pendiente</button>
+            <button type="button" onClick={invoke(onUpdate, 'updateCenter')} className="h-5 rounded border border-red-100 bg-red-50 px-1.5 text-[8px] font-semibold text-red-700 hover:bg-red-100">DB diferida</button>
+            <button type="button" onClick={invoke(onUpdate, 'updateCenter')} className="h-5 rounded border border-amber-100 bg-amber-50 px-1.5 text-[8px] font-semibold text-amber-700 hover:bg-amber-100">Smoke pendiente</button>
             <button type="button" onClick={() => activateF113Profile(f113ActiveProfile.id)} className="h-5 rounded border border-cyan-100 bg-cyan-50 px-1.5 text-[8px] font-semibold text-cyan-700 hover:bg-cyan-100">
               Perfil {f113ActiveProfile.label}
             </button>

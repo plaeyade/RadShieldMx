@@ -236,6 +236,7 @@ export default function CanvasArea({
   const [visualMode, setVisualMode] = useState<F191VisualMode>(loadF191VisualMode);
   const [savedViews, setSavedViews] = useState<F216SavedCanvasView[]>(loadF216SavedViews);
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -414,6 +415,20 @@ export default function CanvasArea({
     setInspectorEditOpen(false);
   }, [canvasState.selectedId]);
 
+  useEffect(() => {
+    if (!contextMenu) return;
+    const closeContextMenu = () => setContextMenu(null);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeContextMenu();
+    };
+    window.addEventListener('click', closeContextMenu);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('click', closeContextMenu);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contextMenu]);
+
   const togglePanelVisibility = (key: F188CanvasPanelKey) => {
     setPanelVisibility((current) => ({ ...current, [key]: !current[key] }));
   };
@@ -429,6 +444,25 @@ export default function CanvasArea({
 
   const activateCanvasTool = (tool: F191CanvasTool) => {
     setActiveTool?.(tool);
+  };
+
+  const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const canvasX = (event.clientX - rect.left - canvasState.offsetX) / canvasState.scale;
+    const canvasY = (event.clientY - rect.top - canvasState.offsetY) / canvasState.scale;
+    setContextMenu({
+      x: Math.min(event.clientX, Math.max(16, window.innerWidth - 236)),
+      y: Math.min(event.clientY, Math.max(16, window.innerHeight - 312)),
+      canvasX,
+      canvasY,
+    });
+  }, [canvasState.offsetX, canvasState.offsetY, canvasState.scale]);
+
+  const runContextMenuAction = (action?: () => void) => {
+    action?.();
+    setContextMenu(null);
   };
 
   const applyVisualMode = (mode: F191VisualMode) => {
@@ -1353,7 +1387,7 @@ export default function CanvasArea({
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
-              onContextMenu={e => e.preventDefault()}
+              onContextMenu={handleCanvasContextMenu}
             />
 
             {/* v65: Freehand drawing overlay canvas */}
@@ -1362,6 +1396,49 @@ export default function CanvasArea({
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ zIndex: 5 }}
             />
+
+            {contextMenu && (
+              <div
+                data-testid="canvas-context-menu"
+                className="fixed z-50 w-56 overflow-hidden rounded-md border border-slate-200 bg-white text-[11px] text-slate-700 shadow-xl"
+                style={{ left: contextMenu.x, top: contextMenu.y }}
+                onClick={(event) => event.stopPropagation()}
+                onContextMenu={(event) => event.preventDefault()}
+              >
+                <div className="border-b border-slate-100 bg-slate-50 px-2.5 py-1.5">
+                  <div className="font-bold text-slate-800">Canvas CAD</div>
+                  <div className="text-[9px] text-slate-400">
+                    x {contextMenu.canvasX.toFixed(1)} / y {contextMenu.canvasY.toFixed(1)}
+                  </div>
+                </div>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('select'))}>Seleccionar / editar</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('barrier'))}>Dibujar barrera</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('source'))}>Colocar fuente/equipo</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('measure'))}>Medir / cota</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onZoomToFit)}>Ajustar vista</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onExportPNG)}>Exportar PNG</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenEvidencePack)}>Abrir evidencia</button>
+                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenMedical3D ?? onOpen3DViewer)}>Inspeccion 3D medica</button>
+                <div className="border-t border-slate-100" />
+                <button
+                  type="button"
+                  className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50 disabled:cursor-not-allowed disabled:text-slate-300"
+                  disabled={!selectedInspectorEntity || !onDuplicateSelected}
+                  onClick={() => runContextMenuAction(duplicateInspectorSelection)}
+                >
+                  Duplicar seleccionado
+                </button>
+                <button
+                  type="button"
+                  className="block w-full px-2.5 py-1.5 text-left text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-300"
+                  disabled={!selectedInspectorEntity || !onDeleteSelected}
+                  onClick={() => runContextMenuAction(deleteInspectorSelection)}
+                >
+                  Borrar seleccionado
+                </button>
+              </div>
+            )}
 
             <div
               data-testid="f214-sketchup-canvas-reorg"

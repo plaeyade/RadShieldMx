@@ -1,5 +1,69 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F361 - Reparacion post-beta de operacion visual
+
+F361 corrige los puntos que impedian usar la beta con confianza: botones de acceso rapido sin accion, menu Archivo desfasado, canvas sin boton derecho, ventanas que tapaban el plano y Update Center sin reflejar los cambios recientes.
+
+Uso del canvas con boton derecho:
+
+1. Haga clic derecho sobre el plano o area de trabajo.
+2. Seleccione una accion: **Seleccionar/editar**, **Dibujar barrera**, **Colocar fuente/equipo**, **Medir/cota**, **Ajustar vista**, **Exportar PNG**, **Calcular blindaje**, **Abrir evidencia** o **Inspeccion 3D medica**.
+3. Si existe un objeto seleccionado, el menu tambien permite **Duplicar seleccionado** o **Borrar seleccionado** con confirmacion.
+4. Presione `Esc` o haga clic fuera del menu para cerrarlo.
+
+Uso de ventanas:
+
+1. Arrastre cualquier dialogo desde su encabezado.
+2. Use **Minimizar** para liberar visual del canvas sin cerrar la herramienta.
+3. Use **Expandir** para revisar tablas o reportes amplios.
+4. Use **Cerrar** para terminar la herramienta activa.
+
+Menu Archivo:
+
+1. **Nuevo Proyecto:** reinicia el flujo de trabajo.
+2. **Abrir Proyecto:** abre el administrador de proyectos.
+3. **Guardar:** conserva el estado local o backend segun configuracion.
+4. **Importar CSV (Batch):** carga datos de barreras/equipos.
+5. **Importar DXF:** abre visor DXF o ruta DWG externa cuando exista proveedor.
+6. **Importar STEP/IGES:** prepara geometria 3D.
+7. **Exportar CSV/PDF/CNSNS:** genera salidas tecnicas y regulatorias preliminares.
+8. **Especificaciones, Audit Trail y Logs:** sirven para diagnostico, trazabilidad y soporte.
+
+Accesos rapidos:
+
+- **Memoria:** abre Memoria IA con el perfil activo.
+- **Evidencia:** abre Evidence Pack.
+- **Validar:** abre NCRP Validation.
+- **Heatmap:** abre mapa de dosis/isodosis.
+- **DB diferida** y **Smoke pendiente:** abren Update Center.
+- Si un handler del contenedor principal no esta conectado, F361 usa fallback al registro de dialogs para evitar botones muertos.
+
+Documento Cyclone KIUBE MID 55672 Rev G:
+
+- Si el hash del PDF ya coincide con una fuente previamente registrada, se descarta como duplicado.
+- Si el motor tecnico del KIUBE ya existe en `cycloneKIUBEData.ts`, el PDF no reemplaza calculos; se agrega como evidencia documental RAG con hash, paginas y chunks.
+- Si no hay texto extraible, el documento queda marcado para OCR o re-subida searchable.
+
+Estado de beta:
+
+- La beta F356-F360 no debe considerarse completa hasta que F361 pase build y contratos.
+- Ningun flujo F361 habilita memoria firmada, espesor certificado ni dictamen final sin revision profesional.
+
+## Cobertura F99-F360 - Resumen operativo para usuario
+
+Este manual conserva el esquema previo, pero la cobertura v99-F360 se agrupa por bloques funcionales para evitar repetir cientos de entradas.
+
+1. **F99-F124 Canvas, menus y materiales:** se consolidan herramientas CAD, perfiles DX/TX/NM/CY, Material Comparison, costo/tiempo/peso/carga estructural y menus por flujo real.
+2. **F125-F150 calculo, evidencia y release candidate:** cada resultado debe transportar formula, norma, inputs, outputs, citas, advertencias y evidencia; se agregan comparador base/conservador, anexos de materiales, Memoria IA por perfil y QA numerico.
+3. **F151-F181 deploy, DB y prepublicacion:** se separan carriles local, estatico y full-stack; MySQL/backup/restore y smoke URL final quedan como gates antes de release productivo.
+4. **F182-F230 recuperacion visual y canvas CAD:** se estabilizan sidebar, menu Archivo, paneles movibles, herramientas CAD, inspector contextual, duplicar/borrar, heatmap, cotas, seleccion y harness E2E de canvas.
+5. **F231-F260 manuales, staging y deploy estatico:** se actualizan manuales, control de cambios, staging/feature flags, paquetes ZIP y rutas de deploy publico estatico.
+6. **F261-F292 RAG/OCR/APIs/memorias reales:** se preparan proveedores DWG, OCR local con Tesseract, deduplicacion por hash, memorias analiticas reales, chunks y trazabilidad por pagina.
+7. **F293-F330 rediseño 3D y motores externos:** se mejora inspeccion 3D con Three/R3F, recorrido WASD, PBR, colisiones, handoff Unity externo y Babylon como runtime futuro con fallback.
+8. **F331-F360 caso real Centro Neuro y beta:** se prepara prueba con ciclotron, Gamma Knife y LINAC, escala 1:100, cargas conservadoras, concreto alta densidad y memoria beta preliminar no certificada.
+
+Regla general: si el sistema muestra una cita, hash o valor como **candidato**, **derivado**, **draft** o **preliminar**, debe verificarse contra documento, pagina y revision profesional antes de usarse en una memoria analitica final.
+
 ## Addendum F356-F360 - Prueba real y release beta
 
 F356-F360 cambia el modo de trabajo: deja de agregar fases por inercia y prepara la app para prueba real de usuario.
