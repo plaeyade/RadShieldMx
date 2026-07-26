@@ -471,11 +471,13 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
   const { camera } = useThree();
   const keys = useRef(new Set<string>());
   const yaw = useRef(0);
+  const eyeHeight = useRef(1.65);
 
   useEffect(() => {
     if (!enabled) return;
     const [cx, , cz] = scene.bounds.center;
     camera.position.set(cx, 1.65, cz + Math.max(2.2, scene.bounds.depth * 0.35));
+    eyeHeight.current = 1.65;
     yaw.current = Math.PI;
     camera.lookAt(cx, 1.35, cz);
 
@@ -492,18 +494,31 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
 
   useFrame((_, delta) => {
     if (!enabled) return;
-    const turnSpeed = 1.7 * delta;
-    const moveSpeed = 2.6 * delta;
+    const speedModifier = keys.current.has('shift') ? 1.9 : keys.current.has('control') ? 0.42 : 1;
+    const turnSpeed = 1.7 * speedModifier * delta;
+    const moveSpeed = 2.6 * speedModifier * delta;
+    const heightSpeed = 0.7 * delta;
+    const [cx, , cz] = scene.bounds.center;
+    const margin = 0.45;
+    const minX = cx - scene.bounds.width / 2 + margin;
+    const maxX = cx + scene.bounds.width / 2 - margin;
+    const minZ = cz - scene.bounds.depth / 2 + margin;
+    const maxZ = cz + scene.bounds.depth / 2 - margin;
+
     if (keys.current.has('arrowleft') || keys.current.has('q')) yaw.current += turnSpeed;
     if (keys.current.has('arrowright') || keys.current.has('e')) yaw.current -= turnSpeed;
+    if (keys.current.has('r')) eyeHeight.current = Math.min(2.2, eyeHeight.current + heightSpeed);
+    if (keys.current.has('f')) eyeHeight.current = Math.max(1.05, eyeHeight.current - heightSpeed);
     const forward = new THREE.Vector3(Math.sin(yaw.current), 0, Math.cos(yaw.current));
     const right = new THREE.Vector3(forward.z, 0, -forward.x);
     if (keys.current.has('w') || keys.current.has('arrowup')) camera.position.addScaledVector(forward, moveSpeed);
     if (keys.current.has('s') || keys.current.has('arrowdown')) camera.position.addScaledVector(forward, -moveSpeed);
     if (keys.current.has('a')) camera.position.addScaledVector(right, -moveSpeed);
     if (keys.current.has('d')) camera.position.addScaledVector(right, moveSpeed);
-    camera.position.y = 1.65;
-    camera.lookAt(camera.position.x + forward.x, 1.55, camera.position.z + forward.z);
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
+    camera.position.y = eyeHeight.current;
+    camera.lookAt(camera.position.x + forward.x, eyeHeight.current - 0.1, camera.position.z + forward.z);
   });
 
   return null;
@@ -1074,7 +1089,15 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 {walkthrough ? 'WASD/flechas: recorrer' : 'Orbit: click + drag'}
               </Badge>
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
-                {walkthrough ? 'Q/E: girar' : 'Zoom: scroll'}
+                {walkthrough ? 'Q/E: girar - Shift/Ctrl velocidad' : 'Zoom: scroll'}
+              </Badge>
+              {walkthrough && (
+                <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                  R/F: altura camara
+                </Badge>
+              )}
+              <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                {walkthrough ? 'Limites de sala activos' : 'Inspeccion por click'}
               </Badge>
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                 {renderStrategy.status === 'active' ? 'Render activo R3F' : `${renderStrategy.label}: adapter`}

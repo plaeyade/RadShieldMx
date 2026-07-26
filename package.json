@@ -406,6 +406,8 @@
     "test:f315:unity-external-viewer-bridge": "node scripts/check-f315-unity-external-viewer-bridge-contracts.mjs",
     "prepare:f316:babylon-install-diagnostics": "node scripts/f316-babylon-install-diagnostics.mjs",
     "test:f316:babylon-install-diagnostics": "node scripts/check-f316-babylon-install-diagnostics-contracts.mjs",
+    "prepare:f317-f323:medical-3d-release-line": "node scripts/f317-f323-medical-3d-release-line.mjs",
+    "test:f317-f323:medical-3d-release-line": "node scripts/check-f317-f323-medical-3d-release-line-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

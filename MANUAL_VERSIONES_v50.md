@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F317-F323 (2026-07-25) - Medical 3D release line
+
+- Artefactos: `outputs/f317_f323_medical_3d_release_line/f317_f323_medical_3d_release_line.json` y `outputs/fase_317_323_medical_3d_release_line.md`.
+- F317: matriz de smoke visual Three/R3F para seis modalidades y tres modos.
+- F318: desbloqueo de dependencias Babylon; sigue bloqueado por `EACCES` npm/registry.
+- F319-F321: prototipo Babylon bajo runtime gate, materiales PBR y compuerta WebGPU/WebXR.
+- F322: prueba de Unity WebGL externo cuando exista URL publicada.
+- F323: snapshots, bookmarks y hashes de escena para Memoria IA, PDF y Evidence Pack.
+- WASD mejora con Shift, Ctrl, R/F y limites de sala.
+- Scripts: `npm run prepare:f317-f323:medical-3d-release-line` y `npm run test:f317-f323:medical-3d-release-line`.
+
 # F316 (2026-07-25) - Babylon dependency diagnostics
 
 - Artefactos: `outputs/f316_babylon_install_diagnostics/f316_babylon_install_diagnostics.json` y `outputs/fase_316_babylon_install_diagnostics.md`.

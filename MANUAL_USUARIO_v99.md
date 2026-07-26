@@ -1,5 +1,38 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F317-F323 - Medical 3D release line
+
+F317-F323 ordena el cierre del visor medico 3D sin sustituir el motor estable. Three/R3F sigue como visor activo; Babylon queda preparado para PBR/WebGPU/WebXR cuando npm permita instalar dependencias; Unity queda como visor externo por URL/handoff.
+
+Uso actual del visor Three/R3F:
+
+1. Elegir modalidad: LINAC, PET/CT, CT, Gamma Knife, HDR o Radiofarmacia.
+2. Elegir modo: Presentacion, Tecnico o Dosis.
+3. Activar inspeccion visual para etiquetas de muros, espesores, zonas y equipos.
+4. Activar recorrido WASD si se requiere visita interna.
+5. Exportar PNG, OBJ, JSON, AI Brief, Verify Pack, F147 pack o Unity JSON segun destino.
+
+Mejoras WASD ya disponibles:
+
+1. `W/A/S/D` y flechas desplazan la camara.
+2. `Q/E` gira la vista.
+3. `Shift` acelera el recorrido.
+4. `Ctrl` activa movimiento fino para inspeccionar muros y equipos.
+5. `R/F` sube o baja la altura de camara.
+6. La camara se mantiene dentro de los limites de la sala para evitar perderse fuera del plano.
+
+Ruta post-F324 para fotorealismo en modo recorrido:
+
+1. F324: pointer-lock y mouse-look con salida clara.
+2. F325: colisiones/navmesh para no atravesar muros/equipos.
+3. F326: biblioteca PBR de materiales de blindaje.
+4. F327: luces fisicas, sombras y presets de exposicion.
+5. F328: modelos GLB validados para equipos medicos.
+6. F329: modo recorrido fotorealista dedicado.
+7. F330: snapshots/bookmarks vinculados a Memoria IA, PDF y Evidence Pack.
+
+El fotorealismo es viable en modo recorrido, pero debe separarse de los calculos. La escena puede verse realista; la autoridad regulatoria sigue siendo el motor de calculo, las normas, las citas y la revision profesional.
+
 ## Addendum F316 - Babylon dependency diagnostics
 
 F316 registra el estado real de Babylon. La app ya tiene adapter y loader dinamico, pero los paquetes `@babylonjs/core` y `@babylonjs/loaders` no estan instalados porque npm devuelve `EACCES` al consultar `registry.npmjs.org`.

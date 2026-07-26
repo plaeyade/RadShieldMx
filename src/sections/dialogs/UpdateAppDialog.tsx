@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F317-F323 Medical 3D release line', current: '3D closure staged', latest: 'Three/R3F modality smoke + Babylon/Unity/report path', status: 'current', description: 'Three/R3F remains stable, WASD gains speed/precision/height/bounds, Babylon remains gated by npm EACCES, Unity is ready as external URL handoff, and 3D exports are mapped to Memoria IA/PDF/Evidence Pack.' },
   { name: 'F316 Babylon dependency diagnostics', current: 'blocked by npm EACCES', latest: 'diagnostic manifest + stable fallback', status: 'blocked', description: 'Babylon code path is ready, but dependency installation is blocked by EACCES on registry.npmjs.org. Three/R3F remains active and no partial dependency changes are committed.' },
   { name: 'F315 Unity external viewer bridge', current: 'bridge ready', latest: 'external URL launcher + handoff JSON', status: 'current', description: 'Medical 3D now exports a Unity launch packet and can open a configured Unity WebGL URL. Unity remains external and visual-only; Three/R3F remains the stable fallback.' },
   { name: 'F314 Babylon runtime loader', current: 'loader ready', latest: 'dynamic import + fallback', status: 'current', description: 'Se agrega cargador runtime Babylon con import dinamico y fallback obligatorio a Three/R3F. El intento npm install no completo en este entorno; la app queda estable y lista para activar cuando los paquetes existan.' },

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F317-F323 (2026-07-25) - Medical 3D release line
+
+- Adds release-line contracts for Three/R3F modality smoke, Babylon dependency unlock, Babylon staged prototype, PBR materials, WebGPU/WebXR gate, Unity external proof and 3D exports to reports.
+- Improves WASD walkthrough with Shift speed, Ctrl precision, R/F eye height and bounded room navigation.
+- Documents the post-F324 photorealistic walkthrough roadmap.
+- Scripts: `npm run prepare:f317-f323:medical-3d-release-line` and `npm run test:f317-f323:medical-3d-release-line`.
+
 # F316 (2026-07-25) - Babylon dependency diagnostics
 
 - Adds an explicit diagnostics phase for Babylon dependency activation.
