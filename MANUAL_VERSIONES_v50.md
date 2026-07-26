@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F346 (2026-07-25) - Parametros estandar draft
+
+- Artefactos: `outputs/f346_standard_parameter_draft/f346_standard_parameter_draft.json`, `f346_parameterized_barrier_matrix.csv`, `f346_gate_status.csv`, `f346_standard_parameter_visual.svg`, `f346_standard_parameter_visual.html` y `outputs/fase_346_standard_parameter_draft.md`.
+- Agrega geometria estandar por modalidad: bunker LINAC, sala Gamma Knife, vault ciclotron y radiofarmacia/hot lab.
+- Agrega termino fuente estandar draft para Versa HD 15 MeV, Gamma Knife Esprit, Cyclone KIUBE 18 MeV y hot lab.
+- Agrega concreto alta densidad como material candidato: densidad draft, TVL candidato y carga estructural por m2.
+- Agrega penetraciones tipicas: HVAC, conduits, puerta/laberinto, sleeves piso/techo y exhaust ciclotron.
+- Mantiene calculos firmables bloqueados hasta citas versionadas y revision FM/RSO final.
+- Scripts: `npm run prepare:f346:standard-parameter-draft` y `npm run test:f346:standard-parameter-draft`.
+
 # F345 (2026-07-25) - Paquete draft de calculo visual
 
 - Artefactos: `outputs/f345_centro_neuro_draft_calculation_packet/f345_centro_neuro_draft_calculation_packet.json`, `f345_barrier_draft_calculation_matrix.csv`, `f345_calculation_gate_status.csv`, `f345_visual_progress.svg`, `f345_visual_progress.html` y `outputs/fase_345_centro_neuro_draft_calculation_packet.md`.

@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F346 - Parametros estandar para draft
+
+F346 permite avanzar con parametros estandar cuando todavia no se tienen todos los datos del proveedor o del trazado CAD. Estos valores sirven para probar flujo, memoria y visualizacion, no para firmar.
+
+Parametros aplicados:
+
+1. Geometria:
+   - LINAC: bunker draft `8.5 x 7.5 x 3.8 m`.
+   - Gamma Knife: sala draft `6.5 x 6.0 x 3.4 m`.
+   - Ciclotron: vault draft `9.0 x 8.0 x 4.5 m`.
+   - Radiofarmacia/hot lab: area draft `5.0 x 4.0 x 3.0 m`.
+2. Termino fuente:
+   - Versa HD 15 MeV: workload draft maximo y revision de neutrones.
+   - Gamma Knife Esprit: Co-60 con inventario y decaimiento pendientes.
+   - Cyclone KIUBE 18 MeV: corriente/horas draft, neutrones, activacion y exhaust.
+   - Hot lab: inventario de radionuclidos pendiente.
+3. Material:
+   - Concreto alta densidad con densidad draft `3200 kg/m3`.
+   - TVL candidato solo para pruebas; requiere pagina/hash antes de uso final.
+4. Penetraciones:
+   - HVAC, conduits, puerta/laberinto, sleeve piso/techo y exhaust ciclotron se asumen presentes hasta descartarlas.
+5. Revision:
+   - FM/RSO queda como gate final de memoria analitica firmable.
+
+Uso correcto: usar F346 para preparar captura, comparar impacto estructural/costo y alimentar Memoria IA con advertencias. No usar como resultado regulatorio.
+
 ## Addendum F345 - Paquete draft visual de calculo
 
 F345 convierte el marcado de F344 en una matriz draft de calculo por barrera. El objetivo es ver el avance y preparar la entrada para Memoria IA/PDF/Evidence Pack sin inventar espesores.

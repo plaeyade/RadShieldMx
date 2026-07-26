@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F346 (2026-07-25) - Standard parameter draft
+
+- Applies standard draft geometry, source terms, material density/TVL candidates, typical penetrations and final FM/RSO review gates to the F345 barrier matrix.
+- Adds draft values for Versa HD 15 MeV, Gamma Knife Esprit, Cyclone KIUBE 18 MeV and radiofarmacia/hot lab context.
+- Computes draft structural load from high-density concrete density and standard wall thickness, while keeping all signed use blocked.
+- Generates visual progress artifacts: `f346_standard_parameter_visual.svg` and `f346_standard_parameter_visual.html`.
+- Scripts: `npm run prepare:f346:standard-parameter-draft` and `npm run test:f346:standard-parameter-draft`.
+
 # F345 (2026-07-25) - Centro Neuro draft calculation packet
 
 - Adds a visual-first draft calculation packet for Centro Neuro with 24 barrier rows across LINAC, Gamma Knife, cyclotron and radiofarmacia/hot lab context.
