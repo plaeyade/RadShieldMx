@@ -416,6 +416,8 @@
     "test:f331-f338:static-release-close": "node scripts/check-f331-f338-static-release-close-contracts.mjs",
     "prepare:f339:real-case-centro-neuro": "node scripts/f339-real-case-centro-neuro.mjs",
     "test:f339:real-case-centro-neuro": "node scripts/check-f339-real-case-centro-neuro-contracts.mjs",
+    "prepare:f340:centro-neuro-operator-trial": "node scripts/f340-centro-neuro-operator-trial.mjs",
+    "test:f340:centro-neuro-operator-trial": "node scripts/check-f340-centro-neuro-operator-trial-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F340 (2026-07-25) - Centro Neuro operator trial
+
+- Converts the F339 seed into an operator dry-run package for canvas import, scale calibration, room tracing, equipment placement, calculation preflight, Medical 3D snapshots and report exports.
+- Adds a visual SVG overlay for the Centro Neuro plan with Cyclotron/CY, Radiofarmacia/NM, Gamma Knife-LGK/TX and LINAC/TX regions.
+- Defines locked background, working layers, structural-load layer, heatmap/isodose layer and explicit calculation blockers.
+- Keeps all calculations draft-only until scale, source terms, occupancy, materials, penetrations and qualified review are complete.
+- Scripts: `npm run prepare:f340:centro-neuro-operator-trial` and `npm run test:f340:centro-neuro-operator-trial`.
+
 # F339 (2026-07-25) - Centro Neuro real case trial
 
 - Adds a real-case operator package from `CENTRO NEURO PLANTA BAJA 040626.pdf`.

@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F340 - Prueba operativa Centro Neuro
+
+F340 transforma el caso real de F339 en una secuencia de trabajo para probar la app con el plano Centro Neuro. La prueba no cambia el motor de calculo; organiza la captura y evita que se produzcan resultados firmables sin datos completos.
+
+Capas de trabajo:
+
+1. `PDF base`: fondo bloqueado del plano renderizado.
+2. `Controlled zones`: zonas controladas, supervisadas y publicas.
+3. `Equipment rooms`: habitaciones y huellas de ciclotron, Gamma Knife y LINAC.
+4. `Shielding barriers`: muros, puertas, techo, piso, laberintos y penetraciones.
+5. `Annotations and citations`: notas, supuestos, formulas y fuentes.
+6. `Heatmap/isodose`: visualizacion de dosis solo despues de calculo valido.
+7. `Structural load`: peso de equipo y carga por blindaje/material.
+
+Uso recomendado en app:
+
+1. Abrir el canvas/floorplan.
+2. Cargar `outputs/f339_real_case_centro_neuro/centro_neuro_page-1.png` como fondo.
+3. Bloquear la capa del fondo para no mover el plano por accidente.
+4. Calibrar escala con dos puntos arquitectonicos conocidos y distancia real en metros.
+5. Trazar las salas CYCLOTRON, RADIOFARMACIA, LGK/GAMAKNIFE y LINAC.
+6. Colocar simbolos de equipo con orientacion, huella, peso y punto fuente/isocentro.
+7. Registrar metadatos por equipo: energia/actividad, workload, ocupacion, puertas, laberinto, penetraciones y material.
+8. Ejecutar preflight de calculo por modalidad: CY para ciclotron, TX para Gamma Knife y TX para LINAC.
+9. Revisar Medical 3D con capturas por sala y guardar `sceneHash`.
+10. Generar Memoria IA/PDF/Evidence Pack como borrador trazable.
+
+Bloqueos intencionales: si falta escala, fuente, ocupacion, material, penetraciones o revision calificada, la app debe mantener el resultado como preliminar. La visualizacion 3D y el heatmap sirven para inspeccion y comunicacion, no para sustituir el calculo normativo.
+
 ## Addendum F339 - Caso real Centro Neuro
 
 F339 usa el plano `CENTRO NEURO PLANTA BAJA 040626.pdf` como primer caso real de operador. El archivo se trata como plano visual generado desde AutoCAD: se renderiza a PNG para fondo de canvas y se registra con hash. El texto extraido no es la fuente principal; la evidencia viene del PDF, la imagen renderizada y la trazabilidad del operador.

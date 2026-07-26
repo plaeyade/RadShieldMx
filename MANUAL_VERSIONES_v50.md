@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F340 (2026-07-25) - Prueba operativa Centro Neuro
+
+- Artefactos: `outputs/f340_centro_neuro_operator_trial/f340_centro_neuro_operator_trial.json`, `f340_canvas_import_plan.json`, `f340_calculation_dry_runs.csv`, `f340_centro_neuro_overlay.svg` y `outputs/fase_340_centro_neuro_operator_trial.md`.
+- Convierte F339 en una prueba de operador lista para canvas/floorplan.
+- Capas definidas: PDF base, zonas controladas, salas/equipos, barreras, anotaciones/citas, heatmap/isodosis y carga estructural.
+- Prepara placeholders de ciclotron, Gamma Knife y LINAC con metadatos obligatorios por equipo.
+- Prepara dry-runs de calculo, pero bloquea resultados firmables hasta calibrar escala y confirmar fuente, ocupacion, material, puertas/laberintos/penetraciones y revision calificada.
+- Scripts: `npm run prepare:f340:centro-neuro-operator-trial` y `npm run test:f340:centro-neuro-operator-trial`.
+
 # F339 (2026-07-25) - Caso real Centro Neuro
 
 - Artefactos: `outputs/f339_real_case_centro_neuro/f339_real_case_centro_neuro.json`, `f339_floorplan_seed_candidate.json`, `f339_trial_scenarios.csv`, `centro_neuro_page-1.png` y `outputs/fase_339_real_case_centro_neuro.md`.
