@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F342 (2026-07-25) - Evidencia visual Centro Neuro
+
+- Artefactos: `outputs/f342_centro_neuro_visual_evidence/f342_centro_neuro_visual_evidence.json`, `f342_visual_review.html`, `outputs/fase_342_centro_neuro_visual_evidence.md` y capturas en `outputs/f342_centro_neuro_browser_smoke/`.
+- Resume visualmente escala 1:100, concreto alta densidad draft, fuentes por modalidad y pendientes.
+- El smoke visual captura canvas, Update Center, Medical 3D, Memoria IA, Evidence Pack y tablero visual del caso.
+- Uso permitido: revision visual, comunicacion con operador y evidencia de QA.
+- Uso no permitido: certificacion de blindaje sin entradas clinicas/normativas completas.
+- Scripts: `npm run prepare:f342:centro-neuro-visual-evidence`, `npm run test:f342:centro-neuro-visual-evidence` y `npm run test:f342:browser-smoke`.
+
 # F341 (2026-07-25) - Centro Neuro con escala/material/fuentes
 
 - Artefactos: `outputs/f341_centro_neuro_calibrated_trial/f341_centro_neuro_calibrated_trial.json`, `f341_source_terms.json`, `f341_penetrations_occupancy_todo.json`, `f341_operator_inputs.csv` y `outputs/fase_341_centro_neuro_calibrated_trial.md`.

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F342 (2026-07-25) - Centro Neuro visual evidence
+
+- Adds a visual review HTML for the Centro Neuro case using the F340 overlay, F341 scale/material/source data and pending inputs.
+- Adds browser smoke targets for canvas shell, Update Center, Medical 3D, Memoria IA, Evidence Pack and the visual review board.
+- Keeps the visual outputs as review/evidence artifacts only; they do not certify shielding without final source, occupancy, penetration and material evidence.
+- Scripts: `npm run prepare:f342:centro-neuro-visual-evidence`, `npm run test:f342:centro-neuro-visual-evidence` and `npm run test:f342:browser-smoke`.
+
 # F341 (2026-07-25) - Centro Neuro calibrated trial
 
 - Accepts the user-provided 1:100 scale for the Centro Neuro real-case dry run and derives a provisional 0.01693333 m/px render scale at 150 dpi.

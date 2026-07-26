@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F342 - Evidencia visual Centro Neuro
+
+F342 genera resultados visuales para revisar el caso Centro Neuro antes de ingresar datos finales. La fase produce una lamina HTML y capturas del navegador para verificar que la app conserva canvas, menus, Medical 3D, Memoria IA y Evidence Pack.
+
+Resultados visuales esperados:
+
+1. Canvas principal con sidebar y toolbar CAD visibles.
+2. Update Center mostrando F342/F341 como fases actuales.
+3. Medical 3D abierto con escena navegable.
+4. Memoria IA abierta para flujo de reporte.
+5. Evidence Pack abierto para trazabilidad.
+6. Tablero visual del caso con overlay del plano, fuentes, escala, material y pendientes.
+
+Como interpretar los visuales:
+
+1. El overlay muestra regiones de trabajo, no geometria calculada.
+2. La escala 1:100 se usa como preflight; se debe confirmar con cota real.
+3. Concreto alta densidad queda como material draft; se debe elegir ficha documentada con TVL/densidad.
+4. Penetraciones y ocupacion aparecen como pendientes intencionales.
+5. Medical 3D es evidencia visual; el calculo firmable debe venir del motor con formula, norma, inputs, outputs y citas.
+
 ## Addendum F341 - Centro Neuro con escala 1:100
 
 F341 toma los datos iniciales del usuario para preparar una prueba mas cercana al uso real:
