@@ -443,6 +443,46 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
 
           <Separator orientation="vertical" className="h-5 bg-slate-200" />
 
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                data-testid="f295-primary-file-dropdown"
+                variant="ghost"
+                size="sm"
+                className="flex text-[11px] h-8 px-2 text-slate-700 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-semibold border border-slate-100 bg-slate-50/70"
+              >
+                <MiniIcon icon={FolderOpen} color={c.file} />
+                <span className="hidden sm:inline">{t('menu.file')}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" className="w-60 bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
+              <SectionLabel label={t('sidebar.project')} color="text-slate-400" />
+              <SmartItem icon={Plus} iconColor={c.file} label={t('file.new')} onClick={onNewProject} desc="Crear proyecto desde cero" />
+              <SmartItem icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={onProjects} desc="Abrir o administrar proyectos" />
+              <SmartItem icon={Save} iconColor={c.file} label={t('btn.save')} shortcut="Ctrl+S" onClick={onSaveProject} />
+              <DropdownMenuSeparator />
+              <SectionLabel label={t('file.import')} color="text-slate-400" />
+              <SmartItem icon={Upload} iconColor={c.file} label={t('file.import.csv')} onClick={onBatchImport} desc="Importacion batch de barreras/datos" />
+              <SmartItem icon={Layers} iconColor={c.file} label={t('file.import.dxf')} onClick={onDXFViewer} desc="DXF o conversion DWG externa" />
+              <SmartItem icon={FileBox} iconColor={c.file} label={t('file.import.step')} onClick={onSTEPImporter} desc="STEP/IGES para geometria 3D" />
+              <DropdownMenuSeparator />
+              <SectionLabel label={t('file.export')} color="text-slate-400" />
+              <SmartItem icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={onExport} />
+              <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={onPDF} desc="Memoria analitica PDF" />
+              <SmartItem icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={onShare} desc="Web Share API" />
+              <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={onCNSNS} desc="Salida regulatoria" />
+              <DropdownMenuSeparator />
+              <SmartItem icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={onTechSpecs} desc="Especificaciones tecnicas" />
+              <SmartItem icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={onAuditTrail} desc="Trazabilidad" />
+              <SmartItem icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={onLogFileAnalysis} desc="Diagnostico de eventos" />
+              <DropdownMenuSeparator />
+              <SectionLabel label="Ayuda" color="text-slate-400" />
+              <SmartItem icon={BookOpen} iconColor={c.file} label="Glosario" onClick={onGlossary} desc="Terminologia de blindaje" />
+              <SmartItem icon={Info} iconColor={c.file} label="Acerca de" onClick={onAbout} desc="Version y creditos" />
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <div
             data-testid="f92-real-workflow-nav"
             className="hidden"
@@ -669,8 +709,8 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* F116: Archivo remains as the only visible utility menu. */}
-          <div data-testid="f114-deduped-legacy-menu-zone" className="flex items-center gap-0.5">
+          {/* F116/F295: legacy utility menu retained only for source-level rollback contracts. */}
+          <div data-testid="f114-deduped-legacy-menu-zone" className="hidden">
             {[
               { label: t('menu.file'), icon: FolderOpen, color: c.file, items: (
                 <>

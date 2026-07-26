@@ -1702,3 +1702,22 @@ Evidencia minima para cerrar F294:
 10. Memoria IA/PDF/Evidence Pack/snapshot 3D y bitacora de desviaciones.
 
 F294 no certifica uso clinico por si solo. La salida firmada requiere revision de fisico medico/RSO, cierre de desviaciones y fuentes trazables por pagina/hash.
+
+## Addendum F295 - Canvas limpio, Archivo alineado y 3D/motores externos
+
+F295 corrige el problema visible del menu `Archivo`: ahora aparece al inicio de la barra superior y la zona legacy duplicada queda oculta. El resto del flujo principal se conserva como Diseno, Equipos, Blindaje, Verificacion, Reportes, Evidencia e Integraciones.
+
+Al abrir el canvas, los paneles pesados de workflow, QA y continuidad quedan cerrados por defecto para no cubrir el plano. Se pueden recuperar desde los chips compactos del canvas. La sidebar principal y la barra rapida CAD lateral inician colapsadas para dejar mas area util al floorplan; ambas pueden expandirse cuando se requieran herramientas completas.
+
+Visualizacion 3D avanzada:
+1. El visor medico 3D toma muros, equipos, espesores, zonas y materiales del floorplan.
+2. El objetivo es permitir recorrido visual, inspeccion de barreras, zonas controladas, acabados y export de snapshots.
+3. El preview conceptual queda en `outputs/f295_canvas_redesign_smoke/f295_medical_3d_preview.html`.
+
+Motores externos:
+1. GATE/OpenGATE: medicina nuclear, PET/SPECT y escenarios Geant4 controlados.
+2. EGSnrc/egs_brachy: fotones/electrones y braquiterapia.
+3. Geant4 standalone: ciclotron, neutrones, activacion y validacion independiente.
+4. APS/ODA: conversion DWG a DXF/SVG/GLTF antes de entrar al canvas.
+
+Estos motores deben conectarse como runners externos con datasets versionados, hashes, logs y revision profesional; no deben ejecutarse como certificacion automatica desde el frontend.

@@ -63,15 +63,15 @@ type F188WorkflowDock = 'top' | 'right' | 'bottom';
 type F191CanvasTool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser';
 type F191VisualMode = 'plan' | 'heat' | 'isocontours' | 'structure';
 
-const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188';
+const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188_f295_clean_workspace';
 const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
 const F201_WORKFLOW_COMPACT_KEY = 'radshield_canvas_workflow_compact_f201';
 const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const F216_SAVED_VIEWS_KEY = 'radshield_canvas_saved_views_f216';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
-  workflow: true,
-  qa: true,
-  continuity: true,
+  workflow: false,
+  qa: false,
+  continuity: false,
 };
 
 function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
@@ -79,9 +79,9 @@ function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(F188_CANVAS_PANEL_STATE_KEY) || '{}') as Partial<Record<F188CanvasPanelKey, boolean>>;
     return {
-      workflow: parsed.workflow ?? true,
-      qa: parsed.qa ?? true,
-      continuity: parsed.continuity ?? true,
+      workflow: parsed.workflow ?? false,
+      qa: parsed.qa ?? false,
+      continuity: parsed.continuity ?? false,
     };
   } catch {
     return DEFAULT_F188_PANEL_VISIBILITY;
@@ -89,9 +89,9 @@ function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
 }
 
 function loadF188WorkflowDock(): F188WorkflowDock {
-  if (typeof window === 'undefined') return 'top';
+  if (typeof window === 'undefined') return 'right';
   const stored = window.localStorage.getItem(F188_WORKFLOW_DOCK_KEY);
-  return stored === 'right' || stored === 'bottom' ? stored : 'top';
+  return stored === 'top' || stored === 'bottom' ? stored : 'right';
 }
 
 function loadF201WorkflowCompact(): boolean {
@@ -2625,7 +2625,7 @@ export default function CanvasArea({
             {(!panelVisibility.workflow || !panelVisibility.qa || !panelVisibility.continuity) && (
               <div
                 data-testid="f188-hidden-panel-restore"
-                className="absolute top-10 right-2 z-20 flex flex-wrap justify-end gap-1 rounded-md border border-slate-200 bg-white/95 p-1 shadow-sm"
+              className="absolute top-10 right-2 z-20 flex flex-wrap justify-end gap-1 rounded-md border border-slate-200 bg-white/95 p-1 shadow-sm"
                 aria-label="Restaurar paneles ocultos del canvas"
               >
                 {([
@@ -2636,7 +2636,7 @@ export default function CanvasArea({
                   <button
                     key={key}
                     type="button"
-                    className="h-6 rounded border border-slate-200 bg-slate-50 px-2 text-[9px] font-semibold text-slate-600 hover:bg-orange-50 hover:text-orange-700"
+                  className="h-6 rounded border border-slate-200 bg-slate-50 px-2 text-[9px] font-semibold text-slate-600 hover:bg-orange-50 hover:text-orange-700"
                     onClick={() => setPanelVisible(key, true)}
                     title={`Restaurar panel ${label}`}
                     aria-label={`Restaurar panel ${label}`}

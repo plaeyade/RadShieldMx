@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F295 (2026-07-25) - Smoke de rediseno de canvas
+
+- Artefactos: `outputs/f295_canvas_redesign_smoke/f295_canvas_redesign_smoke.json`, `f295_medical_3d_preview.html` y `outputs/fase_295_canvas_redesign_smoke.md`.
+- Corrige el desfase visual de `Archivo`: queda como primer menu de la toolbar principal.
+- Oculta la zona legacy de menus para eliminar duplicidad visible.
+- Canvas inicia en modo limpio: paneles workflow/QA/continuidad cerrados por defecto y recuperables.
+- Sidebar rapida CAD inicia colapsada para no cubrir el layout.
+- Sidebar principal inicia colapsada con ancho estable y boton de expansion.
+- Deja arquitectura para conectar GATE/OpenGATE, EGSnrc/egs_brachy, Geant4 y conversion DWG APS/ODA mediante runners/proveedores externos.
+- Scripts: `npm run prepare:f295:canvas-redesign-smoke` y `npm run test:f295:canvas-redesign-smoke`.
+
 # F294 (2026-07-25) - Smoke guiado real
 
 - Artefactos: `outputs/f294_real_guided_smoke/f294_real_guided_smoke.json`, `f294_operator_evidence_checklist.csv`, `f294_deviation_log_template.csv` y `outputs/fase_294_real_guided_smoke.md`.

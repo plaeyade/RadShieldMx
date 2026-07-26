@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F295 (2026-07-25) - Canvas redesign smoke
+
+- Moved `Archivo` to the beginning of the main toolbar and hid the legacy duplicated menu zone.
+- Changed canvas startup to a clean workspace: workflow, QA and continuity panels are hidden by default and recoverable from compact chips.
+- Collapsed the quick CAD sidebar by default to protect floorplan visibility.
+- Collapsed the main sidebar by default while preserving its stable expand rail.
+- Added F295 manifest, contract and a static medical 3D preview for the next redesign pass.
+
 # F294 (2026-07-25) - Real guided smoke
 
 - Added F294 guided smoke package for the first real operator-run case.

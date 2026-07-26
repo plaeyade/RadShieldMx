@@ -85,19 +85,19 @@ const MINI_CAD_ACTIONS = [
 ];
 
 export default function CanvasQuickActionsSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const open = useAppStore.getState().open;
 
   return (
     <div
-      className={`flex flex-col border-l border-slate-200 bg-white transition-all duration-200 ${collapsed ? 'w-7' : 'w-[68px]'}`}
+      className={`flex flex-col border-l border-slate-200 bg-white transition-all duration-200 ${collapsed ? 'w-8' : 'w-[72px]'}`}
       style={{ zIndex: 15 }}
     >
       {/* Toggle collapse */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="h-6 w-full flex items-center justify-center border-b border-slate-100 hover:bg-slate-50 transition-colors"
-        title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+        title={collapsed ? 'Expandir herramientas CAD rapidas' : 'Colapsar herramientas CAD rapidas para liberar canvas'}
       >
         {collapsed ? (
           <ChevronLeft className="w-3 h-3 text-slate-400" />
@@ -179,6 +179,7 @@ export default function CanvasQuickActionsSidebar() {
               </button>
             );
           })}
+          <span className="-rotate-90 mt-5 text-[8px] font-semibold uppercase tracking-wide text-slate-300">CAD</span>
           {ACTION_GROUPS.map(group =>
             group.buttons.slice(0, 1).map(btn => {
               const Icon = btn.icon;
