@@ -471,6 +471,7 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
   const { camera } = useThree();
   const keys = useRef(new Set<string>());
   const yaw = useRef(0);
+  const pitch = useRef(0);
   const eyeHeight = useRef(1.65);
 
   useEffect(() => {
@@ -479,15 +480,23 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
     camera.position.set(cx, 1.65, cz + Math.max(2.2, scene.bounds.depth * 0.35));
     eyeHeight.current = 1.65;
     yaw.current = Math.PI;
+    pitch.current = -0.04;
     camera.lookAt(cx, 1.35, cz);
 
     const down = (event: KeyboardEvent) => keys.current.add(event.key.toLowerCase());
     const up = (event: KeyboardEvent) => keys.current.delete(event.key.toLowerCase());
+    const move = (event: MouseEvent) => {
+      if (!document.pointerLockElement) return;
+      yaw.current -= event.movementX * 0.0022;
+      pitch.current = THREE.MathUtils.clamp(pitch.current - event.movementY * 0.0018, -0.52, 0.42);
+    };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
+    window.addEventListener('mousemove', move);
     return () => {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
+      window.removeEventListener('mousemove', move);
       keys.current.clear();
     };
   }, [camera, enabled, scene]);
@@ -518,7 +527,11 @@ function WalkthroughRig({ scene, enabled }: { scene: MedicalScene; enabled: bool
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
     camera.position.y = eyeHeight.current;
-    camera.lookAt(camera.position.x + forward.x, eyeHeight.current - 0.1, camera.position.z + forward.z);
+    camera.lookAt(
+      camera.position.x + forward.x,
+      eyeHeight.current + Math.sin(pitch.current),
+      camera.position.z + forward.z,
+    );
   });
 
   return null;
@@ -595,6 +608,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [showClinicalDetail, setShowClinicalDetail] = useState(true);
   const [showInspection, setShowInspection] = useState(true);
   const [walkthrough, setWalkthrough] = useState(false);
+  const [mouseLookEnabled, setMouseLookEnabled] = useState(false);
+  const [mouseLookLocked, setMouseLookLocked] = useState(false);
   const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
   const [activeStationId, setActiveStationId] = useState<string | null>(null);
   const [inspectionTarget, setInspectionTarget] = useState<InspectionTarget | null>(null);
@@ -615,6 +630,20 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   );
 
   const safePlanName = activeFloorPlan.name.replace(/\W+/g, '_');
+
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      setMouseLookLocked(document.pointerLockElement === canvasWrapperRef.current);
+    };
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
+  }, []);
+
+  useEffect(() => {
+    if (walkthrough) return;
+    setMouseLookEnabled(false);
+    if (document.pointerLockElement === canvasWrapperRef.current) document.exitPointerLock();
+  }, [walkthrough]);
 
   const handleExportOBJ = () => {
     downloadText(`medical_3d_${safePlanName}.obj`, medicalSceneToOBJ(scene));
@@ -721,6 +750,11 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const handleOpenUnityExternalViewer = () => {
     if (!unityLaunchPacket.viewer.url) return;
     window.open(unityLaunchPacket.viewer.url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleCanvasPointerLock = () => {
+    if (!walkthrough || !mouseLookEnabled || document.pointerLockElement) return;
+    canvasWrapperRef.current?.requestPointerLock();
   };
 
   const handleSnapshot = () => {
@@ -887,6 +921,14 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 Recorrido WASD
               </span>
               <Switch checked={walkthrough} onCheckedChange={setWalkthrough} />
+            </div>
+
+            <div className="flex items-center justify-between rounded border p-2" data-testid="f324-pointer-lock-control">
+              <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+                <Navigation className="w-3.5 h-3.5 text-violet-600" />
+                Mouse-look
+              </span>
+              <Switch checked={mouseLookEnabled} onCheckedChange={setMouseLookEnabled} disabled={!walkthrough} />
             </div>
 
             <div
@@ -1062,7 +1104,13 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             </div>
           </aside>
 
-          <main ref={canvasWrapperRef} className="relative min-w-0 h-full bg-[#eef3f5]">
+          <main
+            ref={canvasWrapperRef}
+            className="relative min-w-0 h-full bg-[#eef3f5]"
+            onClick={handleCanvasPointerLock}
+            data-testid="f324-pointer-lock-workbench"
+            title={walkthrough && mouseLookEnabled ? 'Click para capturar mouse. Esc para salir.' : undefined}
+          >
             {hasGeometry ? (
               <Canvas className="h-full w-full" shadows camera={{ position: [7, 6, 9], fov: 45 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
                 <Suspense fallback={null}>
@@ -1094,6 +1142,11 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               {walkthrough && (
                 <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                   R/F: altura camara
+                </Badge>
+              )}
+              {walkthrough && mouseLookEnabled && (
+                <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
+                  {mouseLookLocked ? 'Mouse capturado - Esc salir' : 'Click para mouse-look'}
                 </Badge>
               )}
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">

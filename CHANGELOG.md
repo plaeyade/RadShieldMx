@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F324 (2026-07-25) - Pointer-lock walkthrough
+
+- Adds optional mouse-look for Medical 3D walkthrough: enable `Recorrido WASD`, then enable `Mouse-look` and click inside the scene.
+- Supports browser-native `Esc` release, yaw/pitch mouse control, pitch clamp, Shift/Ctrl speed modifiers, R/F eye height and room bounds.
+- Keeps OrbitControls available whenever walkthrough is disabled and does not affect calculations, RAG, reports or exports.
+- Scripts: `npm run prepare:f324:pointer-lock-walkthrough` and `npm run test:f324:pointer-lock-walkthrough`.
+
 # F317-F323 (2026-07-25) - Medical 3D release line
 
 - Adds release-line contracts for Three/R3F modality smoke, Babylon dependency unlock, Babylon staged prototype, PBR materials, WebGPU/WebXR gate, Unity external proof and 3D exports to reports.

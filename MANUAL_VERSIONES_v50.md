@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F324 (2026-07-25) - Pointer-lock walkthrough
+
+- Artefactos: `outputs/f324_pointer_lock_walkthrough/f324_pointer_lock_walkthrough.json` y `outputs/fase_324_pointer_lock_walkthrough.md`.
+- Medical 3D agrega `Mouse-look` opcional dentro de `Recorrido WASD`.
+- Flujo: activar recorrido, activar Mouse-look, hacer click dentro de la escena, usar mouse para mirar y `Esc` para liberar cursor.
+- Conserva `Shift`, `Ctrl`, `R/F`, limites de sala y OrbitControls fuera de recorrido.
+- No modifica calculos, RAG, reportes ni exportaciones.
+- Scripts: `npm run prepare:f324:pointer-lock-walkthrough` y `npm run test:f324:pointer-lock-walkthrough`.
+
 # F317-F323 (2026-07-25) - Medical 3D release line
 
 - Artefactos: `outputs/f317_f323_medical_3d_release_line/f317_f323_medical_3d_release_line.json` y `outputs/fase_317_323_medical_3d_release_line.md`.

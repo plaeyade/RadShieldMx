@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F324 - Pointer-lock walkthrough
+
+F324 mejora el recorrido 3D para que se sienta como visita interna. El modo sigue siendo opcional y no cambia calculos ni evidencia normativa.
+
+Como usarlo:
+
+1. Abrir `Medical 3D Floor Plan`.
+2. Activar `Recorrido WASD`.
+3. Activar `Mouse-look`.
+4. Hacer click dentro de la escena 3D para capturar el mouse.
+5. Mover el mouse para mirar alrededor.
+6. Usar `W/A/S/D` o flechas para desplazarse.
+7. Usar `Shift` para ir mas rapido y `Ctrl` para movimiento fino.
+8. Usar `R/F` para ajustar altura de camara.
+9. Presionar `Esc` para liberar el cursor.
+
+La camara queda acotada a los limites de la sala para evitar salir del plano. Cuando el recorrido esta apagado, vuelven los controles orbitales normales.
+
 ## Addendum F317-F323 - Medical 3D release line
 
 F317-F323 ordena el cierre del visor medico 3D sin sustituir el motor estable. Three/R3F sigue como visor activo; Babylon queda preparado para PBR/WebGPU/WebXR cuando npm permita instalar dependencias; Unity queda como visor externo por URL/handoff.
