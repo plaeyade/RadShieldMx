@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F347 (2026-07-26) - Memoria IA evidence blocks
+
+- Converts F346 standard-parameter rows into preliminary Memoria IA evidence blocks for LINAC, Gamma Knife, cyclotron and radiofarmacia/hot lab.
+- Adds narrative sections with method, inputs, outputs, assumptions, warnings, required citations and final-review gates.
+- Adds report handoff flags for Memoria IA, PDF and Evidence Pack while keeping signed calculations disabled.
+- Generates visual progress artifacts: `f347_memoria_evidence_visual.svg` and `f347_memoria_evidence_visual.html`.
+- Scripts: `npm run prepare:f347:memoria-evidence-blocks` and `npm run test:f347:memoria-evidence-blocks`.
+
 # F346 (2026-07-25) - Standard parameter draft
 
 - Applies standard draft geometry, source terms, material density/TVL candidates, typical penetrations and final FM/RSO review gates to the F345 barrier matrix.

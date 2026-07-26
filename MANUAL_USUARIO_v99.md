@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F347 - Bloques de evidencia para Memoria IA
+
+F347 toma los parametros estandar de F346 y los convierte en bloques narrativos que Memoria IA puede usar para preparar una memoria preliminar.
+
+Cada bloque incluye:
+
+1. Equipo o area.
+2. Perfil de modalidad.
+3. Escala, colindancia y ocupacion.
+4. Metodo preliminar y norma/metodologia.
+5. Material candidato, densidad y TVL candidate.
+6. Carga estructural draft.
+7. Entradas requeridas.
+8. Citas pendientes.
+9. Advertencias.
+10. Estado no firmable.
+
+Bloques creados:
+
+1. LINAC Elekta Versa HD 15 MeV.
+2. Gamma Knife Esprit.
+3. Cyclone KIUBE 18 MeV.
+4. Radiofarmacia / hot lab.
+
+Uso correcto: revisar el visual de F347, completar las citas, sustituir parametros estandar por datos reales y despues generar la memoria draft. La memoria firmable sigue bloqueada hasta geometria, fuente, material, penetraciones y revision FM/RSO final.
+
 ## Addendum F346 - Parametros estandar para draft
 
 F346 permite avanzar con parametros estandar cuando todavia no se tienen todos los datos del proveedor o del trazado CAD. Estos valores sirven para probar flujo, memoria y visualizacion, no para firmar.

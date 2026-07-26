@@ -432,6 +432,8 @@
     "test:f345:centro-neuro-draft-calculation-packet": "node scripts/check-f345-centro-neuro-draft-calculation-packet-contracts.mjs",
     "prepare:f346:standard-parameter-draft": "node scripts/f346-standard-parameter-draft.mjs",
     "test:f346:standard-parameter-draft": "node scripts/check-f346-standard-parameter-draft-contracts.mjs",
+    "prepare:f347:memoria-evidence-blocks": "node scripts/f347-memoria-evidence-blocks.mjs",
+    "test:f347:memoria-evidence-blocks": "node scripts/check-f347-memoria-evidence-blocks-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

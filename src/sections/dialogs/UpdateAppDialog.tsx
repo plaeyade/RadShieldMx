@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F347 Memoria IA evidence', current: 'evidence ready', latest: '4 modality blocks + checklist', status: 'current', description: 'Convierte F346 en bloques preliminares para Memoria IA/PDF/Evidence Pack: resumen, metodo, entradas, citas pendientes, advertencias y checklist final por LINAC, Gamma Knife, ciclotron y radiofarmacia.' },
   { name: 'F346 Standard parameter draft', current: 'draft only', latest: 'geometry + source + material + penetrations', status: 'current', description: 'Aplica parametros estandar de geometria, termino fuente, concreto alta densidad, TVL/densidad candidata, penetraciones tipicas y revision FM/RSO final. Mantiene todo bloqueado para memoria firmable hasta citas/versiones y revision.' },
   { name: 'F345 Centro Neuro draft packet', current: 'visual draft ready', latest: '24 barrier rows + gate map', status: 'current', description: 'Genera matriz draft de calculo por barrera y avance visual HTML/SVG para Centro Neuro. Usa escala 1:100, publico en general y T=1, pero bloquea espesores firmables hasta fuente, material, geometria, penetraciones y revision final.' },
   { name: 'F344 Centro Neuro public markup', current: 'markup-ready', latest: '1:100 + publico en general', status: 'current', description: 'Confirma escala 1:100 para trazado draft, aplica colindancias publico en general con T=1 como criterio conservador inicial y mueve la revision FM/RSO al gate final de memoria firmable.' },

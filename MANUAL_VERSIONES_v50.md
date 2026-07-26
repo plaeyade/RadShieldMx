@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F347 (2026-07-26) - Bloques de evidencia para Memoria IA
+
+- Artefactos: `outputs/f347_memoria_evidence_blocks/f347_memoria_evidence_blocks.json`, `f347_memoria_blocks.csv`, `f347_memoria_checklist.csv`, `f347_memoria_evidence_visual.svg`, `f347_memoria_evidence_visual.html` y `outputs/fase_347_memoria_evidence_blocks.md`.
+- Convierte F346 en cuatro bloques preliminares: LINAC Versa HD, Gamma Knife Esprit, Cyclone KIUBE y radiofarmacia/hot lab.
+- Cada bloque incluye resumen, metodo, entradas, salidas esperadas, supuestos, advertencias, citas pendientes y checklist.
+- Habilita handoff a Memoria IA, PDF y Evidence Pack, pero conserva `signedCalculationProduced=false`.
+- Scripts: `npm run prepare:f347:memoria-evidence-blocks` y `npm run test:f347:memoria-evidence-blocks`.
+
 # F346 (2026-07-25) - Parametros estandar draft
 
 - Artefactos: `outputs/f346_standard_parameter_draft/f346_standard_parameter_draft.json`, `f346_parameterized_barrier_matrix.csv`, `f346_gate_status.csv`, `f346_standard_parameter_visual.svg`, `f346_standard_parameter_visual.html` y `outputs/fase_346_standard_parameter_draft.md`.
