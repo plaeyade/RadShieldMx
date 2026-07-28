@@ -447,6 +447,7 @@
     "test:f362:ui-regression-smoke": "node scripts/check-f362-ui-regression-smoke.mjs",
     "test:f363:three-babylon-readiness": "node scripts/check-f363-three-babylon-readiness-contracts.mjs",
     "test:f364:three-visual-workflow": "node scripts/check-f364-three-visual-workflow-contracts.mjs",
+    "test:f365-f366:visual-evidence-pack": "node scripts/check-f365-f366-visual-evidence-pack-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

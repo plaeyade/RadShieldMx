@@ -2379,3 +2379,33 @@ El checklist visual confirma:
 El boton `Exportar tour visual` genera `medical_3d_visual_workflow_*.json`. Ese archivo debe adjuntarse a Memoria IA, PDF o Evidence Pack cuando se requiera explicar como se reviso visualmente el bunker/sala.
 
 Este flujo no sustituye el motor de calculo ni la revision profesional. Su valor es ordenar evidencia visual, capturas y narrativa tecnica antes de cerrar una memoria analitica.
+
+## Addendum F365-F366 - Capturas Guiadas Y Paquete De Evidencia Visual
+
+F365-F366 agrega una compuerta de evidencia visual dentro de Medical 3D. Cada vez que se usa el boton `Capturar`, la app descarga un PNG y registra un manifiesto con:
+
+1. Preset visual activo.
+2. Nombre del archivo PNG.
+3. Hash visual de escena.
+4. Checklist listo/total.
+5. Estacion F147 activa, si aplica.
+6. Fecha de captura.
+
+La compuerta F366 revisa si existen capturas minimas para:
+
+1. Vista general.
+2. Barreras.
+3. Equipos.
+4. Dosis.
+
+El recorrido es recomendado cuando se necesita documentar inspeccion visual de sala, pero no bloquea el paquete minimo.
+
+Estados:
+
+1. `pending`: no hay capturas.
+2. `review`: hay capturas, pero faltan presets o checklist.
+3. `ready`: estan cubiertas las capturas minimas y el checklist visual esta completo.
+
+El boton `Pack` exporta `medical_3d_visual_evidence_pack_*.json`. Ese archivo resume capturas, checklist, bookmarks, faltantes y politica minima de captura. Debe adjuntarse a Memoria IA, PDF Report o Evidence Pack como soporte visual no certificable.
+
+La evidencia visual no reemplaza calculos, citas normativas, trazabilidad de formulas ni revision profesional.

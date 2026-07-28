@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F365-F366 (2026-07-28) - Visual evidence pack + QA gate
+
+- Medical 3D convierte el boton PNG en captura trazada: workflow, filename, `sceneHash`, checklist y estacion activa.
+- Agrega panel F365-F366 con historial de capturas, faltantes por preset y estado `pending/review/ready`.
+- Nuevo export `medical_3d_visual_evidence_pack_*.json` para Memoria IA, PDF, Evidence Pack y anexos CNSNS/UAQ.
+- El JSON general de revision ahora incluye `visualEvidenceGate` y `visualEvidenceCaptures`.
+- No cambia calculos, geometria, renderer base ni dependencias.
+- Script: `npm run test:f365-f366:visual-evidence-pack`.
+
 # F364 (2026-07-28) - Three/R3F visual workflow
 
 - Medical 3D agrega presets de flujo visual: vista general, barreras, equipos, dosis y recorrido.

@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F365-F366 (2026-07-28) - Paquete de evidencia visual 3D
+
+- F365 convierte cada captura PNG de Medical 3D en evidencia trazada con preset, hash visual, checklist y estacion activa.
+- F366 agrega compuerta QA visual para saber si faltan capturas de vista general, barreras, equipos o dosis.
+- Exporta `medical_3d_visual_evidence_pack_*.json` con capturas, checklist, bookmarks, politica minima y disclaimer.
+- Uso: anexar a Memoria IA, PDF Report, Evidence Pack o CNSNS/UAQ como evidencia visual no certificable.
+- Guardrail: no cambia calculos, citas, renderer base, import DXF/IFC ni motores externos.
+- Script: `npm run test:f365-f366:visual-evidence-pack`.
+
 # F364 (2026-07-28) - Three/R3F flujo visual de revision
 
 - Agrega presets visuales 3D para revisar sala completa, barreras, equipos, dosis y recorrido.

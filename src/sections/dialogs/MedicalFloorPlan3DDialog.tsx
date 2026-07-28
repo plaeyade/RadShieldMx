@@ -52,6 +52,18 @@ type TextureKind = 'floor' | 'concrete' | 'lead' | 'steel' | 'glass' | 'ceiling'
 type Medical3DLightingPreset = 'clinical' | 'inspection' | 'warm';
 type RealismAid = 'materialBands' | 'equipmentFootprints' | 'beamGuides' | 'roomRulers';
 type VisualWorkflowPreset = 'overview' | 'barriers' | 'equipment' | 'dose' | 'walkthrough';
+type VisualEvidenceCapture = {
+  id: string;
+  workflow: VisualWorkflowPreset;
+  label: string;
+  filename: string;
+  sceneHash: string;
+  createdAt: string;
+  checklistReady: number;
+  checklistTotal: number;
+  stationId?: string | null;
+  stationLabel?: string | null;
+};
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -214,6 +226,34 @@ function buildVisualWorkflowChecklist(scene: MedicalScene, stations: F147Inspect
       evidence: `${stations.length} bookmark(s) F147`,
     },
   ];
+}
+
+function buildVisualEvidenceGate(captures: VisualEvidenceCapture[], checklist: ReturnType<typeof buildVisualWorkflowChecklist>) {
+  const readyChecklist = checklist.filter((item) => item.status === 'ready').length;
+  const requiredWorkflows: VisualWorkflowPreset[] = ['overview', 'barriers', 'equipment', 'dose'];
+  const capturedWorkflows = new Set(captures.map((capture) => capture.workflow));
+  const missingWorkflows = requiredWorkflows.filter((workflow) => !capturedWorkflows.has(workflow));
+  const walkthroughCaptured = capturedWorkflows.has('walkthrough');
+  const checklistReady = readyChecklist === checklist.length;
+  const minimumCapturesReady = missingWorkflows.length === 0;
+  const status = checklistReady && minimumCapturesReady ? 'ready' : captures.length > 0 ? 'review' : 'pending';
+
+  return {
+    schema: 'radshield-mx.medical3d.visual-evidence-gate.f366.v1',
+    status,
+    checklistReady,
+    minimumCapturesReady,
+    walkthroughCaptured,
+    readyChecklist,
+    checklistTotal: checklist.length,
+    captureCount: captures.length,
+    requiredWorkflows,
+    missingWorkflows,
+    recommendation:
+      status === 'ready'
+        ? 'Evidencia visual lista para anexar como soporte no certificable.'
+        : `Faltan capturas: ${missingWorkflows.length ? missingWorkflows.join(', ') : 'cerrar checklist visual'}.`,
+  };
 }
 
 function medicalPbrProfile(materialCode: string) {
@@ -1003,6 +1043,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
   const [activeStationId, setActiveStationId] = useState<string | null>(null);
   const [inspectionTarget, setInspectionTarget] = useState<InspectionTarget | null>(null);
+  const [visualEvidenceCaptures, setVisualEvidenceCaptures] = useState<VisualEvidenceCapture[]>([]);
   const [importedFloorPlan, setImportedFloorPlan] = useState<FloorPlan | null>(null);
   const [cadSummary, setCadSummary] = useState<CadBimImportSummary | null>(null);
   const [cadError, setCadError] = useState<string | null>(null);
@@ -1035,6 +1076,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const visualWorkflowChecklist = useMemo(
     () => buildVisualWorkflowChecklist(scene, f147Inspection.stations, realismAids),
     [f147Inspection.stations, realismAids, scene],
+  );
+  const visualEvidenceGate = useMemo(
+    () => buildVisualEvidenceGate(visualEvidenceCaptures, visualWorkflowChecklist),
+    [visualEvidenceCaptures, visualWorkflowChecklist],
   );
 
   const safePlanName = activeFloorPlan.name.replace(/\W+/g, '_');
@@ -1092,6 +1137,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
           sceneHash,
           visualWorkflow,
           visualWorkflowChecklist,
+          visualEvidenceGate,
+          visualEvidenceCaptures,
           captureTargets: ['Memoria IA', 'PDF report', 'Evidence Pack', 'CNSNS/UAQ anexos'],
           cameraBookmarkPolicy: 'Use F147 stations plus user snapshot for final visual evidence.',
           visualOnlyDisclaimer: 'La escena 3D es evidencia visual de revision; los calculos firmables se toman del motor de blindaje y sus citas.',
@@ -1233,6 +1280,36 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     );
   };
 
+  const handleExportVisualEvidencePack = () => {
+    downloadText(
+      `medical_3d_visual_evidence_pack_${safePlanName}.json`,
+      JSON.stringify({
+        schema: 'radshield-mx.medical3d.visual-evidence-pack.f365-f366.v1',
+        generatedBy: 'RadShield-MX F365-F366 Three/R3F Visual Evidence',
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneHash,
+        activeWorkflow: visualWorkflow,
+        visualEvidenceGate,
+        captures: visualEvidenceCaptures,
+        checklist: visualWorkflowChecklist,
+        stationBookmarks: f147Inspection.stations.map((station, index) => ({
+          order: index + 1,
+          id: station.id,
+          label: station.label,
+          purpose: station.purpose,
+          position: station.position,
+          lookAt: station.lookAt,
+          evidence: station.evidence,
+        })),
+        annexTargets: ['Memoria IA', 'PDF Report', 'Evidence Pack', 'CNSNS/UAQ annex'],
+        requiredCapturePolicy: 'Minimo vista general, barreras, equipos y dosis. Recorrido recomendado si hay inspeccion de sala.',
+        disclaimer: 'Las capturas son evidencia visual no certificable; deben acompanar calculo trazable, citas y revision profesional.',
+      }, null, 2),
+      'application/json',
+    );
+  };
+
   const handleExportEngineHandoff = () => {
     downloadText(
       `medical_3d_engine_handoff_${safePlanName}.json`,
@@ -1273,10 +1350,29 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const handleSnapshot = () => {
     const canvas = canvasWrapperRef.current?.querySelector('canvas');
     if (!canvas) return;
+    const workflow = visualWorkflowPresets.find((item) => item.id === visualWorkflow);
+    const timestamp = new Date().toISOString();
+    const readyCount = visualWorkflowChecklist.filter((item) => item.status === 'ready').length;
+    const filename = `medical_3d_${safePlanName}_${visualWorkflow}_${timestamp.replace(/\W+/g, '').slice(0, 14)}.png`;
     const link = document.createElement('a');
-    link.download = `medical_3d_${safePlanName}.png`;
+    link.download = filename;
     link.href = canvas.toDataURL('image/png');
     link.click();
+    setVisualEvidenceCaptures((prev) => [
+      {
+        id: `${visualWorkflow}-${timestamp}`,
+        workflow: visualWorkflow,
+        label: workflow?.label || visualWorkflow,
+        filename,
+        sceneHash,
+        createdAt: timestamp,
+        checklistReady: readyCount,
+        checklistTotal: visualWorkflowChecklist.length,
+        stationId: activeStation?.id || null,
+        stationLabel: activeStation?.label || null,
+      },
+      ...prev,
+    ].slice(0, 12));
   };
 
   const handleCadImport = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -1394,6 +1490,53 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportVisualWorkflowPack}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Exportar tour visual
               </Button>
+            </div>
+
+            <div className="space-y-2 rounded border border-sky-100 bg-sky-50 p-2" data-testid="f365-f366-visual-evidence-pack">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-sky-900 uppercase">Evidencia visual</div>
+                  <div className="text-[9px] text-sky-800">Capturas PNG trazadas por preset + compuerta QA.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{visualEvidenceGate.status}</Badge>
+              </div>
+              <div className="rounded border border-sky-100 bg-white/85 p-2 text-[9px] text-slate-600">
+                <div className="flex items-center justify-between gap-2">
+                  <span>Capturas</span>
+                  <span>{visualEvidenceGate.captureCount}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span>Checklist</span>
+                  <span>{visualEvidenceGate.readyChecklist}/{visualEvidenceGate.checklistTotal}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span>Faltantes</span>
+                  <span>{visualEvidenceGate.missingWorkflows.length ? visualEvidenceGate.missingWorkflows.join(', ') : 'ninguno'}</span>
+                </div>
+                <div className="mt-1 text-sky-800">{visualEvidenceGate.recommendation}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="h-8 justify-start text-xs bg-white" onClick={handleSnapshot}>
+                  <Camera className="w-3.5 h-3.5 mr-2" /> Capturar
+                </Button>
+                <Button size="sm" variant="outline" className="h-8 justify-start text-xs bg-white" onClick={handleExportVisualEvidencePack}>
+                  <Download className="w-3.5 h-3.5 mr-2" /> Pack
+                </Button>
+              </div>
+              {visualEvidenceCaptures.length > 0 && (
+                <div className="max-h-28 space-y-1 overflow-auto">
+                  {visualEvidenceCaptures.slice(0, 5).map((capture) => (
+                    <div key={capture.id} className="rounded border border-sky-100 bg-white/80 px-2 py-1 text-[9px] text-slate-600">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-sky-900">{capture.label}</span>
+                        <span>{capture.checklistReady}/{capture.checklistTotal}</span>
+                      </div>
+                      <div className="truncate font-mono text-[8px]">{capture.filename}</div>
+                      {capture.stationLabel && <div className="truncate text-[8px] text-slate-500">Estacion: {capture.stationLabel}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="f307-f309-render-engine-selector">
