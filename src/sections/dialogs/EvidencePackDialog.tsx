@@ -31,6 +31,7 @@ import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
 import { buildF184ReleaseQualityWorkflow } from '@/lib/f184ReleaseQualityWorkflow';
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
+import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import { IDAC_DOSE_EXTERNAL_NOTE } from '@/lib/idacDoseIntegration';
 import { REVIT_EXTERNAL_INTEGRATION_NOTE } from '@/lib/revitIntegration';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
@@ -89,6 +90,7 @@ export default function EvidencePackDialog({
   const f184ReleaseQuality = useMemo(() => buildF184ReleaseQualityWorkflow(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f208CanvasReporting = useMemo(() => buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f218ReportHandoff = useMemo(() => buildF218ReportHandoff(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(floorPlan), [floorPlan]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
 
@@ -304,6 +306,20 @@ export default function EvidencePackDialog({
               <div>Gates: {f149cMonteCarloGateway.validationGates.map((gate) => `${gate.id}:${gate.status}`).join(' | ')}</div>
               <div>RC: {f149cMonteCarloGateway.exportPackage.releaseReady ? 'gateway listo' : 'validacion requerida'}</div>
               <div className="text-[10px]">{f149cMonteCarloGateway.decision}</div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="f367-f370-release-integration-evidence" className="border-purple-300 bg-purple-50">
+            <CardContent className="p-3 text-xs text-purple-900 space-y-1">
+              <div className="font-semibold">F367-F370 release integration</div>
+              <div>Estado: {f367F370ReleaseIntegration.status}</div>
+              <div>Visual 3D: {f367F370ReleaseIntegration.visualEvidence.requiredFiles.join(' | ')}</div>
+              <div>Superficies: {f367F370ReleaseIntegration.visualEvidence.documentSurfaces.join(' | ')}</div>
+              <div>Unity: {f367F370ReleaseIntegration.unityWebgl.mode}; fallback {f367F370ReleaseIntegration.unityWebgl.fallback}</div>
+              <div>Motores: {f367F370ReleaseIntegration.externalEngines.engines.map((engine) => `${engine.id}:${engine.status}`).join(' | ')}</div>
+              <div>Fotoreal: {f367F370ReleaseIntegration.photorealism.activeEngine}; Babylon {f367F370ReleaseIntegration.photorealism.deferredEngine} pendiente</div>
+              <div>Beta: {f367F370ReleaseIntegration.releaseGate.decision}</div>
+              <div className="text-[10px]">Bloqueos: {f367F370ReleaseIntegration.releaseGate.blockedClaims.join(' | ')}</div>
             </CardContent>
           </Card>
 

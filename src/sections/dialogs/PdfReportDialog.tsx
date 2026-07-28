@@ -15,6 +15,7 @@ import { buildF149bFastradClinicalUtility } from '@/lib/f149bFastradClinicalUtil
 import { buildF149cMonteCarloGateway } from '@/lib/f149cMonteCarloGateway';
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
+import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import type { FloorPlan } from '@/types/radshield';
 import { FileText, Download, BookOpen, Building2, User, Calendar, Shield } from 'lucide-react';
 
@@ -51,6 +52,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
   const f149cMonteCarloGateway = buildF149cMonteCarloGateway(floorPlan);
   const f208CanvasReporting = buildF208CanvasReportingLayer(floorPlan);
   const f218ReportHandoff = buildF218ReportHandoff(floorPlan);
+  const f367F370ReleaseIntegration = buildF367F370ReleaseIntegration(floorPlan);
   const reportTemplates = TEMPLATES.some((item) => item.id === f117Handoff.reportDefaults.templateId)
     ? TEMPLATES
     : [
@@ -90,6 +92,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
       f149c_monte_carlo_gateway: f149cMonteCarloGateway,
       f208_canvas_reporting_layer: f208CanvasReporting,
       f218_report_handoff: f218ReportHandoff,
+      f367_f370_release_integration: f367F370ReleaseIntegration,
       f117_profile_handoff: {
         activeProfile: f117Handoff.activeProfile,
         reportDefaults: f117Handoff.reportDefaults,
@@ -272,6 +275,25 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
                 </p>
                 <p className="mt-1 text-[8px] text-blue-800">
                   Guardrails: {f149cMonteCarloGateway.releaseGuardrails.slice(0, 2).join(' | ')}.
+                </p>
+              </div>
+              <div data-testid="f367-f370-release-integration-pdf" className="mt-2 rounded border border-purple-200 bg-purple-50 p-2">
+                <p className="font-semibold text-purple-900">12. Integracion F367-F370: evidencia 3D, Unity y motores externos</p>
+                <p className="text-purple-900">
+                  Estado {f367F370ReleaseIntegration.status};
+                  {' '}decision {f367F370ReleaseIntegration.releaseGate.decision}.
+                </p>
+                <p className="mt-1 text-[8px] text-purple-800">
+                  Evidencia 3D: {f367F370ReleaseIntegration.visualEvidence.requiredFiles.join(' | ')}.
+                </p>
+                <p className="mt-1 text-[8px] text-purple-800">
+                  Unity: {f367F370ReleaseIntegration.unityWebgl.mode}, fallback {f367F370ReleaseIntegration.unityWebgl.fallback}.
+                </p>
+                <p className="mt-1 text-[8px] text-purple-800">
+                  MC externo: {f367F370ReleaseIntegration.externalEngines.engines.map((engine) => `${engine.id}:${engine.status}`).join(' | ')}.
+                </p>
+                <p className="mt-1 text-[8px] text-purple-800">
+                  Fotorealismo: {f367F370ReleaseIntegration.photorealism.activeEngine}; Babylon pendiente.
                 </p>
               </div>
             </div>

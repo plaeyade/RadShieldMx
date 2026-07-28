@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F367-F370 (2026-07-28) - Integracion beta: evidencia 3D, Unity, motores externos y fotorrealismo
+
+- F367 conecta la evidencia visual 3D con Memoria IA, PDF Report, Evidence Pack y Update Center.
+- F368 formaliza Unity WebGL como visor externo por URL/handoff, con fallback Three/R3F.
+- F369 formaliza runners externos GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy; tambien consolida fotorrealismo avanzado en Three/R3F y deja Babylon pendiente.
+- F370 define release beta frontend con claims bloqueados: MC clinico certificado, DWG nativo en navegador, Babylon runtime y memoria firmada sin revision profesional.
+- Artefactos: `outputs/f367_f370_release_integration/f367_f370_release_integration.json` y `.md`.
+- Scripts: `npm run prepare:f367-f370:release-integration` y `npm run test:f367-f370:release-integration`.
+
 # F365-F366 (2026-07-28) - Paquete de evidencia visual 3D
 
 - F365 convierte cada captura PNG de Medical 3D en evidencia trazada con preset, hash visual, checklist y estacion activa.

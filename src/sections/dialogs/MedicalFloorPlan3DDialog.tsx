@@ -30,6 +30,7 @@ import {
 } from '@/lib/medical3D/renderStrategy';
 import { buildBabylonAdapterContract } from '@/lib/medical3D/babylonAdapter';
 import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExternalViewerBridge';
+import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 
 interface Props {
   open: boolean;
@@ -1056,6 +1057,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
+  const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(activeFloorPlan), [activeFloorPlan]);
   const sceneHash = useMemo(
     () => stableSceneHash({
       scene,
@@ -1175,6 +1177,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
           })),
         },
         babylonReadiness: babylonContract,
+        f367F370ReleaseIntegration,
         equipment: scene.equipment.map((item) => ({
           id: item.id,
           name: item.name,
@@ -1333,6 +1336,34 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     downloadText(
       `medical_3d_unity_handoff_${safePlanName}.json`,
       JSON.stringify(unityLaunchPacket, null, 2),
+      'application/json',
+    );
+  };
+
+  const handleExportF367F370Pack = () => {
+    downloadText(
+      `medical_3d_f367_f370_release_integration_${safePlanName}.json`,
+      JSON.stringify({
+        schema: 'radshield-mx.medical3d.release-integration.f367-f370.v1',
+        generatedBy: 'RadShield-MX Medical 3D',
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneHash,
+        integration: f367F370ReleaseIntegration,
+        unityLaunchPacket,
+        babylonReadiness: babylonContract,
+        visualEvidenceGate,
+        visualEvidenceCaptures,
+        photorealSettings: {
+          activeEngine: 'three-r3f',
+          lightingPreset,
+          photorealWalkthrough,
+          realismAids,
+          pbrProfiles: f367F370ReleaseIntegration.photorealism.pbrMaterials,
+        },
+        externalRunnerBoundary:
+          'Unity/GATE/Geant4/EGSnrc remain external runners/viewers. This pack is an auditable handoff, not an in-browser execution result.',
+      }, null, 2),
       'application/json',
     );
   };
@@ -1537,6 +1568,25 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                   ))}
                 </div>
               )}
+            </div>
+
+            <div className="space-y-2 rounded border border-purple-100 bg-purple-50 p-2" data-testid="f367-f370-medical-3d-release-integration">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-purple-900 uppercase">F367-F370 integracion</div>
+                  <div className="text-[9px] text-purple-800">3D documental, Unity WebGL externo, motores y fotorrealismo.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f367F370ReleaseIntegration.status}</Badge>
+              </div>
+              <div className="rounded border border-purple-100 bg-white/85 p-2 text-[9px] text-slate-600">
+                <div>Unity: {f367F370ReleaseIntegration.unityWebgl.mode} / fallback {f367F370ReleaseIntegration.unityWebgl.fallback}</div>
+                <div>MC: {f367F370ReleaseIntegration.externalEngines.engines.map((engine) => `${engine.id}:${engine.status}`).join(' | ')}</div>
+                <div>Fotoreal: {f367F370ReleaseIntegration.photorealism.activeEngine}; Babylon pendiente</div>
+                <div>Beta: {f367F370ReleaseIntegration.releaseGate.decision}</div>
+              </div>
+              <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportF367F370Pack}>
+                <Download className="w-3.5 h-3.5 mr-2" /> Export F367-F370
+              </Button>
             </div>
 
             <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="f307-f309-render-engine-selector">

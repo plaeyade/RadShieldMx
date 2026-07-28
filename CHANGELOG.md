@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F367-F370 (2026-07-28) - Release integration: 3D evidence, Unity, external engines and beta gate
+
+- Conecta evidencia visual 3D a Memoria IA, PDF Report y Evidence Pack.
+- Formaliza Unity WebGL como visor externo por URL/handoff; no se empaqueta dentro del bundle React.
+- Formaliza GATE/OpenGATE, Geant4 y EGSnrc/egs_brachy como runners externos con manifiesto, hash, version, fisica, seed, historias e incertidumbre.
+- Agrega `src/lib/f367F370ReleaseIntegration.ts` y export F367-F370 desde Medical 3D.
+- Fotorrealismo avanzado queda en Three/R3F PBR + capturas; Babylon sigue pendiente hasta resolver dependencia/smoke.
+- Genera `outputs/f367_f370_release_integration/f367_f370_release_integration.json`.
+- Scripts: `npm run prepare:f367-f370:release-integration` y `npm run test:f367-f370:release-integration`.
+
 # F365-F366 (2026-07-28) - Visual evidence pack + QA gate
 
 - Medical 3D convierte el boton PNG en captura trazada: workflow, filename, `sceneHash`, checklist y estacion activa.

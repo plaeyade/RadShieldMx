@@ -2409,3 +2409,35 @@ Estados:
 El boton `Pack` exporta `medical_3d_visual_evidence_pack_*.json`. Ese archivo resume capturas, checklist, bookmarks, faltantes y politica minima de captura. Debe adjuntarse a Memoria IA, PDF Report o Evidence Pack como soporte visual no certificable.
 
 La evidencia visual no reemplaza calculos, citas normativas, trazabilidad de formulas ni revision profesional.
+
+## Addendum F367-F370 - Integracion Beta, Unity, Motores Externos Y Fotorealismo
+
+F367-F370 cierra la linea actual como integracion beta. La evidencia visual 3D deja de vivir solo en Medical 3D y aparece tambien en:
+
+1. Memoria IA.
+2. PDF Report.
+3. Evidence Pack.
+4. Update Center.
+
+Unity WebGL queda implementado como visor externo formal. Para usarlo se requiere publicar un build Unity WebGL aparte y configurar:
+
+1. `VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER`.
+2. `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+
+La app exporta `medical_3d_unity_handoff_*.json` y `medical_3d_f367_f370_release_integration_*.json`. Unity solo puede devolver capturas, bookmarks o referencia de recorrido; no sustituye calculos, citas ni revision profesional.
+
+Los motores externos quedan formalizados como runners:
+
+1. GATE/OpenGATE para NM/PET/SPECT y escenarios medicos Geant4.
+2. Geant4 para transporte general, ciclotron, neutrones y scoring independiente.
+3. EGSnrc/egs_brachy para fotones, electrones y braquiterapia.
+
+Cada runner debe devolver version, fisica/dataset, seed, historias, incertidumbre, hash de entrada, hash de salida y manifiesto de corrida.
+
+Fotorealismo avanzado:
+
+1. Ahora: Three/R3F con PBR, luces, materiales, footprints, bandas y capturas.
+2. Despues: assets GLB/GLTF reales de equipos y acabados.
+3. Pendiente: Babylon PBR/WebGPU/WebXR, solo cuando pase instalacion, build y smoke visual.
+
+F370 permite publicar frontend beta, pero bloquea afirmar: Monte Carlo clinico certificado, DWG nativo en navegador, Babylon runtime activo o memoria firmada sin revision profesional.
