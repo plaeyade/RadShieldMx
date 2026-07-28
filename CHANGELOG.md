@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F371-F372 (2026-07-28) - Beta visual smoke + static package
+
+- F371 agrega smoke Playwright visual para shell, canvas, sidebar, menu Archivo, boton derecho, Memoria IA, PDF Report, Evidence Pack y Medical 3D.
+- Genera capturas reales de la app y una lamina visual Three/R3F + Unity WebGL externo + motores MC + flujo de memoria analitica.
+- F372 empaqueta `dist/` como beta frontend estatica en ZIP, con manifiesto de alcance, commit, screenshots y claims bloqueados.
+- Mantiene Unity WebGL como visor externo por handoff y Babylon como pendiente.
+- Scripts: `npm run test:f371-f372:beta-visual`, `npm run prepare:f372:beta-package` y `npm run test:f371-f372:beta-contracts`.
+
 # F367-F370 (2026-07-28) - Release integration: 3D evidence, Unity, external engines and beta gate
 
 - Conecta evidencia visual 3D a Memoria IA, PDF Report y Evidence Pack.

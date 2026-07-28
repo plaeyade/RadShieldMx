@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F371-F372 (2026-07-28) - Smoke beta visual y paquete estatico
+
+- F371 valida en navegador la superficie principal antes de publicar: canvas visible, sidebar estable, menu Archivo alineado, boton derecho del canvas, Memoria IA, PDF Report, Evidence Pack y Medical 3D.
+- El smoke guarda capturas PNG en `outputs/f371_f372_beta_visuals/`.
+- Tambien genera `f371_f372_three_unity_memoria_flow.html`, una lamina visual que explica como conviven Three/R3F, Unity WebGL externo, motores externos y memoria analitica.
+- F372 genera `outputs/f372_beta_static_package/radshield-mx-f372-static-beta.zip` desde `dist/`.
+- El paquete es frontend beta estatico. No afirma Monte Carlo clinico certificado, Unity embebido, Babylon activo, DWG nativo ni memoria firmada.
+- Scripts: `npm run test:f371-f372:beta-visual`, `npm run prepare:f372:beta-package` y `npm run test:f371-f372:beta-contracts`.
+
 # F367-F370 (2026-07-28) - Integracion beta: evidencia 3D, Unity, motores externos y fotorrealismo
 
 - F367 conecta la evidencia visual 3D con Memoria IA, PDF Report, Evidence Pack y Update Center.

@@ -2441,3 +2441,29 @@ Fotorealismo avanzado:
 3. Pendiente: Babylon PBR/WebGPU/WebXR, solo cuando pase instalacion, build y smoke visual.
 
 F370 permite publicar frontend beta, pero bloquea afirmar: Monte Carlo clinico certificado, DWG nativo en navegador, Babylon runtime activo o memoria firmada sin revision profesional.
+
+## Addendum F371-F372 - Smoke Visual Beta Y Paquete Estatico
+
+F371-F372 sirve para revisar la app como usuario antes de publicar o entregar un ZIP beta. No cambia calculos ni agrega dependencias pesadas; valida que las superficies criticas sigan visibles y exporta evidencia visual.
+
+El smoke F371 revisa:
+
+1. Shell principal: barra superior, sidebar estable y canvas visible.
+2. Menu Archivo: debe abrir debajo de su boton, con ancho acotado y estilo consistente.
+3. Boton derecho del canvas: debe mostrar menu contextual CAD.
+4. Memoria IA: debe mostrar la tarjeta F367-F370 con Three/R3F, Unity externo, motores MC y claims bloqueados.
+5. PDF Report: debe incluir el bloque F367-F370 para anexar evidencia 3D.
+6. Evidence Pack: debe mostrar la trazabilidad F367-F370.
+7. Medical 3D: debe abrir la escena Three/R3F y mostrar el panel de integracion F367-F370.
+
+Las capturas se guardan en `outputs/f371_f372_beta_visuals/`. La imagen `08_three_unity_memoria_flow_visual.png` resume visualmente el flujo:
+
+1. El plano/canvas define geometria, escala, equipos y zonas.
+2. Three/R3F permite inspeccion visual inmediata dentro de la app.
+3. Unity WebGL queda como visor externo para recorrido fotorrealista si existe una URL configurada.
+4. Los motores externos reciben paquetes de entrada versionados y devuelven resultados con hash/incertidumbre.
+5. Memoria IA, PDF Report y Evidence Pack usan esas evidencias como anexos, no como calculo firmado automatico.
+
+F372 genera el ZIP `outputs/f372_beta_static_package/radshield-mx-f372-static-beta.zip`. Ese ZIP es apropiado para Vercel/Netlify/manual static hosting cuando se quiere probar frontend sin backend live.
+
+El paquete beta no debe presentarse como release clinico certificado. Para una memoria firmable aun se requiere revisar geometria final, cargas de trabajo, TVL/densidad versionadas, penetraciones, colindancias, formula/norma/cita y revision profesional.
