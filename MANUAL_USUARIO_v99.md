@@ -2331,3 +2331,25 @@ Babylon.js PBR/WebGPU/WebXR queda como adapter futuro. Debe activarse solo con f
 Unity WebGL queda al final. Su uso recomendado es como visor externo pesado para recorridos fotorealistas o demostraciones, no como motor regulatorio. Si se usa, debe recibir un case pack JSON/GLTF desde la app y devolver snapshots o recorridos, nunca resultados clinicos firmados sin revision profesional.
 
 El boton `Exportar handoff 3D` genera el paquete de estrategia para conectar el visor activo o un adapter externo.
+
+## Addendum F363 - Three/R3F Inspeccion Visual Y Babylon Readiness
+
+F363 mejora el visor Medical 3D sin cambiar el motor estable. Three/R3F sigue activo y agrega ayudas visuales de inspeccion que se pueden encender o apagar desde el panel lateral del visor:
+
+1. Bandas de material y espesor: muestran sobre cada muro una lectura rapida del material, espesor candidato y familia de blindaje.
+2. Footprints de equipos: dibujan la huella de LINAC, Gamma Knife, ciclotron u otros equipos para revisar si el sembrado coincide con el plano.
+3. Guias de haz o fuente: muestran vectores visuales no dosimetricos para entender direccion, campo principal y zonas que requieren revision.
+4. Cotas de sala: ayudan a inspeccionar dimensiones generales durante el recorrido.
+
+Estas ayudas son visuales y no sustituyen el calculo firmado. Sirven para revisar coherencia entre plano, equipo, material, zonas controladas y narrativa de la memoria analitica.
+
+El export de revision 3D incluye dos bloques nuevos: `threeR3fInspection`, con las ayudas visuales activas y su proposito, y `babylonReadiness`, con el estado del carril Babylon.
+
+Para reparar o instalar Babylon en una fase posterior, las rutas recomendadas son:
+
+1. Instalacion normal: `npm install @babylonjs/core @babylonjs/loaders`.
+2. Cache local del repo: `npm install @babylonjs/core @babylonjs/loaders --cache .npm-cache-babylon --prefer-online`.
+3. Gestor alterno: `corepack enable && pnpm add @babylonjs/core @babylonjs/loaders`.
+4. Tarballs locales: descargar o generar paquetes `.tgz` y luego instalarlos desde disco.
+
+Unity WebGL queda reservado para una etapa posterior de recorrido hiperrealista, porque requiere pipeline de assets, build mas pesado, politicas de hosting y QA visual independiente.

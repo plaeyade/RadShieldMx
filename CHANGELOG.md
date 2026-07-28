@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F363 (2026-07-28) - Three/R3F inspection aids + Babylon repair lane
+
+- Medical 3D agrega ayudas visuales activables en Three/R3F: bandas de material/espesor, footprints de equipos, guias visuales de haz/fuente y cotas de sala.
+- El export JSON de revision ahora incluye `threeR3fInspection` y `babylonReadiness` para dejar trazabilidad del visor activo y del carril Babylon.
+- Se documentan alternativas de instalacion/reparacion de Babylon: npm normal, cache local del repo, pnpm/corepack y tarballs locales.
+- Babylon permanece desactivado como dependencia runtime hasta resolver instalacion; Three/R3F sigue como motor estable.
+- Script: `npm run test:f363:three-babylon-readiness`.
+
 # F361 (2026-07-26) - Reparacion post-beta: canvas, ventanas, Archivo, RAG y manuales
 
 - Corrige regresiones visibles de la beta: boton derecho del canvas ahora abre menu contextual CAD con seleccionar, barrera, fuente, medicion, ajustar vista, exportar PNG, calcular, evidencia, 3D, duplicar y borrar seleccionado.

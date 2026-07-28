@@ -28,6 +28,7 @@ import {
   getMedical3DRenderStrategy,
   type Medical3DRenderEngine,
 } from '@/lib/medical3D/renderStrategy';
+import { buildBabylonAdapterContract } from '@/lib/medical3D/babylonAdapter';
 import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExternalViewerBridge';
 
 interface Props {
@@ -49,6 +50,7 @@ const materialColors: Record<string, string> = {
 
 type TextureKind = 'floor' | 'concrete' | 'lead' | 'steel' | 'glass' | 'ceiling' | 'equipment';
 type Medical3DLightingPreset = 'clinical' | 'inspection' | 'warm';
+type RealismAid = 'materialBands' | 'equipmentFootprints' | 'beamGuides' | 'roomRulers';
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -59,6 +61,40 @@ const lightingPresets: Record<Medical3DLightingPreset, { ambient: number; key: n
   inspection: { ambient: 0.52, key: 1.18, cool: 0.72, warm: 0.18, label: 'Inspeccion tecnica' },
   warm: { ambient: 0.74, key: 0.72, cool: 0.28, warm: 0.54, label: 'Recorrido calido' },
 };
+
+const defaultRealismAids: Record<RealismAid, boolean> = {
+  materialBands: true,
+  equipmentFootprints: true,
+  beamGuides: true,
+  roomRulers: true,
+};
+
+const babylonInstallOptions = [
+  {
+    id: 'standard',
+    label: 'Instalacion normal',
+    command: 'npm install @babylonjs/core @babylonjs/loaders',
+    useWhen: 'Cuando npm ya puede escribir cache y resolver registry.npmjs.org sin EACCES.',
+  },
+  {
+    id: 'local-cache',
+    label: 'Cache local del repo',
+    command: 'npm install @babylonjs/core @babylonjs/loaders --cache .npm-cache-babylon --prefer-online',
+    useWhen: 'Cuando el bloqueo viene de permisos/carpeta cache global de npm.',
+  },
+  {
+    id: 'pnpm-or-yarn',
+    label: 'Gestor alterno',
+    command: 'corepack enable && pnpm add @babylonjs/core @babylonjs/loaders',
+    useWhen: 'Cuando npm insiste en EACCES aunque Node y red funcionen.',
+  },
+  {
+    id: 'vendor-tarballs',
+    label: 'Tarballs locales',
+    command: 'npm pack @babylonjs/core @babylonjs/loaders && npm install ./babylonjs-core-*.tgz ./babylonjs-loaders-*.tgz',
+    useWhen: 'Cuando hay que descargar paquetes fuera del entorno de Codex y traerlos al repo.',
+  },
+];
 
 function stableSceneHash(value: unknown): string {
   const text = JSON.stringify(value);
@@ -449,6 +485,99 @@ function DoseOverlays({ scene, visible }: { scene: MedicalScene; visible: boolea
   );
 }
 
+function MaterialBands({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
+  if (!visible) return null;
+  const maxThickness = Math.max(1, ...scene.walls.map((wall) => wall.requiredThickness_mm || 0));
+  return (
+    <group data-testid="f363-three-material-bands">
+      {scene.walls.map((wall) => {
+        const thickness = wall.requiredThickness_mm || 0;
+        const ratio = THREE.MathUtils.clamp(thickness / maxThickness, 0.12, 1);
+        const color = wall.barrierType === 'primary' ? '#ef4444' : wall.barrierType === 'secondary' ? '#f59e0b' : '#38bdf8';
+        return (
+          <group key={`band-${wall.id}`} position={wall.center} rotation={[0, wall.rotationY, 0]}>
+            <Box args={[wall.size[0], 0.055, 0.045]} position={[0, wall.size[1] / 2 + 0.08, wall.size[2] / 2 + 0.035]}>
+              <meshBasicMaterial color={color} transparent opacity={0.32 + ratio * 0.36} />
+            </Box>
+            <Box args={[Math.max(0.16, wall.size[0] * ratio), 0.065, 0.055]} position={[-wall.size[0] * (1 - ratio) / 2, wall.size[1] / 2 + 0.17, wall.size[2] / 2 + 0.04]}>
+              <meshBasicMaterial color={color} transparent opacity={0.68} />
+            </Box>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+function EquipmentFootprints({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <group data-testid="f363-three-equipment-footprints">
+      {scene.equipment.map((item) => (
+        <group key={`footprint-${item.id}`} position={[item.position[0], 0.022, item.position[2]]} rotation={[-Math.PI / 2, 0, item.rotationY]}>
+          <planeGeometry args={[item.footprint_m[0], item.footprint_m[1]]} />
+          <meshBasicMaterial color="#0ea5e9" transparent opacity={0.14} side={THREE.DoubleSide} />
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function BeamGuides({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <group data-testid="f363-three-beam-guides">
+      {scene.equipment.map((item) => {
+        if (!['linac', 'gammaKnife', 'radiofarmacia'].includes(item.kind)) return null;
+        const beamColor = item.kind === 'linac' ? '#38bdf8' : item.kind === 'gammaKnife' ? '#818cf8' : '#f97316';
+        const beamLength = item.kind === 'radiofarmacia' ? 1.8 : 2.8;
+        return (
+          <group key={`beam-${item.id}`} position={[item.position[0], 1.12, item.position[2]]} rotation={[Math.PI / 2, 0, item.rotationY]}>
+            <coneGeometry args={[item.kind === 'gammaKnife' ? 0.72 : 0.34, beamLength, 48, 1, true]} />
+            <meshBasicMaterial color={beamColor} transparent opacity={item.kind === 'radiofarmacia' ? 0.1 : 0.16} side={THREE.DoubleSide} />
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+function RoomRulers({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
+  if (!visible) return null;
+  const [cx, , cz] = scene.bounds.center;
+  const y = 0.055;
+  const z = cz + scene.bounds.depth / 2 + 0.25;
+  const x = cx - scene.bounds.width / 2 - 0.25;
+  return (
+    <group data-testid="f363-three-room-rulers">
+      <lineSegments>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[new Float32Array([
+              cx - scene.bounds.width / 2, y, z,
+              cx + scene.bounds.width / 2, y, z,
+              x, y, cz - scene.bounds.depth / 2,
+              x, y, cz + scene.bounds.depth / 2,
+            ]), 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#0f172a" transparent opacity={0.55} />
+      </lineSegments>
+      <Html position={[cx, 0.2, z + 0.12]} center distanceFactor={9}>
+        <div className="rounded border bg-white/95 px-2 py-1 text-[10px] font-semibold text-slate-700 shadow">
+          {scene.bounds.width.toFixed(1)} m
+        </div>
+      </Html>
+      <Html position={[x - 0.16, 0.2, cz]} center distanceFactor={9}>
+        <div className="rounded border bg-white/95 px-2 py-1 text-[10px] font-semibold text-slate-700 shadow">
+          {scene.bounds.depth.toFixed(1)} m
+        </div>
+      </Html>
+    </group>
+  );
+}
+
 function ClinicalFixtures({ scene, mode }: { scene: MedicalScene; mode: Medical3DMode }) {
   const [cx, , cz] = scene.bounds.center;
   const halfWidth = scene.bounds.width / 2;
@@ -610,6 +739,7 @@ function RoomScene({
   collisionEnabled,
   photorealWalkthrough,
   lightingPreset,
+  realismAids,
   showInspection,
   activeStation,
   onInspect,
@@ -622,6 +752,7 @@ function RoomScene({
   collisionEnabled: boolean;
   photorealWalkthrough: boolean;
   lightingPreset: Medical3DLightingPreset;
+  realismAids: Record<RealismAid, boolean>;
   showInspection: boolean;
   activeStation?: F147InspectionStation;
   onInspect?: (target: InspectionTarget) => void;
@@ -666,6 +797,10 @@ function RoomScene({
       {scene.equipment.map((item) => <Equipment key={item.id} item={item} onInspect={onInspect} />)}
       {showClinicalDetail && <ClinicalFixtures scene={scene} mode={visualMode} />}
       <DoseOverlays scene={scene} visible={mode === 'dose' && !photorealWalkthrough} />
+      <MaterialBands scene={scene} visible={realismAids.materialBands && (showInspection || photorealWalkthrough)} />
+      <EquipmentFootprints scene={scene} visible={realismAids.equipmentFootprints && (showInspection || visualMode !== 'presentation')} />
+      <BeamGuides scene={scene} visible={realismAids.beamGuides && (showInspection || mode === 'dose')} />
+      <RoomRulers scene={scene} visible={realismAids.roomRulers && showInspection} />
 
       <gridHelper args={[Math.max(scene.bounds.width, scene.bounds.depth) + 2, 24, '#94a3b8', '#d1d5db']} position={[cx, 0.01, cz]} />
       {!walkthrough && <OrbitControls target={[cx, 1.2, cz]} maxPolarAngle={Math.PI / 2.05} minDistance={2.5} maxDistance={42} makeDefault />}
@@ -692,6 +827,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [collisionEnabled, setCollisionEnabled] = useState(true);
   const [photorealWalkthrough, setPhotorealWalkthrough] = useState(false);
   const [lightingPreset, setLightingPreset] = useState<Medical3DLightingPreset>('clinical');
+  const [realismAids, setRealismAids] = useState<Record<RealismAid, boolean>>(defaultRealismAids);
   const [mouseLookEnabled, setMouseLookEnabled] = useState(false);
   const [mouseLookLocked, setMouseLookLocked] = useState(false);
   const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
@@ -708,6 +844,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const f147Inspection = useMemo(() => buildF147Medical3DInspection(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
+  const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
   const sceneHash = useMemo(
     () => stableSceneHash({
       scene,
@@ -715,9 +852,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
       mode,
       photorealWalkthrough,
       lightingPreset,
+      realismAids,
       cadSummary: cadSummary ? { kind: cadSummary.kind, entities: cadSummary.sourceEntities, layers: cadSummary.detectedLayers } : null,
     }),
-    [cadSummary, lightingPreset, mode, photorealWalkthrough, preset, scene],
+    [cadSummary, lightingPreset, mode, photorealWalkthrough, preset, realismAids, scene],
   );
   const activeStation = useMemo(
     () => f147Inspection.stations.find((station) => station.id === activeStationId),
@@ -725,6 +863,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   );
 
   const safePlanName = activeFloorPlan.name.replace(/\W+/g, '_');
+
+  const toggleRealismAid = (aid: RealismAid) => {
+    setRealismAids((prev) => ({ ...prev, [aid]: !prev[aid] }));
+  };
 
   useEffect(() => {
     const handlePointerLockChange = () => {
@@ -764,6 +906,14 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
           lightingPreset,
           photorealWalkthrough,
         },
+        threeR3fInspection: {
+          schema: 'radshield-mx.medical3d.three-r3f-inspection.v1',
+          enabledAids: realismAids,
+          materialBands: 'Banda superior por muro: tipo de barrera + espesor relativo.',
+          equipmentFootprints: 'Huella real de cada equipo para revisar espacio libre y colisiones.',
+          beamGuides: 'Guia visual no dosimetrica de haz/isocentro/fuente.',
+          roomRulers: 'Cotas visuales de ancho/profundidad para inspeccion rapida.',
+        },
         assetPipeline: {
           schema: 'radshield-mx.medical3d.assetPipeline.v1',
           acceptedStaticAssets: ['glb', 'gltf', 'png', 'svg'],
@@ -776,6 +926,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             ragTags: item.ragTags,
           })),
         },
+        babylonReadiness: babylonContract,
         equipment: scene.equipment.map((item) => ({
           id: item.id,
           name: item.name,
@@ -1078,6 +1229,55 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </div>
             </div>
 
+            <div className="space-y-2 rounded border border-slate-200 bg-white p-2" data-testid="f363-three-r3f-realism-aids">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-slate-700 uppercase">Three/R3F ayudas visuales</div>
+                  <div className="text-[9px] text-slate-500">Capas no dosimetricas para inspeccion, evidencia y recorrido.</div>
+                </div>
+                <Badge variant="outline" className="text-[9px]">{Object.values(realismAids).filter(Boolean).length}/4</Badge>
+              </div>
+              {([
+                ['materialBands', 'Bandas material/espesor', 'Color por tipo de barrera y espesor relativo.'],
+                ['equipmentFootprints', 'Huellas de equipo', 'Footprint real para espacio libre y colision.'],
+                ['beamGuides', 'Guias de haz/fuente', 'Visual no certificable para orientar isocentro/fuente.'],
+                ['roomRulers', 'Reglas de sala', 'Cotas visuales de ancho y profundidad.'],
+              ] as Array<[RealismAid, string, string]>).map(([id, label, description]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`w-full rounded border px-2 py-1.5 text-left text-[10px] transition ${realismAids[id] ? 'border-teal-200 bg-teal-50 text-teal-900' : 'border-slate-200 bg-slate-50 text-slate-500'}`}
+                  onClick={() => toggleRealismAid(id)}
+                  aria-pressed={realismAids[id]}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold">{label}</span>
+                    <span>{realismAids[id] ? 'ON' : 'OFF'}</span>
+                  </div>
+                  <div className="mt-0.5 text-[9px] opacity-80">{description}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-2 rounded border border-violet-100 bg-violet-50 p-2" data-testid="f363-babylon-install-options">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-semibold text-violet-900 uppercase">Babylon: reparacion/instalacion</span>
+                <Badge variant="outline" className="bg-white text-[9px]">{babylonContract.readiness}</Badge>
+              </div>
+              <div className="text-[10px] leading-relaxed text-violet-900">
+                Mantener Three/R3F como fallback. Activar Babylon solo con paquetes instalados, flags y smoke visual.
+              </div>
+              <div className="space-y-1">
+                {babylonInstallOptions.map((option) => (
+                  <div key={option.id} className="rounded border border-violet-100 bg-white/85 p-2 text-[9px] text-slate-700">
+                    <div className="font-semibold text-violet-900">{option.label}</div>
+                    <code className="mt-1 block break-words rounded bg-slate-50 px-1 py-0.5 font-mono text-[8px] text-slate-700">{option.command}</code>
+                    <div className="mt-1 text-slate-500">{option.useWhen}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div
               data-testid="f92-3d-inspection-readiness"
               className="rounded border border-teal-100 bg-teal-50 p-2 text-xs text-teal-900 space-y-1"
@@ -1270,6 +1470,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                     collisionEnabled={collisionEnabled}
                     photorealWalkthrough={photorealWalkthrough && walkthrough}
                     lightingPreset={lightingPreset}
+                    realismAids={realismAids}
                     showInspection={showInspection}
                     activeStation={activeStation}
                     onInspect={setInspectionTarget}

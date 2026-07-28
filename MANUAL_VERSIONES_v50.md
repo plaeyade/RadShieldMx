@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F363 (2026-07-28) - Three/R3F inspeccion y Babylon readiness
+
+- Medical 3D conserva Three/R3F como runtime estable y agrega overlays de inspeccion visual para materiales, equipos, haces y cotas.
+- El operador puede activar o apagar ayudas visuales sin cambiar el calculo base ni romper el canvas principal.
+- El paquete de revision exporta readiness de Babylon para saber si esta listo, bloqueado o pendiente de dependencias.
+- Rutas recomendadas para Babylon: `npm install @babylonjs/core @babylonjs/loaders`, cache local `.npm-cache-babylon`, `pnpm add` via Corepack o tarballs locales cuando la red/registry falle.
+- Unity WebGL queda diferido a una fase posterior por riesgo de peso, build y hosting.
+- Script: `npm run test:f363:three-babylon-readiness`.
+
 # F361 (2026-07-26) - Reparacion post-beta
 
 - Artefactos: `outputs/f361_post_beta_repair/f361_post_beta_repair.json`, `f361_kiube_document_chunks.jsonl`, `f361_kiube_document_chunks_db_draft.json` y `f361_manual_update_matrix.csv`.
