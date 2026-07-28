@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F364 (2026-07-28) - Three/R3F visual workflow
+
+- Medical 3D agrega presets de flujo visual: vista general, barreras, equipos, dosis y recorrido.
+- La escena Three/R3F dibuja ruta de estaciones F147 con marcadores numerados y resalta la estacion activa.
+- Se agrega checklist visual de geometria, materiales, equipos, contexto dosis/zonas y bookmarks.
+- El JSON de revision incluye `visualWorkflow`, `visualWorkflowChecklist` y `stationBookmarks`.
+- Nuevo export: `medical_3d_visual_workflow_*.json` para Memoria IA, PDF y Evidence Pack.
+- Script: `npm run test:f364:three-visual-workflow`.
+
 # F363 (2026-07-28) - Three/R3F inspection aids + Babylon repair lane
 
 - Medical 3D agrega ayudas visuales activables en Three/R3F: bandas de material/espesor, footprints de equipos, guias visuales de haz/fuente y cotas de sala.

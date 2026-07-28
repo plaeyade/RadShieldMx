@@ -2353,3 +2353,29 @@ Para reparar o instalar Babylon en una fase posterior, las rutas recomendadas so
 4. Tarballs locales: descargar o generar paquetes `.tgz` y luego instalarlos desde disco.
 
 Unity WebGL queda reservado para una etapa posterior de recorrido hiperrealista, porque requiere pipeline de assets, build mas pesado, politicas de hosting y QA visual independiente.
+
+## Addendum F364 - Flujo Visual 3D Para Revision Y Evidencia
+
+F364 agrega un flujo visual guiado dentro de Medical 3D. El objetivo es que el usuario no tenga que improvisar capturas: la app propone presets para revisar el mismo plano desde cinco perspectivas.
+
+Presets disponibles:
+
+1. Vista general: muestra sala completa, zonas y lectura rapida del caso.
+2. Barreras: enfoca materiales, espesores, cotas y tipo de barrera.
+3. Equipos: muestra footprints, posicion de fuente/isocentro y espacio libre.
+4. Dosis: activa visual de dosis/zonas y guias de fuente.
+5. Recorrido: activa WASD, colisiones, PBR ligero, techo y estaciones.
+
+La escena muestra una ruta de inspeccion con estaciones F147 numeradas. Al seleccionar una estacion, la camara salta al punto de revision y se abre una tarjeta con proposito, posicion y evidencia esperada.
+
+El checklist visual confirma:
+
+1. Geometria cargada.
+2. Materiales visibles.
+3. Equipos sembrados.
+4. Contexto de dosis y zonas.
+5. Estaciones/bookmarks disponibles.
+
+El boton `Exportar tour visual` genera `medical_3d_visual_workflow_*.json`. Ese archivo debe adjuntarse a Memoria IA, PDF o Evidence Pack cuando se requiera explicar como se reviso visualmente el bunker/sala.
+
+Este flujo no sustituye el motor de calculo ni la revision profesional. Su valor es ordenar evidencia visual, capturas y narrativa tecnica antes de cerrar una memoria analitica.

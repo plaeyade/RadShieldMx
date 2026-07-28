@@ -51,6 +51,7 @@ const materialColors: Record<string, string> = {
 type TextureKind = 'floor' | 'concrete' | 'lead' | 'steel' | 'glass' | 'ceiling' | 'equipment';
 type Medical3DLightingPreset = 'clinical' | 'inspection' | 'warm';
 type RealismAid = 'materialBands' | 'equipmentFootprints' | 'beamGuides' | 'roomRulers';
+type VisualWorkflowPreset = 'overview' | 'barriers' | 'equipment' | 'dose' | 'walkthrough';
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -68,6 +69,80 @@ const defaultRealismAids: Record<RealismAid, boolean> = {
   beamGuides: true,
   roomRulers: true,
 };
+
+const visualWorkflowPresets: Array<{
+  id: VisualWorkflowPreset;
+  label: string;
+  description: string;
+  mode: Medical3DMode;
+  walkthrough: boolean;
+  photoreal: boolean;
+  inspection: boolean;
+  ceiling: boolean;
+  lighting: Medical3DLightingPreset;
+  aids: Record<RealismAid, boolean>;
+}> = [
+  {
+    id: 'overview',
+    label: 'Vista general',
+    description: 'Sala completa, zonas y lectura rapida para explicar el caso.',
+    mode: 'presentation',
+    walkthrough: false,
+    photoreal: false,
+    inspection: true,
+    ceiling: false,
+    lighting: 'clinical',
+    aids: defaultRealismAids,
+  },
+  {
+    id: 'barriers',
+    label: 'Barreras',
+    description: 'Materiales, espesores y cotas para revisar blindaje.',
+    mode: 'technical',
+    walkthrough: false,
+    photoreal: false,
+    inspection: true,
+    ceiling: false,
+    lighting: 'inspection',
+    aids: { materialBands: true, equipmentFootprints: false, beamGuides: true, roomRulers: true },
+  },
+  {
+    id: 'equipment',
+    label: 'Equipos',
+    description: 'Footprints, isocentro/fuente y espacio libre.',
+    mode: 'technical',
+    walkthrough: false,
+    photoreal: false,
+    inspection: true,
+    ceiling: false,
+    lighting: 'clinical',
+    aids: { materialBands: false, equipmentFootprints: true, beamGuides: true, roomRulers: true },
+  },
+  {
+    id: 'dose',
+    label: 'Dosis',
+    description: 'Heatmap, guia de fuente y lectura de zonas controladas.',
+    mode: 'dose',
+    walkthrough: false,
+    photoreal: false,
+    inspection: true,
+    ceiling: false,
+    lighting: 'inspection',
+    aids: { materialBands: true, equipmentFootprints: true, beamGuides: true, roomRulers: false },
+  },
+  {
+    id: 'walkthrough',
+    label: 'Recorrido',
+    description: 'WASD con colisiones, PBR ligero y estaciones visuales.',
+    mode: 'presentation',
+    walkthrough: true,
+    photoreal: true,
+    inspection: true,
+    ceiling: true,
+    lighting: 'warm',
+    aids: defaultRealismAids,
+  },
+];
 
 const babylonInstallOptions = [
   {
@@ -104,6 +179,41 @@ function stableSceneHash(value: unknown): string {
     hash = Math.imul(hash, 16777619);
   }
   return `scene-${(hash >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+function buildVisualWorkflowChecklist(scene: MedicalScene, stations: F147InspectionStation[], realismAids: Record<RealismAid, boolean>) {
+  return [
+    {
+      id: 'geometry',
+      label: 'Geometria cargada',
+      status: scene.walls.length > 0 || scene.equipment.length > 0 ? 'ready' : 'blocked',
+      evidence: `${scene.walls.length} muros, ${scene.equipment.length} equipos`,
+    },
+    {
+      id: 'materials',
+      label: 'Materiales visibles',
+      status: scene.walls.every((wall) => Boolean(wall.materialCode)) && realismAids.materialBands ? 'ready' : 'review',
+      evidence: realismAids.materialBands ? 'Bandas material/espesor activas' : 'Activar bandas para captura final',
+    },
+    {
+      id: 'equipment',
+      label: 'Equipos sembrados',
+      status: scene.equipment.length > 0 && realismAids.equipmentFootprints ? 'ready' : 'review',
+      evidence: `${scene.equipment.length} footprint(s)`,
+    },
+    {
+      id: 'dose-context',
+      label: 'Contexto dosis/zonas',
+      status: scene.dosePoints.length > 0 && scene.zones.length > 0 ? 'ready' : 'review',
+      evidence: `${scene.dosePoints.length} puntos visuales, ${scene.zones.length} zonas`,
+    },
+    {
+      id: 'stations',
+      label: 'Estaciones de recorrido',
+      status: stations.length >= 3 ? 'ready' : 'review',
+      evidence: `${stations.length} bookmark(s) F147`,
+    },
+  ];
 }
 
 function medicalPbrProfile(materialCode: string) {
@@ -578,6 +688,60 @@ function RoomRulers({ scene, visible }: { scene: MedicalScene; visible: boolean 
   );
 }
 
+function RouteSegment({ from, to }: { from: [number, number, number]; to: [number, number, number] }) {
+  const start = useMemo(() => new THREE.Vector3(from[0], 0.09, from[2]), [from]);
+  const end = useMemo(() => new THREE.Vector3(to[0], 0.09, to[2]), [to]);
+  const middle = useMemo(() => start.clone().add(end).multiplyScalar(0.5), [end, start]);
+  const direction = useMemo(() => end.clone().sub(start), [end, start]);
+  const length = Math.max(direction.length(), 0.01);
+  const quaternion = useMemo(
+    () => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize()),
+    [direction],
+  );
+
+  return (
+    <mesh position={middle.toArray()} quaternion={quaternion}>
+      <cylinderGeometry args={[0.025, 0.025, length, 12]} />
+      <meshBasicMaterial color="#0f766e" transparent opacity={0.62} />
+    </mesh>
+  );
+}
+
+function InspectionRoute({
+  stations,
+  visible,
+  activeStationId,
+}: {
+  stations: F147InspectionStation[];
+  visible: boolean;
+  activeStationId?: string | null;
+}) {
+  if (!visible || stations.length === 0) return null;
+  return (
+    <group data-testid="f364-three-inspection-route">
+      {stations.slice(0, -1).map((station, index) => (
+        <RouteSegment key={`route-${station.id}`} from={station.position} to={stations[index + 1].position} />
+      ))}
+      {stations.map((station, index) => {
+        const isActive = activeStationId === station.id;
+        return (
+          <group key={`station-marker-${station.id}`} position={[station.position[0], 0.12, station.position[2]]}>
+            <mesh>
+              <cylinderGeometry args={[isActive ? 0.2 : 0.14, isActive ? 0.2 : 0.14, 0.08, 24]} />
+              <meshBasicMaterial color={isActive ? '#f97316' : '#14b8a6'} transparent opacity={0.82} />
+            </mesh>
+            <Html position={[0, 0.42, 0]} center distanceFactor={7}>
+              <div className={`rounded border px-2 py-1 text-[10px] font-semibold shadow ${isActive ? 'border-orange-200 bg-orange-50 text-orange-900' : 'border-teal-200 bg-white/95 text-teal-900'}`}>
+                {index + 1}. {station.label}
+              </div>
+            </Html>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
 function ClinicalFixtures({ scene, mode }: { scene: MedicalScene; mode: Medical3DMode }) {
   const [cx, , cz] = scene.bounds.center;
   const halfWidth = scene.bounds.width / 2;
@@ -742,6 +906,8 @@ function RoomScene({
   realismAids,
   showInspection,
   activeStation,
+  activeStationId,
+  inspectionStations,
   onInspect,
 }: {
   scene: MedicalScene;
@@ -755,6 +921,8 @@ function RoomScene({
   realismAids: Record<RealismAid, boolean>;
   showInspection: boolean;
   activeStation?: F147InspectionStation;
+  activeStationId?: string | null;
+  inspectionStations: F147InspectionStation[];
   onInspect?: (target: InspectionTarget) => void;
 }) {
   const [cx, , cz] = scene.bounds.center;
@@ -801,6 +969,7 @@ function RoomScene({
       <EquipmentFootprints scene={scene} visible={realismAids.equipmentFootprints && (showInspection || visualMode !== 'presentation')} />
       <BeamGuides scene={scene} visible={realismAids.beamGuides && (showInspection || mode === 'dose')} />
       <RoomRulers scene={scene} visible={realismAids.roomRulers && showInspection} />
+      <InspectionRoute stations={inspectionStations} activeStationId={activeStationId} visible={showInspection} />
 
       <gridHelper args={[Math.max(scene.bounds.width, scene.bounds.depth) + 2, 24, '#94a3b8', '#d1d5db']} position={[cx, 0.01, cz]} />
       {!walkthrough && <OrbitControls target={[cx, 1.2, cz]} maxPolarAngle={Math.PI / 2.05} minDistance={2.5} maxDistance={42} makeDefault />}
@@ -828,6 +997,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [photorealWalkthrough, setPhotorealWalkthrough] = useState(false);
   const [lightingPreset, setLightingPreset] = useState<Medical3DLightingPreset>('clinical');
   const [realismAids, setRealismAids] = useState<Record<RealismAid, boolean>>(defaultRealismAids);
+  const [visualWorkflow, setVisualWorkflow] = useState<VisualWorkflowPreset>('overview');
   const [mouseLookEnabled, setMouseLookEnabled] = useState(false);
   const [mouseLookLocked, setMouseLookLocked] = useState(false);
   const [renderEngine, setRenderEngine] = useState<Medical3DRenderEngine>('three-r3f');
@@ -850,22 +1020,42 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
       scene,
       preset,
       mode,
+      visualWorkflow,
       photorealWalkthrough,
       lightingPreset,
       realismAids,
       cadSummary: cadSummary ? { kind: cadSummary.kind, entities: cadSummary.sourceEntities, layers: cadSummary.detectedLayers } : null,
     }),
-    [cadSummary, lightingPreset, mode, photorealWalkthrough, preset, realismAids, scene],
+    [cadSummary, lightingPreset, mode, photorealWalkthrough, preset, realismAids, scene, visualWorkflow],
   );
   const activeStation = useMemo(
     () => f147Inspection.stations.find((station) => station.id === activeStationId),
     [activeStationId, f147Inspection.stations],
+  );
+  const visualWorkflowChecklist = useMemo(
+    () => buildVisualWorkflowChecklist(scene, f147Inspection.stations, realismAids),
+    [f147Inspection.stations, realismAids, scene],
   );
 
   const safePlanName = activeFloorPlan.name.replace(/\W+/g, '_');
 
   const toggleRealismAid = (aid: RealismAid) => {
     setRealismAids((prev) => ({ ...prev, [aid]: !prev[aid] }));
+  };
+
+  const applyVisualWorkflowPreset = (workflowId: VisualWorkflowPreset) => {
+    const workflow = visualWorkflowPresets.find((item) => item.id === workflowId);
+    if (!workflow) return;
+    setVisualWorkflow(workflow.id);
+    setMode(workflow.mode);
+    setWalkthrough(workflow.walkthrough);
+    setPhotorealWalkthrough(workflow.photoreal);
+    setShowInspection(workflow.inspection);
+    setShowCeiling(workflow.ceiling);
+    setLightingPreset(workflow.lighting);
+    setRealismAids(workflow.aids);
+    if (workflow.id === 'walkthrough' && f147Inspection.stations[0]) setActiveStationId(f147Inspection.stations[0].id);
+    if (workflow.id !== 'walkthrough') setMouseLookEnabled(false);
   };
 
   useEffect(() => {
@@ -900,11 +1090,22 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         visualEvidence: {
           schema: 'radshield-mx.medical3d.visualEvidence.v1',
           sceneHash,
+          visualWorkflow,
+          visualWorkflowChecklist,
           captureTargets: ['Memoria IA', 'PDF report', 'Evidence Pack', 'CNSNS/UAQ anexos'],
           cameraBookmarkPolicy: 'Use F147 stations plus user snapshot for final visual evidence.',
           visualOnlyDisclaimer: 'La escena 3D es evidencia visual de revision; los calculos firmables se toman del motor de blindaje y sus citas.',
           lightingPreset,
           photorealWalkthrough,
+          stationBookmarks: f147Inspection.stations.map((station, index) => ({
+            order: index + 1,
+            id: station.id,
+            label: station.label,
+            purpose: station.purpose,
+            position: station.position,
+            lookAt: station.lookAt,
+            evidence: station.evidence,
+          })),
         },
         threeR3fInspection: {
           schema: 'radshield-mx.medical3d.three-r3f-inspection.v1',
@@ -983,6 +1184,50 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         equipment: scene.equipment,
         walls: scene.walls,
         zones: scene.zones,
+      }, null, 2),
+      'application/json',
+    );
+  };
+
+  const handleExportVisualWorkflowPack = () => {
+    downloadText(
+      `medical_3d_visual_workflow_${safePlanName}.json`,
+      JSON.stringify({
+        schema: 'radshield-mx.medical3d.visual-workflow.f364.v1',
+        generatedBy: 'RadShield-MX F364 Three/R3F Visual Workflow',
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneHash,
+        activeWorkflow: visualWorkflow,
+        workflows: visualWorkflowPresets.map((workflow) => ({
+          id: workflow.id,
+          label: workflow.label,
+          description: workflow.description,
+          mode: workflow.mode,
+          walkthrough: workflow.walkthrough,
+          photoreal: workflow.photoreal,
+          inspection: workflow.inspection,
+          lighting: workflow.lighting,
+          aids: workflow.aids,
+        })),
+        checklist: visualWorkflowChecklist,
+        stationBookmarks: f147Inspection.stations.map((station, index) => ({
+          order: index + 1,
+          id: station.id,
+          label: station.label,
+          purpose: station.purpose,
+          position: station.position,
+          lookAt: station.lookAt,
+          evidence: station.evidence,
+        })),
+        captureSequence: [
+          'Aplicar Vista general y capturar sala completa.',
+          'Aplicar Barreras y capturar espesores/materiales.',
+          'Aplicar Equipos y validar footprints/isocentro/fuente.',
+          'Aplicar Dosis y capturar heatmap/zonas.',
+          'Aplicar Recorrido y guardar estaciones relevantes.',
+        ],
+        disclaimer: 'Paquete visual no certificable; alimentar Memoria IA/Evidence Pack junto con calculo trazable y citas.',
       }, null, 2),
       'application/json',
     );
@@ -1110,6 +1355,45 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+            </div>
+
+            <div className="space-y-2 rounded border border-emerald-100 bg-emerald-50 p-2" data-testid="f364-three-visual-workflow">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-emerald-900 uppercase">Flujo visual 3D</div>
+                  <div className="text-[9px] text-emerald-800">Presets para capturas, memoria y evidencia.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{visualWorkflow}</Badge>
+              </div>
+              <div className="grid grid-cols-1 gap-1">
+                {visualWorkflowPresets.map((workflow) => (
+                  <button
+                    key={workflow.id}
+                    type="button"
+                    className={`rounded border px-2 py-1.5 text-left text-[10px] transition ${visualWorkflow === workflow.id ? 'border-emerald-300 bg-white text-emerald-950 shadow-sm' : 'border-emerald-100 bg-white/70 text-slate-600 hover:bg-white'}`}
+                    onClick={() => applyVisualWorkflowPreset(workflow.id)}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold">{workflow.label}</span>
+                      <span className="text-[9px]">{workflow.mode}</span>
+                    </div>
+                    <div className="mt-0.5 text-[9px] opacity-80">{workflow.description}</div>
+                  </button>
+                ))}
+              </div>
+              <div className="rounded border border-emerald-100 bg-white/85 p-2 text-[9px] text-slate-600">
+                {visualWorkflowChecklist.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-2 py-0.5">
+                    <span>{item.label}</span>
+                    <span className={item.status === 'ready' ? 'text-emerald-700' : item.status === 'blocked' ? 'text-red-700' : 'text-amber-700'}>
+                      {item.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportVisualWorkflowPack}>
+                <Download className="w-3.5 h-3.5 mr-2" /> Exportar tour visual
+              </Button>
             </div>
 
             <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="f307-f309-render-engine-selector">
@@ -1473,6 +1757,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                     realismAids={realismAids}
                     showInspection={showInspection}
                     activeStation={activeStation}
+                    activeStationId={activeStationId}
+                    inspectionStations={f147Inspection.stations}
                     onInspect={setInspectionTarget}
                   />
                 </Suspense>
@@ -1484,6 +1770,12 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             )}
 
             <div className="absolute left-4 top-4 flex gap-2">
+              <Badge className="bg-emerald-50/95 text-emerald-900 border-emerald-200 shadow-sm" variant="outline">
+                F364: {visualWorkflowPresets.find((workflow) => workflow.id === visualWorkflow)?.label || visualWorkflow}
+              </Badge>
+              <Badge className="bg-emerald-50/95 text-emerald-900 border-emerald-200 shadow-sm" variant="outline">
+                Checklist {visualWorkflowChecklist.filter((item) => item.status === 'ready').length}/{visualWorkflowChecklist.length}
+              </Badge>
               <Badge className="bg-white/90 text-slate-700 border shadow-sm" variant="outline">
                 {walkthrough ? 'WASD/flechas: recorrer' : 'Orbit: click + drag'}
               </Badge>

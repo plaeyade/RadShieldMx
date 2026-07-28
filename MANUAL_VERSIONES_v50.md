@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F364 (2026-07-28) - Three/R3F flujo visual de revision
+
+- Agrega presets visuales 3D para revisar sala completa, barreras, equipos, dosis y recorrido.
+- Dibuja dentro de Three/R3F la ruta de estaciones F147 con marcadores numerados.
+- Muestra checklist de captura visual para evitar que Memoria IA/PDF/Evidence Pack queden sin evidencia basica.
+- Exporta `medical_3d_visual_workflow_*.json` con secuencia de captura, bookmarks, checklist y hash visual.
+- No agrega dependencias ni cambia el motor de calculo.
+- Script: `npm run test:f364:three-visual-workflow`.
+
 # F363 (2026-07-28) - Three/R3F inspeccion y Babylon readiness
 
 - Medical 3D conserva Three/R3F como runtime estable y agrega overlays de inspeccion visual para materiales, equipos, haces y cotas.
