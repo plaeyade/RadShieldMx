@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SidePanelShell from './SidePanelShell';
 
 interface FAQItem { q: string; a: string; category: string; }
 
@@ -25,14 +26,14 @@ export default function FAQPanel({ onClose }: { onClose: () => void }) {
   const filtered = cat === 'Todas' ? FAQS : FAQS.filter(f => f.category === cat);
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[480px] bg-white shadow-2xl border-l border-slate-200 z-50 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-white">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-5 h-5 text-blue-600" />
-          <div><h2 className="text-sm font-bold text-slate-800">Preguntas Frecuentes</h2><p className="text-[10px] text-slate-500">{FAQS.length} preguntas | RadShield-MX v78</p></div>
-        </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
-      </div>
+    <SidePanelShell
+      title="Preguntas Frecuentes"
+      subtitle={`${FAQS.length} preguntas | RadShield-MX v78`}
+      icon={<HelpCircle className="w-5 h-5 text-blue-600" />}
+      widthClass="w-[480px]"
+      accentClass="from-blue-50 to-white"
+      onClose={onClose}
+    >
       {/* Categories */}
       <div className="flex flex-wrap gap-1 px-4 py-2 border-b border-slate-100">
         <button onClick={() => setCat('Todas')} className={cn('text-[10px] px-2 py-1 rounded-full border', cat === 'Todas' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-600 border-slate-200')}>Todas</button>
@@ -50,6 +51,6 @@ export default function FAQPanel({ onClose }: { onClose: () => void }) {
           </div>
         ))}
       </div>
-    </div>
+    </SidePanelShell>
   );
 }

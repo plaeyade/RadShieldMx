@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F377 - Paneles laterales
+
+F377 mejora los paneles que aparecen desde la derecha y pueden tapar el plano.
+
+Paneles cubiertos:
+
+1. **Preguntas Frecuentes.**
+2. **Extension Warehouse / Plugins.**
+3. **RAG Vector Database.**
+4. **Memorias de Calculo.**
+
+Uso:
+
+1. Abra el panel desde su menu o boton correspondiente.
+2. Use **Minimizar** para dejarlo como pastilla compacta y revisar el canvas.
+3. Pulse la pastilla minimizada para restaurar.
+4. Use **Cerrar** para retirar el panel por completo.
+5. En RAG, el boton de refrescar se conserva en el encabezado del panel.
+
+Regla operacional: minimizar un panel lateral no borra datos, filtros ni documentos cargados; solo despeja el area del floorplan.
+
 ## Addendum F376 - Ventanas flotantes sobre el canvas
 
 F376 mejora el trabajo cuando una herramienta queda encima del plano.

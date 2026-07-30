@@ -5,7 +5,7 @@
  * ═══════════════════════════════════════════════════════════
  */
 import { useEffect, useState, useRef } from 'react';
-import { Database, Upload, Globe, Trash2, Download, FileUp, BookOpen, Sparkles, X, Loader2, Search, FileText, RefreshCw, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { Database, Upload, Globe, Trash2, Download, FileUp, BookOpen, Sparkles, X, Loader2, Search, FileText, RefreshCw, CheckCircle, AlertTriangle, Clock, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +48,7 @@ export default function RAGIngestionPanel({ onClose }: Props) {
   const scraper = useWebScraper();
   const [activeTab, setActiveTab] = useState<'docs' | 'ingest' | 'web' | 'jobs'>('docs');
   const [textInput, setTextInput] = useState('');
+  const [f377Minimized, setF377Minimized] = useState(false);
   const [ingestMeta, setIngestMeta] = useState({
     title: '',
     source: '',
@@ -115,7 +116,12 @@ export default function RAGIngestionPanel({ onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[480px] bg-white shadow-2xl border-l border-slate-200 z-50 flex flex-col">
+    <div
+      className={`fixed right-0 z-50 flex bg-white shadow-2xl border border-slate-200 ${f377Minimized ? 'bottom-4 w-[340px] rounded-lg' : 'inset-y-0 w-[480px] border-l flex-col'}`}
+      data-testid="f377-side-panel-shell"
+      data-f377-panel="rag-ingestion"
+      data-f377-side-panel-minimized={f377Minimized ? 'true' : 'false'}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-violet-50 to-white">
         <div className="flex items-center gap-2">
@@ -129,11 +135,21 @@ export default function RAGIngestionPanel({ onClose }: Props) {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => rag.refresh()}>
             <RefreshCw className="w-4 h-4 text-slate-500" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setF377Minimized((value) => !value)} data-testid="f377-side-panel-minimize" title={f377Minimized ? 'Restaurar panel' : 'Minimizar panel'} aria-label={f377Minimized ? 'Restaurar RAG Vector Database' : 'Minimizar RAG Vector Database'}>
+            {f377Minimized ? <Maximize2 className="w-4 h-4 text-slate-500" /> : <Minimize2 className="w-4 h-4 text-slate-500" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} data-testid="f377-side-panel-close" title="Cerrar panel" aria-label="Cerrar RAG Vector Database">
             <X className="w-4 h-4 text-slate-500" />
           </Button>
         </div>
       </div>
+
+      {f377Minimized ? (
+        <button type="button" className="px-4 py-2 text-left text-[11px] font-medium text-slate-600 hover:bg-violet-50" onClick={() => setF377Minimized(false)} data-testid="f377-side-panel-restore">
+          Panel minimizado. Pulse para restaurar.
+        </button>
+      ) : (
+      <>
 
       {/* Stats bar */}
       {rag.stats && (
@@ -375,6 +391,8 @@ export default function RAGIngestionPanel({ onClose }: Props) {
           </span>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

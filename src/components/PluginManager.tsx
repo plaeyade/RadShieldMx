@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Puzzle, Power, Download, Trash2, Star, Globe, Lock } from 'lucide-react';
+import SidePanelShell from './SidePanelShell';
 
 interface Plugin { id: string; name: string; desc: string; author: string; version: string; installed: boolean; active: boolean; category: string; downloads: number; rating: number; official: boolean; }
 
@@ -24,14 +25,14 @@ export default function PluginManager({ onClose }: { onClose: () => void }) {
   const toggleInstall = (id: string) => setPlugins(ps => ps.map(p => p.id === id ? { ...p, installed: !p.installed, active: !p.installed } : p));
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[520px] bg-white shadow-2xl border-l border-slate-200 z-50 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-white">
-        <div className="flex items-center gap-2">
-          <Puzzle className="w-5 h-5 text-purple-600" />
-          <div><h2 className="text-sm font-bold text-slate-800">Extension Warehouse</h2><p className="text-[10px] text-slate-500">{plugins.filter(p => p.installed).length} installed | {plugins.length} available</p></div>
-        </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
-      </div>
+    <SidePanelShell
+      title="Extension Warehouse"
+      subtitle={`${plugins.filter(p => p.installed).length} installed | ${plugins.length} available`}
+      icon={<Puzzle className="w-5 h-5 text-purple-600" />}
+      widthClass="w-[520px]"
+      accentClass="from-purple-50 to-white"
+      onClose={onClose}
+    >
       {/* Categories */}
       <div className="flex gap-1 px-4 py-2 border-b border-slate-100 overflow-x-auto">
         {cats.map(c => <button key={c} onClick={() => setCat(c)} className={`text-[10px] px-2 py-1 rounded-full border whitespace-nowrap ${cat === c ? 'bg-purple-600 text-white border-purple-600' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>{c}</button>)}
@@ -66,6 +67,6 @@ export default function PluginManager({ onClose }: { onClose: () => void }) {
           </div>
         ))}
       </div>
-    </div>
+    </SidePanelShell>
   );
 }

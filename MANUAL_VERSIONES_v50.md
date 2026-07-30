@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F377 (2026-07-30) - Paneles laterales minimizables
+
+- Nuevo `SidePanelShell` para paneles laterales que suelen tapar el plano.
+- FAQ y Extension Warehouse usan el marco comun con minimizar/restaurar/cerrar.
+- RAG Vector Database y Memorias de Calculo agregan controles F377 manteniendo sus acciones internas.
+- Objetivo: poder consultar ayuda, plugins, RAG o memoria sin perder visibilidad del canvas.
+- Guardrail: no modifica renderer, seleccion, snapping, calculo ni DB.
+- Script: `npm run test:f377:side-panels`.
+
 # F376 (2026-07-30) - Ventanas flotantes no bloqueantes
 
 - `DialogShell` conserva arrastre, minimizar, expandir/restaurar y cerrar, ahora con identificadores de QA.

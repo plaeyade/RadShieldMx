@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F377 Side panel controls', current: 'enabled', latest: 'FAQ/plugins/RAG/memory side panels minimizable', status: 'current', description: 'Agrega SidePanelShell y controles de minimizar/restaurar/cerrar para paneles laterales. FAQ, Extension Warehouse, RAG Vector Database y Memorias de Calculo pueden despejar el canvas sin perder estado.' },
   { name: 'F376 Window controls', current: 'enabled', latest: 'non-blocking minimized windows + draggable SourceSelector', status: 'current', description: 'Refuerza ventanas flotantes con minimizar, expandir y cerrar trazables. Al minimizar, el overlay deja pasar clics al canvas. Fuente ahora abre como ventana arrastrable, minimizable, expandible y restaurable.' },
   { name: 'F375 Clean canvas workspace', current: 'enabled', latest: 'CAD Limpio / CAD Guia toggle', status: 'current', description: 'Agrega modo CAD Limpio para ocultar overlays auxiliares grandes y modo CAD Guia para recuperarlos cuando se requiera QA, escenas, mini vistas y export visual. Mantiene dock CAD operativo y tira compacta de estado F375.' },
   { name: 'F374 Quick actions + CAD dock', current: 'repaired', latest: 'sidebar callbacks + toolbar feedback + canvas dock', status: 'current', description: 'Repara accesos rapidos para que ejecuten accion real o dialog fallback, agrega confirmacion visible y crea dock CAD sobre el canvas con Plano, Muro, Fuente, Zona, Calc, 3D y Evidencia. Mantiene renderer base sin reescritura.' },

@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F377 (2026-07-30) - Paneles laterales controlables
+
+- Agrega `SidePanelShell` reutilizable para paneles laterales con minimizar, restaurar y cerrar.
+- Migra FAQ y Extension Warehouse al shell lateral uniforme.
+- Refuerza RAG Vector Database y Memorias de Calculo con controles F377 de minimizar/restaurar/cerrar sin tocar su logica interna.
+- Reduce paneles laterales que obstruyen el canvas al revisar plano, evidencia, RAG o memoria de calculo.
+- Guardrail: no cambia renderer base, eventos CAD ni motores de calculo.
+- Script: `npm run test:f377:side-panels`.
+
 # F376 (2026-07-30) - Controles de ventanas sobre canvas
 
 - Refuerza `DialogShell` para que sus controles de minimizar, expandir y cerrar sean trazables y accesibles.
