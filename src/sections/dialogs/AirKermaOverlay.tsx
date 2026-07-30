@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, FileBarChart, Download, Printer, Eye, ChevronDown } from 'lucide-react';
+import { Download } from 'lucide-react';
+import DialogShell from '@/components/DialogShell';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 
 interface AirKermaPoint {
   x: number; // along barrier (m)
@@ -118,27 +118,23 @@ export default function AirKermaOverlay({ distributions, onClose, onExportPDF }:
   }, [dist, showShielded]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-[#fff7ed]">
-          <div className="flex items-center gap-2">
-            <FileBarChart className="w-5 h-5 text-[#f97316]" />
-            <h2 className="text-sm font-bold text-slate-800">Air Kerma Distribution Overlay</h2>
-            <span className="text-[10px] text-slate-400 ml-2">Report-ready overlays for each evaluated barrier</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1" onClick={onExportPDF}><Download className="w-3.5 h-3.5" /> Export PDF</Button>
-            <button
-              aria-label="Cerrar Air Kerma Distribution Overlay"
-              onClick={onClose}
-              className="w-7 h-7 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+    <DialogShell
+      title="Air Kerma Distribution Overlay"
+      subtitle="Report-ready overlays for each evaluated barrier"
+      gradientFrom="from-orange-500"
+      gradientTo="to-amber-500"
+      maxWidth="max-w-5xl"
+      onClose={onClose}
+      footer={(
+        <div className="flex w-full justify-end">
+          <Button size="sm" variant="outline" className="h-8 text-[11px] gap-1" onClick={onExportPDF}>
+            <Download className="w-3.5 h-3.5" />
+            Export PDF
+          </Button>
         </div>
-
-        <div className="flex flex-1 overflow-hidden">
+      )}
+    >
+        <div className="flex min-h-[520px] overflow-hidden rounded-lg border border-slate-200" data-testid="f380-air-kerma-overlay-dialogshell">
           {/* Barrier Selector */}
           <div className="w-56 border-r border-slate-200 bg-slate-50 overflow-auto">
             <div className="p-3">
@@ -186,7 +182,6 @@ export default function AirKermaOverlay({ distributions, onClose, onExportPDF }:
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </DialogShell>
   );
 }

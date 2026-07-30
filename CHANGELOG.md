@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F380 (2026-07-30) - Air Kerma Overlay en ventana controlable
+
+- Migra `AirKermaOverlay` del overlay fullscreen legacy a `DialogShell`.
+- Conserva selector de barreras, grafica canvas, curva sin blindaje, curva blindada, meta de diseno, metricas y accion **Export PDF**.
+- El overlay ahora hereda arrastre, minimizar, expandir/restaurar, cerrar y pass-through al minimizar.
+- Cierra el segundo candidato P0 de la auditoria F378 sin tocar formulas ni distribuciones de kerma.
+- Script: `npm run test:f380:air-kerma-overlay`.
+
 # F379 (2026-07-30) - Barrier Editor en ventana controlable
 
 - Migra `BarrierEditor` del overlay fullscreen legacy a `DialogShell`.

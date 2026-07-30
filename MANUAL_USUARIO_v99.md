@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F380 - Overlay de Air Kerma
+
+F380 convierte el overlay de distribucion de kerma en aire en una ventana controlable.
+
+Uso:
+
+1. Abra **Air Kerma Overlay** desde el flujo de blindaje o herramientas de verificacion.
+2. Seleccione la barrera en la lista izquierda.
+3. Revise la curva roja de kerma sin blindaje y la curva verde de kerma blindada.
+4. Active o desactive **Show Shielded** para comparar visualmente el efecto de la barrera.
+5. Revise meta de diseno, maximo kerma, espesor maximo y material.
+6. Use **Export PDF** para generar evidencia visual del overlay.
+7. Use **Minimizar** si necesita volver al canvas sin cerrar el analisis.
+
+Regla operacional: Air Kerma Overlay debe funcionar como instrumento de revision junto al plano; si tapa el layout, arrastrelo, minimicelo o expandalo segun la tarea.
+
 ## Addendum F379 - Editor de barreras
 
 F379 convierte el editor de barreras en una ventana controlable.

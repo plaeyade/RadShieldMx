@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F380 (2026-07-30) - Air Kerma Overlay controlable
+
+- `AirKermaOverlay` deja de usar overlay fullscreen legacy.
+- Ahora se muestra dentro de `DialogShell`, con arrastre, minimizar, expandir/restaurar y cerrar.
+- Se mantienen selector de barreras, grafica de kerma, curva blindada, linea de meta de diseno, metricas y exportacion PDF.
+- Esta fase cierra el segundo P0 de F378.
+- Script: `npm run test:f380:air-kerma-overlay`.
+
 # F379 (2026-07-30) - Barrier Editor controlable
 
 - `BarrierEditor` deja de usar overlay fullscreen legacy.
