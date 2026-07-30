@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F374 (2026-07-30) - Acciones rapidas y dock CAD
+
+- Sidebar: los accesos **Calc**, **UAQ**, **Mem**, **Mat** y **DXF** ahora tienen ejecucion directa, fallback de dialogo y confirmacion visible.
+- Toolbar: favoritos persistentes **Memoria**, **Evidencia**, **Validar** y **Heatmap** muestran confirmacion al enviarse.
+- Canvas: nuevo dock CAD inferior con **Plano**, **Muro**, **Fuente**, **Zona**, **Calc**, **3D** y **Evid**.
+- Objetivo: reducir botones desconectados y dar al usuario una ruta operacional clara desde plano a calculo/evidencia.
+- Guardrail: no se reescribe el renderer base ni el sistema de eventos profundo en esta fase.
+- Scripts: `npm run test:f374:quick-canvas` y `npm run test:f374:quick-canvas-smoke`.
+
 # F371-F372 (2026-07-28) - Smoke beta visual y paquete estatico
 
 - F371 valida en navegador la superficie principal antes de publicar: canvas visible, sidebar estable, menu Archivo alineado, boton derecho del canvas, Memoria IA, PDF Report, Evidence Pack y Medical 3D.

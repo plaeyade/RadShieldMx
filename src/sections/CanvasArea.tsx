@@ -237,6 +237,7 @@ export default function CanvasArea({
   const [savedViews, setSavedViews] = useState<F216SavedCanvasView[]>(loadF216SavedViews);
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
+  const [lastCanvasCommand, setLastCanvasCommand] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -463,6 +464,19 @@ export default function CanvasArea({
   const runContextMenuAction = (action?: () => void) => {
     action?.();
     setContextMenu(null);
+  };
+
+  const runCanvasCommand = (label: string, action?: () => void) => {
+    try {
+      if (!action) throw new Error('accion no configurada');
+      action();
+      setLastCanvasCommand(label);
+      toast.success(`${label}: accion enviada`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'error desconocido';
+      setLastCanvasCommand(`${label}: error`);
+      toast.error(`${label}: ${message}`);
+    }
   };
 
   const applyVisualMode = (mode: F191VisualMode) => {
@@ -851,6 +865,15 @@ export default function CanvasArea({
       action: undefined,
       icon: Database,
     },
+  ];
+  const f374CanvasCommands = [
+    { id: 'plan', label: 'Plano', detail: 'Importar plano base', icon: Upload, action: onImportFloorPlan },
+    { id: 'barrier', label: 'Muro', detail: 'Dibujar barrera', icon: Box, action: () => activateCanvasTool('barrier') },
+    { id: 'source', label: 'Fuente', detail: 'Colocar equipo/fuente', icon: Atom, action: () => activateCanvasTool('source') },
+    { id: 'region', label: 'Zona', detail: 'Dibujar zona controlada/publica', icon: Shield, action: () => activateCanvasTool('region') },
+    { id: 'calc', label: 'Calc', detail: 'Ejecutar calculo', icon: Calculator, action: onRunCalculations },
+    { id: 'medical3d', label: '3D', detail: 'Inspeccion medica 3D', icon: Stethoscope, action: onOpenMedical3D ?? onOpen3DViewer },
+    { id: 'evidence', label: 'Evid', detail: 'Abrir evidencia', icon: FileSearch, action: onOpenEvidencePack },
   ];
 
   return (
@@ -1397,6 +1420,48 @@ export default function CanvasArea({
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ zIndex: 5 }}
             />
+
+            <div
+              data-testid="f374-canvas-command-dock"
+              className="absolute bottom-3 left-1/2 z-30 flex max-w-[calc(100%-32px)] -translate-x-1/2 items-center gap-1 rounded-lg border border-slate-200 bg-white/94 px-2 py-1.5 shadow-xl backdrop-blur"
+              aria-label="Dock de comandos principales del canvas"
+            >
+              <div className="hidden border-r border-slate-200 pr-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 md:block">
+                CAD
+              </div>
+              {f374CanvasCommands.map((command) => {
+                const Icon = command.icon;
+                const isToolCommand = command.id === activeTool;
+                return (
+                  <button
+                    key={command.id}
+                    type="button"
+                    data-testid={`f374-command-${command.id}`}
+                    className={`h-8 min-w-12 rounded-md border px-2 text-[10px] font-bold transition-colors ${
+                      isToolCommand
+                        ? 'border-orange-200 bg-orange-50 text-orange-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white hover:text-orange-700'
+                    } disabled:cursor-not-allowed disabled:opacity-40`}
+                    onClick={() => runCanvasCommand(command.detail, command.action)}
+                    disabled={!command.action}
+                    title={command.detail}
+                    aria-label={command.detail}
+                  >
+                    <span className="flex items-center justify-center gap-1">
+                      <Icon className="h-3.5 w-3.5" />
+                      {command.label}
+                    </span>
+                  </button>
+                );
+              })}
+              <div
+                data-testid="f374-canvas-command-status"
+                className="hidden min-w-28 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-[9px] font-medium text-slate-500 lg:block"
+                title="Ultimo comando enviado desde el dock CAD"
+              >
+                {lastCanvasCommand ? `Ultimo: ${lastCanvasCommand}` : 'Listo para diseno'}
+              </div>
+            </div>
 
             {contextMenu && (
               <div

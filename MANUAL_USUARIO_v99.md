@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F374 - Accesos rapidos y dock CAD operativo
+
+F374 corrige el problema reportado donde los botones de acceso rapido se abrian visualmente pero no ejecutaban una accion clara.
+
+Accesos rapidos de la sidebar:
+
+1. **Calc:** ejecuta el calculo de blindaje del proyecto actual; si el callback no esta disponible, abre el dialogo de calculo.
+2. **UAQ:** abre el flujo de atenuacion/blindaje asociado.
+3. **Mem:** abre Memoria IA.
+4. **Mat:** abre la toolbox de materiales con TVL, densidad, peso, costo, tiempo y carga estructural.
+5. **DXF:** abre el visor/importador DXF o fallback DWG externo cuando aplique.
+
+Despues de cada clic la sidebar muestra **Ultima accion**. Si una accion no esta disponible, la app debe mostrar un aviso en lugar de quedarse muda.
+
+Dock CAD del canvas:
+
+1. **Plano:** importar plano base.
+2. **Muro:** activar dibujo de barreras.
+3. **Fuente:** colocar equipo o fuente radiologica.
+4. **Zona:** trazar zona controlada, publica u ocupada.
+5. **Calc:** ejecutar calculo con geometria, fuentes, materiales y factores actuales.
+6. **3D:** abrir inspeccion medica 3D.
+7. **Evid:** abrir Evidence Pack.
+
+El dock CAD no reemplaza el renderer; organiza acciones de uso frecuente sin tapar completamente el layout. La reescritura del renderer/eventos base queda para una fase posterior con pruebas E2E dedicadas.
+
 ## Addendum F361 - Reparacion post-beta de operacion visual
 
 F361 corrige los puntos que impedian usar la beta con confianza: botones de acceso rapido sin accion, menu Archivo desfasado, canvas sin boton derecho, ventanas que tapaban el plano y Update Center sin reflejar los cambios recientes.

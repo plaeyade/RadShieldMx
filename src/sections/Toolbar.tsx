@@ -18,6 +18,7 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '@/comp
 import { F92_REAL_WORKFLOW } from '@/lib/f92RealWorkflow';
 import { F113_MODALITY_PROFILES, type F113ModalityProfileId } from '@/lib/f113ModalityProfiles';
 import { useAppStore } from '@/stores/appStore';
+import { toast } from 'sonner';
 
 /* ─── mini icon component ─── */
 function MiniIcon({ icon: Icon, color }: { icon: ComponentType<{className?: string}>, color: string }) {
@@ -399,18 +400,26 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
   const f112ZoneCount = f112Plan?.regions?.length ?? f112Plan?.occupiedRegions?.length ?? 0;
   const f112ResultCount = Array.isArray(barrierResults) ? barrierResults.length : 0;
   const f112LayoutReady = Boolean(f112Plan?.imageUrl) || f112BarrierCount > 0;
-  const invoke = (handler?: () => void, fallbackDialog?: string) => () => {
-    if (typeof handler === 'function') {
-      handler();
-      return;
+  const invoke = (handler?: () => void, fallbackDialog?: string, label = 'Accion') => () => {
+    try {
+      if (typeof handler === 'function') {
+        handler();
+      } else if (fallbackDialog) {
+        openDialog(fallbackDialog as any);
+      } else {
+        throw new Error('accion no configurada');
+      }
+      toast.success(`${label}: accion enviada`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'error desconocido';
+      toast.error(`${label}: ${message}`);
     }
-    if (fallbackDialog) openDialog(fallbackDialog as any);
   };
   const f112Favorites = useMemo(() => [
-    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: invoke(onMemoriaAI, 'memoriaAI'), tip: 'Memoria IA' },
-    { id: 'evidence' as const, label: 'Evidencia', icon: FileSearch, className: 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-100', onClick: invoke(onEvidencePack, 'evidencePack'), tip: 'Evidence Pack' },
-    { id: 'validate' as const, label: 'Validar', icon: ShieldCheck, className: 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-100', onClick: invoke(onNCRPValidation, 'ncrpValidation'), tip: 'NCRP Validation' },
-    { id: 'heatmap' as const, label: 'Heatmap', icon: Crosshair, className: 'text-red-700 bg-red-50 hover:bg-red-100 border-red-100', onClick: invoke(onDoseMap, 'doseMap'), tip: 'Mapa de dosis/isodosis' },
+    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: invoke(onMemoriaAI, 'memoriaAI', 'Memoria IA'), tip: 'Memoria IA' },
+    { id: 'evidence' as const, label: 'Evidencia', icon: FileSearch, className: 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-100', onClick: invoke(onEvidencePack, 'evidencePack', 'Evidence Pack'), tip: 'Evidence Pack' },
+    { id: 'validate' as const, label: 'Validar', icon: ShieldCheck, className: 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-100', onClick: invoke(onNCRPValidation, 'ncrpValidation', 'Validacion NCRP'), tip: 'NCRP Validation' },
+    { id: 'heatmap' as const, label: 'Heatmap', icon: Crosshair, className: 'text-red-700 bg-red-50 hover:bg-red-100 border-red-100', onClick: invoke(onDoseMap, 'doseMap', 'Heatmap'), tip: 'Mapa de dosis/isodosis' },
   ], [onDoseMap, onEvidencePack, onMemoriaAI, onNCRPValidation]);
 
   const toggleF112Favorite = (id: F112FavoriteId) => {
@@ -1068,7 +1077,14 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                 <Tooltip key={item.id}>
                   <TooltipTrigger asChild>
                     <div className="flex items-center rounded-md border border-slate-100 bg-white shadow-sm">
-                      <Button variant="ghost" size="sm" className={`h-6 px-2 text-[9px] border-r border-slate-100 gap-1 ${item.className}`} onClick={item.onClick}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`h-6 px-2 text-[9px] border-r border-slate-100 gap-1 ${item.className}`}
+                        onClick={item.onClick}
+                        title={`Ejecutar acceso rapido: ${item.tip}`}
+                        data-testid={`f374-toolbar-quick-${item.id}`}
+                      >
                         <Icon className="w-3 h-3" />{item.label}
                       </Button>
                       <button

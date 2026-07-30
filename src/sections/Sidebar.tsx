@@ -28,6 +28,7 @@ import {
 import type { CriticalPoint, FloorPlan, Barrier } from '@/types/radshield';
 import { applyShieldingPresetToBarrier, SHIELDING_PRESETS } from '@/lib/canvasF85Workflow';
 import { CANVAS_TOOL_ICON_PROFILES, getCanvasToolIconProfile } from '@/lib/f98UnifiedIconography';
+import { toast } from 'sonner';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -222,6 +223,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
+  const [lastQuickAction, setLastQuickAction] = useState<string | null>(null);
   const open = useAppStore((s) => s.open);
 
   useEffect(() => {
@@ -233,13 +235,34 @@ export default function Sidebar({
   };
 
   /* ─── Quick action dispatcher ─── */
+  const runQuickAction = (label: string, handler?: () => void, fallbackDialog?: string) => {
+    try {
+      if (handler) {
+        handler();
+      } else if (fallbackDialog) {
+        open(fallbackDialog as any);
+      } else {
+        throw new Error('accion no configurada');
+      }
+      setLastQuickAction(label);
+      toast.success(`${label}: accion enviada`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'error desconocido';
+      setLastQuickAction(`${label}: error`);
+      toast.error(`${label}: ${message}`);
+    }
+  };
+
   const dispatchQuickAction = (action: string) => {
     switch (action) {
-      case 'calculate': onRunCalculations?.(); break;
-      case 'uaq': onUAQ?.(); break;
-      case 'memoria': onMemoriaAI?.(); break;
-      case 'material': open('materialComparison'); break;
-      case 'dxf': onDXFViewer?.(); break;
+      case 'calculate': runQuickAction('Calcular blindaje', onRunCalculations, 'dashboardCalc'); break;
+      case 'uaq': runQuickAction('UAQ / Atenuacion', onUAQ, 'shieldingCalculator'); break;
+      case 'memoria': runQuickAction('Memoria IA', onMemoriaAI, 'memoriaAI'); break;
+      case 'material': runQuickAction('Toolbox materiales', () => open('materialComparison')); break;
+      case 'dxf': runQuickAction('DXF / DWG', onDXFViewer, 'dxfViewer'); break;
+      default:
+        setLastQuickAction('Accion no configurada');
+        toast.warning('Accion rapida no configurada');
     }
   };
 
@@ -331,6 +354,13 @@ export default function Sidebar({
                 color={a.color} bgColor={a.bg} size="sm"
                 onClick={() => dispatchQuickAction(a.action)} />
             ))}
+          </div>
+          <div
+            data-testid="f374-quick-action-status"
+            className="mt-1 rounded-md border border-orange-100 bg-white/80 px-2 py-1 text-[9px] font-medium text-slate-500"
+            title="Confirmacion de que el acceso rapido envio una accion real o abrio su fallback"
+          >
+            {lastQuickAction ? `Ultima accion: ${lastQuickAction}` : 'Accesos conectados: calculo, UAQ, Memoria IA, materiales y DXF.'}
           </div>
         </div>
 

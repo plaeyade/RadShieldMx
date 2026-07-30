@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F374 (2026-07-30) - Accesos rapidos ejecutables + dock CAD del canvas
+
+- Repara accesos rapidos de Sidebar para que ejecuten callback real o abran un dialog fallback: Calcular, UAQ, Memoria IA, Materiales y DXF/DWG.
+- Agrega confirmacion visible y toast de accion enviada para evitar botones mudos.
+- Refuerza favoritos superiores F112 con confirmacion y `data-testid` de prueba.
+- Agrega dock CAD F374 sobre el canvas con comandos reales: Plano, Muro, Fuente, Zona, Calc, 3D y Evidencia.
+- No cambia renderer base ni eventos profundos; prepara ese trabajo para una fase separada de bajo control.
+- Scripts: `npm run test:f374:quick-canvas` y `npm run test:f374:quick-canvas-smoke`.
+
 # F371-F372 (2026-07-28) - Beta visual smoke + static package
 
 - F371 agrega smoke Playwright visual para shell, canvas, sidebar, menu Archivo, boton derecho, Memoria IA, PDF Report, Evidence Pack y Medical 3D.
