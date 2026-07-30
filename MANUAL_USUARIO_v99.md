@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F379 - Editor de barreras
+
+F379 convierte el editor de barreras en una ventana controlable.
+
+Uso:
+
+1. Abra **Barrier Editor** desde la barra de herramientas o flujo de blindaje.
+2. Seleccione una barrera en la lista izquierda.
+3. Edite supuestos: nombre, tipo, factor de uso, ocupacion, meta de diseno y workload.
+4. Edite material y espesores equivalentes.
+5. Use **Minimizar** si necesita revisar el canvas sin cerrar el editor.
+6. Use **Expandir** cuando necesite revisar la tabla completa.
+7. Pulse **Generate Recommendations** para recalcular/recomendar con los datos actuales.
+
+Regla operacional: el editor ya no debe bloquear permanentemente el floorplan; si tapa una zona de dibujo, arrastrelo o minimicelo.
+
 ## Addendum F378 - Modales fullscreen legacy
 
 F378 no cambia el comportamiento clinico ni de calculo. Su funcion es ordenar que ventanas antiguas deben seguir a pantalla completa y cuales deben migrarse en fases posteriores.

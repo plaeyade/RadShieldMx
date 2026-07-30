@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F379 (2026-07-30) - Barrier Editor controlable
+
+- `BarrierEditor` deja de usar overlay fullscreen legacy.
+- Ahora se muestra dentro de `DialogShell`, con arrastre, minimizar, expandir/restaurar y cerrar.
+- Se mantienen las funciones de edicion: nombre, tipo de barrera, U, T, P, workload, material, espesor requerido y equivalentes.
+- La accion **Generate Recommendations** permanece en el footer del dialog.
+- Esta fase cierra el primer P0 de F378.
+- Script: `npm run test:f379:barrier-editor`.
+
 # F378 (2026-07-30) - Politica de modales fullscreen
 
 - Se agrega una auditoria formal de overlays y modales legacy.

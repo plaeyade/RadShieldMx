@@ -462,6 +462,7 @@
     "test:f377:side-panels": "node scripts/check-f377-side-panel-controls-contracts.mjs",
     "prepare:f378:legacy-modal-audit": "node scripts/f378-legacy-modal-audit.mjs",
     "test:f378:legacy-modal-audit": "node scripts/check-f378-legacy-modal-audit-contracts.mjs",
+    "test:f379:barrier-editor": "node scripts/check-f379-barrier-editor-dialogshell-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

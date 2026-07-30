@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F379 Barrier Editor window', current: 'enabled', latest: 'BarrierEditor migrated to DialogShell', status: 'current', description: 'Migra Barrier Editor desde overlay fullscreen legacy hacia DialogShell. Mantiene supuestos, materiales, espesores y Generate Recommendations, pero ahora permite arrastrar, minimizar, expandir y cerrar sin bloquear el canvas.' },
   { name: 'F378 Legacy modal audit', current: 'ready', latest: 'fullscreen policy + migration priority report', status: 'current', description: 'Clasifica modales fullscreen legacy: workflows documentales/regulatorios pueden seguir fullscreen; herramientas espaciales del canvas como Barrier Editor, Air Kerma Overlay y Control Points pasan a cola P0 para migrar a ventanas controlables.' },
   { name: 'F377 Side panel controls', current: 'enabled', latest: 'FAQ/plugins/RAG/memory side panels minimizable', status: 'current', description: 'Agrega SidePanelShell y controles de minimizar/restaurar/cerrar para paneles laterales. FAQ, Extension Warehouse, RAG Vector Database y Memorias de Calculo pueden despejar el canvas sin perder estado.' },
   { name: 'F376 Window controls', current: 'enabled', latest: 'non-blocking minimized windows + draggable SourceSelector', status: 'current', description: 'Refuerza ventanas flotantes con minimizar, expandir y cerrar trazables. Al minimizar, el overlay deja pasar clics al canvas. Fuente ahora abre como ventana arrastrable, minimizable, expandible y restaurable.' },

@@ -1,13 +1,12 @@
-import { useState, useMemo } from 'react';
-import { X, Save, PenTool, Box, CheckCircle2, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+import { PenTool, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { OCCUPANCY_FACTORS, DESIGN_GOALS, MATERIALS } from '@/types/radshield';
 import type { Barrier } from '@/types/radshield';
+import DialogShell from '@/components/DialogShell';
 
 function getThicknessValue(thickness: Barrier['requiredThickness_mm'], materialCode?: string): number {
   if (typeof thickness === 'number') return thickness;
@@ -34,28 +33,45 @@ export default function BarrierEditor({ barriers, onUpdateBarrier, onClose, onGe
 
   if (!barrier) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md">
+      <DialogShell
+        title="Barrier Assumptions & Materials Editor"
+        subtitle="No barriers available"
+        gradientFrom="from-orange-500"
+        gradientTo="to-amber-500"
+        maxWidth="max-w-md"
+        onClose={onClose}
+      >
+        <div className="p-2" data-testid="f379-barrier-editor-empty">
           <p className="text-slate-600">No barriers to edit. Create barriers on the floor plan first.</p>
           <Button className="mt-4" onClick={onClose}>Close</Button>
         </div>
-      </div>
+      </DialogShell>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-[#fff7ed]">
-          <div className="flex items-center gap-2">
-            <PenTool className="w-5 h-5 text-[#f97316]" />
-            <h2 className="text-sm font-bold text-slate-800">Barrier Assumptions & Materials Editor</h2>
+    <DialogShell
+      title="Barrier Assumptions & Materials Editor"
+      subtitle="Editar supuestos, ocupacion, materiales y recomendaciones"
+      gradientFrom="from-orange-500"
+      gradientTo="to-amber-500"
+      maxWidth="max-w-4xl"
+      onClose={onClose}
+      footer={(
+        <>
+          <p className="text-[10px] text-slate-400">
+            Edit barrier assumptions, materials, and occupancies before generating recommendations.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="text-[11px]" onClick={onClose}>Cancel</Button>
+            <Button size="sm" className="bg-[#f97316] hover:bg-[#ea580c] text-white text-[11px] gap-1" onClick={() => { onGenerateRecommendations(); onClose(); }}>
+              <CheckCircle2 className="w-3.5 h-3.5" /> Generate Recommendations
+            </Button>
           </div>
-          <button aria-label="Cerrar Barrier Assumptions Editor" onClick={onClose} className="w-7 h-7 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100"><X className="w-4 h-4" /></button>
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
+        </>
+      )}
+    >
+        <div className="flex min-h-[520px] overflow-hidden rounded-lg border border-slate-200" data-testid="f379-barrier-editor-dialogshell">
           {/* Barrier List */}
           <div className="w-56 border-r border-slate-200 bg-slate-50 overflow-auto">
             <div className="p-3">
@@ -217,20 +233,6 @@ export default function BarrierEditor({ barriers, onUpdateBarrier, onClose, onGe
             </div>
           </div>
         </div>
-
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50">
-          <p className="text-[10px] text-slate-400">
-            Edit barrier assumptions, materials, and occupancies before generating recommendations.
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="text-[11px]" onClick={onClose}>Cancel</Button>
-            <Button size="sm" className="bg-[#f97316] hover:bg-[#ea580c] text-white text-[11px] gap-1" onClick={() => { onGenerateRecommendations(); onClose(); }}>
-              <CheckCircle2 className="w-3.5 h-3.5" /> Generate Recommendations
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </DialogShell>
   );
 }
