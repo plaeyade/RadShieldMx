@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { X, Radiation, Zap, Brain, Atom, Scan, Microscope, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check } from 'lucide-react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
+import { X, Radiation, Zap, Brain, Atom, Scan, Microscope, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check, Maximize2, Minimize2, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export interface SourceItem {
@@ -59,6 +60,45 @@ export default function SourceSelector({ onSelect, onClose, selectedId }: Props)
   const [activeCat, setActiveCat] = useState<string | 'all'>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [minimized, setMinimized] = useState(false);
+  const [maximized, setMaximized] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+
+  const shellStyle = useMemo(() => {
+    if (maximized) return { transform: 'none' };
+    return { transform: `translate(${position.x}px, ${position.y}px)` };
+  }, [maximized, position.x, position.y]);
+
+  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (maximized) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('button,input')) return;
+    dragRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: position.x,
+      originY: position.y,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, [maximized, position.x, position.y]);
+
+  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    setPosition({
+      x: dragRef.current.originX + event.clientX - dragRef.current.startX,
+      y: dragRef.current.originY + event.clientY - dragRef.current.startY,
+    });
+  }, []);
+
+  const handlePointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = null;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture may already be released by the browser.
+    }
+  }, []);
 
   const cats = [...new Set(CATALOG.map(s => s.category))];
   const filtered = CATALOG.filter(s => {
@@ -68,26 +108,87 @@ export default function SourceSelector({ onSelect, onClose, selectedId }: Props)
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-[500px] max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 ${minimized ? 'pointer-events-none bg-transparent' : 'bg-black/30'}`}
+      onClick={minimized ? undefined : onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Selector de fuente radiologica"
+      data-testid="f376-source-selector-overlay"
+      data-f376-source-pass-through={minimized ? 'true' : 'false'}
+    >
+      <div
+        className={`pointer-events-auto bg-white rounded-xl shadow-2xl border border-slate-200 ${maximized ? 'w-[calc(100vw-32px)] h-[calc(100vh-32px)]' : minimized ? 'fixed bottom-4 right-4 w-[360px]' : 'w-[500px] max-h-[85vh]'} flex flex-col overflow-hidden`}
+        onClick={e => e.stopPropagation()}
+        style={minimized ? undefined : shellStyle}
+        data-testid="f376-source-selector-window"
+        data-f376-source-minimized={minimized ? 'true' : 'false'}
+        data-f376-source-maximized={maximized ? 'true' : 'false'}
+      >
+        <div
+          className="flex cursor-move select-none items-center justify-between px-4 py-3 border-b border-slate-100"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          title="Arrastrar selector de fuentes"
+        >
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-orange-100"><Radiation className="w-5 h-5 text-orange-600" /></div>
             <div>
-              <h3 className="font-semibold text-sm text-slate-800">Fuente de Radiacion</h3>
+              <h3 className="flex items-center gap-1.5 font-semibold text-sm text-slate-800"><Move className="h-3.5 w-3.5 text-slate-400" />Fuente de Radiacion</h3>
               <p className="text-[10px] text-slate-400">18 fuentes reales — normativa aplicada automaticamente</p>
             </div>
           </div>
-          <button className="text-slate-400 hover:text-slate-600" onClick={onClose}><X className="w-4 h-4" /></button>
+          <div className="flex items-center gap-1">
+            <button
+              className="rounded p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              onClick={() => setMinimized((value) => !value)}
+              aria-label={minimized ? 'Restaurar selector de fuentes' : 'Minimizar selector de fuentes'}
+              title={minimized ? 'Restaurar selector de fuentes' : 'Minimizar selector de fuentes'}
+              data-testid="f376-source-selector-minimize"
+            >
+              <Minimize2 className="w-4 h-4" />
+            </button>
+            <button
+              className="rounded p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              onClick={() => {
+                setMaximized((value) => !value);
+                setMinimized(false);
+              }}
+              aria-label={maximized ? 'Restaurar tamano del selector de fuentes' : 'Expandir selector de fuentes'}
+              title={maximized ? 'Restaurar tamano' : 'Expandir selector de fuentes'}
+              data-testid="f376-source-selector-expand"
+            >
+              <Maximize2 className="w-4 h-4" />
+            </button>
+            <button
+              className="rounded p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              onClick={onClose}
+              aria-label="Cerrar selector de fuentes"
+              title="Cerrar selector de fuentes"
+              data-testid="f376-source-selector-close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-        <div className="px-4 py-2 border-b border-slate-100">
+        {minimized && (
+          <button
+            className="px-4 py-2 text-left text-[11px] font-medium text-slate-600 hover:bg-orange-50"
+            onClick={() => setMinimized(false)}
+            data-testid="f376-source-selector-minimized"
+          >
+            Selector minimizado. Pulse para restaurar y continuar colocando fuentes.
+          </button>
+        )}
+        {!minimized && <div className="px-4 py-2 border-b border-slate-100">
           <input type="text" placeholder="Buscar nombre, energia, normativa..." className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200" value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <div className="px-3 py-2 border-b border-slate-100 flex gap-1 flex-wrap">
+        </div>}
+        {!minimized && <div className="px-3 py-2 border-b border-slate-100 flex gap-1 flex-wrap">
           <button className={`px-2 py-1 rounded-full text-[10px] font-medium ${activeCat === 'all' ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} onClick={() => setActiveCat('all')}>Todas ({CATALOG.length})</button>
           {cats.map(cat => { const c = CAT_CFG[cat]; return <button key={cat} className={`px-2 py-1 rounded-full text-[10px] font-medium flex items-center gap-1 ${activeCat === cat ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} onClick={() => setActiveCat(cat)}>{c?.icon}{c?.label}</button>; })}
-        </div>
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+        </div>}
+        {!minimized && <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
           {filtered.map(s => { const c = CAT_CFG[s.category]; const isExp = expanded === s.id; const isSel = selectedId === s.id; return (
             <div key={s.id} className={`rounded-lg border ${isSel ? 'border-orange-300 bg-orange-50' : 'border-slate-100'}`}>
               <div className="flex items-center gap-2 px-3 py-2 cursor-pointer" onClick={() => setExpanded(isExp ? null : s.id)}>
@@ -115,8 +216,8 @@ export default function SourceSelector({ onSelect, onClose, selectedId }: Props)
               )}
             </div>
           ); })}
-        </div>
-        <div className="px-4 py-2 border-t border-slate-100 bg-slate-50 rounded-b-xl text-[9px] text-slate-400">Los calculos se ajustan automaticamente a la normativa correspondiente</div>
+        </div>}
+        {!minimized && <div className="px-4 py-2 border-t border-slate-100 bg-slate-50 rounded-b-xl text-[9px] text-slate-400">Los calculos se ajustan automaticamente a la normativa correspondiente</div>}
       </div>
     </div>
   );

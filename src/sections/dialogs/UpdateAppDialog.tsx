@@ -92,6 +92,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F376 Window controls', current: 'enabled', latest: 'non-blocking minimized windows + draggable SourceSelector', status: 'current', description: 'Refuerza ventanas flotantes con minimizar, expandir y cerrar trazables. Al minimizar, el overlay deja pasar clics al canvas. Fuente ahora abre como ventana arrastrable, minimizable, expandible y restaurable.' },
   { name: 'F375 Clean canvas workspace', current: 'enabled', latest: 'CAD Limpio / CAD Guia toggle', status: 'current', description: 'Agrega modo CAD Limpio para ocultar overlays auxiliares grandes y modo CAD Guia para recuperarlos cuando se requiera QA, escenas, mini vistas y export visual. Mantiene dock CAD operativo y tira compacta de estado F375.' },
   { name: 'F374 Quick actions + CAD dock', current: 'repaired', latest: 'sidebar callbacks + toolbar feedback + canvas dock', status: 'current', description: 'Repara accesos rapidos para que ejecuten accion real o dialog fallback, agrega confirmacion visible y crea dock CAD sobre el canvas con Plano, Muro, Fuente, Zona, Calc, 3D y Evidencia. Mantiene renderer base sin reescritura.' },
   { name: 'F371-F372 Beta visual + static package', current: 'ready', latest: 'screenshots + ZIP beta', status: 'current', description: 'Valida en navegador canvas, sidebar, Archivo, boton derecho, Memoria IA, PDF Report, Evidence Pack y Medical 3D. Genera capturas reales, lamina Three/R3F + Unity + memoria y paquete ZIP estatico para beta frontend.' },

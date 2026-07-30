@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F376 (2026-07-30) - Ventanas flotantes no bloqueantes
+
+- `DialogShell` conserva arrastre, minimizar, expandir/restaurar y cerrar, ahora con identificadores de QA.
+- Al minimizar una ventana, el fondo deja de interceptar clics y permite seguir operando el canvas.
+- `SourceSelector` ya no es un modal rigido: se puede arrastrar, minimizar, expandir/restaurar y cerrar.
+- El selector minimizado queda como una pastilla compacta en la esquina inferior derecha.
+- Objetivo: evitar que Fuente, calculos o dialogos tapen el plano y obliguen a reiniciar la sesion.
+- Scripts: `npm run test:f376:window-controls` y `npm run test:f376:window-controls-smoke`.
+
 # F375 (2026-07-30) - Modo canvas limpio / guia
 
 - Nuevo modo **CAD Limpio:** oculta overlays auxiliares grandes y deja una tira compacta con estado del flujo.

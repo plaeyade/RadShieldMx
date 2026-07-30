@@ -1,5 +1,27 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F376 - Ventanas flotantes sobre el canvas
+
+F376 mejora el trabajo cuando una herramienta queda encima del plano.
+
+Uso general de ventanas:
+
+1. Arrastre la ventana desde el encabezado cuando tape el layout.
+2. Pulse **Minimizar** para liberar el canvas sin perder la herramienta.
+3. Mientras esta minimizada, puede seguir usando el dock CAD y el plano.
+4. Pulse la pastilla minimizada para restaurar la ventana.
+5. Use **Expandir** para revisar listas o tablas amplias.
+6. Use **Cerrar** para terminar esa herramienta.
+
+Selector de fuentes:
+
+1. Abra **Fuente** desde el dock CAD.
+2. Busque o filtre por modalidad: diagnostico, terapia, radiocirugia, medicina nuclear, braquiterapia o ciclotron.
+3. Si el selector tapa el plano, minimicelo o arrastrelo.
+4. Seleccione la fuente/equipo para que el flujo use su energia, norma y carga de trabajo base.
+
+Regla operacional: minimizar una ventana no cancela la accion; solo despeja el canvas. Cerrar la ventana si termina el paso.
+
 ## Addendum F375 - Modo limpio y modo guia del canvas
 
 F375 agrega un control superior del canvas para alternar entre dos modos de trabajo:

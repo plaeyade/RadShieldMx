@@ -70,13 +70,15 @@ export default function DialogShell({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-2 ${minimized ? 'pointer-events-none bg-transparent' : 'bg-black/40'}`}
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      data-testid="f376-dialog-overlay"
+      data-f376-dialog-pass-through={minimized ? 'true' : 'false'}
     >
       <div
-        className={`bg-white rounded-lg shadow-2xl w-full ${maximized ? 'max-w-[calc(100vw-24px)] h-[calc(100vh-24px)]' : maxWidth} ${minimized ? 'max-h-[58px]' : 'max-h-[95vh]'} flex flex-col overflow-hidden`}
+        className={`pointer-events-auto bg-white rounded-lg shadow-2xl w-full ${maximized ? 'max-w-[calc(100vw-24px)] h-[calc(100vh-24px)]' : maxWidth} ${minimized ? 'max-h-[58px]' : 'max-h-[95vh]'} flex flex-col overflow-hidden`}
         style={shellStyle}
         data-testid="draggable-dialog-shell"
         data-dialog-minimized={minimized ? 'true' : 'false'}
@@ -103,6 +105,7 @@ export default function DialogShell({
               className="p-1.5 rounded hover:bg-white/20 transition"
               aria-label={minimized ? 'Restaurar' : 'Minimizar'}
               title={minimized ? 'Restaurar ventana' : 'Minimizar ventana'}
+              data-testid="f376-dialog-minimize"
             >
               <Minimize2 className="w-4 h-4" />
             </button>
@@ -114,6 +117,7 @@ export default function DialogShell({
               className="p-1.5 rounded hover:bg-white/20 transition"
               aria-label={maximized ? 'Restaurar tamano' : 'Expandir'}
               title={maximized ? 'Restaurar tamano' : 'Expandir ventana'}
+              data-testid="f376-dialog-expand"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
@@ -122,6 +126,7 @@ export default function DialogShell({
               className="p-1.5 rounded hover:bg-white/20 transition"
               aria-label="Cerrar"
               title="Cerrar ventana"
+              data-testid="f376-dialog-close"
             >
               <X className="w-5 h-5" />
             </button>

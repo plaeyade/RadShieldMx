@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F376 (2026-07-30) - Controles de ventanas sobre canvas
+
+- Refuerza `DialogShell` para que sus controles de minimizar, expandir y cerrar sean trazables y accesibles.
+- Cuando una ventana comun queda minimizada, el overlay deja pasar eventos al canvas para no bloquear el floorplan.
+- Convierte `SourceSelector` en una ventana CAD operable: arrastrable, minimizable, expandible, restaurable y cerrable.
+- Agrega cierre con etiqueta accesible para evitar overlays sin salida clara al usar **Fuente** desde el dock CAD.
+- Smoke F376 valida abrir Fuente, minimizar, volver a usar el dock del canvas, restaurar, expandir y cerrar.
+- Scripts: `npm run test:f376:window-controls` y `npm run test:f376:window-controls-smoke`.
+
 # F375 (2026-07-30) - Canvas limpio / guia
 
 - Agrega modo persistente **CAD Limpio** para liberar el plano ocultando overlays auxiliares grandes.
