@@ -62,12 +62,14 @@ type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
 type F188WorkflowDock = 'top' | 'right' | 'bottom';
 type F191CanvasTool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser';
 type F191VisualMode = 'plan' | 'heat' | 'isocontours' | 'structure';
+type F375CanvasChromeMode = 'clean' | 'guided';
 
 const F188_CANVAS_PANEL_STATE_KEY = 'radshield_canvas_panels_f188_f295_clean_workspace';
 const F188_WORKFLOW_DOCK_KEY = 'radshield_canvas_workflow_dock_f188';
 const F201_WORKFLOW_COMPACT_KEY = 'radshield_canvas_workflow_compact_f201';
 const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const F216_SAVED_VIEWS_KEY = 'radshield_canvas_saved_views_f216';
+const F375_CANVAS_CHROME_MODE_KEY = 'radshield_canvas_chrome_mode_f375';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: false,
   qa: false,
@@ -119,6 +121,11 @@ function loadF216SavedViews(): F216SavedCanvasView[] {
   } catch {
     return [];
   }
+}
+
+function loadF375CanvasChromeMode(): F375CanvasChromeMode {
+  if (typeof window === 'undefined') return 'clean';
+  return window.localStorage.getItem(F375_CANVAS_CHROME_MODE_KEY) === 'guided' ? 'guided' : 'clean';
 }
 
 interface CanvasAreaProps {
@@ -238,6 +245,7 @@ export default function CanvasArea({
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
   const [lastCanvasCommand, setLastCanvasCommand] = useState<string | null>(null);
+  const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -413,6 +421,10 @@ export default function CanvasArea({
   }, [savedViews]);
 
   useEffect(() => {
+    window.localStorage.setItem(F375_CANVAS_CHROME_MODE_KEY, canvasChromeMode);
+  }, [canvasChromeMode]);
+
+  useEffect(() => {
     setInspectorEditOpen(false);
   }, [canvasState.selectedId]);
 
@@ -441,6 +453,19 @@ export default function CanvasArea({
   const cycleWorkflowDock = () => {
     setWorkflowDock((dock) => (dock === 'top' ? 'right' : dock === 'right' ? 'bottom' : 'top'));
     setWorkflowCompact(false);
+  };
+
+  const f375IsCleanWorkspace = canvasChromeMode === 'clean';
+  const toggleF375CanvasChrome = () => {
+    const nextMode: F375CanvasChromeMode = f375IsCleanWorkspace ? 'guided' : 'clean';
+    setCanvasChromeMode(nextMode);
+    if (nextMode === 'clean') {
+      setPanelVisibility({ workflow: false, qa: false, continuity: false });
+      setLegendCollapsed(true);
+    } else {
+      setLegendCollapsed(false);
+    }
+    toast.success(nextMode === 'clean' ? 'Canvas limpio activado' : 'Canvas guia activado');
   };
 
   const activateCanvasTool = (tool: F191CanvasTool) => {
@@ -900,6 +925,22 @@ export default function CanvasArea({
           <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" title="Zonas">{regionCount}Z</span>
         </div>
         <div className="flex-1" />
+        <button
+          type="button"
+          data-testid="f375-clean-workspace-toggle"
+          data-f375-canvas-mode={canvasChromeMode}
+          className={`hidden h-6 rounded-md border px-2 text-[10px] font-bold transition-colors lg:inline-flex lg:items-center lg:gap-1 ${
+            f375IsCleanWorkspace
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-white'
+              : 'border-orange-200 bg-orange-50 text-orange-700 hover:bg-white'
+          }`}
+          onClick={toggleF375CanvasChrome}
+          title={f375IsCleanWorkspace ? 'Modo limpio activo: libera el plano ocultando overlays auxiliares. Clic para modo guia.' : 'Modo guia activo: muestra overlays QA, escenas y export visual. Clic para modo limpio.'}
+          aria-label={f375IsCleanWorkspace ? 'Activar modo guia del canvas' : 'Activar modo limpio del canvas'}
+        >
+          <Sparkles className="h-3 w-3" />
+          {f375IsCleanWorkspace ? 'Limpio' : 'Guia'}
+        </button>
         <div
           data-testid="f188-canvas-panel-controls"
           className="hidden xl:flex items-center gap-0.5 mr-1 rounded-md border border-slate-200 bg-slate-50 px-1 py-0.5"
@@ -1423,11 +1464,16 @@ export default function CanvasArea({
 
             <div
               data-testid="f374-canvas-command-dock"
+              data-f375-canvas-mode={canvasChromeMode}
               className="absolute bottom-3 left-1/2 z-30 flex max-w-[calc(100%-32px)] -translate-x-1/2 items-center gap-1 rounded-lg border border-slate-200 bg-white/94 px-2 py-1.5 shadow-xl backdrop-blur"
               aria-label="Dock de comandos principales del canvas"
             >
-              <div className="hidden border-r border-slate-200 pr-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 md:block">
-                CAD
+              <div
+                data-testid="f375-canvas-mode-badge"
+                className="hidden border-r border-slate-200 pr-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 md:block"
+                title={f375IsCleanWorkspace ? 'Canvas limpio: overlays auxiliares ocultos' : 'Canvas guia: overlays auxiliares visibles'}
+              >
+                {f375IsCleanWorkspace ? 'CAD Limpio' : 'CAD Guia'}
               </div>
               {f374CanvasCommands.map((command) => {
                 const Icon = command.icon;
@@ -1506,9 +1552,24 @@ export default function CanvasArea({
               </div>
             )}
 
+            {f375IsCleanWorkspace && (
+              <div
+                data-testid="f375-clean-guide-strip"
+                className="pointer-events-none absolute left-2 top-2 z-10 hidden max-w-[520px] items-center gap-1 rounded-md border border-emerald-200 bg-white/92 px-2 py-1 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:flex"
+                title="Modo limpio F375: estados compactos visibles, paneles auxiliares completos ocultos para liberar el plano."
+              >
+                <span className="rounded bg-emerald-50 px-1.5 py-0.5 font-bold text-emerald-700">F375 Limpio</span>
+                <span className="rounded border border-stone-200 bg-[#f8f5ef] px-1 py-0.5 font-semibold text-slate-600">F214 Studio</span>
+                <span className="rounded border border-stone-200 bg-white px-1 py-0.5 font-semibold text-slate-600">F217 Export</span>
+                <span data-testid="f375-clean-hidden-overlays" className="rounded border border-slate-100 bg-slate-50 px-1 py-0.5 text-slate-500">
+                  overlays compactos
+                </span>
+              </div>
+            )}
+
             <div
               data-testid="f214-sketchup-canvas-reorg"
-              className="pointer-events-none absolute top-2 left-[456px] z-10 hidden max-w-[520px] items-center gap-1 rounded-md border border-stone-300 bg-[#f8f5ef]/95 px-2 py-1 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:flex"
+              className={`pointer-events-none absolute top-2 left-[456px] z-10 max-w-[520px] items-center gap-1 rounded-md border border-stone-300 bg-[#f8f5ef]/95 px-2 py-1 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm ${f375IsCleanWorkspace ? 'hidden' : 'hidden xl:flex'}`}
               title={`${f214SketchUpCanvas.viewportTitle}. ${f214SketchUpCanvas.warnings.join(' ') || 'Vista tipo estudio organizada.'}`}
             >
               <span className={`rounded px-1.5 py-0.5 font-bold ${
@@ -1539,7 +1600,7 @@ export default function CanvasArea({
 
             <div
               data-testid="f215-canvas-scene-presets"
-              className="absolute top-10 left-[456px] z-10 hidden max-w-[560px] items-center gap-1 rounded-md border border-stone-300 bg-white/92 px-2 py-1 shadow-sm backdrop-blur-sm xl:flex"
+              className={`absolute top-10 left-[456px] z-10 max-w-[560px] items-center gap-1 rounded-md border border-stone-300 bg-white/92 px-2 py-1 shadow-sm backdrop-blur-sm ${f375IsCleanWorkspace ? 'hidden' : 'hidden xl:flex'}`}
               title={`${f215ScenePresets.readyPresetCount}/${f215ScenePresets.totalPresetCount} escenas listas. ${f215ScenePresets.warnings.join(' ') || 'Presets de vista listos para diseno y revision.'}`}
             >
               <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${
@@ -1578,7 +1639,7 @@ export default function CanvasArea({
 
             <div
               data-testid="f216-mini-view-manager"
-              className="absolute bottom-16 left-2 z-10 hidden max-w-[440px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:block"
+              className={`absolute bottom-16 left-2 z-10 max-w-[440px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm ${f375IsCleanWorkspace ? 'hidden' : 'hidden xl:block'}`}
               title={`${f216MiniViewManager.activeViewLabel}: zoom ${f216MiniViewManager.zoomPercent}%, pan ${f216MiniViewManager.panLabel}. ${f216MiniViewManager.warnings.join(' ') || 'Mini View Manager listo.'}`}
             >
               <div className="flex items-center gap-1">
@@ -1649,7 +1710,7 @@ export default function CanvasArea({
 
             <div
               data-testid="f217-visual-export-by-scene"
-              className="absolute bottom-16 left-[460px] z-10 hidden max-w-[540px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm xl:block"
+              className={`absolute bottom-16 left-[460px] z-10 max-w-[540px] rounded-md border border-stone-300 bg-white/94 px-2 py-1.5 text-[8px] text-slate-600 shadow-sm backdrop-blur-sm ${f375IsCleanWorkspace ? 'hidden' : 'hidden xl:block'}`}
               title={`${f217VisualExport.readySceneCount}/${f217VisualExport.scenes.length} escenas listas. ${f217VisualExport.warnings.join(' ') || 'Export visual por escena listo.'}`}
             >
               <div className="flex items-center gap-1">
@@ -2765,7 +2826,7 @@ export default function CanvasArea({
             </div>
             )}
 
-            {(!panelVisibility.workflow || !panelVisibility.qa || !panelVisibility.continuity) && (
+            {!f375IsCleanWorkspace && (!panelVisibility.workflow || !panelVisibility.qa || !panelVisibility.continuity) && (
               <div
                 data-testid="f188-hidden-panel-restore"
               className="absolute top-10 right-2 z-20 flex flex-wrap justify-end gap-1 rounded-md border border-slate-200 bg-white/95 p-1 shadow-sm"

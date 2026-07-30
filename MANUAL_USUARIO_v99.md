@@ -1,5 +1,22 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F375 - Modo limpio y modo guia del canvas
+
+F375 agrega un control superior del canvas para alternar entre dos modos de trabajo:
+
+1. **CAD Limpio:** recomendado para dibujar, revisar el plano, seleccionar objetos y evitar que paneles auxiliares tapen el layout.
+2. **CAD Guia:** recomendado para QA, export visual, revisar escenas, mini vistas y estados tecnicos.
+
+Uso:
+
+1. Abra la app y ubique el boton **Limpio/Guia** en la barra superior del canvas.
+2. En **Limpio**, trabaje con el dock CAD principal: **Plano**, **Muro**, **Fuente**, **Zona**, **Calc**, **3D** y **Evid**.
+3. Si necesita paneles de apoyo, pulse el boton para cambiar a **Guia**.
+4. En **Guia** aparecen los paneles F214 Studio, F215 Scenes, F216 View y F217 Export.
+5. Para volver a trabajar sin obstrucciones, pulse de nuevo y regrese a **Limpio**.
+
+Regla operacional: el modo limpio no elimina herramientas; solo oculta overlays auxiliares. Los calculos, seleccion, importacion de plano, 3D, evidencia y menus siguen conectados.
+
 ## Addendum F374 - Accesos rapidos y dock CAD operativo
 
 F374 corrige el problema reportado donde los botones de acceso rapido se abrian visualmente pero no ejecutaban una accion clara.

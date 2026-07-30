@@ -455,6 +455,8 @@
     "test:f371-f372:beta-contracts": "node scripts/check-f371-f372-beta-contracts.mjs",
     "test:f374:quick-canvas": "node scripts/check-f374-quick-canvas-contracts.mjs",
     "test:f374:quick-canvas-smoke": "playwright test e2e/f374-quick-canvas-smoke.spec.ts --project=chromium",
+    "test:f375:clean-workspace": "node scripts/check-f375-canvas-clean-workspace-contracts.mjs",
+    "test:f375:clean-workspace-smoke": "playwright test e2e/f375-canvas-clean-workspace.spec.ts --project=chromium",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

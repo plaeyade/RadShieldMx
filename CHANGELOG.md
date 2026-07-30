@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F375 (2026-07-30) - Canvas limpio / guia
+
+- Agrega modo persistente **CAD Limpio** para liberar el plano ocultando overlays auxiliares grandes.
+- Agrega modo **CAD Guia** para recuperar paneles de estado, escenas, mini vistas y export visual.
+- Mantiene una tira compacta F375 con estados F214/F217 para compatibilidad con smokes y trazabilidad sin ensuciar el canvas.
+- El dock CAD F374 muestra el modo actual y sigue disponible en ambos modos.
+- Al activar modo limpio se ocultan paneles flotantes, se colapsa leyenda y se conserva acceso por controles superiores.
+- Scripts: `npm run test:f375:clean-workspace` y `npm run test:f375:clean-workspace-smoke`.
+
 # F374 (2026-07-30) - Accesos rapidos ejecutables + dock CAD del canvas
 
 - Repara accesos rapidos de Sidebar para que ejecuten callback real o abran un dialog fallback: Calcular, UAQ, Memoria IA, Materiales y DXF/DWG.

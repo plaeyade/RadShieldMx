@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F375 (2026-07-30) - Modo canvas limpio / guia
+
+- Nuevo modo **CAD Limpio:** oculta overlays auxiliares grandes y deja una tira compacta con estado del flujo.
+- Nuevo modo **CAD Guia:** restaura paneles de estudio, escenas, mini vistas y export visual para QA.
+- El cambio se persiste en localStorage y no reescribe el renderer ni eventos base.
+- Al entrar a modo limpio se ocultan paneles flotantes `workflow/qa/continuity` y se colapsa la leyenda.
+- Objetivo: reducir obstrucciones sobre el floorplan y mantener rutas de inspeccion cuando se necesiten.
+- Scripts: `npm run test:f375:clean-workspace` y `npm run test:f375:clean-workspace-smoke`.
+
 # F374 (2026-07-30) - Acciones rapidas y dock CAD
 
 - Sidebar: los accesos **Calc**, **UAQ**, **Mem**, **Mat** y **DXF** ahora tienen ejecucion directa, fallback de dialogo y confirmacion visible.
