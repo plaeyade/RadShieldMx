@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F378 (2026-07-30) - Auditoria de modales fullscreen legacy
+
+- Agrega politica `F378_FULLSCREEN_DIALOG_POLICY` para clasificar dialogs legacy antes de migrarlos.
+- Genera reporte JSON/CSV/MD en `outputs/f378_legacy_modal_audit/`.
+- Define que workflows de documentos, evidencia, dashboard, tablas y checklist pueden quedarse fullscreen con encabezado formal.
+- Prioriza migracion P0 a ventana controlable para herramientas espaciales/canvas: Barrier Editor, Air Kerma Overlay y Control Points.
+- Evita migraciones masivas riesgosas sobre ~100 dialogs; cada migracion futura debe tener close/minimize/restore y smoke.
+- Scripts: `npm run prepare:f378:legacy-modal-audit` y `npm run test:f378:legacy-modal-audit`.
+
 # F377 (2026-07-30) - Paneles laterales controlables
 
 - Agrega `SidePanelShell` reutilizable para paneles laterales con minimizar, restaurar y cerrar.

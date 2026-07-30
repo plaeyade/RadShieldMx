@@ -1,5 +1,22 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F378 - Modales fullscreen legacy
+
+F378 no cambia el comportamiento clinico ni de calculo. Su funcion es ordenar que ventanas antiguas deben seguir a pantalla completa y cuales deben migrarse en fases posteriores.
+
+Reglas:
+
+1. **Se quedan fullscreen:** Memoria Analitica, Evidence Pack, Manual, Dashboard, Layout Bunker, Checklist CNSNS y tablas NCRP extensas.
+2. **Deben migrar primero:** Barrier Editor, Air Kerma Overlay y Control Points, porque son herramientas espaciales que deben verse junto al canvas.
+3. **Cada migracion futura debe incluir:** cerrar, minimizar, restaurar, etiqueta accesible y prueba smoke.
+4. **No se deben migrar todos los dialogs a la vez:** el riesgo de romper flujos de reporte o memoria es alto.
+
+Uso para QA:
+
+1. Ejecute `npm run prepare:f378:legacy-modal-audit`.
+2. Revise `outputs/f378_legacy_modal_audit/f378_legacy_modal_audit.md`.
+3. Use la lista P0 para planear las siguientes mejoras visuales del canvas.
+
 ## Addendum F377 - Paneles laterales
 
 F377 mejora los paneles que aparecen desde la derecha y pueden tapar el plano.

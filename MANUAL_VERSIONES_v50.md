@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F378 (2026-07-30) - Politica de modales fullscreen
+
+- Se agrega una auditoria formal de overlays y modales legacy.
+- No todo fullscreen es error: memoria analitica, evidencia, manual, dashboards, tablas NCRP y checklist regulatorio pueden requerir pantalla completa.
+- Los candidatos P0 a migrar son herramientas que deben convivir con el canvas: **Barrier Editor**, **Air Kerma Overlay** y **Control Points**.
+- La salida queda en `outputs/f378_legacy_modal_audit/` como JSON, CSV y Markdown.
+- Guardrail: ninguna migracion futura se acepta sin controles cerrar/minimizar/restaurar y smoke.
+- Scripts: `npm run prepare:f378:legacy-modal-audit` y `npm run test:f378:legacy-modal-audit`.
+
 # F377 (2026-07-30) - Paneles laterales minimizables
 
 - Nuevo `SidePanelShell` para paneles laterales que suelen tapar el plano.
