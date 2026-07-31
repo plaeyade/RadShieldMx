@@ -1,5 +1,32 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F392-F398 - Fullscreen controlado
+
+F392-F398 conserva los workflows amplios, pero centraliza sus controles.
+
+Pantallas cubiertas:
+
+1. **Evidence Pack:** revision de fuentes y ledger de citas.
+2. **Manual de Usuario:** lector extenso con indice y busqueda.
+3. **Memoria Analitica:** wizard documental con export TXT/PDF.
+4. **Layout Bunker:** dimensiones, layout detallado y factibilidad de zona controlada.
+5. **Dashboard:** KPIs ejecutivos.
+6. **Checklist CNSNS:** validacion regulatoria.
+7. **NCRP 151 Tables:** consulta de tablas amplias.
+
+Controles comunes:
+
+1. **Cerrar:** sale de la pantalla.
+2. **Minimizar contenido:** deja visible solo el encabezado.
+3. **Vista contenida/fullscreen:** permite revisar el workflow como panel contenido o pantalla completa.
+
+Nota operativa: Dashboard, Checklist y NCRP 151 Tables ya usan solo el encabezado nuevo. Evidence Pack, Manual, Memoria Analitica y Layout Bunker mantienen controles internos mientras se valida visualmente que no se rompan exports, formularios y wizards.
+
+QA recomendado:
+
+1. `npm run prepare:f392-f398:fullscreen-shell`
+2. `npm run test:f392-f398:fullscreen-shell`
+
 ## Addendum F389-F391 - Ventanas movibles restantes
 
 F389-F391 cierra la migracion de ventanas que debian convivir con el canvas.

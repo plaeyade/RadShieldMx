@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Ruler, AlertTriangle, CheckCircle, DoorOpen, Map, FileDown, Layers, Route, SlidersHorizontal } from 'lucide-react';
+import FullscreenShell from '@/components/FullscreenShell';
 import { BUNKER_LAYOUTS, getAllLayoutsForType, DETAILED_LAYOUTS, getDetailedLayout, type BunkerLayout, type DetailedLayout } from '@/lib/bunkerLayouts';
 import {
   TESTFIT_ADAPTED_CAPABILITIES,
@@ -86,7 +87,14 @@ function LayoutContent({
   const feasibilitySummary = useMemo(() => summarizeControlledZoneFeasibility(feasibilityOptions), [feasibilityOptions]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }}>
+    <FullscreenShell
+      title="Layouts de Bunkers"
+      subtitle="Dimensiones minimas, layout detallado y factibilidad de zona controlada - F395"
+      icon={<Ruler className="h-5 w-5" />}
+      accentClassName="bg-slate-700"
+      traceId="f395-layout-bunker-fullscreen-shell"
+      onClose={() => onOpenChange(false)}
+    >
       <div className="flex items-center justify-between px-6 py-3 border-b bg-slate-50">
         <div className="flex items-center gap-3">
           <div className="bg-slate-700 text-white p-2 rounded-lg"><Ruler className="w-5 h-5" /></div>
@@ -161,7 +169,7 @@ function LayoutContent({
           )}
         </div>
       </div>
-    </div>
+    </FullscreenShell>
   );
 }
 

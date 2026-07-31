@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F392-F398 (2026-07-31) - FullscreenShell controlado
+
+- Se crea `FullscreenShell` para workflows que requieren pantalla amplia pero deben tener controles consistentes.
+- F392 Evidence Pack, F393 Manual, F394 Memoria Analitica, F395 Layout Bunker, F396 Dashboard, F397 Checklist CNSNS y F398 NCRP 151 Tables pasan a `FullscreenShell`.
+- Controles nuevos comunes: cerrar, minimizar contenido y alternar vista contenida/fullscreen.
+- Dashboard, Checklist CNSNS y NCRP 151 Tables quedan normalizados sin header legacy.
+- Evidence Pack, Manual, Memoria Analitica y Layout Bunker conservan temporalmente controles internos por seguridad funcional; son candidatos a limpieza visual posterior.
+- Scripts: `npm run prepare:f392-f398:fullscreen-shell` y `npm run test:f392-f398:fullscreen-shell`.
+
 # F389-F391 (2026-07-31) - Cierre completo DialogShell
 
 - F389 migra `CompareScenariosDialog` a `DialogShell`; comparacion, badges, costos y export CSV se conservan.

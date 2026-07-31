@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import FullscreenShell from '@/components/FullscreenShell';
 import {
   buildEvidenceCitationLedger,
   createEvidencePack,
@@ -189,7 +190,14 @@ export default function EvidencePackDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+    <FullscreenShell
+      title="Evidence Pack"
+      subtitle="Fuentes trazables para memorias analiticas y revisiones deep dive - F392"
+      icon={<BookOpenCheck className="h-5 w-5" />}
+      accentClassName="bg-emerald-600"
+      traceId="f392-evidence-pack-fullscreen-shell"
+      onClose={() => onOpenChange(false)}
+    >
       <div className="px-6 py-4 border-b bg-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
@@ -490,6 +498,6 @@ export default function EvidencePackDialog({
           </div>
         </main>
       </div>
-    </div>
+    </FullscreenShell>
   );
 }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { X, BookOpen, Search, ChevronRight } from 'lucide-react';
+import FullscreenShell from '@/components/FullscreenShell';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -486,7 +487,14 @@ function Content({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
   const selected = S.find(s => s.id === sel);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{width:'100vw',height:'100vh'}}>
+    <FullscreenShell
+      title="Manual de Usuario"
+      subtitle="Lector documental extenso con busqueda e indice - F393"
+      icon={<BookOpen className="h-5 w-5" />}
+      accentClassName="bg-[#f97316]"
+      traceId="f393-manual-fullscreen-shell"
+      onClose={() => onOpenChange(false)}
+    >
       <div className="flex items-center justify-between px-6 py-3 border-b bg-slate-50">
         <div className="flex items-center gap-3">
           <div className="bg-[#f97316] text-white p-2 rounded-lg"><BookOpen className="w-5 h-5"/></div>
@@ -530,6 +538,6 @@ function Content({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
           )}
         </div>
       </div>
-    </div>
+    </FullscreenShell>
   );
 }

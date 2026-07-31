@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import FullscreenShell from '@/components/FullscreenShell';
 import {
   FileText, ChevronRight, ChevronLeft, Building2, Atom, Shield,
   Ruler, Users, Calculator, CheckCircle, Download, BookOpen, AlertTriangle, FileDown
@@ -56,9 +57,16 @@ const ROOM_TYPES = [
 export default function MemoriaAnaliticaWizard({ open, onOpenChange }: Props) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }}>
+    <FullscreenShell
+      title="Memoria Analitica de Blindaje"
+      subtitle="Wizard documental con calculo, normativa y export PDF - F394"
+      icon={<BookOpen className="h-5 w-5" />}
+      accentClassName="bg-indigo-600"
+      traceId="f394-memoria-analitica-fullscreen-shell"
+      onClose={() => onOpenChange(false)}
+    >
       <WizardContent onOpenChange={onOpenChange} />
-    </div>
+    </FullscreenShell>
   );
 }
 

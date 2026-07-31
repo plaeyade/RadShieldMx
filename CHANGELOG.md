@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F392-F398 (2026-07-31) - Control comun para las 7 fullscreen
+
+- Agrega `FullscreenShell`, un contenedor comun para workflows de pantalla amplia con cerrar, minimizar contenido y alternar vista contenida/fullscreen.
+- Migra las 7 superficies que F378 habia dejado fullscreen por politica: Evidence Pack, Manual, Memoria Analitica, Layout Bunker, Dashboard, Checklist CNSNS y NCRP 151 Tables.
+- Estas pantallas siguen siendo de lectura/trabajo amplio, pero ya no poseen overlays `fixed inset-0` propios; el comportamiento de ventana queda centralizado y trazable.
+- Dashboard, Checklist y NCRP 151 Tables quedan normalizados con shell unico y sin encabezado legacy.
+- Evidence Pack, Manual, Memoria Analitica y Layout Bunker quedan en migracion de bajo riesgo: shell superior comun conservando controles internos hasta una pasada visual posterior.
+- Scripts: `npm run prepare:f392-f398:fullscreen-shell` y `npm run test:f392-f398:fullscreen-shell`.
+
 # F389-F391 (2026-07-31) - Cierre completo de migracion DialogShell
 
 - Migra las 3 candidatas no P0 restantes de F378 a ventanas `DialogShell`: `CompareScenariosDialog`, `TutorialDialog` y `VersionHistoryDialog`.
