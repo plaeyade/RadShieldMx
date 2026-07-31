@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { X, MapPin, Plus, Target, Trash2, Info } from 'lucide-react';
+import { MapPin, Plus, Trash2 } from 'lucide-react';
+import DialogShell from '@/components/DialogShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 
 export interface ControlPoint {
   id: string;
@@ -35,7 +35,6 @@ const PRESET_GOALS = [
 
 export default function ControlPointsDialog({ controlPoints, onUpdate, onClose, floorPlanWidth = 800, floorPlanHeight = 600 }: ControlPointsDialogProps) {
   const [points, setPoints] = useState<ControlPoint[]>(controlPoints);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPoint, setNewPoint] = useState<Partial<ControlPoint>>({ designGoal_mSv_per_wk: 0.02, occupancyFactor: 1.0, notes: '' });
 
@@ -73,18 +72,15 @@ export default function ControlPointsDialog({ controlPoints, onUpdate, onClose, 
   const scale = Math.min(300 / floorPlanWidth, 200 / floorPlanHeight);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-[#fff7ed]">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-[#f97316]" />
-            <h2 className="text-sm font-bold text-slate-800">Control Points & Design Goals</h2>
-            <span className="text-[10px] text-slate-400 ml-2">Define control points and design goals directly on the facility floorplan</span>
-          </div>
-          <button aria-label="Cerrar Control Points" onClick={onClose} className="w-7 h-7 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100"><X className="w-4 h-4" /></button>
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
+    <DialogShell
+      title="Control Points & Design Goals"
+      subtitle="Define control points and design goals directly on the facility floorplan"
+      gradientFrom="from-orange-500"
+      gradientTo="to-amber-500"
+      maxWidth="max-w-3xl"
+      onClose={onClose}
+    >
+        <div className="flex min-h-[520px] overflow-hidden rounded-lg border border-slate-200" data-testid="f381-control-points-dialogshell">
           {/* Mini Floor Plan Preview */}
           <div className="w-80 border-r border-slate-200 bg-slate-50 p-4">
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Floor Plan Preview</p>
@@ -159,7 +155,6 @@ export default function ControlPointsDialog({ controlPoints, onUpdate, onClose, 
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </DialogShell>
   );
 }

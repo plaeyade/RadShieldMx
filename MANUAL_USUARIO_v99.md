@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F382 - Cierre de ventanas P0 del canvas
+
+F382 confirma que las tres herramientas espaciales prioritarias ya no bloquean el plano completo.
+
+Herramientas cerradas:
+
+1. **Barrier Editor:** supuestos, materiales y espesores.
+2. **Air Kerma Overlay:** curvas de kerma y export visual.
+3. **Control Points:** puntos de control y metas de diseno sobre el floorplan.
+
+Regla operacional: estas tres herramientas deben poder convivir con el canvas. Si una tapa el area de trabajo, use arrastrar, minimizar, expandir o cerrar; no debe ser necesario abandonar el plano.
+
+QA recomendado: ejecute `npm run test:f382:p0-dialogshell-closure` antes de publicar un build donde se modifiquen estas ventanas.
+
+## Addendum F381 - Puntos de control
+
+F381 convierte los puntos de control y metas de diseno en una ventana controlable.
+
+Uso:
+
+1. Abra **Control Points & Design Goals** desde el flujo de verificacion o herramientas del canvas.
+2. Revise la vista mini del floorplan para ubicar los puntos existentes.
+3. Use **Add Control Point** para crear un nuevo punto.
+4. Asigne nombre, posicion X/Y, meta de diseno y ocupacion.
+5. Use los puntos numerados para revisar su correspondencia visual con el plano.
+6. Use **Minimizar** para regresar al canvas sin perder la lista de puntos.
+
+Regla operacional: los puntos de control representan lugares de evaluacion, colindancias o posiciones de interes; deben definirse antes de cerrar memoria analitica o evidencia regulatoria.
+
 ## Addendum F380 - Overlay de Air Kerma
 
 F380 convierte el overlay de distribucion de kerma en aire en una ventana controlable.

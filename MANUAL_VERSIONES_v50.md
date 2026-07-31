@@ -1,5 +1,20 @@
 # RadShield-MX - Manual de Versiones
 
+# F382 (2026-07-31) - Cierre P0 DialogShell
+
+- Se cierra la cola P0 definida en F378.
+- `BarrierEditor`, `AirKermaOverlay` y `ControlPointsDialog` ya usan `DialogShell`.
+- Se agrega contrato comun para validar que esas tres herramientas sigan siendo movibles/minimizables y no regresen al overlay legacy.
+- Script: `npm run test:f382:p0-dialogshell-closure`.
+
+# F381 (2026-07-31) - Control Points controlable
+
+- `ControlPointsDialog` deja de usar overlay fullscreen legacy.
+- Ahora se muestra dentro de `DialogShell`, con arrastre, minimizar, expandir/restaurar y cerrar.
+- Se mantienen vista mini del floorplan, puntos numerados, alta de punto de control, meta de diseno, posicion y ocupacion.
+- Esta fase cierra el tercer P0 de F378.
+- Script: `npm run test:f381:control-points`.
+
 # F380 (2026-07-30) - Air Kerma Overlay controlable
 
 - `AirKermaOverlay` deja de usar overlay fullscreen legacy.

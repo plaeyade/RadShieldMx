@@ -1,5 +1,20 @@
 # RadShield-MX - Fases recientes
 
+# F382 (2026-07-31) - Cierre P0 DialogShell
+
+- Cierra la cola P0 de la auditoria F378.
+- Verifica que `BarrierEditor`, `AirKermaOverlay` y `ControlPointsDialog` ya usan `DialogShell`.
+- Agrega guardrail para impedir que cualquiera de esas tres herramientas vuelva al overlay `fixed inset-0 z-50 bg-black/50`.
+- Script: `npm run test:f382:p0-dialogshell-closure`.
+
+# F381 (2026-07-31) - Control Points en ventana controlable
+
+- Migra `ControlPointsDialog` del overlay fullscreen legacy a `DialogShell`.
+- Conserva vista mini del floorplan, puntos numerados, alta de punto de control, meta de diseno, posicion y ocupacion.
+- El dialog ahora hereda arrastre, minimizar, expandir/restaurar, cerrar y pass-through al minimizar.
+- Cierra el tercer candidato P0 de la auditoria F378 sin tocar la logica de puntos ni actualizacion.
+- Script: `npm run test:f381:control-points`.
+
 # F380 (2026-07-30) - Air Kerma Overlay en ventana controlable
 
 - Migra `AirKermaOverlay` del overlay fullscreen legacy a `DialogShell`.
