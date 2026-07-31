@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Ruler, AlertTriangle, CheckCircle, DoorOpen, Map, FileDown, Layers, Route, SlidersHorizontal } from 'lucide-react';
+import { Ruler, AlertTriangle, CheckCircle, DoorOpen, Map, FileDown, Layers, Route, SlidersHorizontal } from 'lucide-react';
 import FullscreenShell from '@/components/FullscreenShell';
 import { BUNKER_LAYOUTS, getAllLayoutsForType, DETAILED_LAYOUTS, getDetailedLayout, type BunkerLayout, type DetailedLayout } from '@/lib/bunkerLayouts';
 import {
@@ -125,7 +125,6 @@ function LayoutContent({
           ) : (
             <Badge className="bg-emerald-600">Zona controlada</Badge>
           )}
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}><X className="w-4 h-4" /></Button>
         </div>
       </div>
 

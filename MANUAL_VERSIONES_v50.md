@@ -1,12 +1,21 @@
 # RadShield-MX - Manual de Versiones
 
+# F399-F403 (2026-07-31) - QA visual y beta controlada
+
+- F399 formaliza QA visual de 10 superficies controladas: 7 fullscreen por politica y 3 ventanas movibles.
+- F400 retira cierres duplicados internos en Evidence Pack, Manual, Memoria Analitica y Layout Bunker. El cierre oficial queda en el shell comun.
+- F401 incorpora smoke Playwright dedicado para controles de ventana: abrir, minimizar, restaurar, vista contenida/fullscreen y cerrar.
+- F402 agrega controles E2E ocultos para abrir superficies criticas aunque un menu visual falle.
+- F403 exige `dist/index.html` y escribe manifiesto beta con hash, conteo de archivos y superficies cubiertas.
+- Scripts: `npm run build`, `npm run prepare:f399-f403:window-beta`, `npm run test:f399-f403:window-beta` y `npm run test:f399-f403:e2e`.
+
 # F392-F398 (2026-07-31) - FullscreenShell controlado
 
 - Se crea `FullscreenShell` para workflows que requieren pantalla amplia pero deben tener controles consistentes.
 - F392 Evidence Pack, F393 Manual, F394 Memoria Analitica, F395 Layout Bunker, F396 Dashboard, F397 Checklist CNSNS y F398 NCRP 151 Tables pasan a `FullscreenShell`.
 - Controles nuevos comunes: cerrar, minimizar contenido y alternar vista contenida/fullscreen.
 - Dashboard, Checklist CNSNS y NCRP 151 Tables quedan normalizados sin header legacy.
-- Evidence Pack, Manual, Memoria Analitica y Layout Bunker conservan temporalmente controles internos por seguridad funcional; son candidatos a limpieza visual posterior.
+- Evidence Pack, Manual, Memoria Analitica y Layout Bunker conservan sus cabeceras funcionales, pero F400 retira los cierres duplicados.
 - Scripts: `npm run prepare:f392-f398:fullscreen-shell` y `npm run test:f392-f398:fullscreen-shell`.
 
 # F389-F391 (2026-07-31) - Cierre completo DialogShell

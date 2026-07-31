@@ -1,5 +1,5 @@
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpenCheck, Download, FileUp, Link, Plus, Trash2, X } from 'lucide-react';
+import { BookOpenCheck, Download, FileUp, Link, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -211,9 +211,6 @@ export default function EvidencePackDialog({
         <div className="flex items-center gap-2">
           <Badge variant="outline">Offline JSON</Badge>
           <Badge variant="outline">Fase 43</Badge>
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} aria-label="Cerrar Evidence Pack">
-            <X className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 

@@ -1,12 +1,21 @@
 # RadShield-MX - Fases recientes
 
+# F399-F403 (2026-07-31) - QA visual y paquete beta controlado
+
+- F399 agrega auditoria de superficies controladas: 7 `FullscreenShell` y 3 `DialogShell` migradas.
+- F400 limpia cierres internos duplicados en Evidence Pack, Manual, Memoria Analitica y Layout Bunker; las acciones utiles internas se conservan.
+- F401 agrega smoke Playwright dedicado para abrir, minimizar, alternar vista contenida y cerrar workflows fullscreen, ademas de abrir/cerrar Compare, Tutorial y Version History.
+- F402 amplia controles E2E ocultos para abrir superficies controladas sin depender de Archivo, sidebar ni accesos rapidos.
+- F403 genera manifiesto beta con estado de superficies y build `dist`.
+- Scripts: `npm run build`, `npm run prepare:f399-f403:window-beta`, `npm run test:f399-f403:window-beta` y `npm run test:f399-f403:e2e`.
+
 # F392-F398 (2026-07-31) - Control comun para las 7 fullscreen
 
 - Agrega `FullscreenShell`, un contenedor comun para workflows de pantalla amplia con cerrar, minimizar contenido y alternar vista contenida/fullscreen.
 - Migra las 7 superficies que F378 habia dejado fullscreen por politica: Evidence Pack, Manual, Memoria Analitica, Layout Bunker, Dashboard, Checklist CNSNS y NCRP 151 Tables.
 - Estas pantallas siguen siendo de lectura/trabajo amplio, pero ya no poseen overlays `fixed inset-0` propios; el comportamiento de ventana queda centralizado y trazable.
 - Dashboard, Checklist y NCRP 151 Tables quedan normalizados con shell unico y sin encabezado legacy.
-- Evidence Pack, Manual, Memoria Analitica y Layout Bunker quedan en migracion de bajo riesgo: shell superior comun conservando controles internos hasta una pasada visual posterior.
+- Evidence Pack, Manual, Memoria Analitica y Layout Bunker quedan con shell superior comun; los cierres internos duplicados se retiran en F400.
 - Scripts: `npm run prepare:f392-f398:fullscreen-shell` y `npm run test:f392-f398:fullscreen-shell`.
 
 # F389-F391 (2026-07-31) - Cierre completo de migracion DialogShell

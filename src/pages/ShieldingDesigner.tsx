@@ -169,6 +169,7 @@ const ElectronTransportDialog = lazy(() => import('@/sections/dialogs/ElectronTr
 const STEPImporterDialog = lazy(() => import('@/sections/dialogs/STEPImporterDialog'));
 const ManualDialog = lazy(() => import('@/sections/dialogs/ManualDialog'));
 const MemoriaAIWizard = lazy(() => import('@/sections/dialogs/MemoriaAIWizard'));
+const MemoriaAnaliticaWizard = lazy(() => import('@/sections/dialogs/MemoriaAnaliticaWizard'));
 const DoseMapDialog = lazy(() => import('@/sections/dialogs/DoseMapDialog'));
 const RealTime3DDialog = lazy(() => import('@/sections/dialogs/RealTime3DDialog'));
 const MedicalFloorPlan3DDialog = lazy(() => import('@/sections/dialogs/MedicalFloorPlan3DDialog'));
@@ -348,7 +349,7 @@ import SplashScreen from '@/sections/dialogs/SplashScreen';
 const FloorCeilingDialog = lazy(() => import('@/sections/dialogs/FloorCeilingDialog'));
 const ICRU57Dialog = lazy(() => import('@/sections/dialogs/ICRU57Dialog'));
 const ICRU96Dialog = lazy(() => import('@/sections/dialogs/ICRU96Dialog'));
-const TutorialDialog = lazy(() => import('@/sections/dialogs/ExampleWizardDialog'));
+const TutorialDialog = lazy(() => import('@/sections/dialogs/TutorialDialog'));
 import { generatePDFReport } from '@/hooks/usePDFGenerator';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
@@ -2160,9 +2161,18 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         </button>
       )}
       {!showWelcomeScreen && typeof window !== 'undefined' && window.localStorage.getItem('radshield-e2e-controls') === 'true' && (
-        <div data-testid="e2e-dialog-controls" className="fixed bottom-2 left-2 z-[70] flex gap-1 rounded bg-white/95 p-1 shadow">
+        <div data-testid="e2e-dialog-controls" className="fixed bottom-2 left-2 z-[70] flex max-w-[calc(100vw-1rem)] flex-wrap gap-1 rounded bg-white/95 p-1 shadow">
           <button data-testid="e2e-open-evidence-pack" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('evidencePack')}>Evidence</button>
           <button data-testid="e2e-open-memoria-ai" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('memoriaAI')}>Memoria</button>
+          <button data-testid="e2e-open-memoria-wizard" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('memoriaWizard')}>MA Wizard</button>
+          <button data-testid="e2e-open-layout-bunker" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('layoutBunker')}>Layout</button>
+          <button data-testid="e2e-open-manual" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('manual')}>Manual</button>
+          <button data-testid="e2e-open-dashboard" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('dashboard')}>Dash</button>
+          <button data-testid="e2e-open-checklist-cnsns" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('checklistCNSNS')}>CNSNS Full</button>
+          <button data-testid="e2e-open-ncrp151-tables" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('ncrp151Tables')}>NCRP</button>
+          <button data-testid="e2e-open-compare-scenarios" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('compareScenarios')}>Compare</button>
+          <button data-testid="e2e-open-tutorial" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('tutorial')}>Tutorial</button>
+          <button data-testid="e2e-open-version-history" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('versionHistory')}>Version</button>
           <button data-testid="e2e-open-regulatory-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('regulatoryReport')}>Reg</button>
           <button data-testid="e2e-open-pdf-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('pdfReport')}>PDF</button>
           <button data-testid="e2e-open-cnsns-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('cnsns')}>CNSNS</button>
@@ -2255,10 +2265,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="mcResults" component={MCResultsDialog} resultJson={lastMCResult} />
                 <LazyDialog
                   name="memoriaWizard"
-                  component={MemoriaAIWizard}
-                  floorPlan={floorPlan}
-                  barrierResults={barrierResults}
-                  sampleLines={sampleLines}
+                  component={MemoriaAnaliticaWizard}
                 />
         {/* v30: AI-Powered Analytical Memory Wizard */}
         <LazyDialog

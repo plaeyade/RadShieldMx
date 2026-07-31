@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F399-F403 - QA visual y beta controlada
+
+F399-F403 cierra la pasada de ventanas amplias antes de seguir con renderer/canvas.
+
+Uso operativo:
+
+1. Abra Evidence Pack, Manual, Memoria Analitica, Layout Bunker, Dashboard, Checklist CNSNS o NCRP 151 Tables.
+2. Use el encabezado superior comun para **cerrar**, **minimizar contenido** o alternar **vista contenida/fullscreen**.
+3. En Evidence Pack, Manual, Memoria y Layout Bunker, las cabeceras internas quedan para busqueda, filtros, exportacion o seleccion; ya no deben mostrar un segundo boton de cierre.
+4. Compare Scenarios, Tutorial y Version History usan ventana movible `DialogShell`: se pueden arrastrar, minimizar, expandir/restaurar y cerrar.
+5. Para QA, active `localStorage.radshield-e2e-controls=true`; apareceran botones compactos de apertura que permiten probar las superficies sin depender de menus.
+
+Validacion:
+
+1. `npm run build`
+2. `npm run prepare:f399-f403:window-beta`
+3. `npm run test:f399-f403:window-beta`
+4. `npm run test:f399-f403:e2e`
+
+Resultado esperado: 7 fullscreen controladas, 3 DialogShell controladas, 4 pantallas complejas sin cierre duplicado y manifiesto beta en `outputs/f399_f403_window_beta_audit/`.
+
 ## Addendum F392-F398 - Fullscreen controlado
 
 F392-F398 conserva los workflows amplios, pero centraliza sus controles.

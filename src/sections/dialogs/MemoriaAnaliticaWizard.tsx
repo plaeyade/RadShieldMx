@@ -282,7 +282,6 @@ function WizardContent({ onOpenChange }: { onOpenChange: (open: boolean) => void
               <Button variant="outline" size="sm" onClick={exportMemoriaPDF} className="text-xs h-8 text-red-600 border-red-200 hover:bg-red-50"><FileDown className="w-3 h-3 mr-1" /> Exportar PDF</Button>
             </>
           )}
-          <Button aria-label="Cerrar Memoria Analitica Wizard" variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="h-8 w-8 p-0"><span className="text-lg">×</span></Button>
         </div>
       </div>
 
