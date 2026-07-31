@@ -1,5 +1,39 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F384 - Backlog post-beta
+
+F384 separa lo que ya esta cerrado de lo que sigue gateado.
+
+Cerrado:
+
+1. Las tres ventanas P0 del canvas definidas en F378.
+2. `BarrierEditor`, `AirKermaOverlay` y `ControlPointsDialog` ya conviven con el plano mediante `DialogShell`.
+
+No cerrado como producto final:
+
+1. **Babylon runtime activo:** existe adapter/loader, pero falta dependencia activa y smoke visual.
+2. **Unity WebGL real externo:** existe handoff/URL gate, pero falta build Unity publicado y prueba visual.
+3. **DWG provider live:** existe contrato APS/ODA, pero falta fixture DWG no sensible, credenciales, conversion y auditoria de capas/escala.
+4. **GATE/EGSnrc/Geant4 runners:** existen contratos/preflight, pero faltan motores/runners reales, datasets versionados y casos conocidos.
+5. **Renderer base v2:** sigue diferido por riesgo; requiere rama/flag, pixel diff y rollback.
+6. **Fotorrealismo avanzado:** Three/R3F tiene presets/PBR readiness; Babylon/Unity-grade realism sigue pendiente.
+
+Regla operacional: no anunciar Babylon, Unity real, DWG live ni Monte Carlo clinico como terminados hasta pasar sus smoke live.
+
+## Addendum F383 - QA de integracion de ventanas P0
+
+F383 verifica que las herramientas P0 migradas no solo existan como codigo, sino que sigan conectadas al flujo principal.
+
+Cobertura:
+
+1. Importacion lazy desde `ShieldingDesigner`.
+2. Estados de apertura/cierre.
+3. Callbacks de toolbar.
+4. Ramas render de `BarrierEditor`, `AirKermaOverlay` y `ControlPointsDialog`.
+5. Trazabilidad por `data-testid` de cada dialog.
+
+QA recomendado: ejecute `npm run test:f383:p0-integration-qa` despues de modificar toolbar, layout principal o cualquiera de esas tres herramientas.
+
 ## Addendum F382 - Cierre de ventanas P0 del canvas
 
 F382 confirma que las tres herramientas espaciales prioritarias ya no bloquean el plano completo.

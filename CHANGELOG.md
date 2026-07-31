@@ -1,5 +1,19 @@
 # RadShield-MX - Fases recientes
 
+# F384 (2026-07-31) - Estado honesto del backlog post-beta
+
+- Agrega manifest de estado para Babylon, Unity WebGL externo, proveedor DWG, runners GATE/EGSnrc/Geant4, renderer base v2 y fotorrealismo avanzado.
+- Declara que F378 P0 de ventanas espaciales si esta cerrado por F379-F382.
+- Declara que Babylon runtime activo, Unity real publicado, DWG live provider y Monte Carlo externo clinico siguen gateados hasta smoke live.
+- Scripts: `npm run prepare:f384:post-beta-backlog` y `npm run test:f384:post-beta-backlog`.
+
+# F383 (2026-07-31) - QA de integracion P0 DialogShell
+
+- Agrega contrato de integracion para las tres herramientas P0 migradas desde F378.
+- Verifica lazy imports, estados de apertura/cierre, callbacks de toolbar y ramas render de `BarrierEditor`, `AirKermaOverlay` y `ControlPointsDialog`.
+- Complementa los smokes visuales existentes de canvas/ventanas sin cambiar renderer ni menus.
+- Script: `npm run test:f383:p0-integration-qa`.
+
 # F382 (2026-07-31) - Cierre P0 DialogShell
 
 - Cierra la cola P0 de la auditoria F378.
