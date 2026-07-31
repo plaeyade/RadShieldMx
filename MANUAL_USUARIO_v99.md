@@ -1,5 +1,32 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F404 - Menu Archivo funcional
+
+F404 valida el menu **Archivo** desde la interfaz real.
+
+Flujo operativo:
+
+1. Abra **Archivo** en la barra superior.
+2. Use **Nuevo Proyecto** para reiniciar el workspace actual.
+3. Use **Abrir Proyecto** para abrir el administrador local/cloud.
+4. Use **Importar CSV**, **Importar DXF** o **Importar STEP/IGES** para traer datos externos al flujo de plano/blindaje.
+5. Use **Exportar CSV** o **Exportar Reporte CNSNS** para salidas estructuradas.
+6. Use **Especificaciones Tecnicas**, **Audit Trail** y **Analisis de Logs** para revision tecnica y trazabilidad.
+7. Use **Glosario** y **Acerca de** para ayuda y version.
+
+Notas:
+
+- **Especificaciones Tecnicas** ya no es una pantalla vacia; ahora muestra ficha tecnica real F404.
+- **Compartir resultados** depende de Web Share API del navegador.
+- **Exportar PDF** puede ejecutar descarga directa en lugar de abrir un dialog visible.
+- **Guardar** requiere revisar persistencia local/DB segun modo de ejecucion.
+
+QA:
+
+1. `npm run prepare:f404:file-menu-functional`
+2. `npm run test:f404:file-menu-functional`
+3. `npm run test:f404:file-menu-functional:e2e`
+
 ## Addendum F399-F403 - QA visual y beta controlada
 
 F399-F403 cierra la pasada de ventanas amplias antes de seguir con renderer/canvas.

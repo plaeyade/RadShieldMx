@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F404 (2026-07-31) - Archivo funcional
+
+- Se agregan identificadores QA a los 15 submenus reales de Archivo.
+- `Especificaciones Tecnicas` deja de ser stub y abre una ficha tecnica real.
+- Smoke navegador cubre acciones visibles de Archivo: abrir proyectos, importar CSV, importar DXF, importar STEP/IGES, export CSV, reporte CNSNS, audit trail, logs, glosario, acerca de y tech specs.
+- Quedan diferidas por naturaleza de runtime: guardar/persistencia, compartir por Web Share API, export PDF directo y reset visual de nuevo proyecto.
+- Scripts: `npm run prepare:f404:file-menu-functional`, `npm run test:f404:file-menu-functional` y `npm run test:f404:file-menu-functional:e2e`.
+
 # F399-F403 (2026-07-31) - QA visual y beta controlada
 
 - F399 formaliza QA visual de 10 superficies controladas: 7 fullscreen por politica y 3 ventanas movibles.

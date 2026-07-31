@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F404 (2026-07-31) - Archivo menu funcional real
+
+- Agrega `data-testid` estable a los 15 items reales del menu Archivo.
+- Repara `TechSpecsDialog`: deja de ser stub/null y muestra una ficha tecnica real con trazabilidad F404.
+- Agrega smoke Playwright que abre el menu Archivo normal y valida superficies reales para proyectos, CSV, DXF, STEP/IGES, export CSV, CNSNS, audit trail, logs, tech specs, glosario y acerca de.
+- Declara diferidos de runtime para acciones con APIs externas o descarga directa: nuevo proyecto visual/reset, guardar/persistencia, PDF directo y Web Share API.
+- Scripts: `npm run prepare:f404:file-menu-functional`, `npm run test:f404:file-menu-functional` y `npm run test:f404:file-menu-functional:e2e`.
+
 # F399-F403 (2026-07-31) - QA visual y paquete beta controlado
 
 - F399 agrega auditoria de superficies controladas: 7 `FullscreenShell` y 3 `DialogShell` migradas.

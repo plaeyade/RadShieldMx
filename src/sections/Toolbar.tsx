@@ -30,13 +30,14 @@ function MiniIcon({ icon: Icon, color }: { icon: ComponentType<{className?: stri
 }
 
 /* ─── smart menu item ─── */
-function SmartItem({ icon: Icon, iconColor, label, onClick, shortcut, desc }: {
+function SmartItem({ icon: Icon, iconColor, label, onClick, shortcut, desc, testId }: {
   icon: ComponentType<{className?: string}>;
   iconColor: string; label: string | ReactNode;
-  onClick?: () => void; shortcut?: string; desc?: string;
+  onClick?: () => void; shortcut?: string; desc?: string; testId?: string;
 }) {
   return (
     <DropdownMenuItem
+      data-testid={testId}
       onClick={onClick}
       className="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-[#fff7ed] cursor-pointer transition-colors group text-[11px] text-slate-700 font-medium focus:bg-[#fff7ed] focus:text-[#f97316]"
     >
@@ -474,28 +475,28 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent data-testid="f295-primary-file-menu" align="start" side="bottom" sideOffset={5} collisionPadding={12} className="w-64 max-w-[calc(100vw-24px)] bg-white border border-slate-200 shadow-lg rounded-xl p-1.5">
               <SectionLabel label={t('sidebar.project')} color="text-slate-400" />
-              <SmartItem icon={Plus} iconColor={c.file} label={t('file.new')} onClick={invoke(onNewProject)} desc="Crear proyecto desde cero" />
-              <SmartItem icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={invoke(onProjects, 'projects')} desc="Abrir o administrar proyectos" />
-              <SmartItem icon={Save} iconColor={c.file} label={t('btn.save')} shortcut="Ctrl+S" onClick={invoke(onSaveProject)} />
+              <SmartItem testId="f404-file-new-project" icon={Plus} iconColor={c.file} label={t('file.new')} onClick={invoke(onNewProject)} desc="Crear proyecto desde cero" />
+              <SmartItem testId="f404-file-open-projects" icon={FolderOpen} iconColor={c.file} label={t('file.open')} onClick={invoke(onProjects, 'projects')} desc="Abrir o administrar proyectos" />
+              <SmartItem testId="f404-file-save-project" icon={Save} iconColor={c.file} label={t('btn.save')} shortcut="Ctrl+S" onClick={invoke(onSaveProject)} />
               <DropdownMenuSeparator />
               <SectionLabel label={t('file.import')} color="text-slate-400" />
-              <SmartItem icon={Upload} iconColor={c.file} label={t('file.import.csv')} onClick={invoke(onBatchImport, 'batchImport')} desc="Importacion batch de barreras/datos" />
-              <SmartItem icon={Layers} iconColor={c.file} label={t('file.import.dxf')} onClick={invoke(onDXFViewer, 'dxfViewer')} desc="DXF o conversion DWG externa" />
-              <SmartItem icon={FileBox} iconColor={c.file} label={t('file.import.step')} onClick={invoke(onSTEPImporter, 'stepImporter')} desc="STEP/IGES para geometria 3D" />
+              <SmartItem testId="f404-file-import-csv" icon={Upload} iconColor={c.file} label={t('file.import.csv')} onClick={invoke(onBatchImport, 'batchImport')} desc="Importacion batch de barreras/datos" />
+              <SmartItem testId="f404-file-import-dxf" icon={Layers} iconColor={c.file} label={t('file.import.dxf')} onClick={invoke(onDXFViewer, 'dxfViewer')} desc="DXF o conversion DWG externa" />
+              <SmartItem testId="f404-file-import-step" icon={FileBox} iconColor={c.file} label={t('file.import.step')} onClick={invoke(onSTEPImporter, 'stepImporter')} desc="STEP/IGES para geometria 3D" />
               <DropdownMenuSeparator />
               <SectionLabel label={t('file.export')} color="text-slate-400" />
-              <SmartItem icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={invoke(onExport, 'export')} />
-              <SmartItem icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={invoke(onPDF, 'pdfReport')} desc="Memoria analitica PDF" />
-              <SmartItem icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={invoke(onShare)} desc="Web Share API" />
-              <SmartItem icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={invoke(onCNSNS, 'cnsns')} desc="Salida regulatoria" />
+              <SmartItem testId="f404-file-export-csv" icon={Download} iconColor={c.file} label={t('file.export.csv')} onClick={invoke(onExport, 'export')} />
+              <SmartItem testId="f404-file-export-pdf" icon={FileDown} iconColor={c.file} label="Exportar PDF" onClick={invoke(onPDF, 'pdfReport')} desc="Memoria analitica PDF" />
+              <SmartItem testId="f404-file-share-results" icon={Share2} iconColor={c.file} label="Compartir resultados" onClick={invoke(onShare)} desc="Web Share API" />
+              <SmartItem testId="f404-file-export-cnsns" icon={Printer} iconColor={c.file} label="Exportar Reporte CNSNS" onClick={invoke(onCNSNS, 'cnsns')} desc="Salida regulatoria" />
               <DropdownMenuSeparator />
-              <SmartItem icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={invoke(onTechSpecs, 'techSpecs')} desc="Especificaciones tecnicas" />
-              <SmartItem icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={invoke(onAuditTrail, 'auditTrail')} desc="Trazabilidad" />
-              <SmartItem icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={invoke(onLogFileAnalysis, 'logFileAnalysis')} desc="Diagnostico de eventos" />
+              <SmartItem testId="f404-file-tech-specs" icon={Settings} iconColor={c.file} label={t('file.techSpecs')} onClick={invoke(onTechSpecs, 'techSpecs')} desc="Especificaciones tecnicas" />
+              <SmartItem testId="f404-file-audit-trail" icon={Activity} iconColor={c.file} label={t('file.auditTrail')} onClick={invoke(onAuditTrail, 'auditTrail')} desc="Trazabilidad" />
+              <SmartItem testId="f404-file-log-analysis" icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={invoke(onLogFileAnalysis, 'logFileAnalysis')} desc="Diagnostico de eventos" />
               <DropdownMenuSeparator />
               <SectionLabel label="Ayuda" color="text-slate-400" />
-              <SmartItem icon={BookOpen} iconColor={c.file} label="Glosario" onClick={invoke(onGlossary, 'glossary')} desc="Terminologia de blindaje" />
-              <SmartItem icon={Info} iconColor={c.file} label="Acerca de" onClick={invoke(onAbout, 'about')} desc="Version y creditos" />
+              <SmartItem testId="f404-file-glossary" icon={BookOpen} iconColor={c.file} label="Glosario" onClick={invoke(onGlossary, 'glossary')} desc="Terminologia de blindaje" />
+              <SmartItem testId="f404-file-about" icon={Info} iconColor={c.file} label="Acerca de" onClick={invoke(onAbout, 'about')} desc="Version y creditos" />
             </DropdownMenuContent>
           </DropdownMenu>
 
