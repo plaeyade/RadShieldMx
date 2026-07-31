@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F385-F386 (2026-07-31) - Capacidades productivas 3D
+
+- F385 agrega auditoria de capacidades productivas y evita sobreprometer funciones gateadas.
+- F386 valida Three/R3F como ruta visual productiva y deja Unity externo listo para smoke por URL.
+- Babylon no esta instalado en el bundle actual; sigue como adapter preparado, no como motor productivo.
+- Medical 3D muestra un panel de estado: Three/R3F productivo, Babylon no instalado y Unity URL pendiente/configurada.
+- Scripts: `npm run prepare:f385:production-capability-audit`, `npm run prepare:f386:three-unity-smoke` y `npm run test:f385-f386:productive-capabilities`.
+
 # F384 (2026-07-31) - Backlog post-beta
 
 - Se agrega manifest de estado para backlog pesado: Babylon, Unity WebGL externo, DWG provider, GATE/EGSnrc/Geant4, renderer base v2 y fotorrealismo avanzado.

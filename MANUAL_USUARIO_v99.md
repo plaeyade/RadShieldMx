@@ -1,5 +1,30 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F385-F386 - Capacidades productivas 3D
+
+F385-F386 agrega una compuerta visible para distinguir capacidades reales del build actual contra integraciones preparadas pero no activas.
+
+Estado operativo:
+
+1. **Three/R3F:** es la ruta productiva activa para inspeccion 3D medica. Renderiza sala/bunker, equipos, espesores, materiales, zonas, recorrido visual y evidencia para Memoria IA/PDF/Evidence Pack.
+2. **Babylon:** no esta instalado en el bundle actual. La app conserva el contrato/adapter, pero no debe tratarse como motor productivo hasta instalar `@babylonjs/core` y `@babylonjs/loaders`, activar flag y pasar smoke visual.
+3. **Unity WebGL:** esta preparado como visor externo por URL. Para probarlo use `VITE_MEDICAL_3D_UNITY_WEBGL_URL` o `F386_UNITY_WEBGL_URL`; para release estricto use `F386_REQUIRE_UNITY_LIVE=true`.
+4. **DWG provider y motores Monte Carlo externos:** siguen gateados por proveedor, credenciales, fixtures, runners y smoke live. No sustituyen el motor deterministico ni la evidencia normativa hasta validacion formal.
+
+Uso recomendado:
+
+1. Abra **Medical 3D / Inspeccion 3D**.
+2. Revise el panel **F385-F386 capacidades productivas**.
+3. Si Three/R3F aparece activo, puede usarlo para recorrido visual, capturas y evidencia.
+4. Si Unity URL esta pendiente, configure la URL externa antes de usarla como evidencia visual.
+5. Si Babylon aparece como no instalado, continue con Three/R3F; no fuerce el flujo Babylon en produccion.
+
+QA recomendado:
+
+1. `npm run prepare:f385:production-capability-audit`
+2. `npm run prepare:f386:three-unity-smoke`
+3. `npm run test:f385-f386:productive-capabilities`
+
 ## Addendum F384 - Backlog post-beta
 
 F384 separa lo que ya esta cerrado de lo que sigue gateado.

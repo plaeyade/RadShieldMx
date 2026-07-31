@@ -1057,6 +1057,26 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
+  const productiveCapabilityRows = useMemo(() => ([
+    {
+      id: 'three-r3f',
+      label: 'Three/R3F productivo',
+      status: 'activo',
+      detail: 'Motor visual principal con Canvas, recorrido, PBR ligero y evidencia visual exportable.',
+    },
+    {
+      id: 'babylon',
+      label: 'Babylon no instalado',
+      status: 'gateado',
+      detail: 'Adapter preparado; activar solo con @babylonjs/core/loaders instalados, flag y smoke visual.',
+    },
+    {
+      id: 'unity',
+      label: 'Unity URL',
+      status: unityLaunchPacket.viewer.url ? 'configurada' : 'pendiente',
+      detail: unityLaunchPacket.viewer.url || 'Falta VITE_MEDICAL_3D_UNITY_WEBGL_URL para probar visor externo real.',
+    },
+  ]), [unityLaunchPacket.viewer.url]);
   const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(activeFloorPlan), [activeFloorPlan]);
   const sceneHash = useMemo(
     () => stableSceneHash({
@@ -1587,6 +1607,27 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportF367F370Pack}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Export F367-F370
               </Button>
+            </div>
+
+            <div className="space-y-2 rounded border border-emerald-100 bg-emerald-50 p-2" data-testid="f385-f386-productive-capability-gate">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-emerald-900 uppercase">F385-F386 capacidades productivas</div>
+                  <div className="text-[9px] text-emerald-800">Solo Three/R3F queda activo en el bundle actual; Unity/Babylon requieren gate live.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">claim guard</Badge>
+              </div>
+              <div className="space-y-1">
+                {productiveCapabilityRows.map((row) => (
+                  <div key={row.id} className="rounded border border-emerald-100 bg-white/85 px-2 py-1.5 text-[9px] text-slate-600">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-emerald-950">{row.label}</span>
+                      <span className={row.status === 'activo' || row.status === 'configurada' ? 'text-emerald-700' : 'text-amber-700'}>{row.status}</span>
+                    </div>
+                    <div className="mt-0.5 leading-relaxed">{row.detail}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-2" data-testid="f307-f309-render-engine-selector">

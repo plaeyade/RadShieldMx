@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F385-F386 (2026-07-31) - Capacidades productivas 3D
+
+- Agrega auditoria ejecutable de capacidades productivas: Three/R3F, Babylon, Unity WebGL externo, DWG provider y runners Monte Carlo.
+- Confirma que Babylon no esta instalado/activo en el bundle actual; se mantiene como adapter gateado.
+- Refuerza Medical 3D con panel visible `F385-F386 capacidades productivas`: Three/R3F productivo, Babylon no instalado y Unity URL pendiente/configurada.
+- Agrega smoke F386 para validar Three/R3F y probar Unity externo cuando exista `F386_UNITY_WEBGL_URL` o `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+- Scripts: `npm run prepare:f385:production-capability-audit`, `npm run prepare:f386:three-unity-smoke` y `npm run test:f385-f386:productive-capabilities`.
+
 # F384 (2026-07-31) - Estado honesto del backlog post-beta
 
 - Agrega manifest de estado para Babylon, Unity WebGL externo, proveedor DWG, runners GATE/EGSnrc/Geant4, renderer base v2 y fotorrealismo avanzado.
