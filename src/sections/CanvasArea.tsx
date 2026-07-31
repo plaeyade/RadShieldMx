@@ -52,6 +52,7 @@ import { buildF220CanvasCadPriorityActions, type F220CadActionKey } from '@/lib/
 import { buildF221CanvasRealConnections } from '@/lib/f221CanvasRealConnections';
 import { buildF222ToF226CanvasHardening } from '@/lib/f222ToF226CanvasHardening';
 import { buildF227CanvasRendererLayerExtraction } from '@/lib/f227CanvasRendererLayerExtraction';
+import { buildRendererBaseV2Summary } from '@/lib/canvas/renderDynamicHelpers';
 import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers';
 import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
 import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
@@ -665,6 +666,12 @@ export default function CanvasArea({
     hasFloorPlanImage: Boolean(floorPlan?.imageUrl),
     scale: canvasState.scale,
     scale_m_per_pixel: floorPlan.scale_m_per_pixel,
+  });
+  const f387RendererBaseV2 = buildRendererBaseV2Summary({
+    heatmapPointCount,
+    sampleLineCount: sampleLines.length,
+    rendererHelpersActive: f228StaticRendererHelpers.helpers,
+    eventControllerTouched: false,
   });
   const f229CanvasCadE2EHarness = buildF229CanvasCadE2EHarness({
     barrierCount,
@@ -2543,6 +2550,41 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   grid/imagen/HUD extraidos; eventos intactos
+                </span>
+              </div>
+              <div
+                data-testid="f387-renderer-base-v2"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f387RendererBaseV2.guardrails.join(' ')}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f387RendererBaseV2.status === 'renderer-base-v2-active'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F387 Render v2
+                </span>
+                <span data-testid="f387-renderer-helper-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f387RendererBaseV2.activeHelpers.length} helpers
+                </span>
+                <span data-testid="f387-renderer-heatmap-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-rose-50 text-rose-700 border-rose-100">
+                  heat {f387RendererBaseV2.heatmapPointCount}
+                </span>
+                <span data-testid="f387-renderer-sample-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-amber-50 text-amber-700 border-amber-100">
+                  muestras {f387RendererBaseV2.sampleLineCount}
+                </span>
+                {f387RendererBaseV2.dynamicHelpers.map((helper) => (
+                  <span
+                    key={helper}
+                    data-testid={`f387-helper-${helper}`}
+                    className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-100"
+                    title="Helper dinamico activo; no modifica eventos, grips ni seleccion"
+                  >
+                    {helper.replace('drawCanvas', '').replace('Layer', '')}
+                  </span>
+                ))}
+                <span className="text-[7px] text-slate-400 truncate">
+                  eventos/grips intactos
                 </span>
               </div>
               <div

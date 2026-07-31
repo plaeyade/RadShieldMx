@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F387-F388 (2026-07-31) - Renderer base v2 y fotorrealismo avanzado
+
+- F378 queda cerrado como auditoria: 15 superficies clasificadas, 7 fullscreen conservadas, 6 candidatas a migrar.
+- Ya estan migradas las 3 candidatas P0: Barrier Editor, Air Kerma Overlay y Control Points.
+- Quedan 3 candidatas no P0 para fases posteriores: Compare Scenarios, Tutorial y Version History.
+- F387 extrae capas dinamicas reales del canvas a helpers v2: heatmap/isocontornos y lineas de muestreo Kmax/Tmax.
+- F388 mejora Three/R3F con ACES, PCFSoftShadowMap, DPR acotado, PBR procedural y panel de evidencia visual.
+- Scripts: `npm run prepare:f387-f388:renderer-photoreal` y `npm run test:f387-f388:renderer-photoreal`.
+
 # F385-F386 (2026-07-31) - Capacidades productivas 3D
 
 - F385 agrega auditoria de capacidades productivas y evita sobreprometer funciones gateadas.

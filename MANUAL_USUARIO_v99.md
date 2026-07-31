@@ -1,5 +1,37 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F387-F388 - Renderer base v2 y fotorrealismo avanzado
+
+F387-F388 avanza el canvas y la inspeccion 3D sin cambiar la logica de eventos.
+
+Estado de ventanas F378:
+
+1. **15 superficies clasificadas:** completado por auditoria F378.
+2. **7 fullscreen conservadas:** completado por politica; permanecen fullscreen Memoria Analitica, Evidence Pack, Manual, Dashboard, Layout Bunker, Checklist CNSNS y NCRP 151 Tables.
+3. **6 candidatas a migrar:** 3 ya migradas por F379-F382 y 3 quedan para fases no P0.
+4. **Migradas:** Barrier Editor, Air Kerma Overlay y Control Points.
+5. **Pendientes no P0:** Compare Scenarios, Tutorial y Version History.
+
+Uso del renderer base v2:
+
+1. Abra el canvas.
+2. Revise la fila **F387 Render v2**.
+3. Verifique que aparezcan helpers de heatmap y muestras.
+4. Use el canvas normalmente; eventos, grips, seleccion, snapping y dibujo siguen en el controlador estable.
+
+Uso de fotorrealismo avanzado:
+
+1. Abra **Medical 3D**.
+2. Active **Recorrido WASD** y, si desea inspeccion visual, **Recorrido fotoreal**.
+3. Seleccione luz clinica, inspeccion o recorrido.
+4. Revise el panel **F388 fotorrealismo avanzado**: muestra calidad, DPR, tone mapping ACES, sombras y preset visual.
+5. Exporte PNG/OBJ/JSON como evidencia visual. La imagen no reemplaza calculos, citas, PDF ni revision del fisico medico/RSO.
+
+QA recomendado:
+
+1. `npm run prepare:f387-f388:renderer-photoreal`
+2. `npm run test:f387-f388:renderer-photoreal`
+
 ## Addendum F385-F386 - Capacidades productivas 3D
 
 F385-F386 agrega una compuerta visible para distinguir capacidades reales del build actual contra integraciones preparadas pero no activas.

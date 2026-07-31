@@ -31,6 +31,7 @@ import {
 import { buildBabylonAdapterContract } from '@/lib/medical3D/babylonAdapter';
 import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExternalViewerBridge';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
+import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
 
 interface Props {
   open: boolean;
@@ -1057,6 +1058,12 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
+  const photorealAdvancedProfile = useMemo(() => buildPhotorealAdvancedProfile({
+    scene,
+    enabled: photorealWalkthrough,
+    lightingPreset,
+    walkthrough,
+  }), [lightingPreset, photorealWalkthrough, scene, walkthrough]);
   const productiveCapabilityRows = useMemo(() => ([
     {
       id: 'three-r3f',
@@ -1747,6 +1754,25 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </div>
             </div>
 
+            <div className="space-y-2 rounded border border-amber-100 bg-amber-50 p-2" data-testid="f388-photoreal-advanced-profile">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-amber-950 uppercase">F388 fotorrealismo avanzado</div>
+                  <div className="text-[9px] text-amber-900">Three/R3F con ACES, sombras suaves, DPR acotado y evidencia visual.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{photorealAdvancedProfile.quality}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-1 text-[9px] text-amber-950">
+                <div className="rounded border border-amber-100 bg-white/85 px-1.5 py-1">DPR {photorealAdvancedProfile.dpr.join('-')}</div>
+                <div className="rounded border border-amber-100 bg-white/85 px-1.5 py-1">ACES exp {photorealAdvancedProfile.exposure.toFixed(2)}</div>
+                <div className="rounded border border-amber-100 bg-white/85 px-1.5 py-1">{photorealAdvancedProfile.shadowMap}</div>
+                <div className="rounded border border-amber-100 bg-white/85 px-1.5 py-1">{photorealAdvancedProfile.envPreset}</div>
+              </div>
+              <div className="text-[9px] leading-relaxed text-amber-900">
+                {photorealAdvancedProfile.warnings[0]} No modifica calculos ni memoria firmable.
+              </div>
+            </div>
+
             <div className="space-y-2 rounded border border-slate-200 bg-white p-2" data-testid="f363-three-r3f-realism-aids">
               <div className="flex items-center justify-between gap-2">
                 <div>
@@ -1977,7 +2003,20 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             title={walkthrough && mouseLookEnabled ? 'Click para capturar mouse. Esc para salir.' : undefined}
           >
             {hasGeometry ? (
-              <Canvas className="h-full w-full" shadows camera={{ position: [7, 6, 9], fov: 45 }} gl={{ antialias: true, preserveDrawingBuffer: true }}>
+              <Canvas
+                className="h-full w-full"
+                shadows
+                dpr={photorealAdvancedProfile.dpr}
+                camera={{ position: [7, 6, 9], fov: 45 }}
+                gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+                onCreated={({ gl }) => {
+                  gl.shadowMap.enabled = true;
+                  gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                  gl.toneMapping = THREE.ACESFilmicToneMapping;
+                  gl.toneMappingExposure = photorealAdvancedProfile.exposure;
+                  gl.outputColorSpace = THREE.SRGBColorSpace;
+                }}
+              >
                 <Suspense fallback={null}>
                   <RoomScene
                     scene={scene}

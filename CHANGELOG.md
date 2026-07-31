@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F387-F388 (2026-07-31) - Renderer base v2 y fotorrealismo avanzado
+
+- F378 queda cuantificado: 15 superficies clasificadas, 7 permanecen fullscreen por politica, 6 candidatas a migrar, 3 P0 migradas y 3 candidatas no P0 pendientes.
+- F387 conecta renderer base v2 real para capas dinamicas seguras: `drawCanvasHeatmapLayer` y `drawCanvasSampleLinesLayer`; eventos, grips, snapping y seleccion quedan intactos.
+- F388 activa perfil avanzado Three/R3F con ACES tone mapping, sombras PCF soft, DPR acotado, PBR procedural y panel visible de evidencia visual.
+- Babylon sigue no instalado y Unity sigue gateado por URL externa; Three/R3F permanece como motor visual productivo.
+- Scripts: `npm run prepare:f387-f388:renderer-photoreal` y `npm run test:f387-f388:renderer-photoreal`.
+
 # F385-F386 (2026-07-31) - Capacidades productivas 3D
 
 - Agrega auditoria ejecutable de capacidades productivas: Three/R3F, Babylon, Unity WebGL externo, DWG provider y runners Monte Carlo.

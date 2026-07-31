@@ -8,6 +8,7 @@ import {
 } from '@/lib/controlledZoneCanvasUx';
 import { getBarrierLayerDisplay, getBarrierRiskColor, getBarrierRiskLevel } from '@/lib/canvasF85Workflow';
 import { drawCanvasBackgroundGrid, drawCanvasScaleHud, drawFloorPlanImageLayer } from '@/lib/canvas/renderStaticHelpers';
+import { drawCanvasHeatmapLayer, drawCanvasSampleLinesLayer } from '@/lib/canvas/renderDynamicHelpers';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -357,128 +358,10 @@ export function useCanvas(
       ctx.fillText(region.name, csp.x, csp.y);
     }
 
-    // Heatmap overlay
-    if (heatmapData && heatmapData.length > 0) {
-      const maxKerma = Math.max(...heatmapData.map(p => p.kerma));
-      const minKerma = Math.min(...heatmapData.map(p => p.kerma));
-      const range = maxKerma - minKerma || 1;
-
-      for (const pt of heatmapData) {
-        const sp = worldToScreen(pt.x, pt.y);
-        const normalized = (pt.kerma - minKerma) / range;
-        // Color map: green -> yellow -> orange -> red (low -> high)
-        let r = 0, g = 0, b = 0;
-        if (normalized < 0.33) {
-          // green to yellow
-          const t = normalized / 0.33;
-          r = Math.round(34 + t * (251 - 34));
-          g = Math.round(197 + t * (192 - 197));
-          b = Math.round(94 + t * (45 - 94));
-        } else if (normalized < 0.66) {
-          // yellow to orange
-          const t = (normalized - 0.33) / 0.33;
-          r = Math.round(251 + t * (237 - 251));
-          g = Math.round(192 + t * (137 - 192));
-          b = Math.round(45 + t * (54 - 45));
-        } else {
-          // orange to red
-          const t = (normalized - 0.66) / 0.34;
-          r = Math.round(237 + t * (220 - 237));
-          g = Math.round(137 + t * (38 - 137));
-          b = Math.round(54 + t * (38 - 54));
-        }
-
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.25)`;
-        const radius = 8 * canvasState.scale;
-        ctx.beginPath();
-        ctx.arc(sp.x, sp.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Draw heatmap legend
-      const legendX = 10;
-      const legendY = 60;
-      const legendW = 120;
-      const legendH = 12;
-      for (let i = 0; i < legendW; i++) {
-        const t = i / legendW;
-        let r = 0, g = 0, b = 0;
-        if (t < 0.33) {
-          const tt = t / 0.33;
-          r = Math.round(34 + tt * (251 - 34));
-          g = Math.round(197 + tt * (192 - 197));
-          b = Math.round(94 + tt * (45 - 94));
-        } else if (t < 0.66) {
-          const tt = (t - 0.33) / 0.33;
-          r = Math.round(251 + tt * (237 - 251));
-          g = Math.round(192 + tt * (137 - 192));
-          b = Math.round(45 + tt * (54 - 45));
-        } else {
-          const tt = (t - 0.66) / 0.34;
-          r = Math.round(237 + tt * (220 - 237));
-          g = Math.round(137 + tt * (38 - 137));
-          b = Math.round(54 + tt * (38 - 54));
-        }
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(legendX + i, legendY, 1, legendH);
-      }
-      ctx.fillStyle = '#2d3748';
-      ctx.font = 'bold 10px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(minKerma.toFixed(2), legendX, legendY + legendH + 10);
-      ctx.textAlign = 'right';
-      ctx.fillText(maxKerma.toFixed(2), legendX + legendW, legendY + legendH + 10);
-      ctx.textAlign = 'center';
-      ctx.fillText('mSv/sem', legendX + legendW / 2, legendY - 3);
-
-      const contourLevels = [
-        { ratio: 0.25, label: '25%', color: '#22c55e' },
-        { ratio: 0.5, label: '50%', color: '#f59e0b' },
-        { ratio: 0.75, label: '75%', color: '#ef4444' },
-      ];
-      for (const level of contourLevels) {
-        const target = minKerma + range * level.ratio;
-        const candidates = heatmapData
-          .map((pt) => ({ pt, delta: Math.abs(pt.kerma - target) }))
-          .sort((a, b) => a.delta - b.delta)
-          .slice(0, 8);
-        if (candidates.length < 3) continue;
-        const centroid = candidates.reduce((acc, item) => ({ x: acc.x + item.pt.x, y: acc.y + item.pt.y }), { x: 0, y: 0 });
-        centroid.x /= candidates.length;
-        centroid.y /= candidates.length;
-        const csp = worldToScreen(centroid.x, centroid.y);
-        const radius = Math.max(18, Math.min(140, 24 + level.ratio * 72)) * canvasState.scale;
-        ctx.save();
-        ctx.strokeStyle = level.color;
-        ctx.fillStyle = level.color;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([8, 4]);
-        ctx.globalAlpha = 0.78;
-        ctx.beginPath();
-        ctx.arc(csp.x, csp.y, radius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${level.label} ${target.toFixed(2)}`, csp.x, csp.y - radius - 6);
-        ctx.restore();
-      }
-
-      const regulatoryThreshold = 0.02;
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(legendX, legendY + 34, 138, 20, 4);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#991b1b';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(`Umbral regulatorio: ${regulatoryThreshold} mSv/sem`, legendX + 5, legendY + 47);
-      ctx.restore();
-    }
+    drawCanvasHeatmapLayer(ctx, heatmapData, {
+      scale: canvasState.scale,
+      worldToScreen,
+    });
 
     // Barriers
     for (const barrier of floorPlan.barriers) {
@@ -692,84 +575,14 @@ export function useCanvas(
       }
     }
 
-    // ========== RadShield Sample Lines & Points (0.3m beyond barriers) ==========
-    if (sampleLines && sampleLines.length > 0) {
-      for (const sl of sampleLines) {
-        if (sl.points.length < 2) continue;
-
-        // Draw sample line (dashed, 0.3m beyond barrier)
-        if (canvasState.showSampleLines) {
-          const first = worldToScreen(sl.points[0].x, sl.points[0].y);
-          const last = worldToScreen(sl.points[sl.points.length - 1].x, sl.points[sl.points.length - 1].y);
-          ctx.strokeStyle = '#f59e0b'; // amber
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 3]);
-          ctx.beginPath();
-          ctx.moveTo(first.x, first.y);
-          ctx.lineTo(last.x, last.y);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Label "0.3m"
-          const midIdx = Math.floor(sl.points.length / 2);
-          const midPt = worldToScreen(sl.points[midIdx].x, sl.points[midIdx].y);
-          ctx.fillStyle = '#f59e0b';
-          ctx.font = 'bold 9px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('0.3m', midPt.x, midPt.y - 4);
-        }
-
-        // Draw sample points (small black circles)
-        if (canvasState.showSamplePoints) {
-          for (const pt of sl.points) {
-            const spt = worldToScreen(pt.x, pt.y);
-            ctx.fillStyle = 'rgba(30, 30, 30, 0.6)';
-            ctx.beginPath();
-            ctx.arc(spt.x, spt.y, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        // Draw maximum circles (RadShield style)
-        if (canvasState.showMaxima) {
-          // Large RED circle = maximum air-kerma rate point
-          if (sl.maxKermaPoint) {
-            const sp = worldToScreen(sl.maxKermaPoint.x, sl.maxKermaPoint.y);
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(sp.x, sp.y, 10, 0, Math.PI * 2);
-            ctx.stroke();
-            // Red fill with low opacity
-            ctx.fillStyle = 'rgba(220, 38, 38, 0.15)';
-            ctx.fill();
-            // Label
-            ctx.fillStyle = '#dc2626';
-            ctx.font = 'bold 9px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(`Kmax`, sp.x, sp.y - 12);
-          }
-
-          // Large BLUE circle = maximum barrier thickness point
-          if (sl.maxThicknessPoint) {
-            const sp = worldToScreen(sl.maxThicknessPoint.x, sl.maxThicknessPoint.y);
-            ctx.strokeStyle = '#2563eb';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(sp.x, sp.y, 10, 0, Math.PI * 2);
-            ctx.stroke();
-            // Blue fill with low opacity
-            ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
-            ctx.fill();
-            // Label
-            ctx.fillStyle = '#2563eb';
-            ctx.font = 'bold 9px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(`Tmax`, sp.x, sp.y + 18);
-          }
-        }
-      }
-    }
+    drawCanvasSampleLinesLayer(ctx, sampleLines ?? [], {
+      scale: canvasState.scale,
+      worldToScreen,
+    }, {
+      showSampleLines: canvasState.showSampleLines,
+      showSamplePoints: canvasState.showSamplePoints,
+      showMaxima: canvasState.showMaxima,
+    });
 
     // X-ray sources — differentiated icons by modality category
     for (const source of floorPlan.sources) {
