@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F405-F408 (2026-07-31) - Trazabilidad calculo, canvas QA, heatmap reportable y Unity handoff
+
+- F405 agrega `f405CalculationTraceabilityBundle`: empaqueta formula, norma, inputs, outputs, supuestos, warnings, citas, unidades, comparador y cache por barrera para Memoria IA, PDF y Evidence Pack.
+- F406 agrega `f406CanvasToolQa`: contrato verificable de herramientas CAD, modos visuales, command dock, canvas principal y boton derecho.
+- F407 agrega `f407ReportableHeatmap`: convierte la leyenda F212 e isocontornos en snapshot exportable con umbrales regulatorios y evidencia requerida.
+- F408 agrega `f408UnitySceneExport`: export 3D en metros, eje Y arriba, muros/equipos/zonas/dosis para Three/R3F, Unity WebGL, glTF/OBJ y runners externos.
+- Nuevas validaciones: `npm run prepare:f405-f408:calc-canvas-unity`, `npm run test:f405-f408:calc-canvas-unity` y `npm run test:f405-f408:unit`.
+
 # F404 (2026-07-31) - Archivo menu funcional real
 
 - Agrega `data-testid` estable a los 15 items reales del menu Archivo.

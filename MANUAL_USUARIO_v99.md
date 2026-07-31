@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F405-F408 - Calculo trazable, Canvas QA, Heatmap y Unity
+
+F405-F408 cierra una compuerta tecnica previa a nuevas mejoras de alto riesgo del renderer.
+
+1. **Calculo trazable F405:** cada barrera calculada debe conservar formula, norma, entradas, salidas, supuestos, advertencias clinicas, citas, unidades normalizadas, comparador base/conservador y cache. Si falta alguno, la Memoria IA puede usarlo como borrador, pero no como salida firmable.
+2. **Canvas QA F406:** las herramientas minimas del canvas son Seleccionar, Muro, Fuente, Zona, Medir, Pan, Plano, Heat, Iso, Estructura, dock CAD, canvas principal y boton derecho. Cada boton debe conservar `title`/`aria-label` y accion real.
+3. **Heatmap reportable F407:** el mapa de calor solo se considera exportable cuando existen escala, lineas de muestreo a 0.3 m, resultados de barrera, leyenda regulatoria F212 y snapshot visual.
+4. **Unity/3D F408:** el handoff 3D usa metros, eje Y arriba y mapea el plano 2D a X/Z. Unity, Three o glTF pueden mejorar materiales, recorrido y acabados, pero no deben modificar geometria, espesores ni resultados sin generar nuevo hash.
+
+Comandos de validacion:
+
+1. `npm run prepare:f405-f408:calc-canvas-unity`
+2. `npm run test:f405-f408:calc-canvas-unity`
+3. `npm run test:f405-f408:unit`
+
 ## Addendum F404 - Menu Archivo funcional
 
 F404 valida el menu **Archivo** desde la interfaz real.

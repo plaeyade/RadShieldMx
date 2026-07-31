@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F405-F408 (2026-07-31) - Calculo trazable, Canvas QA, Heatmap y Unity
+
+- F405: bundle unico para entregar calculos a Memoria IA/PDF/Evidence con formula, norma, entradas, salidas, supuestos, advertencias, citas, unidades normalizadas, comparador base/conservador y cache F196.
+- F406: auditoria de herramientas reales del canvas: seleccionar, muro, fuente, zona, medir, pan, modos Plano/Heat/Iso/Estructura, dock CAD, canvas principal y menu contextual.
+- F407: snapshot reportable del heatmap/isocontornos con leyenda regulatoria F212, puntos clasificados, targets de export y evidencia minima.
+- F408: contrato de export 3D para Three/R3F, Unity WebGL, glTF/OBJ y motores externos; usa metros, eje Y arriba y no permite modificar geometria/espesor sin nuevo hash.
+- Scripts: `npm run prepare:f405-f408:calc-canvas-unity`, `npm run test:f405-f408:calc-canvas-unity` y `npm run test:f405-f408:unit`.
+
 # F404 (2026-07-31) - Archivo funcional
 
 - Se agregan identificadores QA a los 15 submenus reales de Archivo.
