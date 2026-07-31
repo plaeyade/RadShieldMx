@@ -1,5 +1,27 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F389-F391 - Ventanas movibles restantes
+
+F389-F391 cierra la migracion de ventanas que debian convivir con el canvas.
+
+Estado final F378:
+
+1. **15 superficies clasificadas:** completo.
+2. **7 fullscreen conservadas:** siguen fullscreen por politica funcional o documental.
+3. **6 candidatas a ventana:** completo, 6/6 migradas a `DialogShell`.
+4. **Nuevas migradas:** Compare Scenarios, Tutorial y Version History.
+
+Uso:
+
+1. Abra **Compare Scenarios** para contrastar dos escenarios de blindaje. Puede mover, minimizar o expandir la ventana y exportar CSV.
+2. Abra **Tutorial** para seguir el paso a paso mientras practica sobre el floorplan.
+3. Abra **Version History** para revisar versiones y restaurar una version previa sin monopolizar toda la pantalla.
+
+QA recomendado:
+
+1. `npm run prepare:f389-f391:dialogshell-migration`
+2. `npm run test:f389-f391:dialogshell-migration`
+
 ## Addendum F387-F388 - Renderer base v2 y fotorrealismo avanzado
 
 F387-F388 avanza el canvas y la inspeccion 3D sin cambiar la logica de eventos.

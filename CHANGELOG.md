@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F389-F391 (2026-07-31) - Cierre completo de migracion DialogShell
+
+- Migra las 3 candidatas no P0 restantes de F378 a ventanas `DialogShell`: `CompareScenariosDialog`, `TutorialDialog` y `VersionHistoryDialog`.
+- La cola F378 `migrate-window` queda cerrada: 6/6 candidatas migradas. Las 7 superficies que permanecen fullscreen quedan por politica funcional/regulatoria, no por omision.
+- `Compare Scenarios` conserva comparacion A/B y export CSV, ahora como ventana movible/minimizable/expandible.
+- `Tutorial` queda como guia flotante para practicar sobre el canvas sin bloquearlo.
+- `Version History` conserva seleccion, restore y toast, ahora en ventana controlable.
+- Scripts: `npm run prepare:f389-f391:dialogshell-migration` y `npm run test:f389-f391:dialogshell-migration`.
+
 # F387-F388 (2026-07-31) - Renderer base v2 y fotorrealismo avanzado
 
 - F378 queda cuantificado: 15 superficies clasificadas, 7 permanecen fullscreen por politica, 6 candidatas a migrar, 3 P0 migradas y 3 candidatas no P0 pendientes.

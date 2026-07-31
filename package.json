@@ -474,6 +474,8 @@
     "test:f385-f386:productive-capabilities": "node scripts/check-f385-f386-productive-capabilities-contracts.mjs",
     "prepare:f387-f388:renderer-photoreal": "node scripts/f387-f388-renderer-photoreal-audit.mjs",
     "test:f387-f388:renderer-photoreal": "node scripts/check-f387-f388-renderer-photoreal-contracts.mjs",
+    "prepare:f389-f391:dialogshell-migration": "node scripts/f389-f391-dialogshell-migration-audit.mjs",
+    "test:f389-f391:dialogshell-migration": "node scripts/check-f389-f391-dialogshell-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",
