@@ -34,10 +34,15 @@ export const REVIT_EXTERNAL_INTEGRATION_NOTE =
   'Revit/Autodesk queda como integracion BIM externa: RadShield-MX importa IFC/DXF hoy; RVT nativo, Revit Add-in y Autodesk Platform Services quedan para una fase posterior con licencia/API controlada.';
 
 export const REVIT_SHARED_PARAMETERS: RevitSharedParameter[] = [
+  { name: 'RS_BimEntityId', description: 'Identificador persistente RadShield para roundtrip BIM', example: 'barrier-east-001' },
   { name: 'RS_ShieldingType', description: 'Clasificacion radiologica de barrera', example: 'Primaria / Secundaria' },
   { name: 'RS_DesignGoal_mSv', description: 'Meta de diseno usada en memoria analitica', example: '0.02' },
   { name: 'RS_MaterialCode', description: 'Material normalizado para calculo', example: 'CONCRETE235 / LEAD' },
   { name: 'RS_RequiredThickness', description: 'Espesor requerido calculado', example: '178 mm' },
+  { name: 'RS_ControlledZone', description: 'Clasificacion de zona asociada al objeto', example: 'Publica / Controlada / No ocupada' },
+  { name: 'RS_StructuralLoad_kg_m2', description: 'Carga superficial estimada por material de blindaje', example: '512 kg/m2' },
+  { name: 'RS_CalculationHash', description: 'Hash reproducible de entradas de calculo', example: 'f196-cache-v1:ab12cd34' },
+  { name: 'RS_RevisionStatus', description: 'Estado de revision tecnica del objeto', example: 'Draft / RSO Review / Approved' },
   { name: 'RS_PassFail', description: 'Resultado de verificacion', example: 'PASS / FAIL' },
   { name: 'RS_EvidencePackId', description: 'Paquete de evidencia que sustenta el calculo', example: 'pack-20260711' },
   { name: 'RS_SourceTrace', description: 'Trazabilidad de fuente BIM/importacion', example: 'IFC export + revision A' },

@@ -34,6 +34,7 @@ test('F411 BIM canvas studio surfaces are visible and connected', async ({ page 
   await expect(page.getByTestId('f412-bim-entity-catalog')).toBeVisible();
   await expect(page.getByTestId('f412-bim-rs-parameters')).toBeVisible();
   await expect(page.getByTestId('f412-bim-roundtrip-gates')).toBeVisible();
+  await expect(page.getByTestId('f413-bim-execution-plan')).toBeVisible();
   await expect(page.getByTestId('f411-bim-command-line')).toBeVisible();
 
   await page.getByTestId('f411-bim-ribbon-shielding').click();
@@ -58,6 +59,7 @@ test('F411 BIM canvas studio surfaces are visible and connected', async ({ page 
       'f412-bim-entity-catalog',
       'f412-bim-rs-parameters',
       'f412-bim-roundtrip-gates',
+      'f413-bim-execution-plan',
       'f411-bim-command-line',
     ],
   };

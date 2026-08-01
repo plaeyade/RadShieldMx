@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F413 (2026-07-31) - BIM Execution Plan
+
+- Agrega `f413BimExecutionPlan.ts` con pasos BIM operativos: Acquire, Normalize, Classify, Bind RS_*, Calculate, Coordinate y Publish.
+- Amplia parametros Revit `RS_*` con `RS_BimEntityId`, `RS_ControlledZone`, `RS_StructuralLoad_kg_m2`, `RS_CalculationHash` y `RS_RevisionStatus`.
+- El canvas muestra `f413-bim-execution-plan` para revisar avance BIM desde geometria hasta memoria, evidencia y coordinacion estructural.
+- Define worksets de arquitectura, proteccion radiologica, estructura/obra y evidencia; cada uno tiene regla operativa para QA.
+- Scripts: `npm run prepare:f413:bim-execution` y `npm run test:f413:bim-execution`.
+
 # F412 (2026-07-31) - Metodologia BIM operable
 
 - Extiende F411 con un catalogo BIM interno: barreras `IfcWall`, zonas `IfcSpace`, fuentes `RadShieldSource`, puntos criticos `RadShieldControlPoint` y capas `IfcPresentationLayerAssignment`.

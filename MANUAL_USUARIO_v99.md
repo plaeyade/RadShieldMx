@@ -1,5 +1,32 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F413 - BIM Execution Plan
+
+F413 agrega una secuencia BIM de trabajo para usar RadShield-MX con disciplina similar a Revit/Plant 3D:
+
+1. **Acquire:** recibir plano DXF/IFC/PDF, registrar fuente, escala, revision y hash.
+2. **Normalize:** revisar unidades, ejes, niveles, origen y escala.
+3. **Classify:** clasificar muros, zonas, fuentes/equipos, penetraciones, puntos criticos y capas.
+4. **Bind RS_*:** asignar parametros compartidos RadShield a cada entidad.
+5. **Calculate:** ejecutar calculo trazable con geometria, fuente, material, P/T/U/W, TVL y citas.
+6. **Coordinate:** revisar carga estructural, interferencias, penetraciones, obra, costos y tiempos.
+7. **Publish:** generar memoria, PDF, anexos, snapshots, JSON reproducible y Evidence Pack.
+
+Worksets recomendados:
+
+- **Arquitectura:** muros, puertas, espacios, capas y dimensiones.
+- **Proteccion radiologica:** fuentes, barreras, puntos criticos, zonas y resultados.
+- **Estructura/obra:** materiales, peso, carga superficial, costos y tiempos.
+- **Evidencia:** normas, PDFs, hashes, paginas, memoria y decisiones.
+
+Nuevos parametros RS_*:
+
+- `RS_BimEntityId`: identificador persistente de entidad.
+- `RS_ControlledZone`: zona publica/controlada/no ocupada.
+- `RS_StructuralLoad_kg_m2`: carga superficial estimada por material.
+- `RS_CalculationHash`: hash reproducible de entradas de calculo.
+- `RS_RevisionStatus`: Draft, RSO Review o Approved.
+
 ## Addendum F412 - Metodologia BIM en RadShield-MX
 
 F412 define como se debe usar BIM dentro del producto.

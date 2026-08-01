@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F413 (2026-07-31) - BIM Execution Plan
+
+- F413 formaliza el flujo BIM de proyecto: Acquire, Normalize, Classify, Bind RS_*, Calculate, Coordinate y Publish.
+- Agrega `src/lib/f413BimExecutionPlan.ts` y lo muestra en el canvas como `f413-bim-execution-plan`.
+- Parametros RS_* ampliados: `RS_BimEntityId`, `RS_ControlledZone`, `RS_StructuralLoad_kg_m2`, `RS_CalculationHash` y `RS_RevisionStatus`.
+- Worksets: arquitectura, proteccion radiologica, estructura/obra y evidencia.
+- Entregables: manifiesto BIM JSON, memoria PDF con citas, handoff IFC/DXF, schedule Revit RS_* y Evidence Pack.
+- Comandos: `npm run prepare:f413:bim-execution` y `npm run test:f413:bim-execution`.
+
 # F412 (2026-07-31) - Metodologia BIM operable
 
 - F412 convierte la adaptacion visual F411 en contrato metodologico.

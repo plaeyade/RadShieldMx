@@ -58,6 +58,7 @@ import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
 import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
 import { buildF231ToF236CanvasReleaseCoverage } from '@/lib/f231ToF236CanvasReleaseCoverage';
 import { buildF411BimCanvasMethodology } from '@/lib/f411BimCanvasMethodology';
+import { buildF413BimExecutionPlan } from '@/lib/f413BimExecutionPlan';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -915,6 +916,7 @@ export default function CanvasArea({
     selectedKind: selectedInspectorKind,
     selectedName: selectedInspectorName,
   });
+  const f413BimExecutionPlan = buildF413BimExecutionPlan(f411BimMethodology);
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -1986,6 +1988,34 @@ export default function CanvasArea({
                       {f411BimMethodology.sharedParameterRows.slice(0, 5).map((parameter) => (
                         <span key={parameter.name} className="rounded bg-[#263545] px-1 text-[8px] text-slate-200" title={`${parameter.description}: ${parameter.example}`}>
                           {parameter.name.replace('RS_', '')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f413-bim-execution-plan" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>BIM Execution</span>
+                      <span className={f413BimExecutionPlan.status === 'bim-execution-ready' ? 'text-emerald-300' : 'text-amber-300'}>
+                        {f413BimExecutionPlan.readinessScore}%
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {f413BimExecutionPlan.steps.map((step) => (
+                        <span
+                          key={step.id}
+                          data-testid={`f413-bim-step-${step.id}`}
+                          className={`rounded px-1 py-0.5 text-center text-[7px] font-bold ${
+                            step.status === 'ready'
+                              ? 'bg-emerald-950/50 text-emerald-200'
+                              : step.status === 'external'
+                                ? 'bg-cyan-950/50 text-cyan-200'
+                                : step.status === 'blocked'
+                                  ? 'bg-red-950/50 text-red-200'
+                                  : 'bg-amber-950/50 text-amber-200'
+                          }`}
+                          title={`${step.owner}: ${step.purpose}`}
+                        >
+                          {step.label.slice(0, 4)}
                         </span>
                       ))}
                     </div>
