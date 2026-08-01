@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F414 - Referencia visual BIM / videos
+
+F414 agrega una capa de referencia para que el canvas conserve una logica tipo AutoCAD Plant 3D/Revit sin perder las acciones reales de RadShield-MX.
+
+Al usar el canvas BIM:
+
+1. Revise el **ribbon disciplinar** para entrar por Proyecto, Modelo, Equipos, Blindaje, Anotar, Verificar, Reportar y Evidencia.
+2. Use **Project Manager** para ubicar planos, modelos, equipos, barreras, zonas, reportes y fuentes de evidencia.
+3. Use **Propiedades/Capas** para confirmar visibilidad, bloqueo, color, opacidad, material, TVL, carga estructural y estado de revision.
+4. Use el **viewport anotado** para revisar etiquetas, flechas, leyenda, zonas, heatmap/isocontornos y capturas exportables.
+5. Use **View cube / navegacion** para alternar planta, ajuste, pan, zoom y recorrido medico 3D.
+6. Lea la **linea de comando** para ver herramienta activa, accion reciente, advertencias de escala, DXF, memoria y evidencia.
+
+Nota: los videos enviados quedan como referencia operativa. Codex aun no puede ver `ffmpeg.exe` en `AppData/Local` ni en `PATH`, por lo que la extraccion automatica de frames se completara cuando se proporcione una ruta ejecutable verificable.
+
 ## Addendum F413 - BIM Execution Plan
 
 F413 agrega una secuencia BIM de trabajo para usar RadShield-MX con disciplina similar a Revit/Plant 3D:

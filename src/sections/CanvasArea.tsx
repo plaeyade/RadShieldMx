@@ -59,6 +59,7 @@ import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
 import { buildF231ToF236CanvasReleaseCoverage } from '@/lib/f231ToF236CanvasReleaseCoverage';
 import { buildF411BimCanvasMethodology } from '@/lib/f411BimCanvasMethodology';
 import { buildF413BimExecutionPlan } from '@/lib/f413BimExecutionPlan';
+import { buildF414BimVideoReferencePlan } from '@/lib/f414BimVideoReference';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -917,6 +918,7 @@ export default function CanvasArea({
     selectedName: selectedInspectorName,
   });
   const f413BimExecutionPlan = buildF413BimExecutionPlan(f411BimMethodology);
+  const f414BimVideoReference = buildF414BimVideoReferencePlan(false);
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -2016,6 +2018,26 @@ export default function CanvasArea({
                           title={`${step.owner}: ${step.purpose}`}
                         >
                           {step.label.slice(0, 4)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f414-bim-video-reference" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Video/UI reference</span>
+                      <span className={f414BimVideoReference.status === 'reference-ready' ? 'text-emerald-300' : 'text-amber-300'}>
+                        {f414BimVideoReference.status === 'reference-ready' ? 'frames' : 'image'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f414BimVideoReference.patterns.slice(0, 6).map((pattern) => (
+                        <span
+                          key={pattern.id}
+                          data-testid={`f414-bim-pattern-${pattern.id}`}
+                          className="truncate rounded bg-[#263545] px-1 py-0.5 text-[7px] text-cyan-100"
+                          title={`${pattern.canvasApplication} Regla: ${pattern.releaseRule}`}
+                        >
+                          {pattern.label}
                         </span>
                       ))}
                     </div>

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F414 (2026-07-31) - BIM video reference alignment
+
+- Agrega `f414BimVideoReference.ts` con patrones de interfaz observados en la referencia AutoCAD Plant 3D/Revit: ribbon disciplinar, Project Manager, propiedades/capas, viewport anotado, view cube/navegacion y linea de comando.
+- El canvas muestra `f414-bim-video-reference` dentro del panel BIM con reglas de aplicacion y release para que futuras iteraciones no rompan el flujo visual.
+- Se documenta que `ffmpeg.exe` aun no es visible para Codex en `AppData/Local` ni `PATH`; queda preparado el handoff para extraer frames a `outputs/f414_bim_video_reference` cuando se proporcione la ruta exacta.
+- Scripts: `npm run prepare:f414:bim-video-reference` y `npm run test:f414:bim-video-reference`.
+
 # F413 (2026-07-31) - BIM Execution Plan
 
 - Agrega `f413BimExecutionPlan.ts` con pasos BIM operativos: Acquire, Normalize, Classify, Bind RS_*, Calculate, Coordinate y Publish.

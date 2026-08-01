@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F414 (2026-07-31) - BIM video reference alignment
+
+- F414 registra la referencia visual BIM/AutoCAD Plant 3D usada para adaptar el canvas.
+- Patrones versionados: ribbon por disciplina, Project Manager lateral, propiedades/capas, viewport anotado, view cube/navegacion y linea de comando.
+- Agrega `src/lib/f414BimVideoReference.ts` y lo muestra en el canvas como `f414-bim-video-reference`.
+- `ffmpeg.exe` no fue visible desde Codex en `AppData/Local`, `PATH` ni Chocolatey; la extraccion de frames queda lista para cuando exista una ruta ejecutable verificable.
+- Comandos: `npm run prepare:f414:bim-video-reference` y `npm run test:f414:bim-video-reference`.
+
 # F413 (2026-07-31) - BIM Execution Plan
 
 - F413 formaliza el flujo BIM de proyecto: Acquire, Normalize, Classify, Bind RS_*, Calculate, Coordinate y Publish.
