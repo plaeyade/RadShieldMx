@@ -65,6 +65,7 @@ import { buildF416ToF420BimCanvasSequence } from '@/lib/f416ToF420BimCanvasSeque
 import { buildF421ToF425BimHandoffPlan } from '@/lib/f421ToF425BimHandoff';
 import { buildF426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
 import { buildF431ToF435RendererReleaseGate } from '@/lib/f431ToF435RendererReleaseGate';
+import { buildF436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -939,6 +940,11 @@ export default function CanvasArea({
     handoff: f421ToF425BimHandoff,
   });
   const f431ToF435RendererReleaseGate = buildF431ToF435RendererReleaseGate(f426ToF430CalcRendererClosure);
+  const f436ToF438RendererV2Bridge = buildF436ToF438RendererV2Bridge({
+    floorPlan,
+    closure: f426ToF430CalcRendererClosure,
+    releaseGate: f431ToF435RendererReleaseGate,
+  });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -2396,6 +2402,34 @@ export default function CanvasArea({
                       ))}
                     </div>
                   </div>
+                  <div data-testid="f436-f438-renderer-v2-bridge" className="mt-2 rounded border border-violet-800 bg-[#120b1f]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F436-F438 Renderer v2</span>
+                      <span className={f436ToF438RendererV2Bridge.status === 'renderer-v2-bridge-ready' ? 'text-emerald-200' : 'text-amber-200'}>
+                        {f436ToF438RendererV2Bridge.status === 'renderer-v2-bridge-ready' ? 'ready' : 'gated'}
+                      </span>
+                    </div>
+                    <div data-testid="f436-visual-baseline" className="grid grid-cols-2 gap-1">
+                      {f436ToF438RendererV2Bridge.visualBaselines.map((baseline) => (
+                        <span key={baseline.id} className="truncate rounded bg-violet-950/50 px-1 py-0.5 text-[7px] text-violet-200" title={`${baseline.width}x${baseline.height}: ${baseline.acceptance}`}>
+                          {baseline.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f437-pdf-evidence-live-link" className="mt-1 truncate text-[8px] text-slate-300" title={f436ToF438RendererV2Bridge.pdfEvidenceLinks.map((link) => `${link.target}: ${link.payloadFields.join(', ')}`).join(' | ')}>
+                      <span className="font-bold text-violet-200">{f436ToF438RendererV2Bridge.pdfEvidenceLinks.length}</span> PDF/Evidence links
+                    </div>
+                    <div data-testid="f438-renderer-geometry-core" className="mt-1 flex flex-wrap gap-1">
+                      {f436ToF438RendererV2Bridge.geometryCoreEntities.map((entity) => (
+                        <span key={entity.id} className={`rounded px-1 py-0.5 text-[7px] ${entity.enabledByFlag ? 'bg-emerald-950/50 text-emerald-200' : 'bg-amber-950/50 text-amber-200'}`} title={`${entity.rendererLayer}: ${entity.normalizedFields.join(', ')}`}>
+                          {entity.entityType}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f438-feature-flag-policy" className="mt-1 truncate text-[8px] text-slate-300" title={f436ToF438RendererV2Bridge.featureFlagPolicy.rollback.join(' ')}>
+                      Flag: <span className="font-bold text-violet-200">{f436ToF438RendererV2Bridge.featureFlagPolicy.masterFlag}</span> / eventos off
+                    </div>
+                  </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
                     {f411BimMethodology.roundtripGates.slice(0, 4).map((gate) => (
                       <span
@@ -3237,6 +3271,31 @@ export default function CanvasArea({
                 ))}
                 <span className="text-[7px] text-slate-400 truncate">
                   eventos/grips intactos
+                </span>
+              </div>
+              <div
+                data-testid="f436-f438-renderer-v2-bridge-row"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f436ToF438RendererV2Bridge.acceptanceGates.join(' ')}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f436ToF438RendererV2Bridge.status === 'renderer-v2-bridge-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-violet-50 text-violet-700 border border-violet-100'
+                }`}>
+                  F436-F438
+                </span>
+                <span data-testid="f436-baseline-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f436ToF438RendererV2Bridge.visualBaselines.length} baselines
+                </span>
+                <span data-testid="f437-link-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f436ToF438RendererV2Bridge.pdfEvidenceLinks.length} links
+                </span>
+                <span data-testid="f438-core-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f436ToF438RendererV2Bridge.geometryCoreEntities.length} core
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  renderer bajo flag; eventos off
                 </span>
               </div>
               <div

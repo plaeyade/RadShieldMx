@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F436-F438 (2026-07-31) - Bridge renderer v2
+
+- F436 genera baseline visual desktop y mobile/tablet para verificar que canvas/sidebar/ribbon/paneles BIM se mantienen visibles.
+- F437 conecta roles, penetraciones, carga estructural y baseline visual con Memoria IA, PDF Report y Evidence Pack.
+- F438 define un geometry core normalizado para barreras, fuentes, regiones, penetraciones y overlays.
+- El geometry core queda condicionado por `VITE_CANVAS_HIGH_RISK_CAD`; `VITE_CANVAS_EVENT_CONTROLLER_V2` sigue apagado.
+- Rollback: apagar flags, limpiar `localStorage.radshield_feature_flags` y volver a `CanvasArea/useCanvas`.
+
 # F431-F435 (2026-07-31) - Gate de release para renderer profundo
 
 - F431 agrega smoke visual/E2E para el panel F426-F430 y confirma que canvas/sidebar/ribbon siguen visibles.

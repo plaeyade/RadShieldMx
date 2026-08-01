@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F436-F438 (2026-07-31) - Renderer v2 bridge
+
+- **F436:** agrega baseline visual desktop y mobile/tablet para confirmar canvas, sidebar, ribbon y paneles F426-F435 antes de tocar renderer base.
+- **F437:** conecta manifest vivo para Memoria IA, PDF Report y Evidence Pack con roles, penetraciones, carga estructural y baseline visual.
+- **F438:** define geometry core normalizado para barreras, fuentes, regiones, penetraciones y overlays bajo `VITE_CANVAS_HIGH_RISK_CAD`.
+- Mantiene `VITE_CANVAS_EVENT_CONTROLLER_V2=false`; eventos, seleccion, grips y snapping siguen en la ruta estable `CanvasArea/useCanvas`.
+- Agrega E2E `f436-f438-renderer-v2-bridge.spec.ts` con baseline desktop y mobile.
+
 # F431-F435 (2026-07-31) - Renderer release gate
 
 - **F431:** agrega smoke visual dedicado para comprobar que F426-F430 aparece sin ocultar canvas, sidebar ni ribbon BIM.

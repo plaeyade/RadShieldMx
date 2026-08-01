@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F436-F438 - Bridge seguro hacia renderer v2
+
+F436-F438 prepara el renderer profundo sin sustituir todavia el canvas estable.
+
+1. **F436 - Baseline visual:** genera capturas desktop y mobile/tablet. Deben verse canvas, sidebar, ribbon BIM y paneles F426-F435 en escritorio; en mobile debe conservarse canvas y toolbar.
+2. **F437 - Link PDF/Evidence:** conecta tabla de roles, anexo de penetraciones, carga estructural y baseline visual con Memoria IA, PDF Report y Evidence Pack.
+3. **F438 - Geometry core:** normaliza barreras, fuentes, zonas, penetraciones y overlays para que un renderer v2 pueda consumir datos sin leer directamente componentes React.
+
+Politica de seguridad:
+
+- `VITE_CANVAS_HIGH_RISK_CAD` controla el inicio del renderer geometry core.
+- `VITE_CANVAS_EVENT_CONTROLLER_V2` permanece apagado en esta fase.
+- Si falla canvas, sidebar o seleccion, apagar flags y volver a `CanvasArea/useCanvas`.
+- No mezclar renderer v2 y reescritura de eventos en la misma fase.
+
 ## Addendum F431-F435 - Gate de release del renderer profundo
 
 F431-F435 no agrega botones nuevos al operador: agrega verificacion para asegurar que lo implementado en F426-F430 se pueda usar sin romper canvas, sidebar, ribbon BIM ni export visual.
