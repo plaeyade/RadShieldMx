@@ -15,6 +15,11 @@ const checks = [
       'workflowNeeds',
       'IDs persistentes por objeto',
       'Importadores auditados',
+      'F412BimEntityRow',
+      'entityCatalog',
+      'sharedParameterRows',
+      'roundtripGates',
+      'REVIT_SHARED_PARAMETERS',
     ],
   },
   {
@@ -28,6 +33,9 @@ const checks = [
       'f411-bim-layers',
       'f411-bim-navigation-rail',
       'f411-bim-command-line',
+      'f412-bim-entity-catalog',
+      'f412-bim-rs-parameters',
+      'f412-bim-roundtrip-gates',
     ],
   },
   {
@@ -38,6 +46,7 @@ const checks = [
       'f411-bim-ribbon',
       'f411-bim-project-manager',
       'f411-bim-navigation-rail',
+      'f412-bim-entity-catalog',
     ],
   },
 ];

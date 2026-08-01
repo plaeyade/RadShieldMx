@@ -1956,7 +1956,7 @@ export default function CanvasArea({
                 </div>
                 <div
                   data-testid="f411-bim-methodology-card"
-                  className="absolute right-14 top-2 z-20 hidden w-[284px] rounded-md border border-slate-700 bg-[#1c2631]/94 p-2 text-slate-100 shadow-xl backdrop-blur xl:block"
+                  className="absolute right-14 top-2 z-20 hidden w-[304px] rounded-md border border-slate-700 bg-[#1c2631]/94 p-2 text-slate-100 shadow-xl backdrop-blur xl:block"
                   title={f411BimMethodology.bimDataNeeds.join(' ')}
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">
@@ -1965,12 +1965,46 @@ export default function CanvasArea({
                       {f411BimMethodology.readinessScore}%
                     </span>
                   </div>
-                  <div className="space-y-1">
-                    {f411BimMethodology.bimDataNeeds.slice(0, 3).map((need, index) => (
-                      <div key={need} className="grid grid-cols-[18px_1fr] gap-1 text-[9px] leading-snug text-slate-300">
-                        <span className="rounded bg-[#101821] text-center font-mono text-cyan-200">{index + 1}</span>
-                        <span>{need}</span>
+                  <div data-testid="f412-bim-entity-catalog" className="space-y-1">
+                    {f411BimMethodology.entityCatalog.slice(0, 5).map((entityRow) => (
+                      <div key={entityRow.id} className="grid grid-cols-[20px_1fr_42px] items-center gap-1 text-[9px] leading-snug text-slate-300">
+                        <span className={`h-2 w-2 rounded-full ${
+                          entityRow.status === 'ready' ? 'bg-emerald-300' :
+                            entityRow.status === 'external' ? 'bg-cyan-300' : 'bg-amber-300'
+                        }`} />
+                        <span className="truncate" title={`${entityRow.category}: ${entityRow.radShieldBinding}`}>{entityRow.label}</span>
+                        <span className="rounded bg-[#101821] px-1 text-right font-mono text-cyan-200">{entityRow.count}</span>
                       </div>
+                    ))}
+                  </div>
+                  <div data-testid="f412-bim-rs-parameters" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>RS_* Parameters</span>
+                      <span className="text-cyan-200">{f411BimMethodology.sharedParameterRows.length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {f411BimMethodology.sharedParameterRows.slice(0, 5).map((parameter) => (
+                        <span key={parameter.name} className="rounded bg-[#263545] px-1 text-[8px] text-slate-200" title={`${parameter.description}: ${parameter.example}`}>
+                          {parameter.name.replace('RS_', '')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
+                    {f411BimMethodology.roundtripGates.slice(0, 4).map((gate) => (
+                      <span
+                        key={gate.id}
+                        className={`rounded border px-1 py-0.5 text-[8px] ${
+                          gate.status === 'ready'
+                            ? 'border-emerald-700 bg-emerald-950/40 text-emerald-200'
+                            : gate.status === 'external'
+                              ? 'border-cyan-700 bg-cyan-950/40 text-cyan-200'
+                              : 'border-amber-700 bg-amber-950/40 text-amber-200'
+                        }`}
+                        title={gate.note}
+                      >
+                        {gate.label}
+                      </span>
                     ))}
                   </div>
                 </div>

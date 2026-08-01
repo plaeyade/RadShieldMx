@@ -495,6 +495,8 @@
     "prepare:f411:bim-canvas": "node scripts/f411-bim-canvas-adaptation-audit.mjs",
     "test:f411:bim-canvas": "node scripts/check-f411-bim-canvas-adaptation-contracts.mjs",
     "test:f411:bim-canvas:e2e": "playwright test e2e/f411-bim-canvas.spec.ts --project=chromium",
+    "prepare:f412:bim-methodology": "node scripts/f412-bim-methodology-implementation-audit.mjs",
+    "test:f412:bim-methodology": "node scripts/check-f412-bim-methodology-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

@@ -1,5 +1,6 @@
 import type { CanvasLayer } from '@/hooks/useCanvasLayers';
 import type { FloorPlan } from '@/types/radshield';
+import { REVIT_SHARED_PARAMETERS } from '@/lib/revitIntegration';
 
 export interface F411BimProjectNode {
   id: string;
@@ -17,6 +18,23 @@ export interface F411BimLayerRow {
   opacityPercent: number;
 }
 
+export interface F412BimEntityRow {
+  id: string;
+  label: string;
+  category: 'IfcWall' | 'IfcSpace' | 'RadShieldSource' | 'RadShieldControlPoint' | 'IfcPresentationLayerAssignment';
+  count: number;
+  radShieldBinding: string;
+  requiredParameters: string[];
+  status: 'ready' | 'draft' | 'external';
+}
+
+export interface F412BimRoundtripGate {
+  id: string;
+  label: string;
+  status: 'ready' | 'blocked' | 'external';
+  note: string;
+}
+
 export interface F411BimMethodologyPlan {
   schema: 'radshield-mx.f411.bim-canvas-methodology.v1';
   phase: 'F411';
@@ -30,6 +48,9 @@ export interface F411BimMethodologyPlan {
   interfacePattern: string[];
   bimDataNeeds: string[];
   workflowNeeds: string[];
+  entityCatalog: F412BimEntityRow[];
+  sharedParameterRows: Array<{ name: string; description: string; example: string }>;
+  roundtripGates: F412BimRoundtripGate[];
 }
 
 function node(id: string, label: string, count: number, review = false): F411BimProjectNode {
@@ -39,6 +60,18 @@ function node(id: string, label: string, count: number, review = false): F411Bim
     count,
     status: count > 0 ? (review ? 'review' : 'ready') : 'empty',
   };
+}
+
+function entity(
+  id: string,
+  label: string,
+  category: F412BimEntityRow['category'],
+  count: number,
+  radShieldBinding: string,
+  requiredParameters: string[],
+  status: F412BimEntityRow['status'] = count > 0 ? 'ready' : 'draft',
+): F412BimEntityRow {
+  return { id, label, category, count, radShieldBinding, requiredParameters, status };
 }
 
 export function buildF411BimCanvasMethodology(args: {
@@ -118,6 +151,82 @@ export function buildF411BimCanvasMethodology(args: {
       'Clash/penetration checker para puertas, ductos, pasos de cable, laberintos y colindancias.',
       'Sincronizacion 2D/3D: cualquier cambio de plano debe actualizar renderer, memoria y Evidence Pack.',
       'QA de exportacion: PDF, anexos, snapshots visuales, JSON reproducible y restore de proyecto.',
+    ],
+    entityCatalog: [
+      entity(
+        'barriers',
+        'Barreras de blindaje',
+        'IfcWall',
+        barrierCount,
+        'FloorPlan.barriers -> calculo NCRP/IAEA/UAQ -> RS_RequiredThickness',
+        ['RS_ShieldingType', 'RS_MaterialCode', 'RS_RequiredThickness', 'RS_PassFail'],
+      ),
+      entity(
+        'zones',
+        'Zonas / espacios',
+        'IfcSpace',
+        regionCount,
+        'FloorPlan.regions/occupiedRegions -> ocupacion T/P -> memoria analitica',
+        ['RS_DesignGoal_mSv', 'RS_EvidencePackId'],
+      ),
+      entity(
+        'sources',
+        'Equipos y fuentes',
+        'RadShieldSource',
+        sourceCount,
+        'FloorPlan.sources -> termino fuente/workload/energia -> barreras dominantes',
+        ['RS_SourceTrace', 'RS_EvidencePackId'],
+      ),
+      entity(
+        'control-points',
+        'Puntos criticos',
+        'RadShieldControlPoint',
+        criticalPointCount,
+        'FloorPlan.criticalPoints -> dosis esperada -> pass/fail por zona',
+        ['RS_DesignGoal_mSv', 'RS_PassFail'],
+      ),
+      entity(
+        'layers',
+        'Capas disciplinares',
+        'IfcPresentationLayerAssignment',
+        layers.length,
+        'CanvasLayer -> visibilidad/bloqueo/color/opacidad -> revision CAD/BIM',
+        ['RS_SourceTrace'],
+        layers.length > 0 ? 'ready' : 'draft',
+      ),
+    ],
+    sharedParameterRows: REVIT_SHARED_PARAMETERS,
+    roundtripGates: [
+      {
+        id: 'ifc-dxf-in',
+        label: 'Entrada IFC/DXF',
+        status: 'ready',
+        note: 'IFC/DXF ya tienen rutas parciales/funcionales. Deben validar unidades, capas, escala y hash antes de aplicar al floorplan.',
+      },
+      {
+        id: 'rs-parameters',
+        label: 'Parametros RS_*',
+        status: 'ready',
+        note: 'Parametros compartidos listos para schedules Revit/Add-in: tipo, meta, material, espesor, pass/fail, evidencia y trazabilidad.',
+      },
+      {
+        id: 'native-rvt',
+        label: 'RVT nativo',
+        status: 'external',
+        note: 'Requiere Revit API/Add-in/Autodesk Platform Services. No debe ejecutarse dentro del navegador.',
+      },
+      {
+        id: 'dwg-native',
+        label: 'DWG nativo',
+        status: 'external',
+        note: 'Mantener conversion externa a DXF/SVG/IFC con ODA/APS, hash, timeout y confirmacion del operador.',
+      },
+      {
+        id: 'db-versioning',
+        label: 'DB/API versionada',
+        status: 'blocked',
+        note: 'Necesaria para BIM multiusuario serio: revisiones, permisos, restore, diffs, evidence y control de cambios.',
+      },
     ],
   };
 }

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F412 (2026-07-31) - Metodologia BIM operable
+
+- Extiende F411 con un catalogo BIM interno: barreras `IfcWall`, zonas `IfcSpace`, fuentes `RadShieldSource`, puntos criticos `RadShieldControlPoint` y capas `IfcPresentationLayerAssignment`.
+- El panel BIM muestra entidades, conteos, parametros compartidos `RS_*` y compuertas de roundtrip: IFC/DXF, parametros RS, RVT externo, DWG externo y DB/API versionada.
+- La metodologia liga objetos de canvas con calculo, memoria, evidencia y Revit/IFC: `RS_ShieldingType`, `RS_MaterialCode`, `RS_RequiredThickness`, `RS_PassFail`, `RS_EvidencePackId` y `RS_SourceTrace`.
+- RVT y DWG nativos siguen externos por diseno: requieren Revit API/Add-in/APS/ODA, fixtures, hashes, validacion de capas/unidades y confirmacion del operador.
+- Scripts: `npm run prepare:f412:bim-methodology` y `npm run test:f412:bim-methodology`.
+
 # F411 (2026-07-31) - Adaptacion BIM del canvas
 
 - El canvas incorpora un modo guia tipo BIM inspirado en AutoCAD Plant 3D/Revit: ribbon disciplinar, Project Manager, Details, Layers, navegacion, cubo de vista, leyenda y linea de comando.

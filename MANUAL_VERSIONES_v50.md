@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F412 (2026-07-31) - Metodologia BIM operable
+
+- F412 convierte la adaptacion visual F411 en contrato metodologico.
+- Catalogo de entidades: `IfcWall` para barreras, `IfcSpace` para zonas, `RadShieldSource` para equipos/fuentes, `RadShieldControlPoint` para puntos criticos y `IfcPresentationLayerAssignment` para capas.
+- El canvas muestra `f412-bim-entity-catalog`, `f412-bim-rs-parameters` y `f412-bim-roundtrip-gates`.
+- Parametros compartidos RS_*: tipo de blindaje, meta de diseno, material, espesor requerido, pass/fail, Evidence Pack y trazabilidad de fuente.
+- Roundtrip BIM: IFC/DXF y parametros RS_* listos; RVT nativo y DWG nativo quedan como externos; DB/API versionada sigue siendo requisito para multiusuario y control de revisiones.
+- Comandos: `npm run prepare:f412:bim-methodology` y `npm run test:f412:bim-methodology`.
+
 # F411 (2026-07-31) - Adaptacion BIM del canvas
 
 - F411 agrega una estacion visual tipo BIM al canvas en modo **Guia**.

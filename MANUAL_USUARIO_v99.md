@@ -1,5 +1,43 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F412 - Metodologia BIM en RadShield-MX
+
+F412 define como se debe usar BIM dentro del producto.
+
+Entidades principales:
+
+- **Barreras / IfcWall:** cada muro de blindaje debe tener tipo radiologico, material, espesor requerido, resultado pass/fail y evidencia.
+- **Zonas / IfcSpace:** cada sala, area publica, zona controlada o colindancia debe tener ocupacion, meta de diseno y relacion con puntos criticos.
+- **Fuentes / RadShieldSource:** cada equipo o fuente debe conservar modalidad, energia, workload, termino fuente, fabricante y cita.
+- **Puntos criticos / RadShieldControlPoint:** cada punto debe conservar posicion, meta P, ocupacion T, resultado y advertencias.
+- **Capas / IfcPresentationLayerAssignment:** cada disciplina debe conservar visibilidad, bloqueo, color, opacidad y funcion operativa.
+
+Parametros compartidos para Revit/Add-in:
+
+- `RS_ShieldingType`: primaria, secundaria, fuga, nuclear u otra clasificacion.
+- `RS_DesignGoal_mSv`: meta de diseno usada en memoria.
+- `RS_MaterialCode`: material normalizado para calculo.
+- `RS_RequiredThickness`: espesor requerido calculado.
+- `RS_PassFail`: cumplimiento preliminar o final.
+- `RS_EvidencePackId`: evidencia que sustenta el resultado.
+- `RS_SourceTrace`: origen del objeto BIM/importacion/fuente.
+
+Flujo BIM recomendado:
+
+1. Importar DXF/IFC o usar plano base calibrado.
+2. Clasificar muros, espacios, equipos y puntos criticos.
+3. Asignar materiales versionados con TVL/HVL, densidad, peso, costo y hash documental.
+4. Ejecutar calculo y revisar advertencias.
+5. Exportar memoria, PDF, Evidence Pack y snapshot visual.
+6. Para roundtrip Revit, usar parametros RS_* en un Add-in o export JSON/IFC controlado.
+
+Limites actuales:
+
+- IFC/DXF tienen ruta operativa parcial/funcional.
+- RVT nativo requiere Revit API, Add-in o Autodesk Platform Services.
+- DWG nativo requiere conversion externa APS/ODA a DXF/SVG/IFC.
+- BIM multiusuario serio requiere DB/API versionada con permisos, restore, revisiones y control de cambios.
+
 ## Addendum F411 - Canvas tipo BIM / Revit
 
 F411 agrega una capa de trabajo tipo BIM al canvas para que el plano se lea como una estacion CAD/BIM y no como un lienzo aislado.
