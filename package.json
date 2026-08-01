@@ -501,6 +501,8 @@
     "test:f413:bim-execution": "node scripts/check-f413-bim-execution-contracts.mjs",
     "prepare:f414:bim-video-reference": "node scripts/f414-bim-video-reference-audit.mjs",
     "test:f414:bim-video-reference": "node scripts/check-f414-bim-video-reference-contracts.mjs",
+    "prepare:f415:bim-mep": "node scripts/f415-bim-mep-coordination-audit.mjs",
+    "test:f415:bim-mep": "node scripts/check-f415-bim-mep-coordination-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

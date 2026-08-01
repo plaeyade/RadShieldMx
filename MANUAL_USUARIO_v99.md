@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F415 - Coordinacion BIM-MEP para blindaje
+
+F415 usa los frames extraidos de los videos BIM para agregar una metodologia de coordinacion entre proteccion radiologica, arquitectura, estructura y obra/MEP.
+
+En el canvas BIM, revise:
+
+1. **Muros/losas de blindaje:** espesor requerido, densidad/TVL, carga kg/m2 y continuidad.
+2. **HVAC/ductos:** cruces de barrera, compensacion de blindaje, sleeves/laberintos y evidencia.
+3. **Tuberias/gases/agua:** diametro, material, trayectoria, sello de penetracion y distancia a fuente.
+4. **Charolas/cableado:** pasamuros, canalizacion, blindaje local y acceso de mantenimiento.
+5. **Penetraciones/puertas:** ubicacion, dimensiones, equivalente de blindaje y revision fisico-medica.
+
+Gates de salida antes de memoria firmable:
+
+- Registro de penetraciones en Evidence Pack.
+- Clash MEP/blindaje.
+- Carga estructural de materiales HD y equipos.
+- Acceso de mantenimiento sin rutas directas de fuga radiologica.
+
 ## Addendum F414 - Referencia visual BIM / videos
 
 F414 agrega una capa de referencia para que el canvas conserve una logica tipo AutoCAD Plant 3D/Revit sin perder las acciones reales de RadShield-MX.

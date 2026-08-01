@@ -22,7 +22,7 @@ export function buildF414BimVideoReferencePlan(hasDecodedFrames = false): F414Bi
     status: hasDecodedFrames ? 'reference-ready' : 'frames-required',
     sourceEvidence: [
       'WhatsApp still image: AutoCAD Plant 3D style ribbon, project manager, layers, properties, viewport labels, view cube and command line.',
-      'WhatsApp videos: pending frame extraction from local ffmpeg path; Codex cannot see ffmpeg.exe in AppData/Local or PATH yet.',
+      'WhatsApp videos: decoded frames show MEP/BIM walkthrough, shaded-with-edges visual style, pipe catalog palette, view cube, command line and color-coded systems.',
     ],
     patterns: [
       {
@@ -66,6 +66,27 @@ export function buildF414BimVideoReferencePlan(hasDecodedFrames = false): F414Bi
         observedIn: 'image',
         canvasApplication: 'Mostrar estado de herramienta, accion reciente, errores de escala/DXF y comandos de memoria.',
         releaseRule: 'Los mensajes deben reflejar acciones reales del store/canvas, no texto decorativo.',
+      },
+      {
+        id: 'mep-color-systems',
+        label: 'Sistemas MEP por color',
+        observedIn: 'video',
+        canvasApplication: 'Representar ductos, tuberias, charolas, penetraciones y soportes por disciplina para revisar interferencias con blindaje.',
+        releaseRule: 'Cada sistema MEP debe tener capa, categoria, material/diametro si aplica, cruce de barrera y estado de revision.',
+      },
+      {
+        id: 'tool-palette',
+        label: 'Tool palette flotante',
+        observedIn: 'video',
+        canvasApplication: 'Agregar paleta compacta de componentes clinicos/BIM: muro HD, puerta, ducto, penetracion, equipo, fuente, punto critico.',
+        releaseRule: 'La paleta no debe tapar seleccion ni viewport; todo icono debe ejecutar accion real o abrir dialogo especifico.',
+      },
+      {
+        id: 'shaded-with-edges',
+        label: 'Shaded with edges',
+        observedIn: 'video',
+        canvasApplication: 'Usar modo 3D/2.5D con solidos coloreados, aristas visibles y etiquetas para inspeccion de bunker/sala.',
+        releaseRule: 'El modo visual debe conservar escala, capas, orientacion y export PNG/PDF con hash del proyecto.',
       },
     ],
     extractionNotes: [

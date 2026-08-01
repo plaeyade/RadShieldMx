@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F415 (2026-07-31) - BIM MEP coordination
+
+- Agrega `f415BimMepCoordination.ts` para convertir los videos BIM en metodologia clinica/constructiva: muros/losas de blindaje, HVAC/ductos, tuberias, charolas/cableado y penetraciones/puertas.
+- Cada sistema declara categoria IFC, color, riesgo radiologico y checks obligatorios: TVL/densidad, cruce de barrera, compensacion de blindaje, sello de penetracion, distancia a fuente, carga kg/m2 y evidencia.
+- El canvas muestra `f415-bim-mep-coordination` dentro del panel BIM con capas MEP y gates bloqueantes.
+- Gates F415: registro de penetraciones, clash MEP/blindaje, carga estructural y acceso/mantenimiento.
+- Scripts: `npm run prepare:f415:bim-mep` y `npm run test:f415:bim-mep`.
+
 # F414 (2026-07-31) - BIM video reference alignment
 
 - Agrega `f414BimVideoReference.ts` con patrones de interfaz observados en la referencia AutoCAD Plant 3D/Revit: ribbon disciplinar, Project Manager, propiedades/capas, viewport anotado, view cube/navegacion y linea de comando.

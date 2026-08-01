@@ -60,6 +60,7 @@ import { buildF231ToF236CanvasReleaseCoverage } from '@/lib/f231ToF236CanvasRele
 import { buildF411BimCanvasMethodology } from '@/lib/f411BimCanvasMethodology';
 import { buildF413BimExecutionPlan } from '@/lib/f413BimExecutionPlan';
 import { buildF414BimVideoReferencePlan } from '@/lib/f414BimVideoReference';
+import { buildF415BimMepCoordinationPlan } from '@/lib/f415BimMepCoordination';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -918,7 +919,8 @@ export default function CanvasArea({
     selectedName: selectedInspectorName,
   });
   const f413BimExecutionPlan = buildF413BimExecutionPlan(f411BimMethodology);
-  const f414BimVideoReference = buildF414BimVideoReferencePlan(false);
+  const f414BimVideoReference = buildF414BimVideoReferencePlan(true);
+  const f415BimMepCoordination = buildF415BimMepCoordinationPlan();
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -2039,6 +2041,29 @@ export default function CanvasArea({
                         >
                           {pattern.label}
                         </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f415-bim-mep-coordination" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>MEP coordination</span>
+                      <span className="text-emerald-300">{f415BimMepCoordination.gates.filter((gate) => gate.releaseBlocking).length} gates</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f415BimMepCoordination.systemLayers.slice(0, 5).map((layer) => (
+                        <div key={layer.id} className="grid grid-cols-[10px_1fr_32px] items-center gap-1 text-[8px] text-slate-300">
+                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: layer.color }} />
+                          <span className="truncate" title={`${layer.bimCategory}: ${layer.requiredChecks.join(', ')}`}>{layer.label}</span>
+                          <span className={`rounded px-1 text-center font-bold ${
+                            layer.radiologicalRisk === 'high'
+                              ? 'bg-red-950/50 text-red-200'
+                              : layer.radiologicalRisk === 'medium'
+                                ? 'bg-amber-950/50 text-amber-200'
+                                : 'bg-emerald-950/50 text-emerald-200'
+                          }`}>
+                            {layer.radiologicalRisk}
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>

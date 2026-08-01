@@ -13,7 +13,9 @@ const markers = [
   'extractionNotes',
   'canvasApplication',
   'releaseRule',
-  'ffmpeg.exe',
+  'mep-color-systems',
+  'tool-palette',
+  'shaded-with-edges',
 ];
 
 const failures = markers.filter((marker) => !text.includes(marker));

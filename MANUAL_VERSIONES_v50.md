@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F415 (2026-07-31) - BIM MEP coordination
+
+- F415 toma los frames reales de los videos y formaliza una metodologia BIM-MEP para RadShield-MX.
+- Nuevas capas/sistemas: muros/losas de blindaje, HVAC/ductos, tuberias/gases/agua, charolas/cableado y penetraciones/puertas.
+- Cada sistema tiene categoria IFC, color, riesgo radiologico y checks obligatorios para memoria, evidencia y coordinacion de obra.
+- Nuevos gates: registro de penetraciones, clash MEP/blindaje, carga estructural y acceso/mantenimiento.
+- El canvas muestra `f415-bim-mep-coordination` en el panel BIM.
+- Comandos: `npm run prepare:f415:bim-mep` y `npm run test:f415:bim-mep`.
+
 # F414 (2026-07-31) - BIM video reference alignment
 
 - F414 registra la referencia visual BIM/AutoCAD Plant 3D usada para adaptar el canvas.
