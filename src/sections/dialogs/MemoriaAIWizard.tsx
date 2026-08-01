@@ -49,6 +49,7 @@ import { buildF184ReleaseQualityWorkflow, formatF184ReleaseQualityWorkflowText }
 import { buildF208CanvasReportingLayer, formatF208CanvasReportingLayerText } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff, formatF218ReportHandoffText } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration, formatF367F370ReleaseIntegrationText } from '@/lib/f367F370ReleaseIntegration';
+import { buildF409OutputSurfaceIntegration, formatF409OutputSurfaceIntegrationText } from '@/lib/f409OutputSurfaceIntegration';
 import { useAppStore } from '@/stores/appStore';
 import type { FloorPlan } from '@/types/radshield';
 
@@ -219,6 +220,8 @@ export default function MemoriaAIWizard({
   const f218ReportHandoffText = useMemo(() => formatF218ReportHandoffText(f218ReportHandoff), [f218ReportHandoff]);
   const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(floorPlan), [floorPlan]);
   const f367F370ReleaseIntegrationText = useMemo(() => formatF367F370ReleaseIntegrationText(f367F370ReleaseIntegration), [f367F370ReleaseIntegration]);
+  const f409OutputIntegration = useMemo(() => buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const f409OutputIntegrationText = useMemo(() => formatF409OutputSurfaceIntegrationText(f409OutputIntegration), [f409OutputIntegration]);
   const f117Handoff = useMemo(() => buildF117ModalityHandoff(), []);
   const f118SuggestedEquipmentKey = f117Handoff.memoriaDefaults.recommendedEquipmentKeys.find((key) => EQUIPMENT_DB[key]) || '';
   const f102DesignPlan = useMemo(() => buildF102MemoryDesignPlan({
@@ -316,7 +319,8 @@ export default function MemoriaAIWizard({
     const f208Section = `\n7.10 CANVAS REPORTABLE F208\n${f208CanvasReportingText}\n`;
     const f218Section = `\n7.11 HANDOFF VISUAL F218\n${f218ReportHandoffText}\n`;
     const f367F370Section = `\n7.12 INTEGRACION F367-F370 / 3D, UNITY, MOTORES EXTERNOS Y BETA\n${f367F370ReleaseIntegrationText}\n`;
-    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}\n${improvementSection}`.trim();
+    const f409Section = `\n7.13 INTEGRACION F409 / SALIDAS REALES F405-F408\n${f409OutputIntegrationText}\n`;
+    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}\n${improvementSection}`.trim();
     return `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO
 
 1. DATOS DEL PROYECTO
@@ -383,10 +387,11 @@ ${f184Section}
 ${f208Section}
 ${f218Section}
 ${f367F370Section}
+${f409Section}
 ${evidenceSection}
 ${improvementSection}
 `;
-  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, evidenceSection, memoriaAIPlan]);
+  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, f409OutputIntegrationText, evidenceSection, memoriaAIPlan]);
 
   // ─── Export handlers ───
   const exportPDF = useCallback(() => {

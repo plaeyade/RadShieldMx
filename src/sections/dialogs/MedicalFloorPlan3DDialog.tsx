@@ -32,6 +32,7 @@ import { buildBabylonAdapterContract } from '@/lib/medical3D/babylonAdapter';
 import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExternalViewerBridge';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
+import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
 
 interface Props {
   open: boolean;
@@ -1058,6 +1059,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
+  const f408UnitySceneExport = useMemo(() => buildF408UnitySceneExport(activeFloorPlan, preset), [activeFloorPlan, preset]);
+  const f408UnityValidationWarnings = useMemo(() => validateF408UnitySceneExport(f408UnitySceneExport), [f408UnitySceneExport]);
   const photorealAdvancedProfile = useMemo(() => buildPhotorealAdvancedProfile({
     scene,
     enabled: photorealWalkthrough,
@@ -1378,6 +1381,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         sceneHash,
         integration: f367F370ReleaseIntegration,
         unityLaunchPacket,
+        f408UnitySceneExport,
+        f408UnityValidationWarnings,
         babylonReadiness: babylonContract,
         visualEvidenceGate,
         visualEvidenceCaptures,
@@ -1770,6 +1775,24 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </div>
               <div className="text-[9px] leading-relaxed text-amber-900">
                 {photorealAdvancedProfile.warnings[0]} No modifica calculos ni memoria firmable.
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-indigo-100 bg-indigo-50 p-2" data-testid="f409-f408-unity-scene-surface">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-indigo-950 uppercase">F409 / F408 salida 3D</div>
+                  <div className="text-[9px] text-indigo-900">Escena exportable para Evidence Pack, Memoria IA y visor externo.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f408UnitySceneExport.status}</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-[9px] text-indigo-950">
+                <div className="rounded border border-indigo-100 bg-white/85 px-1.5 py-1">Muros {f408UnitySceneExport.walls.length}</div>
+                <div className="rounded border border-indigo-100 bg-white/85 px-1.5 py-1">Equipos {f408UnitySceneExport.equipment.length}</div>
+                <div className="rounded border border-indigo-100 bg-white/85 px-1.5 py-1">Zonas {f408UnitySceneExport.zones.length}</div>
+              </div>
+              <div className="text-[9px] leading-relaxed text-indigo-900">
+                {f408UnityValidationWarnings[0] || 'Coordenadas en metros, Y-up y geometria lista para handoff externo.'}
               </div>
             </div>
 

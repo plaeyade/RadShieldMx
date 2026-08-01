@@ -487,6 +487,8 @@
     "prepare:f405-f408:calc-canvas-unity": "node scripts/f405-f408-calc-canvas-unity-audit.mjs",
     "test:f405-f408:calc-canvas-unity": "node scripts/check-f405-f408-calc-canvas-unity-contracts.mjs",
     "test:f405-f408:unit": "node scripts/check-f405-f408-unit-contracts.mjs",
+    "prepare:f409:output-surfaces": "node scripts/f409-output-surface-integration-audit.mjs",
+    "test:f409:output-surfaces": "node scripts/check-f409-output-surface-integration-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

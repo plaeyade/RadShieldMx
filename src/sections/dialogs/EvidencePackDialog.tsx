@@ -33,6 +33,7 @@ import { buildF184ReleaseQualityWorkflow } from '@/lib/f184ReleaseQualityWorkflo
 import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
+import { buildF409OutputSurfaceIntegration } from '@/lib/f409OutputSurfaceIntegration';
 import { IDAC_DOSE_EXTERNAL_NOTE } from '@/lib/idacDoseIntegration';
 import { REVIT_EXTERNAL_INTEGRATION_NOTE } from '@/lib/revitIntegration';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
@@ -92,6 +93,7 @@ export default function EvidencePackDialog({
   const f208CanvasReporting = useMemo(() => buildF208CanvasReportingLayer(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f218ReportHandoff = useMemo(() => buildF218ReportHandoff(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(floorPlan), [floorPlan]);
+  const f409OutputIntegration = useMemo(() => buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
 
@@ -325,6 +327,28 @@ export default function EvidencePackDialog({
               <div>Fotoreal: {f367F370ReleaseIntegration.photorealism.activeEngine}; Babylon {f367F370ReleaseIntegration.photorealism.deferredEngine} pendiente</div>
               <div>Beta: {f367F370ReleaseIntegration.releaseGate.decision}</div>
               <div className="text-[10px]">Bloqueos: {f367F370ReleaseIntegration.releaseGate.blockedClaims.join(' | ')}</div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="f409-output-surface-integration-evidence" className="border-indigo-300 bg-indigo-50">
+            <CardContent className="p-3 text-xs text-indigo-950 space-y-1">
+              <div className="font-semibold">F409 salidas reales</div>
+              <div>Estado: {f409OutputIntegration.status}</div>
+              <div>Listas/revision/bloqueadas: {f409OutputIntegration.readyCount}/{f409OutputIntegration.reviewCount}/{f409OutputIntegration.blockedCount}</div>
+              <div>F405: {f409OutputIntegration.traceability.status}</div>
+              <div>F407: {f409OutputIntegration.heatmap.status}</div>
+              <div>F408: {f409OutputIntegration.unity.status}</div>
+              <div>{f409OutputIntegration.surfaces.map((surface) => `${surface.label}:${surface.status}`).join(' | ')}</div>
+              <div className="text-[10px]">{f409OutputIntegration.decision}</div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2 h-7 w-full justify-start bg-white text-[10px]"
+                onClick={() => downloadJson(`f409_output_surface_${pack.projectName.replace(/\W+/g, '_')}.json`, f409OutputIntegration)}
+              >
+                <Download className="mr-2 h-3.5 w-3.5" /> Exportar F409 JSON
+              </Button>
             </CardContent>
           </Card>
 

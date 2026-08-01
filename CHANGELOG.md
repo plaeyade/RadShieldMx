@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F409 (2026-07-31) - Integracion de salidas F405-F408
+
+- Agrega `f409OutputSurfaceIntegration`: une trazabilidad F405, heatmap reportable F407 y escena Unity/3D F408 en una sola matriz de salida.
+- Memoria IA ahora incluye seccion 7.13 con estado de superficies reales: Memoria IA, Evidence Pack, PDF/heatmap, Medical 3D y Update Center.
+- Evidence Pack agrega tarjeta visible F409 y export JSON dedicado para auditar salidas listas, en revision o bloqueadas.
+- Medical 3D muestra estado F409/F408 con muros, equipos, zonas y advertencias de handoff externo.
+- Update Center refleja F409 como fase integrada.
+- Scripts: `npm run prepare:f409:output-surfaces` y `npm run test:f409:output-surfaces`.
+
 # F405-F408 (2026-07-31) - Trazabilidad calculo, canvas QA, heatmap reportable y Unity handoff
 
 - F405 agrega `f405CalculationTraceabilityBundle`: empaqueta formula, norma, inputs, outputs, supuestos, warnings, citas, unidades, comparador y cache por barrera para Memoria IA, PDF y Evidence Pack.

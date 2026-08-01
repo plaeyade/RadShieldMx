@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F409 (2026-07-31) - Salidas reales integradas
+
+- F409 conecta en una sola superficie de release lo producido por F405, F407 y F408.
+- La Memoria IA muestra el bloque **7.13 Integracion F409** para saber si el calculo, heatmap y salida 3D pueden pasar a memoria, PDF, Evidence Pack y visor externo.
+- Evidence Pack incorpora fuente `ev-f409-output-surface-integration`, tarjeta lateral y descarga JSON.
+- Medical 3D muestra el estado de exportacion F408 con muros, equipos, zonas y advertencias.
+- Update Center lista F409 sobre F405-F408.
+- Comandos: `npm run prepare:f409:output-surfaces` y `npm run test:f409:output-surfaces`.
+
 # F405-F408 (2026-07-31) - Calculo trazable, Canvas QA, Heatmap y Unity
 
 - F405: bundle unico para entregar calculos a Memoria IA/PDF/Evidence con formula, norma, entradas, salidas, supuestos, advertencias, citas, unidades normalizadas, comparador base/conservador y cache F196.

@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F409 - Salidas reales F405-F408
+
+F409 es la compuerta que revisa si los avances de calculo, heatmap y 3D ya aparecen en superficies reales de trabajo.
+
+Que integra:
+
+1. **F405 calculo trazable:** formula, norma, entradas, salidas, advertencias, citas, unidades, comparador y cache por barrera.
+2. **F407 heatmap reportable:** puntos/lineas de muestreo, leyenda regulatoria, umbrales y evidencia minima.
+3. **F408 salida 3D:** escena en metros para Three/R3F, Unity externo, OBJ/glTF y paquetes de revision visual.
+
+Donde se usa:
+
+1. **Memoria IA:** revise la seccion **7.13 INTEGRACION F409** antes de exportar una memoria. Si aparece `review` o `blocked`, use la salida solo como borrador.
+2. **Evidence Pack:** abra la tarjeta **F409 salidas reales**. Desde ahi puede exportar `f409_output_surface_*.json`.
+3. **Medical 3D:** revise el bloque **F409 / F408 salida 3D** para verificar muros, equipos, zonas y advertencias antes de usar el recorrido como evidencia visual.
+4. **Update Center:** confirme que F409 aparece como `integrated`.
+
+Lectura de estado:
+
+- `ready`: la superficie esta lista para QA/export controlado.
+- `review`: hay datos utiles, pero faltan advertencias, citas, puntos, trazas o geometria antes de firmar.
+- `blocked`: no debe usarse en una memoria firmable.
+
+Validacion:
+
+1. `npm run prepare:f409:output-surfaces`
+2. `npm run test:f409:output-surfaces`
+3. `npm run build`
+
 ## Addendum F405-F408 - Calculo trazable, Canvas QA, Heatmap y Unity
 
 F405-F408 cierra una compuerta tecnica previa a nuevas mejoras de alto riesgo del renderer.

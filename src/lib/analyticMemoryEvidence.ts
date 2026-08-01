@@ -3,6 +3,7 @@ import { buildF86EvidenceSummary } from '@/lib/canvasF85Workflow';
 import { createEvidenceSource, type EvidenceSource } from '@/lib/evidencePack';
 import { buildF125CalculationEvidenceGate, buildF125CalculationEvidenceSection } from '@/lib/f125CalculationEvidenceGate';
 import { buildF126ReleaseEvidenceSection } from '@/lib/f126ReleaseEvidenceHardening';
+import { buildF409OutputSurfaceIntegration, formatF409OutputSurfaceIntegrationText } from '@/lib/f409OutputSurfaceIntegration';
 import type { FloorPlan } from '@/types/radshield';
 
 export interface AnalyticMemorySnapshot {
@@ -53,6 +54,7 @@ export function createFloorPlanEvidenceSources(
   const snapshot = buildAnalyticMemorySnapshot(floorPlan, barrierResults, sampleLines);
   const f86Evidence = buildF86EvidenceSummary(floorPlan);
   const f125Gate = buildF125CalculationEvidenceGate(floorPlan, barrierResults, sampleLines);
+  const f409OutputIntegration = buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines);
   const generatedAt = new Date().toISOString();
 
   return [
@@ -131,6 +133,21 @@ export function createFloorPlanEvidenceSources(
       sectionRef: 'F125 calculation-memory evidence gate',
       verificationStatus: f125Gate.reviewRequiredCount === 0 && f125Gate.missingResultCount === 0 && f125Gate.resultCount > 0 ? 'reviewed' : 'draft',
     }),
+    createEvidenceSource({
+      id: 'ev-f409-output-surface-integration',
+      title: 'F409 integracion de salidas F405-F408',
+      url: `radshield://output-surface-integration/${floorPlan.id}`,
+      sourceType: 'technicalReport',
+      capturedAt: generatedAt,
+      claim: 'Memoria IA, Evidence Pack, PDF/heatmap y Medical 3D reciben el mismo bundle trazable de calculo, evidencia visual y escena externa.',
+      excerpt: `${f409OutputIntegration.status}; superficies listas ${f409OutputIntegration.readyCount}; revision ${f409OutputIntegration.reviewCount}; bloqueadas ${f409OutputIntegration.blockedCount}; F405 ${f409OutputIntegration.traceability.status}; F407 ${f409OutputIntegration.heatmap.status}; F408 ${f409OutputIntegration.unity.status}.`,
+      notes: f409OutputIntegration.decision,
+      confidence: f409OutputIntegration.status === 'output-surfaces-integrated' ? 'high' : 'medium',
+      tags: ['F409', 'F405', 'F407', 'F408', 'Memoria IA', 'Evidence Pack', 'Medical 3D'],
+      documentId: `f409-${floorPlan.id}`,
+      sectionRef: 'F409 output surface integration',
+      verificationStatus: f409OutputIntegration.blockedCount === 0 ? 'reviewed' : 'draft',
+    }),
   ];
 }
 
@@ -142,6 +159,7 @@ export function buildAnalyticMemoryEvidenceSection(
   if (!floorPlan) return '';
   const snapshot = buildAnalyticMemorySnapshot(floorPlan, barrierResults, sampleLines);
   const sources = createFloorPlanEvidenceSources(floorPlan, barrierResults, sampleLines);
+  const f409OutputIntegration = buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines);
   return `
 7. EVIDENCIA TRAZABLE DEL CANVAS (F76)
    Proyecto activo: ${floorPlan.name}
@@ -163,6 +181,9 @@ ${sources.map(source => `   - ${source.title}: ${source.claim}`).join('\n')}
    Debe revisarse contra planos firmados, documentos NCRP/AAPM/IAEA/CNSNS y criterios del fisico medico responsable antes de emitir version final.
 
 ${buildF125CalculationEvidenceSection(floorPlan, barrierResults, sampleLines)}
+
+7.4 INTEGRACION DE SALIDAS F409 / F405-F408
+${formatF409OutputSurfaceIntegrationText(f409OutputIntegration)}
 
 ${buildF126ReleaseEvidenceSection(sources)}
 `;
