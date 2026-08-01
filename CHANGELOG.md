@@ -6,6 +6,10 @@
 - Cada sistema declara categoria IFC, color, riesgo radiologico y checks obligatorios: TVL/densidad, cruce de barrera, compensacion de blindaje, sello de penetracion, distancia a fuente, carga kg/m2 y evidencia.
 - El canvas muestra `f415-bim-mep-coordination` dentro del panel BIM con capas MEP y gates bloqueantes.
 - Gates F415: registro de penetraciones, clash MEP/blindaje, carga estructural y acceso/mantenimiento.
+- Integra las imagenes de divulgacion/explicacion como secuencia operativa: visible vs real, cada muro tiene una funcion, antes del primer paciente y respaldo por estandares.
+- Agrega roles de superficie para Memoria IA: barrera primaria, barrera secundaria, laberinto y puerta blindada, cada uno con requisito de evidencia/calculo.
+- Agrega preguntas de diseno: donde va la radiacion, que espesor requiere cada barrera, quien necesita proteccion, como se controla fuga/dispersion y si es seguro antes de construir.
+- Agrega referencias de trazabilidad: IAEA SR-47, AAPM TG-108, ICRU 83, NCRP 151 y normativa local CNSNS/UAQ.
 - Scripts: `npm run prepare:f415:bim-mep` y `npm run test:f415:bim-mep`.
 
 # F414 (2026-07-31) - BIM video reference alignment

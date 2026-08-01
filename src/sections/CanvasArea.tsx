@@ -2067,6 +2067,50 @@ export default function CanvasArea({
                       ))}
                     </div>
                   </div>
+                  <div data-testid="f415-shielding-story-sequence" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Shielding story</span>
+                      <span className="text-cyan-200">{f415BimMepCoordination.surfaceRoles.length} roles</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f415BimMepCoordination.shieldingStory.slice(0, 4).map((step) => (
+                        <span
+                          key={step.id}
+                          data-testid={`f415-story-${step.id}`}
+                          className="truncate rounded bg-[#263545] px-1 py-0.5 text-[7px] text-cyan-100"
+                          title={`${step.message} Uso canvas: ${step.canvasUse}`}
+                        >
+                          {step.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {f415BimMepCoordination.surfaceRoles.map((role) => (
+                        <span
+                          key={role.id}
+                          data-testid={`f415-surface-role-${role.id}`}
+                          className="rounded border px-1 py-0.5 text-[7px] text-slate-100"
+                          style={{ borderColor: role.color }}
+                          title={`${role.function} Memoria: ${role.memoryRequirement}`}
+                        >
+                          {role.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f415-design-questions" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Before first patient</span>
+                      <span className="text-cyan-200">{f415BimMepCoordination.referenceStandards.length} refs</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f415BimMepCoordination.designQuestions.slice(0, 3).map((item) => (
+                        <div key={item.id} data-testid={`f415-question-${item.id}`} className="truncate text-[8px] text-slate-300" title={item.requiredEvidence}>
+                          <span className="font-bold text-cyan-200">?</span> {item.question}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
                     {f411BimMethodology.roundtripGates.slice(0, 4).map((gate) => (
                       <span

@@ -4,6 +4,13 @@
 
 F415 usa los frames extraidos de los videos BIM para agregar una metodologia de coordinacion entre proteccion radiologica, arquitectura, estructura y obra/MEP.
 
+Las imagenes agregadas se traducen a una secuencia de diseno:
+
+1. **Visible vs real:** el cuarto clinico es solo la parte visible; el bunker completo incluye el volumen y masa del blindaje.
+2. **Cada muro tiene trabajo diferente:** barrera primaria, secundaria, laberinto y puerta se calculan y justifican de forma distinta.
+3. **Antes del primer paciente:** definir haz/energia, espesor, ocupacion, fuga/dispersion, MEP/penetraciones y seguridad.
+4. **Respaldado por estandares:** IAEA, AAPM, ICRU, NCRP y normativa local deben aparecer con cita/pagina/hash en memoria y Evidence Pack.
+
 En el canvas BIM, revise:
 
 1. **Muros/losas de blindaje:** espesor requerido, densidad/TVL, carga kg/m2 y continuidad.

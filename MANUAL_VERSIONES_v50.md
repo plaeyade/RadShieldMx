@@ -7,6 +7,10 @@
 - Cada sistema tiene categoria IFC, color, riesgo radiologico y checks obligatorios para memoria, evidencia y coordinacion de obra.
 - Nuevos gates: registro de penetraciones, clash MEP/blindaje, carga estructural y acceso/mantenimiento.
 - El canvas muestra `f415-bim-mep-coordination` en el panel BIM.
+- Las imagenes nuevas agregan una secuencia de comunicacion y QA: visible vs real, cada muro tiene funcion, antes del primer paciente y respaldo por estandares.
+- Roles de barrera: primaria, secundaria, laberinto y puerta blindada, todos con evidencia requerida para Memoria IA.
+- Preguntas de diseno: radiacion, espesor, proteccion, fuga/dispersion y seguridad antes de construir.
+- Referencias versionables: IAEA SR-47, AAPM TG-108, ICRU 83, NCRP 151 y normativa local CNSNS/UAQ.
 - Comandos: `npm run prepare:f415:bim-mep` y `npm run test:f415:bim-mep`.
 
 # F414 (2026-07-31) - BIM video reference alignment
