@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F410 (2026-07-31) - QA funcional de salidas F409
+
+- Agrega smoke Playwright `e2e/f410-output-surfaces.spec.ts` para abrir Memoria IA, Evidence Pack y Medical 3D desde controles E2E.
+- Memoria IA agrega tarjeta visible `f409-output-surface-integration-memoria` para revisar F409 sin buscar dentro del texto generado.
+- Los controles E2E incorporan `e2e-open-medical-3d`, lo que permite probar directamente la superficie 3D.
+- El smoke genera `outputs/f410_output_surface_qa/f410_output_surface_qa.json`, Markdown y capturas PNG.
+- Scripts: `npm run prepare:f410:output-surface-qa`, `npm run test:f410:output-surface-qa` y `npm run test:f410:output-surface-qa:e2e`.
+
 # F409 (2026-07-31) - Integracion de salidas F405-F408
 
 - Agrega `f409OutputSurfaceIntegration`: une trazabilidad F405, heatmap reportable F407 y escena Unity/3D F408 en una sola matriz de salida.

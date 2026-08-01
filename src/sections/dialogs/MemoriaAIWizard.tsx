@@ -746,6 +746,20 @@ ${improvementSection}
               <div className="mt-1 truncate">Capturas: {f367F370ReleaseIntegration.visualEvidence.minimumCapturePolicy}</div>
               <div className="mt-1 text-[8px] text-purple-700 truncate">Bloqueos: {f367F370ReleaseIntegration.releaseGate.blockedClaims.join(' | ')}</div>
             </div>
+            <div data-testid="f409-output-surface-integration-memoria" className="col-span-6 rounded border border-indigo-100 bg-indigo-50 px-2 py-1 text-indigo-950">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-semibold">F409 salidas reales F405-F408</div>
+                <Badge className="h-4 bg-indigo-100 text-indigo-700 text-[9px]">{f409OutputIntegration.status}</Badge>
+              </div>
+              <div className="mt-1 grid grid-cols-4 gap-1 text-[9px]">
+                <div className="rounded bg-white/70 border border-indigo-100 px-2 py-1">Listas: {f409OutputIntegration.readyCount}</div>
+                <div className="rounded bg-white/70 border border-indigo-100 px-2 py-1">Revision: {f409OutputIntegration.reviewCount}</div>
+                <div className="rounded bg-white/70 border border-indigo-100 px-2 py-1">Bloqueadas: {f409OutputIntegration.blockedCount}</div>
+                <div className="rounded bg-white/70 border border-indigo-100 px-2 py-1">3D: {f409OutputIntegration.unity.status}</div>
+              </div>
+              <div className="mt-1 truncate">{f409OutputIntegration.surfaces.map((surface) => `${surface.label}:${surface.status}`).join(' | ')}</div>
+              <div className="mt-1 text-[8px] text-indigo-700 truncate">{f409OutputIntegration.decision}</div>
+            </div>
             <div data-testid="f149b-fastrad-export-smoke-memoria" className="col-span-6 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-slate-900">
               <div className="flex items-center justify-between gap-2">
                 <div className="font-semibold">F149b FASTRAD + smoke export</div>

@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F410 - QA funcional de salidas F409
+
+F410 verifica que las salidas F409 aparezcan en la app real.
+
+Superficies probadas:
+
+1. **Memoria IA:** debe mostrar la tarjeta **F409 salidas reales F405-F408** con conteo de listas, revision, bloqueadas y estado 3D.
+2. **Evidence Pack:** debe mostrar la tarjeta **F409 salidas reales** y el boton **Exportar F409 JSON**.
+3. **Medical 3D:** debe mostrar el bloque **F409 / F408 salida 3D** con muros, equipos, zonas y advertencias.
+
+Uso manual:
+
+1. Active controles E2E si requiere prueba directa: `localStorage.radshield-e2e-controls = "true"`.
+2. Abra **Memoria**, **Evidence** y **3D** desde los controles inferiores de QA.
+3. Confirme que las tres tarjetas F409/F408 sean visibles.
+4. En Evidence Pack, exporte el JSON F409 si necesita anexarlo a evidencia de QA.
+
+Uso automatizado:
+
+1. `npm run prepare:f410:output-surface-qa`
+2. `npm run test:f410:output-surface-qa`
+3. `npm run test:f410:output-surface-qa:e2e`
+
+La prueba E2E genera:
+
+- `outputs/f410_output_surface_qa/f410_output_surface_qa.json`
+- `outputs/f410_output_surface_qa/f410_output_surface_qa.md`
+- capturas PNG de Memoria IA, Evidence Pack y Medical 3D.
+
 ## Addendum F409 - Salidas reales F405-F408
 
 F409 es la compuerta que revisa si los avances de calculo, heatmap y 3D ya aparecen en superficies reales de trabajo.

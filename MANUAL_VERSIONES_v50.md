@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F410 (2026-07-31) - QA funcional de salidas F409
+
+- F410 valida en navegador que F409 ya no sea solo contrato interno.
+- El smoke abre **Memoria IA**, **Evidence Pack** y **Medical 3D** con controles E2E.
+- Memoria IA ahora muestra tarjeta visible `f409-output-surface-integration-memoria`.
+- Se agrega boton E2E `e2e-open-medical-3d` para abrir la inspeccion 3D de forma directa.
+- Evidencia generada: `outputs/f410_output_surface_qa/f410_output_surface_qa.json`, `f410_output_surface_qa.md` y capturas.
+- Comandos: `npm run prepare:f410:output-surface-qa`, `npm run test:f410:output-surface-qa` y `npm run test:f410:output-surface-qa:e2e`.
+
 # F409 (2026-07-31) - Salidas reales integradas
 
 - F409 conecta en una sola superficie de release lo producido por F405, F407 y F408.

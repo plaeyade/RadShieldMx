@@ -2178,6 +2178,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           <button data-testid="e2e-open-cnsns-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('cnsns')}>CNSNS</button>
           <button data-testid="e2e-open-cnsns-checklist" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('cnsnsChecklist')}>Check</button>
           <button data-testid="e2e-open-batch-report-exporter" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('batchReportExporter')}>Batch</button>
+          <button data-testid="e2e-open-medical-3d" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('medicalFloorPlan3D')}>3D</button>
         </div>
       )}
       <Suspense fallback={<DialogFallback />}>
