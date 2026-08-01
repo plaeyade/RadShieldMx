@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F431-F435 (2026-07-31) - Gate de release para renderer profundo
+
+- F431 agrega smoke visual/E2E para el panel F426-F430 y confirma que canvas/sidebar/ribbon siguen visibles.
+- F432 crea manifest para conectar Evidence Pack y Memoria IA con roles, penetraciones, carga estructural, QA normativo y export visual.
+- F433 revisa bloqueos de release y los clasifica como info, warning o blocking.
+- F434 decide si el renderer base v2 puede avanzar: solo contrato, renderer detras de flag o bloqueo de reescritura.
+- F435 entrega el siguiente tramo seguro: F436 baseline visual, F437 PDF/Evidence live link y F438 renderer geometry core flagged.
+- Guardrail: no se reescribe event controller ni renderer base sin F229 + F431 E2E y rollback.
+
 # F426-F430 (2026-07-31) - Cierre calculo + renderer profundo
 
 - F426 clasifica superficies por rol radiologico y asigna familia de calculo: primaria, secundaria, laberinto, puerta y penetracion.

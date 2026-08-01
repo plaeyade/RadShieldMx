@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F431-F435 (2026-07-31) - Renderer release gate
+
+- **F431:** agrega smoke visual dedicado para comprobar que F426-F430 aparece sin ocultar canvas, sidebar ni ribbon BIM.
+- **F432:** define manifest Evidence/Memoria para roles de barrera, penetraciones, carga estructural, QA normativo y export visual BIM.
+- **F433:** agrega revision de bloqueos de release derivados de escala, fuentes, barreras, MEP, materiales y QA.
+- **F434:** agrega decision explicita de renderer base v2: contrato solamente, renderer v2 detras de flag o bloqueo de reescritura.
+- **F435:** deja handoff para F436-F438: baseline visual, PDF/Evidence live link y primer renderer geometry core detras de flag.
+- Agrega E2E `f431-f435-renderer-release-gate.spec.ts` y scripts `prepare/test:f431-f435:renderer-release`.
+
 # F426-F430 (2026-07-31) - Calc/Renderer closure
 
 - **F426 motor:** agrega calculo por rol de superficie: primaria, secundaria, laberinto, puerta y penetracion con formula/norma/inputs/outputs/overlays.

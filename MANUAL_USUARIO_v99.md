@@ -1,5 +1,17 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F431-F435 - Gate de release del renderer profundo
+
+F431-F435 no agrega botones nuevos al operador: agrega verificacion para asegurar que lo implementado en F426-F430 se pueda usar sin romper canvas, sidebar, ribbon BIM ni export visual.
+
+1. **F431 - Smoke visual:** confirma que el panel F426-F430, los roles, penalizaciones, carga estructural, QA normativo, flujo de Memoria IA y plan del renderer son visibles.
+2. **F432 - Manifest Evidence/Memoria:** lista que debe viajar a Evidence Pack y Memoria IA: tabla de roles, anexo de penetraciones, anexo estructural, ledger QA y export visual BIM.
+3. **F433 - Bloqueos de release:** clasifica pendientes como informativos, advertencias o bloqueantes. Si faltan escala, fuente, barreras, penetraciones o fixtures QA, la memoria se mantiene preliminar.
+4. **F434 - Decision renderer base v2:** si hay bloqueos, solo se mantienen contratos. Si F229 y F431 pasan, el renderer v2 puede entrar despues bajo flag y con rollback.
+5. **F435 - Handoff:** prepara F436 baseline visual, F437 conexion PDF/Evidence y F438 geometry core del renderer.
+
+Regla practica: si el canvas o sidebar desaparecen, no se debe tocar el renderer base. Primero repetir F229 y F431. El renderer profundo debe avanzar por capas, con captura visual y rollback, no como reescritura completa de eventos.
+
 ## Addendum F426-F430 - Calculo, renderer profundo y Memoria IA desde canvas
 
 F426-F430 cierra el puente entre el plano editable, el motor de calculo, la inspeccion visual BIM y la Memoria IA.

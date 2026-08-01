@@ -64,6 +64,7 @@ import { buildF415BimMepCoordinationPlan } from '@/lib/f415BimMepCoordination';
 import { buildF416ToF420BimCanvasSequence } from '@/lib/f416ToF420BimCanvasSequence';
 import { buildF421ToF425BimHandoffPlan } from '@/lib/f421ToF425BimHandoff';
 import { buildF426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
+import { buildF431ToF435RendererReleaseGate } from '@/lib/f431ToF435RendererReleaseGate';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -937,6 +938,7 @@ export default function CanvasArea({
     sequence: f416ToF420BimCanvasSequence,
     handoff: f421ToF425BimHandoff,
   });
+  const f431ToF435RendererReleaseGate = buildF431ToF435RendererReleaseGate(f426ToF430CalcRendererClosure);
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -2359,6 +2361,37 @@ export default function CanvasArea({
                           title={`${step.phase}: ${step.implementation} | ${step.connectedEvidence.join(', ')}`}
                         >
                           {step.phase}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f431-f435-renderer-release-gate" className="mt-2 rounded border border-emerald-800 bg-[#07140f]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F431-F435 Release gate</span>
+                      <span className={f431ToF435RendererReleaseGate.status === 'renderer-release-gate-ready' ? 'text-emerald-200' : 'text-amber-200'}>
+                        {f431ToF435RendererReleaseGate.status === 'renderer-release-gate-ready' ? 'ready' : 'gated'}
+                      </span>
+                    </div>
+                    <div data-testid="f431-visual-smoke-surfaces" className="grid grid-cols-3 gap-1">
+                      {f431ToF435RendererReleaseGate.visualSmokeSurfaces.slice(0, 6).map((surface) => (
+                        <span key={surface.id} className="truncate rounded bg-emerald-950/40 px-1 py-0.5 text-[7px] text-emerald-200" title={`${surface.testId}: ${surface.expected}`}>
+                          {surface.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f432-evidence-memory-manifest" className="mt-1 truncate text-[8px] text-slate-300" title={f431ToF435RendererReleaseGate.evidenceMemoryManifest.map((item) => `${item.label}: ${item.evidenceOutput}`).join(' | ')}>
+                      <span className="font-bold text-emerald-200">{f431ToF435RendererReleaseGate.evidenceMemoryManifest.length}</span> manifests Evidence/Memoria
+                    </div>
+                    <div data-testid="f433-release-block-review" className="mt-1 truncate text-[8px] text-slate-300" title={f431ToF435RendererReleaseGate.releaseBlockReview.map((item) => item.blocker).join(' | ')}>
+                      <span className="font-bold text-amber-200">{f431ToF435RendererReleaseGate.releaseBlockReview.length}</span> release checks
+                    </div>
+                    <div data-testid="f434-renderer-base-decision" className="mt-1 truncate rounded bg-[#263545] px-1 py-0.5 text-[8px] text-slate-200" title={`${f431ToF435RendererReleaseGate.rendererBaseDecision.rationale} Rollback: ${f431ToF435RendererReleaseGate.rendererBaseDecision.rollback}`}>
+                      Renderer: <span className="font-bold text-cyan-200">{f431ToF435RendererReleaseGate.rendererBaseDecision.decision}</span>
+                    </div>
+                    <div data-testid="f435-next-phase-handoff" className="mt-1 flex flex-wrap gap-1">
+                      {f431ToF435RendererReleaseGate.nextPhaseHandoff.map((item) => (
+                        <span key={item.id} className="rounded border border-emerald-700 px-1 py-0.5 text-[7px] text-emerald-200" title={`${item.deliverable} | ${item.acceptanceCriteria.join(', ')}`}>
+                          {item.nextPhase}
                         </span>
                       ))}
                     </div>
