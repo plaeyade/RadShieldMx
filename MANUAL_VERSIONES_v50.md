@@ -5,7 +5,8 @@
 - F414 registra la referencia visual BIM/AutoCAD Plant 3D usada para adaptar el canvas.
 - Patrones versionados: ribbon por disciplina, Project Manager lateral, propiedades/capas, viewport anotado, view cube/navegacion y linea de comando.
 - Agrega `src/lib/f414BimVideoReference.ts` y lo muestra en el canvas como `f414-bim-video-reference`.
-- `ffmpeg.exe` no fue visible desde Codex en `AppData/Local`, `PATH` ni Chocolatey; la extraccion de frames queda lista para cuando exista una ruta ejecutable verificable.
+- Agrega `scripts/extract-f414-bim-video-frames.ps1` para extraer frames con FFmpeg WinGet hacia `outputs/f414_bim_video_reference`.
+- Codex puede verificar la ruta WinGet de `ffmpeg.exe`, pero el sandbox no puede ejecutar/copiar el binario desde ese paquete. Ejecute el script desde PowerShell normal si se requieren frames reales.
 - Comandos: `npm run prepare:f414:bim-video-reference` y `npm run test:f414:bim-video-reference`.
 
 # F413 (2026-07-31) - BIM Execution Plan

@@ -12,6 +12,8 @@ const requiredMarkers = [
   ['src/lib/f414BimVideoReference.ts', 'command-line'],
   ['src/sections/CanvasArea.tsx', 'buildF414BimVideoReferencePlan'],
   ['src/sections/CanvasArea.tsx', 'f414-bim-video-reference'],
+  ['scripts/extract-f414-bim-video-frames.ps1', 'f414_bim_video_reference'],
+  ['scripts/extract-f414-bim-video-frames.ps1', 'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe'],
   ['CHANGELOG.md', 'F414'],
   ['MANUAL_VERSIONES_v50.md', 'F414'],
   ['MANUAL_USUARIO_v99.md', 'F414'],

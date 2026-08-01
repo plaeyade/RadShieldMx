@@ -13,7 +13,14 @@ Al usar el canvas BIM:
 5. Use **View cube / navegacion** para alternar planta, ajuste, pan, zoom y recorrido medico 3D.
 6. Lea la **linea de comando** para ver herramienta activa, accion reciente, advertencias de escala, DXF, memoria y evidencia.
 
-Nota: los videos enviados quedan como referencia operativa. Codex aun no puede ver `ffmpeg.exe` en `AppData/Local` ni en `PATH`, por lo que la extraccion automatica de frames se completara cuando se proporcione una ruta ejecutable verificable.
+Nota: los videos enviados quedan como referencia operativa. La ruta WinGet de `ffmpeg.exe` fue localizada, pero el sandbox de Codex no puede ejecutar/copiar ese binario desde el paquete. Para generar frames reales, ejecute desde PowerShell normal:
+
+```powershell
+cd C:\Users\carlo\Documents\Codex\2026-07-03\ana\work\recovery-app
+.\scripts\extract-f414-bim-video-frames.ps1
+```
+
+Los frames quedaran en `outputs\f414_bim_video_reference` para revision visual y ajuste posterior del canvas.
 
 ## Addendum F413 - BIM Execution Plan
 
