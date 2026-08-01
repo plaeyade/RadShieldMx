@@ -63,6 +63,7 @@ import { buildF414BimVideoReferencePlan } from '@/lib/f414BimVideoReference';
 import { buildF415BimMepCoordinationPlan } from '@/lib/f415BimMepCoordination';
 import { buildF416ToF420BimCanvasSequence } from '@/lib/f416ToF420BimCanvasSequence';
 import { buildF421ToF425BimHandoffPlan } from '@/lib/f421ToF425BimHandoff';
+import { buildF426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -930,6 +931,11 @@ export default function CanvasArea({
   const f421ToF425BimHandoff = buildF421ToF425BimHandoffPlan({
     floorPlan,
     sequence: f416ToF420BimCanvasSequence,
+  });
+  const f426ToF430CalcRendererClosure = buildF426ToF430CalcRendererClosure({
+    floorPlan,
+    sequence: f416ToF420BimCanvasSequence,
+    handoff: f421ToF425BimHandoff,
   });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
@@ -2290,6 +2296,70 @@ export default function CanvasArea({
                         <div key={item.id} data-testid={`f425-handoff-${item.id}`} className="truncate text-[8px] text-slate-300" title={`${item.target}: ${item.blockingFields.join(', ')} | ${item.handoffRule}`}>
                           <span className="font-bold text-cyan-200">-</span> {item.label}
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f426-f430-calc-renderer-closure" className="mt-2 rounded border border-cyan-800 bg-[#08131d]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F426-F430 Calc/Renderer</span>
+                      <span className={f426ToF430CalcRendererClosure.releaseBlocks.length ? 'text-amber-200' : 'text-emerald-200'}>
+                        {f426ToF430CalcRendererClosure.releaseBlocks.length} blocks
+                      </span>
+                    </div>
+                    <div data-testid="f426-surface-role-calculation" className="grid grid-cols-5 gap-1">
+                      {f426ToF430CalcRendererClosure.surfaceRoleCalculations.map((item) => (
+                        <span
+                          key={item.id}
+                          className={`truncate rounded px-1 py-0.5 text-center text-[7px] ${
+                            item.status === 'ready'
+                              ? 'bg-emerald-950/50 text-emerald-200'
+                              : item.status === 'needs-calculation'
+                                ? 'bg-amber-950/50 text-amber-200'
+                                : 'bg-red-950/50 text-red-200'
+                          }`}
+                          title={`${item.formulaFamily} | ${item.standard} | ${item.rendererOverlay}`}
+                        >
+                          {item.label}:{item.barrierCount}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f427-penetration-penalties" className="mt-1 flex flex-wrap gap-1">
+                      {f426ToF430CalcRendererClosure.penetrationPenalties.slice(0, 4).map((item) => (
+                        <span
+                          key={item.id}
+                          className={`rounded border px-1 py-0.5 text-[7px] ${item.blocking ? 'border-red-700 text-red-200' : 'border-amber-700 text-amber-200'}`}
+                          title={`${item.trigger} Factor ${item.defaultPenaltyFactor.toFixed(2)} | ${item.penaltyModel}`}
+                        >
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-1 grid grid-cols-2 gap-1 text-[8px] text-slate-300">
+                      <div data-testid="f428-structural-loads" className="truncate rounded bg-[#263545] px-1 py-0.5" title="Carga estructural integrada por material, muro, losa, puerta y equipo">
+                        <span className="font-bold text-cyan-200">{f426ToF430CalcRendererClosure.totalStructuralLoadKgPerM2}</span> kg/m2
+                      </div>
+                      <div data-testid="f429-normative-qa-cases" className="truncate rounded bg-[#263545] px-1 py-0.5" title="Casos conocidos NCRP/IAEA/UAQ pendientes/listos por modalidad">
+                        <span className="font-bold text-cyan-200">{f426ToF430CalcRendererClosure.normativeQaCases.length}</span> QA cases
+                      </div>
+                    </div>
+                    <div data-testid="f430-auto-memory-flow" className="mt-1 truncate text-[8px] text-slate-300" title={f426ToF430CalcRendererClosure.autoMemorySteps.map((step) => `${step.label}: ${step.output}`).join(' | ')}>
+                      <span className="font-bold text-cyan-200">Memoria:</span> {'plano -> equipo -> barreras -> calculo -> evidencia -> PDF'}
+                    </div>
+                    <div data-testid="f426-f430-renderer-deep-plan" className="mt-1 flex flex-wrap gap-1">
+                      {f426ToF430CalcRendererClosure.rendererDeepPlan.map((step) => (
+                        <span
+                          key={step.id}
+                          className={`rounded px-1 py-0.5 text-[7px] ${
+                            step.status === 'ready'
+                              ? 'bg-emerald-950/50 text-emerald-200'
+                              : step.status === 'draft'
+                                ? 'bg-amber-950/50 text-amber-200'
+                                : 'bg-red-950/50 text-red-200'
+                          }`}
+                          title={`${step.phase}: ${step.implementation} | ${step.connectedEvidence.join(', ')}`}
+                        >
+                          {step.phase}
+                        </span>
                       ))}
                     </div>
                   </div>

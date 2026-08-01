@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F426-F430 (2026-07-31) - Cierre calculo + renderer profundo
+
+- F426 clasifica superficies por rol radiologico y asigna familia de calculo: primaria, secundaria, laberinto, puerta y penetracion.
+- F427 define penalizaciones y bloqueos QA para penetraciones MEP, sleeves, huecos, puertas y continuidad de blindaje.
+- F428 agrega carga estructural integrada por material, barrera, puerta y equipo con kg/m2 y kPa estimados.
+- F429 registra casos QA normativos pendientes/listos para NCRP/IAEA/UAQ: LINAC 6 MV, LINAC 15/18 MV, CT/RX, Gamma Knife/Co-60, PET/NM y ciclotron 18 MeV.
+- F430 conecta canvas con Memoria IA automatica: plano, equipo, barreras, calculo, citas, evidencia y PDF.
+- Renderer profundo F426-F430 queda preparado con geometry core, cutaway 2.5D visible/real, penetraciones MEP, export visual BIM y QA visual/E2E.
+- Decision tecnica: no se reescribe el renderer base en esta fase; se deja un contrato estable para hacerlo despues con menor riesgo.
+
 # F421-F425 (2026-07-31) - BIM handoff / intake / export
 
 - F421 agrega salidas visuales BIM para PNG, PDF, JSON y Evidence Pack.

@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F426-F430 (2026-07-31) - Calc/Renderer closure
+
+- **F426 motor:** agrega calculo por rol de superficie: primaria, secundaria, laberinto, puerta y penetracion con formula/norma/inputs/outputs/overlays.
+- **F427 motor:** agrega penalizaciones de penetraciones para sleeves, ductos, puertas, huecos y continuidad de blindaje.
+- **F428 motor:** integra carga estructural kg/m2/kPa por barrera/material/equipo para revisar impacto constructivo.
+- **F429 motor:** define QA normativo por casos conocidos NCRP/IAEA/UAQ para LINAC, CT/RX, Gamma Knife, PET/NM y ciclotron.
+- **F430 motor:** define flujo automatico Memoria IA desde canvas: plano -> equipo -> barreras -> calculo -> evidencia -> PDF.
+- **F426-F430 renderer profundo:** agrega contrato de geometry core, cutaway 2.5D visible/real, penetraciones MEP, export visual conectado a Evidence/Memoria y QA visual/E2E.
+- Alcance: esta fase cierra contratos y panel UI sin reescribir eventos base del canvas; el renderer profundo v2 debe usar estos contratos como entrada estable.
+
 # F421-F425 (2026-07-31) - BIM handoff / intake / export
 
 - **F421:** agrega contrato de export visual BIM: snapshot PNG, anexo PDF, handoff JSON y Evidence visual pack.

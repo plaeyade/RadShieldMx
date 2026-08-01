@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F426-F430 - Calculo, renderer profundo y Memoria IA desde canvas
+
+F426-F430 cierra el puente entre el plano editable, el motor de calculo, la inspeccion visual BIM y la Memoria IA.
+
+1. **F426 - Calculo por rol de superficie:** cada barrera se interpreta como primaria, secundaria, laberinto, puerta o penetracion. El panel BIM muestra cuantos elementos existen por rol, la familia de formula, norma aplicable y overlay visual esperado.
+2. **F427 - Penalizacion por penetraciones:** ductos, sleeves, huecos, puertas y cruces MEP generan penalizacion o bloqueo QA. Un hueco sin mitigacion no debe pasar a memoria firmable aunque el muro base cumpla.
+3. **F428 - Carga estructural:** el sistema estima kg/m2 y kPa por espesor/material/equipo. Esto sirve para revisar impacto estructural, costo y tiempo de obra antes de decidir plomo, concreto, bloque HD, TM Nipoll, Contuplex u otro material.
+4. **F429 - QA normativo:** quedan definidos casos conocidos por modalidad: LINAC 6 MV, LINAC 15/18 MV con neutrones, CT/RX NCRP 147, Gamma Knife/Co-60, PET/NM TG-108 e instalaciones de ciclotron 18 MeV.
+5. **F430 - Memoria IA automatica:** el flujo esperado es plano -> equipo -> barreras -> calculo -> evidencia -> PDF. Cada resultado debe incluir formula, norma, entradas, salidas, advertencias, cita y hash/pagina.
+
+Uso en canvas:
+
+1. Cargue o trace el plano y calibre la escala.
+2. Coloque equipo/fuente con modalidad, energia/actividad/workload e isocentro.
+3. Dibuje barreras, zonas y puntos criticos.
+4. Asigne o revise roles de superficie en el panel BIM.
+5. Revise penalizaciones MEP, carga estructural y bloqueos.
+6. Ejecute calculo y genere Memoria IA solo cuando los bloqueos de escala, fuente, barrera, material, penetraciones y QA esten resueltos.
+
+Nota operativa: F426-F430 no sustituye la revision del fisico medico/RSO. El renderer profundo queda preparado para usar geometry core, cutaway 2.5D, MEP real, export visual y QA E2E, pero el cambio de renderer base debe hacerse despues de validar estos contratos.
+
 ## Addendum F421-F425 - Exportacion, intake y handoff BIM
 
 F421-F425 prepara la salida y entrada BIM antes de tocar el renderer profundo.
