@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F411 (2026-07-31) - Adaptacion BIM del canvas
+
+- El canvas incorpora un modo guia tipo BIM inspirado en AutoCAD Plant 3D/Revit: ribbon disciplinar, Project Manager, Details, Layers, navegacion, cubo de vista, leyenda y linea de comando.
+- La UI no reemplaza el renderer ni promete DWG/IFC/Revit nativo; se conecta a acciones reales ya existentes: importar plano, fuente/equipo, barrera, medir, calcular, snapshot, evidencia e inspeccion 3D.
+- Se agrega `f411BimCanvasMethodology.ts` para declarar que necesita RadShield-MX para operar con metodologia BIM real: IDs persistentes, categorias tipo IFC, geometria normalizada, materiales versionados, relaciones calculo-evidencia y proveedores externos DWG/IFC/Revit.
+- Se agrega smoke E2E `e2e/f411-bim-canvas.spec.ts` para verificar que la estacion BIM aparezca en modo guia y que los botones de ribbon cambien herramientas reales del canvas.
+- Scripts: `npm run prepare:f411:bim-canvas`, `npm run test:f411:bim-canvas` y `npm run test:f411:bim-canvas:e2e`.
+
 # F410 (2026-07-31) - QA funcional de salidas F409
 
 - Agrega smoke Playwright `e2e/f410-output-surfaces.spec.ts` para abrir Memoria IA, Evidence Pack y Medical 3D desde controles E2E.

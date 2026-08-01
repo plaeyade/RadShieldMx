@@ -1,5 +1,39 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F411 - Canvas tipo BIM / Revit
+
+F411 agrega una capa de trabajo tipo BIM al canvas para que el plano se lea como una estacion CAD/BIM y no como un lienzo aislado.
+
+Como usarlo:
+
+1. En el canvas, active **Guia** desde el boton superior si esta en modo limpio.
+2. Use el ribbon **BIM Studio** para entrar al flujo: **Proyecto**, **Modelo**, **Equipos**, **Blindaje**, **Anotar**, **Verificar**, **Reportar** y **Evidencia**.
+3. Use **Project Manager** para revisar si el proyecto ya tiene plano base, modelo, equipos, barreras, zonas, puntos criticos, reportes y evidencia.
+4. Use **Details** para verificar escala, seleccion, capas visibles y readiness BIM.
+5. Use **Layers** para revisar visibilidad, bloqueo, color y opacidad por disciplina.
+6. Use la navegacion lateral para acercar, alejar, ajustar, pan, vista planta o inspeccion 3D.
+7. Use la linea **Command** para confirmar la ultima accion real enviada al canvas.
+
+Logica operativa:
+
+- **Proyecto** importa o actualiza el plano base.
+- **Modelo** abre la inspeccion 3D medica si esta conectada.
+- **Equipos** activa colocacion de fuente/equipo.
+- **Blindaje** activa dibujo de barrera.
+- **Anotar** activa medicion/cotas.
+- **Verificar** ejecuta calculo de blindaje.
+- **Reportar** exporta snapshot visual.
+- **Evidencia** abre el Evidence Pack.
+
+Que falta para metodologia BIM completa:
+
+- IDs persistentes por objeto y categorias tipo IFC/Revit.
+- Geometria 2D/3D normalizada con unidades, escala, niveles y elevaciones.
+- Materiales versionados con densidad, TVL/HVL, peso, costo, tiempo, proveedor, pagina y hash.
+- Relaciones trazables entre equipo, termino fuente, barrera, punto critico, formula, cita, memoria y Evidence Pack.
+- Importadores auditados: DXF/SVG hoy; DWG/IFC/Revit mediante proveedor externo con hash, validacion de capas y confirmacion de escala.
+- DB/API multiusuario para permisos, revisiones, restore y versionado.
+
 ## Addendum F410 - QA funcional de salidas F409
 
 F410 verifica que las salidas F409 aparezcan en la app real.

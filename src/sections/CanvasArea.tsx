@@ -57,6 +57,7 @@ import { buildF228StaticRendererHelpers } from '@/lib/f228StaticRendererHelpers'
 import { buildF229CanvasCadE2EHarness } from '@/lib/f229CanvasCadE2EHarness';
 import { buildF230PostF229CoverageGate } from '@/lib/f230PostF229CoverageGate';
 import { buildF231ToF236CanvasReleaseCoverage } from '@/lib/f231ToF236CanvasReleaseCoverage';
+import { buildF411BimCanvasMethodology } from '@/lib/f411BimCanvasMethodology';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -907,6 +908,23 @@ export default function CanvasArea({
     { id: 'medical3d', label: '3D', detail: 'Inspeccion medica 3D', icon: Stethoscope, action: onOpenMedical3D ?? onOpen3DViewer },
     { id: 'evidence', label: 'Evid', detail: 'Abrir evidencia', icon: FileSearch, action: onOpenEvidencePack },
   ];
+  const f411BimMethodology = buildF411BimCanvasMethodology({
+    floorPlan,
+    layers,
+    activeLayer,
+    selectedKind: selectedInspectorKind,
+    selectedName: selectedInspectorName,
+  });
+  const f411BimRibbon = [
+    { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
+    { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
+    { id: 'equipment', label: 'Equipos', detail: 'Colocar fuente o equipo con footprint', icon: Atom, action: () => activateCanvasTool('source') },
+    { id: 'shielding', label: 'Blindaje', detail: 'Dibujar barrera y revisar espesor', icon: Shield, action: () => activateCanvasTool('barrier') },
+    { id: 'annotate', label: 'Anotar', detail: 'Medir, acotar o preparar llamada visual', icon: Ruler, action: () => activateCanvasTool('measure') },
+    { id: 'verify', label: 'Verificar', detail: 'Ejecutar calculo de blindaje', icon: Calculator, action: onRunCalculations },
+    { id: 'reports', label: 'Reportar', detail: 'Exportar captura PNG del canvas', icon: ImageIcon, action: onExportPNG },
+    { id: 'evidence', label: 'Evidencia', detail: 'Abrir Evidence Pack del proyecto', icon: FileSearch, action: onOpenEvidencePack },
+  ];
 
   return (
     <div className="relative flex-1 flex flex-col overflow-hidden bg-[#f3f4f1]" ref={containerRef}>
@@ -1073,6 +1091,50 @@ export default function CanvasArea({
       </div>
 
       {/* ═══ CANVAS PRINCIPAL ═══ */}
+      <div
+        data-testid="f411-bim-ribbon"
+        className={`shrink-0 border-b border-slate-950 bg-[#17202a] px-2 py-1 text-slate-100 shadow-sm ${f375IsCleanWorkspace ? 'hidden' : 'hidden lg:block'}`}
+        aria-label="Ribbon BIM RadShield-MX inspirado en CAD/Revit"
+      >
+        <div className="flex items-center gap-1 overflow-x-auto">
+          <div className="mr-1 flex shrink-0 items-center gap-1 border-r border-slate-600 pr-2">
+            <Database className="h-3.5 w-3.5 text-cyan-300" />
+            <div className="leading-tight">
+              <div className="text-[9px] font-bold uppercase tracking-wide text-cyan-200">BIM Studio</div>
+              <div className="max-w-[160px] truncate text-[8px] text-slate-400">{f411BimMethodology.projectName}</div>
+            </div>
+          </div>
+          {f411BimRibbon.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                data-testid={`f411-bim-ribbon-${item.id}`}
+                className="group flex h-10 min-w-[74px] shrink-0 flex-col items-center justify-center rounded border border-slate-700 bg-[#202b37] px-2 text-[9px] font-semibold text-slate-200 transition-colors hover:border-cyan-400 hover:bg-[#263545] disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={item.action}
+                disabled={!item.action}
+                title={item.detail}
+                aria-label={item.detail}
+              >
+                <Icon className="mb-0.5 h-3.5 w-3.5 text-cyan-300 group-hover:text-cyan-200" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+          <div
+            data-testid="f411-bim-readiness"
+            className="ml-auto flex shrink-0 items-center gap-1 rounded border border-slate-700 bg-[#101821] px-2 py-1 text-[9px]"
+            title={f411BimMethodology.workflowNeeds.join(' ')}
+          >
+            <span className="font-bold text-cyan-200">BIM</span>
+            <span className={f411BimMethodology.status === 'bim-canvas-adaptation-ready' ? 'text-emerald-300' : 'text-amber-300'}>
+              {f411BimMethodology.readinessScore}%
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div
         data-testid="f191-pyrate-inspired-toolbar"
         className="shrink-0 min-h-8 bg-white border-b border-slate-200 flex items-center gap-2 px-2 overflow-x-auto"
@@ -1440,6 +1502,71 @@ export default function CanvasArea({
               backgroundSize: '100% 100%, 24px 24px',
             }}
           >
+            {!f375IsCleanWorkspace && (
+              <div
+                data-testid="f411-bim-project-manager"
+                className="absolute left-2 top-2 z-20 hidden w-[228px] overflow-hidden rounded-md border border-slate-700 bg-[#1c2631]/96 text-slate-100 shadow-2xl backdrop-blur xl:block"
+                aria-label="Project Manager BIM del canvas"
+              >
+                <div className="border-b border-slate-700 bg-[#131b24] px-2 py-1.5">
+                  <div className="text-[9px] font-bold uppercase tracking-wide text-cyan-200">Project Manager</div>
+                  <select
+                    data-testid="f411-bim-current-project"
+                    className="mt-1 h-6 w-full rounded border border-slate-600 bg-[#263545] px-1 text-[10px] font-semibold text-slate-100 outline-none"
+                    value={f411BimMethodology.projectName}
+                    onChange={() => undefined}
+                    title="Proyecto actual del canvas BIM"
+                    aria-label="Proyecto actual del canvas BIM"
+                  >
+                    <option>{f411BimMethodology.projectName}</option>
+                  </select>
+                </div>
+                <div className="max-h-[238px] overflow-y-auto px-2 py-1.5">
+                  {f411BimMethodology.projectTree.map((nodeItem) => (
+                    <div
+                      key={nodeItem.id}
+                      data-testid={`f411-bim-tree-${nodeItem.id}`}
+                      className="mb-0.5 flex items-center gap-1 rounded px-1 py-0.5 text-[10px] hover:bg-[#263545]"
+                      title={`${nodeItem.label}: ${nodeItem.count}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${
+                        nodeItem.status === 'ready' ? 'bg-emerald-300' :
+                          nodeItem.status === 'review' ? 'bg-amber-300' : 'bg-slate-500'
+                      }`} />
+                      <span className="min-w-0 flex-1 truncate">{nodeItem.label}</span>
+                      <span className="rounded bg-[#101821] px-1 text-[9px] text-slate-300">{nodeItem.count}</span>
+                    </div>
+                  ))}
+                </div>
+                <div data-testid="f411-bim-details" className="border-t border-slate-700 px-2 py-1.5">
+                  <div className="mb-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">Details</div>
+                  {f411BimMethodology.details.map(([label, value]) => (
+                    <div key={`${label}-${value}`} className="flex items-center justify-between gap-2 text-[9px]">
+                      <span className="text-slate-400">{label}</span>
+                      <span className="max-w-[120px] truncate font-mono text-slate-100" title={value}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div data-testid="f411-bim-layers" className="border-t border-slate-700 px-2 py-1.5">
+                  <div className="mb-1 flex items-center justify-between text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                    <span>Layers</span>
+                    <span>{f411BimMethodology.activeLayer}</span>
+                  </div>
+                  <div className="space-y-0.5">
+                    {f411BimMethodology.layerRows.map((layerRow) => (
+                      <div key={layerRow.id} className="grid grid-cols-[10px_1fr_18px_18px_28px] items-center gap-1 text-[8px]">
+                        <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: layerRow.color }} />
+                        <span className="truncate text-slate-200" title={layerRow.label}>{layerRow.label}</span>
+                        <span title={layerRow.visible ? 'Visible' : 'Oculta'}>{layerRow.visible ? 'ON' : 'OFF'}</span>
+                        <span title={layerRow.locked ? 'Bloqueada' : 'Editable'}>{layerRow.locked ? 'L' : '-'}</span>
+                        <span className="text-right font-mono text-slate-400">{layerRow.opacityPercent}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Main floor plan canvas */}
             <canvas
               ref={canvasRef}
@@ -1784,7 +1911,11 @@ export default function CanvasArea({
 
             <div
               data-testid="f214-view-cube"
-              className="pointer-events-none absolute right-2 top-[148px] z-10 hidden h-[58px] w-[58px] rotate-[-8deg] rounded-md border border-stone-300 bg-white/90 text-[9px] font-bold text-slate-500 shadow-md backdrop-blur-sm lg:block"
+              className={`pointer-events-none absolute right-2 z-10 hidden h-[58px] w-[58px] rotate-[-8deg] rounded-md border text-[9px] font-bold shadow-md backdrop-blur-sm lg:block ${
+                f375IsCleanWorkspace
+                  ? 'top-[148px] border-stone-300 bg-white/90 text-slate-500'
+                  : 'top-[214px] border-slate-600 bg-[#1c2631]/92 text-slate-200'
+              }`}
               title="Cubo de vista tipo SketchUp: orientacion de planta para inspeccion medica 2D/3D"
             >
               <div className="absolute left-2 top-2 h-8 w-8 skew-y-[-18deg] rounded-sm border border-slate-300 bg-[#f8fafc] shadow-inner" />
@@ -1793,6 +1924,87 @@ export default function CanvasArea({
               <span className="absolute bottom-1 left-2 text-emerald-600">{f214SketchUpCanvas.viewCubeLabels[1]}</span>
               <span className="absolute bottom-1 right-2 text-red-500">{f214SketchUpCanvas.viewCubeLabels[2]}</span>
             </div>
+
+            {!f375IsCleanWorkspace && (
+              <>
+                <div
+                  data-testid="f411-bim-navigation-rail"
+                  className="absolute right-2 top-2 z-20 hidden w-10 rounded-md border border-slate-700 bg-[#1c2631]/94 p-1 text-slate-100 shadow-xl backdrop-blur lg:flex lg:flex-col lg:gap-1"
+                  aria-label="Navegacion BIM del viewport"
+                >
+                  {([
+                    ['zoom-in', 'Acercar vista', ZoomIn, () => setCanvasState((prev: CanvasState) => ({ ...prev, scale: Math.min(10, prev.scale * 1.2) }))],
+                    ['zoom-out', 'Alejar vista', ZoomOut, () => setCanvasState((prev: CanvasState) => ({ ...prev, scale: Math.max(0.1, prev.scale / 1.2) }))],
+                    ['fit', 'Ajustar a pantalla', Maximize, onZoomToFit],
+                    ['pan', 'Activar desplazamiento de vista', Move, () => activateCanvasTool('pan')],
+                    ['top', 'Vista superior / planta', Crosshair, () => applyVisualMode('plan')],
+                    ['3d', 'Abrir recorrido medico 3D', Stethoscope, onOpenMedical3D ?? onOpen3DViewer],
+                  ] as const).map(([id, title, Icon, action]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      data-testid={`f411-bim-nav-${id}`}
+                      className="flex h-7 w-7 items-center justify-center rounded border border-slate-700 bg-[#263545] text-cyan-200 hover:border-cyan-400 hover:bg-[#33465a] disabled:cursor-not-allowed disabled:opacity-40"
+                      onClick={action}
+                      disabled={!action}
+                      title={title}
+                      aria-label={title}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </button>
+                  ))}
+                </div>
+                <div
+                  data-testid="f411-bim-methodology-card"
+                  className="absolute right-14 top-2 z-20 hidden w-[284px] rounded-md border border-slate-700 bg-[#1c2631]/94 p-2 text-slate-100 shadow-xl backdrop-blur xl:block"
+                  title={f411BimMethodology.bimDataNeeds.join(' ')}
+                >
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="text-[9px] font-bold uppercase tracking-wide text-cyan-200">BIM methodology</div>
+                    <span className={f411BimMethodology.status === 'bim-canvas-adaptation-ready' ? 'text-[9px] font-bold text-emerald-300' : 'text-[9px] font-bold text-amber-300'}>
+                      {f411BimMethodology.readinessScore}%
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {f411BimMethodology.bimDataNeeds.slice(0, 3).map((need, index) => (
+                      <div key={need} className="grid grid-cols-[18px_1fr] gap-1 text-[9px] leading-snug text-slate-300">
+                        <span className="rounded bg-[#101821] text-center font-mono text-cyan-200">{index + 1}</span>
+                        <span>{need}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div
+                  data-testid="f411-bim-callout-legend"
+                  className="absolute bottom-16 right-2 z-20 hidden w-[220px] rounded-md border border-slate-700 bg-[#101821]/94 p-2 text-[9px] text-slate-200 shadow-xl backdrop-blur lg:block"
+                  aria-label="Leyenda BIM de blindaje"
+                >
+                  <div className="mb-1 text-[9px] font-bold uppercase tracking-wide text-cyan-200">Legend</div>
+                  {[
+                    ['Fuente/equipo', '#ef4444', 'arrow'],
+                    ['Barrera primaria/sec.', '#10b981', 'solid'],
+                    ['Zona controlada/publica', '#0ea5e9', 'dash'],
+                    ['Heatmap/isocontorno', '#f59e0b', 'dot'],
+                  ].map(([label, color, style]) => (
+                    <div key={label} className="flex items-center gap-2 py-0.5">
+                      <span
+                        className={`h-0.5 w-10 ${style === 'dash' ? 'border-t border-dashed' : style === 'dot' ? 'border-t border-dotted' : ''}`}
+                        style={{ backgroundColor: style === 'solid' || style === 'arrow' ? color : 'transparent', borderColor: color }}
+                      />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  data-testid="f411-bim-command-line"
+                  className="absolute bottom-2 left-[244px] right-2 z-20 hidden min-h-7 items-center rounded border border-slate-700 bg-[#101821]/94 px-2 text-[10px] text-slate-300 shadow-xl backdrop-blur xl:flex"
+                  title="Linea de comando visual: refleja la ultima accion enviada desde toolbar o dock"
+                >
+                  <span className="mr-2 font-bold text-cyan-200">Command:</span>
+                  <span className="font-mono">{lastCanvasCommand || `tool=${currentTool.label}; layer=${f411BimMethodology.activeLayer}; selection=${selectedInspectorName}`}</span>
+                </div>
+              </>
+            )}
 
             <div
               data-testid="f214-axis-triad"

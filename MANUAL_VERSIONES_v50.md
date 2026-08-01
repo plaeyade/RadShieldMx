@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F411 (2026-07-31) - Adaptacion BIM del canvas
+
+- F411 agrega una estacion visual tipo BIM al canvas en modo **Guia**.
+- Superficies nuevas: `f411-bim-ribbon`, `f411-bim-project-manager`, `f411-bim-details`, `f411-bim-layers`, `f411-bim-navigation-rail`, `f411-bim-methodology-card`, `f411-bim-callout-legend` y `f411-bim-command-line`.
+- El ribbon se conecta a acciones reales: importar plano, abrir modelo/3D, colocar fuente, dibujar barrera, medir, calcular, snapshot y Evidence Pack.
+- Se agrega `src/lib/f411BimCanvasMethodology.ts` con requisitos para BIM real: IDs persistentes, categorias tipo IFC/Revit, geometria normalizada, materiales versionados, relaciones calculo-evidencia, importadores DWG/IFC/Revit auditados y DB/API multiusuario.
+- F411 no activa DWG/IFC/Revit nativo; mantiene el flujo honesto de conversion externa a DXF/SVG/IFC hasta contar con proveedor, fixtures, credenciales, hash, capas y validacion de escala.
+- Comandos: `npm run prepare:f411:bim-canvas`, `npm run test:f411:bim-canvas` y `npm run test:f411:bim-canvas:e2e`.
+
 # F410 (2026-07-31) - QA funcional de salidas F409
 
 - F410 valida en navegador que F409 ya no sea solo contrato interno.
