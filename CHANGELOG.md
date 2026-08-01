@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F439-F441 (2026-08-01) - Renderer geometry core
+
+- **F439:** agrega normalizador real de geometria desde `floorPlan`: barreras, fuentes/equipos, zonas, penetraciones y overlay de evidencia.
+- **F440:** genera un plan de overlays por capa: barreras por rol, equipos, ocupacion, MEP/penetraciones y estado Evidence/Memoria.
+- **F441:** agrega preflight antes de activar renderer profundo: entidades, overlays, puente F436-F438, flag `VITE_CANVAS_HIGH_RISK_CAD` y garantia de eventos legacy intactos.
+- El geometry core queda observable en el canvas, pero no sustituye renderer, seleccion, grips, boton derecho ni event controller.
+- Agrega scripts `prepare/test:f439-f441:renderer-geometry` y E2E `f439-f441-renderer-geometry-core.spec.ts`.
+
 # F436-F438 (2026-07-31) - Renderer v2 bridge
 
 - **F436:** agrega baseline visual desktop y mobile/tablet para confirmar canvas, sidebar, ribbon y paneles F426-F435 antes de tocar renderer base.

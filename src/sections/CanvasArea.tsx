@@ -66,6 +66,8 @@ import { buildF421ToF425BimHandoffPlan } from '@/lib/f421ToF425BimHandoff';
 import { buildF426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
 import { buildF431ToF435RendererReleaseGate } from '@/lib/f431ToF435RendererReleaseGate';
 import { buildF436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
+import { buildF439ToF441RendererGeometryCore } from '@/lib/f439ToF441RendererGeometryCore';
+import { isEnabled } from '@/lib/featureFlags';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -944,6 +946,12 @@ export default function CanvasArea({
     floorPlan,
     closure: f426ToF430CalcRendererClosure,
     releaseGate: f431ToF435RendererReleaseGate,
+  });
+  const f439ToF441RendererGeometryCore = buildF439ToF441RendererGeometryCore({
+    floorPlan,
+    closure: f426ToF430CalcRendererClosure,
+    bridge: f436ToF438RendererV2Bridge,
+    highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
@@ -2430,6 +2438,38 @@ export default function CanvasArea({
                       Flag: <span className="font-bold text-violet-200">{f436ToF438RendererV2Bridge.featureFlagPolicy.masterFlag}</span> / eventos off
                     </div>
                   </div>
+                  <div data-testid="f439-f441-renderer-geometry-core" className="mt-2 rounded border border-cyan-800 bg-[#061923]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F439-F441 Geometry core</span>
+                      <span className={f439ToF441RendererGeometryCore.status === 'geometry-core-ready' ? 'text-emerald-200' : 'text-amber-200'}>
+                        {f439ToF441RendererGeometryCore.status === 'geometry-core-ready' ? 'ready' : 'gated'}
+                      </span>
+                    </div>
+                    <div data-testid="f439-normalized-entities" className="grid grid-cols-5 gap-1">
+                      {(['barrier', 'source', 'region', 'penetration', 'overlay'] as const).map((type) => (
+                        <span key={type} className="truncate rounded bg-cyan-950/50 px-1 py-0.5 text-center text-[7px] text-cyan-100" title={`Entidades normalizadas tipo ${type}`}>
+                          {type}:{f439ToF441RendererGeometryCore.normalizedEntities.filter((entity) => entity.type === type).length}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f440-overlay-render-plan" className="mt-1 flex flex-wrap gap-1">
+                      {f439ToF441RendererGeometryCore.overlayPlans.map((plan) => (
+                        <span key={plan.id} className="rounded border border-cyan-700 px-1 py-0.5 text-[7px] text-cyan-200" title={`${plan.layer}: ${plan.entityIds.length} entidades | ${plan.evidenceOutput}`}>
+                          {plan.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f441-renderer-core-preflight" className="mt-1 flex flex-wrap gap-1">
+                      {f439ToF441RendererGeometryCore.preflight.map((item) => (
+                        <span key={item.id} className={`rounded px-1 py-0.5 text-[7px] ${item.pass ? 'bg-emerald-950/50 text-emerald-200' : 'bg-amber-950/50 text-amber-200'}`} title={`${item.evidence} Rollback: ${item.rollback}`}>
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f441-renderer-core-decision" className="mt-1 truncate text-[8px] text-slate-300" title={f439ToF441RendererGeometryCore.releaseDecision}>
+                      {f439ToF441RendererGeometryCore.enabledByFeatureFlag ? 'Flag staging activo' : 'Flag staging apagado'} / eventos legacy intactos
+                    </div>
+                  </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
                     {f411BimMethodology.roundtripGates.slice(0, 4).map((gate) => (
                       <span
@@ -3296,6 +3336,31 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   renderer bajo flag; eventos off
+                </span>
+              </div>
+              <div
+                data-testid="f439-f441-renderer-geometry-core-row"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f439ToF441RendererGeometryCore.releaseDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f439ToF441RendererGeometryCore.status === 'geometry-core-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-cyan-50 text-cyan-700 border border-cyan-100'
+                }`}>
+                  F439-F441
+                </span>
+                <span data-testid="f439-entity-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f439ToF441RendererGeometryCore.normalizedEntities.length} entities
+                </span>
+                <span data-testid="f440-overlay-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f439ToF441RendererGeometryCore.overlayPlans.length} overlays
+                </span>
+                <span data-testid="f441-preflight-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f439ToF441RendererGeometryCore.preflight.filter((item) => item.pass).length}/{f439ToF441RendererGeometryCore.preflight.length} preflight
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  geometry core observable; eventos intactos
                 </span>
               </div>
               <div

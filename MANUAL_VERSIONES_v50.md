@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F439-F441 (2026-08-01) - Geometry core observable
+
+- F439 convierte la geometria viva del `floorPlan` en entidades normalizadas de renderer: barreras, fuentes, zonas, penetraciones y overlays.
+- F440 organiza esas entidades en planes de overlay con capa, orden visual, estilo y salida Evidence/Memoria/PDF.
+- F441 agrega preflight de activacion: entidad normalizada, overlay listo, puente F436-F438, flag maestro y eventos legacy intactos.
+- Decision tecnica: el core se muestra como superficie verificable en canvas, pero el renderer base y el controlador de eventos siguen apagados para evitar regresiones.
+- Rollback: apagar `VITE_CANVAS_HIGH_RISK_CAD`, limpiar `localStorage.radshield_feature_flags` y conservar la ruta estable `CanvasArea/useCanvas`.
+
 # F436-F438 (2026-07-31) - Bridge renderer v2
 
 - F436 genera baseline visual desktop y mobile/tablet para verificar que canvas/sidebar/ribbon/paneles BIM se mantienen visibles.

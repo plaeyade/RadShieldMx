@@ -1,5 +1,22 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F439-F441 - Geometry core observable para renderer profundo
+
+F439-F441 agrega una capa tecnica visible para preparar el renderer profundo sin romper la operacion diaria del canvas.
+
+1. **F439 - Entidades normalizadas:** el sistema toma el plano activo y convierte barreras, equipos/fuentes, zonas, penetraciones y estado de evidencia en entidades con ID, tipo, capa, puntos, bounds, material, espesor, modalidad, evidencias y advertencias.
+2. **F440 - Plan de overlays:** esas entidades se agrupan en capas visuales: barreras por rol, equipos, zonas/ocupacion, penetraciones MEP y estado Evidence/Memoria. Cada capa declara su salida esperada para Memoria IA, PDF o Evidence Pack.
+3. **F441 - Preflight:** antes de activar cualquier renderer profundo se revisa que existan entidades, overlays, puente F436-F438, flag controlado y eventos legacy intactos.
+
+Uso practico:
+
+1. Abra el canvas y trabaje normalmente con plano, muros, fuentes y zonas.
+2. En el panel BIM revise la tarjeta **F439-F441 Geometry core**.
+3. Use los conteos para detectar si el plano realmente tiene barreras, fuentes, zonas o penetraciones reconocidas.
+4. Si el preflight marca el flag apagado, significa que el core ya se puede inspeccionar, pero todavia no reemplaza el renderer estable.
+
+Regla de seguridad: F439-F441 no cambia seleccion, boton derecho, grips, snapping ni eventos. Si se activa un renderer experimental en staging, debe conservarse rollback inmediato hacia `CanvasArea/useCanvas`.
+
 ## Addendum F436-F438 - Bridge seguro hacia renderer v2
 
 F436-F438 prepara el renderer profundo sin sustituir todavia el canvas estable.
