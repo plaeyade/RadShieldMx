@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F416-F420 (2026-07-31) - BIM canvas sequence
+
+- **F416:** agrega `f416ToF420BimCanvasSequence.ts` con registro de proveedores BIM: MEPcontent, ProdLib, ARCAT y RevitCity, incluyendo formatos, riesgo QA e integracion externa.
+- **F417:** define biblioteca visual de objetos para canvas: LINAC, Gamma Knife, ciclotron, barrera primaria/secundaria, laberinto, puerta blindada y ducto/penetracion.
+- **F418:** agrega metricas cutaway 2.5D: espacio visible, huella blindada estimada, relacion visible/real y superficies calculadas.
+- **F419:** mapea roles reales de superficie contra barreras existentes y estados: listo, falta geometria o falta calculo.
+- **F420:** agrega candidatos iniciales de clash MEP/blindaje: ducto en primaria, continuidad de puerta, charola en secundaria y MEP sin clasificar.
+- El panel BIM del canvas muestra `f416-provider-registry`, `f417-object-library`, `f418-cutaway-metrics`, `f419-surface-role-assignments` y `f420-mep-clash-candidates`.
+- Scripts: `npm run prepare:f416-f420:bim-canvas` y `npm run test:f416-f420:bim-canvas`.
+
 # F415 (2026-07-31) - BIM MEP coordination
 
 - Agrega `f415BimMepCoordination.ts` para convertir los videos BIM en metodologia clinica/constructiva: muros/losas de blindaje, HVAC/ductos, tuberias, charolas/cableado y penetraciones/puertas.

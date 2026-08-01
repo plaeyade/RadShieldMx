@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F416-F420 (2026-07-31) - BIM canvas sequence
+
+- F416 agrega registro de proveedores BIM externos con riesgo QA: MEPcontent, ProdLib, ARCAT y RevitCity.
+- F417 agrega biblioteca visual de objetos clinicos/BIM para preparar la paleta real del canvas.
+- F418 agrega metricas cutaway 2.5D para explicar espacio visible vs bunker real.
+- F419 asigna roles de superficie: primaria, secundaria, laberinto y puerta.
+- F420 agrega candidatos iniciales de cruces MEP/blindaje para ductos, puertas, charolas y objetos sin clasificar.
+- Nuevas superficies UI: `f416-provider-registry`, `f417-object-library`, `f418-cutaway-metrics`, `f419-surface-role-assignments` y `f420-mep-clash-candidates`.
+- Comandos: `npm run prepare:f416-f420:bim-canvas` y `npm run test:f416-f420:bim-canvas`.
+
 # F415 (2026-07-31) - BIM MEP coordination
 
 - F415 toma los frames reales de los videos y formaliza una metodologia BIM-MEP para RadShield-MX.

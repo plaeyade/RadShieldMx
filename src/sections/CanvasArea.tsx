@@ -61,6 +61,7 @@ import { buildF411BimCanvasMethodology } from '@/lib/f411BimCanvasMethodology';
 import { buildF413BimExecutionPlan } from '@/lib/f413BimExecutionPlan';
 import { buildF414BimVideoReferencePlan } from '@/lib/f414BimVideoReference';
 import { buildF415BimMepCoordinationPlan } from '@/lib/f415BimMepCoordination';
+import { buildF416ToF420BimCanvasSequence } from '@/lib/f416ToF420BimCanvasSequence';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -921,6 +922,10 @@ export default function CanvasArea({
   const f413BimExecutionPlan = buildF413BimExecutionPlan(f411BimMethodology);
   const f414BimVideoReference = buildF414BimVideoReferencePlan(true);
   const f415BimMepCoordination = buildF415BimMepCoordinationPlan();
+  const f416ToF420BimCanvasSequence = buildF416ToF420BimCanvasSequence({
+    floorPlan,
+    f415: f415BimMepCoordination,
+  });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -2107,6 +2112,92 @@ export default function CanvasArea({
                       {f415BimMepCoordination.designQuestions.slice(0, 3).map((item) => (
                         <div key={item.id} data-testid={`f415-question-${item.id}`} className="truncate text-[8px] text-slate-300" title={item.requiredEvidence}>
                           <span className="font-bold text-cyan-200">?</span> {item.question}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f416-provider-registry" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>BIM providers</span>
+                      <span className="text-cyan-200">{f416ToF420BimCanvasSequence.providers.length}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f416ToF420BimCanvasSequence.providers.map((provider) => (
+                        <span
+                          key={provider.id}
+                          data-testid={`f416-provider-${provider.id}`}
+                          className={`truncate rounded px-1 py-0.5 text-[7px] ${
+                            provider.qaRisk === 'low'
+                              ? 'bg-emerald-950/50 text-emerald-200'
+                              : provider.qaRisk === 'medium'
+                                ? 'bg-amber-950/50 text-amber-200'
+                                : 'bg-red-950/50 text-red-200'
+                          }`}
+                          title={`${provider.url} | ${provider.formats.join(', ')} | ${provider.radShieldUse}`}
+                        >
+                          {provider.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f417-object-library" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Object library</span>
+                      <span className="text-cyan-200">{f416ToF420BimCanvasSequence.objectTemplates.length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {f416ToF420BimCanvasSequence.objectTemplates.slice(0, 8).map((template) => (
+                        <span
+                          key={template.id}
+                          data-testid={`f417-object-${template.id}`}
+                          className="rounded border px-1 py-0.5 text-[7px] text-slate-100"
+                          style={{ borderColor: template.color }}
+                          title={`${template.canvasAction} Metadata: ${template.requiredMetadata.join(', ')}`}
+                        >
+                          {template.symbol}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f418-cutaway-metrics" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Cutaway 2.5D</span>
+                      <span className="text-cyan-200">visible/real</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f416ToF420BimCanvasSequence.cutawayMetrics.map((metric) => (
+                        <div key={metric.id} data-testid={`f418-cutaway-${metric.id}`} className="truncate rounded bg-[#263545] px-1 py-0.5 text-[7px] text-slate-200" title={metric.label}>
+                          <span className={metric.status === 'ready' ? 'text-emerald-300' : metric.status === 'draft' ? 'text-amber-300' : 'text-red-300'}>{metric.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f419-surface-role-assignments" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Surface roles</span>
+                      <span className="text-cyan-200">{f416ToF420BimCanvasSequence.surfaceAssignments.filter((item) => item.status === 'ready').length} ready</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f416ToF420BimCanvasSequence.surfaceAssignments.map((assignment) => (
+                        <div key={assignment.id} data-testid={`f419-role-${assignment.id}`} className="grid grid-cols-[10px_1fr_28px] items-center gap-1 text-[8px] text-slate-300">
+                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: assignment.color }} />
+                          <span className="truncate" title={assignment.requirement}>{assignment.label}</span>
+                          <span className={assignment.status === 'ready' ? 'text-emerald-300' : assignment.status === 'needs-calculation' ? 'text-amber-300' : 'text-red-300'}>
+                            {assignment.barrierCount}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f420-mep-clash-candidates" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>MEP clash checks</span>
+                      <span className="text-red-200">{f416ToF420BimCanvasSequence.clashCandidates.filter((item) => item.releaseBlocking).length} block</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f416ToF420BimCanvasSequence.clashCandidates.slice(0, 3).map((candidate) => (
+                        <div key={candidate.id} data-testid={`f420-clash-${candidate.id}`} className="truncate text-[8px] text-slate-300" title={`${candidate.affectedSurface}: ${candidate.requiredAction}`}>
+                          <span className={candidate.risk === 'high' ? 'font-bold text-red-300' : candidate.risk === 'medium' ? 'font-bold text-amber-300' : 'font-bold text-emerald-300'}>!</span> {candidate.label}
                         </div>
                       ))}
                     </div>

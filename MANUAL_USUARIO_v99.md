@@ -1,5 +1,24 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F416-F420 - Secuencia BIM del canvas
+
+F416-F420 agrega una secuencia operativa para convertir referencias externas y objetos BIM en decisiones de diseno radiologico.
+
+1. **F416 - Proveedores BIM:** MEPcontent, ProdLib, ARCAT y RevitCity se registran con formatos, uso esperado y riesgo QA. RevitCity queda como referencia no canonica.
+2. **F417 - Biblioteca visual:** LINAC, Gamma Knife, ciclotron, barrera primaria/secundaria, laberinto, puerta blindada y ducto/penetracion quedan definidos como plantillas del canvas.
+3. **F418 - Cutaway 2.5D:** el canvas calcula metricas de espacio visible, huella blindada estimada y relacion visible/real.
+4. **F419 - Roles de superficie:** cada barrera debe clasificarse como primaria, secundaria, laberinto o puerta para poder justificar memoria.
+5. **F420 - Cruces MEP/blindaje:** ductos, puertas, charolas y objetos MEP sin clasificar generan candidatos de revision antes de exportar.
+
+Uso recomendado:
+
+- Primero importe o dibuje el plano.
+- Calibre escala.
+- Coloque equipos/fuentes.
+- Clasifique barreras por rol.
+- Revise cutaway y MEP clash.
+- Genere Memoria IA solo cuando cada superficie tenga formula, norma, material, TVL, cita y evidencia.
+
 ## Addendum F415 - Coordinacion BIM-MEP para blindaje
 
 F415 usa los frames extraidos de los videos BIM para agregar una metodologia de coordinacion entre proteccion radiologica, arquitectura, estructura y obra/MEP.
