@@ -505,6 +505,8 @@
     "test:f415:bim-mep": "node scripts/check-f415-bim-mep-coordination-contracts.mjs",
     "prepare:f416-f420:bim-canvas": "node scripts/f416-f420-bim-canvas-sequence-audit.mjs",
     "test:f416-f420:bim-canvas": "node scripts/check-f416-f420-bim-canvas-sequence-contracts.mjs",
+    "prepare:f421-f425:bim-handoff": "node scripts/f421-f425-bim-handoff-audit.mjs",
+    "test:f421-f425:bim-handoff": "node scripts/check-f421-f425-bim-handoff-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

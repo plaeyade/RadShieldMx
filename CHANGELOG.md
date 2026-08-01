@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F421-F425 (2026-07-31) - BIM handoff / intake / export
+
+- **F421:** agrega contrato de export visual BIM: snapshot PNG, anexo PDF, handoff JSON y Evidence visual pack.
+- **F422:** define intake pipeline para DXF/SVG/IFC/GLB como rutas navegables y DWG/RFA/RVT como rutas externas/futuras con riesgo alto.
+- **F423:** normaliza categorias BIM a entidades RadShield: barreras, zonas, fuentes, puntos criticos, penetraciones MEP y EvidenceAsset.
+- **F424:** agrega Product/Spec Library para equipos, materiales, puertas, MEP y especificaciones con campos obligatorios y regla de evidencia.
+- **F425:** define entregables de handoff: Revit Schedule RS_*, IFC PropertySet RadShield, Evidence Pack, Memoria IA BIM y QA manifest.
+- Declara que el renderer profundo debe tocarse **despues de F425**, cuando ya estan definidos export/import/normalizacion/productos/handoff.
+- Scripts: `npm run prepare:f421-f425:bim-handoff` y `npm run test:f421-f425:bim-handoff`.
+
 # F416-F420 (2026-07-31) - BIM canvas sequence
 
 - **F416:** agrega `f416ToF420BimCanvasSequence.ts` con registro de proveedores BIM: MEPcontent, ProdLib, ARCAT y RevitCity, incluyendo formatos, riesgo QA e integracion externa.

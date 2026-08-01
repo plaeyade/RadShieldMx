@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F421-F425 - Exportacion, intake y handoff BIM
+
+F421-F425 prepara la salida y entrada BIM antes de tocar el renderer profundo.
+
+1. **F421 - Export visual BIM:** prepara capturas PNG, anexo PDF, JSON reproducible y Evidence visual pack.
+2. **F422 - Intake pipeline:** DXF/SVG/IFC/GLB pueden entrar con validacion; DWG/RFA/RVT requieren proveedor externo o add-in.
+3. **F423 - Normalizacion RS_*:** convierte IfcWall/IfcSpace/Equipment/Openings/Specs a barreras, zonas, fuentes, penetraciones, puntos y evidencia.
+4. **F424 - Product/Spec Library:** liga equipo, material, puerta, MEP o especificacion con proveedor, documento, version, pagina/hash y campos obligatorios.
+5. **F425 - Handoff:** genera contrato para Revit Schedule, IFC PropertySet, Evidence Pack, Memoria IA BIM y QA manifest.
+
+Cuándo tocar renderer profundo:
+
+- Despues de F425.
+- Motivo: el renderer debe pintar geometria real y campos ya normalizados. Si se cambia antes, puede verse mejor pero no garantiza calculo, evidencia, export ni handoff.
+- La siguiente etapa ideal es F426-F430: renderer/base geometry + calculo por rol + penalizacion por penetraciones + export BIM visual comprobable.
+
 ## Addendum F416-F420 - Secuencia BIM del canvas
 
 F416-F420 agrega una secuencia operativa para convertir referencias externas y objetos BIM en decisiones de diseno radiologico.

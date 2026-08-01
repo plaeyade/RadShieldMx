@@ -62,6 +62,7 @@ import { buildF413BimExecutionPlan } from '@/lib/f413BimExecutionPlan';
 import { buildF414BimVideoReferencePlan } from '@/lib/f414BimVideoReference';
 import { buildF415BimMepCoordinationPlan } from '@/lib/f415BimMepCoordination';
 import { buildF416ToF420BimCanvasSequence } from '@/lib/f416ToF420BimCanvasSequence';
+import { buildF421ToF425BimHandoffPlan } from '@/lib/f421ToF425BimHandoff';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -925,6 +926,10 @@ export default function CanvasArea({
   const f416ToF420BimCanvasSequence = buildF416ToF420BimCanvasSequence({
     floorPlan,
     f415: f415BimMepCoordination,
+  });
+  const f421ToF425BimHandoff = buildF421ToF425BimHandoffPlan({
+    floorPlan,
+    sequence: f416ToF420BimCanvasSequence,
   });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
@@ -2198,6 +2203,92 @@ export default function CanvasArea({
                       {f416ToF420BimCanvasSequence.clashCandidates.slice(0, 3).map((candidate) => (
                         <div key={candidate.id} data-testid={`f420-clash-${candidate.id}`} className="truncate text-[8px] text-slate-300" title={`${candidate.affectedSurface}: ${candidate.requiredAction}`}>
                           <span className={candidate.risk === 'high' ? 'font-bold text-red-300' : candidate.risk === 'medium' ? 'font-bold text-amber-300' : 'font-bold text-emerald-300'}>!</span> {candidate.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f421-visual-export-bim" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Visual exports</span>
+                      <span className="text-cyan-200">{f421ToF425BimHandoff.visualExports.filter((item) => item.status === 'ready').length} ready</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f421ToF425BimHandoff.visualExports.map((item) => (
+                        <span
+                          key={item.id}
+                          data-testid={`f421-export-${item.id}`}
+                          className={`truncate rounded px-1 py-0.5 text-[7px] ${item.status === 'ready' ? 'bg-emerald-950/50 text-emerald-200' : 'bg-amber-950/50 text-amber-200'}`}
+                          title={`${item.format}: ${item.includes.join(', ')} | ${item.releaseUse}`}
+                        >
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f422-intake-pipeline" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Intake pipeline</span>
+                      <span className="text-cyan-200">{f421ToF425BimHandoff.intakeRoutes.length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {f421ToF425BimHandoff.intakeRoutes.map((route) => (
+                        <span
+                          key={route.id}
+                          data-testid={`f422-intake-${route.id}`}
+                          className={`rounded border px-1 py-0.5 text-[7px] ${
+                            route.risk === 'low'
+                              ? 'border-emerald-700 text-emerald-200'
+                              : route.risk === 'medium'
+                                ? 'border-amber-700 text-amber-200'
+                                : 'border-red-700 text-red-200'
+                          }`}
+                          title={`${route.mode}: ${route.intakeRule}`}
+                        >
+                          {route.format}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f423-normalization-map" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Normalize RS_*</span>
+                      <span className="text-cyan-200">{f421ToF425BimHandoff.normalizationMap.length}</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f421ToF425BimHandoff.normalizationMap.slice(0, 3).map((item) => (
+                        <div key={item.id} data-testid={`f423-map-${item.id}`} className="truncate text-[8px] text-slate-300" title={`${item.sourceCategory} -> ${item.targetCategory}: ${item.validationRule}`}>
+                          <span className="font-bold text-cyan-200">RS</span> {item.targetCategory}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f424-product-spec-library" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>Product/spec</span>
+                      <span className="text-cyan-200">{f421ToF425BimHandoff.productSpecRecords.length}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {f421ToF425BimHandoff.productSpecRecords.slice(0, 6).map((record) => (
+                        <span
+                          key={record.id}
+                          data-testid={`f424-product-${record.id}`}
+                          className="truncate rounded bg-[#263545] px-1 py-0.5 text-[7px] text-slate-200"
+                          title={`${record.source}: ${record.requiredFields.join(', ')} | ${record.evidenceRule}`}
+                        >
+                          {record.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div data-testid="f425-bim-handoff" className="mt-2 rounded border border-slate-700 bg-[#101821]/80 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>BIM handoff</span>
+                      <span className="text-amber-200" title={f421ToF425BimHandoff.rendererDeepRationale}>renderer after F425</span>
+                    </div>
+                    <div className="space-y-1">
+                      {f421ToF425BimHandoff.handoffDeliverables.slice(0, 4).map((item) => (
+                        <div key={item.id} data-testid={`f425-handoff-${item.id}`} className="truncate text-[8px] text-slate-300" title={`${item.target}: ${item.blockingFields.join(', ')} | ${item.handoffRule}`}>
+                          <span className="font-bold text-cyan-200">-</span> {item.label}
                         </div>
                       ))}
                     </div>
