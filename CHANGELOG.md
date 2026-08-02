@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F454 (2026-08-01) - Post-beta heavy engines gate
+
+- Cierra el frente F449-F453 como beta estable y separa las mejoras pesadas en carriles post-beta.
+- Mantiene **Three/R3F** como visor 3D productivo y fallback obligatorio.
+- Define gate para **Babylon real PBR/WebGPU/WebXR**: requiere `@babylonjs/core`, `@babylonjs/loaders`, import dinamico, feature flag, smoke visual y fallback a Three/R3F.
+- Define gate para **Unity WebGL avanzado**: requiere build externo/URL `VITE_MEDICAL_3D_UNITY_WEBGL_URL`, handoff JSON/GLTF, headers correctos y smoke visual; Unity queda como visual-only.
+- Define gate para **fotorrealismo pesado**: assets PBR, GLB/texturas, lazy loading, presupuesto de bundle, capturas reportables y rollback.
+- Agrega scripts `prepare:f454:post-beta-engines` y `test:f454:post-beta-engines`; el prepare genera `outputs/f454_post_beta_heavy_engines/f454_local_dependency_probe.json`.
+
 # F449-F453 (2026-08-01) - BIM memory visual
 
 - **F449:** agrega trazabilidad grafica calculo -> formula -> norma -> seccion de Memoria IA para barrera primaria, secundaria, laberinto/puerta, penetraciones MEP y carga estructural.

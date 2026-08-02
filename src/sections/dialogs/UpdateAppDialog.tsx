@@ -75,6 +75,7 @@ import { buildF158DeployTargetPostSmoke } from '@/lib/f158DeployTargetPostSmoke'
 import { buildF159SitesHostingPrep } from '@/lib/f159SitesHostingPrep';
 import { buildF163CanvasClosureSummary } from '@/lib/f163CanvasClosure';
 import { buildF164ClinicalProjectMap } from '@/lib/f164ClinicalProjectMap';
+import { buildF454PostBetaHeavyEngines } from '@/lib/f454PostBetaHeavyEngines';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -92,6 +93,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F454 Post-beta heavy engines', current: 'closed/staged', latest: 'Three stable + Babylon local dependency gate + Unity external URL gate + heavy photoreal roadmap', status: 'current', description: buildF454PostBetaHeavyEngines().releaseDecision },
   { name: 'F449-F453 BIM memory visual', current: 'visual board ready', latest: 'cutaway bunker + wall roles + BIM ribbon + citations + Memoria IA handoff', status: 'current', description: 'Integra una visualizacion BIM grafica dentro del canvas: sala visible vs bunker real, roles de muros primaria/secundaria/laberinto/puerta/penetraciones, panel tipo Project Manager/Properties, referencias NCRP/IAEA/AAPM/UAQ y flujo plano->equipo->barreras->calculo->citas->PDF. La fase queda conectada a F426-F430, renderer v2 y F446-F448 sin tocar eventos base.' },
   { name: 'F446-F448 Canvas strong QA', current: 'qa gate ready', latest: 'critical surfaces + right click + quick actions + window controls + regression gates', status: 'current', description: 'Agrega una compuerta fuerte del canvas antes de release: valida sidebar, canvas, dock CAD, overlay renderer v2 pointer-events:none, boton derecho, quick actions, ventanas controlables y gates de regresion con E2E dedicado.' },
   { name: 'F442-F445 Renderer v2 runtime', current: 'overlay runtime ready', latest: 'render instructions + layer passes + nonblocking overlay canvas + rollback gate', status: 'current', description: 'Convierte el geometry core F439-F441 en instrucciones reales de dibujo y las monta sobre un canvas overlay pointer-events:none. Opera como preview seguro si VITE_CANVAS_HIGH_RISK_CAD esta apagado y como runtime flagged en staging; no reemplaza seleccion, grips, snapping, boton derecho ni event controller.' },

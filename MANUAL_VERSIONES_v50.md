@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F454 (2026-08-01) - Cierre beta y motores pesados post-beta
+
+- F454 cierra la beta visual BIM y ordena las mejoras pesadas en carriles separados.
+- Three/R3F sigue como runtime estable integrado a React y fallback obligatorio.
+- Babylon pasa a fase post-beta real: debe estar instalado localmente en el repo con `@babylonjs/core` y `@babylonjs/loaders`, cargar por import dinamico, usar feature flag y pasar smoke visual.
+- Unity WebGL pasa a fase post-beta externa: requiere build publicado, URL `VITE_MEDICAL_3D_UNITY_WEBGL_URL`, handoff JSON/GLTF y QA visual. Unity no calcula ni firma resultados.
+- El fotorrealismo pesado se activa solo con assets lazy-loaded, presupuesto de bundle, visual regression y rollback.
+- Comandos: `npm run prepare:f454:post-beta-engines` y `npm run test:f454:post-beta-engines`.
+
 # F449-F453 (2026-08-01) - Tablero BIM para Memoria IA
 
 - F449 conecta visualmente cada superficie con formula, norma, evidencia y seccion de memoria: primaria, secundaria, laberinto/puerta, penetraciones y carga estructural.

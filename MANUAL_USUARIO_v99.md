@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F454 - Cierre beta y motores pesados post-beta
+
+F454 cierra la beta actual sin activar dependencias pesadas dentro del flujo principal. La regla es simple: la app debe seguir abriendo rapido, con canvas/sidebar/menus estables, y los motores pesados entran solo cuando pasen su smoke dedicado.
+
+Estado operativo:
+
+1. **Three/R3F:** sigue como visor 3D principal integrado. Es el fallback obligatorio para Medical 3D, recorridos, capturas, evidencia y revision visual.
+2. **Babylon real:** se habilita post-beta cuando `@babylonjs/core` y `@babylonjs/loaders` esten instalados localmente en este repo, no solo globalmente en Windows. Debe cargar por import dinamico, con flag, fallback a Three/R3F y smoke visual.
+3. **Unity WebGL avanzado:** se usa como visor externo pesado. Requiere build Unity publicado, URL `VITE_MEDICAL_3D_UNITY_WEBGL_URL`, handoff JSON/GLTF y prueba visual. Unity no calcula blindaje ni sustituye citas, PDF o Memoria IA.
+4. **Fotorrealismo pesado:** se activa despues con assets PBR, GLB/texturas, lazy loading, presupuesto de bundle y rollback.
+
+Como validar dependencias:
+
+1. Ejecute `npm run prepare:f454:post-beta-engines`.
+2. Revise `outputs/f454_post_beta_heavy_engines/f454_local_dependency_probe.json`.
+3. Si Babylon aparece faltante, instale en la carpeta del repo: `npm install @babylonjs/core @babylonjs/loaders`.
+4. Si Unity aparece faltante, configure un build externo y `VITE_MEDICAL_3D_UNITY_WEBGL_URL`.
+5. No publique Babylon/Unity como productivos hasta correr sus pruebas post-beta.
+
+Decision: F454 deja cerrado el release beta estable y prepara F455-F458 para Babylon local, Babylon PBR, Unity WebGL externo y fotorrealismo pesado.
+
 ## Addendum F449-F453 - Tablero BIM grafico para Memoria IA
 
 F449-F453 agrega una vista BIM dentro del canvas para explicar y revisar el blindaje como un modelo clinico-constructivo, no solo como lineas de plano.
