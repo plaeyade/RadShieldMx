@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F470-F474 (2026-08-01) - Babylon profundo interactivo
+
+- **F470:** Babylon pasa de tarjeta de paridad a runtime interactivo visual-only conectado a `MedicalScene`.
+- **F471:** agrega picking de muros, bandas, zonas, equipos y guia de haz con HUD de propiedades sin modificar calculos ni plano.
+- **F472:** agrega camaras de inspeccion **Iso**, **Planta** y **Frente** para revisar barreras, equipos y zonas.
+- **F473:** expone overlays activos de rol de barrera, zonas controladas, footprints de equipos y guia de haz.
+- **F474:** agrega auditoria, contratos y E2E con capturas en `outputs/f470_f474_babylon_deep_runtime`; Three/R3F sigue como renderer productivo/fallback.
+
 # F469 (2026-08-01) - Visual beta publicable
 
 - Cierra la beta visual como paquete estatico publicable: ZIP de `dist`, manifiesto con hash, checklist post-deploy y backlog post-beta.

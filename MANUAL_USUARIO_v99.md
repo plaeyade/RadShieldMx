@@ -1,5 +1,20 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F470-F474 - Babylon profundo interactivo
+
+F470-F474 agrega una segunda vista Babylon dentro de **Medical 3D** para inspeccion visual avanzada.
+
+Uso recomendado:
+
+1. Abra **Medical 3D** desde el canvas.
+2. Localice la tarjeta **F456-F458 Babylon parity** dentro del panel de motor 3D.
+3. Use **Iso**, **Planta** o **Frente** para cambiar la camara de inspeccion.
+4. Haga clic sobre muros, bandas, zonas, equipos o la guia de haz para ver el HUD **F471 HUD seleccion**.
+5. Revise **F473 overlays activos** para confirmar que estan presentes roles de barrera, zonas controladas, footprints de equipos y guia de haz.
+6. Use **Export PNG Babylon** para anexar una captura visual a Evidence Pack o Memoria IA.
+
+Regla de uso: Babylon profundo es una herramienta visual de inspeccion. No reemplaza el calculo trazable, no firma espesores y no sustituye la revision del fisico medico/RSO. Three/R3F continua como visor productivo principal y fallback.
+
 ## Addendum F469 - Beta visual publicable
 
 F469 empaqueta la beta visual como frontend estatico publicable.

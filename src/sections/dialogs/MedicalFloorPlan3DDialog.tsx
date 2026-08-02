@@ -34,6 +34,7 @@ import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegratio
 import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
 import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
 import { buildBabylonRuntimeSmokeContract, buildBabylonSceneParityContract } from '@/lib/medical3D/babylonRuntimeSmoke';
+import { buildBabylonDeepRuntimeContract, type BabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
 import {
   buildDefaultPbrMaterialDatabase,
   buildPbrMaterialDbUpdate,
@@ -81,6 +82,13 @@ type BabylonPerformanceMetrics = {
   fps: number | null;
   meshes: number;
 };
+type BabylonDeepCameraMode = 'iso' | 'top' | 'front';
+type BabylonPickedEntity = {
+  id: string;
+  type: 'wall' | 'equipment' | 'zone' | 'beam';
+  label: string;
+  details: string[];
+} | null;
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -1087,15 +1095,38 @@ function BabylonRuntimeSmokePreview({
   scene,
   enabled,
   onStatusChange,
+  deepContract,
 }: {
   scene: MedicalScene;
   enabled: boolean;
   onStatusChange?: (status: BabylonSmokeStatus) => void;
+  deepContract: BabylonDeepRuntimeContract;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cameraRef = useRef<any>(null);
   const [status, setStatus] = useState<BabylonSmokeStatus>('idle');
   const [message, setMessage] = useState('Babylon listo para prueba visual aislada.');
   const [metrics, setMetrics] = useState<BabylonPerformanceMetrics>({ firstFrameMs: null, fps: null, meshes: 0 });
+  const [cameraMode, setCameraMode] = useState<BabylonDeepCameraMode>('iso');
+  const [pickedEntity, setPickedEntity] = useState<BabylonPickedEntity>(null);
+
+  const applyCameraMode = (mode: BabylonDeepCameraMode) => {
+    setCameraMode(mode);
+    const camera = cameraRef.current;
+    if (!camera) return;
+    if (mode === 'iso') {
+      camera.alpha = Math.PI * 0.72;
+      camera.beta = Math.PI / 3.2;
+    }
+    if (mode === 'top') {
+      camera.alpha = Math.PI / 2;
+      camera.beta = 0.12;
+    }
+    if (mode === 'front') {
+      camera.alpha = Math.PI;
+      camera.beta = Math.PI / 2.6;
+    }
+  };
 
   const handleExportBabylonPng = () => {
     const canvas = canvasRef.current;
@@ -1108,8 +1139,8 @@ function BabylonRuntimeSmokePreview({
 
   useEffect(() => {
     let disposed = false;
-    let engine: { dispose: () => void; resize: () => void; runRenderLoop: (callback: () => void) => void } | null = null;
-    let babylonScene: { render: () => void; dispose: () => void } | null = null;
+    let engine: any = null;
+    let babylonScene: any = null;
     let resizeHandler: (() => void) | null = null;
 
     const setSmokeStatus = (nextStatus: BabylonSmokeStatus, nextMessage: string) => {
@@ -1163,6 +1194,7 @@ function BabylonRuntimeSmokePreview({
         camera.lowerRadiusLimit = 4;
         camera.upperRadiusLimit = 16;
         camera.attachControl(canvas, true);
+        cameraRef.current = camera;
 
         const hemi = new babylon.HemisphericLight('f455Hemi', new babylon.Vector3(0.2, 1, 0.15), babylonScene);
         hemi.intensity = 0.82;
@@ -1187,7 +1219,24 @@ function BabylonRuntimeSmokePreview({
         const controlZone = new babylon.StandardMaterial('f455ControlledZone', babylonScene);
         controlZone.diffuseColor = new babylon.Color3(0.1, 0.56, 0.74);
         controlZone.alpha = 0.28;
+        const selectionMaterial = new babylon.StandardMaterial('f471SelectionMat', babylonScene);
+        selectionMaterial.diffuseColor = new babylon.Color3(0.2, 0.95, 0.9);
+        selectionMaterial.emissiveColor = new babylon.Color3(0.06, 0.35, 0.32);
         const roleMaterials = new Map<string, typeof concrete>();
+
+        const registerPick = (mesh: any, entity: NonNullable<BabylonPickedEntity>) => {
+          mesh.metadata = { ...(mesh.metadata || {}), radshieldEntity: entity, radshieldOriginalMaterial: mesh.material };
+          mesh.actionManager = new babylon.ActionManager(babylonScene);
+          mesh.actionManager.registerAction(new babylon.ExecuteCodeAction(babylon.ActionManager.OnPickTrigger, () => {
+            const originalMaterial = mesh.metadata?.radshieldOriginalMaterial;
+            babylonScene.meshes.forEach((candidate: any) => {
+              if (candidate.metadata?.radshieldOriginalMaterial) candidate.material = candidate.metadata.radshieldOriginalMaterial;
+            });
+            mesh.material = selectionMaterial;
+            mesh.metadata.radshieldOriginalMaterial = originalMaterial || mesh.material;
+            setPickedEntity(entity);
+          }));
+        };
 
         const materialForWall = (barrierType: string, materialCode: string) => {
           const key = `${barrierType}:${materialCode}`;
@@ -1215,6 +1264,17 @@ function BabylonRuntimeSmokePreview({
           wallMesh.position.set(wall.center[0], wall.center[1], wall.center[2]);
           wallMesh.rotation.y = wall.rotationY;
           wallMesh.material = materialForWall(wall.barrierType, wall.materialCode);
+          const wallEntity = {
+            id: wall.id,
+            type: 'wall' as const,
+            label: wall.name,
+            details: [
+              `Rol ${wall.barrierType}`,
+              `Material ${wall.materialCode}`,
+              `Espesor ${Math.round(wall.requiredThickness_mm ?? wall.thickness_m * 1000)} mm`,
+            ],
+          };
+          registerPick(wallMesh, wallEntity);
 
           const [r, g, b] = babylonRoleColor(wall.barrierType);
           const band = babylon.MeshBuilder.CreateBox(
@@ -1228,6 +1288,7 @@ function BabylonRuntimeSmokePreview({
           bandMaterial.diffuseColor = new babylon.Color3(r, g, b);
           bandMaterial.emissiveColor = new babylon.Color3(r * 0.25, g * 0.25, b * 0.25);
           band.material = bandMaterial;
+          registerPick(band, wallEntity);
         });
 
         const primaryBand = babylon.MeshBuilder.CreateBox('f455PrimaryBarrierBand', { width: width * 0.74, depth: 0.06, height: 0.16 }, babylonScene);
@@ -1235,6 +1296,12 @@ function BabylonRuntimeSmokePreview({
         const primaryMaterial = new babylon.StandardMaterial('f455PrimaryBandMat', babylonScene);
         primaryMaterial.diffuseColor = new babylon.Color3(0.91, 0.23, 0.22);
         primaryBand.material = primaryMaterial;
+        registerPick(primaryBand, {
+          id: 'primary-role-band',
+          type: 'wall',
+          label: 'Banda primaria de referencia',
+          details: ['Overlay visual', 'Rol primaria', 'No modifica calculos'],
+        });
 
         if (scene.zones.length) {
           scene.zones.forEach((medicalZone) => {
@@ -1245,14 +1312,36 @@ function BabylonRuntimeSmokePreview({
             const zone = babylon.MeshBuilder.CreateGround(`f456Zone_${medicalZone.id}`, { width: zoneWidth, height: zoneDepth }, babylonScene);
             zone.position.set(medicalZone.center[0], 0.01, medicalZone.center[2]);
             zone.material = controlZone;
+            registerPick(zone, {
+              id: medicalZone.id,
+              type: 'zone',
+              label: medicalZone.name,
+              details: [`Tipo ${medicalZone.type}`, `Puntos ${medicalZone.points.length}`, 'Overlay de zona controlada'],
+            });
           });
         } else {
           const zone = babylon.MeshBuilder.CreateGround('f455ControlledArea', { width: width * 0.55, height: depth * 0.38 }, babylonScene);
           zone.position.set(scene.bounds.center[0], 0.01, scene.bounds.center[2] + depth * 0.18);
           zone.material = controlZone;
+          registerPick(zone, {
+            id: 'default-controlled-area',
+            type: 'zone',
+            label: 'Zona controlada de ejemplo',
+            details: ['Generada para inspeccion visual', 'Reemplazar por zona real del plano'],
+          });
         }
 
         scene.equipment.forEach((medicalEquipment, index) => {
+          const equipmentEntity = {
+            id: medicalEquipment.id,
+            type: 'equipment' as const,
+            label: medicalEquipment.name,
+            details: [
+              `Modalidad ${medicalEquipment.modality}`,
+              `Footprint ${medicalEquipment.footprint_m[0]} x ${medicalEquipment.footprint_m[1]} m`,
+              `Rotacion ${(medicalEquipment.rotationY * 180 / Math.PI).toFixed(0)} deg`,
+            ],
+          };
           const couch = babylon.MeshBuilder.CreateBox(
             `f456EquipmentFootprint_${medicalEquipment.id}`,
             { width: medicalEquipment.footprint_m[0], depth: medicalEquipment.footprint_m[1], height: 0.22 },
@@ -1261,6 +1350,7 @@ function BabylonRuntimeSmokePreview({
           couch.position.set(medicalEquipment.position[0], 0.72, medicalEquipment.position[2]);
           couch.rotation.y = medicalEquipment.rotationY;
           couch.material = equipment;
+          registerPick(couch, equipmentEntity);
 
           const gantry = babylon.MeshBuilder.CreateTorus(
             `f456MedicalGantry_${medicalEquipment.id}`,
@@ -1271,6 +1361,7 @@ function BabylonRuntimeSmokePreview({
           gantry.rotation.x = Math.PI / 2;
           gantry.rotation.z = index * 0.08;
           gantry.material = equipment;
+          registerPick(gantry, equipmentEntity);
         });
 
         const sourceCone = babylon.MeshBuilder.CreateCylinder('f455BeamGuide', {
@@ -1286,6 +1377,12 @@ function BabylonRuntimeSmokePreview({
         beamMaterial.diffuseColor = new babylon.Color3(0.15, 0.45, 1);
         beamMaterial.alpha = 0.22;
         sourceCone.material = beamMaterial;
+        registerPick(sourceCone, {
+          id: 'beam-guide',
+          type: 'beam',
+          label: 'Guia de haz visual',
+          details: ['Visual-only', 'Sirve para revisar orientacion', 'No sustituye QA dosimetrico'],
+        });
 
         let frameCount = 0;
         engine.runRenderLoop(() => {
@@ -1313,6 +1410,7 @@ function BabylonRuntimeSmokePreview({
     return () => {
       disposed = true;
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+      cameraRef.current = null;
       babylonScene?.dispose();
       engine?.dispose();
     };
@@ -1339,6 +1437,40 @@ function BabylonRuntimeSmokePreview({
       </div>
       <div className={`text-[9px] leading-relaxed ${status === 'failed' ? 'text-red-700' : 'text-cyan-900'}`}>
         {message}
+      </div>
+      <div className="grid gap-2 md:grid-cols-[1fr_1fr]" data-testid="f470-f474-babylon-deep-runtime">
+        <div className="rounded border border-cyan-100 bg-white/85 p-2 text-[9px] leading-relaxed text-cyan-950" data-testid="f471-babylon-pick-hud">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="font-semibold">F471 HUD seleccion</span>
+            <Badge variant="outline" className="text-[8px]">{pickedEntity?.type || 'standby'}</Badge>
+          </div>
+          <div className="font-medium">{pickedEntity?.label || 'Seleccione muro/equipo/zona en el canvas Babylon.'}</div>
+          {(pickedEntity?.details || ['Picking no altera calculo ni floorplan.']).map((detail) => (
+            <div key={detail} className="text-cyan-800">{detail}</div>
+          ))}
+        </div>
+        <div className="rounded border border-cyan-100 bg-white/85 p-2 text-[9px] leading-relaxed text-cyan-950" data-testid="f473-babylon-overlays">
+          <div className="mb-1 font-semibold">F473 overlays activos</div>
+          <div className="grid grid-cols-2 gap-1">
+            {deepContract.controls.overlays.map((overlay) => (
+              <span key={overlay} className="rounded bg-cyan-50 px-1 py-0.5">{overlay}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-1" data-testid="f472-babylon-camera-modes">
+        {(['iso', 'top', 'front'] as BabylonDeepCameraMode[]).map((mode) => (
+          <Button
+            key={mode}
+            size="sm"
+            variant={cameraMode === mode ? 'default' : 'outline'}
+            className="h-7 text-[10px]"
+            onClick={() => applyCameraMode(mode)}
+            data-testid={`f472-babylon-camera-${mode}`}
+          >
+            {mode === 'iso' ? 'Iso' : mode === 'top' ? 'Planta' : 'Frente'}
+          </Button>
+        ))}
       </div>
       <div className="grid grid-cols-3 gap-1 text-[9px] text-cyan-950" data-testid="f457-babylon-performance-gate">
         <div className="rounded border border-cyan-100 bg-white/85 px-1.5 py-1">FPS {metrics.fps ?? 'warmup'}</div>
@@ -1393,6 +1525,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
   const babylonSmokeContract = useMemo(() => buildBabylonRuntimeSmokeContract(scene), [scene]);
   const babylonParityContract = useMemo(() => buildBabylonSceneParityContract(scene), [scene]);
+  const babylonDeepContract = useMemo(() => buildBabylonDeepRuntimeContract(scene), [scene]);
   const f408UnitySceneExport = useMemo(() => buildF408UnitySceneExport(activeFloorPlan, preset), [activeFloorPlan, preset]);
   const f408UnityValidationWarnings = useMemo(() => validateF408UnitySceneExport(f408UnitySceneExport), [f408UnitySceneExport]);
   const photorealAdvancedProfile = useMemo(() => buildPhotorealAdvancedProfile({
@@ -2167,6 +2300,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 scene={scene}
                 enabled={open && hasGeometry}
                 onStatusChange={setBabylonSmokeStatus}
+                deepContract={babylonDeepContract}
               />
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportEngineHandoff}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Exportar handoff 3D

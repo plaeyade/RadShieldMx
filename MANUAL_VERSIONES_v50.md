@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F470-F474 (2026-08-01) - Babylon profundo interactivo
+
+- F470 habilita una escena Babylon interactiva alimentada por `MedicalScene`, sin sustituir el renderer productivo Three/R3F.
+- F471 permite seleccionar entidades del visor Babylon y ver un HUD con tipo, ID, rol/material/footprint y advertencia visual-only.
+- F472 incorpora camaras **Iso**, **Planta** y **Frente** para revisar el bunker/sala desde orientaciones de inspeccion.
+- F473 muestra overlays de roles de barrera, zonas controladas, footprints de equipos y guia de haz.
+- F474 agrega comandos `npm run prepare:f470-f474:babylon-deep`, `npm run test:f470-f474:babylon-deep` y `npm run test:f470-f474:babylon-deep:e2e`.
+
 # F469 (2026-08-01) - Visual beta publicable
 
 - Genera paquete estatico publicable desde `dist/` con hash, commit, checklist post-deploy y backlog post-beta.
