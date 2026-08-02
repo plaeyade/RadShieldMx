@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F455 (2026-08-01) - Babylon runtime smoke visual
+
+- Verifica que `@babylonjs/core`, `@babylonjs/loaders`, `@babylonjs/materials` y `@babylonjs/gui` ya puedan usarse desde el bundle local.
+- Agrega un preview Babylon aislado dentro de **Medical 3D** con canvas propio, carga dinamica, sala cutaway, concreto PBR, equipo medico proxy, haz visual y zona controlada translucida.
+- Mantiene **Three/R3F** como renderer principal y fallback productivo; Babylon queda en modo smoke post-beta hasta completar paridad, rendimiento y export visual.
+- Agrega contrato `radshield-mx.medical3d.babylon-runtime-smoke.f455.v1`, scripts `prepare/test:f455:babylon-runtime` y E2E `test:f455:babylon-runtime:e2e`.
+
 # F454 (2026-08-01) - Post-beta heavy engines gate
 
 - Cierra el frente F449-F453 como beta estable y separa las mejoras pesadas en carriles post-beta.

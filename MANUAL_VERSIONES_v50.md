@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F455 (2026-08-01) - Babylon runtime smoke visual
+
+- F455 confirma que Babylon ya no es solo backlog documental: el visor 3D carga runtime local mediante import dinamico.
+- La vista se muestra como tarjeta aislada en **Medical 3D**, con PBR ligero, corte de bunker, barreras, equipo medico, guia de haz y zona controlada.
+- Three/R3F conserva la escena principal y todas las capturas productivas hasta que Babylon pase paridad de escena, rendimiento y export.
+- Comandos: `npm run prepare:f455:babylon-runtime`, `npm run test:f455:babylon-runtime` y `npm run test:f455:babylon-runtime:e2e`.
+
 # F454 (2026-08-01) - Cierre beta y motores pesados post-beta
 
 - F454 cierra la beta visual BIM y ordena las mejoras pesadas en carriles separados.

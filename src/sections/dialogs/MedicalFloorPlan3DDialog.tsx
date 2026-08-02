@@ -33,6 +33,7 @@ import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExter
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
 import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
+import { buildBabylonRuntimeSmokeContract } from '@/lib/medical3D/babylonRuntimeSmoke';
 
 interface Props {
   open: boolean;
@@ -67,6 +68,7 @@ type VisualEvidenceCapture = {
   stationId?: string | null;
   stationLabel?: string | null;
 };
+type BabylonSmokeStatus = 'idle' | 'loading' | 'ready' | 'failed';
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -1029,6 +1031,197 @@ function downloadText(filename: string, content: string, type = 'text/plain') {
   URL.revokeObjectURL(url);
 }
 
+function clampBabylonDimension(value: number, fallback: number) {
+  if (!Number.isFinite(value) || value <= 0) return fallback;
+  return Math.min(Math.max(value, 3), 12);
+}
+
+function BabylonRuntimeSmokePreview({
+  scene,
+  enabled,
+  onStatusChange,
+}: {
+  scene: MedicalScene;
+  enabled: boolean;
+  onStatusChange?: (status: BabylonSmokeStatus) => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [status, setStatus] = useState<BabylonSmokeStatus>('idle');
+  const [message, setMessage] = useState('Babylon listo para prueba visual aislada.');
+
+  useEffect(() => {
+    let disposed = false;
+    let engine: { dispose: () => void; resize: () => void; runRenderLoop: (callback: () => void) => void } | null = null;
+    let babylonScene: { render: () => void; dispose: () => void } | null = null;
+    let resizeHandler: (() => void) | null = null;
+
+    const setSmokeStatus = (nextStatus: BabylonSmokeStatus, nextMessage: string) => {
+      if (disposed) return;
+      setStatus(nextStatus);
+      setMessage(nextMessage);
+      onStatusChange?.(nextStatus);
+    };
+
+    if (!enabled || !canvasRef.current) {
+      setSmokeStatus('idle', 'Abra una escena con geometria para activar Babylon.');
+      return () => {
+        disposed = true;
+      };
+    }
+
+    setSmokeStatus('loading', 'Cargando @babylonjs/core/loaders/materials...');
+
+    void (async () => {
+      try {
+        const babylon = await import('@babylonjs/core');
+        await import('@babylonjs/loaders');
+        await import('@babylonjs/materials');
+
+        if (disposed || !canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        const width = clampBabylonDimension(scene.bounds.width, 7.5);
+        const depth = clampBabylonDimension(scene.bounds.depth, 6);
+        const wallThickness = Math.min(Math.max(scene.review.maxRequiredThickness_mm / 1000, 0.35), 1.4);
+        const wallHeight = 2.9;
+
+        engine = new babylon.Engine(canvas, true, {
+          antialias: true,
+          preserveDrawingBuffer: true,
+          stencil: true,
+        });
+        babylonScene = new babylon.Scene(engine);
+        babylonScene.clearColor = new babylon.Color4(0.035, 0.052, 0.075, 1);
+
+        const camera = new babylon.ArcRotateCamera(
+          'f455Camera',
+          Math.PI * 0.72,
+          Math.PI / 3.2,
+          Math.max(width, depth) * 1.25,
+          new babylon.Vector3(0, 0.9, 0),
+          babylonScene,
+        );
+        camera.lowerRadiusLimit = 4;
+        camera.upperRadiusLimit = 16;
+        camera.attachControl(canvas, true);
+
+        const hemi = new babylon.HemisphericLight('f455Hemi', new babylon.Vector3(0.2, 1, 0.15), babylonScene);
+        hemi.intensity = 0.82;
+        const key = new babylon.DirectionalLight('f455Key', new babylon.Vector3(-0.6, -1, -0.35), babylonScene);
+        key.intensity = 1.2;
+
+        const concrete = new babylon.PBRMaterial('f455ConcretePbr', babylonScene);
+        concrete.albedoColor = new babylon.Color3(0.48, 0.47, 0.42);
+        concrete.roughness = 0.86;
+        concrete.metallic = 0;
+
+        const interior = new babylon.PBRMaterial('f455InteriorPbr', babylonScene);
+        interior.albedoColor = new babylon.Color3(0.82, 0.84, 0.82);
+        interior.roughness = 0.58;
+        interior.metallic = 0;
+
+        const equipment = new babylon.PBRMaterial('f455EquipmentPbr', babylonScene);
+        equipment.albedoColor = new babylon.Color3(0.83, 0.86, 0.87);
+        equipment.roughness = 0.38;
+        equipment.metallic = 0.18;
+
+        const controlZone = new babylon.StandardMaterial('f455ControlledZone', babylonScene);
+        controlZone.diffuseColor = new babylon.Color3(0.1, 0.56, 0.74);
+        controlZone.alpha = 0.28;
+
+        const floor = babylon.MeshBuilder.CreateBox('f455Floor', { width, depth, height: 0.12 }, babylonScene);
+        floor.position.y = -0.06;
+        floor.material = interior;
+
+        const backWall = babylon.MeshBuilder.CreateBox('f455BackShield', { width, depth: wallThickness, height: wallHeight }, babylonScene);
+        backWall.position.set(0, wallHeight / 2, -depth / 2);
+        backWall.material = concrete;
+
+        const leftWall = babylon.MeshBuilder.CreateBox('f455LeftShield', { width: wallThickness, depth, height: wallHeight }, babylonScene);
+        leftWall.position.set(-width / 2, wallHeight / 2, 0);
+        leftWall.material = concrete;
+
+        const rightWall = babylon.MeshBuilder.CreateBox('f455RightShield', { width: wallThickness, depth, height: wallHeight }, babylonScene);
+        rightWall.position.set(width / 2, wallHeight / 2, 0);
+        rightWall.material = concrete;
+
+        const primaryBand = babylon.MeshBuilder.CreateBox('f455PrimaryBarrierBand', { width: width * 0.74, depth: 0.06, height: 0.16 }, babylonScene);
+        primaryBand.position.set(0, wallHeight + 0.08, -depth / 2 + wallThickness / 2);
+        const primaryMaterial = new babylon.StandardMaterial('f455PrimaryBandMat', babylonScene);
+        primaryMaterial.diffuseColor = new babylon.Color3(0.91, 0.23, 0.22);
+        primaryBand.material = primaryMaterial;
+
+        const zone = babylon.MeshBuilder.CreateGround('f455ControlledArea', { width: width * 0.55, height: depth * 0.38 }, babylonScene);
+        zone.position.set(0, 0.01, depth * 0.18);
+        zone.material = controlZone;
+
+        const couch = babylon.MeshBuilder.CreateBox('f455TreatmentCouch', { width: 1.15, depth: 2.1, height: 0.22 }, babylonScene);
+        couch.position.set(0, 0.72, 0.05);
+        couch.material = equipment;
+
+        const gantry = babylon.MeshBuilder.CreateTorus('f455MedicalGantry', { diameter: 1.55, thickness: 0.22 }, babylonScene);
+        gantry.position.set(0, 1.45, -0.9);
+        gantry.rotation.x = Math.PI / 2;
+        gantry.material = equipment;
+
+        const sourceCone = babylon.MeshBuilder.CreateCylinder('f455BeamGuide', {
+          diameterTop: 0.08,
+          diameterBottom: 0.92,
+          height: 2.25,
+          tessellation: 32,
+        }, babylonScene);
+        sourceCone.position.set(0, 1.25, -0.1);
+        sourceCone.rotation.x = Math.PI / 2;
+        const beamMaterial = new babylon.StandardMaterial('f455BeamMaterial', babylonScene);
+        beamMaterial.diffuseColor = new babylon.Color3(0.15, 0.45, 1);
+        beamMaterial.alpha = 0.22;
+        sourceCone.material = beamMaterial;
+
+        engine.runRenderLoop(() => {
+          babylonScene?.render();
+        });
+        resizeHandler = () => engine?.resize();
+        window.addEventListener('resize', resizeHandler);
+        setSmokeStatus('ready', `Babylon runtime activo: ${scene.walls.length} barreras, ${scene.equipment.length} equipos.`);
+      } catch (error) {
+        setSmokeStatus('failed', error instanceof Error ? error.message : 'No fue posible cargar Babylon runtime.');
+      }
+    })();
+
+    return () => {
+      disposed = true;
+      if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+      babylonScene?.dispose();
+      engine?.dispose();
+    };
+  }, [enabled, onStatusChange, scene]);
+
+  return (
+    <div className="space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2" data-testid="f455-babylon-runtime-smoke">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <div className="text-[11px] font-semibold uppercase text-cyan-950">F455 Babylon runtime</div>
+          <div className="text-[9px] text-cyan-900">Smoke visual real con PBR, cutaway y fallback Three/R3F.</div>
+        </div>
+        <Badge variant="outline" className="bg-white text-[9px]" data-testid="f455-babylon-runtime-status">
+          {status}
+        </Badge>
+      </div>
+      <div className="relative h-40 overflow-hidden rounded border border-cyan-100 bg-slate-950">
+        <canvas ref={canvasRef} className="h-full w-full" data-testid="f455-babylon-runtime-canvas" />
+        {status !== 'ready' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 px-3 text-center text-[10px] text-cyan-50">
+            {message}
+          </div>
+        )}
+      </div>
+      <div className={`text-[9px] leading-relaxed ${status === 'failed' ? 'text-red-700' : 'text-cyan-900'}`}>
+        {message}
+      </div>
+    </div>
+  );
+}
+
 export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan }: Props) {
   const [preset, setPreset] = useState<MedicalRoomPreset>('linac');
   const [mode, setMode] = useState<Medical3DMode>('presentation');
@@ -1047,6 +1240,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [activeStationId, setActiveStationId] = useState<string | null>(null);
   const [inspectionTarget, setInspectionTarget] = useState<InspectionTarget | null>(null);
   const [visualEvidenceCaptures, setVisualEvidenceCaptures] = useState<VisualEvidenceCapture[]>([]);
+  const [babylonSmokeStatus, setBabylonSmokeStatus] = useState<BabylonSmokeStatus>('idle');
   const [importedFloorPlan, setImportedFloorPlan] = useState<FloorPlan | null>(null);
   const [cadSummary, setCadSummary] = useState<CadBimImportSummary | null>(null);
   const [cadError, setCadError] = useState<string | null>(null);
@@ -1059,6 +1253,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
+  const babylonSmokeContract = useMemo(() => buildBabylonRuntimeSmokeContract(scene), [scene]);
   const f408UnitySceneExport = useMemo(() => buildF408UnitySceneExport(activeFloorPlan, preset), [activeFloorPlan, preset]);
   const f408UnityValidationWarnings = useMemo(() => validateF408UnitySceneExport(f408UnitySceneExport), [f408UnitySceneExport]);
   const photorealAdvancedProfile = useMemo(() => buildPhotorealAdvancedProfile({
@@ -1076,9 +1271,11 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     },
     {
       id: 'babylon',
-      label: 'Babylon no instalado',
-      status: 'gateado',
-      detail: 'Adapter preparado; activar solo con @babylonjs/core/loaders instalados, flag y smoke visual.',
+      label: 'Babylon runtime',
+      status: babylonSmokeStatus === 'ready' ? 'runtime smoke' : 'instalado',
+      detail: babylonSmokeStatus === 'ready'
+        ? 'Dependencias locales cargadas; preview PBR/cutaway validado sin sustituir Three/R3F.'
+        : 'Dependencias locales presentes; ejecutar smoke visual F455 para habilitar paridad post-beta.',
     },
     {
       id: 'unity',
@@ -1086,7 +1283,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
       status: unityLaunchPacket.viewer.url ? 'configurada' : 'pendiente',
       detail: unityLaunchPacket.viewer.url || 'Falta VITE_MEDICAL_3D_UNITY_WEBGL_URL para probar visor externo real.',
     },
-  ]), [unityLaunchPacket.viewer.url]);
+  ]), [babylonSmokeStatus, unityLaunchPacket.viewer.url]);
   const f367F370ReleaseIntegration = useMemo(() => buildF367F370ReleaseIntegration(activeFloorPlan), [activeFloorPlan]);
   const sceneHash = useMemo(
     () => stableSceneHash({
@@ -1634,7 +1831,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                   <div key={row.id} className="rounded border border-emerald-100 bg-white/85 px-2 py-1.5 text-[9px] text-slate-600">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-semibold text-emerald-950">{row.label}</span>
-                      <span className={row.status === 'activo' || row.status === 'configurada' ? 'text-emerald-700' : 'text-amber-700'}>{row.status}</span>
+                      <span className={row.status === 'activo' || row.status === 'configurada' || row.status === 'runtime smoke' ? 'text-emerald-700' : 'text-amber-700'}>{row.status}</span>
                     </div>
                     <div className="mt-0.5 leading-relaxed">{row.detail}</div>
                   </div>
@@ -1662,6 +1859,11 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 <div>{renderStrategy.role}</div>
                 <div className="mt-1 text-amber-700">{renderStrategy.activationGate}</div>
               </div>
+              <BabylonRuntimeSmokePreview
+                scene={scene}
+                enabled={open && hasGeometry}
+                onStatusChange={setBabylonSmokeStatus}
+              />
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportEngineHandoff}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Exportar handoff 3D
               </Button>
@@ -1829,10 +2031,14 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
             <div className="space-y-2 rounded border border-violet-100 bg-violet-50 p-2" data-testid="f363-babylon-install-options">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-semibold text-violet-900 uppercase">Babylon: reparacion/instalacion</span>
-                <Badge variant="outline" className="bg-white text-[9px]">{babylonContract.readiness}</Badge>
+                <Badge variant="outline" className="bg-white text-[9px]">{babylonSmokeStatus === 'ready' ? 'runtime-smoke-ready' : babylonContract.readiness}</Badge>
               </div>
               <div className="text-[10px] leading-relaxed text-violet-900">
-                Mantener Three/R3F como fallback. Activar Babylon solo con paquetes instalados, flags y smoke visual.
+                Dependencias locales verificadas para F455. Mantener Three/R3F como fallback hasta completar paridad visual, medicion de rendimiento y QA de export.
+              </div>
+              <div className="rounded border border-violet-100 bg-white/85 p-2 text-[9px] text-violet-900">
+                <div className="font-semibold">{babylonSmokeContract.status}</div>
+                <div>{babylonSmokeContract.visualElements.join(' | ')}</div>
               </div>
               <div className="space-y-1">
                 {babylonInstallOptions.map((option) => (

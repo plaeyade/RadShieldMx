@@ -1,5 +1,25 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F455 - Babylon runtime smoke visual
+
+F455 agrega una prueba visual real de Babylon dentro de **Medical 3D**. No reemplaza el motor principal: Three/R3F sigue siendo la escena productiva, y Babylon aparece como una tarjeta de smoke aislada para validar que el runtime local carga correctamente.
+
+Como revisarlo:
+
+1. Abra la app y entre al workspace.
+2. Use el acceso **3D** o el dialogo **Medical 3D**.
+3. En el panel lateral, revise la tarjeta **F455 Babylon runtime**.
+4. El estado debe pasar a `ready` cuando el canvas Babylon cargue.
+5. La vista muestra un corte de bunker con concreto PBR, barreras, equipo medico, guia de haz y zona controlada.
+
+Interpretacion:
+
+- Si aparece `ready`, Babylon esta instalado y el smoke visual funciona.
+- Si aparece `loading`, espere unos segundos; el runtime se carga bajo demanda.
+- Si aparece `failed`, Three/R3F sigue funcionando y debe revisarse la instalacion local de `@babylonjs/core`, `@babylonjs/loaders`, `@babylonjs/materials` y `@babylonjs/gui`.
+
+Uso recomendado: utilizar Babylon para pruebas visuales post-beta, escenas PBR mas robustas, posible WebGPU/WebXR y recorridos futuros. No usarlo todavia para calculo, firma normativa ni reemplazo del export de evidencia hasta completar QA de paridad.
+
 ## Addendum F454 - Cierre beta y motores pesados post-beta
 
 F454 cierra la beta actual sin activar dependencias pesadas dentro del flujo principal. La regla es simple: la app debe seguir abriendo rapido, con canvas/sidebar/menus estables, y los motores pesados entran solo cuando pasen su smoke dedicado.
