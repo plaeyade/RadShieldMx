@@ -1,5 +1,22 @@
 # RadShield-MX - Manual de Versiones
 
+# F510 (2026-08-02) - TVL PET/DX suplementarios en DB live
+
+- F510 agrega `src/lib/f510DiagnosticPetTvlPromotion.ts`.
+- F510 agrega `scripts/f510-diagnostic-pet-tvl-promotion.mjs`.
+- Objetivo: resolver las dos revisiones que quedaron en F508-F509 para PET/NM 511 keV y CT/RX diagnostico 120 kVp.
+- Valores promovidos:
+  - `lead-cast / tvl-primary / 511keV = 11.8 mm`.
+  - `lead-cast / tvl-diagnostic / 120kVp = 0.27 mm`.
+- Ambos valores quedan como `approved-reference` y `allowed_use=calculation`, ligados a `src-norm-lead-cast` y a su page/hash ya sembrado.
+- Flags requeridos para escritura live: `F510_DB_READBACK=1`, `F510_SEED_LIVE=1`, `F510_CONFIRM_EXACT_VALUES=1`, `F510_CONFIRM_RESTORE_PROBE=1` y `DATABASE_URL`.
+- Politica: insertar solo filas faltantes; no sobrescribir valores existentes; rollback transaccional si hay conflicto.
+- Artefactos: `outputs/f510_diagnostic_pet_tvl_promotion`.
+- Comandos:
+  - `npm run prepare:f510:diagnostic-pet-tvl`
+  - `npm run test:f510:diagnostic-pet-tvl`
+- Verificacion posterior: repetir F508-F509 con `F508_DB_READBACK=1` y confirmar que PET 511 keV y DX 120 kVp pasan.
+
 # F508-F509 (2026-08-02) - Post-seed readback y QA DB-backed
 
 - F508-F509 agrega `src/lib/f508F509PostSeedQa.ts`.

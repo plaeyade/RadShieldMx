@@ -34,6 +34,8 @@
     "test:f506-f507:regulatory-seed-readback": "node scripts/check-f506-f507-regulatory-seed-readback-contracts.mjs",
     "prepare:f508-f509:post-seed-qa": "node scripts/f508-f509-post-seed-qa.mjs",
     "test:f508-f509:post-seed-qa": "node scripts/check-f508-f509-post-seed-qa-contracts.mjs",
+    "prepare:f510:diagnostic-pet-tvl": "node scripts/f510-diagnostic-pet-tvl-promotion.mjs",
+    "test:f510:diagnostic-pet-tvl": "node scripts/check-f510-diagnostic-pet-tvl-promotion-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

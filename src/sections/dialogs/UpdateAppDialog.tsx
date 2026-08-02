@@ -84,6 +84,7 @@ import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep'
 import { buildF505RegulatoryMaterialsSchemaApply } from '@/lib/f505RegulatoryMaterialsSchemaApply';
 import { buildF506F507RegulatorySeedReadback } from '@/lib/f506F507RegulatorySeedReadback';
 import { buildF508F509PostSeedQa } from '@/lib/f508F509PostSeedQa';
+import { buildF510DiagnosticPetTvlPromotion } from '@/lib/f510DiagnosticPetTvlPromotion';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -101,6 +102,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F510 PET/DX TVL exactos', current: 'supplemental DB seed gate', latest: 'PET 511 keV + diagnostico 120 kVp lead values for live QA', status: 'current', description: `Promueve ${buildF510DiagnosticPetTvlPromotion().supplementalValues.length} valores suplementarios approved-reference para ${buildF510DiagnosticPetTvlPromotion().dbPolicy.requiredMaterialId}: PET 511 keV y DX 120 kVp. Requiere ${buildF510DiagnosticPetTvlPromotion().requiredFlags.join(', ')} y despues repite F508-F509 para que ambos casos pasen con page/hash.` },
   { name: 'F508-F509 post-seed QA DB', current: 'DB-backed readback + QA gate', latest: 'seeded material values joined with sources and NCRP/IAEA/UAQ cases', status: 'current', description: `Lee ${buildF508F509PostSeedQa().dbReadback.targetTables.length} tablas live con ${buildF508F509PostSeedQa().dbReadback.requiredFlag}, valida conteos minimos y ejecuta QA DB-backed. Casos diagnostico/PET/ciclotron quedan en review si falta valor exacto versionado.` },
   { name: 'F506-F507 trazabilidad/seed regulatorio', current: 'readback + approved-only seed gate', latest: 'document_chunks page/hash resolution + transactional approved-reference seed', status: 'current', description: `Resuelve page_ref/hash contra ${buildF506F507RegulatorySeedReadback().sourceReadback.targetTable} con ${buildF506F507RegulatorySeedReadback().sourceReadback.requiredFlag}; F507 solo inserta filas aprobadas con ${buildF506F507RegulatorySeedReadback().controlledSeed.requiredFlags.join(', ')} y rollback transaccional.` },
   { name: 'F505 schema DB regulatoria/materiales', current: 'apply gate ready', latest: 'safe CREATE TABLE IF NOT EXISTS with restore-probe/readback guard', status: 'current', description: `Aplica de forma controlada el schema F501 solo con flags explicitos: ${buildF505RegulatoryMaterialsSchemaApply().requiredFlags.join(', ')}. Bloquea INSERT/DELETE/DROP/ALTER y repite readback para ${buildF505RegulatoryMaterialsSchemaApply().requiredTables.length} tablas requeridas.` },

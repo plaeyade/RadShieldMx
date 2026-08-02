@@ -1,5 +1,62 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F510 - TVL PET/DX suplementarios en DB live
+
+F510 cierra las dos revisiones pendientes de F508-F509 para que el QA DB-backed use valores reales de `material_value_versions` tambien en PET/NM y diagnostico.
+
+Valores promovidos:
+
+```text
+lead-cast / tvl-primary / 511keV  = 11.8 mm
+lead-cast / tvl-diagnostic / 120kVp = 0.27 mm
+```
+
+Uso normal en dry-run:
+
+```text
+npm run prepare:f510:diagnostic-pet-tvl
+npm run test:f510:diagnostic-pet-tvl
+```
+
+Seed live controlado:
+
+```text
+$env:F510_DB_READBACK="1"
+$env:F510_SEED_LIVE="1"
+$env:F510_CONFIRM_EXACT_VALUES="1"
+$env:F510_CONFIRM_RESTORE_PROBE="1"
+npm run prepare:f510:diagnostic-pet-tvl
+Remove-Item Env:\F510_DB_READBACK
+Remove-Item Env:\F510_SEED_LIVE
+Remove-Item Env:\F510_CONFIRM_EXACT_VALUES
+Remove-Item Env:\F510_CONFIRM_RESTORE_PROBE
+```
+
+Despues de F510:
+
+```text
+$env:F508_DB_READBACK="1"
+npm run prepare:f508-f509:post-seed-qa
+Remove-Item Env:\F508_DB_READBACK
+```
+
+Resultado esperado:
+
+1. `material_value_versions` aumenta de 106 a 108 si las filas no existian.
+2. PET 511 keV pasa de `review` a `pass`.
+3. CT/RX diagnostico 120 kVp pasa de `review` a `pass`.
+4. El resumen queda en `outputs/f508_f509_post_seed_qa/f508_f509_summary.md`.
+
+Artefactos F510:
+
+```text
+outputs/f510_diagnostic_pet_tvl_promotion/
+  f510_manifest.json
+  f510_summary.md
+  f510_supplemental_value_candidates.jsonl
+  f510_live_insert_report.csv
+```
+
 ## Addendum F508-F509 - QA post-seed con valores reales DB
 
 F508-F509 verifica que el seed aprobado de materiales pueda alimentar el motor de calculo de forma trazable.

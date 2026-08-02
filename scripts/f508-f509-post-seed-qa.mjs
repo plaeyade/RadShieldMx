@@ -286,7 +286,7 @@ const manifest = {
   blockers,
   nextPhase: status === 'post-seed-qa-blocked'
     ? 'Resolve F508 blockers before release QA.'
-    : 'F510 add exact diagnostic/PET/cyclotron source-specific values and rerun F509.',
+    : 'F511 expand source-specific PET/DX/cyclotron values from canonical PDF extraction when more energies/materials are approved.',
 };
 
 writeCsv('f508_seeded_value_readback.csv', values.map((row) => ({

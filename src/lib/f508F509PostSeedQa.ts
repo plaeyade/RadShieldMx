@@ -48,6 +48,6 @@ export function buildF508F509PostSeedQa(): F508F509PostSeedQa {
       'f508_seeded_value_readback.csv',
       'f509_db_backed_qa_cases.jsonl',
     ],
-    nextPhase: 'F510 promote exact diagnostic/PET/cyclotron values only after page/hash review, then rerun F509.',
+    nextPhase: 'F511 expand source-specific PET/DX/cyclotron values from canonical PDF extraction when more energies/materials are approved.',
   };
 }

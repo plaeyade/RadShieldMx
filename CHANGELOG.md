@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F510 (2026-08-02) - Promocion TVL PET/DX a DB live
+
+- Agrega `src/lib/f510DiagnosticPetTvlPromotion.ts`.
+- Agrega `scripts/f510-diagnostic-pet-tvl-promotion.mjs` para promover dos valores exactos faltantes en `material_value_versions`: `lead-cast/tvl-primary/511keV = 11.8 mm` y `lead-cast/tvl-diagnostic/120kVp = 0.27 mm`.
+- El seed live exige `F510_DB_READBACK=1`, `F510_SEED_LIVE=1`, `F510_CONFIRM_EXACT_VALUES=1`, `F510_CONFIRM_RESTORE_PROBE=1` y `DATABASE_URL`.
+- La escritura es transaccional e idempotente: inserta solo filas faltantes, no pisa filas existentes y hace rollback si detecta conflicto o falla.
+- Produce `outputs/f510_diagnostic_pet_tvl_promotion/f510_manifest.json`, `f510_summary.md`, `f510_supplemental_value_candidates.jsonl` y `f510_live_insert_report.csv`.
+- Despues de F510 se repite `npm run prepare:f508-f509:post-seed-qa` con `F508_DB_READBACK=1` para confirmar que PET 511 keV y DX 120 kVp pasan el QA DB-backed.
+- Comandos: `npm run prepare:f510:diagnostic-pet-tvl` y `npm run test:f510:diagnostic-pet-tvl`.
+
 # F508-F509 (2026-08-02) - Post-seed readback y QA DB-backed
 
 - Agrega `src/lib/f508F509PostSeedQa.ts`.
