@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F505 (2026-08-01) - Aplicacion controlada de schema DB regulatoria/materiales
+
+- Agrega `src/lib/f505RegulatoryMaterialsSchemaApply.ts` y `scripts/f505-regulatory-materials-schema-apply.mjs`.
+- El script valida `db/f501_f504_regulatory_materials_schema.sql`, bloquea keywords destructivos y exige `F505_APPLY_SCHEMA=1`, `F505_CONFIRM_RESTORE_PROBE=1` y `DATABASE_URL` para live apply.
+- Solo permite `CREATE TABLE IF NOT EXISTS`; no hace seed, inserts, deletes, drops ni alters.
+- Produce `outputs/f505_regulatory_materials_schema_apply/f505_schema_apply_manifest.json` y `f505_schema_apply.md`.
+- Siguiente paso: repetir F500 con `F500_DB_READBACK=1` y preparar F506/F507 seed transaccional.
+
 # F501-F504 (2026-08-01) - DB schema y assets pesados reales
 
 - **F501:** agrega `db/f501_f504_regulatory_materials_schema.sql` con schema revisable para `regulatory_sources`, `material_constants`, `material_value_versions` y `material_source_links`.

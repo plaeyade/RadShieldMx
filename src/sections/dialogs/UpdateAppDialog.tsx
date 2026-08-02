@@ -81,6 +81,7 @@ import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMate
 import { buildF499RegulatoryMaterialsSeedDryRun } from '@/lib/f499RegulatoryMaterialsSeedDryRun';
 import { buildF500RegulatoryMaterialsLiveGate } from '@/lib/f500RegulatoryMaterialsLiveGate';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
+import { buildF505RegulatoryMaterialsSchemaApply } from '@/lib/f505RegulatoryMaterialsSchemaApply';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -98,6 +99,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F505 schema DB regulatoria/materiales', current: 'apply gate ready', latest: 'safe CREATE TABLE IF NOT EXISTS with restore-probe/readback guard', status: 'current', description: `Aplica de forma controlada el schema F501 solo con flags explicitos: ${buildF505RegulatoryMaterialsSchemaApply().requiredFlags.join(', ')}. Bloquea INSERT/DELETE/DROP/ALTER y repite readback para ${buildF505RegulatoryMaterialsSchemaApply().requiredTables.length} tablas requeridas.` },
   { name: 'F501-F504 DB/assets pesados', current: 'schema + asset intake ready', latest: 'SQL draft + photoreal folders + Unity WebGL live-build gate', status: 'current', description: `Prepara schema DB y rutas de assets pesados sin seed live: ${buildF501F504HeavyAssetsDbPrep().database.requiredTables.length} tablas requeridas, asset root ${buildF501F504HeavyAssetsDbPrep().heavyAssets.photorealRoot} y Unity root ${buildF501F504HeavyAssetsDbPrep().heavyAssets.unityRoot}. Unity real sigue pendiente hasta copiar index.html, Build/*.loader/framework/data/wasm y TemplateData.` },
   { name: 'F500 live gate regulatorio/materiales', current: 'readback gate ready', latest: 'F499 integrity + restore probe + optional DB readback, no live writes', status: 'current', description: `Preflight para pasar de F499 a seed live controlado: ${buildF500RegulatoryMaterialsLiveGate().requiredTables.length} tablas requeridas, ${buildF500RegulatoryMaterialsLiveGate().f499Counts.reviewRequiredValueVersions} valores aun en revision y escritura live bloqueada en F500. Ejecutar prepare:f500 con F500_DB_READBACK=1 cuando DATABASE_URL apunte a la DB correcta.` },
   { name: 'F499 seed dry-run regulatorio/materiales', current: 'dry-run artifacts ready', latest: 'JSONL + CSV + SQL draft + manifest, live DB write blocked', status: 'current', description: `Genera seed dry-run para regulatory_sources, material_constants, material_value_versions y material_source_links sin escribir DB live. Conteo actual: ${buildF499RegulatoryMaterialsSeedDryRun().counts.materialValueVersions} versiones de valores y ${buildF499RegulatoryMaterialsSeedDryRun().counts.materialSourceLinks} links. F499_SEED_LIVE=1 aborta; F500 hara readback live solo con aprobacion, restore probe y revision de duplicados.` },

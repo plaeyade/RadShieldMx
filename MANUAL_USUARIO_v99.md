@@ -1,5 +1,43 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F505 - Aplicacion controlada del schema DB
+
+F505 aplica el schema regulatorio/materiales solo si se cumplen las compuertas de seguridad. Por defecto corre en dry-run.
+
+Dry-run:
+
+```text
+npm run prepare:f505:regulatory-materials-schema
+npm run test:f505:regulatory-materials-schema
+```
+
+Live controlado en PowerShell:
+
+```text
+$env:F505_APPLY_SCHEMA="1"
+$env:F505_CONFIRM_RESTORE_PROBE="1"
+npm run prepare:f505:regulatory-materials-schema
+Remove-Item Env:\F505_APPLY_SCHEMA
+Remove-Item Env:\F505_CONFIRM_RESTORE_PROBE
+```
+
+Reglas de seguridad:
+
+1. Requiere `DATABASE_URL`.
+2. Requiere restore probe F153 listo.
+3. Solo permite `CREATE TABLE IF NOT EXISTS`.
+4. Bloquea `INSERT`, `DELETE`, `DROP`, `TRUNCATE`, `ALTER`, `UPDATE` y `REPLACE`.
+5. No hace seed ni cambia valores regulatorios.
+6. Despues de aplicar, repetir F500 con `F500_DB_READBACK=1`.
+
+Artefactos:
+
+```text
+outputs/f505_regulatory_materials_schema_apply/
+  f505_schema_apply_manifest.json
+  f505_schema_apply.md
+```
+
 ## Addendum F501-F504 - DB schema y assets pesados reales
 
 F501-F504 prepara la entrada productiva de schema DB y assets pesados, pero no ejecuta seed live ni inventa archivos Unity/HDRI/PBR.

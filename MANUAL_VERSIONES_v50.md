@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F505 (2026-08-01) - Aplicacion controlada de schema DB regulatoria/materiales
+
+- F505 agrega `src/lib/f505RegulatoryMaterialsSchemaApply.ts`.
+- Agrega `scripts/f505-regulatory-materials-schema-apply.mjs`.
+- Modo dry-run: `npm run prepare:f505:regulatory-materials-schema`.
+- Modo live controlado: requiere `F505_APPLY_SCHEMA=1`, `F505_CONFIRM_RESTORE_PROBE=1` y `DATABASE_URL`.
+- El script solo permite `CREATE TABLE IF NOT EXISTS`; bloquea `INSERT`, `DELETE`, `DROP`, `TRUNCATE`, `ALTER`, `UPDATE` y `REPLACE`.
+- Comandos: `npm run prepare:f505:regulatory-materials-schema` y `npm run test:f505:regulatory-materials-schema`.
+- Despues de live apply se debe correr F500 con `F500_DB_READBACK=1`.
+
 # F501-F504 (2026-08-01) - DB schema y assets pesados reales
 
 - F501-F504 agrega `src/lib/f501F504HeavyAssetsDbPrep.ts`.
