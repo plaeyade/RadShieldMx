@@ -7,6 +7,7 @@ export type CanvasEventModeV2 =
   | 'lasso'
   | 'pan'
   | 'zoom'
+  | 'tool'
   | 'delete'
   | 'undo';
 
@@ -35,6 +36,7 @@ export interface CanvasEventActionV2 {
     | 'snap-preview'
     | 'pan-view'
     | 'zoom-view'
+    | 'activate-tool'
     | 'delete-selection'
     | 'undo-last'
     | 'ignore';
@@ -56,7 +58,7 @@ export function getCanvasEventControllerV2Status(): CanvasEventControllerV2Statu
     enabled: isEnabled('canvasEventControllerV2'),
     gatedBy: ['VITE_CANVAS_HIGH_RISK_CAD', 'VITE_CANVAS_EVENT_CONTROLLER_V2'],
     safeDefault: 'route-to-stable-useCanvas',
-    coveredModes: ['select', 'drag', 'snap', 'lasso', 'pan', 'zoom', 'delete', 'undo'],
+    coveredModes: ['select', 'drag', 'snap', 'lasso', 'pan', 'zoom', 'tool', 'delete', 'undo'],
     requiredE2E: [
       'canvas remains nonblank',
       'wall drag preserves geometry',
@@ -96,6 +98,9 @@ export function routeCanvasEventV2(event: CanvasPointerEventV2): CanvasEventActi
   }
   if (event.type === 'wheel') {
     return { action: 'zoom-view', reason: 'wheel routed to zoom', requiresE2E: true };
+  }
+  if (event.mode === 'tool' && event.type === 'pointerdown') {
+    return { action: 'activate-tool', reason: 'canvas UI tool command routed through event harness', requiresE2E: true };
   }
   if (event.mode === 'pan') {
     return { action: 'pan-view', reason: 'pan mode pointer route', requiresE2E: true };

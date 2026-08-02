@@ -61,6 +61,8 @@ test('F446-F448 validates canvas surfaces, right click, quick actions and nonblo
   await page.getByTestId('canvas-context-action-measure').click();
   await expect(page.getByTestId('canvas-context-menu')).toBeHidden();
   await expect(page.getByTestId('f98-active-canvas-tool-indicator')).toContainText(/medir|cota|measure/i);
+  await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('activate-tool');
+  await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'activate-tool');
 
   const screenshot = path.join(outputDir, '01_canvas_strong_qa.png');
   await page.screenshot({ path: screenshot, fullPage: false });

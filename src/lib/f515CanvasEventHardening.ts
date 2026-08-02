@@ -61,6 +61,13 @@ export const F515_CANVAS_EVENT_SCENARIOS: F515CanvasEventScenario[] = [
     e2eName: 'wheel zoom does not move panels',
   },
   {
+    id: 'f516c-context-tool-routes-to-harness',
+    event: { type: 'pointerdown', mode: 'tool', x: 120, y: 160 },
+    expectedAction: 'activate-tool',
+    stableFallbackRequired: false,
+    e2eName: 'context menu tool action activates stable tool through harness',
+  },
+  {
     id: 'f515-lasso-start-update-finish',
     event: { type: 'pointerdown', mode: 'lasso', x: 20, y: 30 },
     expectedAction: 'start-selection',
@@ -128,6 +135,9 @@ export function routeCanvasEventV2WithGate(event: CanvasPointerEventV2, forceEna
   if (event.type === 'wheel') {
     return { action: 'zoom-view', reason: 'wheel routed to zoom', requiresE2E: true };
   }
+  if (event.mode === 'tool' && event.type === 'pointerdown') {
+    return { action: 'activate-tool', reason: 'canvas UI tool command routed through event harness', requiresE2E: true };
+  }
   if (event.mode === 'pan') {
     return { action: 'pan-view', reason: 'pan mode pointer route', requiresE2E: true };
   }
@@ -183,6 +193,7 @@ export function buildF515CanvasEventHardening(): F515CanvasEventHardeningContrac
     requiredNextE2E: [
       'canvas nonblank after app load',
       'right-click/context surface does not block pointer capture',
+      'right-click/context tool command routes through F516c harness and keeps stable tool activation',
       'quick actions still dispatch their dialog/store action',
       'drag preview does not commit geometry before pointerup',
       'lasso selection has escape/cancel behavior',
