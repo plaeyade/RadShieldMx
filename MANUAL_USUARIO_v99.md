@@ -1,5 +1,78 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F501-F504 - DB schema y assets pesados reales
+
+F501-F504 prepara la entrada productiva de schema DB y assets pesados, pero no ejecuta seed live ni inventa archivos Unity/HDRI/PBR.
+
+Comandos:
+
+```text
+npm run prepare:f501-f504:heavy-assets-db
+npm run test:f501-f504:heavy-assets-db
+```
+
+DB:
+
+```text
+db/f501_f504_regulatory_materials_schema.sql
+```
+
+Ese SQL crea, si no existen:
+
+```text
+regulatory_sources
+material_constants
+material_value_versions
+material_source_links
+```
+
+Orden seguro:
+
+1. Revisar SQL F501.
+2. Aplicarlo a MySQL con respaldo/restore probe vigente.
+3. Repetir F500 con `F500_DB_READBACK=1`.
+4. Solo si F500 pasa, preparar F501 seed live transaccional.
+
+Assets pesados:
+
+```text
+public/medical3d/photoreal/
+  ASSET_MANIFEST_F501_F504.json
+  hdri/clinical_softbox.hdr
+  textures/hd-concrete/albedo.webp
+  textures/hd-concrete/normal.webp
+  textures/hd-concrete/roughness.webp
+  textures/hd-concrete/ao.webp
+  decals/radiation-warning.webp
+  decals/penetration-tag.webp
+```
+
+Unity WebGL real:
+
+```text
+public/unity/radshield-medical-3d/
+  index.html
+  Build/*.loader.js
+  Build/*.framework.js
+  Build/*.data
+  Build/*.wasm
+  TemplateData/*
+```
+
+Para activar carpeta local:
+
+```text
+VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true
+```
+
+Para build hospedado:
+
+```text
+VITE_MEDICAL_3D_UNITY_WEBGL_URL=https://servidor/unity/index.html
+```
+
+Qué falta del build Unity WebGL real al cierre de F501-F504: todavía no se copiaron `index.html`, carpeta `Build` con loader/framework/data/wasm ni `TemplateData`. RadShield ya tiene puente, handoff y gate; falta exportar desde Unity y copiar esos archivos.
+
 ## Addendum F500 - Live gate regulatorio/materiales
 
 F500 revisa si el paquete F499 ya puede pasar a seed live controlado. No escribe en la base de datos.

@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F501-F504 (2026-08-01) - DB schema y assets pesados reales
+
+- F501-F504 agrega `src/lib/f501F504HeavyAssetsDbPrep.ts`.
+- F501 deja schema SQL revisable en `db/f501_f504_regulatory_materials_schema.sql`.
+- F502 prepara intake de assets en `public/medical3d/photoreal` con `ASSET_MANIFEST_F501_F504.json`, `hdri/`, `textures/` y `decals/`.
+- F503 documenta el build Unity WebGL real esperado en `public/unity/radshield-medical-3d/README_UNITY_WEBGL_BUILD.md`.
+- F504 agrega auditoria `scripts/f501-f504-heavy-assets-db-prep.mjs`.
+- Comandos: `npm run prepare:f501-f504:heavy-assets-db` y `npm run test:f501-f504:heavy-assets-db`.
+- F501-F504 no aplica migracion live ni hace seed. Primero aplicar SQL revisado, repetir F500 con `F500_DB_READBACK=1`, copiar assets reales y correr build/smoke.
+- Unity WebGL real requiere `index.html`, `Build/*.loader.js`, `Build/*.framework.js`, `Build/*.data`, `Build/*.wasm`, `TemplateData/*` y `VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true` o URL externa.
+
 # F500 (2026-08-01) - Live gate DB regulatoria/materiales
 
 - F500 agrega `src/lib/f500RegulatoryMaterialsLiveGate.ts`.

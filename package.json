@@ -26,6 +26,8 @@
     "test:f499:regulatory-materials-seed": "node scripts/check-f499-regulatory-materials-seed-dry-run-contracts.mjs",
     "prepare:f500:regulatory-materials-live-gate": "node scripts/f500-regulatory-materials-live-gate.mjs",
     "test:f500:regulatory-materials-live-gate": "node scripts/check-f500-regulatory-materials-live-gate-contracts.mjs",
+    "prepare:f501-f504:heavy-assets-db": "node scripts/f501-f504-heavy-assets-db-prep.mjs",
+    "test:f501-f504:heavy-assets-db": "node scripts/check-f501-f504-heavy-assets-db-prep-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

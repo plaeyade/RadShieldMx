@@ -1,0 +1,33 @@
+{
+  "schema": "radshield-mx.medical3d.photoreal-assets.f501-f504.v1",
+  "assetRoot": "public/medical3d/photoreal",
+  "status": "intake-ready-assets-missing",
+  "requiredFolders": [
+    "hdri",
+    "textures",
+    "decals"
+  ],
+  "recommendedAssets": [
+    "hdri/clinical_softbox.hdr",
+    "textures/hd-concrete/albedo.webp",
+    "textures/hd-concrete/normal.webp",
+    "textures/hd-concrete/roughness.webp",
+    "textures/hd-concrete/ao.webp",
+    "textures/lead-sheet/albedo.webp",
+    "textures/lead-sheet/roughness.webp",
+    "textures/lead-sheet/metalness.webp",
+    "textures/tm-nipoll-block/albedo.webp",
+    "textures/tm-nipoll-block/normal.webp",
+    "textures/tm-nipoll-block/roughness.webp",
+    "decals/radiation-warning.webp",
+    "decals/penetration-tag.webp",
+    "decals/wall-role-label.webp",
+    "decals/equipment-footprint.webp"
+  ],
+  "rules": [
+    "Assets are visual evidence only.",
+    "TVL, density, structural load and costs remain governed by calculation/RAG/material DB.",
+    "Load heavy assets lazily and keep Three/R3F fallback enabled.",
+    "Run F501-F504 audit and build after copying assets."
+  ]
+}
