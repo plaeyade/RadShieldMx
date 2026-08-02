@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F469 (2026-08-01) - Visual beta publicable
+
+- Genera paquete estatico publicable desde `dist/` con hash, commit, checklist post-deploy y backlog post-beta.
+- Artefactos: `outputs/f469_visual_beta_publication_close/f469_visual_beta_publication_close.json`, `radshield-mx-f469-visual-beta-publicable.zip`, `f469_post_deploy_checklist.csv` y `f469_post_beta_backlog.md`.
+- Uso: `npm run prepare:f469:visual-beta-publication` y `npm run test:f469:visual-beta-publication`.
+- Claims bloqueados: calculo clinico certificado, Babylon profundo, Unity WebGL real embebido, DB regulatoria completa y memoria firmable sin QA/revision.
+
 # F464-F468 (2026-08-01) - RC visual beta 3D
 
 - F464: QA visual 3D completo dentro de Medical 3D. Valida Three/R3F, Babylon runtime/paridad, recorrido WASD, DB PBR y Unity handoff.

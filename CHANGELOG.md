@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F469 (2026-08-01) - Visual beta publicable
+
+- Cierra la beta visual como paquete estatico publicable: ZIP de `dist`, manifiesto con hash, checklist post-deploy y backlog post-beta.
+- Define claims permitidos: frontend estatico, Medical 3D visual, Babylon parity card, Unity handoff, DB PBR visual y evidencia para Memoria IA/PDF.
+- Bloquea claims no listos: calculo clinico certificado, Babylon profundo como renderer principal, Unity embebido real, DB regulatoria completa y memoria firmable.
+- Artefactos: `outputs/f469_visual_beta_publication_close/radshield-mx-f469-visual-beta-publicable.zip`, manifiesto JSON, checklist CSV y backlog MD.
+
 # F464-F468 (2026-08-01) - RC visual beta 3D
 
 - **F464:** agrega contrato y panel de QA visual beta para Three/R3F, Babylon, WASD, PBR y Unity handoff.

@@ -541,6 +541,8 @@
     "prepare:f464-f468:visual-beta": "node scripts/f464-f468-visual-beta-audit.mjs",
     "test:f464-f468:visual-beta": "node scripts/check-f464-f468-visual-beta-contracts.mjs",
     "test:f464-f468:visual-beta:e2e": "playwright test e2e/f464-f468-visual-beta.spec.ts --project=chromium",
+    "prepare:f469:visual-beta-publication": "node scripts/f469-visual-beta-publication-close.mjs",
+    "test:f469:visual-beta-publication": "node scripts/check-f469-visual-beta-publication-contracts.mjs",
     "test:f191:pyrate-toolbar-smoke": "playwright test e2e/f191-pyrate-toolbar.spec.ts --project=chromium",
     "test:dialog-route-dedup": "node scripts/check-dialog-route-dedup-contracts.mjs",
     "test:deploy:config": "node scripts/check-deploy-config.mjs",

@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F469 - Beta visual publicable
+
+F469 empaqueta la beta visual como frontend estatico publicable.
+
+Uso:
+
+1. Ejecute `npm run build`.
+2. Ejecute `npm run prepare:f469:visual-beta-publication`.
+3. Revise `outputs/f469_visual_beta_publication_close/README_F469_VISUAL_BETA_PUBLICABLE.md`.
+4. Suba el contenido de `dist/` o el ZIP `radshield-mx-f469-visual-beta-publicable.zip` a Vercel, Netlify o servidor estatico.
+5. Despues de publicar, use `f469_post_deploy_checklist.csv` contra la URL publica.
+
+Alcance permitido: demo/beta visual estatica con canvas, Medical 3D, evidencia visual, Babylon parity card, Unity handoff y DB PBR visual. Alcance bloqueado: calculo clinico certificado, DB regulatoria completa, Unity WebGL real embebido, Babylon profundo como renderer principal y memoria analitica firmable.
+
+Backlog inmediato post-beta: Babylon profundo, Unity WebGL real, fotorrealismo avanzado, QA numerico NCRP/IAEA/UAQ y DB regulatoria/materiales versionada.
+
 ## Addendum F464-F468 - RC visual beta 3D
 
 F464-F468 cierra la beta visual de Medical 3D antes de publicar otra version estatica.
