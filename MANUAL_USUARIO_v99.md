@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F442-F445 - Runtime visual renderer v2
+
+F442-F445 convierte el geometry core de F439-F441 en una capa visual dibujada sobre el canvas.
+
+1. **F442 - Instrucciones de render:** cada barrera, zona, equipo, penetracion u overlay se transforma en una instruccion de dibujo con capa, estilo, orden visual, evidencia y advertencias.
+2. **F443 - Passes por capa:** las instrucciones se ordenan para dibujar barreras, fuentes, zonas, penetraciones y evidencia sin mezclar responsabilidades.
+3. **F444 - Overlay runtime:** el sistema monta un canvas overlay no interactivo. Este overlay puede verse en modo guia/estructura o bajo flag, pero no reemplaza el canvas estable.
+4. **F445 - Rollback:** si el overlay oculta informacion o afecta la operacion, se apaga el overlay/flag y se conserva el renderer base.
+
+Uso practico:
+
+1. Cambie a modo **CAD Guia**, **Estruct** o active staging con `VITE_CANVAS_HIGH_RISK_CAD=true`.
+2. Revise la tarjeta **F442-F445 Renderer v2 runtime**.
+3. Confirme instrucciones, passes, gates y rollback.
+4. Si necesita trabajar sin ayudas visuales, use **CAD Limpio** para despejar overlays auxiliares.
+
+Importante: F442-F445 no cambia calculos, seleccion, grips, snapping, boton derecho ni guardado del proyecto. Es una capa visual para preparar el renderer profundo v2 con menor riesgo.
+
 ## Addendum F439-F441 - Geometry core observable para renderer profundo
 
 F439-F441 agrega una capa tecnica visible para preparar el renderer profundo sin romper la operacion diaria del canvas.

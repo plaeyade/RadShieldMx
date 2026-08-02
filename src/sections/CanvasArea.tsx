@@ -67,6 +67,7 @@ import { buildF426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRenderer
 import { buildF431ToF435RendererReleaseGate } from '@/lib/f431ToF435RendererReleaseGate';
 import { buildF436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
 import { buildF439ToF441RendererGeometryCore } from '@/lib/f439ToF441RendererGeometryCore';
+import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } from '@/lib/f442ToF445RendererV2Runtime';
 import { isEnabled } from '@/lib/featureFlags';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
@@ -261,6 +262,7 @@ export default function CanvasArea({
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
+  const rendererV2OverlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Track canvas size for responsive rendering
   useEffect(() => {
@@ -953,6 +955,7 @@ export default function CanvasArea({
     bridge: f436ToF438RendererV2Bridge,
     highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
+  const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -963,6 +966,49 @@ export default function CanvasArea({
     { id: 'reports', label: 'Reportar', detail: 'Exportar captura PNG del canvas', icon: ImageIcon, action: onExportPNG },
     { id: 'evidence', label: 'Evidencia', detail: 'Abrir Evidence Pack del proyecto', icon: FileSearch, action: onOpenEvidencePack },
   ];
+
+  useEffect(() => {
+    const canvas = rendererV2OverlayCanvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const shouldShowRendererV2Overlay =
+      f442ToF445RendererV2Runtime.activationMode === 'flagged-active' ||
+      canvasChromeMode === 'guided' ||
+      visualMode === 'structure' ||
+      visualMode === 'isocontours';
+    if (!shouldShowRendererV2Overlay) return;
+
+    drawF442ToF445RendererV2Overlay(
+      ctx,
+      f442ToF445RendererV2Runtime,
+      {
+        scale: canvasState.scale,
+        offsetX: canvasState.offsetX,
+        offsetY: canvasState.offsetY,
+      },
+      {
+        showLabels: canvasChromeMode === 'guided' || visualMode === 'structure',
+        previewOpacity: canvasChromeMode === 'guided' ? 0.62 : 0.82,
+      },
+    );
+  }, [
+    canvasChromeMode,
+    canvasSize.height,
+    canvasSize.width,
+    canvasState.offsetX,
+    canvasState.offsetY,
+    canvasState.scale,
+    f442ToF445RendererV2Runtime,
+    visualMode,
+  ]);
 
   return (
     <div className="relative flex-1 flex flex-col overflow-hidden bg-[#f3f4f1]" ref={containerRef}>
@@ -1625,6 +1671,14 @@ export default function CanvasArea({
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
               onContextMenu={handleCanvasContextMenu}
+            />
+
+            <canvas
+              ref={rendererV2OverlayCanvasRef}
+              data-testid="f442-f445-renderer-v2-overlay-canvas"
+              className="absolute inset-0 h-full w-full pointer-events-none"
+              style={{ zIndex: 6 }}
+              aria-label="Overlay renderer v2 F442-F445"
             />
 
             {/* v65: Freehand drawing overlay canvas */}
@@ -2468,6 +2522,38 @@ export default function CanvasArea({
                     </div>
                     <div data-testid="f441-renderer-core-decision" className="mt-1 truncate text-[8px] text-slate-300" title={f439ToF441RendererGeometryCore.releaseDecision}>
                       {f439ToF441RendererGeometryCore.enabledByFeatureFlag ? 'Flag staging activo' : 'Flag staging apagado'} / eventos legacy intactos
+                    </div>
+                  </div>
+                  <div data-testid="f442-f445-renderer-v2-runtime" className="mt-2 rounded border border-sky-800 bg-[#04131f]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F442-F445 Renderer v2 runtime</span>
+                      <span className={f442ToF445RendererV2Runtime.status === 'renderer-v2-runtime-ready' ? 'text-emerald-200' : f442ToF445RendererV2Runtime.status === 'renderer-v2-runtime-preview' ? 'text-sky-200' : 'text-amber-200'}>
+                        {f442ToF445RendererV2Runtime.activationMode}
+                      </span>
+                    </div>
+                    <div data-testid="f442-render-instructions" className="grid grid-cols-4 gap-1">
+                      {(['polyline', 'polygon', 'footprint', 'badge'] as const).map((primitive) => (
+                        <span key={primitive} className="truncate rounded bg-sky-950/50 px-1 py-0.5 text-center text-[7px] text-sky-100" title={`Primitivas ${primitive}`}>
+                          {primitive}:{f442ToF445RendererV2Runtime.instructions.filter((instruction) => instruction.primitive === primitive).length}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f443-render-passes" className="mt-1 flex flex-wrap gap-1">
+                      {f442ToF445RendererV2Runtime.passes.slice(0, 6).map((pass) => (
+                        <span key={pass.id} className="rounded border border-sky-700 px-1 py-0.5 text-[7px] text-sky-200" title={pass.acceptance}>
+                          {pass.label}:{pass.instructionIds.length}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f444-runtime-gates" className="mt-1 flex flex-wrap gap-1">
+                      {f442ToF445RendererV2Runtime.gates.map((gate) => (
+                        <span key={gate.id} className={`rounded px-1 py-0.5 text-[7px] ${gate.pass ? 'bg-emerald-950/50 text-emerald-200' : 'bg-amber-950/50 text-amber-200'}`} title={gate.evidence}>
+                          {gate.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f445-rollback-plan" className="mt-1 truncate text-[8px] text-slate-300" title={f442ToF445RendererV2Runtime.rollbackPlan.map((item) => `${item.trigger}: ${item.action}`).join(' | ')}>
+                      Helper: <span className="font-bold text-sky-200">{f442ToF445RendererV2Runtime.drawHelper}</span> / rollback listo
                     </div>
                   </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
@@ -3361,6 +3447,33 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   geometry core observable; eventos intactos
+                </span>
+              </div>
+              <div
+                data-testid="f442-f445-renderer-v2-runtime-row"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f442ToF445RendererV2Runtime.releaseDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f442ToF445RendererV2Runtime.status === 'renderer-v2-runtime-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : f442ToF445RendererV2Runtime.status === 'renderer-v2-runtime-preview'
+                      ? 'bg-sky-50 text-sky-700 border border-sky-100'
+                      : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F442-F445
+                </span>
+                <span data-testid="f442-instruction-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f442ToF445RendererV2Runtime.instructions.length} instr
+                </span>
+                <span data-testid="f443-pass-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f442ToF445RendererV2Runtime.passes.length} passes
+                </span>
+                <span data-testid="f444-gate-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f442ToF445RendererV2Runtime.gates.filter((gate) => gate.pass).length}/{f442ToF445RendererV2Runtime.gates.length} gates
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  overlay v2 sin eventos
                 </span>
               </div>
               <div

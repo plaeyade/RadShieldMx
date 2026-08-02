@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F442-F445 (2026-08-01) - Runtime renderer v2 sobre overlay
+
+- F442 convierte entidades F439-F441 en instrucciones reales de dibujo: barreras, zonas, footprints de equipo, penetraciones, labels y badges.
+- F443 ordena esas instrucciones en passes por capa para poder dibujar de forma controlada y auditable.
+- F444 monta el overlay renderer v2 como canvas independiente `pointer-events:none`; no intercepta clics, arrastres, seleccion ni boton derecho.
+- F445 agrega rollback: ocultar overlay, apagar `VITE_CANVAS_HIGH_RISK_CAD`, limpiar flags locales y conservar `VITE_CANVAS_EVENT_CONTROLLER_V2=false`.
+- Estado operativo: preview seguro por defecto; activacion completa solo en staging/flag y con E2E antes/despues.
+
 # F439-F441 (2026-08-01) - Geometry core observable
 
 - F439 convierte la geometria viva del `floorPlan` en entidades normalizadas de renderer: barreras, fuentes, zonas, penetraciones y overlays.

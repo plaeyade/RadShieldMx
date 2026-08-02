@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F442-F445 (2026-08-01) - Renderer v2 runtime overlay
+
+- **F442:** genera instrucciones de render desde el geometry core F439-F441: polylines, poligonos, footprints, badges, estilos, labels, evidencias y advertencias.
+- **F443:** agrupa instrucciones en passes por capa usando el helper puro `drawF442ToF445RendererV2Overlay`.
+- **F444:** monta un canvas overlay runtime `pointer-events:none`; si `VITE_CANVAS_HIGH_RISK_CAD` esta apagado funciona como preview, si esta activo queda en modo flagged.
+- **F445:** agrega rollback explicito: apagar overlay, apagar flag alto riesgo y mantener `VITE_CANVAS_EVENT_CONTROLLER_V2=false`.
+- Mantiene renderer base, seleccion, grips, snapping, boton derecho y event controller en la ruta estable `CanvasArea/useCanvas`.
+
 # F439-F441 (2026-08-01) - Renderer geometry core
 
 - **F439:** agrega normalizador real de geometria desde `floorPlan`: barreras, fuentes/equipos, zonas, penetraciones y overlay de evidencia.
