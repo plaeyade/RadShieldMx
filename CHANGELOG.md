@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+# F484-F490 (2026-08-01) - Motor calculo QA NCRP/IAEA/UAQ
+
+- **F484:** agrega caso QA LINAC 6 MV barrera primaria con TVL NCRP151 y cita UAQ.
+- **F485:** agrega caso de alta energia LINAC 15 MV con advertencia neutronica y margen conservador.
+- **F486:** agrega caso CT/RX diagnostico NCRP147 para plomo equivalente.
+- **F487:** agrega caso Gamma Knife/Co-60 con trazabilidad IAEA-SRS47/UAQ.
+- **F488:** agrega caso PET/NM TG-108 511 keV y advertencias de workflow.
+- **F489:** agrega caso ciclotron 18 MeV con concreto alta densidad y contribucion neutronica.
+- **F490:** agrega gate de release: permite beta preliminar si los fixtures pasan, pero bloquea uso clinico hasta TVL/densidad/fuente versionada por pagina/hash y revision FM/RSO.
+- Ruta de assets pesados: `public/medical3d/photoreal` para PBR/HDRI/decals y `public/unity/radshield-medical-3d` para Unity WebGL exportado. Deben entrar como lazy/gated y probarse con QA visual/post-deploy sin cambiar el calculo.
+
 # F479-F483 (2026-08-01) - Fotorrealismo avanzado con texturas/HDRI/decals
 
 - **F479:** agrega paquete de texturas PBR versionadas y carpeta `public/medical3d/photoreal` para assets opcionales.

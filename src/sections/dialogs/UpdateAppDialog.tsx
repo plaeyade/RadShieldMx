@@ -76,6 +76,7 @@ import { buildF159SitesHostingPrep } from '@/lib/f159SitesHostingPrep';
 import { buildF163CanvasClosureSummary } from '@/lib/f163CanvasClosure';
 import { buildF164ClinicalProjectMap } from '@/lib/f164ClinicalProjectMap';
 import { buildF454PostBetaHeavyEngines } from '@/lib/f454PostBetaHeavyEngines';
+import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -93,6 +94,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F484-F490 Motor calculo QA', current: 'normative QA gate', latest: 'NCRP151 + NCRP147 + IAEA + UAQ + TG108 regression cases', status: 'current', description: `Agrega gate QA del motor con ${buildF484F490NormativeQa().summary.totalCases} casos: LINAC 6 MV primario, LINAC 15 MV/neutrones, CT NCRP147, Gamma Knife/Co-60, PET/NM TG-108 y ciclotron 18 MeV. Mantiene los resultados como preliminares hasta fuente/TVL/densidad versionada, hash documental y revision FM/RSO. Assets pesados entran despues por public/medical3d/photoreal o public/unity/radshield-medical-3d con QA visual separado.` },
   { name: 'F479-F483 fotorrealismo avanzado', current: 'procedural photoreal pack', latest: 'texture/HDRI/decals/render presets + visual QA export', status: 'current', description: 'Agrega paquete visual avanzado para Medical 3D: rutas de texturas PBR versionadas, HDRI local preparado, decals clinicos/BIM sobre la escena, presets inspeccion/presentacion/cinematico y export JSON. Mantiene assets pesados como lazy/gated y separa apariencia visual de TVL/densidad/citas tecnicas.' },
   { name: 'F475-F478 Unity WebGL real', current: 'export folder gate', latest: 'local Unity WebGL export folder + iframe/new-tab shell + case bridge + live QA gate', status: 'current', description: 'Prepara Unity WebGL real con carpeta exportada: `public/unity/radshield-medical-3d` debe contener index.html, Build/*.loader.js, framework/data/wasm y TemplateData. La app muestra estado, requisitos, iframe/new-tab controlado y export de caso; si falta la carpeta real, queda bloqueado sin romper Three/R3F.' },
   { name: 'F470-F474 Babylon profundo', current: 'deep runtime gated', latest: 'interactive Babylon scene + picking HUD + camera modes + overlays + E2E screenshots', status: 'current', description: 'Babylon avanza de parity card a escena interactiva visual-only: picking de muros/equipos/zonas/haz, HUD de propiedades, camaras Iso/Planta/Frente, overlays de rol/material/zona y capturas QA. Three/R3F sigue como renderer productivo y fallback obligatorio.' },

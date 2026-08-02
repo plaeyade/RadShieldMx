@@ -1,5 +1,49 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F484-F490 - Motor calculo QA NCRP/IAEA/UAQ
+
+F484-F490 agrega una compuerta de QA numerico para el motor de calculo antes de seguir cargando assets pesados o publicar otra version visual. La idea es sencilla: primero comprobar que el motor responde de forma estable en casos pequenos y trazables; despues se agregan texturas, HDRI, Unity WebGL o modelos pesados como capa visual.
+
+Casos incluidos:
+
+1. LINAC 6 MV, barrera primaria, TVL NCRP151.
+2. LINAC 15 MV, secundaria con revision neutronica.
+3. CT/RX diagnostico, plomo equivalente NCRP147.
+4. Gamma Knife / Co-60, revision IAEA-SRS47 y memorias UAQ.
+5. PET/NM 511 keV, screening TG-108.
+6. Ciclotron 18 MeV, concreto alta densidad y contribucion neutronica.
+
+Comandos de validacion:
+
+```text
+npm run prepare:f484-f490:normative-qa
+npm run test:f484-f490:normative-qa
+npm run test:f484-f490:normative-qa:unit
+```
+
+Ruta para meter assets pesados reales:
+
+```text
+public/medical3d/photoreal/
+  hdri/clinical_softbox.hdr
+  textures/<material>/albedo.webp
+  textures/<material>/normal.webp
+  textures/<material>/roughness.webp
+  textures/<material>/ao.webp
+  decals/radiation-warning.webp
+  decals/controlled-area.webp
+
+public/unity/radshield-medical-3d/
+  index.html
+  Build/*.loader.js
+  Build/*.framework.js
+  Build/*.data
+  Build/*.wasm
+  TemplateData/
+```
+
+Cuando meterlos: despues de que F484-F490 pase y antes de un deploy visual nuevo. Como meterlos: copiarlos en esas rutas, activar solo carga lazy/gated desde Medical 3D, correr QA visual, build y smoke post-deploy. Regla de seguridad: un asset pesado mejora inspeccion, comunicacion y evidencia visual; no cambia calculos, TVL, densidad, costos, cargas estructurales ni citas normativas.
+
 ## Addendum F479-F483 - Fotorrealismo avanzado
 
 F479-F483 mejora Medical 3D para inspeccion visual y presentacion con texturas, HDRI, decals y presets.

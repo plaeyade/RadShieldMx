@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F484-F490 (2026-08-01) - Motor calculo QA NCRP/IAEA/UAQ
+
+- F484-F490 agrega `src/lib/f484F490NormativeQa.ts` como gate de regresion para el motor de calculo.
+- Cubre seis rutas: LINAC 6 MV primaria, LINAC 15 MV/neutrones, CT/RX NCRP147, Gamma Knife/Co-60, PET/NM TG-108 y ciclotron 18 MeV.
+- Cada caso devuelve fase, norma, metodo, entradas, salida esperada, tolerancia, citas y advertencias clinicas.
+- Comandos: `npm run prepare:f484-f490:normative-qa`, `npm run test:f484-f490:normative-qa` y `npm run test:f484-f490:normative-qa:unit`.
+- Decision: la beta puede usar estos casos como QA preliminar, pero memoria clinica final requiere termino fuente, TVL/densidad, ocupacion, penetraciones, hash documental y revision FM/RSO.
+- Assets pesados reales entran despues de este gate: `public/medical3d/photoreal` para texturas/HDRI/decals y `public/unity/radshield-medical-3d` para Unity WebGL exportado.
+
 # F479-F483 (2026-08-01) - Fotorrealismo avanzado con texturas/HDRI/decals
 
 - F479 define el paquete de assets opcionales en `public/medical3d/photoreal`.
