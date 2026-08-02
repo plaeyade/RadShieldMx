@@ -1,5 +1,43 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F508-F509 - QA post-seed con valores reales DB
+
+F508-F509 verifica que el seed aprobado de materiales pueda alimentar el motor de calculo de forma trazable.
+
+Comandos:
+
+```text
+$env:F508_DB_READBACK="1"
+npm run prepare:f508-f509:post-seed-qa
+npm run test:f508-f509:post-seed-qa
+Remove-Item Env:\F508_DB_READBACK
+```
+
+Que valida F508:
+
+1. Tablas live presentes.
+2. Conteos minimos del seed aprobado.
+3. Valores con `approved-reference`.
+4. Valores con `allowed_use=calculation`.
+5. Citas con fuente, pagina/hash y material relacionado.
+
+Que valida F509:
+
+1. LINAC 6 MV primaria con TVL de concreto normal DB.
+2. LINAC 15 MV secundaria con TVL de concreto normal DB.
+3. Gamma Knife/Co-60 con TVL de concreto DB.
+4. PET 511 keV, CT/RX diagnostico y ciclotron se reportan como revision si falta valor exacto versionado.
+
+Artefactos:
+
+```text
+outputs/f508_f509_post_seed_qa/
+  f508_f509_manifest.json
+  f508_f509_summary.md
+  f508_seeded_value_readback.csv
+  f509_db_backed_qa_cases.jsonl
+```
+
 ## Addendum F506-F507 - Trazabilidad page/hash y seed controlado
 
 F506-F507 cierra la ruta entre los documentos RAG (`document_chunks`) y la DB regulatoria/materiales.

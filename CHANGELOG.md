@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F508-F509 (2026-08-02) - Post-seed readback y QA DB-backed
+
+- Agrega `src/lib/f508F509PostSeedQa.ts`.
+- Agrega `scripts/f508-f509-post-seed-qa.mjs` para leer tablas live sembradas: `regulatory_sources`, `material_constants`, `material_value_versions`, `material_source_links` y `document_chunks`.
+- F508 valida conteos minimos post-seed, fuentes con page/hash y que todos los valores seeded sean `approved-reference` + `allowed_use=calculation`.
+- F509 ejecuta casos QA usando valores reales de DB para LINAC 6 MV, LINAC 15 MV y Gamma Knife/Co-60; diagnostico/PET/ciclotron quedan en `review` si falta valor exacto versionado.
+- Produce `outputs/f508_f509_post_seed_qa/f508_f509_manifest.json`, `f508_f509_summary.md`, CSV de valores seeded y JSONL de casos QA.
+- Comandos: `npm run prepare:f508-f509:post-seed-qa` y `npm run test:f508-f509:post-seed-qa`.
+
 # F506-F507 (2026-08-02) - Trazabilidad page/hash y seed controlado aprobado
 
 - Agrega `src/lib/f506F507RegulatorySeedReadback.ts`.
