@@ -36,6 +36,8 @@
     "test:f508-f509:post-seed-qa": "node scripts/check-f508-f509-post-seed-qa-contracts.mjs",
     "prepare:f510:diagnostic-pet-tvl": "node scripts/f510-diagnostic-pet-tvl-promotion.mjs",
     "test:f510:diagnostic-pet-tvl": "node scripts/check-f510-diagnostic-pet-tvl-promotion-contracts.mjs",
+    "prepare:f511-f514:beta-closure": "node scripts/f511-f514-beta-closure.mjs",
+    "test:f511-f514:beta-closure": "node scripts/check-f511-f514-beta-closure-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

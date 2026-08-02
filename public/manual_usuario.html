@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>RadShield-MX F510 - Manual de Usuario y Control de Versiones</title>
+<title>RadShield-MX F511-F514 - Manual de Usuario y Control de Versiones</title>
 <style>
 body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
 @page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
@@ -89,7 +89,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="cover-accent"></div>
   <div class="cover-accent2"></div>
   <div class="cover-content">
-    <div class="cover-version">VERSION F510</div>
+    <div class="cover-version">VERSION F511-F514 BETA</div>
     <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
     <p class="cover-subtitle">Manual de Usuario y Control de Versiones</p>
     <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Professional Radiation Shielding Calculation Platform</p>
@@ -109,11 +109,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <ul class="toc">
     <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
     <li class="toc-l1"><a href="#sec0">0. Addendum F361-F490 post-beta</a></li>
-    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F510</a></li>
+    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F511-F514</a></li>
     <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
     <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
 
-    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F510)</a></li>
+    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F514)</a></li>
     <li class="toc-l1"><a href="#sec4">4. Control de Cambios Completo</a></li>
 
     <li class="toc-part"><a href="#part3">PARTE III: METODOLOGIA CIENTIFICA</a></li>
@@ -172,6 +172,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <div class="part-divider" id="part1">PARTE I<br><span style="font-size:14pt;font-weight:400;">Introduccion y Fundamentos</span></div>
 
 <h1 id="sec0">0. Addendum F361-F490 post-beta</h1>
+<div class="new-box">
+<span class="new-box-title">F511-F514 - Cierre beta publicable:</span>
+<p>F511-F514 congela el estado beta, verifica evidencia F508-F510, genera paquete estatico desde <code>dist/</code>, deja checklist de smoke post-deploy y emite decision beta. Comandos: <code>npm run build</code>, <code>npm run prepare:f511-f514:beta-closure</code> y <code>npm run test:f511-f514:beta-closure</code>.</p>
+<p>Artefactos: <code>outputs/f511_f514_beta_closure/f511_f514_beta_closure_manifest.json</code>, <code>f511_f514_beta_closure_summary.md</code>, <code>radshield-mx-f511-f514-beta.zip</code> y <code>f513_post_deploy_smoke_checklist.csv</code>. Permitido: prueba real de usuario y calculo preliminar con advertencias. Bloqueado: memoria firmada, calculo clinico certificado o dictamen final sin revision FM/RSO.</p>
+</div>
 <div class="new-box">
 <span class="new-box-title">F510 - TVL PET/DX suplementarios en DB live:</span>
 <p>F510 promueve dos valores faltantes a <code>material_value_versions</code>: <code>lead-cast/tvl-primary/511keV = 11.8 mm</code> y <code>lead-cast/tvl-diagnostic/120kVp = 0.27 mm</code>. Ambos quedan como <code>approved-reference</code> y <code>allowed_use=calculation</code>, ligados a <code>src-norm-lead-cast</code> con page/hash ya sembrado.</p>

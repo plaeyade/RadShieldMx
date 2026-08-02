@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+# F511-F514 (2026-08-02) - Cierre beta publicable
+
+- **F511:** agrega QA final beta con evidencia F508-F510, dist, manuales y Update Center.
+- **F512:** genera paquete beta estatico `radshield-mx-f511-f514-beta.zip` desde `dist/` con SHA256 y manifiesto.
+- **F513:** genera checklist de smoke post-deploy para URL publica: carga, Menu Archivo, canvas/sidebar, Update Center, manual, DB QA, calculo basico y Memoria IA.
+- **F514:** emite decision de release beta: permitido para prueba real de usuario y bloqueado para memoria firmada/calculo clinico certificado.
+- Agrega `src/lib/f511F514BetaClosure.ts`.
+- Agrega `scripts/f511-f514-beta-closure.mjs` y `scripts/check-f511-f514-beta-closure-contracts.mjs`.
+- Comandos: `npm run prepare:f511-f514:beta-closure` y `npm run test:f511-f514:beta-closure`.
+- Post-beta: Babylon profundo, Unity WebGL real exportado, fotorrealismo pesado y QA numerico adicional quedan fuera del cierre beta.
+
 # F510 (2026-08-02) - Promocion TVL PET/DX a DB live
 
 - Agrega `src/lib/f510DiagnosticPetTvlPromotion.ts`.

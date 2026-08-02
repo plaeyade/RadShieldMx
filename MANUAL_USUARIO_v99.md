@@ -1,5 +1,53 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F511-F514 - Cierre beta publicable
+
+F511-F514 es el cierre recomendado para lanzar RadShield-MX como beta tecnica. No agrega funciones grandes nuevas; congela el estado actual, empaqueta el frontend y deja una lista verificable para la URL publica.
+
+Comandos:
+
+```text
+npm run build
+npm run prepare:f511-f514:beta-closure
+npm run test:f511-f514:beta-closure
+```
+
+Artefactos:
+
+```text
+outputs/f511_f514_beta_closure/
+  f511_f514_beta_closure_manifest.json
+  f511_f514_beta_closure_summary.md
+  radshield-mx-f511-f514-beta.zip
+  f513_post_deploy_smoke_checklist.csv
+```
+
+Que valida F511:
+
+1. F508-F510 DB-backed QA esta en pass.
+2. `dist/index.html` existe.
+3. Manual HTML, changelog y manual de versiones estan actualizados.
+4. Update Center incluye F510 y cierre beta.
+
+Que entrega F512:
+
+1. ZIP estatico del `dist/`.
+2. SHA256 del paquete.
+3. Commit/branch de origen.
+4. Evidencia usada para liberar beta.
+
+Que deja F513:
+
+1. Checklist para probar la URL publica.
+2. Validacion manual de carga inicial.
+3. Validacion de Menu Archivo, canvas/sidebar, manual, Update Center, calculo basico y Memoria IA preliminar.
+
+Decision F514:
+
+1. Permitido: beta tecnica para prueba real de usuario, captura de datos, revision de canvas, flujo de calculo preliminar y reportes con advertencias.
+2. Bloqueado: memoria analitica firmada, calculo clinico certificado, dictamen final o liberacion constructiva sin revision FM/RSO.
+3. Post-beta: renderer profundo, Babylon, Unity WebGL real, fotorrealismo pesado y QA numerico ampliado.
+
 ## Addendum F510 - TVL PET/DX suplementarios en DB live
 
 F510 cierra las dos revisiones pendientes de F508-F509 para que el QA DB-backed use valores reales de `material_value_versions` tambien en PET/NM y diagnostico.
