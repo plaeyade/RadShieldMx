@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F475-F478 (2026-08-01) - Unity WebGL real con carpeta exportada
+
+- F475 define la carpeta oficial para un build Unity WebGL real: `public/unity/radshield-medical-3d`.
+- F476 agrega carga por iframe o nueva pestana con URL externa (`VITE_MEDICAL_3D_UNITY_WEBGL_URL`) o build local (`VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true`).
+- F477 conecta el export **Unity case** con geometria, materiales, bookmarks y contrato visual-only.
+- F478 agrega `npm run prepare:f475-f478:unity-webgl`, `npm run test:f475-f478:unity-webgl` y `npm run test:f475-f478:unity-webgl:e2e`.
+- Para reclamar Unity funcional real, la auditoria debe encontrar `index.html`, `Build/*.loader.js`, `Build/*.framework.js`, `Build/*.data`, `Build/*.wasm` y `TemplateData`.
+
 # F470-F474 (2026-08-01) - Babylon profundo interactivo
 
 - F470 habilita una escena Babylon interactiva alimentada por `MedicalScene`, sin sustituir el renderer productivo Three/R3F.

@@ -1,5 +1,34 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F475-F478 - Unity WebGL real con carpeta exportada
+
+F475-F478 prepara la app para abrir un visor Unity WebGL real cuando exista una carpeta exportada desde Unity.
+
+Estructura requerida:
+
+```text
+public/unity/radshield-medical-3d/
+  index.html
+  Build/
+    *.loader.js
+    *.framework.js
+    *.data
+    *.wasm
+  TemplateData/
+```
+
+Uso recomendado:
+
+1. Compile/exporte el proyecto Unity como **WebGL**.
+2. Copie el contenido exportado dentro de `public/unity/radshield-medical-3d`.
+3. Para build local, configure `VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true`.
+4. Para build publicado, configure `VITE_MEDICAL_3D_UNITY_WEBGL_URL=https://.../index.html`.
+5. Abra **Medical 3D** y revise **F475-F478 Unity WebGL real**.
+6. Use **Unity case** para exportar el paquete JSON que Unity debe consumir.
+7. Use **Abrir/preview** solo cuando el gate indique URL o build local disponible.
+
+Regla de uso: Unity es recorrido visual/fotorealista. No calcula, no modifica espesores firmables y no reemplaza Evidence Pack, Memoria IA ni revision profesional. Si la carpeta real no existe, la app queda en gate pendiente sin romper Three/R3F.
+
 ## Addendum F470-F474 - Babylon profundo interactivo
 
 F470-F474 agrega una segunda vista Babylon dentro de **Medical 3D** para inspeccion visual avanzada.

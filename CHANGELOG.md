@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F475-F478 (2026-08-01) - Unity WebGL real con carpeta exportada
+
+- **F475:** agrega contrato y carpeta destino `public/unity/radshield-medical-3d` para recibir un export WebGL real de Unity.
+- **F476:** agrega shell de iframe/new-tab para cargar URL externa o build local con `VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true`.
+- **F477:** refuerza el handoff JSON de caso con contrato F475-F478, query params y frontera visual-only.
+- **F478:** agrega auditoria de archivos esperados, scripts, E2E y documentacion. Si falta el build real, la app lo muestra como gate pendiente y mantiene Three/R3F como fallback.
+
 # F470-F474 (2026-08-01) - Babylon profundo interactivo
 
 - **F470:** Babylon pasa de tarjeta de paridad a runtime interactivo visual-only conectado a `MedicalScene`.
