@@ -1,5 +1,16 @@
 # Manual de Usuario RadShield-MX - F516d
 
+## Addendum F516e - Exportar PNG desde boton derecho
+
+F516e conecta `Canvas CAD -> Exportar PNG` desde el menu contextual al event harness. La accion real sigue usando `onExportPNG`, por lo que no cambia la ruta estable de exportacion ni el renderer. Lo nuevo es que el harness registra `export-png` y el E2E confirma que el menu contextual se cierra, el canvas queda visible y la accion queda trazada.
+
+Secuencia vigente de acciones reales de bajo riesgo:
+
+1. F515b: `Ctrl/Meta + rueda` -> `zoom-view`.
+2. F516c: `Medir/cota` desde boton derecho -> `activate-tool`.
+3. F516d: `Ajustar vista` desde boton derecho -> `fit-view`.
+4. F516e: `Exportar PNG` desde boton derecho -> `export-png`.
+
 ## Addendum F516d - Manual reconstruido y acciones reales del canvas
 
 El manual HTML fue reconstruido desde cero en `public/manual_usuario.html` para cubrir usuarios basicos, intermedios y avanzados. La estructura nueva documenta el flujo real `plano -> modalidad -> equipo -> barreras -> materiales -> calculo -> verificacion -> Memoria IA -> Evidence Pack/PDF`, con tablas para cada boton, menu y accion relevante.

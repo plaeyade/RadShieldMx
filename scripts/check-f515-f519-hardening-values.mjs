@@ -4,6 +4,7 @@ const eventCases = [
   ['wheel zoom', true, 'wheel', 'zoom', 1, 1, undefined, undefined, 'zoom-view'],
   ['context fit view', true, 'pointerdown', 'fit', 1, 1, undefined, undefined, 'fit-view'],
   ['context tool command', true, 'pointerdown', 'tool', 1, 1, undefined, undefined, 'activate-tool'],
+  ['context PNG export', true, 'pointerdown', 'export', 1, 1, undefined, undefined, 'export-png'],
   ['snap preview', true, 'pointermove', 'snap', 1, 1, undefined, undefined, 'snap-preview'],
   ['delete key', true, 'keydown', 'delete', 0, 0, 'Delete', undefined, 'delete-selection'],
   ['undo key', true, 'keydown', 'undo', 0, 0, 'z', true, 'undo-last'],
@@ -17,6 +18,7 @@ function routeHarness([, enabled, type, mode, x, y, key, ctrlKey]) {
   if (type === 'wheel') return 'zoom-view';
   if (mode === 'fit' && type === 'pointerdown') return 'fit-view';
   if (mode === 'tool' && type === 'pointerdown') return 'activate-tool';
+  if (mode === 'export' && type === 'pointerdown') return 'export-png';
   if (mode === 'snap' && type === 'pointermove') return 'snap-preview';
   return 'route-to-stable-useCanvas';
 }

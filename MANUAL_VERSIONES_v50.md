@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F516e (2026-08-02) - Context PNG export
+
+- **F516e canvas:** conecta `Canvas CAD -> Exportar PNG` desde el menu de boton derecho al event harness.
+- La accion registra `export-png`, conserva `onExportPNG` como ruta estable y queda cubierta por E2E.
+- No modifica geometria, calculos, DB, RAG, report generator ni renderer profundo.
+- Validacion:
+  - `npm run build`
+  - `npm run test:f515-f519:hardening`
+  - `npm run test:f515-f519:hardening:values`
+  - `playwright e2e/f446-f448-canvas-strong-qa.spec.ts`
+
 # F516d (2026-08-02) - Context fit view + manuales desde cero
 
 - **F516d canvas:** conecta `Canvas CAD -> Ajustar vista` desde el menu de boton derecho al event harness. La accion registra `fit-view`, conserva `onZoomToFit` como ruta estable y queda cubierta por E2E.

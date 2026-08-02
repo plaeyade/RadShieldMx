@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F516e (2026-08-02) - Context PNG export harness
+
+- Conecta `Canvas CAD -> Exportar PNG` desde el menu de boton derecho al event harness.
+- La accion conserva la ruta estable `onExportPNG`, registra `export-png` y queda cubierta por E2E.
+- Mantiene la progresion segura F515b/F516c/F516d: `zoom-view`, `activate-tool`, `fit-view` y ahora `export-png`.
+
 # F516d (2026-08-02) - Context fit view + manuales reconstruidos
 
 - Conecta `Canvas CAD -> Ajustar vista` desde el menu de boton derecho al event harness. La accion conserva `onZoomToFit`, registra `fit-view` y queda cubierta por E2E.

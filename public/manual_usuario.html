@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F516d - Manual de Usuario</title>
+  <title>RadShield-MX F516e - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F516d</span>
+      <span class="pill">Version de manual: F516e</span>
       <span class="pill">Fecha: 2026-08-02</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -191,7 +191,7 @@
 
     <section id="canvas">
       <h2>5. Canvas / Floorplan CAD-BIM</h2>
-      <p>El canvas es el centro operativo. Las acciones de bajo riesgo ya pasan por el harness F515/F516: zoom con <span class="kbd">Ctrl</span> + rueda, herramientas desde boton derecho y ajustar vista desde boton derecho.</p>
+      <p>El canvas es el centro operativo. Las acciones de bajo riesgo ya pasan por el harness F515/F516: zoom con <span class="kbd">Ctrl</span> + rueda, herramientas desde boton derecho, ajustar vista desde boton derecho y exportar PNG desde boton derecho.</p>
       <h3>5.1 Dock De Herramientas Del Canvas</h3>
       <table>
         <thead><tr><th>Boton</th><th>Accion</th><th>Conecta con</th><th>Resultado visible</th></tr></thead>
@@ -220,7 +220,7 @@
           <tr><td>Colocar fuente/equipo</td><td>Cambia a herramienta fuente.</td><td>F516c: enlaza con Equipment DB al colocar.</td></tr>
           <tr><td>Medir / cota</td><td>Cambia a medicion.</td><td>F516c validado por E2E.</td></tr>
           <tr><td>Ajustar vista</td><td>Centra/encuadra el plano.</td><td>F516d validado como <code>fit-view</code>.</td></tr>
-          <tr><td>Exportar PNG</td><td>Genera imagen del canvas.</td><td>Pendiente de ruta harness dedicada.</td></tr>
+          <tr><td>Exportar PNG</td><td>Genera imagen del canvas.</td><td>F516e validado como <code>export-png</code>; usa la ruta estable <code>onExportPNG</code>.</td></tr>
           <tr><td>Calcular blindaje</td><td>Llama al motor de calculo.</td><td>Debe tener proyecto/equipo/barreras validos.</td></tr>
           <tr><td>Abrir evidencia</td><td>Abre Evidence Pack.</td><td>Conecta resultados y citas.</td></tr>
           <tr><td>Inspeccion 3D medica</td><td>Abre visual 3D.</td><td>Conecta canvas, materiales y zonas.</td></tr>
@@ -290,11 +290,12 @@
           <tr><td>F515b</td><td>Zoom con Ctrl/Meta + rueda conectado.</td><td>E2E canvas fuerte.</td></tr>
           <tr><td>F516c</td><td>Herramientas desde boton derecho conectadas.</td><td>E2E <code>activate-tool</code>.</td></tr>
           <tr><td>F516d</td><td>Ajustar vista desde boton derecho conectado.</td><td>E2E <code>fit-view</code>.</td></tr>
-          <tr><td>Manual F516d</td><td>Usuario/versiones rehechos para niveles basico/intermedio/avanzado.</td><td>Build + revision HTML.</td></tr>
+          <tr><td>F516e</td><td>Exportar PNG desde boton derecho conectado.</td><td>E2E <code>export-png</code>.</td></tr>
+          <tr><td>Manual F516e</td><td>Usuario/versiones rehechos para niveles basico/intermedio/avanzado y actualizados con export PNG contextual.</td><td>Build + revision HTML.</td></tr>
         </tbody>
       </table>
       <footer>
-        RadShield-MX F516d. Manual reconstruido el 2026-08-02. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
+        RadShield-MX F516e. Manual actualizado el 2026-08-02. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
       </footer>
     </section>
   </main>
