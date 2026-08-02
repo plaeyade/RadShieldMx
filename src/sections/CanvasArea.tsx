@@ -68,6 +68,7 @@ import { buildF431ToF435RendererReleaseGate } from '@/lib/f431ToF435RendererRele
 import { buildF436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
 import { buildF439ToF441RendererGeometryCore } from '@/lib/f439ToF441RendererGeometryCore';
 import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } from '@/lib/f442ToF445RendererV2Runtime';
+import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
 import { isEnabled } from '@/lib/featureFlags';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
@@ -956,6 +957,17 @@ export default function CanvasArea({
     highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
   const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
+  const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
+    sidebarVisible: true,
+    canvasVisible: true,
+    commandDockVisible: true,
+    contextMenuAvailable: true,
+    dialogControlsAvailable: true,
+    sourceSelectorControlsAvailable: true,
+    rendererRuntime: f442ToF445RendererV2Runtime,
+    quickCommandCount: 7,
+    selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+  });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
     { id: 'model', label: 'Modelo', detail: 'Abrir modelo o inspeccion 3D medica', icon: Box, action: onOpenMedical3D ?? onOpen3DViewer },
@@ -1749,18 +1761,19 @@ export default function CanvasArea({
                     x {contextMenu.canvasX.toFixed(1)} / y {contextMenu.canvasY.toFixed(1)}
                   </div>
                 </div>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('select'))}>Seleccionar / editar</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('barrier'))}>Dibujar barrera</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('source'))}>Colocar fuente/equipo</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('measure'))}>Medir / cota</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onZoomToFit)}>Ajustar vista</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onExportPNG)}>Exportar PNG</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenEvidencePack)}>Abrir evidencia</button>
-                <button type="button" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenMedical3D ?? onOpen3DViewer)}>Inspeccion 3D medica</button>
+                <button type="button" data-testid="canvas-context-action-select" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('select'))}>Seleccionar / editar</button>
+                <button type="button" data-testid="canvas-context-action-barrier" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('barrier'))}>Dibujar barrera</button>
+                <button type="button" data-testid="canvas-context-action-source" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('source'))}>Colocar fuente/equipo</button>
+                <button type="button" data-testid="canvas-context-action-measure" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasTool('measure'))}>Medir / cota</button>
+                <button type="button" data-testid="canvas-context-action-fit" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onZoomToFit)}>Ajustar vista</button>
+                <button type="button" data-testid="canvas-context-action-export" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onExportPNG)}>Exportar PNG</button>
+                <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
+                <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenEvidencePack)}>Abrir evidencia</button>
+                <button type="button" data-testid="canvas-context-action-3d" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenMedical3D ?? onOpen3DViewer)}>Inspeccion 3D medica</button>
                 <div className="border-t border-slate-100" />
                 <button
                   type="button"
+                  data-testid="canvas-context-action-duplicate"
                   className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50 disabled:cursor-not-allowed disabled:text-slate-300"
                   disabled={!selectedInspectorEntity || !onDuplicateSelected}
                   onClick={() => runContextMenuAction(duplicateInspectorSelection)}
@@ -1769,6 +1782,7 @@ export default function CanvasArea({
                 </button>
                 <button
                   type="button"
+                  data-testid="canvas-context-action-delete"
                   className="block w-full px-2.5 py-1.5 text-left text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-300"
                   disabled={!selectedInspectorEntity || !onDeleteSelected}
                   onClick={() => runContextMenuAction(deleteInspectorSelection)}
@@ -2554,6 +2568,38 @@ export default function CanvasArea({
                     </div>
                     <div data-testid="f445-rollback-plan" className="mt-1 truncate text-[8px] text-slate-300" title={f442ToF445RendererV2Runtime.rollbackPlan.map((item) => `${item.trigger}: ${item.action}`).join(' | ')}>
                       Helper: <span className="font-bold text-sky-200">{f442ToF445RendererV2Runtime.drawHelper}</span> / rollback listo
+                    </div>
+                  </div>
+                  <div data-testid="f446-f448-canvas-strong-qa" className="mt-2 rounded border border-lime-800 bg-[#0b1809]/90 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between font-bold uppercase tracking-wide text-slate-400">
+                      <span>F446-F448 Canvas QA</span>
+                      <span className={f446ToF448CanvasStrongQa.status === 'canvas-strong-qa-ready' ? 'text-emerald-200' : f446ToF448CanvasStrongQa.status === 'canvas-strong-qa-review' ? 'text-amber-200' : 'text-red-200'}>
+                        {f446ToF448CanvasStrongQa.status.replace('canvas-strong-qa-', '')}
+                      </span>
+                    </div>
+                    <div data-testid="f446-surface-checks" className="grid grid-cols-2 gap-1">
+                      {f446ToF448CanvasStrongQa.surfaceChecks.map((check) => (
+                        <span key={check.id} className={`truncate rounded px-1 py-0.5 text-[7px] ${check.status === 'ready' ? 'bg-emerald-950/50 text-emerald-200' : check.status === 'review' ? 'bg-amber-950/50 text-amber-200' : 'bg-red-950/50 text-red-200'}`} title={`${check.surface}: ${check.evidence}`}>
+                          {check.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f447-interaction-checks" className="mt-1 flex flex-wrap gap-1">
+                      {f446ToF448CanvasStrongQa.interactionChecks.map((check) => (
+                        <span key={check.id} className={`rounded px-1 py-0.5 text-[7px] ${check.status === 'ready' ? 'bg-lime-950/50 text-lime-200' : check.status === 'review' ? 'bg-amber-950/50 text-amber-200' : 'bg-red-950/50 text-red-200'}`} title={`${check.action}: ${check.expected}`}>
+                          {check.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f448-regression-gates" className="mt-1 flex flex-wrap gap-1">
+                      {f446ToF448CanvasStrongQa.regressionGates.map((gate) => (
+                        <span key={gate.id} className={`rounded border px-1 py-0.5 text-[7px] ${gate.pass ? 'border-emerald-700 text-emerald-200' : 'border-red-700 text-red-200'}`} title={`${gate.blockingRule} Rollback: ${gate.rollback}`}>
+                          {gate.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f448-release-decision" className="mt-1 truncate text-[8px] text-slate-300" title={f446ToF448CanvasStrongQa.releaseDecision}>
+                      E2E: <span className="font-bold text-lime-200">{f446ToF448CanvasStrongQa.e2eSpec}</span>
                     </div>
                   </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
@@ -3474,6 +3520,33 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   overlay v2 sin eventos
+                </span>
+              </div>
+              <div
+                data-testid="f446-f448-canvas-strong-qa-row"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f446ToF448CanvasStrongQa.releaseDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f446ToF448CanvasStrongQa.status === 'canvas-strong-qa-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : f446ToF448CanvasStrongQa.status === 'canvas-strong-qa-review'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                      : 'bg-red-50 text-red-700 border border-red-100'
+                }`}>
+                  F446-F448
+                </span>
+                <span data-testid="f446-surface-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f446ToF448CanvasStrongQa.surfaceChecks.filter((check) => check.status === 'ready').length}/{f446ToF448CanvasStrongQa.surfaceChecks.length} surfaces
+                </span>
+                <span data-testid="f447-interaction-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f446ToF448CanvasStrongQa.interactionChecks.filter((check) => check.status === 'ready').length}/{f446ToF448CanvasStrongQa.interactionChecks.length} actions
+                </span>
+                <span data-testid="f448-regression-pass-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f446ToF448CanvasStrongQa.regressionGates.filter((gate) => gate.pass).length}/{f446ToF448CanvasStrongQa.regressionGates.length} gates
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  QA fuerte canvas
                 </span>
               </div>
               <div

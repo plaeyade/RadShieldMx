@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F446-F448 (2026-08-01) - Canvas strong QA
+
+- **F446:** agrega compuerta de superficies criticas: sidebar estable, canvas principal, dock CAD y overlay renderer v2 no bloqueante.
+- **F447:** agrega compuerta de interacciones: boton derecho, accesos rapidos, ventanas controlables y seguridad de seleccion legacy.
+- **F448:** agrega gates de regresion para release beta: canvas visible despues de acciones, overlay `pointer-events:none`, ventanas minimizables/cerrables y E2E obligatorio.
+- Agrega testids a acciones del menu contextual del canvas para validar cada funcion por separado.
+- Agrega E2E `f446-f448-canvas-strong-qa.spec.ts` con quick actions, boton derecho y overlay v2.
+
 # F442-F445 (2026-08-01) - Renderer v2 runtime overlay
 
 - **F442:** genera instrucciones de render desde el geometry core F439-F441: polylines, poligonos, footprints, badges, estilos, labels, evidencias y advertencias.

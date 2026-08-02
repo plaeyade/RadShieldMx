@@ -1,5 +1,23 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F446-F448 - QA fuerte del canvas antes de release
+
+F446-F448 no agrega una herramienta nueva; agrega una compuerta para confirmar que el canvas sigue usable despues de los overlays y mejoras CAD/BIM.
+
+1. **F446 - Superficies criticas:** revisa sidebar, canvas principal, dock CAD y overlay renderer v2.
+2. **F447 - Interacciones reales:** valida boton derecho, accesos rapidos, ventanas controlables y seleccion legacy.
+3. **F448 - Gates de regresion:** bloquea release si desaparece el canvas, si el overlay roba eventos, si una ventana no puede cerrarse/minimizarse o si no corre el E2E dedicado.
+
+Uso practico:
+
+1. Abra el canvas en modo **CAD Guia**.
+2. Confirme que se ve la tarjeta **F446-F448 Canvas QA**.
+3. Pruebe el dock inferior: Plano, Muro, Fuente, Zona, Calc, 3D y Evid.
+4. Haga clic derecho sobre el canvas y use acciones como **Dibujar barrera**, **Medir / cota** o **Calcular blindaje**.
+5. Si una ventana tapa el plano, use minimizar/cerrar antes de continuar.
+
+Regla: si el canvas, la sidebar o el dock desaparecen, no se publica beta. Primero se repite el E2E F446-F448 y se apagan overlays auxiliares si hace falta.
+
 ## Addendum F442-F445 - Runtime visual renderer v2
 
 F442-F445 convierte el geometry core de F439-F441 en una capa visual dibujada sobre el canvas.

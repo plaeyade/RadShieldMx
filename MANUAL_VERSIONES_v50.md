@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F446-F448 (2026-08-01) - QA fuerte del canvas
+
+- F446 verifica superficies criticas: sidebar, canvas principal, dock CAD y overlay renderer v2.
+- F447 verifica interacciones del operador: boton derecho, quick actions, ventanas controlables y seleccion legacy.
+- F448 agrega gates de regresion para release: canvas visible despues de acciones, overlay no bloqueante, ventanas cerrables/minimizables y E2E dedicado.
+- El menu contextual del canvas ahora tiene testids por accion para validar barrera, fuente, medir, calcular, evidencia, exportar y 3D.
+- Comandos: `npm run prepare:f446-f448:canvas-qa`, `npm run test:f446-f448:canvas-qa` y `npm run test:f446-f448:canvas-qa:e2e`.
+
 # F442-F445 (2026-08-01) - Runtime renderer v2 sobre overlay
 
 - F442 convierte entidades F439-F441 en instrucciones reales de dibujo: barreras, zonas, footprints de equipo, penetraciones, labels y badges.
