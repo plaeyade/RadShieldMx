@@ -36,6 +36,7 @@ import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f
 import { buildBabylonRuntimeSmokeContract, buildBabylonSceneParityContract } from '@/lib/medical3D/babylonRuntimeSmoke';
 import { buildBabylonDeepRuntimeContract, type BabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
 import { buildUnityWebglExportedBuildContract, type UnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebglExportedBuild';
+import { buildAdvancedPhotorealPackContract, type AdvancedPhotorealPackContract } from '@/lib/medical3D/advancedPhotorealPack';
 import {
   buildDefaultPbrMaterialDatabase,
   buildPbrMaterialDbUpdate,
@@ -721,6 +722,45 @@ function BeamGuides({ scene, visible }: { scene: MedicalScene; visible: boolean 
   );
 }
 
+function PhotorealDecals({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
+  if (!visible) return null;
+  const doorWall = scene.walls.find((wall) => wall.barrierType === 'door') || scene.walls[0];
+  const primaryWall = scene.walls.find((wall) => wall.barrierType === 'primary') || scene.walls[0];
+  const firstEquipment = scene.equipment[0];
+  return (
+    <group data-testid="f481-photoreal-decals">
+      {doorWall && (
+        <Html position={[doorWall.center[0], Math.min(doorWall.size[1] + 0.42, 3), doorWall.center[2]]} center distanceFactor={7}>
+          <div className="rounded border border-amber-300 bg-amber-50/95 px-2 py-1 text-[10px] font-bold text-amber-900 shadow">
+            RADIACION / ACCESO CONTROLADO
+          </div>
+        </Html>
+      )}
+      {primaryWall && (
+        <Html position={[primaryWall.center[0], primaryWall.size[1] + 0.36, primaryWall.center[2]]} center distanceFactor={7}>
+          <div className="rounded border border-red-200 bg-white/95 px-2 py-1 text-[10px] font-semibold text-red-700 shadow">
+            Barrera primaria / espesor visible
+          </div>
+        </Html>
+      )}
+      {firstEquipment && (
+        <Html position={[firstEquipment.position[0], 1.82, firstEquipment.position[2]]} center distanceFactor={7}>
+          <div className="rounded border border-sky-200 bg-sky-50/95 px-2 py-1 text-[10px] font-semibold text-sky-800 shadow">
+            Footprint equipo / isocentro
+          </div>
+        </Html>
+      )}
+      {scene.zones.slice(0, 2).map((zone) => (
+        <Html key={`decal-zone-${zone.id}`} position={[zone.center[0], 0.18, zone.center[2]]} center distanceFactor={8}>
+          <div className="rounded border border-violet-200 bg-violet-50/95 px-2 py-1 text-[10px] font-semibold text-violet-800 shadow">
+            Zona {zone.controlled ? 'controlada' : 'ocupacion'}
+          </div>
+        </Html>
+      ))}
+    </group>
+  );
+}
+
 function RoomRulers({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
   if (!visible) return null;
   const [cx, , cz] = scene.bounds.center;
@@ -1037,6 +1077,7 @@ function RoomScene({
       <MaterialBands scene={scene} visible={realismAids.materialBands && (showInspection || photorealWalkthrough)} />
       <EquipmentFootprints scene={scene} visible={realismAids.equipmentFootprints && (showInspection || visualMode !== 'presentation')} />
       <BeamGuides scene={scene} visible={realismAids.beamGuides && (showInspection || mode === 'dose')} />
+      <PhotorealDecals scene={scene} visible={photorealWalkthrough && showInspection} />
       <RoomRulers scene={scene} visible={realismAids.roomRulers && showInspection} />
       <InspectionRoute stations={inspectionStations} activeStationId={activeStationId} visible={showInspection} />
 
@@ -1575,6 +1616,62 @@ function UnityWebglExportedBuildPreview({
   );
 }
 
+function AdvancedPhotorealPackPanel({
+  contract,
+  onExport,
+}: {
+  contract: AdvancedPhotorealPackContract;
+  onExport: () => void;
+}) {
+  return (
+    <div className="space-y-2 rounded border border-rose-100 bg-rose-50 p-2" data-testid="f479-f483-advanced-photoreal-pack">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <div className="text-[11px] font-semibold uppercase text-rose-950">F479-F483 fotorealismo avanzado</div>
+          <div className="text-[9px] text-rose-900">Texturas, HDRI, decals, presets y QA/export visual.</div>
+        </div>
+        <Badge variant="outline" className="bg-white text-[9px]">{contract.status}</Badge>
+      </div>
+      <div className="grid grid-cols-2 gap-1 text-[9px] text-rose-950">
+        <div className="rounded border border-rose-100 bg-white/85 px-1.5 py-1">Assets {contract.assetTier}</div>
+        <div className="rounded border border-rose-100 bg-white/85 px-1.5 py-1">Materiales {contract.scene.materials}</div>
+        <div className="rounded border border-rose-100 bg-white/85 px-1.5 py-1">HDRI {contract.hdri.mode}</div>
+        <div className="rounded border border-rose-100 bg-white/85 px-1.5 py-1">Decals {contract.decals.length}</div>
+      </div>
+      <div className="rounded border border-rose-100 bg-white/85 p-2 text-[9px] leading-relaxed text-rose-950" data-testid="f479-photoreal-texture-plan">
+        <div className="font-semibold">Asset root: {contract.assetRoot}</div>
+        <div>{contract.textures.map((texture) => `${texture.label}: ${texture.expectedMaps.join('/')}`).join(' | ')}</div>
+      </div>
+      <div className="rounded border border-rose-100 bg-white/85 p-2 text-[9px] leading-relaxed text-rose-950" data-testid="f480-photoreal-hdri-plan">
+        <div className="font-semibold">HDRI esperado</div>
+        <div>{contract.hdri.expectedPath}; fallback {contract.hdri.fallback}</div>
+      </div>
+      <div className="grid grid-cols-2 gap-1 text-[9px]" data-testid="f481-photoreal-decal-plan">
+        {contract.decals.slice(0, 4).map((decal) => (
+          <div key={decal.id} className="rounded border border-rose-100 bg-white/85 px-1.5 py-1 text-rose-950">
+            <span className="font-semibold">{decal.label}</span>
+            <div className="text-rose-800">{decal.placement}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-1 text-[9px]" data-testid="f482-photoreal-render-presets">
+        {contract.renderPresets.map((preset) => (
+          <div key={preset.id} className={`rounded border px-1.5 py-1 ${preset.gated ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-rose-100 bg-white/85 text-rose-950'}`}>
+            <div className="font-semibold">{preset.label}</div>
+            <div>{preset.gated ? 'gated' : 'ready'}</div>
+          </div>
+        ))}
+      </div>
+      <div className="text-[9px] leading-relaxed text-amber-700">
+        {contract.warnings[0]} {contract.warnings[1]}
+      </div>
+      <Button size="sm" variant="outline" className="h-8 w-full justify-start bg-white text-xs" onClick={onExport} data-testid="f483-export-photoreal-pack">
+        <Download className="w-3.5 h-3.5 mr-2" /> Export F479-F483
+      </Button>
+    </div>
+  );
+}
+
 export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan }: Props) {
   const [preset, setPreset] = useState<MedicalRoomPreset>('linac');
   const [mode, setMode] = useState<Medical3DMode>('presentation');
@@ -1619,6 +1716,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     lightingPreset,
     walkthrough,
   }), [lightingPreset, photorealWalkthrough, scene, walkthrough]);
+  const advancedPhotorealPack = useMemo(
+    () => buildAdvancedPhotorealPackContract({ scene, pbrMaterialDb, photorealEnabled: photorealWalkthrough }),
+    [pbrMaterialDb, photorealWalkthrough, scene],
+  );
   const f459F463VisualStack = useMemo(() => buildF459F463VisualStack(scene, pbrMaterialDb), [pbrMaterialDb, scene]);
   const f464F468VisualBeta = useMemo(
     () => buildF464F468VisualBetaContract({
@@ -1983,6 +2084,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
           activeEngine: 'three-r3f',
           lightingPreset,
           photorealWalkthrough,
+          advancedPhotorealPack,
           realismAids,
           pbrProfiles: f367F370ReleaseIntegration.photorealism.pbrMaterials,
           pbrMaterialDb,
@@ -2011,6 +2113,24 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         unityLaunchPacket,
         unityExportedBuildContract,
         reportTargets: ['Memoria IA', 'PDF Report', 'Evidence Pack', 'Update Center', 'manual usuario'],
+      }, null, 2),
+      'application/json',
+    );
+  };
+
+  const handleExportAdvancedPhotorealPack = () => {
+    downloadText(
+      `medical_3d_f479_f483_advanced_photoreal_${safePlanName}.json`,
+      JSON.stringify({
+        ...advancedPhotorealPack,
+        generatedBy: 'RadShield-MX Medical 3D F479-F483 Advanced Photoreal Pack',
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneHash,
+        photorealWalkthrough,
+        lightingPreset,
+        pbrMaterialDb,
+        reportTargets: ['Medical 3D visual evidence', 'Memoria IA visual appendix', 'Evidence Pack', 'marketing/demo snapshots'],
       }, null, 2),
       'application/json',
     );
@@ -2526,6 +2646,8 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 {photorealAdvancedProfile.warnings[0]} No modifica calculos ni memoria firmable.
               </div>
             </div>
+
+            <AdvancedPhotorealPackPanel contract={advancedPhotorealPack} onExport={handleExportAdvancedPhotorealPack} />
 
             <div className="space-y-2 rounded border border-stone-200 bg-stone-50 p-2" data-testid="f462-pbr-material-gallery">
               <div className="flex items-center justify-between gap-2">

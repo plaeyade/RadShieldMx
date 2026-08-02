@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F479-F483 (2026-08-01) - Fotorrealismo avanzado con texturas/HDRI/decals
+
+- **F479:** agrega paquete de texturas PBR versionadas y carpeta `public/medical3d/photoreal` para assets opcionales.
+- **F480:** prepara HDRI local `clinical_softbox.hdr` con fallback a luces procedurales Three/R3F.
+- **F481:** agrega decals visuales de radiacion/acceso controlado, rol de barrera, zona, footprint de equipo y penetraciones/MEP.
+- **F482:** define presets de render **Inspeccion**, **Presentacion** y **Cinematico**; el modo cinematografico queda gated para assets pesados.
+- **F483:** agrega panel, export JSON, auditoria, contratos, E2E y manuales. La apariencia visual no sustituye TVL, densidad, costo, carga estructural ni citas.
+
 # F475-F478 (2026-08-01) - Unity WebGL real con carpeta exportada
 
 - **F475:** agrega contrato y carpeta destino `public/unity/radshield-medical-3d` para recibir un export WebGL real de Unity.

@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F479-F483 (2026-08-01) - Fotorrealismo avanzado con texturas/HDRI/decals
+
+- F479 define el paquete de assets opcionales en `public/medical3d/photoreal`.
+- F480 prepara HDRI local y fallback procedural para no romper deploy estatico.
+- F481 agrega decals clinicos/BIM visibles en la escena cuando el recorrido fotoreal e inspeccion estan activos.
+- F482 agrega presets de render: inspeccion tecnica, presentacion y cinematografico gated.
+- F483 agrega comandos `npm run prepare:f479-f483:photoreal-pack`, `npm run test:f479-f483:photoreal-pack` y `npm run test:f479-f483:photoreal-pack:e2e`.
+
 # F475-F478 (2026-08-01) - Unity WebGL real con carpeta exportada
 
 - F475 define la carpeta oficial para un build Unity WebGL real: `public/unity/radshield-medical-3d`.

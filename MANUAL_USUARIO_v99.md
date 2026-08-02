@@ -1,5 +1,31 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F479-F483 - Fotorrealismo avanzado
+
+F479-F483 mejora Medical 3D para inspeccion visual y presentacion con texturas, HDRI, decals y presets.
+
+Uso:
+
+1. Abra **Medical 3D**.
+2. Active **Recorrido WASD** y despues **Preset recorrido fotoreal WASD**.
+3. Revise el panel **F479-F483 fotorrealismo avanzado**.
+4. Confirme el plan de texturas PBR, HDRI local y decals.
+5. Use los decals visibles para explicar acceso controlado, rol de barrera, zonas y footprint de equipo.
+6. Exporte **F479-F483** para anexar el contrato visual al Evidence Pack o Memoria IA.
+
+Assets opcionales:
+
+```text
+public/medical3d/photoreal/
+  hdri/clinical_softbox.hdr
+  textures/<material>/albedo.webp
+  textures/<material>/normal.webp
+  textures/<material>/roughness.webp
+  decals/radiation-warning.webp
+```
+
+Regla de uso: el fotorrealismo ayuda a revisar, comunicar y documentar. No cambia TVL, densidad, costo, carga estructural, espesores ni citas normativas.
+
 ## Addendum F475-F478 - Unity WebGL real con carpeta exportada
 
 F475-F478 prepara la app para abrir un visor Unity WebGL real cuando exista una carpeta exportada desde Unity.
