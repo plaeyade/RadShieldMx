@@ -173,6 +173,12 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 
 <h1 id="sec0">0. Addendum F361-F520 post-beta</h1>
 <div class="new-box">
+<span class="new-box-title">F515/F519 - Canvas events y QA numerico ampliado:</span>
+<p>F515 agrega hardening para eventos del canvas sin activar cambios productivos de alto riesgo. La ruta estable de <code>useCanvas</code> sigue siendo canonica; el nuevo contrato valida fallback, coordenadas no finitas, zoom, lasso, snap preview, delete y undo. Tambien deja E2E pendiente para boton derecho, quick actions, drag/geometry commit y undo por hash.</p>
+<p>F519 amplia QA numerico por rol de barrera: primaria, secundaria, laberinto, puerta, penetracion y zona controlada. Cada fixture reporta espesor base, espesor conservador, delta, citas y advertencias. Los resultados siguen preliminares hasta sustituir fixtures por datasets DB-backed con pagina/hash y revision profesional.</p>
+<p>Comandos: <code>npm run prepare:f515-f519:hardening</code> y <code>npm run test:f515-f519:hardening</code>.</p>
+</div>
+<div class="new-box">
 <span class="new-box-title">F515-F520 - Pendientes post-beta productivos:</span>
 <p>F515-F520 inicia la etapa posterior a beta probada. El orden recomendado es: F515 renderer base/eventos del canvas, F519 QA numerico NCRP/IAEA/UAQ, F520 memorias reales para RAG/IA, F518 DB tecnica ENDF/XCOM/ICRU, F516 Babylon profundo y F517 Unity WebGL real cuando exista build exportado.</p>
 <p>F515 no cambia de golpe el comportamiento estable del canvas: toda accion nueva debe tener fallback, QA visual y rollback. F516 mantiene Babylon como lazy/fallback hasta pasar E2E. F517 exige <code>public/unity/radshield-medical-3d/index.html</code>, <code>Build/*</code> y <code>TemplateData/*</code>. F518 no alimenta calculos sin datasets <code>approved-reference</code>. F520 separa memorias reales como evidencia historica, no como norma primaria.</p>

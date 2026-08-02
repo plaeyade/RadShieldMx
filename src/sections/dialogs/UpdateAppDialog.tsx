@@ -86,7 +86,9 @@ import { buildF506F507RegulatorySeedReadback } from '@/lib/f506F507RegulatorySee
 import { buildF508F509PostSeedQa } from '@/lib/f508F509PostSeedQa';
 import { buildF510DiagnosticPetTvlPromotion } from '@/lib/f510DiagnosticPetTvlPromotion';
 import { buildF511F514BetaClosure } from '@/lib/f511F514BetaClosure';
+import { buildF515CanvasEventHardening } from '@/lib/f515CanvasEventHardening';
 import { buildF515F520PostBetaPlan } from '@/lib/f515F520PostBetaPlan';
+import { buildF519NormativeQaExpansion } from '@/lib/f519NormativeQaExpansion';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -104,6 +106,8 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F515 canvas events', current: 'event hardening harness', latest: 'stable fallback + event route matrix + next E2E list', status: 'current', description: `F515 valida ${buildF515CanvasEventHardening().scenarios.length} rutas de evento y mantiene fallback estable. Incluye rollback por flags, matriz CanvasArea/useCanvas/eventControllerV2 y E2E pendiente para boton derecho, quick actions, lasso, drag, snap y undo.` },
+  { name: 'F519 QA numerico ampliado', current: 'barrier-role regression expansion', latest: 'primary/secondary/maze/door/penetration/controlled-zone base vs conservative checks', status: 'current', description: `F519 agrega ${buildF519NormativeQaExpansion().summary.totalCases} casos por rol de barrera y comparador base/conservador. Roles cubiertos: ${buildF519NormativeQaExpansion().summary.barrierRolesCovered.join(', ')}. Resultados siguen preliminares hasta DB-backed datasets y revision profesional.` },
   { name: 'F515-F520 post-beta', current: 'post-beta execution board', latest: 'renderer events + Babylon deep + Unity build gate + ENDF/XCOM/ICRU DB + numeric QA + RAG memories', status: 'current', description: `Ordena ${buildF515F520PostBetaPlan().phaseRange}: ${buildF515F520PostBetaPlan().tracks.length} tracks posteriores a beta. Primero renderer/eventos y QA numerico; Unity queda bloqueado hasta build exportado real; DB ENDF/XCOM/ICRU queda gated por datasets approved-reference.` },
   { name: 'F511-F514 beta closure', current: 'beta package/release gate', latest: 'QA final + ZIP beta + smoke checklist + beta release decision', status: 'current', description: `Cierra ${buildF511F514BetaClosure().phaseRange}: ${buildF511F514BetaClosure().phases.length} fases para QA final, paquete beta, smoke publico configurable y release beta. Claims permitidos: ${buildF511F514BetaClosure().betaAllowedClaims.length}; claims bloqueados: ${buildF511F514BetaClosure().betaBlockedClaims.length}.` },
   { name: 'F510 PET/DX TVL exactos', current: 'supplemental DB seed gate', latest: 'PET 511 keV + diagnostico 120 kVp lead values for live QA', status: 'current', description: `Promueve ${buildF510DiagnosticPetTvlPromotion().supplementalValues.length} valores suplementarios approved-reference para ${buildF510DiagnosticPetTvlPromotion().dbPolicy.requiredMaterialId}: PET 511 keV y DX 120 kVp. Requiere ${buildF510DiagnosticPetTvlPromotion().requiredFlags.join(', ')} y despues repite F508-F509 para que ambos casos pasen con page/hash.` },

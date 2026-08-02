@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F515/F519 (2026-08-02) - Canvas events y QA numerico ampliado
+
+- **F515:** agrega hardening de eventos del canvas con fallback estable, rutas para zoom/lasso/snap/delete/undo y rollback por flags. No cambia geometria persistente sin E2E.
+- **F519:** agrega QA numerico ampliado por rol de barrera: primaria, secundaria, laberinto, puerta, penetracion y zona controlada.
+- **Comparador F519:** cada caso reporta espesor base, espesor conservador, delta, citas y advertencias preliminares.
+- Comandos:
+  - `npm run prepare:f515-f519:hardening`
+  - `npm run test:f515-f519:hardening`
+- Lo que queda despues: E2E real para boton derecho, quick actions, lasso/drag persistente, y DB-backed datasets para convertir fixtures en QA normativo de release.
+
 # F515-F520 (2026-08-02) - Pendientes post-beta
 
 - **F515 renderer base/eventos:** revisar y endurecer la ruta CanvasArea -> useCanvas -> eventControllerV2. No debe mutar geometria nueva sin E2E dedicado.

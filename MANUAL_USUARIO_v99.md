@@ -1,5 +1,13 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F515/F519 - Canvas events y QA numerico
+
+F515 agrega una capa de verificacion para eventos del canvas. El usuario no deberia notar cambios bruscos: la ruta estable de `useCanvas` sigue siendo canonica. Lo nuevo es la matriz de control para saber que evento debe ir a seleccion, drag, lasso, snap, pan, zoom, delete o undo, y que debe volver a la ruta estable si el flag esta apagado.
+
+F519 amplia el motor de QA numerico: ya no solo revisa modalidad, tambien revisa rol de superficie o barrera. Los roles cubiertos son primaria, secundaria, laberinto, puerta, penetracion y zona controlada. Cada caso entrega espesor base, espesor conservador, cita y advertencia preliminar.
+
+Comandos: `npm run prepare:f515-f519:hardening` y `npm run test:f515-f519:hardening`.
+
 ## Addendum F515-F520 - Linea post-beta
 
 La beta ya puede probarse como frontend estable. A partir de F515-F520 el trabajo se separa en seis lineas para evitar cambios masivos sin control.

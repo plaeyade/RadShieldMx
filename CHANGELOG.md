@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F515/F519 (2026-08-02) - Hardening canvas + QA numerico ampliado
+
+- Agrega `src/lib/f515CanvasEventHardening.ts` con matriz CanvasArea/useCanvas/eventControllerV2, escenarios de rutas de eventos, rollback por flags y lista E2E siguiente.
+- F515 cubre fallback estable, coordenadas no finitas, zoom, lasso, snap preview, delete y undo sin activar mutaciones productivas nuevas.
+- Agrega `src/lib/f519NormativeQaExpansion.ts` con casos por rol de barrera: primaria, secundaria, laberinto, puerta, penetracion y zona controlada.
+- F519 agrega comparador base/conservador para LINAC, CT/RX, Gamma Knife, PET/NM y ciclotron.
+- Agrega `scripts/f515-f519-hardening-audit.mjs` y `scripts/check-f515-f519-hardening-contracts.mjs`.
+- Comandos: `npm run prepare:f515-f519:hardening` y `npm run test:f515-f519:hardening`.
+
 # F515-F520 (2026-08-02) - Plan post-beta productivo
 
 - Agrega `src/lib/f515F520PostBetaPlan.ts`.
