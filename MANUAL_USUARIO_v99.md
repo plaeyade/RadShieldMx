@@ -1,5 +1,18 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F515-F520 - Linea post-beta
+
+La beta ya puede probarse como frontend estable. A partir de F515-F520 el trabajo se separa en seis lineas para evitar cambios masivos sin control.
+
+- **F515:** renderer base y eventos del canvas. Primero se valida seleccion, drag, lasso, snapping, pan, zoom, delete y undo con rollback por flags.
+- **F516:** Babylon profundo real. Debe ser lazy, opcional y con fallback a Three/R3F.
+- **F517:** Unity WebGL real. Solo se activa cuando se copie un build exportado completo en `public/unity/radshield-medical-3d`.
+- **F518:** DB tecnica ENDF/XCOM/ICRU. Los datasets deben tener version, fuente, hash, licencia y aprobacion antes de alimentar calculos.
+- **F519:** QA numerico NCRP/IAEA/UAQ ampliado. Cada caso debe tener formula, norma, tolerancia, cita y advertencia clinica.
+- **F520:** memorias reales para RAG/IA. Las memorias mejoran estructura y evidencia, pero no sustituyen norma primaria.
+
+Comandos de control: `npm run prepare:f515-f520:post-beta-plan` y `npm run test:f515-f520:post-beta-plan`.
+
 ## Addendum F511-F514 - Cierre beta publicable
 
 F511-F514 es el cierre recomendado para lanzar RadShield-MX como beta tecnica. No agrega funciones grandes nuevas; congela el estado actual, empaqueta el frontend y deja una lista verificable para la URL publica.

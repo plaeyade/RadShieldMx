@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>RadShield-MX F511-F514 - Manual de Usuario y Control de Versiones</title>
+<title>RadShield-MX F515-F520 - Manual de Usuario y Control de Versiones</title>
 <style>
 body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
 @page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
@@ -89,7 +89,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="cover-accent"></div>
   <div class="cover-accent2"></div>
   <div class="cover-content">
-    <div class="cover-version">VERSION F511-F514 BETA</div>
+    <div class="cover-version">VERSION F515-F520 POST-BETA</div>
     <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
     <p class="cover-subtitle">Manual de Usuario y Control de Versiones</p>
     <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Professional Radiation Shielding Calculation Platform</p>
@@ -108,7 +108,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="toc-title">Contenido</div>
   <ul class="toc">
     <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
-    <li class="toc-l1"><a href="#sec0">0. Addendum F361-F490 post-beta</a></li>
+    <li class="toc-l1"><a href="#sec0">0. Addendum F361-F520 post-beta</a></li>
     <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F511-F514</a></li>
     <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
     <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
@@ -171,7 +171,13 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <!-- ==================== PARTE I ==================== -->
 <div class="part-divider" id="part1">PARTE I<br><span style="font-size:14pt;font-weight:400;">Introduccion y Fundamentos</span></div>
 
-<h1 id="sec0">0. Addendum F361-F490 post-beta</h1>
+<h1 id="sec0">0. Addendum F361-F520 post-beta</h1>
+<div class="new-box">
+<span class="new-box-title">F515-F520 - Pendientes post-beta productivos:</span>
+<p>F515-F520 inicia la etapa posterior a beta probada. El orden recomendado es: F515 renderer base/eventos del canvas, F519 QA numerico NCRP/IAEA/UAQ, F520 memorias reales para RAG/IA, F518 DB tecnica ENDF/XCOM/ICRU, F516 Babylon profundo y F517 Unity WebGL real cuando exista build exportado.</p>
+<p>F515 no cambia de golpe el comportamiento estable del canvas: toda accion nueva debe tener fallback, QA visual y rollback. F516 mantiene Babylon como lazy/fallback hasta pasar E2E. F517 exige <code>public/unity/radshield-medical-3d/index.html</code>, <code>Build/*</code> y <code>TemplateData/*</code>. F518 no alimenta calculos sin datasets <code>approved-reference</code>. F520 separa memorias reales como evidencia historica, no como norma primaria.</p>
+<p>Comandos: <code>npm run prepare:f515-f520:post-beta-plan</code> y <code>npm run test:f515-f520:post-beta-plan</code>. Artefactos: <code>outputs/f515_f520_post_beta_plan/f515_f520_post_beta_manifest.json</code> y <code>f515_f520_post_beta_summary.md</code>.</p>
+</div>
 <div class="new-box">
 <span class="new-box-title">F511-F514 - Cierre beta publicable:</span>
 <p>F511-F514 congela el estado beta, verifica evidencia F508-F510, genera paquete estatico desde <code>dist/</code>, deja checklist de smoke post-deploy y emite decision beta. Comandos: <code>npm run build</code>, <code>npm run prepare:f511-f514:beta-closure</code> y <code>npm run test:f511-f514:beta-closure</code>.</p>

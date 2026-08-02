@@ -1,5 +1,18 @@
 # RadShield-MX - Fases recientes
 
+# F515-F520 (2026-08-02) - Plan post-beta productivo
+
+- Agrega `src/lib/f515F520PostBetaPlan.ts`.
+- Agrega `scripts/f515-f520-post-beta-plan.mjs` y `scripts/check-f515-f520-post-beta-plan-contracts.mjs`.
+- Define seis tracks post-beta: renderer base/eventos del canvas, Babylon profundo real, Unity WebGL con build exportado, DB tecnica ENDF/XCOM/ICRU, QA numerico NCRP/IAEA/UAQ ampliado y memorias reales para RAG/IA.
+- F515 queda como primer trabajo: endurecer eventos del canvas sin activar mutaciones profundas ni romper la ruta estable.
+- F516 queda gated: Babylon debe cargar lazy, con fallback a Three/R3F y E2E visual antes de promoverlo.
+- F517 queda `needs-assets`: Unity WebGL real requiere build exportado en `public/unity/radshield-medical-3d`.
+- F518 queda `needs-data`: ENDF/XCOM/ICRU requiere datasets versionados y `approved-reference` antes de alimentar calculos.
+- F519 puede avanzar en paralelo con casos numericos adicionales.
+- F520 requiere memorias reales deduplicadas, OCR revisado y trazabilidad por hash/pagina.
+- Comandos: `npm run prepare:f515-f520:post-beta-plan` y `npm run test:f515-f520:post-beta-plan`.
+
 # F511-F514 (2026-08-02) - Cierre beta publicable
 
 - **F511:** agrega QA final beta con evidencia F508-F510, dist, manuales y Update Center.

@@ -86,6 +86,7 @@ import { buildF506F507RegulatorySeedReadback } from '@/lib/f506F507RegulatorySee
 import { buildF508F509PostSeedQa } from '@/lib/f508F509PostSeedQa';
 import { buildF510DiagnosticPetTvlPromotion } from '@/lib/f510DiagnosticPetTvlPromotion';
 import { buildF511F514BetaClosure } from '@/lib/f511F514BetaClosure';
+import { buildF515F520PostBetaPlan } from '@/lib/f515F520PostBetaPlan';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -103,6 +104,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F515-F520 post-beta', current: 'post-beta execution board', latest: 'renderer events + Babylon deep + Unity build gate + ENDF/XCOM/ICRU DB + numeric QA + RAG memories', status: 'current', description: `Ordena ${buildF515F520PostBetaPlan().phaseRange}: ${buildF515F520PostBetaPlan().tracks.length} tracks posteriores a beta. Primero renderer/eventos y QA numerico; Unity queda bloqueado hasta build exportado real; DB ENDF/XCOM/ICRU queda gated por datasets approved-reference.` },
   { name: 'F511-F514 beta closure', current: 'beta package/release gate', latest: 'QA final + ZIP beta + smoke checklist + beta release decision', status: 'current', description: `Cierra ${buildF511F514BetaClosure().phaseRange}: ${buildF511F514BetaClosure().phases.length} fases para QA final, paquete beta, smoke publico configurable y release beta. Claims permitidos: ${buildF511F514BetaClosure().betaAllowedClaims.length}; claims bloqueados: ${buildF511F514BetaClosure().betaBlockedClaims.length}.` },
   { name: 'F510 PET/DX TVL exactos', current: 'supplemental DB seed gate', latest: 'PET 511 keV + diagnostico 120 kVp lead values for live QA', status: 'current', description: `Promueve ${buildF510DiagnosticPetTvlPromotion().supplementalValues.length} valores suplementarios approved-reference para ${buildF510DiagnosticPetTvlPromotion().dbPolicy.requiredMaterialId}: PET 511 keV y DX 120 kVp. Requiere ${buildF510DiagnosticPetTvlPromotion().requiredFlags.join(', ')} y despues repite F508-F509 para que ambos casos pasen con page/hash.` },
   { name: 'F508-F509 post-seed QA DB', current: 'DB-backed readback + QA gate', latest: 'seeded material values joined with sources and NCRP/IAEA/UAQ cases', status: 'current', description: `Lee ${buildF508F509PostSeedQa().dbReadback.targetTables.length} tablas live con ${buildF508F509PostSeedQa().dbReadback.requiredFlag}, valida conteos minimos y ejecuta QA DB-backed. Casos diagnostico/PET/ciclotron quedan en review si falta valor exacto versionado.` },

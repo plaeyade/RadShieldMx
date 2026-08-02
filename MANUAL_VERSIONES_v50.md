@@ -1,5 +1,18 @@
 # RadShield-MX - Manual de Versiones
 
+# F515-F520 (2026-08-02) - Pendientes post-beta
+
+- **F515 renderer base/eventos:** revisar y endurecer la ruta CanvasArea -> useCanvas -> eventControllerV2. No debe mutar geometria nueva sin E2E dedicado.
+- **F516 Babylon profundo:** construir escena real interactiva solo bajo demanda, con fallback a Three/R3F.
+- **F517 Unity WebGL real:** integrar exclusivamente cuando exista build exportado con `index.html`, `Build/*` y `TemplateData/*`.
+- **F518 DB ENDF/XCOM/ICRU:** ampliar la DB tecnica con datasets versionados, hash, licencia y estado `approved-reference`.
+- **F519 QA numerico:** ampliar regresiones NCRP/IAEA/UAQ y propagarlas a Memoria IA, PDF y Evidence Pack.
+- **F520 RAG/IA:** ingerir memorias reales deduplicadas con OCR espanol, pagina/hash y separacion entre evidencia historica y norma primaria.
+- Comandos:
+  - `npm run prepare:f515-f520:post-beta-plan`
+  - `npm run test:f515-f520:post-beta-plan`
+- Orden recomendado: F515, F519, F520, F518, F516 y F517 cuando exista build Unity exportado.
+
 # F511-F514 (2026-08-02) - Cierre beta publicable
 
 - **F511 QA final beta:** verifica que F508-F510 esten en pass, que `dist/index.html` exista, que manuales/Update Center esten sincronizados y que las pruebas post-deploy incluyan canvas/sidebar/Menu Archivo.
