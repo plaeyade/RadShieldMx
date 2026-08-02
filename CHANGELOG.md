@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F464-F468 (2026-08-01) - RC visual beta 3D
+
+- **F464:** agrega contrato y panel de QA visual beta para Three/R3F, Babylon, WASD, PBR y Unity handoff.
+- **F465:** conecta la DB PBR con barreras del plano para mostrar material, densidad, espesor y carga kg/m2 estimada.
+- **F466:** agrega mapa auditable canvas/3D con targets `barrier/source/region` y acciones de seleccion, inspeccion y captura.
+- **F467:** prepara secciones de Memoria IA/PDF/Evidence con capturas visuales, anexos y disclaimers.
+- **F468:** agrega export JSON de RC visual beta y E2E con capturas en `outputs/f464_f468_visual_beta`.
+
 # F459-F463 (2026-08-01) - Unity bridge, photoreal stack, PBR DB and WASD visuals
 
 - **F459-F460:** formaliza el puente Unity WebGL como handoff realista: geometria, materiales PBR, bookmarks y boundary visual-only; requiere `VITE_MEDICAL_3D_UNITY_WEBGL_URL` para abrir build externo.

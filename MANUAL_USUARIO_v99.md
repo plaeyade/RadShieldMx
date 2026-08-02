@@ -1,5 +1,21 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F464-F468 - RC visual beta 3D
+
+F464-F468 cierra la beta visual de Medical 3D antes de publicar otra version estatica.
+
+Flujo recomendado:
+
+1. Abra **Medical 3D Floor Plan** desde el canvas o acceso 3D.
+2. Active **Preset recorrido fotoreal WASD** para encender recorrido, fotorrealismo y guia WASD.
+3. Revise **F464-F468 RC visual beta**. El panel resume estado de Three/R3F, Babylon, WASD, PBR y Unity handoff.
+4. Revise **F465 materiales vinculados** para ver barrera, material PBR, densidad, espesor y carga kg/m2. Esta vista es visual/estructural preliminar; TVL/cita/hash tecnico siguen en Material Toolbox/RAG/calculo.
+5. Revise **F466 sync canvas/3D** para confirmar que cada barrera/equipo/zona tenga target auditable entre plano y escena.
+6. Revise **F467 Memoria IA visual** para saber que secciones se exportaran como evidencia: resumen visual BIM/3D, anexo de materiales, sincronizacion plano-3D, capturas y gate beta.
+7. Use **Export F464-F468 beta** para generar JSON de cierre visual con escena, hash, capturas, DB PBR, Babylon, Unity y targets de reporte.
+
+Regla de uso: F464-F468 permite publicar una beta visual estable. No convierte PBR, Babylon o Unity en calculo clinico certificado; los espesores firmables deben salir del motor trazable con NCRP/IAEA/UAQ, citas, entradas, salidas y revision profesional.
+
 ## Addendum F459-F463 - Unity, fotorealismo, materiales PBR y recorrido
 
 F459-F463 agrupa las salidas visuales avanzadas de Medical 3D.

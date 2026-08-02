@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F464-F468 (2026-08-01) - RC visual beta 3D
+
+- F464: QA visual 3D completo dentro de Medical 3D. Valida Three/R3F, Babylon runtime/paridad, recorrido WASD, DB PBR y Unity handoff.
+- F465: vincula materiales PBR con barreras del plano: material visual, densidad, espesor y carga kg/m2. La cita tecnica/TVL sigue gobernada por RAG/calculo.
+- F466: crea mapa de sincronizacion canvas/3D con targets `barrier`, `source` y `region` para seleccion, inspeccion, resaltado y snapshot.
+- F467: prepara evidencia visual para Memoria IA, PDF y Evidence Pack: vista general, barreras/materiales, equipos/footprints, zonas y recorrido.
+- F468: deja paquete RC visual beta exportable con gate, capturas y E2E. Uso: `npm run prepare:f464-f468:visual-beta`, `npm run test:f464-f468:visual-beta`, `npm run test:f464-f468:visual-beta:e2e`.
+
 # F459-F463 (2026-08-01) - Stack visual 3D post-beta
 
 - F459-F460 deja Unity como puente externo formal: exporta escena/materiales/bookmarks y abre visor solo cuando `VITE_MEDICAL_3D_UNITY_WEBGL_URL` apunte a un build WebGL real.

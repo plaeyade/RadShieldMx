@@ -40,6 +40,7 @@ import {
   type PbrMaterialDatabase,
 } from '@/lib/medical3D/pbrMaterialDatabase';
 import { buildF459F463VisualStack } from '@/lib/medical3D/f459F463VisualStack';
+import { buildF464F468VisualBetaContract } from '@/lib/medical3D/f464F468VisualBeta';
 
 interface Props {
   open: boolean;
@@ -1401,6 +1402,17 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     walkthrough,
   }), [lightingPreset, photorealWalkthrough, scene, walkthrough]);
   const f459F463VisualStack = useMemo(() => buildF459F463VisualStack(scene, pbrMaterialDb), [pbrMaterialDb, scene]);
+  const f464F468VisualBeta = useMemo(
+    () => buildF464F468VisualBetaContract({
+      scene,
+      pbrMaterialDb,
+      babylonReady: babylonSmokeStatus === 'ready',
+      walkthrough,
+      unityUrl: unityLaunchPacket.viewer.url,
+      visualEvidenceCaptureCount: visualEvidenceCaptures.length,
+    }),
+    [babylonSmokeStatus, pbrMaterialDb, scene, unityLaunchPacket.viewer.url, visualEvidenceCaptures.length, walkthrough],
+  );
   const productiveCapabilityRows = useMemo(() => ([
     {
       id: 'three-r3f',
@@ -1762,6 +1774,27 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     );
   };
 
+  const handleExportF464F468BetaPack = () => {
+    downloadText(
+      `medical_3d_f464_f468_visual_beta_${safePlanName}.json`,
+      JSON.stringify({
+        ...f464F468VisualBeta,
+        generatedBy: 'RadShield-MX Medical 3D F464-F468 Visual Beta',
+        roomName: scene.roomName,
+        floorPlan: activeFloorPlan.name,
+        sceneHash,
+        activeWorkflow: visualWorkflow,
+        visualEvidenceGate,
+        visualEvidenceCaptures,
+        pbrMaterialDb,
+        babylonParityContract,
+        unityLaunchPacket,
+        reportTargets: ['Memoria IA', 'PDF Report', 'Evidence Pack', 'Update Center', 'manual usuario'],
+      }, null, 2),
+      'application/json',
+    );
+  };
+
   const handleOpenUnityExternalViewer = () => {
     if (!unityLaunchPacket.viewer.url) return;
     window.open(unityLaunchPacket.viewer.url, '_blank', 'noopener,noreferrer');
@@ -2001,6 +2034,91 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </div>
               <div className="text-[9px] leading-relaxed text-fuchsia-900">
                 DB PBR {f459F463VisualStack.materialDb.version}: {f459F463VisualStack.materialDb.records} materiales. Unity externo queda visual-only hasta URL real.
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2" data-testid="f464-f468-visual-beta">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-cyan-950 uppercase">F464-F468 RC visual beta</div>
+                  <div className="text-[9px] text-cyan-900">QA 3D, materiales, sync canvas/3D, Memoria IA y gate beta.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f464F468VisualBeta.status}</Badge>
+              </div>
+              <div className="grid grid-cols-5 gap-1 text-[9px] text-cyan-950">
+                {f464F468VisualBeta.phases.map((phase) => (
+                  <div key={phase.id} className={`rounded border px-1.5 py-1 ${phase.status === 'ready' ? 'border-cyan-200 bg-white' : 'border-amber-200 bg-amber-50'}`} title={phase.evidence}>
+                    <div className="font-semibold">{phase.id}</div>
+                    <div className="truncate">{phase.status}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded border border-cyan-100 bg-white/85 p-2 text-[9px] leading-relaxed text-cyan-950">
+                <div className="flex items-center justify-between gap-2"><span>Three/R3F</span><span>{f464F468VisualBeta.qa.threeR3f}</span></div>
+                <div className="flex items-center justify-between gap-2"><span>Babylon</span><span>{f464F468VisualBeta.qa.babylon}</span></div>
+                <div className="flex items-center justify-between gap-2"><span>WASD</span><span>{f464F468VisualBeta.qa.wasd}</span></div>
+                <div className="flex items-center justify-between gap-2"><span>Unity</span><span>{f464F468VisualBeta.qa.unityHandoff}</span></div>
+              </div>
+              <Button size="sm" variant="outline" className="w-full h-8 justify-start bg-white text-xs" onClick={handleExportF464F468BetaPack} data-testid="f468-export-visual-beta-pack">
+                <Download className="w-3.5 h-3.5 mr-2" /> Export F464-F468 beta
+              </Button>
+            </div>
+
+            <div className="space-y-2 rounded border border-lime-100 bg-lime-50 p-2" data-testid="f465-material-technical-links">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-lime-950 uppercase">F465 materiales vinculados</div>
+                  <div className="text-[9px] text-lime-900">PBR + densidad + kg/m2 para toolbox tecnica.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f464F468VisualBeta.materialLinks.length}</Badge>
+              </div>
+              <div className="max-h-32 space-y-1 overflow-auto">
+                {f464F468VisualBeta.materialLinks.slice(0, 6).map((link) => (
+                  <div key={link.wallId} className="rounded border border-lime-100 bg-white/85 px-2 py-1 text-[9px] text-lime-950">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-semibold">{link.wallName}</span>
+                      <span>{link.requiredThickness_mm} mm</span>
+                    </div>
+                    <div className="truncate">{link.pbrMaterialName} / {link.density_kg_m3 ?? 'densidad ?'} kg/m3</div>
+                    <div>Carga visual: {link.structuralLoad_kg_m2 ?? 'pendiente'} kg/m2</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-blue-100 bg-blue-50 p-2" data-testid="f466-canvas-3d-sync-map">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-blue-950 uppercase">F466 sync canvas/3D</div>
+                  <div className="text-[9px] text-blue-900">Targets auditables para seleccionar, inspeccionar y capturar.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f464F468VisualBeta.syncLinks.length}</Badge>
+              </div>
+              <div className="max-h-28 space-y-1 overflow-auto">
+                {f464F468VisualBeta.syncLinks.slice(0, 7).map((link) => (
+                  <div key={`${link.entityType}-${link.entityId}`} className="rounded border border-blue-100 bg-white/85 px-2 py-1 text-[9px] text-blue-950">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-semibold">{link.label}</span>
+                      <span>{link.entityType}</span>
+                    </div>
+                    <div className="truncate font-mono text-[8px]">{`${link.canvasTarget} -> ${link.threeDTarget}`}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-rose-100 bg-rose-50 p-2" data-testid="f467-memoria-visual-evidence">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-rose-950 uppercase">F467 Memoria IA visual</div>
+                  <div className="text-[9px] text-rose-900">Capturas y secciones para PDF/Evidence.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{visualEvidenceCaptures.length} caps</Badge>
+              </div>
+              <div className="rounded border border-rose-100 bg-white/85 p-2 text-[9px] leading-relaxed text-rose-950">
+                {f464F468VisualBeta.memoriaEvidence.reportSections.slice(0, 4).map((section) => (
+                  <div key={section}>- {section}</div>
+                ))}
               </div>
             </div>
 
