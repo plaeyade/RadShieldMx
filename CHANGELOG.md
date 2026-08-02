@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F459-F463 (2026-08-01) - Unity bridge, photoreal stack, PBR DB and WASD visuals
+
+- **F459-F460:** formaliza el puente Unity WebGL como handoff realista: geometria, materiales PBR, bookmarks y boundary visual-only; requiere `VITE_MEDICAL_3D_UNITY_WEBGL_URL` para abrir build externo.
+- **F461:** agrega preset visible de recorrido fotoreal WASD y consolida el perfil ACES/PBR/sombras/luces para Three/R3F y preview Babylon.
+- **F462:** agrega galeria de materiales PBR con swatches/fotos procedurales: concreto alta densidad, plomo, acero, vidrio plomado, polimero borado y TM/NIPOLL.
+- **F463:** agrega DB PBR local versionada y actualizable en `localStorage`, export JSON y guia WASD visual para operador.
+- Agrega scripts `prepare/test:f459-f463:visual-stack` y E2E `test:f459-f463:visual-stack:e2e` con capturas de stack visual, Babylon y materiales.
+
 # F456-F458 (2026-08-01) - Babylon scene parity, performance and export
 
 - **F456:** el preview Babylon deja de ser maqueta fija y dibuja entidades reales de `MedicalScene`: barreras con tamano/rotacion/rol/material, equipos con footprint y zonas controladas.

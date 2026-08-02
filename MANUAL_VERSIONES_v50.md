@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F459-F463 (2026-08-01) - Stack visual 3D post-beta
+
+- F459-F460 deja Unity como puente externo formal: exporta escena/materiales/bookmarks y abre visor solo cuando `VITE_MEDICAL_3D_UNITY_WEBGL_URL` apunte a un build WebGL real.
+- F461 agrega preset **recorrido fotoreal WASD** y perfil de iluminacion/sombras/PBR para inspeccion visual.
+- F462 agrega galeria de materiales PBR con texturas procedurales y datos de densidad/uso visual.
+- F463 agrega DB PBR local actualizable y exportable en JSON, persistida en `localStorage`.
+- Comandos: `npm run prepare:f459-f463:visual-stack`, `npm run test:f459-f463:visual-stack` y `npm run test:f459-f463:visual-stack:e2e`.
+
 # F456-F458 (2026-08-01) - Babylon paridad, rendimiento y export
 
 - F456 usa la escena real construida desde el plano: muros/barreras, equipos y zonas pasan a Babylon con geometria, rol y materiales visibles.

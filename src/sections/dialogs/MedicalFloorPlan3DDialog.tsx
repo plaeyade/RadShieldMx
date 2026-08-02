@@ -34,6 +34,12 @@ import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegratio
 import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
 import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
 import { buildBabylonRuntimeSmokeContract, buildBabylonSceneParityContract } from '@/lib/medical3D/babylonRuntimeSmoke';
+import {
+  buildDefaultPbrMaterialDatabase,
+  buildPbrMaterialDbUpdate,
+  type PbrMaterialDatabase,
+} from '@/lib/medical3D/pbrMaterialDatabase';
+import { buildF459F463VisualStack } from '@/lib/medical3D/f459F463VisualStack';
 
 interface Props {
   open: boolean;
@@ -91,6 +97,8 @@ const defaultRealismAids: Record<RealismAid, boolean> = {
   beamGuides: true,
   roomRulers: true,
 };
+
+const PBR_MATERIAL_DB_STORAGE_KEY = 'radshield-medical3d-pbr-material-db-f461';
 
 const visualWorkflowPresets: Array<{
   id: VisualWorkflowPreset;
@@ -1036,6 +1044,19 @@ function downloadText(filename: string, content: string, type = 'text/plain') {
   URL.revokeObjectURL(url);
 }
 
+function loadStoredPbrMaterialDatabase(): PbrMaterialDatabase {
+  if (typeof window === 'undefined') return buildDefaultPbrMaterialDatabase();
+  try {
+    const raw = window.localStorage.getItem(PBR_MATERIAL_DB_STORAGE_KEY);
+    if (!raw) return buildDefaultPbrMaterialDatabase();
+    const parsed = JSON.parse(raw) as PbrMaterialDatabase;
+    if (parsed?.schema === 'radshield-mx.medical3d.pbr-material-db.f461-f463.v1' && Array.isArray(parsed.records)) return parsed;
+    return buildDefaultPbrMaterialDatabase();
+  } catch {
+    return buildDefaultPbrMaterialDatabase();
+  }
+}
+
 function clampBabylonDimension(value: number, fallback: number) {
   if (!Number.isFinite(value) || value <= 0) return fallback;
   return Math.min(Math.max(value, 3), 12);
@@ -1356,6 +1377,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const [inspectionTarget, setInspectionTarget] = useState<InspectionTarget | null>(null);
   const [visualEvidenceCaptures, setVisualEvidenceCaptures] = useState<VisualEvidenceCapture[]>([]);
   const [babylonSmokeStatus, setBabylonSmokeStatus] = useState<BabylonSmokeStatus>('idle');
+  const [pbrMaterialDb, setPbrMaterialDb] = useState<PbrMaterialDatabase>(() => loadStoredPbrMaterialDatabase());
   const [importedFloorPlan, setImportedFloorPlan] = useState<FloorPlan | null>(null);
   const [cadSummary, setCadSummary] = useState<CadBimImportSummary | null>(null);
   const [cadError, setCadError] = useState<string | null>(null);
@@ -1378,6 +1400,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     lightingPreset,
     walkthrough,
   }), [lightingPreset, photorealWalkthrough, scene, walkthrough]);
+  const f459F463VisualStack = useMemo(() => buildF459F463VisualStack(scene, pbrMaterialDb), [pbrMaterialDb, scene]);
   const productiveCapabilityRows = useMemo(() => ([
     {
       id: 'three-r3f',
@@ -1461,6 +1484,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
     setMouseLookEnabled(false);
     if (document.pointerLockElement === canvasWrapperRef.current) document.exitPointerLock();
   }, [walkthrough]);
+
+  useEffect(() => {
+    window.localStorage.setItem(PBR_MATERIAL_DB_STORAGE_KEY, JSON.stringify(pbrMaterialDb));
+  }, [pbrMaterialDb]);
 
   const handleExportOBJ = () => {
     downloadText(`medical_3d_${safePlanName}.obj`, medicalSceneToOBJ(scene));
@@ -1678,7 +1705,27 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const handleExportUnityHandoff = () => {
     downloadText(
       `medical_3d_unity_handoff_${safePlanName}.json`,
-      JSON.stringify(unityLaunchPacket, null, 2),
+      JSON.stringify({
+        ...unityLaunchPacket,
+        f459F460: {
+          schema: 'radshield-mx.medical3d.unity-bridge.f459-f460.v1',
+          status: unityLaunchPacket.viewer.url ? 'external-viewer-configured' : 'handoff-ready-url-pending',
+          pbrMaterialDb,
+          visualOnlyBoundary: 'Unity consumes geometry/material metadata for visual walkthrough only. It does not write signed shielding calculations.',
+        },
+      }, null, 2),
+      'application/json',
+    );
+  };
+
+  const handleUpdatePbrMaterialDb = () => {
+    setPbrMaterialDb((current) => buildPbrMaterialDbUpdate(current));
+  };
+
+  const handleExportPbrMaterialDb = () => {
+    downloadText(
+      `medical_3d_pbr_material_db_${safePlanName}.json`,
+      JSON.stringify(pbrMaterialDb, null, 2),
       'application/json',
     );
   };
@@ -1696,6 +1743,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
         unityLaunchPacket,
         f408UnitySceneExport,
         f408UnityValidationWarnings,
+        f459F463VisualStack,
         babylonReadiness: babylonContract,
         visualEvidenceGate,
         visualEvidenceCaptures,
@@ -1705,6 +1753,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
           photorealWalkthrough,
           realismAids,
           pbrProfiles: f367F370ReleaseIntegration.photorealism.pbrMaterials,
+          pbrMaterialDb,
         },
         externalRunnerBoundary:
           'Unity/GATE/Geant4/EGSnrc remain external runners/viewers. This pack is an auditable handoff, not an in-browser execution result.',
@@ -1934,6 +1983,27 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </Button>
             </div>
 
+            <div className="space-y-2 rounded border border-fuchsia-100 bg-fuchsia-50 p-2" data-testid="f459-f463-visual-stack">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-fuchsia-950 uppercase">F459-F463 visual stack</div>
+                  <div className="text-[9px] text-fuchsia-900">Unity, Babylon, fotorealismo, PBR DB y WASD.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{f459F463VisualStack.status}</Badge>
+              </div>
+              <div className="grid grid-cols-5 gap-1 text-[9px] text-fuchsia-950">
+                {f459F463VisualStack.phases.map((phase) => (
+                  <div key={phase.id} className="rounded border border-fuchsia-100 bg-white/85 px-1.5 py-1" title={phase.output}>
+                    <div className="font-semibold">{phase.id}</div>
+                    <div className="truncate">{phase.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-[9px] leading-relaxed text-fuchsia-900">
+                DB PBR {f459F463VisualStack.materialDb.version}: {f459F463VisualStack.materialDb.records} materiales. Unity externo queda visual-only hasta URL real.
+              </div>
+            </div>
+
             <div className="space-y-2 rounded border border-emerald-100 bg-emerald-50 p-2" data-testid="f385-f386-productive-capability-gate">
               <div className="flex items-center justify-between gap-2">
                 <div>
@@ -1988,11 +2058,17 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 data-testid="f315-unity-external-viewer-bridge"
               >
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="font-semibold text-slate-800">Unity externo</span>
+                  <span className="font-semibold text-slate-800">F459-F460 Unity bridge</span>
                   <Badge variant="outline" className="text-[9px]">{unityLaunchPacket.readiness}</Badge>
                 </div>
                 <div>{unityLaunchPacket.viewer.url || 'URL pendiente por VITE_MEDICAL_3D_UNITY_WEBGL_URL'}</div>
-                <div className="mt-1 text-amber-700">Three/R3F queda como fallback clinico visual.</div>
+                <div className="mt-1 text-amber-700">Handoff listo: geometria, materiales PBR, bookmarks y boundary visual-only. Three/R3F queda como fallback clinico visual.</div>
+                <div className="mt-1 grid grid-cols-4 gap-1 text-[9px]" data-testid="f459-f460-unity-bridge-summary">
+                  <span className="rounded bg-slate-50 px-1 py-0.5">Muros {unityLaunchPacket.querySummary.walls}</span>
+                  <span className="rounded bg-slate-50 px-1 py-0.5">Eq {unityLaunchPacket.querySummary.equipment}</span>
+                  <span className="rounded bg-slate-50 px-1 py-0.5">Zonas {unityLaunchPacket.querySummary.zones}</span>
+                  <span className="rounded bg-slate-50 px-1 py-0.5">PBR {pbrMaterialDb.records.length}</span>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button size="sm" variant="outline" className="h-8 justify-start text-xs bg-white" onClick={handleExportUnityHandoff}>
@@ -2075,13 +2151,22 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               <div className="rounded bg-slate-50 px-2 py-1 text-[10px] leading-relaxed text-slate-600">
                 {lightingPresets[lightingPreset].label}. Hash visual: <span className="font-mono">{sceneHash}</span>
               </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-full justify-start text-xs"
+                onClick={() => applyVisualWorkflowPreset('walkthrough')}
+                data-testid="f461-photoreal-walkthrough-preset"
+              >
+                <Navigation className="w-3.5 h-3.5 mr-2" /> Preset recorrido fotoreal WASD
+              </Button>
             </div>
 
-            <div className="space-y-2 rounded border border-amber-100 bg-amber-50 p-2" data-testid="f388-photoreal-advanced-profile">
+            <div className="space-y-2 rounded border border-amber-100 bg-amber-50 p-2" data-testid="f461-photoreal-advanced-profile">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <div className="text-[11px] font-semibold text-amber-950 uppercase">F388 fotorrealismo avanzado</div>
-                  <div className="text-[9px] text-amber-900">Three/R3F con ACES, sombras suaves, DPR acotado y evidencia visual.</div>
+                  <div className="text-[11px] font-semibold text-amber-950 uppercase">F461 fotorrealismo avanzado</div>
+                  <div className="text-[9px] text-amber-900">Three/R3F + Babylon preview con ACES, PBR, sombras y recorrido.</div>
                 </div>
                 <Badge variant="outline" className="bg-white text-[9px]">{photorealAdvancedProfile.quality}</Badge>
               </div>
@@ -2093,6 +2178,63 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
               </div>
               <div className="text-[9px] leading-relaxed text-amber-900">
                 {photorealAdvancedProfile.warnings[0]} No modifica calculos ni memoria firmable.
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-stone-200 bg-stone-50 p-2" data-testid="f462-pbr-material-gallery">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-stone-900 uppercase">F462 materiales PBR</div>
+                  <div className="text-[9px] text-stone-700">Fotos/swatch procedurales para acabados, carga visual y evidencia.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{pbrMaterialDb.version}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {pbrMaterialDb.records.slice(0, 6).map((material) => (
+                  <div key={material.id} className="overflow-hidden rounded border border-stone-200 bg-white text-[9px] text-stone-700">
+                    <div
+                      className="h-10 border-b border-stone-200"
+                      style={{
+                        background:
+                          material.family === 'lead' || material.family === 'steel'
+                            ? `linear-gradient(135deg, ${material.color}, #f8fafc 42%, ${material.color})`
+                            : `radial-gradient(circle at 25% 25%, #ffffff55, transparent 20%), repeating-linear-gradient(135deg, ${material.color}, ${material.color} 5px, #11182722 6px, ${material.color} 12px)`,
+                      }}
+                      title={`${material.name}: ${material.visualTexture}`}
+                    />
+                    <div className="p-1.5">
+                      <div className="font-semibold text-stone-900">{material.name}</div>
+                      <div>{material.density_kg_m3 ? `${material.density_kg_m3} kg/m3` : 'densidad pendiente'}</div>
+                      <div>R {material.roughness.toFixed(2)} / M {material.metalness.toFixed(2)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="h-8 justify-start bg-white text-xs" onClick={handleUpdatePbrMaterialDb} data-testid="f463-update-pbr-db">
+                  <Sparkles className="w-3.5 h-3.5 mr-2" /> Actualizar DB
+                </Button>
+                <Button size="sm" variant="outline" className="h-8 justify-start bg-white text-xs" onClick={handleExportPbrMaterialDb} data-testid="f463-export-pbr-db">
+                  <Download className="w-3.5 h-3.5 mr-2" /> Export DB
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded border border-sky-100 bg-sky-50 p-2" data-testid="f463-wasd-visual-guide">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-semibold text-sky-950 uppercase">F463 recorrido WASD</div>
+                  <div className="text-[9px] text-sky-900">Guia visual de inspeccion navegable y capturas.</div>
+                </div>
+                <Badge variant="outline" className="bg-white text-[9px]">{walkthrough ? 'ON' : 'OFF'}</Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-center text-[9px] text-sky-950">
+                {['Q', 'W', 'E', 'A', 'S', 'D', 'R', 'Shift', 'Ctrl'].map((key) => (
+                  <span key={key} className="rounded border border-sky-100 bg-white/90 px-1.5 py-1 font-semibold">{key}</span>
+                ))}
+              </div>
+              <div className="text-[9px] leading-relaxed text-sky-900">
+                W/S avanza-retrocede, A/D lateral, Q/E gira, R/F altura, Shift acelera, Ctrl reduce velocidad. Mouse-look requiere activar recorrido.
               </div>
             </div>
 

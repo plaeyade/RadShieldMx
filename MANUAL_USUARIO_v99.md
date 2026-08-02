@@ -1,5 +1,25 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F459-F463 - Unity, fotorealismo, materiales PBR y recorrido
+
+F459-F463 agrupa las salidas visuales avanzadas de Medical 3D.
+
+Uso recomendado:
+
+1. Abra **Medical 3D**.
+2. Revise **F459-F463 visual stack** para confirmar Unity/Babylon/fotoreal/PBR/WASD.
+3. Use **Unity JSON** para exportar el paquete que un build Unity WebGL externo puede consumir.
+4. Active **Preset recorrido fotoreal WASD** para inspeccion navegable.
+5. Revise la galeria **F462 materiales PBR** para concreto alta densidad, plomo, acero, vidrio plomado, polimero borado y TM/NIPOLL.
+6. Use **Actualizar DB** para incorporar el registro TM/NIPOLL HD y persistir la base en el navegador.
+7. Use **Export DB** para obtener el JSON de materiales visuales.
+
+Limites:
+
+- Unity WebGL necesita una URL real en `VITE_MEDICAL_3D_UNITY_WEBGL_URL`. Sin esa URL, RadShield entrega handoff JSON pero no abre un build Unity.
+- La DB PBR es visual/evidencia; no reemplaza TVL, densidad firmable, citas OCR/RAG ni calculo regulatorio.
+- El modo fotoreal sirve para inspeccion y comunicacion. La memoria firmable sigue usando calculos trazables, normas, citas y revision profesional.
+
 ## Addendum F456-F458 - Babylon paridad, rendimiento y export
 
 F456-F458 convierte la prueba Babylon en una superficie util de revision visual. Babylon ahora lee la escena medica real y muestra muros/barreras, equipos, zonas y roles con materiales PBR ligeros.
