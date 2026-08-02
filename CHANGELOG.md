@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F449-F453 (2026-08-01) - BIM memory visual
+
+- **F449:** agrega trazabilidad grafica calculo -> formula -> norma -> seccion de Memoria IA para barrera primaria, secundaria, laberinto/puerta, penetraciones MEP y carga estructural.
+- **F450:** agrega bindings de cita/evidencia para NCRP 151, IAEA SRS-47, materiales TVL/densidad y fichas de fabricante con regla de hash/pagina/chunk.
+- **F451:** adapta las ultimas imagenes y frames BIM/CAD: sala visible vs bunker real, cada muro con rol, diseno respaldado por normas, ribbon/Project Manager/Properties y coordinacion MEP.
+- **F452:** integra un tablero SVG BIM dentro del canvas con corte 2.5D, roles de muros, panel de propiedades, evidence chips y flujo plano -> equipo -> barreras -> calculo -> citas -> PDF.
+- **F453:** agrega handoff de release y E2E dedicado `f449-f453-bim-memory-visual.spec.ts` para validar que el tablero no oculte canvas/sidebar ni rompa F446-F448.
+
 # F446-F448 (2026-08-01) - Canvas strong QA
 
 - **F446:** agrega compuerta de superficies criticas: sidebar estable, canvas principal, dock CAD y overlay renderer v2 no bloqueante.

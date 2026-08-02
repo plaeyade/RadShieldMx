@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F449-F453 (2026-08-01) - Tablero BIM para Memoria IA
+
+- F449 conecta visualmente cada superficie con formula, norma, evidencia y seccion de memoria: primaria, secundaria, laberinto/puerta, penetraciones y carga estructural.
+- F450 define como deben viajar las citas: NCRP, IAEA, AAPM/UAQ, ficha de fabricante y fuente de material con hash, pagina y chunk.
+- F451 convierte las referencias visuales recientes en lenguaje RadShield: corte del bunker, roles de muros, estandar normativo, interfaz tipo BIM/CAD y coordinacion MEP.
+- F452 agrega un tablero grafico en el canvas que muestra Project Manager, corte 2.5D, propiedades, evidencia y flujo a PDF.
+- F453 agrega release handoff y prueba E2E para asegurar que la visualizacion no tape el canvas ni desconecte boton derecho/accesos rapidos.
+- Comandos: `npm run prepare:f449-f453:bim-memory`, `npm run test:f449-f453:bim-memory` y `npm run test:f449-f453:bim-memory:e2e`.
+
 # F446-F448 (2026-08-01) - QA fuerte del canvas
 
 - F446 verifica superficies criticas: sidebar, canvas principal, dock CAD y overlay renderer v2.

@@ -69,6 +69,7 @@ import { buildF436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridg
 import { buildF439ToF441RendererGeometryCore } from '@/lib/f439ToF441RendererGeometryCore';
 import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } from '@/lib/f442ToF445RendererV2Runtime';
 import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
+import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual';
 import { isEnabled } from '@/lib/featureFlags';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
@@ -967,6 +968,12 @@ export default function CanvasArea({
     rendererRuntime: f442ToF445RendererV2Runtime,
     quickCommandCount: 7,
     selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
+  });
+  const f449ToF453BimMemoryVisual = buildF449ToF453BimMemoryVisual({
+    floorPlan,
+    closure: f426ToF430CalcRendererClosure,
+    runtime: f442ToF445RendererV2Runtime,
+    strongQa: f446ToF448CanvasStrongQa,
   });
   const f411BimRibbon = [
     { id: 'project', label: 'Proyecto', detail: 'Importar o actualizar plano base', icon: Upload, action: onImportFloorPlan },
@@ -2602,6 +2609,118 @@ export default function CanvasArea({
                       E2E: <span className="font-bold text-lime-200">{f446ToF448CanvasStrongQa.e2eSpec}</span>
                     </div>
                   </div>
+                  <div data-testid="f449-f453-bim-memory-visual" className="mt-2 rounded border border-indigo-800 bg-[#0b1020]/92 p-1.5 text-[9px]">
+                    <div className="mb-1 flex items-center justify-between gap-2 font-bold uppercase tracking-wide text-slate-400">
+                      <span>{f449ToF453BimMemoryVisual.boardTitle}</span>
+                      <span className={f449ToF453BimMemoryVisual.status === 'bim-memory-visual-ready' ? 'text-emerald-200' : 'text-amber-200'}>
+                        {f449ToF453BimMemoryVisual.status.replace('bim-memory-visual-', '')}
+                      </span>
+                    </div>
+                    <svg
+                      data-testid="f451-bim-visual-board"
+                      viewBox="0 0 520 245"
+                      role="img"
+                      aria-label="Tablero BIM de blindaje con corte del bunker, roles de muros, evidencia y flujo a memoria"
+                      className="h-auto w-full rounded border border-slate-700 bg-[#111827]"
+                    >
+                      <rect x="0" y="0" width="520" height="245" fill="#111827" />
+                      <rect x="8" y="12" width="88" height="184" rx="4" fill="#1f2937" stroke="#475569" />
+                      <text x="16" y="27" fill="#cbd5e1" fontSize="9" fontWeight="700">PROJECT</text>
+                      {['Plano', 'Equipos', 'Muros', 'MEP', 'Evidencia'].map((label, index) => (
+                        <g key={label}>
+                          <rect x="16" y={40 + index * 24} width="68" height="14" rx="2" fill={index === 2 ? '#312e81' : '#334155'} stroke="#64748b" />
+                          <circle cx="23" cy={47 + index * 24} r="3" fill={index === 0 ? '#38bdf8' : index === 1 ? '#ef4444' : index === 2 ? '#22c55e' : index === 3 ? '#06b6d4' : '#f59e0b'} />
+                          <text x="31" y={50 + index * 24} fill="#e5e7eb" fontSize="7">{label}</text>
+                        </g>
+                      ))}
+                      <rect x="112" y="12" width="286" height="28" rx="4" fill="#1f2937" stroke="#475569" />
+                      {['Diseno', 'Equipo', 'Blindaje', 'Verificar', 'Memoria'].map((label, index) => (
+                        <g key={label}>
+                          <rect x={122 + index * 54} y="20" width="44" height="12" rx="2" fill="#334155" stroke="#64748b" />
+                          <text x={129 + index * 54} y="28" fill="#e5e7eb" fontSize="6">{label}</text>
+                        </g>
+                      ))}
+                      <polygon points="178,80 270,50 354,86 258,126" fill="#374151" stroke="#94a3b8" strokeWidth="2" />
+                      <polygon points="198,88 268,66 331,91 257,115" fill="#f87171" opacity="0.82" stroke="#fecaca" />
+                      <polygon points="198,88 257,115 257,151 198,124" fill="#475569" stroke="#94a3b8" />
+                      <polygon points="257,115 331,91 331,128 257,151" fill="#334155" stroke="#94a3b8" />
+                      <polygon points="218,96 265,82 306,98 258,112" fill="#111827" stroke="#e5e7eb" strokeWidth="1.5" />
+                      <rect x="238" y="91" width="38" height="16" rx="7" fill="#d1d5db" stroke="#f8fafc" />
+                      <circle cx="257" cy="99" r="8" fill="#9ca3af" stroke="#f8fafc" />
+                      <path d="M257 99 L342 77" stroke="#60a5fa" strokeWidth="2" markerEnd="url(#f451-arrow)" />
+                      <path d="M258 113 C290 128 311 142 340 158" stroke="#06b6d4" strokeWidth="2" strokeDasharray="5 3" markerEnd="url(#f451-arrow)" />
+                      <path d="M198 124 L161 154" stroke="#f59e0b" strokeWidth="2" strokeDasharray="2 3" markerEnd="url(#f451-arrow)" />
+                      <rect x="333" y="63" width="74" height="24" rx="3" fill="#0f172a" stroke="#60a5fa" />
+                      <text x="340" y="74" fill="#bfdbfe" fontSize="7" fontWeight="700">Primary beam</text>
+                      <text x="340" y="82" fill="#dbeafe" fontSize="6">formulaId + P/T/U/W</text>
+                      <rect x="337" y="146" width="74" height="25" rx="3" fill="#082f49" stroke="#06b6d4" />
+                      <text x="344" y="157" fill="#cffafe" fontSize="7" fontWeight="700">MEP sleeves</text>
+                      <text x="344" y="165" fill="#e0f2fe" fontSize="6">penalty + continuity</text>
+                      <rect x="118" y="146" width="68" height="25" rx="3" fill="#451a03" stroke="#f59e0b" />
+                      <text x="125" y="157" fill="#fde68a" fontSize="7" fontWeight="700">Maze route</text>
+                      <text x="125" y="165" fill="#fef3c7" fontSize="6">indirect path</text>
+                      <rect x="418" y="12" width="92" height="126" rx="4" fill="#1f2937" stroke="#475569" />
+                      <text x="428" y="27" fill="#cbd5e1" fontSize="9" fontWeight="700">PROPERTIES</text>
+                      {f449ToF453BimMemoryVisual.traceBindings.slice(0, 5).map((binding, index) => (
+                        <g key={binding.id}>
+                          <rect x="428" y={38 + index * 18} width="70" height="11" rx="2" fill={binding.status === 'ready' ? '#064e3b' : '#78350f'} />
+                          <text x="434" y={46 + index * 18} fill={binding.status === 'ready' ? '#bbf7d0' : '#fde68a'} fontSize="6">{binding.label}</text>
+                        </g>
+                      ))}
+                      <rect x="418" y="148" width="92" height="48" rx="4" fill="#0f172a" stroke="#64748b" />
+                      <text x="428" y="162" fill="#cbd5e1" fontSize="8" fontWeight="700">Evidence</text>
+                      {['NCRP', 'IAEA', 'AAPM', 'UAQ'].map((label, index) => (
+                        <g key={label}>
+                          <rect x={428 + index * 19} y="170" width="16" height="12" rx="2" fill="#312e81" stroke="#818cf8" />
+                          <text x={431 + index * 19} y="178" fill="#e0e7ff" fontSize="5">{label}</text>
+                        </g>
+                      ))}
+                      <rect x="112" y="203" width="386" height="28" rx="4" fill="#0f172a" stroke="#475569" />
+                      {['Plano', 'Equipo', 'Barreras', 'Calculo', 'Citas', 'PDF'].map((label, index) => (
+                        <g key={label}>
+                          <circle cx={135 + index * 68} cy="217" r="8" fill={index < 4 ? '#065f46' : '#312e81'} stroke="#cbd5e1" />
+                          <text x={126 + index * 68} y="235" fill="#cbd5e1" fontSize="6">{label}</text>
+                          {index < 5 ? <path d={`M${143 + index * 68} 217 L${194 + index * 68} 217`} stroke="#94a3b8" strokeWidth="1.5" markerEnd="url(#f451-arrow)" /> : null}
+                        </g>
+                      ))}
+                      <defs>
+                        <marker id="f451-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                          <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8" />
+                        </marker>
+                      </defs>
+                    </svg>
+                    <div data-testid="f449-trace-bindings" className="mt-1 grid grid-cols-2 gap-1">
+                      {f449ToF453BimMemoryVisual.traceBindings.map((binding) => (
+                        <span key={binding.id} className={`truncate rounded px-1 py-0.5 text-[7px] ${binding.status === 'ready' ? 'bg-emerald-950/50 text-emerald-200' : 'bg-amber-950/50 text-amber-200'}`} title={`${binding.calculationTrace} | ${binding.standard} | ${binding.memorySection}`}>
+                          {binding.label}:{binding.status === 'ready' ? 'ok' : 'data'}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f450-citation-bindings" className="mt-1 flex flex-wrap gap-1">
+                      {f449ToF453BimMemoryVisual.citationBindings.map((binding) => (
+                        <span key={binding.id} className={`rounded border px-1 py-0.5 text-[7px] ${binding.status === 'ready' ? 'border-indigo-700 text-indigo-200' : 'border-amber-700 text-amber-200'}`} title={`${binding.citationRule} Hash: ${binding.hashRule}`}>
+                          {binding.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f451-visual-adaptations" className="mt-1 flex flex-wrap gap-1">
+                      {f449ToF453BimMemoryVisual.visualAdaptations.map((adaptation) => (
+                        <span key={adaptation.id} className="rounded bg-slate-800 px-1 py-0.5 text-[7px] text-slate-200" title={`${adaptation.fromReference} -> ${adaptation.adaptedToRadShield}`}>
+                          {adaptation.canvasLayer}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f452-graphic-panels" className="mt-1 flex flex-wrap gap-1">
+                      {f449ToF453BimMemoryVisual.graphicPanels.map((panel) => (
+                        <span key={panel.id} className="rounded border border-sky-700 px-1 py-0.5 text-[7px] text-sky-200" title={`${panel.purpose} Acciones: ${panel.connectedActions.join(', ')}`}>
+                          {panel.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-testid="f453-release-handoff" className="mt-1 truncate text-[8px] text-slate-300" title={f449ToF453BimMemoryVisual.releaseHandoff.map((item) => `${item.label}: ${item.acceptance}`).join(' | ')}>
+                      {f449ToF453BimMemoryVisual.boardSubtitle}
+                    </div>
+                  </div>
                   <div data-testid="f412-bim-roundtrip-gates" className="mt-2 flex flex-wrap gap-1">
                     {f411BimMethodology.roundtripGates.slice(0, 4).map((gate) => (
                       <span
@@ -3547,6 +3666,34 @@ export default function CanvasArea({
                 </span>
                 <span className="text-[7px] text-slate-400 truncate">
                   QA fuerte canvas
+                </span>
+              </div>
+              <div
+                data-testid="f449-f453-bim-memory-visual-row"
+                className="px-2.5 py-1 border-b border-slate-100 flex items-center gap-1.5 overflow-hidden"
+                title={f449ToF453BimMemoryVisual.releaseDecision}
+              >
+                <span className={`text-[8px] font-bold rounded px-1.5 py-0.5 shrink-0 ${
+                  f449ToF453BimMemoryVisual.status === 'bim-memory-visual-ready'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                }`}>
+                  F449-F453
+                </span>
+                <span data-testid="f449-trace-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f449ToF453BimMemoryVisual.traceBindings.filter((binding) => binding.status === 'ready').length}/{f449ToF453BimMemoryVisual.traceBindings.length} traces
+                </span>
+                <span data-testid="f450-citation-ready-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f449ToF453BimMemoryVisual.citationBindings.filter((binding) => binding.status === 'ready').length}/{f449ToF453BimMemoryVisual.citationBindings.length} citas
+                </span>
+                <span data-testid="f451-visual-adaptation-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f449ToF453BimMemoryVisual.visualAdaptations.length} adaptaciones
+                </span>
+                <span data-testid="f452-panel-count" className="text-[7px] rounded border px-1 py-0.5 whitespace-nowrap bg-slate-50 text-slate-600 border-slate-100">
+                  {f449ToF453BimMemoryVisual.graphicPanels.length} paneles
+                </span>
+                <span className="text-[7px] text-slate-400 truncate">
+                  BIM grafico + Memoria IA
                 </span>
               </div>
               <div

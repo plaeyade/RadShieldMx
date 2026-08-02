@@ -1,5 +1,37 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F449-F453 - Tablero BIM grafico para Memoria IA
+
+F449-F453 agrega una vista BIM dentro del canvas para explicar y revisar el blindaje como un modelo clinico-constructivo, no solo como lineas de plano.
+
+Que muestra:
+
+1. **Project Manager:** lista conceptual de plano, equipos, muros, MEP y evidencia.
+2. **Corte del bunker:** compara la sala visible con la estructura real de blindaje.
+3. **Roles de muros:** primaria, secundaria, laberinto, puerta, penetraciones y carga estructural.
+4. **Propiedades:** cada rol se conecta con formula, norma, seccion de memoria y evidencia.
+5. **Evidencia normativa:** NCRP, IAEA, AAPM/UAQ, fuente de material y fabricante.
+6. **Flujo a memoria:** plano -> equipo -> barreras -> calculo -> citas -> PDF.
+
+Uso practico para disenar una memoria analitica:
+
+1. Cargue o dibuje el plano base.
+2. Coloque el equipo/fuente: LINAC, Gamma Knife, ciclotron, PET/CT, braquiterapia u otra modalidad.
+3. Clasifique barreras: primaria, secundaria, laberinto, puerta y penetraciones MEP.
+4. Revise el tablero BIM: confirme que cada superficie tenga rol, calculo esperado, norma y evidencia.
+5. Ejecute calculo y revise advertencias: TVL sin fuente, material sin densidad validada, penetracion sin continuidad o carga estructural pendiente.
+6. Abra Memoria IA/Evidence Pack para generar el texto tecnico, anexos, capturas y citas.
+
+Interpretacion visual:
+
+- Rojo: barrera primaria y direccion del haz.
+- Ambar: laberinto o trayectoria indirecta.
+- Azul/cian: ductos, sleeves, penetraciones y continuidad MEP.
+- Morado/indigo: evidencia, citas y estado de memoria.
+- Verde: trazas listas para memoria o QA.
+
+La vista BIM no reemplaza la revision del fisico medico/RSO ni certifica por si sola el blindaje. Sirve como tablero de coordinacion para que el plano, calculo, materiales, citas y reporte hablen el mismo idioma.
+
 ## Addendum F446-F448 - QA fuerte del canvas antes de release
 
 F446-F448 no agrega una herramienta nueva; agrega una compuerta para confirmar que el canvas sigue usable despues de los overlays y mejoras CAD/BIM.
