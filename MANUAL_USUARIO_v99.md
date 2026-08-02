@@ -1,5 +1,49 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F500 - Live gate regulatorio/materiales
+
+F500 revisa si el paquete F499 ya puede pasar a seed live controlado. No escribe en la base de datos.
+
+Comandos:
+
+```text
+npm run prepare:f500:regulatory-materials-live-gate
+npm run test:f500:regulatory-materials-live-gate
+```
+
+Para consultar la DB real:
+
+```text
+F500_DB_READBACK=1 npm run prepare:f500:regulatory-materials-live-gate
+```
+
+En Windows PowerShell:
+
+```text
+$env:F500_DB_READBACK="1"
+npm run prepare:f500:regulatory-materials-live-gate
+Remove-Item Env:\F500_DB_READBACK
+```
+
+F500 valida:
+
+1. Que exista el manifiesto F499.
+2. Que no haya IDs duplicados en fuentes, materiales, versiones o links.
+3. Que F153 tenga restore probe listo.
+4. Que `DATABASE_URL` apunte a la DB correcta si se solicita readback.
+5. Que existan `regulatory_sources`, `material_constants`, `material_value_versions`, `material_source_links` y `document_chunks`.
+6. Que queden identificadas las fuentes con page/hash pendiente y los valores `review-required`.
+
+Artefactos:
+
+```text
+outputs/f500_regulatory_materials_live_gate/
+  f500_live_gate_manifest.json
+  f500_live_gate.md
+```
+
+Regla de seguridad: F500 no ejecuta `INSERT`, `DELETE` ni seed live. Si el manifiesto queda en `blocked`, primero se corrigen tablas, restore probe, duplicados, page/hash o aprobaciones. La escritura transaccional queda para F501.
+
 ## Addendum F499 - Seed dry-run regulatorio/materiales
 
 F499 toma la DB regulatoria/materiales versionada de F491-F498 y genera archivos de seed revisables sin escribir en DB live.

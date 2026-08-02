@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F500 (2026-08-01) - Live gate DB regulatoria/materiales
+
+- F500 agrega `src/lib/f500RegulatoryMaterialsLiveGate.ts`.
+- Verifica el paquete F499 antes de permitir seed live: integridad, duplicados, fuentes con page/hash pendiente, valores `review-required`, restore probe F153 y tablas requeridas.
+- Agrega `scripts/f500-regulatory-materials-live-gate.mjs`.
+- Artefactos: `outputs/f500_regulatory_materials_live_gate/f500_live_gate_manifest.json` y `outputs/f500_regulatory_materials_live_gate/f500_live_gate.md`.
+- Comandos: `npm run prepare:f500:regulatory-materials-live-gate` y `npm run test:f500:regulatory-materials-live-gate`.
+- Readback opcional: configurar `DATABASE_URL` y ejecutar con `F500_DB_READBACK=1`.
+- F500 no inserta ni borra filas. La escritura queda para F501 con transaccion, flags explicitos y readback post-seed.
+
 # F499 (2026-08-01) - Seed dry-run DB regulatoria/materiales
 
 - F499 agrega `src/lib/f499RegulatoryMaterialsSeedDryRun.ts`.

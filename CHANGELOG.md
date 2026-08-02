@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F500 (2026-08-01) - Live gate DB regulatoria/materiales
+
+- Agrega `src/lib/f500RegulatoryMaterialsLiveGate.ts` como contrato de preflight posterior a F499.
+- Agrega `scripts/f500-regulatory-materials-live-gate.mjs` para verificar integridad de artefactos F499, duplicados, restore probe F153 y readback opcional de DB.
+- Produce `outputs/f500_regulatory_materials_live_gate/f500_live_gate_manifest.json` y `f500_live_gate.md`.
+- F500 no ejecuta `INSERT` ni `DELETE`; la escritura live queda para F501 con flags explicitos, restore probe y revision aprobada.
+- Si se define `F500_DB_READBACK=1` y `DATABASE_URL`, consulta `information_schema.tables` y conteos de tablas requeridas.
+
 # F499 (2026-08-01) - Seed dry-run DB regulatoria/materiales
 
 - Agrega `src/lib/f499RegulatoryMaterialsSeedDryRun.ts` para transformar el registro F491-F498 en filas candidatas de seed.
