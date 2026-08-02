@@ -1,3 +1,24 @@
+# Manual de Usuario RadShield-MX - F516d
+
+## Addendum F516d - Manual reconstruido y acciones reales del canvas
+
+El manual HTML fue reconstruido desde cero en `public/manual_usuario.html` para cubrir usuarios basicos, intermedios y avanzados. La estructura nueva documenta el flujo real `plano -> modalidad -> equipo -> barreras -> materiales -> calculo -> verificacion -> Memoria IA -> Evidence Pack/PDF`, con tablas para cada boton, menu y accion relevante.
+
+F516d tambien conecta una accion real adicional del canvas al event harness: `Canvas CAD -> Ajustar vista` desde el menu de boton derecho. La accion conserva la implementacion estable `onZoomToFit`, pero ahora registra `fit-view` en el harness y queda cubierta por E2E. F516c mantiene `Medir/cota` como `activate-tool` y F515b mantiene zoom con `Ctrl/Meta + rueda` como `zoom-view`.
+
+Archivos documentales vigentes:
+
+- `public/manual_usuario.html`: manual operativo por perfil de usuario.
+- `public/manual_versiones.html`: manual de versiones y trazabilidad boton/version.
+- `MANUAL_USUARIO_v99.md`: addendums tecnicos del usuario.
+- `MANUAL_VERSIONES_v50.md`: control de versiones en Markdown.
+
+Uso recomendado:
+
+1. Usuario basico: usar `Archivo`, DX/TX/NM/CY, `Calc`, `Mem`, `Evidencia` y `Manual`.
+2. Usuario intermedio: validar canvas, barreras, materiales, ocupacion, heatmap y warnings.
+3. Usuario avanzado: revisar RAG/OCR, hashes, QA numerico, DB tecnica, motores externos y rollback.
+
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
 ## Addendum F515/F519 - Canvas events y QA numerico

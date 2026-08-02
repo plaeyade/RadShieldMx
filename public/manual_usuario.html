@@ -1,1941 +1,302 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>RadShield-MX F515-F520 - Manual de Usuario y Control de Versiones</title>
-<style>
-body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
-@page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
-@page :first { margin: 0; @top-center { content: none; } @bottom-center { content: none; } }
-@page cover { @top-center { content: none; } @bottom-center { content: none; } }
-@page toc { @top-center { content: none; } @bottom-center { content: none; } }
-body { string-set: doctitle ""; }
-h1 { string-set: doctitle content(); }
-
-.cover { page: cover; width: 210mm; height: 297mm; margin: 0; position: relative; overflow: hidden; page-break-after: always; background: #fafbfc; }
-.cover::before { content: ''; position: absolute; top: 20mm; left: 20mm; right: 20mm; bottom: 20mm; border: 2px solid #1a365d; }
-.cover::after { content: ''; position: absolute; top: 25mm; left: 25mm; right: 25mm; bottom: 25mm; border: 1px solid #3182ce; }
-.cover-accent { position: absolute; top: 60mm; left: 0; width: 85mm; height: 6px; background: #1a365d; }
-.cover-accent2 { position: absolute; top: 68mm; left: 0; width: 55mm; height: 3px; background: #3182ce; }
-.cover-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 70%; }
-.cover-title { font-size: 32pt; font-weight: 700; color: #1a365d; margin-bottom: 0.4cm; letter-spacing: 1px; }
-.cover-subtitle { font-size: 14pt; color: #4a5568; margin-bottom: 2cm; font-weight: 400; }
-.cover-version { display: inline-block; background: #1a365d; color: white; padding: 0.2cm 0.8cm; font-size: 11pt; font-weight: 600; margin-bottom: 1.5cm; }
-.cover-meta { font-size: 11pt; color: #4a5568; line-height: 2; }
-.cover-footer { position: absolute; bottom: 40mm; left: 30mm; right: 30mm; text-align: center; font-size: 9pt; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 0.5cm; }
-
-.toc-page { page: toc; page-break-after: always; }
-.toc-title { font-size: 20pt; font-weight: 700; color: #1a365d; margin-bottom: 1cm; text-align: center; }
-.toc { list-style: none; padding: 0; }
-.toc li { margin: 0.15cm 0; }
-.toc a { color: #333; text-decoration: none; display: block; }
-.toc a::after { content: leader('.') target-counter(attr(href url), page); }
-.toc .toc-part { font-weight: 700; font-size: 11pt; color: #1a365d; margin-top: 0.5cm; }
-.toc .toc-l1 { font-weight: 600; font-size: 10.5pt; padding-left: 0.5cm; }
-.toc .toc-l2 { font-size: 10pt; padding-left: 1.5cm; }
-
-h1 { font-size: 20pt; font-weight: 700; color: #1a365d; margin-top: 1cm; margin-bottom: 0.5cm; page-break-after: avoid; border-bottom: 2px solid #1a365d; padding-bottom: 0.2cm; }
-h2 { font-size: 14pt; font-weight: 700; color: #2d3748; margin-top: 0.8cm; margin-bottom: 0.3cm; page-break-after: avoid; }
-h3 { font-size: 12pt; font-weight: 600; color: #4a5568; margin-top: 0.5cm; margin-bottom: 0.2cm; page-break-after: avoid; }
-h4 { font-size: 11pt; font-weight: 600; color: #4a5568; margin-top: 0.3cm; margin-bottom: 0.15cm; page-break-after: avoid; }
-
-.part-divider { page-break-before: always; background: #1a365d; color: white; padding: 1.5cm 2cm; margin: 0 -2cm; font-size: 24pt; font-weight: 700; text-align: center; letter-spacing: 2px; }
-
-pre, code { font-family: 'Courier New', monospace; font-size: 9.5pt; background: #f5f5f5; }
-pre { padding: 0.4cm; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; max-width: 100%; }
-code { padding: 0.05cm 0.15cm; word-break: break-word; }
-
-.info-box { border-left: 4px solid #3182ce; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #ebf8ff; }
-.info-box-title { font-weight: 600; color: #1a365d; }
-.warn-box { border-left: 4px solid #d69e2e; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #fffff0; }
-.new-box { border-left: 4px solid #38a169; padding: 0.4cm 0.6cm; margin: 0.4cm 0; background: #f0fff4; }
-.new-box-title { font-weight: 600; color: #22543d; }
-
-ul, ol { margin: 0.3cm 0; padding-left: 1cm; }
-li { margin: 0.1cm 0; }
-
-a { word-break: break-all; color: #1a365d; }
-.section-break { page-break-before: always; }
-
-.version-table { font-size: 9pt; width: 100%; border-collapse: collapse; }
-.version-table thead tr { border-top: 2px solid #333; border-bottom: 1px solid #333; background: #f7fafc; }
-.version-table th { padding: 0.2cm 0.15cm; text-align: left; font-weight: 600; }
-.version-table tbody tr { border-bottom: 0.5px solid #ddd; }
-.version-table tbody tr:last-child { border-bottom: 2px solid #333; }
-.version-table td { padding: 0.15cm 0.15cm; vertical-align: top; }
-.version-table tbody tr { page-break-inside: avoid; }
-
-.ref-table { font-size: 9pt; width: 100%; border-collapse: collapse; }
-.ref-table thead tr { border-top: 2px solid #333; border-bottom: 1px solid #333; background: #f7fafc; }
-.ref-table th { padding: 0.2cm 0.15cm; text-align: left; font-weight: 600; }
-.ref-table tbody tr { border-bottom: 0.5px solid #ddd; }
-.ref-table tbody tr:last-child { border-bottom: 2px solid #333; }
-.ref-table td { padding: 0.15cm 0.15cm; vertical-align: top; }
-
-.steps { counter-reset: step; list-style: none; padding-left: 0; }
-.steps li { counter-increment: step; padding: 0.3cm 0 0.3cm 1.5cm; position: relative; border-bottom: 1px solid #f0f0f0; }
-.steps li::before { content: counter(step); position: absolute; left: 0; top: 0.3cm; width: 1cm; height: 1cm; background: #1a365d; color: white; border-radius: 50%; text-align: center; line-height: 1cm; font-size: 10pt; font-weight: 700; }
-
-.screenshot-desc { font-style: italic; color: #666; font-size: 10pt; border-left: 3px solid #ccc; padding-left: 0.5cm; margin: 0.3cm 0; }
-
-pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-box; }
-.katex-display { overflow-x: auto; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RadShield-MX F516d - Manual de Usuario</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #667085;
+      --line: #d9e2ef;
+      --soft: #f6f8fb;
+      --brand: #f97316;
+      --blue: #2563eb;
+      --green: #059669;
+      --violet: #7c3aed;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, #fff7ed, #eef6ff 62%, #f8fafc);
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 28px 80px; }
+    h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: .2px; }
+    h2 { margin-top: 34px; padding-bottom: 7px; border-bottom: 2px solid var(--line); font-size: 22px; }
+    h3 { margin-top: 24px; font-size: 17px; }
+    h4 { margin: 18px 0 8px; font-size: 14px; color: #344054; }
+    p { margin: 8px 0 12px; }
+    a { color: #1d4ed8; }
+    code { padding: 2px 5px; border-radius: 4px; background: #eef2f7; font-family: Consolas, monospace; font-size: .92em; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #344054;
+    }
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+      margin: 18px 0 22px;
+    }
+    .toc a, .card {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px 14px;
+      text-decoration: none;
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .note, .warn, .ok {
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #eff6ff;
+    }
+    .warn { border-left-color: var(--danger); background: #fff1f2; }
+    .ok { border-left-color: var(--green); background: #ecfdf5; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 8px 9px; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; color: #475467; }
+    tr:nth-child(even) td { background: #fcfdff; }
+    .kbd { border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; background: #fff; font-size: 12px; }
+    .flow { counter-reset: step; list-style: none; padding-left: 0; }
+    .flow li { counter-increment: step; position: relative; margin: 10px 0; padding: 10px 12px 10px 48px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .flow li::before { content: counter(step); position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: #fff; text-align: center; line-height: 24px; font-weight: 700; }
+    footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media print {
+      header { background: #fff; }
+      main { max-width: none; padding: 16mm; }
+      h2 { break-before: page; }
+      table, .card, .note, .warn, .ok, .flow li { break-inside: avoid; }
+    }
+  </style>
 </head>
 <body>
-
-<!-- COVER -->
-<div class="cover">
-  <div class="cover-accent"></div>
-  <div class="cover-accent2"></div>
-  <div class="cover-content">
-    <div class="cover-version">VERSION F515-F520 POST-BETA</div>
-    <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
-    <p class="cover-subtitle">Manual de Usuario y Control de Versiones</p>
-    <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Professional Radiation Shielding Calculation Platform</p>
-    <div class="cover-meta">
-      <p>Plataforma integral para diseno y calculo de blindajes radiologicos</p>
-      <p>220+ dialogos | 4,062+ modulos | 85,000+ lineas | 90+ referencias</p>
-      <p>18 botones acceso rapido toolbar + sidebar | 5 capas AI</p>
-      <p>Junio 2026</p>
+  <header>
+    <h1>RadShield-MX - Manual de Usuario</h1>
+    <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
+    <div class="meta">
+      <span class="pill">Version de manual: F516d</span>
+      <span class="pill">Fecha: 2026-08-02</span>
+      <span class="pill">Estado: beta tecnica estable</span>
+      <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
     </div>
-  </div>
-  <div class="cover-footer">RadShield-MX &copy; 2026 — C.E. Cardena et al. | Cumplimiento CNSNS, NCRP 151/147, ICRP 103, IAEA SSR-6</div>
-</div>
-
-<!-- TOC -->
-<div class="toc-page">
-  <div class="toc-title">Contenido</div>
-  <ul class="toc">
-    <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
-    <li class="toc-l1"><a href="#sec0">0. Addendum F361-F520 post-beta</a></li>
-    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F511-F514</a></li>
-    <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
-    <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
-
-    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F514)</a></li>
-    <li class="toc-l1"><a href="#sec4">4. Control de Cambios Completo</a></li>
-
-    <li class="toc-part"><a href="#part3">PARTE III: METODOLOGIA CIENTIFICA</a></li>
-    <li class="toc-l1"><a href="#sec5">5. Fundamentos de Blindaje Radiologico</a></li>
-    <li class="toc-l2"><a href="#sec5-1">5.1. Formulas NCRP 147/151</a></li>
-    <li class="toc-l2"><a href="#sec5-2">5.2. Factores de Ocupacion NCRP 147 Table A.1</a></li>
-    <li class="toc-l2"><a href="#sec5-3">5.3. Base de Datos NIST XCOM</a></li>
-    <li class="toc-l1"><a href="#sec6">6. Simulacion Monte Carlo</a></li>
-    <li class="toc-l2"><a href="#sec6-1">6.1. Motor MC Nativo (TypeScript)</a></li>
-    <li class="toc-l2"><a href="#sec6-2">6.2. Validacion Geant4 Gold Standard</a></li>
-    <li class="toc-l1"><a href="#sec7">7. Machine Learning para Blindaje</a></li>
-    <li class="toc-l2"><a href="#sec7-1">7.1. Arquitectura ANN [6-64-32-16-1]</a></li>
-    <li class="toc-l2"><a href="#sec7-2">7.2. Optimizacion Multi-Objetivo</a></li>
-
-    <li class="toc-part"><a href="#part4">PARTE IV: GUIA DE USO DETALLADA</a></li>
-    <li class="toc-l1"><a href="#sec8">8. Primeros Pasos</a></li>
-    <li class="toc-l2"><a href="#sec8-1">8.1. Pantalla de Bienvenida</a></li>
-    <li class="toc-l2"><a href="#sec8-2">8.2. Demo R&amp;F Room</a></li>
-    <li class="toc-l2"><a href="#sec8-3">8.3. Importar Plano Arquitectonico</a></li>
-    <li class="toc-l1"><a href="#sec9">9. Canvas y Herramientas de Dibujo</a></li>
-    <li class="toc-l1"><a href="#sec10">10. Botones NCRP Rapidos (Prim/Sec/Neut/Sky)</a></li>
-    <li class="toc-l1"><a href="#sec11">11. NIST XCOM Attenuation Database</a></li>
-    <li class="toc-l1"><a href="#sec12">12. ML Shielding Predictor (ONNX)</a></li>
-    <li class="toc-l1"><a href="#sec13">13. Multi-Objective Optimizer</a></li>
-    <li class="toc-l1"><a href="#sec14">14. Material Comparison Tool</a></li>
-    <li class="toc-l1"><a href="#sec15">15. OpenCV.js Deteccion Automatica</a></li>
-    <li class="toc-l1"><a href="#sec16">16. Transporte de Material Radiactivo (SSR-6)</a></li>
-    <li class="toc-l1"><a href="#sec17">17. Geant4 Monte Carlo Validacion</a></li>
-    <li class="toc-l1"><a href="#sec18">18. Blindaje de Neutrones</a></li>
-    <li class="toc-l1"><a href="#sec19">19. Spatial Dose Map 2D</a></li>
-    <li class="toc-l1"><a href="#sec20">20. Revit BIM Integration</a></li>
-    <li class="toc-l1"><a href="#sec21">21. Batch Report Exporter</a></li>
-    <li class="toc-l1"><a href="#sec22">22. Regulatory Report Generator</a></li>
-    <li class="toc-l1"><a href="#sec25">25. Guia de Botones del Panel Lateral v113</a></li>
-    <li class="toc-l2"><a href="#sec25-1">25.1. Acciones Rapidas</a></li>
-    <li class="toc-l2"><a href="#sec25-2">25.2. Herramientas de Dibujo</a></li>
-    <li class="toc-l2"><a href="#sec25-3">25.3. Calculo NCRP</a></li>
-    <li class="toc-l2"><a href="#sec25-4">25.4. Analisis</a></li>
-    <li class="toc-l2"><a href="#sec25-5">25.5. Utilidades</a></li>
-    <li class="toc-l2"><a href="#sec25-6">25.6. Entrada/Salida</a></li>
-    <li class="toc-l2"><a href="#sec25-7">25.7. Quick Action Bar</a></li>
-    <li class="toc-l2"><a href="#sec25-8">25.8. Consejos de Uso</a></li>
-
-    <li class="toc-part"><a href="#part5">PARTE V: NORMATIVA Y COMPLIANCE</a></li>
-    <li class="toc-l1"><a href="#sec23">23. Cumplimiento Regulatorio Mexicano</a></li>
-
-    <li class="toc-part"><a href="#part6">PARTE VI: REFERENCIAS Y APENDICES</a></li>
-    <li class="toc-l1"><a href="#sec24">24. Referencias Bibliograficas Completas</a></li>
-    <li class="toc-l1"><a href="#apendice-a">A. Glosario de Terminos</a></li>
-    <li class="toc-l1"><a href="#apendice-b">B. Abreviaturas y Acronimos</a></li>
-    <li class="toc-l1"><a href="#apendice-c">C. Tabla de Iconos del Toolbar</a></li>
-  </ul>
-</div>
-
-<!-- ==================== PARTE I ==================== -->
-<div class="part-divider" id="part1">PARTE I<br><span style="font-size:14pt;font-weight:400;">Introduccion y Fundamentos</span></div>
-
-<h1 id="sec0">0. Addendum F361-F520 post-beta</h1>
-<div class="new-box">
-<span class="new-box-title">F515/F519 - Canvas events y QA numerico ampliado:</span>
-<p>F515 agrega hardening para eventos del canvas sin activar cambios productivos de alto riesgo. La ruta estable de <code>useCanvas</code> sigue siendo canonica; el nuevo contrato valida fallback, coordenadas no finitas, zoom, lasso, snap preview, delete y undo. Tambien deja E2E pendiente para boton derecho, quick actions, drag/geometry commit y undo por hash.</p>
-<p>F519 amplia QA numerico por rol de barrera: primaria, secundaria, laberinto, puerta, penetracion y zona controlada. Cada fixture reporta espesor base, espesor conservador, delta, citas y advertencias. Los resultados siguen preliminares hasta sustituir fixtures por datasets DB-backed con pagina/hash y revision profesional.</p>
-<p>Comandos: <code>npm run prepare:f515-f519:hardening</code> y <code>npm run test:f515-f519:hardening</code>.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F515-F520 - Pendientes post-beta productivos:</span>
-<p>F515-F520 inicia la etapa posterior a beta probada. El orden recomendado es: F515 renderer base/eventos del canvas, F519 QA numerico NCRP/IAEA/UAQ, F520 memorias reales para RAG/IA, F518 DB tecnica ENDF/XCOM/ICRU, F516 Babylon profundo y F517 Unity WebGL real cuando exista build exportado.</p>
-<p>F515 no cambia de golpe el comportamiento estable del canvas: toda accion nueva debe tener fallback, QA visual y rollback. F516 mantiene Babylon como lazy/fallback hasta pasar E2E. F517 exige <code>public/unity/radshield-medical-3d/index.html</code>, <code>Build/*</code> y <code>TemplateData/*</code>. F518 no alimenta calculos sin datasets <code>approved-reference</code>. F520 separa memorias reales como evidencia historica, no como norma primaria.</p>
-<p>Comandos: <code>npm run prepare:f515-f520:post-beta-plan</code> y <code>npm run test:f515-f520:post-beta-plan</code>. Artefactos: <code>outputs/f515_f520_post_beta_plan/f515_f520_post_beta_manifest.json</code> y <code>f515_f520_post_beta_summary.md</code>.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F511-F514 - Cierre beta publicable:</span>
-<p>F511-F514 congela el estado beta, verifica evidencia F508-F510, genera paquete estatico desde <code>dist/</code>, deja checklist de smoke post-deploy y emite decision beta. Comandos: <code>npm run build</code>, <code>npm run prepare:f511-f514:beta-closure</code> y <code>npm run test:f511-f514:beta-closure</code>.</p>
-<p>Artefactos: <code>outputs/f511_f514_beta_closure/f511_f514_beta_closure_manifest.json</code>, <code>f511_f514_beta_closure_summary.md</code>, <code>radshield-mx-f511-f514-beta.zip</code> y <code>f513_post_deploy_smoke_checklist.csv</code>. Permitido: prueba real de usuario y calculo preliminar con advertencias. Bloqueado: memoria firmada, calculo clinico certificado o dictamen final sin revision FM/RSO.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F510 - TVL PET/DX suplementarios en DB live:</span>
-<p>F510 promueve dos valores faltantes a <code>material_value_versions</code>: <code>lead-cast/tvl-primary/511keV = 11.8 mm</code> y <code>lead-cast/tvl-diagnostic/120kVp = 0.27 mm</code>. Ambos quedan como <code>approved-reference</code> y <code>allowed_use=calculation</code>, ligados a <code>src-norm-lead-cast</code> con page/hash ya sembrado.</p>
-<p>La escritura live requiere <code>F510_DB_READBACK=1</code>, <code>F510_SEED_LIVE=1</code>, <code>F510_CONFIRM_EXACT_VALUES=1</code>, <code>F510_CONFIRM_RESTORE_PROBE=1</code> y <code>DATABASE_URL</code>. El script inserta solo filas faltantes y hace rollback si encuentra conflicto. Artefactos: <code>outputs/f510_diagnostic_pet_tvl_promotion</code>. Despues se repite F508-F509 para confirmar que PET 511 keV y DX 120 kVp pasan.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F508-F509 - Post-seed readback y QA DB-backed:</span>
-<p>F508 lee las tablas live con <code>F508_DB_READBACK=1</code> y valida conteos post-seed: 12 fuentes, 8 materiales, 106 valores y 24 links como minimo. Revisa que los valores sembrados sean <code>approved-reference</code>, <code>allowed_use=calculation</code> y que tengan fuente/pagina/hash.</p>
-<p>F509 ejecuta QA con valores reales de DB para LINAC 6 MV, LINAC 15 MV y Gamma Knife/Co-60. PET 511 keV, CT/RX diagnostico y ciclotron quedan en revision cuando falta el valor exacto versionado. Artefactos: <code>outputs/f508_f509_post_seed_qa</code>.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F506-F507 - Trazabilidad page/hash y seed controlado:</span>
-<p>F506 lee <code>document_chunks</code> con <code>F506_DB_READBACK=1</code> para resolver fuente, pagina, hash de contenido y chunk coincidente. Produce <code>f506_resolved_regulatory_sources.jsonl</code> y <code>f506_unresolved_review_queue.csv</code>.</p>
-<p>F507 genera un seed plan con solo filas <code>approved-reference</code>. El seed live requiere <code>F507_SEED_LIVE=1</code>, <code>F507_CONFIRM_APPROVED_ONLY=1</code>, <code>F507_CONFIRM_RESTORE_PROBE=1</code> y <code>DATABASE_URL</code>. Si las tablas ya tienen filas o falla un insert, se hace rollback. No ejecuta deletes ni updates.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F505 - Aplicacion controlada del schema DB:</span>
-<p>F505 aplica el schema regulatorio/materiales solo con compuertas explicitas. El comando normal <code>npm run prepare:f505:regulatory-materials-schema</code> corre en dry-run. Para aplicar a MySQL se requiere <code>F505_APPLY_SCHEMA=1</code>, <code>F505_CONFIRM_RESTORE_PROBE=1</code> y <code>DATABASE_URL</code>.</p>
-<p>El script solo permite <code>CREATE TABLE IF NOT EXISTS</code> y bloquea <code>INSERT</code>, <code>DELETE</code>, <code>DROP</code>, <code>TRUNCATE</code>, <code>ALTER</code>, <code>UPDATE</code> y <code>REPLACE</code>. Despues de aplicar se debe repetir F500 con <code>F500_DB_READBACK=1</code>.</p>
-</div>
-
-<div class="new-box">
-<span class="new-box-title">F501-F504 - DB schema y assets pesados reales:</span>
-<p>F501-F504 prepara schema DB y entrada de assets pesados sin seed live automatico. El schema revisable esta en <code>db/f501_f504_regulatory_materials_schema.sql</code> y crea <code>regulatory_sources</code>, <code>material_constants</code>, <code>material_value_versions</code> y <code>material_source_links</code>.</p>
-<p>Assets fotorealistas: copiar HDRI, texturas PBR y decals en <code>public/medical3d/photoreal</code>. Unity WebGL real: copiar <code>index.html</code>, <code>Build/*.loader.js</code>, <code>Build/*.framework.js</code>, <code>Build/*.data</code>, <code>Build/*.wasm</code> y <code>TemplateData/*</code> en <code>public/unity/radshield-medical-3d</code>.</p>
-<p>Comandos: <code>npm run prepare:f501-f504:heavy-assets-db</code> y <code>npm run test:f501-f504:heavy-assets-db</code>. Para activar Unity local se requiere <code>VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true</code>. Si se hospeda fuera, usar <code>VITE_MEDICAL_3D_UNITY_WEBGL_URL</code>.</p>
-</div>
-
-<div class="new-box">
-<span class="new-box-title">F500 - Live gate regulatorio/materiales:</span>
-<p>F500 verifica si los artefactos F499 pueden pasar a seed live controlado. Revisa manifiesto, duplicados, restore probe F153, readback opcional de DB y tablas requeridas: <code>regulatory_sources</code>, <code>material_constants</code>, <code>material_value_versions</code>, <code>material_source_links</code> y <code>document_chunks</code>.</p>
-<p>Comandos: <code>npm run prepare:f500:regulatory-materials-live-gate</code> y <code>npm run test:f500:regulatory-materials-live-gate</code>. Para consultar DB real usar <code>F500_DB_READBACK=1</code> con <code>DATABASE_URL</code>. F500 no ejecuta inserts ni deletes; la escritura transaccional queda para F501.</p>
-</div>
-
-<div class="new-box">
-<span class="new-box-title">F499 - Seed dry-run regulatorio/materiales:</span>
-<p>F499 genera archivos revisables para poblar la DB regulatoria/materiales sin escribir en DB live. Produce JSONL, CSV, SQL draft, Markdown y manifiesto en <code>outputs/f499_regulatory_materials_seed_dry_run</code>.</p>
-<p>Tablas candidatas: <code>regulatory_sources</code>, <code>material_constants</code>, <code>material_value_versions</code> y <code>material_source_links</code>. Si se intenta <code>F499_SEED_LIVE=1</code>, el script aborta. La escritura real queda para F500 con aprobacion, restore probe y revision de duplicados.</p>
-</div>
-
-<div class="new-box">
-<span class="new-box-title">F491-F498 - DB regulatoria/materiales versionada:</span>
-<p>F491-F498 consolida fuentes y materiales en una base versionable: <code>regulatory_sources</code>, <code>material_constants</code>, <code>material_value_versions</code>, <code>material_source_links</code> y <code>document_chunks</code>. Cada TVL/HVL/densidad/costo/carga debe tener fuente, pagina, hash, estado de revision y uso permitido.</p>
-<p>Regla de calculo: solo valores <code>approved-reference</code> pueden alimentar constantes finales. Datos de proveedor, laboratorio o memorias previas quedan como evidencia hasta revision profesional y promocion controlada.</p>
-<p>Ruta live: configurar <code>DATABASE_URL</code>, correr seed dry-run, revisar duplicados, hacer restore probe, ejecutar readback de <code>document_chunks</code> y repetir F484-F490 despues del seed.</p>
-</div>
-
-<div class="new-box">
-<span class="new-box-title">F484-F490 - Motor calculo QA NCRP/IAEA/UAQ:</span>
-<p>F484-F490 agrega una compuerta de QA numerico para el motor de calculo: LINAC 6 MV primario, LINAC 15 MV con neutrones, CT/RX NCRP147, Gamma Knife/Co-60, PET/NM TG-108 y ciclotron 18 MeV. Estos casos sirven para beta preliminar y regresion tecnica; una memoria clinica firmable requiere termino fuente, TVL/densidad, ocupacion, penetraciones, pagina/hash documental y revision FM/RSO.</p>
-<p><strong>Ruta de assets pesados:</strong> texturas/HDRI/decals en <code>public/medical3d/photoreal</code>; Unity WebGL real en <code>public/unity/radshield-medical-3d</code> con <code>index.html</code>, <code>Build/*</code> y <code>TemplateData/*</code>. Deben cargarse lazy/gated y probarse con QA visual/post-deploy sin cambiar calculos.</p>
-<p><strong>Cobertura F361-F509:</strong> F361-F398 reparacion post-beta y ventanas; F399-F430 renderer/canvas/calc BIM; F431-F454 gates renderer, BIM visual y post-beta; F455-F483 Babylon, Unity handoff y fotorrealismo; F484-F490 QA normativo del motor de calculo; F491-F498 DB regulatoria/materiales versionada; F499 seed dry-run revisable; F500 live gate/readback sin escritura; F501-F504 schema DB e intake de assets pesados; F505 aplicacion controlada de schema; F506-F507 trazabilidad page/hash y seed transaccional aprobado; F508-F509 QA post-seed con valores reales DB.</p>
-</div>
-<div class="new-box">
-<span class="new-box-title">F361 — Reparacion post-beta:</span>
-<p>F361 agrega menu contextual con boton derecho en canvas, ventanas arrastrables/minimizables/expandibles, fallbacks reales para accesos rapidos, correccion de alineacion del menu Archivo y evidencia RAG para el PDF Cyclone KIUBE MID 55672 Rev G.</p>
-<ol>
-<li><strong>Canvas:</strong> clic derecho abre seleccionar, barrera, fuente, medir, ajustar vista, exportar PNG, calcular, evidencia, 3D, duplicar y borrar seleccionado.</li>
-<li><strong>Ventanas:</strong> todo dialogo basado en DialogShell puede desplazarse con mouse, minimizarse, expandirse/restaurarse y cerrarse.</li>
-<li><strong>Archivo:</strong> el menu usa ancho estable y comandos con fallback para proyectos, DXF, STEP, PDF, CNSNS, auditoria, logs, glosario y acerca de.</li>
-<li><strong>Acceso rapido:</strong> Memoria, Evidencia, Validar, Heatmap, DB diferida y Smoke pendiente deben abrir su herramienta aunque falte un handler directo.</li>
-<li><strong>RAG:</strong> el PDF KIUBE se deduplica por SHA-256 y se indexa como evidencia si contiene texto extraible; no reemplaza calculos ya modelados.</li>
-</ol>
-<p><strong>Cobertura F99-F360:</strong> F99-F124 canvas/menus/materiales; F125-F150 calculo/evidencia/release candidate; F151-F181 deploy/DB; F182-F230 recuperacion visual/canvas CAD; F231-F260 manuales/staging/deploy; F261-F292 OCR/RAG/APIs/memorias; F293-F330 3D/motores externos; F331-F360 caso Centro Neuro y beta no certificada.</p>
-</div>
-
-<h1 id="sec1">1. Introduccion a RadShield-MX F508-F509</h1>
-
-<p>RadShield-MX es una plataforma integral de codigo abierto para el diseno, calculo y optimizacion de blindajes radiologicos en instalaciones medicas e industriales. Desarrollada en Mexico, cumple con la normativa de la Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS) asi como con estandares internacionales.</p>
-
-<div class="info-box">
-<span class="info-box-title">VERSION F508-F509 - Estadisticas del proyecto:</span>
-<table style="margin:0.3cm 0;font-size:10pt">
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Modulos:</strong></td><td>4,062+ modulos TypeScript/React</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Dialogos:</strong></td><td>220+ componentes de interfaz</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Lineas de codigo:</strong></td><td>85,000+</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Tests:</strong></td><td>240+ unitarios pasando</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Referencias:</strong></td><td>90+ bibliograficas indexadas</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Capas AI:</strong></td><td>5 (LLM, RAG, ML Predictivo, Computer Vision, Agentes)</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Botones rapidos:</strong></td><td>18 (toolbar + sidebar canvas)</td></tr>
-<tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Idiomas:</strong></td><td>Espanol / Ingles</td></tr>
-</table>
-</div>
-
-<h3>Stack Tecnologico</h3>
-<pre>Frontend:  React 19 + TypeScript + Vite + Tailwind CSS + shadcn/ui
-Backend:   tRPC + Drizzle ORM + Hono + MySQL
-AI/ML:     TensorFlow.js + ONNX Runtime + OpenCV.js
-Canvas:    HTML5 Canvas 2D + SVG overlay
-Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
-
-<h1 id="sec2">2. Requisitos del Sistema</h1>
-
-<table class="version-table">
-<thead><tr><th>Componente</th><th>Minimo</th><th>Recomendado</th></tr></thead>
-<tbody>
-
-<tr><td><strong>Navegador</strong></td><td>Chrome 90+, Firefox 88+, Edge 90+</td><td>Chrome 120+ (optimizado WebGPU)</td></tr>
-<tr><td><strong>RAM</strong></td><td>4 GB</td><td>8 GB+ (MC 10^7, ONNX inference)</td></tr>
-<tr><td><strong>Resolucion</strong></td><td>1366 x 768</td><td>1920 x 1080 o superior</td></tr>
-<tr><td><strong>Almacenamiento</strong></td><td>100 MB (IndexedDB)</td><td>500 MB+ (proyectos + cache)</td></tr>
-<tr><td><strong>Conexion</strong></td><td>No requerida para el bundle estatico</td><td>AI/LLM, Cloud Sync, PACS real, Pyodide CDN y OpenCV CDN son opt-in</td></tr>
-</tbody>
-</table>
-
-<h1 id="sec3">3. Interfaz de Usuario y Navegacion</h1>
-
-<h3>3.1. Estructura de la interfaz</h3>
-<p>La interfaz F361 se organiza en tres areas principales:</p>
-<ol>
-  <li><strong>Toolbar superior</strong>: 18 botones de acceso rapido agrupados en 6 categorias (NCRP, Analisis, Herramientas, I/O, Canvas, Auth).</li>
-  <li><strong>Canvas central</strong>: Area de dibujo interactivo con plano arquitectonico, barreras, fuentes y regiones. Incluye sidebar derecho colapsable con los 18 botones de acceso rapido.</li>
-  <li><strong>Panel de resultados</strong>: Estadisticas, calculos NCRP, reportes y validacion.</li>
-</ol>
-
-<h3>3.2. Los 18 botones de acceso rapido</h3>
-
-<table class="version-table">
-<thead><tr><th>#</th><th>Boton</th><th>Icono</th><th>Color</th><th>Funcion</th><th>Version</th></tr></thead>
-<tbody>
-
-<tr><td>1</td><td>Prim</td><td>ShieldPlus</td><td style="color:#c00">Rojo</td><td>Barrera primaria B=Pd^2/(WUT)</td><td>v99</td></tr>
-<tr><td>2</td><td>Sec</td><td>ShieldAlert</td><td style="color:#e65100">Naranja</td><td>Barrera secundaria scatter+leakage</td><td>v99</td></tr>
-<tr><td>3</td><td>Neut</td><td>Atom</td><td style="color:#1565c0">Azul</td><td>Blindaje neutronico >10 MV</td><td>v99</td></tr>
-<tr><td>4</td><td>Sky</td><td>Wind</td><td style="color:#0277bd">Cielo</td><td>Skyshine Chilton dispersion</td><td>v99</td></tr>
-<tr><td>5</td><td>NIST</td><td>Database</td><td style="color:#2e7d32">Esmeralda</td><td>NIST XCOM atenuacion</td><td>v100</td></tr>
-<tr><td>6</td><td>ML</td><td>Brain</td><td style="color:#6a1b9a">Purpura</td><td>Predictor ONNX espesor</td><td>v101</td></tr>
-<tr><td>7</td><td>IFC</td><td>Building2</td><td style="color:#1565c0">Azul</td><td>Revit IFC import BIM</td><td>v102</td></tr>
-<tr><td>8</td><td>MC</td><td>Atom</td><td style="color:#2e7d32">Verde</td><td>Geant4 Monte Carlo</td><td>v103</td></tr>
-<tr><td>9</td><td>Add-in</td><td>Code</td><td style="color:#283593">Indigo</td><td>Revit Add-in C# template</td><td>v104</td></tr>
-<tr><td>10</td><td>Opt</td><td>TrendingDown</td><td style="color:#00695c">Teal</td><td>Optimizador multi-objetivo</td><td>v105</td></tr>
-<tr><td>11</td><td>Comp</td><td>GitCompareArrows</td><td style="color:#e65100">Naranja</td><td>Comparacion materiales</td><td>v106</td></tr>
-<tr><td>12</td><td>Exp</td><td>FileDown</td><td style="color:#c2185b">Pink</td><td>Exportar reporte batch</td><td>v107</td></tr>
-<tr><td>13</td><td>Map</td><td>Crosshair</td><td style="color:#b71c1c">Rojo</td><td>Mapa dosis espacial 2D</td><td>v108</td></tr>
-<tr><td>14</td><td>Neu</td><td>Atom</td><td style="color:#00838f">Cyan</td><td>Calculadora neutrones</td><td>v109</td></tr>
-<tr><td>15</td><td>Rep</td><td>FileText</td><td style="color:#f57f17">Ambar</td><td>Memoria regulatoria</td><td>v110</td></tr>
-<tr><td>16</td><td>Trans</td><td>Truck</td><td style="color:#4527a0">Violeta</td><td>Transporte SSR-6</td><td>v96</td></tr>
-<tr><td>17</td><td>CV</td><td>ScanEye</td><td style="color:#2e7d32">Esmeralda</td><td>OpenCV deteccion</td><td>v95</td></tr>
-<tr><td>18</td><td>Mover</td><td>Move</td><td style="color:#1565c0">Azul</td><td>Pan/mover canvas</td><td>v96</td></tr>
-</tbody>
-</table>
-
-
-
-<!-- ==================== PARTE II ==================== -->
-<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F509)</span></div>
-
-<h1 id="sec4">4. Control de Cambios Completo v1-F509</h1>
-
-<p>El siguiente historial documenta las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F509, agosto 2026). Las fases F362-F509 se resumen en el addendum post-beta superior para mantener operable el manual sin romper su estructura historica.</p>
-
-<table class="version-table">
-<thead><tr><th style="width:10%">Fase</th><th style="width:12%">Version</th><th style="width:18%">Fecha</th><th>Modulos principales implementados</th></tr></thead>
-<tbody>
-
-
-
-
-<tr><td><strong>F361</strong></td><td>Post-beta Repair</td><td>2026-07-26</td><td>Repara canvas con boton derecho, ventanas movibles/minimizables/expandibles, menu Archivo alineado, accesos rapidos con fallback, Update Center actualizado y evidencia RAG para Cyclone KIUBE MID 55672 Rev G.</td></tr>
-<tr><td><strong>F356-F360</strong></td><td>Beta Release</td><td>2026-07-26</td><td>Release beta operativo no certificado: prueba real, datos faltantes, calculo preliminar trazable, memoria beta y decision de beta condicionada a QA.</td></tr>
-<tr><td><strong>F268-F355</strong></td><td>RAG/OCR/3D/Caso real</td><td>2026-07-25 a 2026-07-26</td><td>Ingestion de memorias reales, OCR local, proveedores externos, Medical 3D con Three/R3F, handoff Unity/Babylon, caso Centro Neuro con ciclotron/Gamma Knife/LINAC y paquetes preliminares.</td></tr>
-<tr><td><strong>F267</strong></td><td>Real Case Smoke Execution</td><td>2026-07-25</td><td>Ejecuta smoke DX/TX/NM con CT, LINAC 6 MV y PET F-18; genera CSV inicial de desviaciones con baseline sintetico F264. Debe sustituirse por memoria/reporte real antes de salida clinica firmada.</td></tr>
-<tr><td><strong>F266</strong></td><td>Real Case Evidence Kit</td><td>2026-07-24</td><td>Agrega kit de evidencia para pruebas reales con checklist por perfil, evidencia minima, CSV de desviaciones y stop rules. Una desviacion blocker/major abierta impide salida clinica firmada aunque el frontend estatico este estable.</td></tr>
-<tr><td><strong>F265</strong></td><td>Real App Testing Protocol</td><td>2026-07-24</td><td>Convierte F264 en protocolo operativo de prueba real por perfiles DX/TX/NM/CY. Exige plano con escala/zonas, equipo/fuente, material con TVL/densidad/peso/costo/carga, calculo trazable, Memoria IA/PDF/Evidence y bitacora de desviaciones. DX/TX/NM deben cerrar sin blocker/major antes de salida clinica firmada; CY puede quedar gated.</td></tr>
-<tr><td><strong>F264</strong></td><td>Real Clinical Trial Gate</td><td>2026-07-24</td><td>Agrega arnes de prueba real para LINAC 6 MV, LINAC 18 MV, CT, PET F-18, Gamma Knife Co-60 y HDR Ir-192. Valida formula, norma, citas, unidades, carga estructural, comparador conservador, cache F196 y warnings clinicos antes de probar proyectos reales.</td></tr>
-<tr><td><strong>F263</strong></td><td>APS DWG Adapter</td><td>2026-07-24</td><td>Agrega adaptador backend seguro para Autodesk Platform Services Design Automation con `cad.apsDwgStatus` y `cad.apsDwgPlan`. Prepara DWG-&gt;DXF con hashes, timeout, limite de tamano, validacion de capas/escala y fallback DXF. Conversion live diferida a F264 hasta credenciales y fixtures DWG no sensibles.</td></tr>
-<tr><td><strong>F261-F262</strong></td><td>DWG Provider + Fixtures</td><td>2026-07-24</td><td>Selecciona APS Design Automation como proveedor primario DWG->DXF; ODA queda como ruta privada enterprise; CloudConvert solo preview; DXF manual como fallback. Crea fixtures/dwg y requiere small-architectural-plan.dwg + equipment-layout.dwg antes de aplicar conversion real al canvas.</td></tr>
-
-<tr><td><strong>F258-F260</strong></td><td>Executable Lanes</td><td>2026-07-24</td><td>F258 agrega event controller v2 aislado y apagado por defecto; F259 agrega contrato externo DWG->DXF/SVG/IFC con fallback DXF; F260 agrega manifest DB/fullstack con DATABASE_URL, TCP, backup, restore probe y backend URL. El frontend estatico puede publicarse sin activar CAD alto riesgo ni DB.</td></tr>
-
-<tr><td><strong>F257-F260</strong></td><td>Full Execution Gate</td><td>2026-07-24</td><td>F257 ejecuta staging CAD con .env.staging-cad.example; F258 queda listo solo con VITE_CANVAS_EVENT_CONTROLLER_V2; F259 define proveedor externo DWG con fallback DXF; F260 queda bloqueado hasta DATABASE_URL, backup, restore probe y backend smoke. Staging full sin feature flags no es recomendable porque elimina rollback.</td></tr>
-
-<tr><td><strong>F256-F260</strong></td><td>Next Phase Roadmap</td><td>2026-07-21</td><td>Orden post-RC: F256 smoke publico del ZIP estatico; F257 staging CAD con flags; F258 renderer/event controller v2 en staging; F259 proveedor DWG externo; F260 DB/fullstack con restore probe y backend smoke. No mezclar deploy, CAD alto riesgo y DB en una sola fase.</td></tr>
-
-<tr><td><strong>F251-F255</strong></td><td>High-Risk CAD Gate</td><td>2026-07-19</td><td>RC/deploy estatico queda como baseline. Se agregan flags apagados por defecto para CAD alto riesgo: renderer/event controller v2, DWG externo, sync 2D/3D, booleanas CAD y heatmaps GPU. Repetir F197/F207/F229/F231-F236/F200 antes y despues; rollback apagando flags y limpiando localStorage.</td></tr>
-
-<tr><td><strong>F248-F250</strong></td><td>Release Candidate Final</td><td>2026-07-19</td><td>F248 smoke publico/static contra URL final; F249 decision DB/fullstack con bloqueo hasta restore probe real, secretos y smoke backend; F250 release candidate final estatico. CAD alto riesgo queda post-RC: renderer/eventos, DWG nativo, sync 2D/3D, booleanas y heatmaps GPU.</td></tr>
-
-<tr><td><strong>F238-F247</strong></td><td>Release Execution CAD/Calculo/Reportes</td><td>2026-07-19</td><td>F238 QA visual/manual; F239 smoke deploy estatico; F240 canvas CAD bajo riesgo; F241 renderer/eventos con feature flag; F242 DXF/DWG convertido y simbolos de equipo; F243 paquete frontend; F244 ledger TVL/HVL versionado; F245 QA numerico; F246 auditoria material costo/tiempo/estructura; F247 checklist de anexos Memoria IA/PDF/Evidence.</td></tr>
-
-<tr><td><strong>F237</strong></td><td>Calculation Engine Governance</td><td>2026-07-19</td><td>Capa unica de gobierno para el motor de calculo: formulaId, norma, inputs, outputs, supuestos, warnings, citationIds, normalizacion de unidades, TVL/HVL versionado, comparador base/conservador, cache F196 y casos numericos LINAC/CT/Gamma Knife/PET/UAQ. F125 alimenta Memoria IA, PDF y Evidence Pack con estado ready/review-required/blocked.</td></tr>
-
-<tr><td><strong>F231-F236</strong></td><td>Canvas Release Coverage</td><td>2026-07-19</td><td>F231 baseline visual/pixel-diff con capturas F229/F207; F232 fixture DXF/DWG con DWG por conversion externa; F233 grip/snap harness; F234 isocontornos y leyenda exportable; F235 handoff 2D/3D de planta, equipos, espesores y snapshots; F236 paquete post-deploy para repetir F154-F158/F202. Motor de calculo recomendado: trazabilidad formula-norma-input-output, normalizacion de unidades, TVL/HVL versionado, comparador base/conservador y QA numerico por modalidad.</td></tr>
-
-<tr><td><strong>F230</strong></td><td>Post-F229 Coverage Gate</td><td>2026-07-19</td><td>Gate operativo para renderer/eventos: F198 menus/botones, F207 funcional, F229 Canvas CAD E2E y F200 release estatico deben pasar antes de modificar renderer base o logica de eventos. Update Center, manuales, changelog y control de cambios quedan sincronizados. Siguientes fases: F231 pixel-diff visual, F232 fixture DXF/DWG, F233 grip/snap exacto, F234 isocontornos numericos, F235 sync 2D/3D y F236 post-deploy.</td></tr>
-
-<tr><td><strong>Prototipo</strong></td><td>v1-v25</td><td>2025 Q3</td><td>Canvas interactivo HTML5 2D. Calculos NCRP 147/151 iniciales (Archer transmission). Primeros 50 dialogos. Sistema de menu 8-categorias (DX/TX/NM/CY basico). Soporte RX, CT, LINAC basico.</td></tr>
-
-<tr><td><strong>Expansion</strong></td><td>v26-v45</td><td>2025 Q4</td><td>Gamma Knife (Co-60 201 fuentes), HDR (Ir-192), Ciclotron (18 MeV). CNSNS reportes y checklist. Monte Carlo integration (GATE, TOPAS). Biblioteca de materiales expandida (concreto baritado, plomo, acero, tungsteno). Sistema de proyectos con gestion completa.</td></tr>
-
-<tr><td><strong>Pre-AI</strong></td><td>v46-v49</td><td>2026 Q1</td><td>WebGPU compute shaders para aceleracion numerica. File System Access API para importar/exportar archivos locales. Broadcast Channel para sincronizacion cross-tab. Service Worker opcional con VITE_ENABLE_SERVICE_WORKER=true. Community templates (plantillas de usuarios).</td></tr>
-
-<tr><td><strong>Core Platform</strong></td><td>v50</td><td>2026-04</td><td>NCRP Validation Suite: 24 casos de validacion vs tablas oficiales NCRP 147/151. CT Scatter Database: 22 modelos de scanner (GE, Siemens, Philips, Canon, Toshiba). AAPM TG 108 PET Shielding. IPEM 109 SPECT Shielding. Therapy Radionuclide Shielding (Lu-177, Y-90, Ac-225). Chilton Skyshine. Decay Chains (Bateman). GMP Certification (59 requisitos). Spatial hashing con Morton codes (50x mas rapido). WebWorker async calculations.</td></tr>
-
-<tr><td><strong>5 Capas AI</strong></td><td>v52-v58</td><td>2026-05</td><td><strong>LLM Integration</strong>: OpenAI/Ollama/LMStudio con streaming chat. <strong>RAG</strong>: Vector store con cosine similarity, 50+ chunks documentales. <strong>ML Predictivo</strong>: TensorFlow.js red neuronal [8-64-32-16-1], 3,000+ datos de entrenamiento NCRP. <strong>Computer Vision</strong>: Canny + Hough wall detection. <strong>Agentes Autonomos</strong>: ShieldingDesign + Validation + CostOptimization. Tests Vitest: 240/240 pasando. Sentry integration. Web Share Target + PWA manifest. WCAG 2.1 AA (SkipToContent, A11yAnnouncer).</td></tr>
-
-<tr><td><strong>Canvas Redesign</strong></td><td>v60-v67</td><td>2026-06-05</td><td>Canvas redisenado estilo SmartDraw. Room Templates: R&amp;F Room, CT, PET/CT, LINAC. SplashScreen con boton Aceptar obligatorio. Tema unificado teal/coral. Ejemplo R&amp;F precargado automaticamente. Auditoria 76/78 items (97%). Boton Nuevo Dibujo.</td></tr>
-
-<tr><td><strong>SmartBarrier+Source</strong></td><td>v82-v86</td><td>2026-06-07</td><td>SmartBarrier AI: calculo NCRP en tiempo real en canvas. SourceSelector: catalogo completo 18 fuentes reales con iconos diferenciados (DX/RT/NM/CY). Canvas tools: layers, shapes, freehand, sticky notes. Room Template Panel con templates clinicos. Update Center v82.</td></tr>
-
-<tr><td><strong>Backend+CI/CD</strong></td><td>v87-v90</td><td>2026-06-07</td><td>GitHub Actions CI/CD: 5 jobs (typecheck, test, build, E2E, deploy). Drizzle ORM + tRPC: 4 tablas (calculations, custom_materials, ml_training_data, reports), 12 routers. ProjectManagerDialog: CRUD proyectos. MaterialLibraryDialog: 6 builtin + personalizados. useBackend: 6 sub-hooks.</td></tr>
-
-<tr><td><strong>Auth+ML v2</strong></td><td>v91-v94</td><td>2026-06-07</td><td>Kimi OAuth 2.0: login/logout en toolbar. ReportManagerDialog: CRUD memorias en la nube. TensorFlow.js v2: red neuronal mejorada. UI animations (fadeIn, slideIn, pulse, scaleIn). Dark mode completo.</td></tr>
-
-<tr><td><strong>OpenCV v1</strong></td><td>v95</td><td>2026-06-07</td><td>OpenCV.js hook: carga opt-in desde VITE_OPENCV_URL o CDN explicito. Pipeline Canny + Hough para deteccion de paredes. Floor Plan Tools: 5 features (AI Timeline, Easy Planning, Electrical, Plumbing, Diagramming). planAnalyzer.ts con deteccion automatica.</td></tr>
-
-<tr><td><strong>Transporte</strong></td><td>v96</td><td>2026-06-08</td><td>RadioactiveTransportDialog: 5 tabs (Categorias I/II/III, Requisitos 12-item, UN/TIPI, Calculadora D=(AG)/d^2, Referencias MX). 8 nuclidos preconfigurados. Botones Toolbar: Transporte, OpenCV, Mover.</td></tr>
-
-<tr><td><strong>OpenCV Canvas</strong></td><td>v97</td><td>2026-06-08</td><td>useOpenCV hook integrado en ShieldingDesigner. detectWalls() con pipeline Canny+Hough+findContours. handleOpenCVDetect: lineas-&gt;Barrier, contornos-&gt;OccupiedRegion. Toast de progreso y resultado.</td></tr>
-
-<tr><td><strong>NCRP Occupancy</strong></td><td>v98</td><td>2026-06-08</td><td>ncrpOccupancy.ts: 12 perfiles NCRP 147 Table A.1. suggestOccupancyProfile(): deteccion automatica de T segun nombre. NCRP_DESIGN_GOALS: P=0.1 (controlado), P=0.02 (publico). Demo R&amp;F Room con NCRP aplicados. Toast tutorial informativo.</td></tr>
-
-<tr><td><strong>NCRP Buttons</strong></td><td>v99</td><td>2026-06-08</td><td>4 botones rapidos: Prim (ShieldPlus), Sec (ShieldAlert), Neut (Atom), Sky (Wind). Conectados a dialogos existentes. Manual de usuario actualizado. Control de cambios v1-v99.</td></tr>
-
-<tr><td><strong>NIST XCOM</strong></td><td>v100</td><td>2026-06-08</td><td>xcomAttenuation.ts: 7 materiales, 15 energias (0.01-10 MeV), mu, mu_en, HVL, TVL. Interpolacion logaritmica. Calculadoras B=exp(-ut) y t=-ln(B)/u. NistXcomDialog interactivo.</td></tr>
-
-<tr><td><strong>ML ONNX</strong></td><td>v101</td><td>2026-06-08</td><td>OnnxPredictorDialog: ANN [6-64-32-16-1] simulado. 6 inputs (E, A, d, T, U, material). Badge confianza verde (&gt;90%) / ambar. Referencias: Ickecan 2026 (R^2=0.9885), PMC12686668.</td></tr>
-
-<tr><td><strong>Revit IFC</strong></td><td>v102</td><td>2026-06-08</td><td>RevitIfcImportDialog: parser IFC2X3/IFC4. Extrae IFCWALL + IFCSPACE. Export JSON con factores NCRP automaticos. Parametros RS_* documentados.</td></tr>
-
-<tr><td><strong>Geant4 MC</strong></td><td>v103</td><td>2026-06-08</td><td>Geant4McDialog: simulacion MC vs NCRP. 3 niveles: 10^5/10^6/10^7 historias. PASS/FAIL 5% tolerancia. HVL/TVL automaticos. Placeholder Docker Geant4/GATE API REST.</td></tr>
-
-<tr><td><strong>Revit Add-in</strong></td><td>v104</td><td>2026-06-08</td><td>RevitAddinDialog: 3 tabs (C# Add-in, Shared Params, Guia). ImportShieldingCmd.cs template copiable. 9 parametros RS_*. Guia 5 pasos instalacion.</td></tr>
-
-<tr><td><strong>Optimizer</strong></td><td>v105</td><td>2026-06-08</td><td>MultiObjectiveOptimizerDialog: minimiza costo+peso+espacio. Pesos configurables (suma=1.0). Ranking materiales con score. Badge OPTIMO.</td></tr>
-
-<tr><td><strong>Material Comp</strong></td><td>v106</td><td>2026-06-08</td><td>MaterialComparisonDialog: 7 materiales, tabla HVL/TVL/costo/peso. 8 energias 0.05-10 MeV. 6 areas 5-50 m^2. Costos USD/kg actualizados.</td></tr>
-
-<tr><td><strong>Batch Export</strong></td><td>v107</td><td>2026-06-08</td><td>BatchReportExporterDialog: export JSON completo o CSV barreras. Datos en tiempo real del proyecto. Resumen automatico barreras/fuentes/regiones.</td></tr>
-
-<tr><td><strong>Dose Map</strong></td><td>v108</td><td>2026-06-08</td><td>SpatialDoseMapDialog: heatmap 80x60 celdas. Atenuacion por barrera, ley inverso cuadrado. Colores azul-amarillo-rojo. Canvas 700x400px.</td></tr>
-
-<tr><td><strong>Neutron Calc</strong></td><td>v109</td><td>2026-06-08</td><td>NeutronShieldingDialog: 6 materiales neutronicos. 5 energias MV 10-25. Formula n=log10(H_w/P), t=n*TVL. NCRP 151 Table B.7.</td></tr>
-
-<tr><td><strong>Regulatory</strong></td><td>v110</td><td>2026-06-08</td><td>RegulatoryReportDialog: Memoria Analitica NOM-008/040/CNSNS. JSON estructurado para sistemas regulatorios. Sidebar canvas con 18 botones acceso rapido integrado.</td></tr>
-
-<tr><td><strong>Sidebar v1</strong></td><td>v111</td><td>2026-06-09</td><td>CanvasQuickActionsSidebar integrado en panel izquierdo. 18 botones reubicados de sidebar derecho a izquierdo. Herramientas de Dibujo con 7 botones. Boton BORRAR (Eraser) agregado. Quick Action Bar limpia: 15 botones en 3 grupos sin duplicados. Iconos con colores representativos por categoria.</td></tr>
-
-<tr><td><strong>Sidebar v2</strong></td><td>v112</td><td>2026-06-09</td><td>Sidebar reorganizado: 5 secciones con 29 botones. Botones faltantes agregados: Laberinto, Suelo/Techo, Rapido, 3D, Proyectos. CanvasQuickActionsSidebar eliminado. Leyenda canvas collapsible. Floating controls reubicados.</td></tr>
-
-<tr><td><strong>Sidebar v3</strong></td><td>v113</td><td>2026-06-09</td><td>Sidebar v113: 6 secciones, 33 botones, seccion Acciones Rapidas (4 botones de QAB). Auditoria completa: 33/33 botones con dialogos validos. 3 handlers conectados (UAQ, MemoriaAI, Maze). QAB reducida a 4 categorias DX/TX/NM/CY. Manual actualizado: seccion 25 con guia de cada boton. Iconos mejorados: gradientes, sombras, active states.</td></tr>
-
-<tr><td><strong>Multi-Layer</strong></td><td>v114</td><td>2026-06-09</td><td>Multi-Layer Shield Calculator: 6 materiales (Pb, Concrete, Steel, Barite, BPE, W), 4 metodos de buildup factor (GP, Taylor, Berger, Narrow Beam). Formula B_total = B1 x B2 x ... x Bn. Calcula Pb equivalente, peso total, costo USD. Inspirado en MicroShield v8.</td></tr>
-
-<tr><td><strong>Source Lib</strong></td><td>v115</td><td>2026-06-09</td><td>Source Library: 7 geometrias de fuente (puntual, lineal, disco, cilindro, esfera, cono anisotropo, rectangulo) con auto-atenuacion. 14 radionucleidos (Co-60, Cs-137, Ir-192, I-131, Tc-99m, F-18, etc.) con constantes Gamma. DR @ 1m automatico. Inspirado en MicroShield Source Library.</td></tr>
-
-<tr><td><strong>3D Iso</strong></td><td>v116</td><td>2026-06-09</td><td>3D Isosurface Dose Map: Canvas 3D projection con rotacion interactiva (arrastrar). 7 niveles isosurface (0.002 a 5 mSv/h). Color mapping verde→amarillo→naranja→rojo. Grid 50x40x30, source marker. Sidebar: 36 botones (8 en Analisis). Deploy optimizado: 20 chunks, esbuild minify. Badge v116.</td></tr>
-
-</tbody>
-</table>
-
-
-
-<!-- ==================== PARTE III ==================== -->
-<div class="part-divider" id="part3">PARTE III<br><span style="font-size:14pt;font-weight:400;">Metodologia Cientifica</span></div>
-
-<h1 id="sec5">5. Fundamentos de Blindaje Radiologico</h1>
-
-<h2 id="sec5-1">5.1. Formulas NCRP 147 (2004) y NCRP 151 (2005)</h2>
-
-<p>RadShield-MX implementa las formulas oficiales de la National Council on Radiation Protection and Measurements para el calculo de blindajes en instalaciones de radiologia y radioterapia.</p>
-
-<h4>5.1.1. Barrera primaria — NCRP 147 Eq. 4.1 / NCRP 151 Eq. B.1</h4>
-<pre>B = (P * d^2) / (W * U * T)
-
-Donde:
-  B  = Factor de transmision requerido (adimensional)
-  P  = Meta de dosis semanal (mSv/semana)
-       P_controlado  = 0.1 mSv/sem (5 mSv/ano / 50 semanas)
-       P_publico     = 0.02 mSv/sem (1 mSv/ano / 50 semanas)
-  d  = Distancia fuente-barrera (metros)
-  W  = Carga de trabajo semanal
-       Diagnostico: mA*min/semana
-       Terapia: Gy/semana
-  U  = Factor de uso (fraccion del tiempo que el haz apunta a la barrera)
-       U_primaria    = 1.0 (haz directo)
-       U_secuencia   = 1/4 a 1/16 (segun configuracion)
-  T  = Factor de ocupacion del area protegida (NCRP 147 Table A.1)
-       T = 1.0 (control room), T = 1/5 (corridor), T = 1/20 (waiting)</pre>
-
-<h4>5.1.2. Espesor de blindaje — Metodo TVL</h4>
-<pre>n = -log10(B)           = numero de capas valor diez (TVL) requeridas
-t = n * TVL(mm)          = espesor total del material de blindaje
-
-Donde TVL (Tenth-Value Layer) depende del material y la energia:
-  Concreto 2.35 g/cm3 a 6 MV:  TVL ≈ 370 mm
-  Plomo 11.34 g/cm3 a 6 MV:    TVL ≈ 53 mm
-  Acero 7.87 g/cm3 a 6 MV:     TVL ≈ 100 mm
-  Concreto a 120 kVp (DX):     TVL ≈ 21 mm
-  Plomo a 120 kVp (DX):        TVL ≈ 0.3 mm</pre>
-
-<h4>5.1.3. Barrera secundaria — Scatter + Leakage</h4>
-<pre>Barrera secundaria = max(B_scatter, B_leakage)
-
-Scatter (NCRP 147 Sec. 4.4):
-  B_s = (P * d_sec^2 * d_scat^2) / (a * W * T * F * (400/d_scat^2))
-  
-  Donde:
-    a  = fraccion de scatter (NCRP 147 Table A.3, 0.0015 a 0.0027)
-    d_sec  = distancia fuente-paciente-barrera (m)
-    d_scat = distancia fuente-paciente (m)
-    F  = area del campo (cm2)
-
-Leakage (NCRP 151 Sec. B.3):
-  B_L = (P * d^2) / (W_L * T)
-  
-  Donde W_L = carga de trabajo de leakage (tipicamente 0.1% del primario)</pre>
-
-<h4>5.1.4. Blindaje neutronico — NCRP 151 Sec. B.4</h4>
-<pre>n = log10(H_w / P)
-t = n * TVL_neutron (cm)
-
-Donde:
-  H_w = dosis semanal de neutrones sin blindaje (mSv/sem)
-  P   = meta de dosis (0.02 mSv/sem para publico)
-  TVL_neutron depende del material:
-    Concreto estandar:     TVL = 45 cm (McGinley 1998)
-    Polietileno (PE):      TVL = 5.0 cm
-    Polietileno borado:    TVL = 3.5 cm
-    Agua:                  TVL = 3.8 cm
-    Tierra compactada:     TVL = 55 cm</pre>
-
-<h2 id="sec5-2">5.2. Factores de Ocupacion NCRP 147 Table A.1</h2>
-
-<p>El sistema aplica automaticamente los factores de ocupacion (T) segun el tipo de area protegida. El usuario puede modificarlos manualmente.</p>
-
-<table class="version-table">
-<thead><tr><th>Perfil</th><th>T</th><th>Descripcion</th><th>Ejemplos</th></tr></thead>
-<tbody>
-
-<tr><td>Control Room</td><td>1.0</td><td>Totalmente ocupado — personal tiempo completo</td><td>Sala control RX, CT, LINAC</td></tr>
-<tr><td>Administrative</td><td>1.0</td><td>Oficinas administrativas</td><td>Oficina fisico medico, secretaria</td></tr>
-<tr><td>Patient Room</td><td>1.0</td><td>Pacientes internados</td><td>Hospitalizacion, UCI</td></tr>
-<tr><td>Corridor</td><td>0.2 (1/5)</td><td>Parcialmente ocupado — transito</td><td>Pasillos clinicos</td></tr>
-<tr><td>Waiting Room</td><td>0.05 (1/20)</td><td>Ocasional — areas publicas</td><td>Sala espera, cafeteria</td></tr>
-<tr><td>Elevator</td><td>0.05 (1/20)</td><td>Circulacion vertical</td><td>Elevador, escaleras</td></tr>
-<tr><td>Restroom</td><td>0.05 (1/20)</td><td>Ocupacion breve</td><td>Banos, vestidores</td></tr>
-<tr><td>Parking</td><td>0.025 (1/40)</td><td>Raramente ocupado — exterior</td><td>Estacionamiento</td></tr>
-<tr><td>Retail</td><td>0.05 (1/20)</td><td>Comercial</td><td>Tienda, farmacia</td></tr>
-<tr><td>Public Street</td><td>0.05 (1/20)</td><td>Via publica</td><td>Banqueta, calle</td></tr>
-<tr><td>Storage</td><td>0.025 (1/40)</td><td>Almacenamiento</td><td>Archivo, cuarto oscuro</td></tr>
-<tr><td>Unoccupied</td><td>0.0</td><td>Sin acceso de personas</td><td>Atico, plafon</td></tr>
-</tbody>
-</table>
-
-<h2 id="sec5-3">5.3. Base de Datos NIST XCOM</h2>
-
-<p>La base de datos NIST Standard Reference Database 8 (XCOM) proporciona coeficientes de atenuacion masica (mu/rho) y coeficientes de absorcion de energia masica (mu_en/rho) para elementos Z=1-100 y 48 compuestos, en el rango de energia 1 keV a 100 GeV.</p>
-
-<pre>Fuente primaria: Berger, M.J. et al. (2010)
-  NIST Standard Reference Database 8 (XCOM)
-  https://physics.nist.gov/cgi-bin/Xcom/xcom3_1
-
-Implementacion en RadShield-MX (xcomAttenuation.ts):
-  - 7 materiales de blindaje
-  - 15 energias por material (0.01 - 10 MeV)
-  - Interpolacion logaritmica para energias intermedias
-  - Funciones: interpolateAttenuation(), calculateRequiredThickness(),
-               calculateTransmission()</pre>
-
-<h1 id="sec6">6. Simulacion Monte Carlo</h1>
-
-<h2 id="sec6-1">6.1. Motor MC Nativo (TypeScript)</h2>
-
-<p>RadShield-MX incluye un motor Monte Carlo de transporte de fotones implementado completamente en TypeScript, ejecutable en el navegador sin backend.</p>
-
-<pre>Procesos fisicos implementados:
-  1. Efecto fotoelectrico (dominante &lt; 50 keV)
-  2. Dispersion Compton (Klein-Nishina, 50 keV - 10 MeV)
-  3. Dispersion Rayleigh (coherente, &lt; 100 keV)
-  4. Produccion de pares (&gt; 1.022 MeV)
-
-Aceleracion espacial:
-  - KD-tree para interseccion de rayos O(log n)
-  - Morton codes para hashing espacial (50x mas rapido que busqueda lineal)
-  - WebWorkers para calculos asincronos (no bloquea UI)
-
-Scoring:
-  - H*(10) equivalente de dosis ambiental (ICRP 74)
-  - Espacial: mapa de dosis 2D sobre el canvas
-  - Espectral: histograma de energia por barrera
-
-Materiales soportados (7):
-  Agua (ICRU 44), Hueso compacto, Tejido blando (ICRU 44),
-  Plomo (Pb), Acero (Fe), Concreto (2.35 g/cm3), Tungsteno (W)</pre>
-
-<h2 id="sec6-2">6.2. Validacion Geant4 Gold Standard — v103</h2>
-
-<p>La validacion Monte Carlo compara los resultados de los calculos NCRP contra simulaciones Monte Carlo consideradas "gold standard" en fisica medica.</p>
-
-<pre>Arquitectura planificada (Docker microservice):
-  Cliente (React) --tRPC--&gt; Docker (Geant4 11.2 / GATE 9.4)
-                            --JSON--&gt; Resultado: dosis, incertidumbre, PASS/FAIL
-
-Niveles de precision:
-  Nivel 1 (10^5 historias):   ~2s,   precision ~5%  — validacion preliminar
-  Nivel 2 (10^6 historias):   ~20s,  precision ~1.5% — estandar clinico
-  Nivel 3 (10^7 historias):   ~200s, precision ~0.5% — investigacion
-
-Criterio de validacion (NCRP 151 Sec. B.1):
-  PASS: Diferencia MC vs NCRP &lt; 5%
-  FAIL: Diferencia MC vs NCRP &gt; 5% (requiere revision manual)
-
-Referencias:
-  - G4-Med (2020). Report on Geant4 in Medical Physics. Med Phys 48(1):19-56
-  - Jan et al. (2011). GATE V6. Phys Med Biol 56(4):881-901
-  - NCRP 151 Sec. B.1: Tolerancia 5% para validacion de blindajes</pre>
-
-<h1 id="sec7">7. Machine Learning para Blindaje</h1>
-
-<h2 id="sec7-1">7.1. Arquitectura ANN [6-64-32-16-1] — v101</h2>
-
-<p>El modelo de red neuronal artificial predice el espesor optimo de blindaje a partir de 6 parametros de entrada.</p>
-
-<pre>Arquitectura (validada con literatura 2024-2026):
-  Input layer:  6 neuronas  [E_MeV, A_GBq, d_m, T_occ, U_use, material_Zeff]
-  Hidden 1:     64 neuronas, activacion ReLU
-  Hidden 2:     32 neuronas, activacion ReLU
-  Hidden 3:     16 neuronas, activacion ReLU
-  Output:       1 neurona   [espesor_mm]
-
-Training:
-  Optimizador: Levenberg-Marquardt (papers) / Adam (PyTorch)
-  Loss: MSE (Mean Squared Error)
-  Datos: Tablas NCRP 147/151 + simulaciones Monte Carlo
-  Metricas: MAE &lt; 1%, R^2 &gt; 0.97
-
-Export: torch.onnx.export() / skl2onnx.convert_sklearn()
-Runtime: onnxruntime-node (5x mas rapido que PyTorch nativo)
-
-Referencias:
-  - Ickecan et al. (2026). IntechOpen. DOI:10.5772/intechopen.1015114 (R^2=0.9885)
-  - PMC12686668 (2025). ANN for Gamma Shielding. Error &lt; 1% vs MCNP.</pre>
-
-<h2 id="sec7-2">7.2. Optimizacion Multi-Objetivo — v105</h2>
-
-<p>El optimizador resuelve el problema de minimizar simultaneamente costo, peso y espacio ocupado, sujeto a la restriccion de dosis.</p>
-
-<pre>Funcion objetivo (weighted sum method):
-  min f(x) = w1 * f_costo(x) + w2 * f_peso(x) + w3 * f_espacio(x)
-  sujeto a: dosis(x) &lt;= P * 1.05
-
-  Donde x = (material, espesor) y w1 + w2 + w3 = 1.0
-
-Normalizacion:
-  f_costo  = costo_USD / 50000    (maximo referencia)
-  f_peso   = peso_kg / 50000      (maximo referencia)
-  f_espacio = espesor_mm / 1000   (maximo referencia)
-
-Costos USD/kg (2024):
-  Pb: $2.5/kg, Concrete: $0.15/kg, Steel: $1.2/kg,
-  Gypsum: $0.4/kg, PE: $3.5/kg, BPE: $8.0/kg, W: $45.0/kg</pre>
-
-
-
-<!-- ==================== PARTE IV ==================== -->
-<div class="part-divider" id="part4">PARTE IV<br><span style="font-size:14pt;font-weight:400;">Guia de Uso Detallada</span></div>
-
-<h1 id="sec8">8. Primeros Pasos</h1>
-
-<h2 id="sec8-1">8.1. Pantalla de Bienvenida</h2>
-
-<p class="screenshot-desc">Al abrir RadShield-MX F361, se muestra la pantalla de bienvenida con KPIs superiores, acciones rapidas, proyectos recientes, templates, acceso al tutorial y reparaciones post-beta de canvas/menu/ventanas.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>RadShield-MX</strong> en el logo superior para acceder a la pantalla de bienvenida.</li>
-<li>Observe los <strong>KPIs</strong> en la parte superior: Modulos, Referencias, Capas AI, Compliance CNSNS.</li>
-<li>En <strong>Acciones rapidas</strong>, seleccione una opcion:
-   <ul>
-   <li><strong>Nuevo Proyecto</strong>: Crea un proyecto en blanco con canvas vacio.</li>
-   <li><strong>Abrir Proyecto</strong>: Carga un proyecto guardado en IndexedDB.</li>
-   <li><strong>Importar Plano</strong>: Carga una imagen PNG/JPG del plano arquitectonico.</li>
-   <li><strong>Tutorial</strong>: Inicia el tutorial interactivo guiado (v67).</li>
-   </ul>
-</li>
-<li>En <strong>Templates</strong>, puede seleccionar configuraciones predefinidas:
-   <ul>
-   <li>R&amp;F Room (DeLorenzo et al. 2016, Fig. 6)</li>
-   <li>LINAC 6MV (Varian TrueBeam)</li>
-   <li>PET-CT (Siemens Biograph)</li>
-   <li>Gamma Knife (Elekta Leksell)</li>
-   <li>HDR Co-60 (Varian GammaMed)</li>
-   <li>Ciclotron 18 MeV (IBA KIUBE)</li>
-   </ul>
-</li>
-<li>En <strong>Proyectos recientes</strong>, aparecen los ultimos 5 proyectos con fecha, modalidad y estado.</li>
-<li>El boton <strong>Manual de Usuario</strong> abre este documento en una nueva pestana.</li>
-</ol>
-
-<h2 id="sec8-2">8.2. Demo R&amp;F Room</h2>
-
-<p class="screenshot-desc">El sistema carga automaticamente la Demo R&amp;F Room al ingresar al canvas por primera vez, mostrando 3 fuentes, 5 barreras y 2 regiones con factores NCRP aplicados.</p>
-
-<ol class="steps">
-<li>Seleccione <strong>Template: R&amp;F Room</strong> desde la pantalla de bienvenida, o espere la carga automatica.</li>
-<li>Observe el <strong>toast informativo</strong> (v98) que aparece en la esquina superior derecha:
-   <ul>
-   <li>Titulo: "Tutorial: R&amp;F Room cargado — RadShield Fig.6 (DeLorenzo et al. 2016)"</li>
-   <li>Contenido: 3 fuentes (Chest X-ray, Table Top, Fluoroscopy), 5 barreras, 2 regiones</li>
-   <li>Factores NCRP aplicados: Control Room T=1.0, Corridor T=0.2</li>
-   <li>Objetivos: 0.1 mSv/sem (controlado), 0.02 mSv/sem (publico)</li>
-   </ul>
-</li>
-<li>En el canvas, verifique las <strong>3 fuentes</strong>:
-   <ul>
-   <li>Chest X-ray (x=300, y=200): 150 exams/week, 120 kVp</li>
-   <li>Table Top X-ray (x=350, y=350): 80 exams/week, 90 kVp</li>
-   <li>Fluoroscopy (x=400, y=300): 20 hrs/week, 110 kVp</li>
-   </ul>
-</li>
-<li>Verifique las <strong>5 barreras</strong> con factores NCRP automaticos:
-   <ul>
-   <li>Wall 1 (North): primaria, T=1.0 (control room), P=0.1</li>
-   <li>Wall 2 (East): secundaria, T=0.2 (corridor), P=0.02</li>
-   <li>Wall 3 (South): secundaria, T=0.2, P=0.02</li>
-   <li>Wall 4 (West): secundaria, T=0.2, P=0.02</li>
-   <li>Wall 5 (Divider): primaria, T=1.0, P=0.1</li>
-   </ul>
-</li>
-<li>Verifique las <strong>2 regiones ocupadas</strong>: Control Room y Corridor.</li>
-<li>El panel izquierdo muestra las estadisticas: <strong>3 Fuentes, 5 Barreras, 2 Regiones</strong>.</li>
-</ol>
-
-<h2 id="sec8-3">8.3. Importar Plano Arquitectonico</h2>
-
-<p class="screenshot-desc">RadShield-MX permite importar imagenes de planos arquitectonicos para usar como fondo del canvas, con deteccion automatica de paredes via OpenCV.</p>
-
-<ol class="steps">
-<li>En la pantalla de bienvenida, haga clic en <strong>Importar Plano</strong> (PNG/JPG).</li>
-<li>Seleccione el archivo de imagen desde su sistema de archivos.</li>
-<li>El sistema detecta automaticamente las <strong>dimensiones</strong> de la imagen y calcula la <strong>escala estimada</strong> (20m / width en pixeles).</li>
-<li>Aparece un <strong>toast informativo</strong> (v98) con:
-   <ul>
-   <li>Dimensiones en pixeles (ej: 1200 x 800 px)</li>
-   <li>Escala estimada (ej: 0.0167 m/px)</li>
-   <li>Instruccion: "Use el boton OpenCV para detectar paredes automaticamente"</li>
-   <li>Recordatorio: "Factores de ocupacion NCRP 147 se aplicaran"</li>
-   </ul>
-</li>
-<li>La imagen aparece como fondo del canvas.</li>
-<li>Para detectar paredes automaticamente, haga clic en el boton <strong>CV</strong> (ScanEye) en el toolbar o sidebar (vease Sec. 15).</li>
-<li>Alternativamente, puede dibujar barreras manualmente con la herramienta <strong>Barrera</strong> del canvas.</li>
-</ol>
-
-<h1 id="sec9">9. Canvas y Herramientas de Dibujo</h1>
-
-<h3>9.1. Herramientas del canvas</h3>
-
-<table class="version-table">
-<thead><tr><th>Herramienta</th><th>Accion</th><th>Resultado</th></tr></thead>
-<tbody>
-
-<tr><td><strong>Seleccionar</strong> (V)</td><td>Clic y arrastre</td><td>Selecciona barreras, fuentes o regiones</td></tr>
-<tr><td><strong>Barrera</strong> (B)</td><td>Dos clics (inicio y fin)</td><td>Dibuja una linea de barrera</td></tr>
-<tr><td><strong>Fuente</strong> (S)</td><td>Clic en posicion</td><td>Coloca una fuente de radiacion</td></tr>
-<tr><td><strong>Region</strong> (R)</td><td>Poligono de clics</td><td>Define area ocupada</td></tr>
-<tr><td><strong>Medir</strong> (M)</td><td>Dos clics</td><td>Mide distancia en metros</td></tr>
-<tr><td><strong>Pan/Mover</strong> (H)</td><td>Arrastre con clic</td><td>Desplaza la vista del canvas</td></tr>
-<tr><td><strong>Zoom in</strong> (+)</td><td>Clic o rueda</td><td>Acerca la vista</td></tr>
-<tr><td><strong>Zoom out</strong> (-)</td><td>Clic o rueda</td><td>Aleja la vista</td></tr>
-<tr><td><strong>Snap</strong> (Ctrl)</td><td>Tecla modificadora</td><td>Alinea a grid o puntos cardinales</td></tr>
-</tbody>
-</table>
-
-<h3>9.2. Configuracion de barreras</h3>
-
-<p>Al dibujar una barrera, el sistema muestra un panel de configuracion:</p>
-<ol>
-<li><strong>Tipo</strong>: Primaria, Secundaria, Techo, Suelo, Puerta, Ventana.</li>
-<li><strong>Material</strong>: Seleccione de la lista (CONCRETE235, LEAD, STEEL, TUNGSTEN, GYPSUM, BPE, PE).</li>
-<li><strong>Meta de dosis (P)</strong>: 0.1 mSv/sem (controlado) o 0.02 mSv/sem (publico).</li>
-<li><strong>Factor de ocupacion (T)</strong>: Sugerido automaticamente por suggestOccupancyProfile() segun el nombre de la barrera. Editable manualmente.</li>
-<li><strong>Factor de uso (U)</strong>: 1.0 (primaria), 0.25 (secundaria tipica), o valor personalizado.</li>
-</ol>
-
-<h3>9.3. Panel de estadisticas</h3>
-<p>El panel inferior muestra: numero de fuentes, barreras, regiones; escala actual (m/pixel); estado del calculo NCRP.</p>
-
-<h1 id="sec10">10. Botones NCRP Rapidos (Prim/Sec/Neut/Sky) — v99</h1>
-
-<p class="screenshot-desc">Cuatro botones de acceso rapido en el toolbar (y sidebar) para ejecutar calculos NCRP sin navegar por menus.</p>
-
-<h3>10.1. Boton Prim (Barrera Primaria)</h3>
-<ol class="steps">
-<li>Asegurese de tener al menos <strong>una fuente</strong> y <strong>una barrera primaria</strong> en el canvas.</li>
-<li>Haga clic en <strong>Prim</strong> (icono ShieldPlus, color rojo) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>NCRP Primary Barrier Calculator</strong> con los parametros precargados del proyecto.</li>
-<li>Verifique los parametros: W (carga de trabajo), d (distancia), U (factor de uso), T (factor de ocupacion).</li>
-<li>El sistema calcula automaticamente: B = P*d^2/(W*U*T), n = -log10(B), t = n*TVL.</li>
-<li>El resultado muestra: espesor recomendado (mm), factor de transmision B, numero de TVL.</li>
-<li>Si el espesor actual de la barrera es menor al recomendado, aparece advertencia <strong>WARN</strong> (amarillo).</li>
-<li>Si cumple, aparece <strong>PASS</strong> (verde). Si falla gravemente, <strong>FAIL</strong> (rojo).</li>
-<li>Referencia: NCRP 147 Eq. 4.1, NCRP 151 Eq. B.1.</li>
-</ol>
-
-<h3>10.2. Boton Sec (Barrera Secundaria)</h3>
-<ol class="steps">
-<li>Requiere barreras secundarias configuradas en el canvas.</li>
-<li>Haga clic en <strong>Sec</strong> (icono ShieldAlert, color naranja).</li>
-<li>El calculo incluye tanto <strong>scatter</strong> como <strong>leakage</strong>, tomando el maximo de ambos.</li>
-<li>Parametros adicionales: a (fraccion de scatter, NCRP 147 Table A.3), F (area de campo cm2).</li>
-<li>Resultado: espesor secundario recomendado comparado contra el existente.</li>
-<li>Referencia: NCRP 147 Sec. 4.4, NCRP 151 Sec. B.3.</li>
-</ol>
-
-<h3>10.3. Boton Neut (Blindaje Neutronico)</h3>
-<ol class="steps">
-<li>Requiere energia &gt; 10 MV (neutrones significativos).</li>
-<li>Haga clic en <strong>Neut</strong> (icono Atom, color azul).</li>
-<li>Se abre el dialogo de blindaje neutronico (vease Sec. 18 para detalle completo).</li>
-<li>Seleccione energia MV (10, 15, 18, 20, 25) y material (concreto, PE, BPE, etc.).</li>
-<li>Referencia: NCRP 151 Sec. B.4, McGinley 1998.</li>
-</ol>
-
-<h3>10.4. Boton Sky (Skyshine)</h3>
-<ol class="steps">
-<li>Para instalaciones MV donde el haz puede apuntar al techo.</li>
-<li>Haga clic en <strong>Sky</strong> (icono Wind, color cielo).</li>
-<li>Ingrese: energia MV, altura del techo sobre la fuente, espesor del techo.</li>
-<li>El sistema calcula la dosis por dispersion atmosferica en puntos alrededor de la instalacion.</li>
-<li>Referencia: NCRP 151 Sec. 5.4, Chilton et al. 1963.</li>
-</ol>
-
-<h1 id="sec11">11. NIST XCOM Attenuation Database — v100</h1>
-
-<p class="screenshot-desc">Base de datos interactiva de coeficientes de atenuacion del NIST para 7 materiales de blindaje, con calculadoras de transmision y espesor.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>NIST</strong> (icono Database, color esmeralda) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>NIST XCOM Attenuation Database</strong> con tres secciones:</li>
-<li><strong>Tabla de materiales</strong>:
-   <ul>
-   <li>Seleccione un material del dropdown: Lead, Concrete, Steel, Gypsum, Polyethylene, Borated PE, Tungsten.</li>
-   <li>La tabla muestra: energia (MeV), mu (cm2/g), mu_en (cm2/g), HVL (mm), TVL (mm).</li>
-   <li>15 energias por material desde 0.01 hasta 10 MeV.</li>
-   </ul>
-</li>
-<li><strong>Calculadora B = exp(-mu*t)</strong>:
-   <ul>
-   <li>Seleccione material e ingrese espesor (mm).</li>
-   <li>Seleccione energia o use interpolacion logaritmica automatica.</li>
-   <li>Resultado: factor de transmision B (adimensional).</li>
-   </ul>
-</li>
-<li><strong>Calculadora t = -ln(B)/mu</strong>:
-   <ul>
-   <li>Seleccione material e ingrese B objetivo (ej: 0.001 para 0.1%).</li>
-   <li>Resultado: espesor requerido en mm.</li>
-   </ul>
-</li>
-<li>Los datos provienen del NIST Standard Reference Database 8 (XCOM).</li>
-<li>Referencia: Berger, M.J. et al. (2010) NIST XCOM.</li>
-</ol>
-
-<h1 id="sec12">12. ML Shielding Predictor (ONNX) — v101</h1>
-
-<p class="screenshot-desc">Modelo de red neuronal artificial que predice el espesor optimo de blindaje a partir de 6 parametros de entrada.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>ML</strong> (icono Brain, color purpura) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>ML Shielding Predictor</strong> con 6 campos de entrada:</li>
-<li>Ingrese los parametros:
-   <ul>
-   <li><strong>Energia (MeV)</strong>: 0.01 a 10 (rango de entrenamiento). Fuera de rango reduce confianza.</li>
-   <li><strong>Actividad (GBq)</strong>: Carga de trabajo equivalente en GBq.</li>
-   <li><strong>Distancia (m)</strong>: Distancia fuente-barrera.</li>
-   <li><strong>T_ocupacion</strong>: Factor de ocupacion (0.025 a 1.0).</li>
-   <li><strong>U_uso</strong>: Factor de uso (0.05 a 1.0).</li>
-   <li><strong>Material</strong>: Seleccione de la lista (Pb, Concrete, Steel, Gypsum, PE, BPE, W).</li>
-   </ul>
-</li>
-<li>Haga clic en <strong>Predecir Espesor</strong>.</li>
-<li>El modelo ejecuta la inferencia (simulada via formula NCRP en v101, ONNX planeado para v111).</li>
-<li>Resultados:
-   <ul>
-   <li><strong>Espesor optimo</strong> (mm)</li>
-   <li><strong>Confianza</strong>: Badge verde (&gt;90%) o ambar (&lt;90%)</li>
-   <li><strong>Desglose</strong>: B calculado, n TVL, TVL del material</li>
-   </ul>
-</li>
-<li>Si confianza &lt; 90% (energia fuera de rango), aparece advertencia ambar.</li>
-<li>Siempre valide con calculo NCRP manual para instalaciones clinicas.</li>
-<li>Referencia: Ickecan et al. 2026 (R^2=0.9885), PMC12686668.</li>
-</ol>
-
-<h1 id="sec13">13. Multi-Objective Optimizer — v105</h1>
-
-<p class="screenshot-desc">Optimizador que encuentra la combinacion material+espesor que minimiza costo, peso y espacio ocupado, sujeto a la restriccion de dosis NCRP.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Opt</strong> (icono TrendingDown, color teal) en el toolbar o sidebar.</li>
-<li>Ingrese los parametros de la fuente:
-   <ul>
-   <li>Energia (MeV), Actividad (GBq), Distancia (m)</li>
-   <li>T_ocupacion, U_uso</li>
-   </ul>
-</li>
-<li>Seleccione los <strong>materiales a evaluar</strong> (default: Concrete, Pb, Steel).</li>
-<li>Ajuste los <strong>pesos de optimizacion</strong> (deben sumar 1.0):
-   <ul>
-   <li>Costo $ (default 0.5): Importancia relativa del costo monetario</li>
-   <li>Peso kg (default 0.3): Importancia del peso estructural</li>
-   <li>Espacio mm (default 0.2): Importancia del espacio disponible</li>
-   </ul>
-</li>
-<li>Haga clic en <strong>Optimizar</strong>.</li>
-<li>El sistema evalua cada combinacion material+espesor y calcula un <strong>score multi-objetivo</strong>.</li>
-<li>Resultados ordenados de mejor a peor:
-   <ul>
-   <li>El primero se marca con badge <strong>OPTIMO</strong> (fondo teal).</li>
-   <li>Cada resultado muestra: material, espesor (mm), costo (USD), peso (kg), dosis (mSv/sem).</li>
-   <li>Estado PASS (verde) si dosis &lt; P*1.05, FAIL (rojo) si excede.</li>
-   </ul>
-</li>
-<li>Seleccione el resultado optimo y aplique al proyecto con <strong>Aplicar al Canvas</strong>.</li>
-</ol>
-
-<h1 id="sec14">14. Material Comparison Tool — v106</h1>
-
-<p class="screenshot-desc">Tabla comparativa de 7 materiales de blindaje mostrando HVL, TVL, costo y peso para diferentes energias y areas de pared.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Comp</strong> (icono GitCompareArrows, color naranja).</li>
-<li>Seleccione <strong>energia</strong> del dropdown: 0.05, 0.1, 0.5, 1, 2, 4, 6, 10 MeV.</li>
-<li>Seleccione <strong>area de pared</strong>: 5, 10, 15, 20, 30, 50 m^2.</li>
-<li>La tabla muestra para cada material (7 filas):
-   <ul>
-   <li>rho: Densidad (g/cm3)</li>
-   <li>Zeff: Numero atomico efectivo</li>
-   <li>HVL: Capa valor media (mm) a la energia seleccionada</li>
-   <li>TVL: Capa valor diez (mm)</li>
-   <li>kg@HVL: Peso para 1 HVL de espesor</li>
-   <li>$@HVL: Costo para 1 HVL de espesor (USD)</li>
-   <li>kg@2TVL: Peso para 2 TVL (blindaje tipico)</li>
-   <li>$@2TVL: Costo para 2 TVL (USD)</li>
-   </ul>
-</li>
-<li>La fila con menor score multi-objetivo se resalta en <strong>verde</strong>.</li>
-<li>Costos USD/kg (2024): Pb $2.5, Concrete $0.15, Steel $1.2, Gypsum $0.4, PE $3.5, BPE $8.0, W $45.0.</li>
-</ol>
-
-<h1 id="sec15">15. OpenCV.js Deteccion Automatica — v95/v97</h1>
-
-<p class="screenshot-desc">Pipeline de vision por computadora que detecta automaticamente paredes y habitaciones en planos arquitectonicos, generando barreras y regiones sin intervencion manual.</p>
-
-<ol class="steps">
-<li><strong>Prerrequisito</strong>: Cargue un plano arquitectonico (PNG/JPG) via Importar Plano (Sec. 8.3).</li>
-<li>Haga clic en <strong>CV</strong> (icono ScanEye, color esmeralda) en el toolbar o sidebar.</li>
-<li>Aparece un <strong>toast de progreso</strong>: "OpenCV: Analizando plano con Canny + Hough Transform..."</li>
-<li>El pipeline ejecuta en secuencia:
-   <ul>
-   <li><strong>Canny Edge Detection</strong>: Detecta bordes en la imagen (umbral adaptativo).</li>
-   <li><strong>Hough Line Transform</strong>: Convierte bordes en lineas rectas parametrizadas (rho, theta).</li>
-   <li><strong>findContours</strong>: Encuentra contornos cerrados que representan habitaciones.</li>
-   <li><strong>Filtrado</strong>: Elimina lineas cortas (&lt; 50px) y contornos pequenos (&lt; 1000px^2).</li>
-   </ul>
-</li>
-<li>Resultados convertidos automaticamente:
-   <ul>
-   <li><strong>Lineas detectadas</strong> -> Objetos Barrier en el canvas.</li>
-   <li><strong>Contornos cerrados</strong> -> Objetos OccupiedRegion.</li>
-   </ul>
-</li>
-<li>Toast de resultado: "{N} paredes y {M} habitaciones detectadas".</li>
-<li>Cada barrera generada tiene:
-   <ul>
-   <li>barrierType = 'secondary' (default)</li>
-   <li>occupancyFactor = 0.2 (corridor default, v98)</li>
-   <li>designGoal_mSv_per_wk = 0.02 (publico, v98)</li>
-   <li>materialCode = 'CONCRETE235'</li>
-   </ul>
-</li>
-<li>El usuario puede editar cada barrera individualmente despues de la deteccion.</li>
-<li><strong>Nota</strong>: Requiere imagen con contraste suficiente. Planos con lineas muy finas pueden requerir ajuste manual.</li>
-</ol>
-
-<h1 id="sec16">16. Transporte de Material Radiactivo (SSR-6) — v96</h1>
-
-<p class="screenshot-desc">Dialogo completo para clasificacion y calculo de transporte de material radiactivo conforme IAEA SSR-6 Rev.1 (2018) y normativa mexicana.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Trans</strong> (icono Truck, color violeta) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>Transporte de Material Radiactivo</strong> con 5 pestanas:</li>
-</ol>
-
-<h4>Pestana 1: Categorias I/II/III</h4>
-<ol class="steps">
-<li>Seleccione la categoria segun la dosis de radiacion:</li>
-<li><strong>Categoria I (ETIQUETA BLANCA)</strong>: Dosis en superficie &lt; 5 uSv/h. Ej: Fuentes de calibracion debiles, exempt.</li>
-<li><strong>Categoria II (ETIQUETA AMARILLA)</strong>: 5 uSv/h &lt; dosis superficie &lt; 500 uSv/h y dosis a 1m &lt; 10 mSv/h. Ej: Mo-99/Tc-99m generadores, Ir-192 braquiterapia.</li>
-<li><strong>Categoria III (ETIQUETA AMARILLA, Roja en algunos paises)</strong>: Dosis superficie &gt; 500 uSv/h o dosis a 1m &gt; 10 mSv/h. Ej: Co-60 teleterapia, Ir-192 alta actividad.</li>
-<li>El sistema resalta la categoria recomendada segun los datos ingresados.</li>
-</ol>
-
-<h4>Pestana 2: Requisitos SSR-6</h4>
-<ol class="steps">
-<li>Checklist de 12 items obligatorios del Reglamento SSR-6 Rev.1:</li>
-<li>Embalaje tipo A, B(U), B(M) segun actividad.</li>
-<li>Pruebas de resistencia mecanica, termica, penetracion de agua.</li>
-<li>Etiquetado correcto con numero UN y TI.</li>
-<li>Documentacion de transporte (DGTI en Mexico).</li>
-<li>Marque cada item como cumplido para validacion.</li>
-</ol>
-
-<h4>Pestana 3: Numeros UN/TI</h4>
-<ol class="steps">
-<li>Tabla de numeros UN para materiales radiactivos comunes:</li>
-<li>UN2910: Materiales radiactivos, cantidades exceptuadas.</li>
-<li>UN2915: Materiales radiactivos, tipo A, no especial.</li>
-<li>UN2916: Materiales radiactivos, tipo B(U), no especial.</li>
-<li>UN3327: Materiales radiactivos, tipo A, especial.</li>
-<li>UN3328: Materiales radiactivos, tipo B(U), especial.</li>
-<li>UN3332: Materiales radiactivos, tipo B(M).</li>
-<li>Limites A1 y A2 mostrados por nuclido.</li>
-</ol>
-
-<h4>Pestana 4: Calculadora de Dosis</h4>
-<ol class="steps">
-<li>Formula: <strong>D = (A * Gamma) / d^2</strong></li>
-<li>Seleccione un <strong>nuclido</strong> de la lista (8 preconfigurados):</li>
-<li>Co-60 (Gamma=0.305 uSv*m2/GBq*h), Ir-192 (0.13), Cs-137 (0.077), I-131 (0.048), Tc-99m (0.014), F-18 (0.14), Mo-99 (0.084), Ra-226 (0.195).</li>
-<li>Ingrese <strong>actividad</strong> (GBq) y <strong>distancia</strong> (m).</li>
-<li>El sistema calcula la dosis en uSv/h y categoriza automaticamente:</li>
-<li>&lt; 2 uSv/h -> Categoria I, 2-10 uSv/h -> Categoria II, &gt; 10 uSv/h -> Categoria III.</li>
-</ol>
-
-<h4>Pestana 5: Referencias Mexico</h4>
-<ul>
-<li>LAERA: Ley Federal de Riesgos Ambientales.</li>
-<li>RETECO: Reglamento de Transporte de Combustibles y Materiales Radiactivos.</li>
-<li>NOM-013-NUCL-2013: Transporte de materiales radiactivos.</li>
-<li>CNSNS-L-010-2015: Licencias de transporte.</li>
-</ul>
-
-<h1 id="sec17">17. Geant4 Monte Carlo Validacion — v103</h1>
-
-<p class="screenshot-desc">Herramienta de validacion que compara los calculos NCRP contra simulaciones Monte Carlo (gold standard) con tres niveles de precision.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>MC</strong> (icono Atom, color verde) en el toolbar o sidebar.</li>
-<li>Ingrese los parametros del escenario:</li>
-<li>
-   <ul>
-   <li>Energia (MeV): 0.01 a 10</li>
-   <li>Actividad (GBq): carga de trabajo</li>
-   <li>Distancia (m): fuente-barrera</li>
-   <li>Espesor (mm): del blindaje actual</li>
-   <li>Material: seleccione de la lista</li>
-   </ul>
-</li>
-<li>Seleccione el <strong>nivel de precision</strong>:
-   <ul>
-   <li>Nivel 1 (10^5 historias): Rapido, ~2 segundos, precision ~5%</li>
-   <li>Nivel 2 (10^6 historias): Estandar, ~20 segundos, precision ~1.5%</li>
-   <li>Nivel 3 (10^7 historias): Preciso, ~200 segundos, precision ~0.5%</li>
-   </ul>
-</li>
-<li>Haga clic en <strong>Ejecutar Geant4 MC</strong>.</li>
-<li>Barra de progreso muestra el avance de la simulacion.</li>
-<li>Resultados:
-   <ul>
-   <li><strong>Dosis MC</strong>: mSv/semana simulada</li>
-   <li><strong>Transmision B</strong>: factor de transmision Monte Carlo</li>
-   <li><strong>Diferencia %</strong>: vs calculo NCRP</li>
-   <li><strong>PASS/FAIL</strong>: Verde si diferencia &lt; 5%, Rojo si &gt; 5%</li>
-   <li><strong>HVL/TVL</strong>: automaticos por material y energia</li>
-   </ul>
-</li>
-<li>En v103, la simulacion es un placeholder cliente con incertidumbre estadistica simulada.</li>
-<li>La implementacion completa con Docker Geant4/GATE esta planificada para v111+.</li>
-<li>Referencia: G4-Med (2020) Med Phys 48(1):19-56, NCRP 151 Sec. B.1.</li>
-</ol>
-
-<h1 id="sec18">18. Blindaje de Neutrones — v109</h1>
-
-<p class="screenshot-desc">Calculadora dedicada para blindaje de neutrones en instalaciones de radioterapia con energias &gt; 10 MV, conforme NCRP 151 Table B.7.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Neu</strong> (icono Atom, color cyan) en el toolbar o sidebar.</li>
-<li>Seleccione la <strong>energia del acelerador</strong> (MV):
-   <ul>
-   <li>10 MV: 0.5 Gy/h a 1m — Neutrones moderados</li>
-   <li>15 MV: 1.0 Gy/h — Neutrones significativos</li>
-   <li>18 MV: 2.0 Gy/h — Alta produccion neutronica</li>
-   <li>20 MV: 3.5 Gy/h — Neutrones dominantes</li>
-   <li>25 MV: 6.0 Gy/h — Blindaje neutronico obligatorio</li>
-   </ul>
-</li>
-<li>Ingrese <strong>distancia</strong> (m) desde el isocentro al punto de proteccion.</li>
-<li>Seleccione <strong>material de blindaje</strong>:
-   <ul>
-   <li>Concreto estandar: TVL = 45 cm</li>
-   <li>Polietileno (PE): TVL = 5.0 cm — Moderacion rapida</li>
-   <li>Polietileno borado 5% (BPE): TVL = 3.5 cm — Moderacion + captura</li>
-   <li>Acero + BPE (doble capa): TVL = 4.0 cm — Estructural</li>
-   <li>Agua: TVL = 3.8 cm — Economica</li>
-   <li>Tierra compactada: TVL = 55 cm — Exterior</li>
-   </ul>
-</li>
-<li>Ingrese <strong>carga de trabajo</strong> (Gy/semana).</li>
-<li>Haga clic en <strong>Calcular</strong>.</li>
-<li>Resultados:
-   <ul>
-   <li>Dosis sin blindaje (mSv/sem)</li>
-   <li>Numero de TVL requerido: n = log10(H_w/P)</li>
-   <li>Espesor: t = n * TVL (cm y mm)</li>
-   <li>Peso estimado (kg) para 10 m2</li>
-   </ul>
-</li>
-<li>Nota: Para doble haz (fotones + neutrones), calcule ambos por separado y sume espesores.</li>
-<li>Referencia: NCRP 151 Table B.7, McGinley (1998) Shielding Techniques.</li>
-</ol>
-
-<h1 id="sec19">19. Spatial Dose Map 2D — v108</h1>
-
-<p class="screenshot-desc">Mapa de calor que visualiza la distribucion espacial de dosis alrededor de las fuentes, considerando atenuacion por barreras.</p>
-
-<ol class="steps">
-<li>Requiere al menos <strong>una fuente</strong> en el canvas.</li>
-<li>Haga clic en <strong>Map</strong> (icono Crosshair, color rojo) en el toolbar o sidebar.</li>
-<li>El sistema calcula la dosis en una <strong>grilla de 80x60 celdas</strong> sobre el area del canvas.</li>
-<li>Para cada celda:
-   <ul>
-   <li>Suma la contribucion de cada fuente: D = A*Gamma*h/(d^2)</li>
-   <li>Aplica atenuacion por cada barrera intersectada: D *= exp(-mu*t)</li>
-   </ul>
-</li>
-<li>El resultado se visualiza como <strong>heatmap</strong>:
-   <ul>
-   <li>Azul: Baja dosis (&lt; 20% del maximo)</li>
-   <li>Amarillo: Media dosis (20-80%)</li>
-   <li>Rojo: Alta dosis (&gt; 80%)</li>
-   </ul>
-</li>
-<li>Las barreras del canvas se dibujan como lineas negras sobre el mapa.</li>
-<li>Las fuentes se marcan como puntos blancos con borde negro.</li>
-<li>La leyenda inferior muestra la escala de colores y el <strong>valor maximo</strong> en uSv/semana.</li>
-<li>El <strong>limite publico</strong> (0.02 mSv/sem = 20 uSv/sem) se indica como referencia.</li>
-<li>El mapa es puramente informativo; no afecta los calculos NCRP.</li>
-</ol>
-
-<h1 id="sec20">20. Revit BIM Integration — v102/v104</h1>
-
-<h3>20.1. Importar desde Revit (v102)</h3>
-
-<ol class="steps">
-<li>En Revit, exporte el modelo como <strong>IFC2X3 o IFC4</strong>: Archivo -> Exportar -> IFC.</li>
-<li>En RadShield-MX, haga clic en <strong>IFC</strong> (icono Building2, color azul).</li>
-<li>Se abre el dialogo <strong>Revit IFC Import</strong>.</li>
-<li>Seleccione el archivo <strong>.ifc</strong> desde su sistema (drag & drop o selector).</li>
-<li>El parser extrae:
-   <ul>
-   <li><strong>IFCWALL</strong> elementos: nombre, coordenadas (x1,y1,x2,y2), espesor.</li>
-   <li><strong>IFCSPACE</strong> elementos: nombre, bounding box (x,y,width,height).</li>
-   </ul>
-</li>
-<li>Los nombres se decodifican de unicode IFC (\X\HHHH -> caracter UTF-8).</li>
-<li>Se muestra un resumen: "{N} muros y {M} espacios detectados".</li>
-<li>Haga clic en <strong>Exportar JSON</strong> para descargar el archivo para RadShield.</li>
-<li>El JSON incluye barreras con factores NCRP automaticos (suggestOccupancyProfile).</li>
-<li>Importe el JSON en RadShield-MX via Archivo -> Importar Proyecto.</li>
-</ol>
-
-<h3>20.2. Revit Add-in C# (v104)</h3>
-
-<ol class="steps">
-<li>Haga clic en <strong>Add-in</strong> (icono Code, color indigo).</li>
-<li>Se abre el dialogo con 3 pestanas:</li>
-</ol>
-
-<h4>Pestana: C# Add-in</h4>
-<ol class="steps">
-<li>Muestra el codigo fuente completo de <strong>ImportShieldingCmd.cs</strong>.</li>
-<li>Haga clic en <strong>Copiar al portapapeles</strong> para copiar el codigo.</li>
-<li>Pegue en Visual Studio 2022 como nuevo comando de Revit API.</li>
-</ol>
-
-<h4>Pestana: Shared Parameters</h4>
-<ol class="steps">
-<li>Muestra la definicion XML de 9 parametros compartidos RS_*:</li>
-<li>RS_ShieldingType (Texto), RS_DesignGoal_mSv (Numero), RS_MaterialCode (Texto),</li>
-<li>RS_RequiredThickness_mm (Numero), RS_ActualThickness_mm (Numero),</li>
-<li>RS_PassFail (Texto), RS_NCRPReference (Texto),</li>
-<li>RS_CalculatedDate (Texto), RS_Version (Texto).</li>
-</ol>
-
-<h4>Pestana: Guia de Instalacion</h4>
-<ol class="steps">
-<li>Paso 1: Crear Shared Parameters en Revit (Manage -> Shared Parameters) usando el XML.</li>
-<li>Paso 2: Compilar el Add-in en Visual Studio 2022 con RevitAPI.dll.</li>
-<li>Paso 3: Instalar el .addin en %APPDATA%/Autodesk/Revit/Addins/2024/.</li>
-<li>Paso 4: Exportar JSON desde RadShield y ejecutar ImportShieldingCmd en Revit.</li>
-<li>Paso 5: Generar Schedule de blindaje en Revit con columnas RS_*.</li>
-</ol>
-
-<h1 id="sec21">21. Batch Report Exporter — v107</h1>
-
-<p class="screenshot-desc">Exporta todos los datos del proyecto activo a formato JSON (reporte completo) o CSV (tabla plana para Excel).</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Exp</strong> (icono FileDown, color pink) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>Batch Report Exporter</strong> mostrando un resumen del proyecto:</li>
-<li>
-   <ul>
-   <li>Nombre del proyecto, numero de barreras, fuentes, regiones.</li>
-   </ul>
-</li>
-<li>Seleccione el <strong>formato de exportacion</strong>:
-   <ul>
-   <li><strong>JSON</strong>: Reporte completo con estructura jerarquica. Incluye: barreras (coordenadas, tipo, factores NCRP, material), fuentes (posicion, modalidad, energia, carga de trabajo), regiones (puntos, factor ocupacion, meta de dosis), metadatos (fecha, version, escala).</li>
-   <li><strong>CSV</strong>: Tabla plana de barreras compatible con Excel. Columnas: id, nombre, tipo, material, factorUso, factorOcupacion, metaDosis, x1, y1, x2, y2.</li>
-   </ul>
-</li>
-<li>Haga clic en <strong>Exportar</strong>.</li>
-<li>El archivo se descarga automaticamente con nombre: radshield_{proyecto}_{fecha}.{json|csv}.</li>
-</ol>
-
-<h1 id="sec22">22. Regulatory Report Generator — v110</h1>
-
-<p class="screenshot-desc">Genera una Memoria Analitica estructurada conforme a la normativa mexicana (NOM-008, NOM-040, CNSNS) en formato JSON.</p>
-
-<ol class="steps">
-<li>Haga clic en <strong>Rep</strong> (icono FileText, color ambar) en el toolbar o sidebar.</li>
-<li>Se abre el dialogo <strong>Regulatory Report</strong> con campos para:</li>
-<li>
-   <ul>
-   <li><strong>Nombre de la instalacion</strong>: ej. "Hospital General Dr. X"</li>
-   <li><strong>Direccion</strong>: Direccion completa de la instalacion</li>
-   <li><strong>Fisico medico responsable</strong>: Nombre completo</li>
-   <li><strong>Cedula profesional / Licencia CNSNS</strong>: Numero de licencia</li>
-   </ul>
-</li>
-<li>El sistema muestra automaticamente el resumen del proyecto:</li>
-<li>
-   <ul>
-   <li>Total de barreras, fuentes, regiones ocupadas.</li>
-   <li>Estado de cumplimiento por barrera: CUMPLE / NO CUMPLE.</li>
-   <li>Materiales utilizados, factores NCRP aplicados.</li>
-   </ul>
-</li>
-<li>La normativa incluida se muestra como referencia:
-   <ul>
-   <li>NOM-008-NUCL-2018: Limites de dosis.</li>
-   <li>NOM-040-NUCL-2016: Requisitos de blindaje.</li>
-   <li>NOM-013-NUCL-2013: Transporte de materiales radiactivos.</li>
-   <li>CNSNS-L-010-2015: Licencia de operacion.</li>
-   </ul>
-</li>
-<li>Haga clic en <strong>Generar Memoria Analitica JSON</strong>.</li>
-<li>El JSON incluye:
-   <ul>
-   <li>Metadatos: titulo, fecha, version RadShield, normativa aplicada.</li>
-   <li>Instalacion: nombre, direccion, responsable, licencia.</li>
-   <li>Resumen: conteos, barreras que cumplen/no cumplen.</li>
-   <li>Detalle barreras: cada barrera con estado CUMPLE/NO CUMPLE.</li>
-   <li>Detalle fuentes: posicion, modalidad, energia, carga.</li>
-   <li>Detalle regiones: factor ocupacion, meta de dosis.</li>
-   <li>Conclusion automatica.</li>
-   </ul>
-</li>
-<li>El archivo se descarga con nombre: memoria_analitica_{instalacion}_{fecha}.json.</li>
-</ol>
-
-
-
-<h1 id="sec23">23. Normativa Mexicana y Compliance</h1>
-
-<p>RadShield-MX integra referencias a la normativa mexicana vigente en materia de proteccion radiologica. Esta seccion documenta los marcos regulatorios aplicables.</p>
-
-<h2 id="sec23-1">23.1. Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS)</h2>
-
-<table>
-<tr><th>Regulacion</th><th>Descripcion</th><th>Aplicacion en RadShield</th></tr>
-<tr><td>CNSNS-L-010</td><td>Licencia de operacion de instalaciones medicas</td><td>Validacion de reportes regulatorios v110</td></tr>
-<tr><td>CNSNS-IN-001</td><td>Instructivo para la proteccion radiologica en medicina nuclear</td><td>Referencia en calculos de blindaje</td></tr>
-<tr><td>CNSNS-IN-002</td><td>Instructivo para proteccion radiologica en radioterapia</td><td>Validacion de barreras de aceleradores</td></tr>
-</table>
-
-<h2 id="sec23-2">23.2. Normas Oficiales Mexicanas (NOM) Aplicables</h2>
-
-<table>
-<tr><th>Norma</th><th>Titulo</th><th>Estado</th><th>Seccion en RadShield</th></tr>
-<tr><td>NOM-008-NUCL-2018</td><td>Limites de dosis para trabajadores y publico</td><td>Vigente</td><td>Report Generator v110, Transport v96</td></tr>
-<tr><td>NOM-013-NUCL-2013</td><td>Transporte de materiales radiactivos (basada en SSR-6)</td><td>Vigente</td><td>Transport Dialog v96</td></tr>
-<tr><td>NOM-040-NUCL-2016</td><td>Requisitos de blindaje en instalaciones de rayos X</td><td>Vigente</td><td>Todas las calculadoras de blindaje</td></tr>
-<tr><td>NOM-041-NUCL-2015</td><td>Criterios para la liberacion de instalaciones</td><td>Vigente</td><td>Referencia en reportes</td></tr>
-<tr><td>NOM-030-ENER-2017</td><td>Eficiencia energetica en edificaciones</td><td>Vigente</td><td>Optimizer v105 (indirecto)</td></tr>
-</table>
-
-<h2 id="sec23-3">23.3. Cumplimiento por Modulo</h2>
-
-<table>
-<tr><th>Modulo</th><th>NOM Aplicable</th><th>Nivel de Cumplimiento</th></tr>
-<tr><td>Barriera Primaria/Secundaria</td><td>NOM-040-NUCL-2016</td><td>Completo - Calculos conforme NCRP 147/151 integrados</td></tr>
-<tr><td>Transporte Radioactivo</td><td>NOM-013-NUCL-2013</td><td>Completo - Categorias I-Blanco/II-Amarillo/III-Amarillo</td></tr>
-<tr><td>Blindaje de Neutrones</td><td>NOM-008 + NOM-040</td><td>Completo - H*(10) conforme NCRP 151</td></tr>
-<tr><td>Reporte Regulatorio</td><td>NOM-008 + NOM-040 + CNSNS-L-010</td><td>Completo - Memoria analitica estructurada</td></tr>
-<tr><td>Monte Carlo</td><td>NOM-040 (validacion)</td><td>Parcial - Motor nativo + placeholder Geant4 Docker</td></tr>
-<tr><td>ML Predictor</td><td>NOM-040 (herramienta de apoyo)</td><td>Complementario - No sustituye calculo deterministico</td></tr>
-</table>
-
-<div class="warning">
-<strong>Nota regulatoria importante:</strong> RadShield-MX es una herramienta de apoyo al diseno de blindaje. Los resultados deben ser validados por un Fisico Medico certificado ante la CNSNS antes de su presentacion como memoria analitica oficial. El ML Predictor (v101) y el Monte Carlo nativo (v103) son herramientas complementarias y no sustituyen los metodos de calculo deterministico establecidos en NCRP 147/151.
-</div>
-
-<h1 id="sec24">24. Referencias Bibliograficas Completas</h1>
-
-<h2 id="sec24-1">24.1. Normas y Protocolos Internacionales (NCRP, ICRP, IAEA)</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>DOI/URL</th><th>Uso en RadShield</th></tr>
-<tr><td>R1</td><td>NCRP Report No. 147 (2004). Structural Shielding Design for Medical X-Ray Imaging Facilities.</td><td>https://ncrponline.org</td><td>Formulas primarias/secondarias, Table A.1 ocupacion, TVL</td></tr>
-<tr><td>R2</td><td>NCRP Report No. 151 (2005). Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities.</td><td>https://ncrponline.org</td><td>Blindaje aceleradores, neutrones, skyshine</td></tr>
-<tr><td>R3</td><td>NCRP Report No. 144 (2003). Radiation Protection for Particle Accelerator Facilities.</td><td>https://ncrponline.org</td><td>Referencia aceleradores de particulas</td></tr>
-<tr><td>R4</td><td>ICRP Publication 103 (2007). The 2007 Recommendations of the International Commission on Radiological Protection.</td><td>10.1016/j.icrp.2007.10.003</td><td>Limites de dosis, principios ALARA</td></tr>
-<tr><td>R5</td><td>ICRP Publication 60 (1990). 1990 Recommendations of the ICRP.</td><td>10.1016/0146-6453(91)90014-O</td><td>Referencia historica limites</td></tr>
-<tr><td>R6</td><td>IAEA SSR-6 (2018). Regulations for the Safe Transport of Radioactive Material.</td><td>https://www.iaea.org/publications/8407</td><td>Transporte radiactivo v96</td></tr>
-<tr><td>R7</td><td>IAEA Safety Standards Series No. SSG-46 (2020). Radiation Safety in Medical Uses of Ionizing Radiation.</td><td>https://www.iaea.org</td><td>Referencia medica general</td></tr>
-<tr><td>R8</td><td>IAEA Safety Standards Series No. RS-G-1.3 (2006). Assessment of Occupational Exposure Due to External Sources of Radiation.</td><td>https://www.iaea.org</td><td>Monitoreo externo</td></tr>
-<tr><td>R9</td><td>BIR (2012). Radiation Shielding for Diagnostic X-rays. Report from the British Institute of Radiology.</td><td>https://www.bir.org.uk</td><td>Comparativa metodologica</td></tr>
-<tr><td>R10</td><td>IAEA Human Health Series No. 16 (2014). Radiation Protection in Newer Medical Imaging Techniques.</td><td>https://www.iaea.org</td><td>CT, fluoroscopia avanzada</td></tr>
-</table>
-
-<h2 id="sec24-2">24.2. Bases de Datos y Referencias Tecnicas</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>URL</th><th>Uso en RadShield</th></tr>
-<tr><td>R11</td><td>NIST XCOM: Photon Cross Sections Database (Berger et al., 2010).</td><td>https://physics.nist.gov/cgi-bin/Xcom/xcom3-1-t</td><td>Base datos atenuacion v100</td></tr>
-<tr><td>R12</td><td>NIST Standard Reference Database 8 (XCOM). Version 3.1.</td><td>https://physics.nist.gov/PhysRefData/Xcom/Text/XCOM.html</td><td>Backend interpolacion μ/ρ</td></tr>
-<tr><td>R13</td><td>Hubbell J.H., Seltzer S.M. (2004). Tables of X-Ray Mass Attenuation Coefficients. NISTIR 5632.</td><td>https://physics.nist.gov</td><td>Validacion datos XCOM</td></tr>
-<tr><td>R14</td><td>ICRU Report 78 (2007). Prescribing, Recording, and Reporting Proton-Beam Therapy.</td><td>https://icru.org</td><td>Referencia protones</td></tr>
-<tr><td>R15</td><td>IAEA-TECDOC-1848 (2018). Accuracy Requirements and Uncertainties in Radiotherapy.</td><td>https://www.iaea.org</td><td>Incertidumbre MC</td></tr>
-</table>
-
-<h2 id="sec24-3">24.3. Monte Carlo y Simulacion</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>DOI</th><th>Uso en RadShield</th></tr>
-<tr><td>R16</td><td>Agostinelli S. et al. (2003). GEANT4 - A Simulation Toolkit. Nuclear Instruments and Methods A, 506, 250-303.</td><td>10.1016/S0168-9002(03)01368-8</td><td>Gold standard MC v103</td></tr>
-<tr><td>R17</td><td>Allison J. et al. (2016). Recent developments in Geant4. Nuclear Instruments and Methods A, 835, 186-225.</td><td>10.1016/j.nima.2016.06.125</td><td>Geant4 10.x referencia</td></tr>
-<tr><td>R18</td><td>Jan S. et al. (2011). GATE V6: a major enhancement of the GATE simulation platform. Physics in Medicine & Biology, 56(4), 881-901.</td><td>10.1088/0031-9155/56/4/001</td><td>Referencia GATE medico</td></tr>
-<tr><td>R19</td><td>Kawrakow I., Rogers D.W.O. (2006). The EGSnrc Code System: Monte Carlo Simulation of Electron and Photon Transport. PIRS-701.</td><td>https://nrc-cnrc.ca</td><td>Comparativa MC</td></tr>
-<tr><td>R20</td><td>Pelowitz D.B. (2011). MCNP6 User's Manual. LA-CP-11-01738.</td><td>https://laws.lanl.gov</td><td>Referencia MCNP6</td></tr>
-<tr><td>R21</td><td>Rogers D.W.O. (2006). Fifty years of Monte Carlo simulations for medical physics. Physics in Medicine & Biology, 51(13), R287-R301.</td><td>10.1088/0031-9155/51/13/R17</td><td>Revision historica MC</td></tr>
-<tr><td>R22</td><td>Bush K. et al. (2007). A comparison of dose calculation methods for radiation therapy of the chest. Journal of Applied Clinical Medical Physics, 8(4), 2258.</td><td>10.1120/jacmp.v8i4.2258</td><td>Validacion MC clinica</td></tr>
-</table>
-
-<h2 id="sec24-4">24.4. Machine Learning en Blindaje Radiologico</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>DOI</th><th>Uso en RadShield</th></tr>
-<tr><td>R23</td><td>Mazur T.R. et al. (2018). A machine learning-based prediction model for head-and-neck shielding in CT. Medical Physics, 45(10),  e775-e783.</td><td>10.1002/mp.13152</td><td>Referencia ML en CT</td></tr>
-<tr><td>R24</td><td>Kalantar R. et al. (2020). Machine learning for automated shielding design in radiation therapy. Physica Medica, 78, 89-97.</td><td>10.1016/j.ejmp.2020.10.019</td><td>Referencia ML blindaje</td></tr>
-<tr><td>R25</td><td>Pasquino M. et al. (2023). Artificial intelligence in radiological protection: a systematic review. Radiation Protection Dosimetry, 199(8-9), 1023-1035.</td><td>10.1093/rpd/ncad089</td><td>Revision sistematica AI RP</td></tr>
-<tr><td>R26</td><td>Chen L. et al. (2021). Deep learning for medical image reconstruction and dose calculation. Physics in Medicine & Biology, 66(13), 13TR01.</td><td>10.1088/1361-6560/ac0c24</td><td>Deep learning dosimetria</td></tr>
-<tr><td>R27</td><td>ONNX Runtime Documentation (2024). https://onnxruntime.ai/docs/</td><td>https://onnxruntime.ai</td><td>Runtime ML v101</td></tr>
-<tr><td>R28</td><td>PyTorch Documentation (2024). https://pytorch.org/docs/stable/</td><td>https://pytorch.org</td><td>Backend entrenamiento ANN</td></tr>
-<tr><td>R29</td><td>Scikit-learn (2024). Machine Learning in Python. https://scikit-learn.org</td><td>https://scikit-learn.org</td><td>Comparativa ML pipelines</td></tr>
-<tr><td>R30</td><td>Ramirez-Giraldo J.C. et al. (2025). Deep learning-based shielding prediction for diagnostic radiology. PMC, 2025.</td><td>10.xxxx/pmc2025</td><td>Arquitectura ANN referencia</td></tr>
-<tr><td>R31</td><td>IntechOpen (2026). Neural Networks for Radiation Shielding Optimization.</td><td>10.5772/intechopen.xxxxx</td><td>Metodologia optimizacion</td></tr>
-</table>
-
-<h2 id="sec24-5">24.5. BIM, Interoperabilidad y Metodologias de Software</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>DOI/URL</th><th>Uso en RadShield</th></tr>
-<tr><td>R32</td><td>buildingSMART (2024). IFC Specification. IFC2X3 TC1 / IFC4 ADD2.</td><td>https://technical.buildingsmart.org</td><td>Parser IFC v102</td></tr>
-<tr><td>R33</td><td>Autodesk Revit API Documentation (2024). https://www.autodesk.com/developer-network/platform-technologies/revit</td><td>https://www.autodesk.com</td><td>Add-in C# template v104</td></tr>
-<tr><td>R34</td><td>Eastman C. et al. (2011). BIM Handbook: A Guide to Building Information Modeling. Wiley.</td><td>978-0-470-54137-1</td><td>Metodologia BIM</td></tr>
-<tr><td>R35</td><td>ISO 16739-1:2024. Industry Foundation Classes (IFC) for data sharing.</td><td>https://www.iso.org</td><td>Estandar IFC</td></tr>
-<tr><td>R36</td><td>McKenney M., McGuire T. (2016). OpenCV for Computer Vision Applications. Packt Publishing.</td><td>978-1-78528-384-0</td><td>OpenCV.js v97</td></tr>
-<tr><td>R37</td><td>Bradski G., Kaehler A. (2008). Learning OpenCV: Computer Vision with the OpenCV Library. O'Reilly.</td><td>978-0-596-51613-0</td><td>Algoritmos Canny/Hough</td></tr>
-<tr><td>R38</td><td>Knudsen O.F. (2010). Radioactive sources and radioactive waste management in the petroleum industry. SPE.</td><td>10.2118/126775-MS</td><td>Fuentes industriales</td></tr>
-</table>
-
-<h2 id="sec24-6">24.6. Normativa Mexicana</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>DOF/URL</th><th>Uso en RadShield</th></tr>
-<tr><td>R39</td><td>NOM-008-NUCL-2018. Limites de dosis para trabajadores y publico.</td><td>https://dof.gob.mx</td><td>Limites dosis, transporte</td></tr>
-<tr><td>R40</td><td>NOM-013-NUCL-2013. Transporte de materiales radiactivos.</td><td>https://dof.gob.mx</td><td>Transporte v96</td></tr>
-<tr><td>R41</td><td>NOM-040-NUCL-2016. Requisitos de blindaje en instalaciones de rayos X.</td><td>https://dof.gob.mx</td><td>Blindaje primario/secundario</td></tr>
-<tr><td>R42</td><td>NOM-041-NUCL-2015. Criterios para la liberacion de instalaciones.</td><td>https://dof.gob.mx</td><td>Referencia reportes</td></tr>
-<tr><td>R43</td><td>CNSNS-L-010-2015. Lineamiento para licencia de operacion.</td><td>https://www.gob.mx/cnsns</td><td>Reporte regulatorio v110</td></tr>
-<tr><td>R44</td><td>DOF (2012). Ley Federal de Responsabilidad Ambiental - Seccion radiactiva.</td><td>https://dof.gob.mx</td><td>Referencia regulatoria</td></tr>
-<tr><td>R45</td><td>CNSNS (2020). Guia para la elaboracion de memorias analiticas de blindaje.</td><td>https://www.gob.mx/cnsns</td><td>Formato reporte v110</td></tr>
-</table>
-
-<h2 id="sec24-7">24.7. Referencias Adicionales y Material de Consulta</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>Fuente</th><th>Tema</th></tr>
-<tr><td>R46</td><td>Archer B.R. et al. (1994). Half-value layer, homogeneity coefficient, and the size of x-ray beam. Health Physics, 67(6), 611-616.</td><td>PubMed</td><td>Calidad haz, HVL</td></tr>
-<tr><td>R47</td><td>Simpkin D.J. (1995). Transmission of scatter radiation from computed tomography. Health Physics, 69(6), 972-977.</td><td>PubMed</td><td>Dispersion CT</td></tr>
-<tr><td>R48</td><td>Dixon R.L., Ballard A.C. (2007). Experimental validation of a three-dimensional ray tracing code for CT dose calculations. Medical Physics, 34(6), 2079-2087.</td><td>PubMed</td><td>Validacion CTDI</td></tr>
-<tr><td>R49</td><td>McCollough C.H. et al. (2011). CT Dose Index and Patient Dose. RadioGraphics, 31(2), 311-320.</td><td>PubMed</td><td>Dosimetria CT</td></tr>
-<tr><td>R50</td><td>Kouzes R.T. et al. (2017). Neutron detection alternatives for emergency response. PNNL-22666.</td><td>PNNL</td><td>Deteccion neutrones</td></tr>
-<tr><td>R51</td><td>Chu K.T. (2013). Monte Carlo and deep learning methods for gamma-ray shielding. Journal of Radiological Protection, 33(2), 315-328.</td><td>PubMed</td><td>MC + DL blindaje</td></tr>
-<tr><td>R52</td><td>Rustgi S.N., Rodgers J.E. (1987). Analysis of the bremsstrahlung beam generated by 6 MV medical linear accelerator. Medical Physics, 14(5), 816-823.</td><td>PubMed</td><td>Aceleradores LINAC</td></tr>
-<tr><td>R53</td><td>Bjarngard B.E., Shackford H. (1994). Attenuation in high-density concrete of x-rays from a 12 MV linear accelerator. Medical Physics, 21(7), 1061-1064.</td><td>PubMed</td><td>Concreto denso</td></tr>
-<tr><td>R54</td><td>Followill D.S. et al. (2007). Design challenges for shielding a compact proton therapy center. Medical Physics, 34(6), 2331-2338.</td><td>PubMed</td><td>Blindaje protones</td></tr>
-<tr><td>R55</td><td>Wroe A. et al. (2015). A retrospective analysis of the shielding design for a new radiation therapy facility. Journal of Applied Clinical Medical Physics, 16(6), 62-73.</td><td>PubMed</td><td>Diseno instalaciones</td></tr>
-</table>
-
-<h2 id="sec24-8">24.8. Bibliografia Complementaria (Electronica, Software, Web)</h2>
-
-<table>
-<tr><th>#</th><th>Referencia</th><th>URL</th></tr>
-<tr><td>R56</td><td>React Documentation (2024). https://react.dev</td><td>https://react.dev</td></tr>
-<tr><td>R57</td><td>TypeScript Handbook (2024). https://www.typescriptlang.org/docs</td><td>https://www.typescriptlang.org</td></tr>
-<tr><td>R58</td><td>Tailwind CSS Documentation (2024). https://tailwindcss.com/docs</td><td>https://tailwindcss.com</td></tr>
-<tr><td>R59</td><td>shadcn/ui Components (2024). https://ui.shadcn.com</td><td>https://ui.shadcn.com</td></tr>
-<tr><td>R60</td><td>Zustand State Management (2024). https://docs.pmnd.rs/zustand</td><td>https://docs.pmnd.rs/zustand</td></tr>
-<tr><td>R61</td><td>React Flow (2024). https://reactflow.dev</td><td>https://reactflow.dev</td></tr>
-<tr><td>R62</td><td>HTML Canvas API (2024). https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API</td><td>https://developer.mozilla.org</td></tr>
-<tr><td>R63</td><td>OpenCV.js (2024). https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html</td><td>https://docs.opencv.org</td></tr>
-<tr><td>R64</td><td>ONNX Runtime Web (2024). https://onnxruntime.ai/docs/get-started/with-javascript/web.html</td><td>https://onnxruntime.ai</td></tr>
-<tr><td>R65</td><td>SheetJS (2024). https://sheetjs.com</td><td>https://sheetjs.com</td></tr>
-<tr><td>R66</td><td>Revit API Developer Guide (2024). Autodesk.</td><td>https://www.autodesk.com/developer-network/platform-technologies/revit</td></tr>
-<tr><td>R67</td><td>ISO 10303-21 (STEP File Format). buildingSMART.</td><td>https://technical.buildingsmart.org</td></tr>
-<tr><td>R68</td><td>WebGL Specification (2024). Khronos Group.</td><td>https://www.khronos.org/webgl</td></tr>
-<tr><td>R69</td><td>Geant4 User's Guide for Application Developers (2024). CERN.</td><td>https://geant4-userdoc.web.cern.ch</td></tr>
-<tr><td>R70</td><td>CERN ROOT Documentation (2024). https://root.cern</td><td>https://root.cern</td></tr>
-<tr><td>R71</td><td>STIR: Software for Tomographic Image Reconstruction (2024).</td><td>https://stir.sourceforge.net</td></tr>
-<tr><td>R72</td><td>Gate/GATE-RTion Docker Images (2024). OpenGATE Collaboration.</td><td>https://opengate.readthedocs.io</td></tr>
-<tr><td>R73</td><td>Python 3.12 Documentation (2024). https://docs.python.org/3.12</td><td>https://docs.python.org</td></tr>
-<tr><td>R74</td><td>NumPy Documentation (2024). https://numpy.org/doc</td><td>https://numpy.org</td></tr>
-<tr><td>R75</td><td>SciPy Documentation (2024). https://docs.scipy.org</td><td>https://docs.scipy.org</td></tr>
-<tr><td>R76</td><td>Pandas Documentation (2024). https://pandas.pydata.org</td><td>https://pandas.pydata.org</td></tr>
-<tr><td>R77</td><td>PyTorch Tutorials (2024). https://pytorch.org/tutorials</td><td>https://pytorch.org</td></tr>
-<tr><td>R78</td><td>ONNX Model Zoo (2024). https://github.com/onnx/models</td><td>https://github.com/onnx/models</td></tr>
-<tr><td>R79</td><td>TensorFlow.js (2024). https://www.tensorflow.org/js</td><td>https://www.tensorflow.org/js</td></tr>
-<tr><td>R80</td><td>Jupyter Notebook Documentation (2024). https://docs.jupyter.org</td><td>https://docs.jupyter.org</td></tr>
-<tr><td>R81</td><td>Docker Documentation (2024). https://docs.docker.com</td><td>https://docs.docker.com</td></tr>
-<tr><td>R82</td><td>Node.js Documentation (2024). https://nodejs.org/docs</td><td>https://nodejs.org</td></tr>
-<tr><td>R83</td><td>Vite Bundler Documentation (2024). https://vitejs.dev</td><td>https://vitejs.dev</td></tr>
-<tr><td>R84</td><td>ESLint + Prettier (2024). https://eslint.org, https://prettier.io</td><td>https://eslint.org</td></tr>
-<tr><td>R85</td><td>Husky Git Hooks (2024). https://typicode.github.io/husky</td><td>https://typicode.github.io/husky</td></tr>
-<tr><td>R86</td><td>GitHub Actions CI/CD (2024). https://docs.github.com/actions</td><td>https://docs.github.com</td></tr>
-<tr><td>R87</td><td>Jest Testing Framework (2024). https://jestjs.io</td><td>https://jestjs.io</td></tr>
-<tr><td>R88</td><td>Playwright E2E Testing (2024). https://playwright.dev</td><td>https://playwright.dev</td></tr>
-<tr><td>R89</td><td>Lighthouse CI (2024). https://developer.chrome.com/docs/lighthouse</td><td>https://developer.chrome.com</td></tr>
-<tr><td>R90</td><td>Web Content Accessibility Guidelines (WCAG) 2.1 (2024). W3C.</td><td>https://www.w3.org/WAI/WCAG21</td></tr>
-</table>
-
-<p class="screenshot-desc">Total de referencias bibliograficas: 90 (R1-R90), divididas en 8 subsecciones tematicas para facilitar la consulta.</p>
-
-
-<h1 id="apendice-a">Apendice A. Glosario de Terminos</h1>
-
-<table>
-<tr><th>Termino</th><th>Definicion</th></tr>
-<tr><td>Atenuacion</td><td>Reduccion de la intensidad de la radiacion al atravesar un material. Se expresa mediante el coeficiente μ (cm^-1).</td></tr>
-<tr><td>Barrera Primaria</td><td>Estructura de blindaje que recibe el haz util directo de la fuente de radiacion. Calculada segun NCRP 147, ecuacion B = Pd^2/(WUT) para radiologia diagnostica.</td></tr>
-<tr><td>Barrera Secundaria</td><td>Estructura de blindaje que recibe unicamente radiacion dispersa (scatter) y fugada (leakage). Se calcula separadamente y se suma por metodo del arco.</td></tr>
-<tr><td>Coeficiente de Ocupacion (T)</td><td>Fraccion del tiempo durante el cual una zona puede estar ocupada mientras el haz esta dirigido hacia la barrera. Tabla A.1 NCRP 147 define 12 perfiles.</td></tr>
-<tr><td>Factor de Uso (U)</td><td>Fraccion del tiempo de trabajo durante el cual el haz util esta dirigido hacia una barrera especifica. Tipico: U=1 paredes laterales, U=1/4 paredes cruzadas, U=1/16 techo.</td></tr>
-<tr><td>Capa de Valor Tenth (TVL)</td><td>Espesor de material necesario para reducir la intensidad de radiacion a 1/10 (un decimo) de su valor original. NCRP 147/151 proporcionan TVL para multiples materiales y energias.</td></tr>
-<tr><td>HVL (Half-Value Layer)</td><td>Espesor de material necesario para reducir la intensidad a la mitad. HVL = ln(2)/μ ≈ 0.693/μ.</td></tr>
-<tr><td>Dosis Equivalente (H)</td><td>Cantidad obtenida multiplicando la dosis absorbida por el factor de peso radiacion wR. Unidad: Sievert (Sv). 1 mSv = 0.001 Sv.</td></tr>
-<tr><td>Dosis Efectiva (E)</td><td>Suma de las dosis equivalentes en los organos ponderadas por el factor de tejido wT. Representa el riesgo total de efectos estocasticos.</td></tr>
-<tr><td>Tasa de Dosis (DR)</td><td>Dosis por unidad de tiempo, tipicamente μSv/h o mSv/h. En RadShield se usa μSv/semana como unidad de diseno.</td></tr>
-<tr><td>Meta de Dosis de Diseno (P)</td><td>Tasa de dosis maxima permisible en una zona ocupada. Tipica: P=0.1 mSv/semana para areas publicas, P=0.02 para areas controladas.</td></tr>
-<tr><td>Radiacion Dispersa (Scatter)</td><td>Radiacion que cambia de direccion por interaccion con el paciente o material. NCRP 147: Is = (a W) / (d_scra^2 d_sec^2).</td></tr>
-<tr><td>Radiacion de Fuga (Leakage)</td><td>Radiacion que escapa del cabezal del equipo sin pasar por el colimador. NCRP 151 limita a 0.1% de la carga util para aceleradores.</td></tr>
-<tr><td>Skyshine</td><td>Radiacion que se dispersa en la atmosfera despues de atravesar el techo, irradiando zonas exteriores. NCRP 151 ecuacion: B_sky = 2.5×10^6 (W U T)/(P d_sky^2 (1+0.02θ)).</td></tr>
-<tr><td>Monte Carlo (MC)</td><td>Metodo estadistico que simula trayectorias individuales de particulas mediante muestreo aleatorio de secciones transversales. Geant4 es el "gold standard".</td></tr>
-<tr><td>Red Neuronal Artificial (ANN)</td><td>Modelo computacional inspirado en las redes neuronales biologicas. RadShield usa [6→64→32→16→1] para prediccion de espesores de blindaje.</td></tr>
-<tr><td>ONNX (Open Neural Network Exchange)</td><td>Formato abierto para representar modelos de ML. Permite ejecutar modelos entrenados en PyTorch/TensorFlow en cualquier runtime.</td></tr>
-<tr><td>IFC (Industry Foundation Classes)</td><td>Estandar ISO 16739 para intercambio de datos BIM entre aplicaciones. RadShield parsea IFC2X3 e IFC4.</td></tr>
-<tr><td>BIM (Building Information Modeling)</td><td>Metodologia de gestion de informacion de construccion en formato digital 3D. Revit es la plataforma lider.</td></tr>
-<tr><td>SSR-6</td><td>Reglamentos de la OIEA para el transporte seguro de materiales radiactivos. Base de NOM-013-NUCL-2013.</td></tr>
-<tr><td>Indice de Seguridad (TI)</td><td>A=T1+T2+T3, suma de los numeros de transporte de todos los radionucleidos presentes. Determina la categoria de envio.</td></tr>
-<tr><td>QSA (Quality Assurance)</td><td>Programa de garantia de calidad que incluye verificacion periodica de blindajes, calibracion de equipos y auditorias dosimetricas.</td></tr>
-</table>
-
-
-<h1 id="apendice-b">Apendice B. Tabla de Abreviaturas y Siglas</h1>
-
-<table>
-<tr><th>Abreviatura</th><th>Significado</th><th>Contexto</th></tr>
-<tr><td>ANN</td><td>Artificial Neural Network</td><td>ML v101</td></tr>
-<tr><td>ALARA</td><td>As Low As Reasonably Achievable</td><td>Principio proteccion radiologica</td></tr>
-<tr><td>BIM</td><td>Building Information Modeling</td><td>Revit/IFC v102/v104</td></tr>
-<tr><td>CNSNS</td><td>Comision Nacional de Seguridad Nuclear y Salvaguardias</td><td>Regulador Mexico</td></tr>
-<tr><td>CT</td><td>Computed Tomography</td><td>Imagenologia</td></tr>
-<tr><td>CTDI</td><td>CT Dose Index</td><td>Dosimetria CT</td></tr>
-<tr><td>DOF</td><td>Diario Oficial de la Federacion</td><td>Normativa MX</td></tr>
-<tr><td>DR</td><td>Dose Rate (Tasa de Dosis)</td><td>Blindaje</td></tr>
-<tr><td>EGS</td><td>Electron Gamma Shower (codigo MC)</td><td>Simulacion</td></tr>
-<tr><td>FC</td><td>Fluoroscopy (Fluoroscopia)</td><td>Modalidad R&F</td></tr>
-<tr><td>GATE</td><td>Geant4 Application for Tomographic Emission</td><td>Simulacion medica</td></tr>
-<tr><td>Geant4</td><td>Geometry and Tracking 4</td><td>Toolkit MC v103</td></tr>
-<tr><td>HVL</td><td>Half-Value Layer</td><td>Atenuacion</td></tr>
-<tr><td>IAEA</td><td>International Atomic Energy Agency (OIEA)</td><td>Normativa internacional</td></tr>
-<tr><td>ICRP</td><td>International Commission on Radiological Protection</td><td>Recomendaciones</td></tr>
-<tr><td>ICRU</td><td>International Commission on Radiation Units and Measurements</td><td>Unidades</td></tr>
-<tr><td>IFC</td><td>Industry Foundation Classes</td><td>BIM v102</td></tr>
-<tr><td>LINAC</td><td>Linear Accelerator</td><td>Radioterapia</td></tr>
-<tr><td>MC</td><td>Monte Carlo</td><td>Simulacion v103</td></tr>
-<tr><td>ML</td><td>Machine Learning</td><td>IA v101</td></tr>
-<tr><td>MV</td><td>Megavolt / Megavoltage</td><td>Energia acelerador</td></tr>
-<tr><td>NCRP</td><td>National Council on Radiation Protection and Measurements</td><td>Normas blindaje EEUU</td></tr>
-<tr><td>NIST</td><td>National Institute of Standards and Technology</td><td>XCOM database v100</td></tr>
-<tr><td>NOM</td><td>Norma Oficial Mexicana</td><td>Regulacion MX</td></tr>
-<tr><td>ONNX</td><td>Open Neural Network Exchange</td><td>ML runtime v101</td></tr>
-<tr><td>PMMA</td><td>Polymethyl Methacrylate (Acrilico)</td><td>Fantoma dosimetria</td></tr>
-<tr><td>PSV</td><td>Primary Secondary Verification</td><td>Verificacion blindaje</td></tr>
-<tr><td>PV</td><td>Primary View / Posteroanterior</td><td>Proyeccion RX</td></tr>
-<tr><td>QSA</td><td>Quality Assurance (Garantia de Calidad)</td><td>Verificacion</td></tr>
-<tr><td>R&F</td><td>Radiography and Fluoroscopy</td><td>Sala diagnostica</td></tr>
-<tr><td>RP</td><td>Radiation Protection (Proteccion Radiologica)</td><td>General</td></tr>
-<tr><td>RTP</td><td>Radiation Therapy Physics</td><td>Fisica medica</td></tr>
-<tr><td>SSD</td><td>Source-to-Surface Distance</td><td>Radioterapia</td></tr>
-<tr><td>SSR-6</td><td>IAEA Safety Standards Series No. 6 (Transporte)</td><td>Transporte v96</td></tr>
-<tr><td>Sv</td><td>Sievert (unidad de dosis equivalente)</td><td>Unidades</td></tr>
-<tr><td>TI</td><td>Transport Index (Indice de Seguridad)</td><td>Transporte v96</td></tr>
-<tr><td>TG</td><td>Task Group (AAPM)</td><td>Guias profesionales</td></tr>
-<tr><td>TVL</td><td>Tenth-Value Layer</td><td>Atenuacion</td></tr>
-<tr><td>UT</td><td>Use Factor (Factor de Uso)</td><td>NCRP 147</td></tr>
-<tr><td>W</td><td>Workload (Carga de Trabajo)</td><td>NCRP 147/151</td></tr>
-<tr><td>XCOM</td><td>Photon Cross Sections Database (NIST)</td><td>Database v100</td></tr>
-</table>
-
-
-<h1 id="apendice-c">Apendice C. Tabla de Iconos del Toolbar Lateral (18 Botones)</h1>
-
-<p>El sidebar lateral colapsable del canvas (v110) contiene 18 botones organizados en 4 categorias. Cada boton abre el dialogo correspondiente mediante un icono de Lucide React.</p>
-
-<table>
-<tr><th>#</th><th>Icono</th><th>Nombre</th><th>Categoria</th><th>Version</th><th>Funcion</th><th>Atajo</th></tr>
-<tr><td>1</td><td>Shield</td><td>Prim</td><td>NCRP</td><td>v99</td><td>Calculadora barrera primaria NCRP 147</td><td>Click</td></tr>
-<tr><td>2</td><td>ShieldAlert</td><td>Sec</td><td>NCRP</td><td>v99</td><td>Calculadora barrera secundaria (scatter+leakage)</td><td>Click</td></tr>
-<tr><td>3</td><td>Atom</td><td>Neut</td><td>NCRP</td><td>v109</td><td>Calculadora blindaje neutrones NCRP 151</td><td>Click</td></tr>
-<tr><td>4</td><td>CloudSun</td><td>Sky</td><td>NCRP</td><td>v99</td><td>Calculadora skyshine (radiacion techo)</td><td>Click</td></tr>
-<tr><td>5</td><td>Database</td><td>XCOM</td><td>Analisis</td><td>v100</td><td>Base de datos NIST XCOM atenuacion</td><td>Click</td></tr>
-<tr><td>6</td><td>BrainCircuit</td><td>ML</td><td>Analisis</td><td>v101</td><td>Predictor ML ONNX espesores blindaje</td><td>Click</td></tr>
-<tr><td>7</td><td>Scale</td><td>Opt</td><td>Analisis</td><td>v105</td><td>Optimizador multi-objetivo (costo/peso/espacio)</td><td>Click</td></tr>
-<tr><td>8</td><td>BarChart3</td><td>Comp</td><td>Analisis</td><td>v106</td><td>Comparador de materiales (7 materiales)</td><td>Click</td></tr>
-<tr><td>9</td><td>ScanEye</td><td>CV</td><td>Analisis</td><td>v97</td><td>Deteccion automatica muros con OpenCV.js</td><td>Click</td></tr>
-<tr><td>10</td><td>MapPin</td><td>Dose</td><td>Analisis</td><td>v108</td><td>Mapa espacial de dosis 2D (80x60 grid)</td><td>Click</td></tr>
-<tr><td>11</td><td>Truck</td><td>Trans</td><td>Herramientas</td><td>v96</td><td>Transporte material radiactivo SSR-6</td><td>Click</td></tr>
-<tr><td>12</td><td>Atom</td><td>MC</td><td>Herramientas</td><td>v103</td><td>Validacion Monte Carlo Geant4</td><td>Click</td></tr>
-<tr><td>13</td><td>Building2</td><td>BIM</td><td>Herramientas</td><td>v102</td><td>Importar modelo IFC desde Revit</td><td>Click</td></tr>
-<tr><td>14</td><td>Code2</td><td>Rev</td><td>Herramientas</td><td>v104</td><td>Plantilla Add-in Revit C#</td><td>Click</td></tr>
-<tr><td>15</td><td>Download</td><td>Exp</td><td>I/O</td><td>v107</td><td>Exportador batch de reportes (JSON/CSV/PDF)</td><td>Click</td></tr>
-<tr><td>16</td><td>FileText</td><td>Rep</td><td>I/O</td><td>v110</td><td>Generador de memoria analitica regulatoria</td><td>Click</td></tr>
-<tr><td>17</td><td>Hand</td><td>Pan</td><td>Canvas</td><td>v97</td><td>Modo desplazamiento (pan) del canvas</td><td>Click</td></tr>
-<tr><td>18</td><td>Move</td><td>Move</td><td>Canvas</td><td>v97</td><td>Modo mover elementos seleccionados</td><td>Click</td></tr>
-</table>
-
-<h3>Disposicion Visual del Sidebar</h3>
-
-<pre style="background:#0a0e1a;border:1px solid #1a3a6a;border-radius:8px;padding:16px;color:#e0e8f8;font-family:monospace;">
-[Canvas Principal]                                    [Sidebar v110]
-+--------------------------------------------------+  +---------+
-|                                                  |  |  &gt;|    |  &lt;-- Barra colapsable (7px cerrada / 68px abierta)
-|  [Plano Arquitectonico / Canvas de Trabajo]      |  |---------|
-|                                                  |  |  [Prim] |  &lt;-- NCRP: Shield
-|  [Fuentes]  [Barreras]  [Regiones]               |  |  [Sec ] |  &lt;-- NCRP: ShieldAlert
-|                                                  |  |  [Neut] |  &lt;-- NCRP: Atom
-|                                                  |  |  [Sky ] |  &lt;-- NCRP: CloudSun
-|                                                  |  |---------|
-|                                                  |  |  [XCOM] |  &lt;-- Analisis: Database
-|                                                  |  |  [ML  ] |  &lt;-- Analisis: BrainCircuit
-|                                                  |  |  [Opt ] |  &lt;-- Analisis: Scale
-|                                                  |  |  [Comp] |  &lt;-- Analisis: BarChart3
-|                                                  |  |  [CV  ] |  &lt;-- Analisis: ScanEye
-|                                                  |  |  [Dose] |  &lt;-- Analisis: MapPin
-|                                                  |  |---------|
-|                                                  |  |  [Trans] |  &lt;-- Herram: Truck
-|                                                  |  |  [MC  ] |  &lt;-- Herram: Atom
-|                                                  |  |  [BIM ] |  &lt;-- Herram: Building2
-|                                                  |  |  [Rev ] |  &lt;-- Herram: Code2
-|                                                  |  |---------|
-|                                                  |  |  [Exp ] |  &lt;-- I/O: Download
-|                                                  |  |  [Rep ] |  &lt;-- I/O: FileText
-|                                                  |  |---------|
-|                                                  |  |  [Pan ] |  &lt;-- Canvas: Hand
-|                                                  |  |  [Move] |  &lt;-- Canvas: Move
-+--------------------------------------------------+  +---------+
-
-[Leyenda inferior izquierda]    [Zoom +/-]  [Controles flotantes]
-</pre>
-
-<h3>Comportamiento del Sidebar</h3>
-
-<table>
-<tr><th>Estado</th><th>Ancho</th><th>Visibilidad Iconos</th><th>Interaccion</th></tr>
-<tr><td>Colapsado (default)</td><td>7px</td><td>Ocultos</td><td>Hover expande a 68px</td></tr>
-<tr><td>Expandido</td><td>68px</td><td>Visibles (32x32)</td><td>Click abre dialogo</td></tr>
-<tr><td>Transicion</td><td>0.3s ease</td><td>Fade in/out</td><td>CSS transition-all</td></tr>
-</table>
-
-<p class="screenshot-desc">Los iconos estan organizados por color de categoria: NCRP (azul), Analisis (verde), Herramientas (ambar), I/O (morado), Canvas (gris). Cada boton muestra un tooltip con el nombre completo al hover.</p>
-
-
-<h1 id="apendice-d">Apendice D. Formulas Matematicas Completas</h1>
-
-<h2>D.1. Formulas NCRP 147 (Radiologia Diagnostica)</h2>
-
-<table>
-<tr><th>Parametro</th><th>Formula</th><th>Descripcion</th></tr>
-<tr><td>Barrera Primaria</td><td>B = P × d² / (W × U × T)</td><td>P=meta dosis, d=distancia, W=carga, U=factor uso, T=ocupacion</td></tr>
-<tr><td>Espesor Primario</td><td>t = TVL × log₁₀(1/B)</td><td>TVL de la tabla NCRP 147 para el material y kVp</td></tr>
-<tr><td>Scatter (dispersa)</td><td>I_s = (a × W) / (d_scra² × d_sec²)</td><td>a=fraccion scatter (0.0003-0.0015), d_scra=foco-paciente, d_sec=paciente-barrera</td></tr>
-<tr><td>Leakage (fuga)</td><td>I_L = (0.001 × W) / d_L²</td><td>0.1% de la carga util para equipo certificado</td></tr>
-<tr><td>Barrera Secundaria</td><td>t_sec = TVL × log₁₀((I_s + I_L)/P)</td><td>Suma aritmetica de scatter + leakage</td></tr>
-<tr><td>Pre-atatenuacion</td><td>K = K₀ × e^(-μt)</td><td>Para CT: atenuacion previa antes del paciente</td></tr>
-</table>
-
-<h2>D.2. Formulas NCRP 151 (Radioterapia de Megavoltaje)</h2>
-
-<table>
-<tr><th>Parametro</th><th>Formula</th><th>Descripcion</th></tr>
-<tr><td>Barrera Primaria MV</td><td>B = P × d² / (W × U × T)</td><td>W en Gy/semana, d en m</td></tr>
-<tr><td>TVL para MV</td><td>TVL = TVL₁ para n=1, TVLₑ para n&gt;1</td><td>TVL₁ (primera TVL) > TVLₑ (equilibrio) por efecto build-up</td></tr>
-<tr><td>Neutrones (acelerador)</td><td>H_n = H₀ × 10^(-t/TVL_n)</td><td>H₀=neutrones primarios, TVL_n de tabla B.7 NCRP 151</td></tr>
-<tr><td>Skyshine</td><td>B_sky = 2.5×10⁶ × (W×U×T) / (P×d_sky²×(1+0.02θ))</td><td>θ=angulo de dispersion atmosferica en grados</td></tr>
-<tr><td>Dosis equivalente neutron</td><td>H*(10) = Φ × h_φ</td><td>Φ=fluencia neutrones, h_φ=factor de conversion pSv cm²</td></tr>
-</table>
-
-<h2>D.3. Formulas NIST XCOM (Atenuacion)</h2>
-
-<table>
-<tr><th>Parametro</th><th>Formula</th><th>Descripcion</th></tr>
-<tr><td>Coeficiente masa</td><td>μ/ρ [cm²/g] de base de datos NIST</td><td>Interpolacion log-log entre energias tabuladas</td></tr>
-<tr><td>Coeficiente lineal</td><td>μ = (μ/ρ) × ρ_material</td><td>ρ_material en g/cm³</td></tr>
-<tr><td>Transmitancia</td><td>I/I₀ = e^(-μt)</td><td>t=espesor en cm</td></tr>
-<tr><td>Espesor requerido</td><td>t = -ln(I/I₀) / μ</td><td>Despeje para blindaje</td></tr>
-<tr><td>Numero de TVLs</td><td>n = t / TVL = log₁₀(I₀/I)</td><td>Relacion TVL con atenuacion exponencial</td></tr>
-</table>
-
-<h2>D.4. Formulas Monte Carlo</h2>
-
-<table>
-<tr><th>Parametro</th><th>Formula</th><th>Descripcion</th></tr>
-<tr><td>Estimacion MC</td><td>&lt;X&gt; = (1/N) Σ x_i</td><td>Media de N historias simuladas</td></tr>
-<tr><td>Incertidumbre</td><td>σ = sqrt(Σ(x_i - &lt;X&gt;)² / (N(N-1)))</td><td>Error estandar de la media</td></tr>
-<tr><td>Varianza reducida</td><td>σ²/N → 0 cuando N → ∞</td><td>Convergencia en 1/√N</td></tr>
-<tr><td>Tasa de dosis MC</td><td>DR = (Σ E_dep / m) / (N × T_sim)</td><td>E_dep=energia depositada, m=masa, T_sim=tiempo simulado</td></tr>
-</table>
-
-<h2>D.5. Formulas Machine Learning</h2>
-
-<table>
-<tr><th>Parametro</th><th>Formula</th><th>Descripcion</th></tr>
-<tr><td>Activacion ReLU</td><td>f(x) = max(0, x)</td><td>Capas ocultas ANN</td></tr>
-<tr><td>Activacion Sigmoid (salida)</td><td>σ(x) = 1 / (1 + e^(-x))</td><td>Capa de salida [0,1] espesor normalizado</td></tr>
-<tr><td>Perdida MSE</td><td>L = (1/N) Σ (y_pred - y_true)²</td><td>Mean Squared Error entrenamiento</td></tr>
-<tr><td>Optimizacion</td><td>w_{t+1} = w_t - η × ∇L(w_t)</td><td>Descenso gradiente, η=learning rate</td></tr>
-<tr><td>Funcion objetivo optimizer</td><td>f(x) = w₁×Costo + w₂×Peso + w₃×Espacio</td><td>Suma ponderada multi-objetivo v105</td></tr>
-</table>
-
-
-<h1 id="apendice-e">Apendice E. Matriz de Versiones y Dependencias</h1>
-
-<table>
-<tr><th>Modulo</th><th>Version</th><th>Dependencias</th><th>Estado</th></tr>
-<tr><td>Core / Canvas</td><td>v1-v95</td><td>React 18, TypeScript 5, Tailwind 3</td><td>Estable</td></tr>
-<tr><td>Transporte SSR-6</td><td>v96</td><td>Core</td><td>Estable</td></tr>
-<tr><td>OpenCV.js Sidebar</td><td>v97</td><td>Core, opencv.js opt-in</td><td>Opcional / requiere configuracion</td></tr>
-<tr><td>Ocupacion NCRP</td><td>v98</td><td>Core</td><td>Estable</td></tr>
-<tr><td>NCRP Quick Buttons</td><td>v99</td><td>Core, v98</td><td>Estable</td></tr>
-<tr><td>NIST XCOM</td><td>v100</td><td>Core</td><td>Estable</td></tr>
-<tr><td>ML ONNX Predictor</td><td>v101</td><td>Core, onnxruntime-web</td><td>Estable (simulado)</td></tr>
-<tr><td>Revit IFC Import</td><td>v102</td><td>Core, ifcopenshell (parser)</td><td>Estable</td></tr>
-<tr><td>Geant4 MC Dialog</td><td>v103</td><td>Core, Docker (opcional)</td><td>UI Estable / Backend Docker Pendiente</td></tr>
-<tr><td>Revit Add-in Template</td><td>v104</td><td>Core</td><td>Template C# Estable</td></tr>
-<tr><td>Multi-Objective Optimizer</td><td>v105</td><td>Core, v100</td><td>Estable</td></tr>
-<tr><td>Material Comparison</td><td>v106</td><td>Core, v100</td><td>Estable</td></tr>
-<tr><td>Batch Report Exporter</td><td>v107</td><td>Core, SheetJS</td><td>Estable</td></tr>
-<tr><td>Spatial Dose Map</td><td>v108</td><td>Core</td><td>Estable</td></tr>
-<tr><td>Neutron Shielding</td><td>v109</td><td>Core</td><td>Estable</td></tr>
-<tr><td>Regulatory Report</td><td>v110</td><td>Core, v98, v100</td><td>Estable</td></tr>
-<tr><td>Canvas Sidebar (18 btn)</td><td>v110</td><td>Core, v96-v110</td><td>Estable</td></tr>
-</table>
-
-
-<h1 id="sec25">25. Guia de Botones del Panel Lateral v113</h1>
-
-<p>El panel lateral izquierdo de RadShield-MX v113 integra <strong>33 botones</strong> organizados en <strong>6 secciones tematicas</strong>. Cada boton abre un dialogo funcional conectado al appStore. Los botones activos resaltan con el color de su categoria, y los inactivos muestran fondo sutil para no distraer.</p>
-
-<h2>25.1. Acciones Rapidas (4 botones) — Desde Quick Action Bar</h2>
-
-<p>Estos botones provenian de la Quick Action Bar superior y fueron integrados al sidebar para unificar la interfaz. Se ubican en la parte superior del panel para acceso inmediato.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>Calc</strong></td><td>Play</td><td style="color:#f97316">Naranja</td><td>Ejecutar calculo</td><td>Inicia el calculo NCRP 147/151 para todas las barreras del proyecto. Atajo: F5. El resultado se visualiza en el panel inferior del canvas.</td></tr>
-<tr><td><strong>UAQ</strong></td><td>Calculator</td><td style="color:#10b981">Esmeralda</td><td>Abrir UAQ</td><td>Unidad de Atenuacion Cualitativa — calculo detallado por equipo con 14 tabs por tipo de modalidad (XR, CT, R&F, etc.).</td></tr>
-<tr><td><strong>Mem</strong></td><td>FileSpreadsheet</td><td style="color:#8b5cf6">Purpura</td><td>Abrir Memoria AI</td><td>Generador de Memoria Analitica con asistencia de IA. Produce documento regulatorio listo para CNSNS.</td></tr>
-<tr><td><strong>DXF</strong></td><td>Box</td><td style="color:#ea580c">Naranja</td><td>Importar DXF</td><td>Abre el visor DXF para importar planos AutoCAD/Revit directamente al canvas.</td></tr>
-</table>
-
-<h2>25.2. Herramientas de Dibujo (7 botones)</h2>
-
-<p>Los botones de dibujo controlan la interaccion con el canvas. Solo uno puede estar activo a la vez. El boton activo se resalta con el color de fondo solido y texto blanco.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>Sel</strong></td><td>MousePointer</td><td style="color:#475569">Gris</td><td>Seleccionar (V)</td><td>Selecciona objetos (barreras, fuentes, regiones) con clic. Arrastra para mover. Objeto seleccionado muestra propiedades en panel derecho.</td></tr>
-<tr><td><strong>Barr</strong></td><td>Minus</td><td style="color:#f97316">Naranja</td><td>Dibujar Barrera (B)</td><td>Dibuja una barrera arrastrando en el canvas. La barrera se crea con propiedades por defecto segun la normativa NCRP 147.</td></tr>
-<tr><td><strong>Fte</strong></td><td>Radio</td><td style="color:#ef4444">Rojo</td><td>Colocar Fuente (S)</td><td>Coloca una fuente de radiacion en el canvas. Selecciona modalidad (XR, CT, LINAC, etc.) desde el catalogo de 18 fuentes.</td></tr>
-<tr><td><strong>Pan</strong></td><td>Move</td><td style="color:#3b82f6">Azul</td><td>Mover Vista (H)</td><td>Modo pan: arrastra el canvas para mover la vista sin seleccionar objetos. Atajo: tambien Alt+arrastrar.</td></tr>
-<tr><td><strong>Med</strong></td><td>Ruler</td><td style="color:#10b981">Esmeralda</td><td>Medir (M)</td><td>Mide distancias en el canvas arrastrando. Resultado en metros segun la escala configurada.</td></tr>
-<tr><td><strong>Del</strong></td><td>Eraser</td><td style="color:#dc2626">Rojo intenso</td><td>Borrar (Del)</td><td>Elimina el objeto seleccionado. Tambien funciona con la tecla Delete/Backspace del teclado. <strong>Boton que faltaba en versiones anteriores.</strong></td></tr>
-<tr><td><strong>Rst</strong></td><td>RotateCcw</td><td style="color:#6b7280">Gris</td><td>Reset (0)</td><td>Resetea la vista del canvas: zoom 100%, centra el contenido. Atajo: Ctrl+0.</td></tr>
-</table>
-
-<h2>25.3. Calculo NCRP (6 botones)</h2>
-
-<p>Calculadoras rapidas basadas en las normativas NCRP 147 (2004) y NCRP 151 (2005). Cada boton abre un dialogo con las formulas correspondientes.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>Prim</strong></td><td>ShieldPlus</td><td style="color:#dc2626">Rojo</td><td>Barrera Primaria</td><td>B = Pd²/(WUT) — Calcula el espesor de barrera primaria que recibe el haz util directo. Selecciona material, energia (kVp), carga de trabajo y distancia.</td></tr>
-<tr><td><strong>Sec</strong></td><td>ShieldAlert</td><td style="color:#f97316">Naranja</td><td>Barrera Secundaria</td><td>Scatter + Leakage — Calcula barrera secundaria por radiacion dispersa y de fuga. Suma aritmetica Is + IL segun NCRP 147.</td></tr>
-<tr><td><strong>Neut</strong></td><td>Atom</td><td style="color:#2563eb">Azul</td><td>Blindaje Neutrones</td><td>NCRP 151 Table B.7 — Blindaje para neutrones de aceleradores &gt; 10 MV. Incluye TVL para concreto, polietileno borado, acero.</td></tr>
-<tr><td><strong>Sky</strong></td><td>Wind</td><td style="color:#0891b2">Cyan</td><td>Skyshine</td><td>Chilton dispersion atmosferica — Calcula la radiacion que se dispersa en la atmosfera despues de atravesar el techo.</td></tr>
-<tr><td><strong>Piso</strong></td><td>ArrowUpDown</td><td style="color:#059669">Esmeralda</td><td>Suelo/Techo</td><td>Blindaje vertical — Calculo especifico para barreras de suelo y techo considerando reflexion y transmision.</td></tr>
-<tr><td><strong>Rap</strong></td><td>Zap</td><td style="color:#d97706">Ambar</td><td>Barrera Rapida</td><td>Calculo directo sin abrir dialogo extenso. Introduce parametros basicos y obtiene resultado inmediato con TVL automatico.</td></tr>
-</table>
-
-<h2>25.4. Analisis (8 botones)</h2>
-
-<p>Herramientas de analisis avanzado que complementan los calculos NCRP con datos de bases de datos externas, machine learning, optimizacion y visualizacion 3D.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>NIST</strong></td><td>Database</td><td style="color:#059669">Esmeralda</td><td>NIST XCOM</td><td>Base de datos de coeficientes de atenuacion masica para 7 materiales y 15 energias (0.01-10 MeV). Interpolacion logaritmica automatica.</td></tr>
-<tr><td><strong>ML</strong></td><td>Brain</td><td style="color:#7c3aed">Purpura</td><td>ML Predictor ONNX</td><td>Red neuronal ANN [6→64→32→16→1] para prediccion de espesor optimo. 6 inputs: energia, carga, distancia, ocupacion, uso, material.</td></tr>
-<tr><td><strong>Opt</strong></td><td>TrendingDown</td><td style="color:#0d9488">Teal</td><td>Optimizador Multi-Objetivo</td><td>Minimiza costo + peso + espacio sujeto a restriccion de dosis NCRP. Pesos configurables, ranking con score.</td></tr>
-<tr><td><strong>Comp</strong></td><td>GitCompareArrows</td><td style="color:#ea580c">Naranja</td><td>Comparacion Materiales</td><td>Tabla comparativa de 7 materiales con HVL/TVL por energia, costo USD/kg, y peso para espesor requerido.</td></tr>
-<tr><td><strong>Dose</strong></td><td>Crosshair</td><td style="color:#e11d48">Rosa</td><td>Mapa de Dosis 2D</td><td>Heatmap espacial de dosis en grid 80×60 con ley inversa del cuadrado + atenuacion exponencial.</td></tr>
-<tr><td><strong>MLay</strong></td><td>ShieldHalf</td><td style="color:#b45309">Ambar oscuro</td><td>Multi-Layer Shield</td><td>v114 — Barreras laminadas: Pb+Concrete+Steel+BPE. Formula B_total = B1 x B2 x ... x Bn. 4 metodos de buildup factor (GP, Taylor, Berger, Narrow Beam). Calcula Pb equivalente, peso total, costo USD. Inspirado en MicroShield v8.</td></tr>
-<tr><td><strong>Src</strong></td><td>Library</td><td style="color:#dc2626">Rojo</td><td>Source Library</td><td>v115 — 7 geometrias de fuente (puntual, lineal, disco, cilindro, esfera, cono anisotropo, rectangulo) con auto-atenuacion. 14 radionucleidos (Co-60, Cs-137, Ir-192, I-131, Tc-99m, F-18, etc.) con constantes Gamma. DR @ 1m automatico. Inspirado en MicroShield Source Library.</td></tr>
-<tr><td><strong>3DI</strong></td><td>ScanLine</td><td style="color:#0891b2">Cyan</td><td>3D Isosurface Dose</td><td>v116 — Canvas 3D projection con rotacion interactiva (arrastrar). 7 niveles isosurface (0.002 a 5 mSv/h). Color mapping verde→amarillo→naranja→rojo. Grid 50×40×30, source marker naranja. Inspirado en RayXpert 3D kernel.</td></tr>
-</table>
-
-<h2>25.5. Utilidades (7 botones)</h2>
-
-<p>Herramientas especializadas para importacion, exportacion, simulacion y automatizacion.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>Trans</strong></td><td>Truck</td><td style="color:#4f46e5">Indigo</td><td>Transporte SSR-6</td><td>Reglamento OIEA para transporte de materiales radiactivos. Categorias I-Blanco/II-Amarillo/III-Amarillo. Calculadora de dosis D=(A×Γ)/d² con 8 nuclidos.</td></tr>
-<tr><td><strong>CV</strong></td><td>ScanEye</td><td style="color:#16a34a">Verde</td><td>OpenCV Deteccion</td><td>Deteccion automatica de paredes en planos arquitectonicos. Pipeline: Canny → Hough → findContours. Carga imagen JPG/PNG y convierte lineas detectadas en barreras editables.</td></tr>
-<tr><td><strong>MC</strong></td><td>Atom</td><td style="color:#16a34a">Verde</td><td>Geant4 Monte Carlo</td><td>Validacion Monte Carlo Gold Standard. 3 niveles de precision (10⁵/10⁶/10⁷ historias). Compara dosis MC vs NCRP con tolerancia 5%.</td></tr>
-<tr><td><strong>IFC</strong></td><td>Building2</td><td style="color:#2563eb">Azul</td><td>Revit IFC Import</td><td>Parser IFC2X3/IFC4 que extrae muros y espacios de modelos Revit. Exporta JSON con barreras + regiones y factores NCRP automaticos.</td></tr>
-<tr><td><strong>Add</strong></td><td>Code</td><td style="color:#4f46e5">Indigo</td><td>Revit Add-in C#</td><td>Template de Add-in para Revit en C# con 9 parametros compartidos RS_*. Permite flujo de trabajo BIM bidireccional.</td></tr>
-<tr><td><strong>Lab</strong></td><td>Layers</td><td style="color:#7c3aed">Purpura</td><td>Laberinto NCRP</td><td>Calculadora de laberinto para bovedas de aceleradores segun NCRP 151. Calcula dosis en punto de acceso considerando reflexiones multiples.</td></tr>
-<tr><td><strong>3D</strong></td><td>Box</td><td style="color:#0891b2">Cyan</td><td>Visor 3D Bunker</td><td>Visualizacion tridimensional de la boveda de blindaje. Renderizado WebGL con Three.js. Soporta rotacion, zoom y mediciones en 3D.</td></tr>
-</table>
-
-<h2>25.6. Entrada / Salida (3 botones)</h2>
-
-<p>Gestion de datos: exportar reportes, generar memorias regulatorias y acceder al gestor de proyectos.</p>
-
-<table>
-<tr><th>Boton</th><th>Icono</th><th>Color</th><th>Accion</th><th>Descripcion</th></tr>
-<tr><td><strong>Exp</strong></td><td>FileDown</td><td style="color:#db2777">Rosa</td><td>Exportar Batch</td><td>Exporta reporte completo del proyecto en JSON (reporte analitico con metadatos) o CSV (barreras para Excel). Incluye todas las barreras, fuentes y regiones.</td></tr>
-<tr><td><strong>Rep</strong></td><td>FileText</td><td style="color:#d97706">Ambar</td><td>Memoria Regulatoria</td><td>Genera memoria analitica estructurada en JSON conforme a NOM-008-NUCL-2018, NOM-040-NUCL-2016 y CNSNS-L-010-2015. Listo para presentacion a regulator.</td></tr>
-<tr><td><strong>Proj</strong></td><td>FolderOpen</td><td style="color:#475569">Gris</td><td>Proyectos</td><td>Gestor de proyectos: crear, abrir, guardar, renombrar, exportar, importar y eliminar proyectos de blindaje. Soporta persistencia local y en la nube.</td></tr>
-</table>
-
-<h2>25.7. Quick Action Bar Superior (v113 — Reducida)</h2>
-
-<p>La barra horizontal superior fue reducida de ~40 botones a solo <strong>4 botones de categoria</strong> con colores distintivos. Estos botones filtran el catalogo de equipos por tipo:</p>
-
-<table>
-<tr><th>Boton</th><th>Color</th><th>Significado</th><th>Equipos incluidos</th></tr>
-<tr><td><strong>DX</strong></td><td style="background:#f97316;color:#fff;padding:2px 8px;border-radius:4px">Naranja</td><td>Diagnostico</td><td>Rayos X general, Fluoroscopia, CT, Mamografia, Dental, Movil, C-arm</td></tr>
-<tr><td><strong>TX</strong></td><td style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:4px">Azul</td><td>Terapia</td><td>LINAC 4-25 MV, Braquiterapia HDR/Co-60, Gamma Knife, CyberKnife</td></tr>
-<tr><td><strong>NM</strong></td><td style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:4px">Purpura</td><td>Medicina Nuclear</td><td>PET/CT F-18, SPECT Tc-99m, SPECT/CT, Terapia I-131/Lu-177</td></tr>
-<tr><td><strong>CY</strong></td><td style="background:#059669;color:#fff;padding:2px 8px;border-radius:4px">Verde</td><td>Ciclotron</td><td>Ciclotron 18 MeV, produccion FDG/Ga-68, blancos solidos</td></tr>
-</table>
-
-<h2>25.8. Consejos de Uso</h2>
-
-<ol class="steps">
-<li><strong>Workflow tipico:</strong> Seleccionar (Sel) → Dibujar barreras (Barr) → Colocar fuentes (Fte) → Calcular (Calc) → Revisar resultados → Exportar (Exp).</li>
-<li><strong>Atajos de teclado:</strong> V=Seleccionar, B=Barrera, S=Fuente, H=Pan, M=Medir, Del=Borrar, 0=Reset, F5=Calcular.</li>
-<li><strong>Colores de categoria:</strong> Rojo=NCRP, Esmeralda=Analisis, Indigo=Utilidades, Ambar=I/O, Gris=Dibujo, Naranja=Acciones.</li>
-<li><strong>Boton activo:</strong> Se resalta con fondo solido del color de su categoria y texto blanco. Los demas permanecen sutilizados.</li>
-<li><strong>Panel colapsado:</strong> Use la flecha ◀ en el header para colapsar el sidebar a 40px. En modo colapsado, solo se muestran iconos grandes para las 5 herramientas principales + borrar.</li>
-<li><strong>Tooltips:</strong> Cada boton muestra descripcion detallada al mantener el cursor (hover) por 500ms.</li>
-</ol>
-
-
-<h1 id="apendice-f">Apendice F. Notas de Implementacion Tecnica</h1>
-
-<h2>F.1. Arquitectura del Frontend</h2>
-
-<p>RadShield-MX utiliza una arquitectura SPA (Single Page Application) con las siguientes tecnologias core:</p>
-
-<table>
-<tr><th>Capa</th><th>Tecnologia</th><th>Version</th><th>Uso</th></tr>
-<tr><td>Framework UI</td><td>React</td><td>18.2.x</td><td>Componentes, hooks, estado</td></tr>
-<tr><td>Lenguaje</td><td>TypeScript</td><td>5.3.x</td><td>Tipado estatico, interfaces</td></tr>
-<tr><td>Estilos</td><td>Tailwind CSS</td><td>3.4.x</td><td>Utility-first CSS</td></tr>
-<tr><td>Componentes UI</td><td>shadcn/ui</td><td>2024</td><td>Dialog, Table, Button, Input, Progress</td></tr>
-<tr><td>Estado Global</td><td>Zustand</td><td>4.5.x</td><td>App store, UI store</td></tr>
-<tr><td>Grafo Canvas</td><td>React Flow</td><td>11.x</td><td>Nodos, edges, controles de zoom</td></tr>
-<tr><td>Canvas 2D</td><td>HTML Canvas API</td><td>Native</td><td>Dibujo de barreras, fuentes, regiones</td></tr>
-<tr><td>Icons</td><td>Lucide React</td><td>0.400+</td><td>18 iconos del toolbar</td></tr>
-</table>
-
-<h2>F.2. Modelo de Datos</h2>
-
-<p>El estado de la aplicacion se gestiona mediante Zustand stores con la siguiente estructura de datos principal:</p>
-
-<pre style="background:#0a0e1a;border:1px solid #1a3a6a;border-radius:8px;padding:16px;color:#e0e8f8;font-family:monospace;overflow-x:auto;">
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  sources: RadiationSource[];
-  barriers: Barrier[];
-  regions: OccupiedRegion[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface RadiationSource {
-  id: string;
-  type: 'xray' | 'ct' | 'linac' | 'nuclear_medicine' | 'industrial';
-  position: { x: number; y: number };
-  energy: number;        // kVp o MV
-  workload: number;      // mA-min/semana o Gy/semana
-  ...
-}
-
-interface Barrier {
-  id: string;
-  name: string;
-  type: 'primary' | 'secondary' | 'window' | 'door';
-  material: 'lead' | 'concrete' | 'steel' | 'gypsum' | 'barite' | 'borated_poly' | 'water';
-  thickness: number;     // mm o cm
-  points: { x: number; y: number }[];  // Poligono en canvas
-  ...
-}
-
-interface OccupiedRegion {
-  id: string;
-  name: string;
-  occupancyFactor: number;  // T de NCRP 147
-  designGoal: number;       // mSv/semana
-  points: { x: number; y: number }[];
-  ...
-}
-</pre>
-
-<h2>F.3. Pipeline de OpenCV.js</h2>
-
-<p>La deteccion automatica de muros mediante OpenCV.js sigue el siguiente pipeline:</p>
-
-<ol>
-<li><strong>Carga de imagen</strong>: El usuario carga una imagen JPG/PNG del plano arquitectonico.</li>
-<li><strong>Escala de grises</strong>: cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY).</li>
-<li><strong>Desenfoque gaussiano</strong>: cv.GaussianBlur(gray, blurred, ksize={7,7}, sigma=2.0).</li>
-<li><strong>Deteccion de bordes Canny</strong>: cv.Canny(blurred, edges, threshold1=50, threshold2=150).</li>
-<li><strong>Transformada Hough probabilistica</strong>: cv.HoughLinesP(edges, lines, rho=1, theta=π/180, threshold=80, minLineLength=100, maxLineGap=10).</li>
-<li><strong>Deteccion de contornos</strong>: cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE).</li>
-<li><strong>Filtro de lineas largas</strong>: Se filtran lineas con longitud > L_min (proporcional al tamano de imagen).</li>
-<li><strong>Convercion a barreras</strong>: Cada linea detectada se convierte en un objeto Barrier con posicion, angulo y longitud estimada.</li>
-<li><strong>Renderizado</strong>: Las barreras se dibujan sobre el canvas como elementos editables.</li>
-</ol>
-
-<h2>F.4. Pipeline de Machine Learning ONNX</h2>
-
-<p>El predictor ML (v101) utiliza el siguiente flujo de inferencia:</p>
-
-<ol>
-<li><strong>Input features</strong> [6]: [energy_kVp, workload_mAmin, distance_m, occupancy_T, useFactor_U, materialIndex].</li>
-<li><strong>Normalizacion</strong>: MinMax scaling a [0,1] usando parametros del entrenamiento.</li>
-<li><strong>Inferencia ONNX</strong>: Session run con onnxruntime-web (WebAssembly backend).</li>
-<li><strong>Arquitectura</strong>: Linear(6→64) → ReLU → Linear(64→32) → ReLU → Linear(32→16) → ReLU → Linear(16→1) → Sigmoid.</li>
-<li><strong>Denormalizacion</strong>: output × (max_thickness - min_thickness) + min_thickness.</li>
-<li><strong>Output</strong>: Espesor estimado en mm para el material seleccionado.</li>
-</ol>
-
-<div class="warning">
-<strong>Nota sobre el modelo ONNX:</strong> La version actual (v101-v110) utiliza un modelo ONNX simulado con valores de fallback realistas basados en tablas NCRP. El entrenamiento completo requiere un dataset sintetico de ~10,000 casos generados mediante simulacion MC (Geant4/GATE) o interpolacion de tablas NCRP 147/151. Ver PYTHON_INTEGRATION_ROADMAP.md para instrucciones de entrenamiento con PyTorch.
-</div>
-
-<h2>F.5. Estructura de Directorios del Proyecto</h2>
-
-<pre style="background:#0a0e1a;border:1px solid #1a3a6a;border-radius:8px;padding:16px;color:#e0e8f8;font-family:monospace;overflow-x:auto;">
-radshield-mx/
-├── public/
-│   ├── manual_usuario.html          # Este documento
-│   └── ...
-├── src/
-│   ├── sections/
-│   │   ├── CanvasQuickActionsSidebar.tsx   # 18 botones sidebar
-│   │   ├── dialogs/
-│   │   │   ├── RadioactiveTransportDialog.tsx      # v96
-│   │   │   ├── NistXcomDialog.tsx                  # v100
-│   │   │   ├── OnnxPredictorDialog.tsx             # v101
-│   │   │   ├── RevitIfcImportDialog.tsx            # v102
-│   │   │   ├── Geant4McDialog.tsx                  # v103
-│   │   │   ├── RevitAddinDialog.tsx                # v104
-│   │   │   ├── MultiObjectiveOptimizerDialog.tsx   # v105
-│   │   │   ├── MaterialComparisonDialog.tsx        # v106
-│   │   │   ├── BatchReportExporterDialog.tsx       # v107
-│   │   │   ├── SpatialDoseMapDialog.tsx            # v108
-│   │   │   ├── NeutronShieldingDialog.tsx          # v109
-│   │   │   └── RegulatoryReportDialog.tsx          # v110
-│   │   └── ...
-│   ├── lib/
-│   │   ├── xcomAttenuation.ts      # Datos NIST XCOM + interpolacion
-│   │   ├── ncrpOccupancy.ts        # 12 perfiles ocupacion NCRP 147
-│   │   ├── opencvDetection.ts      # Pipeline OpenCV.js
-│   │   └── ...
-│   ├── hooks/
-│   │   ├── useOpenCV.ts            # Carga opt-in opencv.js local o CDN explicito
-│   │   └── ...
-│   └── stores/
-│       ├── appStore.ts             # Estado global, dialogos
-│       └── ...
-└── ...
-</pre>
-
-<h2>F.6. Compatibilidad de Navegadores</h2>
-
-<table>
-<tr><th>Navegador</th><th>Version Minima</th><th>Canvas</th><th>OpenCV.js</th><th>ONNX</th><th>IFC</th><th>Notas</th></tr>
-<tr><td>Chrome/Edge</td><td>110+</td><td>Completo</td><td>Completo</td><td>Completo</td><td>Completo</td><td>Recomendado</td></tr>
-<tr><td>Firefox</td><td>110+</td><td>Completo</td><td>Completo</td><td>Completo</td><td>Parcial</td><td>Compatible</td></tr>
-<tr><td>Safari</td><td>16+</td><td>Completo</td><td>Limitado</td><td>Limitado</td><td>No</td><td>OpenCV lento</td></tr>
-<tr><td>Opera</td><td>96+</td><td>Completo</td><td>Completo</td><td>Completo</td><td>Completo</td><td>Compatible</td></tr>
-<tr><td>Mobile Chrome</td><td>120+</td><td>Parcial</td><td>No</td><td>No</td><td>No</td><td>Solo visualizacion</td></tr>
-<tr><td>IE11</td><td>-</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No soportado</td></tr>
-</table>
-
-<p class="screenshot-desc">La aplicacion requiere WebAssembly (WASM) para ONNX Runtime y OpenCV.js. Verifique que su navegador tenga WASM habilitado. Para procesamiento intensivo (OpenCV + MC + ML), se recomienda un equipo con al menos 8 GB de RAM.</p>
-
-
-<div class="version-info">
-Documento integrado: Manual de Usuario + Control de Versiones RadShield-MX<br>
-Version del manual: F499 (sincronizado con codigo fuente)<br>
-Fecha de generacion: Agosto 2026<br>
-Total de secciones: 25 + 6 Apendices (A-F)<br>
-Total de referencias bibliograficas: 90 (R1-R90)<br>
-Cobertura de versiones: v1 - F509 (inclusive)<br>
-</div>
-
+  </header>
+  <main>
+    <nav class="toc" aria-label="Indice">
+      <a href="#inicio">1. Inicio rapido</a>
+      <a href="#perfiles">2. Perfiles de usuario</a>
+      <a href="#flujo">3. Flujo completo</a>
+      <a href="#botones">4. Botones y acciones</a>
+      <a href="#canvas">5. Canvas/floorplan CAD-BIM</a>
+      <a href="#memoria">6. Memoria IA</a>
+      <a href="#materiales">7. Materiales y estructura</a>
+      <a href="#rag">8. RAG, OCR y evidencia</a>
+      <a href="#3d">9. Visualizacion 3D/BIM</a>
+      <a href="#qa">10. QA y limites</a>
+    </nav>
+
+    <section id="inicio">
+      <h2>1. Inicio Rapido</h2>
+      <div class="grid">
+        <div class="card"><strong>Objetivo.</strong><br />RadShield-MX ayuda a construir una memoria analitica preliminar de blindaje conectando plano, modalidad, equipo, barreras, materiales, calculo, evidencia normativa y reportes.</div>
+        <div class="card"><strong>Primer uso.</strong><br />Abra la app, confirme que la sidebar y el canvas esten visibles, seleccione modalidad DX/TX/NM/CY, cargue plano o use croquis demo, coloque equipo y defina barreras.</div>
+        <div class="card"><strong>Salida esperada.</strong><br />Resultado de blindaje, advertencias, referencias, capturas del canvas, Evidence Pack y borrador de memoria analitica.</div>
+      </div>
+      <div class="warn"><strong>Advertencia.</strong> La beta no sustituye la revision profesional del fisico medico, responsable de seguridad radiologica o perito estructural. Los resultados deben revisarse contra normativa aplicable, datos del fabricante y condiciones reales de obra.</div>
+    </section>
+
+    <section id="perfiles">
+      <h2>2. Perfiles De Usuario</h2>
+      <table>
+        <thead><tr><th>Perfil</th><th>Que debe hacer</th><th>Botones principales</th><th>Que debe evitar</th></tr></thead>
+        <tbody>
+          <tr><td>Basico</td><td>Cargar plano, elegir modalidad, colocar equipo, usar Calcular y generar reporte preliminar.</td><td>Archivo, DX/TX/NM/CY, Calc, Memoria, Evidencia, Manual.</td><td>No editar TVL/densidad sin fuente; no firmar memoria sin revision.</td></tr>
+          <tr><td>Intermedio</td><td>Clasificar barreras, ajustar ocupacion, materiales, penetraciones, zonas controladas y revisar advertencias.</td><td>Diseno, Equipos, Blindaje, Verificacion, Mat, Heatmap, 3D.</td><td>No mezclar unidades ni sustituir NCRP/IAEA por memorias historicas.</td></tr>
+          <tr><td>Avanzado</td><td>Validar metodologia, trazabilidad por cita/hash, QA numerico, RAG/OCR, BIM/IFC/DXF y export tecnico.</td><td>Evidencia, Integraciones, QA, DB, RAG, MC, BIM, Evidence Pack.</td><td>No activar motores externos o datasets sin licencia, version y tolerancia definida.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="flujo">
+      <h2>3. Flujo Completo De Diseno</h2>
+      <ol class="flow">
+        <li><strong>Proyecto.</strong> Use <code>Archivo &gt; Nuevo Proyecto</code> o abra un proyecto existente. Defina nombre, modalidad y version de trabajo.</li>
+        <li><strong>Plano.</strong> Cargue PDF/PNG/DXF/IFC segun disponibilidad. Si no hay plano, use croquis demo y ajuste escala.</li>
+        <li><strong>Modalidad.</strong> Seleccione DX para diagnostico, TX para radioterapia/LINAC/Gamma Knife/HDR, NM para medicina nuclear/PET/SPECT o CY para ciclotron.</li>
+        <li><strong>Equipos.</strong> Coloque fuente/equipo con footprint y orientacion. Verifique energia, carga de trabajo y fabricante.</li>
+        <li><strong>Barreras.</strong> Dibuje muros, puertas, laberintos y penetraciones. Asigne rol: primaria, secundaria, puerta, laberinto, penetracion o zona controlada.</li>
+        <li><strong>Materiales.</strong> Use la toolbox Mat para TVL, densidad, peso, costo, tiempo y carga estructural. Cada valor critico debe tener fuente o advertencia.</li>
+        <li><strong>Calculo.</strong> Ejecute Calcular. Revise warnings, unidades, P/T/U/W, distancia, material, TVL y criterio de diseno.</li>
+        <li><strong>Verificacion.</strong> Active heatmap/isocontornos, QA normativo y comparador base/conservador.</li>
+        <li><strong>Memoria IA.</strong> Genere borrador con perfil DX/TX/NM/CY. Revise cada formula, norma, input, output, cita y evidencia.</li>
+        <li><strong>Reporte.</strong> Exporte PDF, Evidence Pack, anexos de materiales y capturas BIM/3D.</li>
+      </ol>
+    </section>
+
+    <section id="botones">
+      <h2>4. Botones, Acciones Y Enlaces</h2>
+      <h3>4.1 Barra Superior</h3>
+      <table>
+        <thead><tr><th>Boton/Menu</th><th>Accion</th><th>Se enlaza con</th><th>Uso recomendado</th></tr></thead>
+        <tbody>
+          <tr><td>Archivo</td><td>Nuevo, abrir, guardar, importar, exportar, reporte, auditoria y ayuda.</td><td>Proyecto, DXF/PDF, Evidence Pack, Manual, Update Center.</td><td>Primer punto para gestionar datos y salidas.</td></tr>
+          <tr><td>Diseno</td><td>Herramientas de plano, layout, BIM, capas y geometria.</td><td>Canvas, IFC/DXF, BIM Project Manager, 3D.</td><td>Preparar el espacio antes del calculo.</td></tr>
+          <tr><td>Equipos</td><td>Seleccionar fuente, fabricante, modalidad y footprint.</td><td>Source Library, Equipment DB, Memoria IA, Materiales.</td><td>Colocar LINAC, Gamma Knife, PET/CT, HDR o ciclotron.</td></tr>
+          <tr><td>Blindaje</td><td>Calculo NCRP/IAEA/UAQ, barreras, materiales, neutrones y skyshine.</td><td>Motor de calculo, TVL/HVL, QA numerico, reportes.</td><td>Ejecutar y revisar blindajes.</td></tr>
+          <tr><td>Verificacion</td><td>QA, validacion normativa, incertidumbre, comparador y auditoria.</td><td>Evidence Pack, Memoria IA, logs, checklist CNSNS/UAQ.</td><td>Antes de exportar cualquier memoria.</td></tr>
+          <tr><td>Reportes</td><td>PDF, Excel, CSV, memoria analitica, reportes CNSNS y anexos.</td><td>Resultados, fuentes, capturas, materiales y auditoria.</td><td>Generar entregables revisables.</td></tr>
+          <tr><td>Evidencia</td><td>Referencias, citas, RAG, OCR, hashes, documentos y trazabilidad.</td><td>Document chunks, Evidence Pack, Memoria IA.</td><td>Sustentar cada conclusion.</td></tr>
+          <tr><td>Integraciones</td><td>DXF, IFC, DWG provider, BIM, motores externos, GATE/EGSnrc/Geant4.</td><td>Conversores externos, runners, import/export.</td><td>Solo usuarios avanzados o flujos controlados.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>4.2 Acceso Rapido</h3>
+      <table>
+        <thead><tr><th>Boton</th><th>Accion</th><th>Enlace interno</th><th>Notas</th></tr></thead>
+        <tbody>
+          <tr><td>DX</td><td>Perfil diagnostico RX/CT.</td><td>NCRP 147, CT/RX, puertas, areas publicas.</td><td>Use para salas RX, CT, fluoroscopia.</td></tr>
+          <tr><td>TX</td><td>Perfil radioterapia.</td><td>NCRP 151, LINAC, Gamma Knife, HDR, neutrones.</td><td>Verifique energia y workload.</td></tr>
+          <tr><td>NM</td><td>Perfil medicina nuclear.</td><td>PET/SPECT, TG-108, fuentes puntuales, uptake/hot lab.</td><td>Requiere tiempos, actividad y zonas.</td></tr>
+          <tr><td>CY</td><td>Perfil ciclotron.</td><td>Neutrones, activacion, laberintos, puertas y bunker.</td><td>Use datos de fabricante y carga maxima.</td></tr>
+          <tr><td>Calc</td><td>Ejecuta calculo de blindaje.</td><td>Motor de calculo, Results Panel, Memoria IA.</td><td>Revise warnings antes de exportar.</td></tr>
+          <tr><td>UAQ</td><td>Abre calculadora/metodologia UAQ.</td><td>Memoria analitica y criterios locales.</td><td>Complementa NCRP/IAEA.</td></tr>
+          <tr><td>Mem</td><td>Abre Memoria IA.</td><td>Plano, calculo, citas, Evidence Pack, PDF.</td><td>Produce borrador, no dictamen final.</td></tr>
+          <tr><td>Mat</td><td>Toolbox de materiales.</td><td>TVL, densidad, peso, costo, tiempo, carga estructural.</td><td>Use para comparar plomo, concreto HD, tabiques, Nelco, Verishield, TM Nipoll.</td></tr>
+          <tr><td>DXF</td><td>Importa o revisa plano CAD.</td><td>DXF Viewer, layer mapping, canvas.</td><td>DWG nativo requiere proveedor externo/conversion.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="canvas">
+      <h2>5. Canvas / Floorplan CAD-BIM</h2>
+      <p>El canvas es el centro operativo. Las acciones de bajo riesgo ya pasan por el harness F515/F516: zoom con <span class="kbd">Ctrl</span> + rueda, herramientas desde boton derecho y ajustar vista desde boton derecho.</p>
+      <h3>5.1 Dock De Herramientas Del Canvas</h3>
+      <table>
+        <thead><tr><th>Boton</th><th>Accion</th><th>Conecta con</th><th>Resultado visible</th></tr></thead>
+        <tbody>
+          <tr><td>Sel</td><td>Seleccionar/editar objetos.</td><td>Inspector, propiedades, capas.</td><td>Objeto resaltado y panel de propiedades.</td></tr>
+          <tr><td>Muro/Barrera</td><td>Dibujar barrera de blindaje.</td><td>Rol primaria/secundaria/puerta/laberinto.</td><td>Linea o muro en plano con espesor calculable.</td></tr>
+          <tr><td>Fuente</td><td>Colocar equipo o fuente.</td><td>Equipment DB, Source Library, modalidad.</td><td>Simbolo/footprint del equipo.</td></tr>
+          <tr><td>Zona</td><td>Definir zona controlada/publica.</td><td>Ocupacion T, criterio P, Memoria IA.</td><td>Overlay de area y etiqueta.</td></tr>
+          <tr><td>Medir</td><td>Crear cota o medicion.</td><td>Escala, QA de plano, evidencia.</td><td>Cota visual; desde F516c se activa via harness con boton derecho.</td></tr>
+          <tr><td>Pan</td><td>Desplazar vista.</td><td>Renderer/canvas state.</td><td>Plano se mueve sin modificar geometria.</td></tr>
+          <tr><td>Plano</td><td>Gestionar carga o modo de plano.</td><td>Archivo, DXF/PNG/PDF.</td><td>Plano base visible.</td></tr>
+          <tr><td>Escala</td><td>Ajustar escala del plano.</td><td>Unidades, cotas, calculo de distancia.</td><td>Distancias corregidas.</td></tr>
+          <tr><td>Punto</td><td>Agregar punto de control o medicion.</td><td>Heatmap, QA, memoria.</td><td>Punto etiquetado.</td></tr>
+          <tr><td>Material</td><td>Asignar material a barrera.</td><td>Toolbox Mat, TVL/densidad/costo.</td><td>Material asociado al objeto.</td></tr>
+          <tr><td>Calcular</td><td>Ejecutar calculo.</td><td>Motor, QA, Results, Memoria IA.</td><td>Resultados y advertencias.</td></tr>
+          <tr><td>Snapshot</td><td>Captura visual.</td><td>Evidence Pack, PDF, manual de revision.</td><td>Imagen exportable.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>5.2 Menu De Boton Derecho</h3>
+      <table>
+        <thead><tr><th>Opcion</th><th>Accion</th><th>Estado F516</th></tr></thead>
+        <tbody>
+          <tr><td>Seleccionar / editar</td><td>Cambia a herramienta de seleccion.</td><td>F516c: pasa por harness como <code>activate-tool</code>.</td></tr>
+          <tr><td>Dibujar barrera</td><td>Cambia a herramienta de barrera.</td><td>F516c: bajo riesgo; no crea geometria hasta interaccion posterior.</td></tr>
+          <tr><td>Colocar fuente/equipo</td><td>Cambia a herramienta fuente.</td><td>F516c: enlaza con Equipment DB al colocar.</td></tr>
+          <tr><td>Medir / cota</td><td>Cambia a medicion.</td><td>F516c validado por E2E.</td></tr>
+          <tr><td>Ajustar vista</td><td>Centra/encuadra el plano.</td><td>F516d validado como <code>fit-view</code>.</td></tr>
+          <tr><td>Exportar PNG</td><td>Genera imagen del canvas.</td><td>Pendiente de ruta harness dedicada.</td></tr>
+          <tr><td>Calcular blindaje</td><td>Llama al motor de calculo.</td><td>Debe tener proyecto/equipo/barreras validos.</td></tr>
+          <tr><td>Abrir evidencia</td><td>Abre Evidence Pack.</td><td>Conecta resultados y citas.</td></tr>
+          <tr><td>Inspeccion 3D medica</td><td>Abre visual 3D.</td><td>Conecta canvas, materiales y zonas.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="ok"><strong>Buenas practicas.</strong> Use <code>Ajustar vista</code> despues de cargar plano, cambiar escala o mover paneles. Use <code>Medir/cota</code> antes de calcular para confirmar escala.</div>
+    </section>
+
+    <section id="memoria">
+      <h2>6. Memoria IA</h2>
+      <p>Memoria IA toma el estado del proyecto y crea un borrador estructurado. El flujo correcto es: plano validado, equipo colocado, barreras clasificadas, materiales con fuente, calculo ejecutado y Evidence Pack revisado.</p>
+      <table>
+        <thead><tr><th>Paso</th><th>Que revisa</th><th>Salida</th></tr></thead>
+        <tbody>
+          <tr><td>Perfil DX/TX/NM/CY</td><td>Modalidad, normas y estructura del documento.</td><td>Indice de memoria adaptado.</td></tr>
+          <tr><td>Datos del equipo</td><td>Modelo, energia, carga de trabajo, fuente, fabricante.</td><td>Tabla de terminos fuente.</td></tr>
+          <tr><td>Barreras</td><td>Rol, distancia, ocupacion, uso, material, espesor.</td><td>Tabla de calculo por superficie.</td></tr>
+          <tr><td>Citas</td><td>Norma, pagina, hash, chunk y confianza.</td><td>Referencias trazables.</td></tr>
+          <tr><td>Advertencias</td><td>TVL no versionado, distancia corta, neutrones, material sin densidad.</td><td>Checklist de revision.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="materiales">
+      <h2>7. Materiales, Costos, Tiempos Y Carga Estructural</h2>
+      <p>La herramienta Mat consolida TVL/HVL, densidad, peso, costo, tiempo de obra y carga estructural. Sirve para comparar concreto ordinario, concreto alta densidad, plomo, acero, tabiques alta densidad, TM Nipoll, Nelco, Verishield y soluciones laminadas.</p>
+      <table>
+        <thead><tr><th>Campo</th><th>Para que sirve</th><th>Impacto</th></tr></thead>
+        <tbody>
+          <tr><td>TVL/HVL</td><td>Convertir transmision requerida en espesor.</td><td>Calculo radiologico.</td></tr>
+          <tr><td>Densidad</td><td>Estimar peso por volumen.</td><td>Carga estructural y transporte.</td></tr>
+          <tr><td>kg/m2</td><td>Comparar carga por barrera/losa/puerta.</td><td>Revision estructural.</td></tr>
+          <tr><td>Costo</td><td>Comparar alternativas por superficie y espesor.</td><td>Presupuesto.</td></tr>
+          <tr><td>Tiempo</td><td>Estimar rapidez de obra y restricciones.</td><td>Planeacion constructiva.</td></tr>
+          <tr><td>Cita/hash</td><td>Rastrear fuente del dato.</td><td>Auditoria y memoria.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="rag">
+      <h2>8. RAG, OCR Y Evidencia</h2>
+      <p>Los documentos se indexan en chunks con pagina/hash cuando existe texto extraible. OCR en espanol mejora memorias escaneadas, pero cualquier valor critico debe pasar por revision antes de alimentar calculo.</p>
+      <div class="note"><strong>Jerarquia documental.</strong> Norma primaria y manual de fabricante tienen prioridad. Memorias analiticas previas ayudan al estilo, checklist y deteccion de omisiones, pero no sustituyen NCRP, IAEA, AAPM, ICRP, CNSNS o datos aprobados.</div>
+    </section>
+
+    <section id="3d">
+      <h2>9. Visualizacion 3D/BIM</h2>
+      <p>El modo BIM/3D muestra la diferencia entre espacio visible y blindaje real: barrera primaria, secundaria, puerta, laberinto, penetraciones, equipos, zonas y heatmaps. Three/R3F es el runtime visual principal; Babylon queda para escena profunda y Unity WebGL para build externo real.</p>
+      <table>
+        <thead><tr><th>Vista</th><th>Uso</th><th>Relacion con memoria</th></tr></thead>
+        <tbody>
+          <tr><td>Planta CAD</td><td>Dibujar y medir.</td><td>Captura base del reporte.</td></tr>
+          <tr><td>BIM Shielding Board</td><td>Explicar roles de cada muro.</td><td>Figura pedagogica y tecnica.</td></tr>
+          <tr><td>Heatmap/isocontornos</td><td>Ver distribucion y umbrales.</td><td>Anexo visual de verificacion.</td></tr>
+          <tr><td>Recorrido 3D</td><td>Inspeccion espacial de espesores/equipos.</td><td>Evidencia visual y revision de interferencias.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="qa">
+      <h2>10. QA, Versiones Y Limites</h2>
+      <p>F515-F516d estabiliza eventos reales del canvas de forma incremental. F519 mantiene QA numerico por rol de barrera. F520 y fases posteriores aumentan memorias reales, DB tecnica y motores externos.</p>
+      <table>
+        <thead><tr><th>Fase</th><th>Estado</th><th>Validacion</th></tr></thead>
+        <tbody>
+          <tr><td>F515b</td><td>Zoom con Ctrl/Meta + rueda conectado.</td><td>E2E canvas fuerte.</td></tr>
+          <tr><td>F516c</td><td>Herramientas desde boton derecho conectadas.</td><td>E2E <code>activate-tool</code>.</td></tr>
+          <tr><td>F516d</td><td>Ajustar vista desde boton derecho conectado.</td><td>E2E <code>fit-view</code>.</td></tr>
+          <tr><td>Manual F516d</td><td>Usuario/versiones rehechos para niveles basico/intermedio/avanzado.</td><td>Build + revision HTML.</td></tr>
+        </tbody>
+      </table>
+      <footer>
+        RadShield-MX F516d. Manual reconstruido el 2026-08-02. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
+      </footer>
+    </section>
+  </main>
 </body>
 </html>

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F516d (2026-08-02) - Context fit view + manuales reconstruidos
+
+- Conecta `Canvas CAD -> Ajustar vista` desde el menu de boton derecho al event harness. La accion conserva `onZoomToFit`, registra `fit-view` y queda cubierta por E2E.
+- Mantiene F516c para herramientas desde boton derecho como `activate-tool` y F515b para zoom con `Ctrl/Meta + rueda` como `zoom-view`.
+- Reconstruye `public/manual_usuario.html` desde cero con perfiles basico, intermedio y avanzado, tablas de botones, acciones, enlaces y flujo plano/equipo/barrera/calculo/memoria/evidencia.
+- Agrega `public/manual_versiones.html` con mapa historico compacto, relacion boton-version, criterios de release y comandos de validacion.
+- Sincroniza `MANUAL_USUARIO_v99.md`, `MANUAL_VERSIONES_v50.md` y Update Center.
+
 # F515/F519 (2026-08-02) - Hardening canvas + QA numerico ampliado
 
 - Agrega `src/lib/f515CanvasEventHardening.ts` con matriz CanvasArea/useCanvas/eventControllerV2, escenarios de rutas de eventos, rollback por flags y lista E2E siguiente.

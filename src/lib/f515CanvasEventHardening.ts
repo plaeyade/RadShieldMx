@@ -68,6 +68,13 @@ export const F515_CANVAS_EVENT_SCENARIOS: F515CanvasEventScenario[] = [
     e2eName: 'context menu tool action activates stable tool through harness',
   },
   {
+    id: 'f516d-context-fit-routes-to-harness',
+    event: { type: 'pointerdown', mode: 'fit', x: 160, y: 180 },
+    expectedAction: 'fit-view',
+    stableFallbackRequired: false,
+    e2eName: 'context menu fit view keeps canvas stable and routes through harness',
+  },
+  {
     id: 'f515-lasso-start-update-finish',
     event: { type: 'pointerdown', mode: 'lasso', x: 20, y: 30 },
     expectedAction: 'start-selection',
@@ -135,6 +142,9 @@ export function routeCanvasEventV2WithGate(event: CanvasPointerEventV2, forceEna
   if (event.type === 'wheel') {
     return { action: 'zoom-view', reason: 'wheel routed to zoom', requiresE2E: true };
   }
+  if (event.mode === 'fit' && event.type === 'pointerdown') {
+    return { action: 'fit-view', reason: 'context menu fit view routed through event harness', requiresE2E: true };
+  }
   if (event.mode === 'tool' && event.type === 'pointerdown') {
     return { action: 'activate-tool', reason: 'canvas UI tool command routed through event harness', requiresE2E: true };
   }
@@ -194,6 +204,7 @@ export function buildF515CanvasEventHardening(): F515CanvasEventHardeningContrac
       'canvas nonblank after app load',
       'right-click/context surface does not block pointer capture',
       'right-click/context tool command routes through F516c harness and keeps stable tool activation',
+      'right-click/context fit view routes through F516d harness and keeps canvas visible',
       'quick actions still dispatch their dialog/store action',
       'drag preview does not commit geometry before pointerup',
       'lasso selection has escape/cancel behavior',

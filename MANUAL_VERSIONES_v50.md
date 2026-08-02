@@ -1,5 +1,18 @@
 # RadShield-MX - Manual de Versiones
 
+# F516d (2026-08-02) - Context fit view + manuales desde cero
+
+- **F516d canvas:** conecta `Canvas CAD -> Ajustar vista` desde el menu de boton derecho al event harness. La accion registra `fit-view`, conserva `onZoomToFit` como ruta estable y queda cubierta por E2E.
+- **F516c recordatorio:** `Medir/cota` desde boton derecho ya registra `activate-tool` sin mutar geometria.
+- **F515b recordatorio:** `Ctrl/Meta + rueda` registra `zoom-view`.
+- **Manual de usuario HTML:** `public/manual_usuario.html` fue reconstruido desde cero con perfiles basico, intermedio y avanzado; explica menus, botones, acciones y enlaces entre flujo de diseno, calculo, evidencia y reportes.
+- **Manual de versiones HTML:** `public/manual_versiones.html` agrega mapa historico compacto, relacion boton-version y criterio de release beta.
+- Validacion:
+  - `npm run build`
+  - `npm run test:f515-f519:hardening`
+  - `npm run test:f515-f519:hardening:values`
+  - `playwright e2e/f446-f448-canvas-strong-qa.spec.ts`
+
 # F515/F519 (2026-08-02) - Canvas events y QA numerico ampliado
 
 - **F515:** agrega hardening de eventos del canvas con fallback estable, rutas para zoom/lasso/snap/delete/undo y rollback por flags. No cambia geometria persistente sin E2E.

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RadShield-MX F516d - Manual de Versiones</title>
+  <style>
+    body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
+    header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
+    main { max-width: 1120px; margin: 0 auto; padding: 24px 28px 80px; }
+    h1 { margin: 0 0 6px; font-size: 30px; }
+    h2 { margin-top: 32px; padding-bottom: 7px; border-bottom: 2px solid #d9e2ef; font-size: 22px; }
+    h3 { margin-top: 22px; font-size: 16px; }
+    .pill { display: inline-block; margin: 6px 6px 0 0; padding: 5px 10px; border: 1px solid #d9e2ef; border-radius: 999px; background: #fff; font-size: 12px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13px; }
+    th, td { border: 1px solid #d9e2ef; padding: 8px 9px; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; text-transform: uppercase; font-size: 12px; color: #475467; }
+    tr:nth-child(even) td { background: #fcfdff; }
+    code { padding: 2px 5px; border-radius: 4px; background: #eef2f7; font-family: Consolas, monospace; }
+    .ok { border-left: 4px solid #059669; background: #ecfdf5; border-radius: 8px; padding: 12px 14px; }
+    .warn { border-left: 4px solid #dc2626; background: #fff1f2; border-radius: 8px; padding: 12px 14px; }
+    @media print { main { max-width: none; padding: 16mm; } h2 { break-before: page; } table { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RadShield-MX - Manual de Versiones</h1>
+    <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
+    <span class="pill">Version documental: F516d</span>
+    <span class="pill">Fecha: 2026-08-02</span>
+    <span class="pill">Beta tecnica estable</span>
+  </header>
+  <main>
+    <h2>1. Como Leer Las Versiones</h2>
+    <table>
+      <thead><tr><th>Perfil</th><th>Que revisar</th><th>Riesgo</th></tr></thead>
+      <tbody>
+        <tr><td>Basico</td><td>Si cambiaron botones, menus, manual, Update Center o flujo de carga/calculo/reporte.</td><td>Bajo si usa solo flujos guiados.</td></tr>
+        <tr><td>Intermedio</td><td>Si cambiaron canvas, materiales, barreras, QA, reportes o conexiones entre paneles.</td><td>Medio: validar escala, unidades y warnings.</td></tr>
+        <tr><td>Avanzado</td><td>Si cambiaron motor de calculo, RAG, DB, eventos, renderers, motores externos o datasets.</td><td>Alto: requiere pruebas y rollback.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2. Version Vigente F515b-F516d</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Boton/accion afectada</th><th>Validacion</th></tr></thead>
+      <tbody>
+        <tr><td>F515b</td><td>Conecta zoom real del canvas al event harness.</td><td><code>Ctrl/Meta + rueda</code>.</td><td>Accion reporta <code>zoom-view</code> y pasa E2E.</td></tr>
+        <tr><td>F516c</td><td>Conecta herramientas desde menu de boton derecho al event harness.</td><td>Seleccionar, Barrera, Fuente, Medir.</td><td>Accion reporta <code>activate-tool</code>; Medir/cota probado.</td></tr>
+        <tr><td>F516d</td><td>Conecta Ajustar vista desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Ajustar vista</code>.</td><td>Accion reporta <code>fit-view</code> y mantiene canvas visible.</td></tr>
+        <tr><td>F516d docs</td><td>Manual de usuario y versiones reconstruidos.</td><td>Manual, Update Center, ayuda.</td><td>HTML estatico y MD sincronizados.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Mapa Historico Compacto</h2>
+    <table>
+      <thead><tr><th>Rango</th><th>Entregable principal</th><th>Impacto en usuario</th></tr></thead>
+      <tbody>
+        <tr><td>v1-v50</td><td>Base de calculo, UI inicial, manuales, reportes y primeros dialogos.</td><td>Permite calcular y documentar blindaje preliminar.</td></tr>
+        <tr><td>F51-F99</td><td>Expande NCRP, CNSNS, UAQ, materiales, quick buttons y auditorias.</td><td>Mas modalidades y salidas regulatorias.</td></tr>
+        <tr><td>F100-F150</td><td>Canvas CAD, Memoria IA, RAG, OCR, DB, evidencia y perfiles DX/TX/NM/CY.</td><td>Flujo plano -> equipo -> calculo -> memoria.</td></tr>
+        <tr><td>F151-F230</td><td>Deploy estatico, restauracion visual, menus, botones, E2E y renderer gates.</td><td>App estable para beta frontend.</td></tr>
+        <tr><td>F231-F300</td><td>Manuales, staging, OCR Tesseract, memorias reales, APIs externas y limpieza de menus.</td><td>Mejor soporte documental y operativo.</td></tr>
+        <tr><td>F301-F360</td><td>Three/R3F, Babylon preliminar, Unity gate, caso Centro Neuro y visuales 3D.</td><td>Inspeccion 3D/BIM y narrativa visual.</td></tr>
+        <tr><td>F361-F430</td><td>Menu Archivo, quick actions, BIM/Revit-like UI, renderer profundo, calculo por rol y memoria automatica.</td><td>Canvas mas profesional y metodologia mas trazable.</td></tr>
+        <tr><td>F431-F514</td><td>Beta visual publicable, DB live QA, materiales versionados, paquete beta y cierre post-deploy.</td><td>Pruebas reales sin claims clinicos certificados.</td></tr>
+        <tr><td>F515-F516d</td><td>Hardening incremental de eventos reales del canvas y manuales renovados.</td><td>Menos riesgo al mejorar renderer/eventos base.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>4. Relacion Boton -> Version -> Siguiente Accion</h2>
+    <table>
+      <thead><tr><th>Boton</th><th>Version que lo estabiliza</th><th>Que hace</th><th>Que sigue</th></tr></thead>
+      <tbody>
+        <tr><td>Archivo</td><td>F404-F407</td><td>Gestiona proyecto, import/export, reportes y manuales.</td><td>Seguir verificando submenus con datos reales.</td></tr>
+        <tr><td>Acceso rapido DX/TX/NM/CY</td><td>F112-F186</td><td>Cambia contexto de modalidad y accesos.</td><td>Conectar mas estado persistente por perfil.</td></tr>
+        <tr><td>Canvas boton derecho</td><td>F516c-F516d</td><td>Activa herramientas y ajuste de vista desde harness.</td><td>Agregar export/calculo/evidencia al harness con guardas.</td></tr>
+        <tr><td>Mat</td><td>F186-F246</td><td>Compara TVL, densidad, peso, costo, tiempo y estructura.</td><td>Ampliar DB tecnica approved-reference.</td></tr>
+        <tr><td>Memoria IA</td><td>F102-F430</td><td>Convierte calculo/evidencia en memoria preliminar.</td><td>Mas memorias reales y citation picker vivo.</td></tr>
+        <tr><td>3D/BIM</td><td>F301-F455</td><td>Inspeccion visual, capas, barreras y narrativa BIM.</td><td>Babylon profundo y Unity build real.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Criterio De Release</h2>
+    <div class="ok"><strong>Permitido en beta:</strong> pruebas reales de usuario, captura de errores, revision visual del canvas, calculos preliminares, Evidence Pack y borrador de memoria con advertencias.</div>
+    <div class="warn"><strong>No permitido sin revision:</strong> memoria firmada, dictamen final, aprobacion constructiva o calculo clinico certificado sin FM/RSO/perito y datos versionados.</div>
+
+    <h2>6. Comandos De Validacion Vigentes</h2>
+    <table>
+      <thead><tr><th>Comando</th><th>Que valida</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm run build</code></td><td>Compila frontend y genera <code>dist/</code>.</td></tr>
+        <tr><td><code>npm run test:f515-f519:hardening</code></td><td>Contratos F515/F519, Update Center y manuales.</td></tr>
+        <tr><td><code>npm run test:f515-f519:hardening:values</code></td><td>Rutas de eventos y casos numericos compactos.</td></tr>
+        <tr><td><code>playwright f446-f448-canvas-strong-qa</code></td><td>Canvas, boton derecho, quick actions y harness.</td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

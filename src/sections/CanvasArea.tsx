@@ -510,6 +510,17 @@ export default function CanvasArea({
     activateCanvasTool(tool);
   };
 
+  const fitCanvasViewFromContext = () => {
+    const routed = routeCanvasEventV2WithGate({
+      type: 'pointerdown',
+      mode: 'fit',
+      x: contextMenu?.canvasX ?? 0,
+      y: contextMenu?.canvasY ?? 0,
+    }, true);
+    setLastF515EventAction(routed.action);
+    onZoomToFit();
+  };
+
   const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1803,7 +1814,7 @@ export default function CanvasArea({
                 <button type="button" data-testid="canvas-context-action-barrier" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasToolFromContext('barrier'))}>Dibujar barrera</button>
                 <button type="button" data-testid="canvas-context-action-source" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasToolFromContext('source'))}>Colocar fuente/equipo</button>
                 <button type="button" data-testid="canvas-context-action-measure" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasToolFromContext('measure'))}>Medir / cota</button>
-                <button type="button" data-testid="canvas-context-action-fit" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onZoomToFit)}>Ajustar vista</button>
+                <button type="button" data-testid="canvas-context-action-fit" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(fitCanvasViewFromContext)}>Ajustar vista</button>
                 <button type="button" data-testid="canvas-context-action-export" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onExportPNG)}>Exportar PNG</button>
                 <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
                 <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenEvidencePack)}>Abrir evidencia</button>

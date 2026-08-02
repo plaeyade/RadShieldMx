@@ -2,6 +2,7 @@ const eventCases = [
   ['disabled stable fallback', false, 'pointerdown', 'drag', 10, 10, undefined, undefined, 'route-to-stable-useCanvas'],
   ['non finite pointer', true, 'pointermove', 'drag', Number.NaN, 1, undefined, undefined, 'ignore'],
   ['wheel zoom', true, 'wheel', 'zoom', 1, 1, undefined, undefined, 'zoom-view'],
+  ['context fit view', true, 'pointerdown', 'fit', 1, 1, undefined, undefined, 'fit-view'],
   ['context tool command', true, 'pointerdown', 'tool', 1, 1, undefined, undefined, 'activate-tool'],
   ['snap preview', true, 'pointermove', 'snap', 1, 1, undefined, undefined, 'snap-preview'],
   ['delete key', true, 'keydown', 'delete', 0, 0, 'Delete', undefined, 'delete-selection'],
@@ -14,6 +15,7 @@ function routeHarness([, enabled, type, mode, x, y, key, ctrlKey]) {
   if (type === 'keydown' && key === 'Delete') return 'delete-selection';
   if (type === 'keydown' && ctrlKey && key?.toLowerCase() === 'z') return 'undo-last';
   if (type === 'wheel') return 'zoom-view';
+  if (mode === 'fit' && type === 'pointerdown') return 'fit-view';
   if (mode === 'tool' && type === 'pointerdown') return 'activate-tool';
   if (mode === 'snap' && type === 'pointermove') return 'snap-preview';
   return 'route-to-stable-useCanvas';
