@@ -78,6 +78,7 @@ import { buildF164ClinicalProjectMap } from '@/lib/f164ClinicalProjectMap';
 import { buildF454PostBetaHeavyEngines } from '@/lib/f454PostBetaHeavyEngines';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
+import { buildF499RegulatoryMaterialsSeedDryRun } from '@/lib/f499RegulatoryMaterialsSeedDryRun';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -95,6 +96,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F499 seed dry-run regulatorio/materiales', current: 'dry-run artifacts ready', latest: 'JSONL + CSV + SQL draft + manifest, live DB write blocked', status: 'current', description: `Genera seed dry-run para regulatory_sources, material_constants, material_value_versions y material_source_links sin escribir DB live. Conteo actual: ${buildF499RegulatoryMaterialsSeedDryRun().counts.materialValueVersions} versiones de valores y ${buildF499RegulatoryMaterialsSeedDryRun().counts.materialSourceLinks} links. F499_SEED_LIVE=1 aborta; F500 hara readback live solo con aprobacion, restore probe y revision de duplicados.` },
   { name: 'F491-F498 DB regulatoria/materiales', current: 'versioned registry ready', latest: 'sources + material constants + value versions + dry-run seed route', status: 'current', description: `Consolida fuentes regulatorias/materiales en una DB versionable con ${buildF491F498RegulatoryMaterialsDb().summary.totalMaterials} materiales y tablas regulatory_sources/material_constants/material_value_versions/material_source_links. Solo valores approved-reference alimentan calculo; proveedores/lab quedan como evidencia hasta revision por pagina/hash. Ruta live: DATABASE_URL, document_chunks canonical, restore probe y F484-F490 post-seed.` },
   { name: 'F484-F490 Motor calculo QA', current: 'normative QA gate', latest: 'NCRP151 + NCRP147 + IAEA + UAQ + TG108 regression cases', status: 'current', description: `Agrega gate QA del motor con ${buildF484F490NormativeQa().summary.totalCases} casos: LINAC 6 MV primario, LINAC 15 MV/neutrones, CT NCRP147, Gamma Knife/Co-60, PET/NM TG-108 y ciclotron 18 MeV. Mantiene los resultados como preliminares hasta fuente/TVL/densidad versionada, hash documental y revision FM/RSO. Assets pesados entran despues por public/medical3d/photoreal o public/unity/radshield-medical-3d con QA visual separado.` },
   { name: 'F479-F483 fotorrealismo avanzado', current: 'procedural photoreal pack', latest: 'texture/HDRI/decals/render presets + visual QA export', status: 'current', description: 'Agrega paquete visual avanzado para Medical 3D: rutas de texturas PBR versionadas, HDRI local preparado, decals clinicos/BIM sobre la escena, presets inspeccion/presentacion/cinematico y export JSON. Mantiene assets pesados como lazy/gated y separa apariencia visual de TVL/densidad/citas tecnicas.' },

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F499 (2026-08-01) - Seed dry-run DB regulatoria/materiales
+
+- Agrega `src/lib/f499RegulatoryMaterialsSeedDryRun.ts` para transformar el registro F491-F498 en filas candidatas de seed.
+- Genera `regulatory_sources`, `material_constants`, `material_value_versions` y `material_source_links`.
+- Agrega `scripts/f499-regulatory-materials-seed-dry-run.mjs` para escribir JSONL, CSV, SQL draft, Markdown y manifiesto en `outputs/f499_regulatory_materials_seed_dry_run`.
+- Bloquea escritura live en F499: si se intenta `F499_SEED_LIVE=1`, el script aborta y remite a F500.
+- Siguiente fase: F500 DB live readback con aprobacion explicita, restore probe, revision de duplicados y F484-F490 post-seed.
+
 # F491-F498 (2026-08-01) - DB regulatoria/materiales versionada
 
 - **F491:** crea registro de fuentes regulatorias/materiales con autoridad, prioridad canonica, hash, page_ref, estado de revision y usos permitidos.

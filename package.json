@@ -22,6 +22,8 @@
     "prepare:f491-f498:regulatory-materials-db": "node scripts/f491-f498-regulatory-materials-db-audit.mjs",
     "test:f491-f498:regulatory-materials-db": "node scripts/check-f491-f498-regulatory-materials-db-contracts.mjs",
     "test:f491-f498:regulatory-materials-db:unit": "node scripts/check-f491-f498-regulatory-materials-db-values.mjs",
+    "prepare:f499:regulatory-materials-seed": "node scripts/f499-regulatory-materials-seed-dry-run.mjs",
+    "test:f499:regulatory-materials-seed": "node scripts/check-f499-regulatory-materials-seed-dry-run-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

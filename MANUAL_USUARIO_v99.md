@@ -1,5 +1,35 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F499 - Seed dry-run regulatorio/materiales
+
+F499 toma la DB regulatoria/materiales versionada de F491-F498 y genera archivos de seed revisables sin escribir en DB live.
+
+Comandos:
+
+```text
+npm run prepare:f499:regulatory-materials-seed
+npm run test:f499:regulatory-materials-seed
+```
+
+Artefactos:
+
+```text
+outputs/f499_regulatory_materials_seed_dry_run/
+  f499_regulatory_sources.jsonl
+  f499_material_constants.jsonl
+  f499_material_value_versions.jsonl
+  f499_material_source_links.jsonl
+  f499_regulatory_sources.csv
+  f499_material_constants.csv
+  f499_material_value_versions.csv
+  f499_material_source_links.csv
+  f499_seed_dry_run.sql
+  f499_seed_manifest.json
+  f499_seed_dry_run.md
+```
+
+Regla de seguridad: F499 es dry-run. Si se intenta activar `F499_SEED_LIVE=1`, el script aborta. La escritura real queda para F500, despues de revisar duplicados, confirmar restore probe y aprobar fuentes comerciales/laboratorio por pagina/hash.
+
 ## Addendum F491-F498 - DB regulatoria/materiales versionada
 
 F491-F498 consolida la base tecnica que debe alimentar Material Toolbox, Memoria IA, Evidence Pack, PDF, Medical 3D y calculo. El objetivo es que TVL, HVL, densidad, peso, costo, carga estructural, fuente, pagina y hash salgan de un registro controlado, no de constantes dispersas.
