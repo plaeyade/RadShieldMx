@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# F456-F458 (2026-08-01) - Babylon scene parity, performance and export
+
+- **F456:** el preview Babylon deja de ser maqueta fija y dibuja entidades reales de `MedicalScene`: barreras con tamano/rotacion/rol/material, equipos con footprint y zonas controladas.
+- **F457:** agrega gate visible de rendimiento: primer frame, FPS aproximado, numero de meshes y regla de fallback a Three/R3F si Babylon falla.
+- **F458:** agrega boton **Export PNG Babylon** para capturas visuales de Evidence/Memoria; se mantiene como evidencia visual no firmable hasta QA completo de paridad.
+- Agrega scripts `prepare/test:f456-f458:babylon-parity` y E2E `test:f456-f458:babylon-parity:e2e`.
+
 # F455 (2026-08-01) - Babylon runtime smoke visual
 
 - Verifica que `@babylonjs/core`, `@babylonjs/loaders`, `@babylonjs/materials` y `@babylonjs/gui` ya puedan usarse desde el bundle local.

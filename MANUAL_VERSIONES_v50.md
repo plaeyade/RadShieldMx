@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F456-F458 (2026-08-01) - Babylon paridad, rendimiento y export
+
+- F456 usa la escena real construida desde el plano: muros/barreras, equipos y zonas pasan a Babylon con geometria, rol y materiales visibles.
+- F457 agrega medicion de primer frame, FPS y meshes para decidir si Babylon puede avanzar o debe quedar como preview con fallback a Three/R3F.
+- F458 agrega export PNG desde el canvas Babylon para anexos visuales, Evidence Pack y comparativas post-beta.
+- Comandos: `npm run prepare:f456-f458:babylon-parity`, `npm run test:f456-f458:babylon-parity` y `npm run test:f456-f458:babylon-parity:e2e`.
+
 # F455 (2026-08-01) - Babylon runtime smoke visual
 
 - F455 confirma que Babylon ya no es solo backlog documental: el visor 3D carga runtime local mediante import dinamico.

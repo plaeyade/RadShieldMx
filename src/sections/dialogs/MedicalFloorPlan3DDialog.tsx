@@ -33,7 +33,7 @@ import { buildUnityExternalViewerLaunchPacket } from '@/lib/medical3D/unityExter
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import { buildPhotorealAdvancedProfile } from '@/lib/medical3D/photorealAdvanced';
 import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
-import { buildBabylonRuntimeSmokeContract } from '@/lib/medical3D/babylonRuntimeSmoke';
+import { buildBabylonRuntimeSmokeContract, buildBabylonSceneParityContract } from '@/lib/medical3D/babylonRuntimeSmoke';
 
 interface Props {
   open: boolean;
@@ -69,6 +69,11 @@ type VisualEvidenceCapture = {
   stationLabel?: string | null;
 };
 type BabylonSmokeStatus = 'idle' | 'loading' | 'ready' | 'failed';
+type BabylonPerformanceMetrics = {
+  firstFrameMs: number | null;
+  fps: number | null;
+  meshes: number;
+};
 type InspectionTarget =
   | { type: 'wall'; id: string; title: string; details: string[] }
   | { type: 'equipment'; id: string; title: string; details: string[] }
@@ -1036,6 +1041,26 @@ function clampBabylonDimension(value: number, fallback: number) {
   return Math.min(Math.max(value, 3), 12);
 }
 
+function babylonRoleColor(barrierType: string) {
+  if (barrierType === 'primary') return [0.82, 0.18, 0.18] as const;
+  if (barrierType === 'secondary') return [0.9, 0.63, 0.16] as const;
+  if (barrierType === 'maze') return [0.13, 0.55, 0.86] as const;
+  if (barrierType === 'door') return [0.42, 0.31, 0.78] as const;
+  return [0.44, 0.48, 0.54] as const;
+}
+
+function babylonMaterialTint(materialCode: string) {
+  const key = materialCode.toLowerCase();
+  if (key.includes('plomo') || key.includes('lead')) return [0.22, 0.23, 0.28] as const;
+  if (key.includes('barit') || key.includes('alta') || key.includes('concreto')) return [0.48, 0.46, 0.4] as const;
+  if (key.includes('acero') || key.includes('steel')) return [0.58, 0.62, 0.65] as const;
+  return [0.56, 0.55, 0.5] as const;
+}
+
+function finiteBabylonFps(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+}
+
 function BabylonRuntimeSmokePreview({
   scene,
   enabled,
@@ -1048,6 +1073,16 @@ function BabylonRuntimeSmokePreview({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<BabylonSmokeStatus>('idle');
   const [message, setMessage] = useState('Babylon listo para prueba visual aislada.');
+  const [metrics, setMetrics] = useState<BabylonPerformanceMetrics>({ firstFrameMs: null, fps: null, meshes: 0 });
+
+  const handleExportBabylonPng = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || status !== 'ready') return;
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `babylon_parity_${scene.roomName.replace(/\W+/g, '_')}.png`;
+    link.click();
+  };
 
   useEffect(() => {
     let disposed = false;
@@ -1070,6 +1105,7 @@ function BabylonRuntimeSmokePreview({
     }
 
     setSmokeStatus('loading', 'Cargando @babylonjs/core/loaders/materials...');
+    setMetrics({ firstFrameMs: null, fps: null, meshes: 0 });
 
     void (async () => {
       try {
@@ -1079,6 +1115,7 @@ function BabylonRuntimeSmokePreview({
 
         if (disposed || !canvasRef.current) return;
 
+        const loadStarted = performance.now();
         const canvas = canvasRef.current;
         const width = clampBabylonDimension(scene.bounds.width, 7.5);
         const depth = clampBabylonDimension(scene.bounds.depth, 6);
@@ -1128,41 +1165,91 @@ function BabylonRuntimeSmokePreview({
         const controlZone = new babylon.StandardMaterial('f455ControlledZone', babylonScene);
         controlZone.diffuseColor = new babylon.Color3(0.1, 0.56, 0.74);
         controlZone.alpha = 0.28;
+        const roleMaterials = new Map<string, typeof concrete>();
+
+        const materialForWall = (barrierType: string, materialCode: string) => {
+          const key = `${barrierType}:${materialCode}`;
+          const cached = roleMaterials.get(key);
+          if (cached) return cached;
+          const mat = new babylon.PBRMaterial(`f456Wall_${key.replace(/\W+/g, '_')}`, babylonScene);
+          const [baseR, baseG, baseB] = babylonMaterialTint(materialCode);
+          mat.albedoColor = new babylon.Color3(baseR, baseG, baseB);
+          mat.roughness = 0.82;
+          mat.metallic = materialCode.toLowerCase().includes('plomo') ? 0.18 : 0;
+          roleMaterials.set(key, mat);
+          return mat;
+        };
 
         const floor = babylon.MeshBuilder.CreateBox('f455Floor', { width, depth, height: 0.12 }, babylonScene);
-        floor.position.y = -0.06;
+        floor.position.set(scene.bounds.center[0], -0.06, scene.bounds.center[2]);
         floor.material = interior;
 
-        const backWall = babylon.MeshBuilder.CreateBox('f455BackShield', { width, depth: wallThickness, height: wallHeight }, babylonScene);
-        backWall.position.set(0, wallHeight / 2, -depth / 2);
-        backWall.material = concrete;
+        scene.walls.forEach((wall, index) => {
+          const wallMesh = babylon.MeshBuilder.CreateBox(
+            `f456Wall_${wall.id}`,
+            { width: wall.size[0], height: wall.size[1], depth: Math.max(wall.size[2], 0.08) },
+            babylonScene,
+          );
+          wallMesh.position.set(wall.center[0], wall.center[1], wall.center[2]);
+          wallMesh.rotation.y = wall.rotationY;
+          wallMesh.material = materialForWall(wall.barrierType, wall.materialCode);
 
-        const leftWall = babylon.MeshBuilder.CreateBox('f455LeftShield', { width: wallThickness, depth, height: wallHeight }, babylonScene);
-        leftWall.position.set(-width / 2, wallHeight / 2, 0);
-        leftWall.material = concrete;
-
-        const rightWall = babylon.MeshBuilder.CreateBox('f455RightShield', { width: wallThickness, depth, height: wallHeight }, babylonScene);
-        rightWall.position.set(width / 2, wallHeight / 2, 0);
-        rightWall.material = concrete;
+          const [r, g, b] = babylonRoleColor(wall.barrierType);
+          const band = babylon.MeshBuilder.CreateBox(
+            `f456RoleBand_${wall.id}`,
+            { width: Math.max(wall.size[0] * 0.92, 0.25), height: 0.06, depth: Math.max(wall.size[2] * 1.24, 0.12) },
+            babylonScene,
+          );
+          band.position.set(wall.center[0], wall.size[1] + 0.08 + index * 0.002, wall.center[2]);
+          band.rotation.y = wall.rotationY;
+          const bandMaterial = new babylon.StandardMaterial(`f456RoleBandMat_${wall.id}`, babylonScene);
+          bandMaterial.diffuseColor = new babylon.Color3(r, g, b);
+          bandMaterial.emissiveColor = new babylon.Color3(r * 0.25, g * 0.25, b * 0.25);
+          band.material = bandMaterial;
+        });
 
         const primaryBand = babylon.MeshBuilder.CreateBox('f455PrimaryBarrierBand', { width: width * 0.74, depth: 0.06, height: 0.16 }, babylonScene);
-        primaryBand.position.set(0, wallHeight + 0.08, -depth / 2 + wallThickness / 2);
+        primaryBand.position.set(scene.bounds.center[0], wallHeight + 0.08, scene.bounds.center[2] - depth / 2 + wallThickness / 2);
         const primaryMaterial = new babylon.StandardMaterial('f455PrimaryBandMat', babylonScene);
         primaryMaterial.diffuseColor = new babylon.Color3(0.91, 0.23, 0.22);
         primaryBand.material = primaryMaterial;
 
-        const zone = babylon.MeshBuilder.CreateGround('f455ControlledArea', { width: width * 0.55, height: depth * 0.38 }, babylonScene);
-        zone.position.set(0, 0.01, depth * 0.18);
-        zone.material = controlZone;
+        if (scene.zones.length) {
+          scene.zones.forEach((medicalZone) => {
+            const xs = medicalZone.points.map((point) => point[0]);
+            const zs = medicalZone.points.map((point) => point[2]);
+            const zoneWidth = Math.max(Math.max(...xs) - Math.min(...xs), 0.8);
+            const zoneDepth = Math.max(Math.max(...zs) - Math.min(...zs), 0.8);
+            const zone = babylon.MeshBuilder.CreateGround(`f456Zone_${medicalZone.id}`, { width: zoneWidth, height: zoneDepth }, babylonScene);
+            zone.position.set(medicalZone.center[0], 0.01, medicalZone.center[2]);
+            zone.material = controlZone;
+          });
+        } else {
+          const zone = babylon.MeshBuilder.CreateGround('f455ControlledArea', { width: width * 0.55, height: depth * 0.38 }, babylonScene);
+          zone.position.set(scene.bounds.center[0], 0.01, scene.bounds.center[2] + depth * 0.18);
+          zone.material = controlZone;
+        }
 
-        const couch = babylon.MeshBuilder.CreateBox('f455TreatmentCouch', { width: 1.15, depth: 2.1, height: 0.22 }, babylonScene);
-        couch.position.set(0, 0.72, 0.05);
-        couch.material = equipment;
+        scene.equipment.forEach((medicalEquipment, index) => {
+          const couch = babylon.MeshBuilder.CreateBox(
+            `f456EquipmentFootprint_${medicalEquipment.id}`,
+            { width: medicalEquipment.footprint_m[0], depth: medicalEquipment.footprint_m[1], height: 0.22 },
+            babylonScene,
+          );
+          couch.position.set(medicalEquipment.position[0], 0.72, medicalEquipment.position[2]);
+          couch.rotation.y = medicalEquipment.rotationY;
+          couch.material = equipment;
 
-        const gantry = babylon.MeshBuilder.CreateTorus('f455MedicalGantry', { diameter: 1.55, thickness: 0.22 }, babylonScene);
-        gantry.position.set(0, 1.45, -0.9);
-        gantry.rotation.x = Math.PI / 2;
-        gantry.material = equipment;
+          const gantry = babylon.MeshBuilder.CreateTorus(
+            `f456MedicalGantry_${medicalEquipment.id}`,
+            { diameter: Math.min(Math.max(medicalEquipment.footprint_m[0] * 0.62, 0.8), 1.8), thickness: 0.18 },
+            babylonScene,
+          );
+          gantry.position.set(medicalEquipment.position[0], 1.45, medicalEquipment.position[2] - medicalEquipment.footprint_m[1] * 0.32);
+          gantry.rotation.x = Math.PI / 2;
+          gantry.rotation.z = index * 0.08;
+          gantry.material = equipment;
+        });
 
         const sourceCone = babylon.MeshBuilder.CreateCylinder('f455BeamGuide', {
           diameterTop: 0.08,
@@ -1170,19 +1257,32 @@ function BabylonRuntimeSmokePreview({
           height: 2.25,
           tessellation: 32,
         }, babylonScene);
-        sourceCone.position.set(0, 1.25, -0.1);
+        const firstEquipment = scene.equipment[0];
+        sourceCone.position.set(firstEquipment?.position[0] ?? scene.bounds.center[0], 1.25, firstEquipment?.position[2] ?? scene.bounds.center[2]);
         sourceCone.rotation.x = Math.PI / 2;
         const beamMaterial = new babylon.StandardMaterial('f455BeamMaterial', babylonScene);
         beamMaterial.diffuseColor = new babylon.Color3(0.15, 0.45, 1);
         beamMaterial.alpha = 0.22;
         sourceCone.material = beamMaterial;
 
+        let frameCount = 0;
         engine.runRenderLoop(() => {
+          frameCount += 1;
+          if (frameCount === 1 && !disposed) {
+            setMetrics({
+              firstFrameMs: Math.round(performance.now() - loadStarted),
+              fps: finiteBabylonFps(engine?.getFps?.()),
+              meshes: babylonScene?.meshes?.length || 0,
+            });
+          }
+          if (frameCount === 45 && !disposed) {
+            setMetrics((prev) => ({ ...prev, fps: finiteBabylonFps(engine?.getFps?.()), meshes: babylonScene?.meshes?.length || prev.meshes }));
+          }
           babylonScene?.render();
         });
         resizeHandler = () => engine?.resize();
         window.addEventListener('resize', resizeHandler);
-        setSmokeStatus('ready', `Babylon runtime activo: ${scene.walls.length} barreras, ${scene.equipment.length} equipos.`);
+        setSmokeStatus('ready', `Babylon parity activo: ${scene.walls.length} barreras, ${scene.equipment.length} equipos, ${scene.zones.length} zonas.`);
       } catch (error) {
         setSmokeStatus('failed', error instanceof Error ? error.message : 'No fue posible cargar Babylon runtime.');
       }
@@ -1200,8 +1300,8 @@ function BabylonRuntimeSmokePreview({
     <div className="space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2" data-testid="f455-babylon-runtime-smoke">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <div className="text-[11px] font-semibold uppercase text-cyan-950">F455 Babylon runtime</div>
-          <div className="text-[9px] text-cyan-900">Smoke visual real con PBR, cutaway y fallback Three/R3F.</div>
+          <div className="text-[11px] font-semibold uppercase text-cyan-950">F456-F458 Babylon parity</div>
+          <div className="text-[9px] text-cyan-900">Escena real, FPS/fallback y export visual para Evidence.</div>
         </div>
         <Badge variant="outline" className="bg-white text-[9px]" data-testid="f455-babylon-runtime-status">
           {status}
@@ -1218,6 +1318,21 @@ function BabylonRuntimeSmokePreview({
       <div className={`text-[9px] leading-relaxed ${status === 'failed' ? 'text-red-700' : 'text-cyan-900'}`}>
         {message}
       </div>
+      <div className="grid grid-cols-3 gap-1 text-[9px] text-cyan-950" data-testid="f457-babylon-performance-gate">
+        <div className="rounded border border-cyan-100 bg-white/85 px-1.5 py-1">FPS {metrics.fps ?? 'warmup'}</div>
+        <div className="rounded border border-cyan-100 bg-white/85 px-1.5 py-1">1er frame {metrics.firstFrameMs ?? '-'} ms</div>
+        <div className="rounded border border-cyan-100 bg-white/85 px-1.5 py-1">Meshes {metrics.meshes}</div>
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 w-full justify-start bg-white text-xs"
+        onClick={handleExportBabylonPng}
+        disabled={status !== 'ready'}
+        data-testid="f458-babylon-export-png"
+      >
+        <Download className="w-3.5 h-3.5 mr-2" /> Export PNG Babylon
+      </Button>
     </div>
   );
 }
@@ -1254,6 +1369,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const unityLaunchPacket = useMemo(() => buildUnityExternalViewerLaunchPacket(scene), [scene]);
   const babylonContract = useMemo(() => buildBabylonAdapterContract(scene), [scene]);
   const babylonSmokeContract = useMemo(() => buildBabylonRuntimeSmokeContract(scene), [scene]);
+  const babylonParityContract = useMemo(() => buildBabylonSceneParityContract(scene), [scene]);
   const f408UnitySceneExport = useMemo(() => buildF408UnitySceneExport(activeFloorPlan, preset), [activeFloorPlan, preset]);
   const f408UnityValidationWarnings = useMemo(() => validateF408UnitySceneExport(f408UnitySceneExport), [f408UnitySceneExport]);
   const photorealAdvancedProfile = useMemo(() => buildPhotorealAdvancedProfile({
@@ -2034,11 +2150,14 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 <Badge variant="outline" className="bg-white text-[9px]">{babylonSmokeStatus === 'ready' ? 'runtime-smoke-ready' : babylonContract.readiness}</Badge>
               </div>
               <div className="text-[10px] leading-relaxed text-violet-900">
-                Dependencias locales verificadas para F455. Mantener Three/R3F como fallback hasta completar paridad visual, medicion de rendimiento y QA de export.
+                Dependencias locales verificadas. F456-F458 agrega paridad de escena, medicion de rendimiento/fallback y export PNG visual.
               </div>
               <div className="rounded border border-violet-100 bg-white/85 p-2 text-[9px] text-violet-900">
-                <div className="font-semibold">{babylonSmokeContract.status}</div>
+                <div className="font-semibold">{babylonSmokeContract.status} / {babylonParityContract.status}</div>
                 <div>{babylonSmokeContract.visualElements.join(' | ')}</div>
+                <div className="mt-1" data-testid="f456-f458-babylon-parity-contract">
+                  Paridad: {babylonParityContract.parity.wallsFromScene} muros, {babylonParityContract.parity.equipmentFromScene} equipos, {babylonParityContract.parity.zonesFromScene} zonas. Export PNG: {babylonParityContract.exportGate.png ? 'ready' : 'review'}.
+                </div>
               </div>
               <div className="space-y-1">
                 {babylonInstallOptions.map((option) => (

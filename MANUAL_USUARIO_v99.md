@@ -1,5 +1,26 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F456-F458 - Babylon paridad, rendimiento y export
+
+F456-F458 convierte la prueba Babylon en una superficie util de revision visual. Babylon ahora lee la escena medica real y muestra muros/barreras, equipos, zonas y roles con materiales PBR ligeros.
+
+Como usarlo:
+
+1. Abra **Medical 3D**.
+2. Revise la tarjeta **F456-F458 Babylon parity**.
+3. Confirme que el estado sea `ready`.
+4. Lea el gate de rendimiento: FPS, primer frame y meshes.
+5. Use **Export PNG Babylon** para capturar una imagen visual para Evidence Pack o revision interna.
+
+Interpretacion de la vista:
+
+- Las barreras provienen de `MedicalScene`, no de un ejemplo fijo.
+- Las bandas superiores indican rol de barrera: primaria, secundaria, laberinto, puerta u otro.
+- Las zonas se renderizan como overlays translucidos para revisar control/ocupacion.
+- Los equipos se muestran como footprints y volumen medico proxy hasta integrar modelos GLB reales.
+
+Limite operativo: la captura Babylon es evidencia visual. El calculo firmable, citas, espesores y PDF regulatorio siguen dependiendo del motor de calculo, Memoria IA y Evidence Pack. Three/R3F sigue siendo fallback obligatorio.
+
 ## Addendum F455 - Babylon runtime smoke visual
 
 F455 agrega una prueba visual real de Babylon dentro de **Medical 3D**. No reemplaza el motor principal: Three/R3F sigue siendo la escena productiva, y Babylon aparece como una tarjeta de smoke aislada para validar que el runtime local carga correctamente.
