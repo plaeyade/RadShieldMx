@@ -1,5 +1,59 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F506-F507 - Trazabilidad page/hash y seed controlado
+
+F506-F507 cierra la ruta entre los documentos RAG (`document_chunks`) y la DB regulatoria/materiales.
+
+Uso normal en dry-run:
+
+```text
+npm run prepare:f506-f507:regulatory-seed-readback
+npm run test:f506-f507:regulatory-seed-readback
+```
+
+Lectura real de DB para resolver fuentes:
+
+```text
+$env:F506_DB_READBACK="1"
+npm run prepare:f506-f507:regulatory-seed-readback
+Remove-Item Env:\F506_DB_READBACK
+```
+
+Seed live aprobado, solo si F506 esta revisado:
+
+```text
+$env:F506_DB_READBACK="1"
+$env:F507_SEED_LIVE="1"
+$env:F507_CONFIRM_APPROVED_ONLY="1"
+$env:F507_CONFIRM_RESTORE_PROBE="1"
+npm run prepare:f506-f507:regulatory-seed-readback
+Remove-Item Env:\F506_DB_READBACK
+Remove-Item Env:\F507_SEED_LIVE
+Remove-Item Env:\F507_CONFIRM_APPROVED_ONLY
+Remove-Item Env:\F507_CONFIRM_RESTORE_PROBE
+```
+
+Reglas:
+
+1. F506 solo lee `document_chunks`.
+2. F506 resuelve `page_ref`, hash y chunk coincidente si hay match claro.
+3. F507 solo siembra `approved-reference`.
+4. F507 excluye valores `review-required`.
+5. F507 aborta si las tablas destino ya tienen filas.
+6. F507 hace rollback si cualquier insert falla.
+7. Despues de seed live se debe repetir F500 y F484-F490.
+
+Artefactos:
+
+```text
+outputs/f506_f507_regulatory_seed_readback/
+  f506_f507_manifest.json
+  f506_f507_summary.md
+  f506_resolved_regulatory_sources.jsonl
+  f506_unresolved_review_queue.csv
+  f507_approved_seed_material_value_versions.jsonl
+```
+
 ## Addendum F505 - Aplicacion controlada del schema DB
 
 F505 aplica el schema regulatorio/materiales solo si se cumplen las compuertas de seguridad. Por defecto corre en dry-run.

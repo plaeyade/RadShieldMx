@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>RadShield-MX F505 - Manual de Usuario y Control de Versiones</title>
+<title>RadShield-MX F506-F507 - Manual de Usuario y Control de Versiones</title>
 <style>
 body { margin: 0; padding: 0; font-family: Georgia, 'Noto Serif', serif; font-size: 11pt; line-height: 1.6; color: #333; text-align: justify; text-align-last: left; }
 @page { size: A4; margin: 2.5cm 2cm; @top-center { content: string(doctitle); font-size: 9pt; color: #888; } @bottom-center { content: counter(page); font-size: 9pt; } }
@@ -89,7 +89,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <div class="cover-accent"></div>
   <div class="cover-accent2"></div>
   <div class="cover-content">
-    <div class="cover-version">VERSION F505</div>
+    <div class="cover-version">VERSION F506-F507</div>
     <h1 class="cover-title" style="border:none;color:#1a365d;">RadShield-MX</h1>
     <p class="cover-subtitle">Manual de Usuario y Control de Versiones</p>
     <p class="cover-subtitle" style="font-size:11pt;color:#718096;">Professional Radiation Shielding Calculation Platform</p>
@@ -109,11 +109,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
   <ul class="toc">
     <li class="toc-part"><a href="#part1">PARTE I: INTRODUCCION Y FUNDAMENTOS</a></li>
     <li class="toc-l1"><a href="#sec0">0. Addendum F361-F490 post-beta</a></li>
-    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F505</a></li>
+    <li class="toc-l1"><a href="#sec1">1. Introduccion a RadShield-MX F506-F507</a></li>
     <li class="toc-l1"><a href="#sec2">2. Requisitos del Sistema</a></li>
     <li class="toc-l1"><a href="#sec3">3. Interfaz de Usuario y Navegacion</a></li>
 
-    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F361)</a></li>
+    <li class="toc-part"><a href="#part2">PARTE II: HISTORIAL DE VERSIONES (v1-F507)</a></li>
     <li class="toc-l1"><a href="#sec4">4. Control de Cambios Completo</a></li>
 
     <li class="toc-part"><a href="#part3">PARTE III: METODOLOGIA CIENTIFICA</a></li>
@@ -173,6 +173,11 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 
 <h1 id="sec0">0. Addendum F361-F490 post-beta</h1>
 <div class="new-box">
+<span class="new-box-title">F506-F507 - Trazabilidad page/hash y seed controlado:</span>
+<p>F506 lee <code>document_chunks</code> con <code>F506_DB_READBACK=1</code> para resolver fuente, pagina, hash de contenido y chunk coincidente. Produce <code>f506_resolved_regulatory_sources.jsonl</code> y <code>f506_unresolved_review_queue.csv</code>.</p>
+<p>F507 genera un seed plan con solo filas <code>approved-reference</code>. El seed live requiere <code>F507_SEED_LIVE=1</code>, <code>F507_CONFIRM_APPROVED_ONLY=1</code>, <code>F507_CONFIRM_RESTORE_PROBE=1</code> y <code>DATABASE_URL</code>. Si las tablas ya tienen filas o falla un insert, se hace rollback. No ejecuta deletes ni updates.</p>
+</div>
+<div class="new-box">
 <span class="new-box-title">F505 - Aplicacion controlada del schema DB:</span>
 <p>F505 aplica el schema regulatorio/materiales solo con compuertas explicitas. El comando normal <code>npm run prepare:f505:regulatory-materials-schema</code> corre en dry-run. Para aplicar a MySQL se requiere <code>F505_APPLY_SCHEMA=1</code>, <code>F505_CONFIRM_RESTORE_PROBE=1</code> y <code>DATABASE_URL</code>.</p>
 <p>El script solo permite <code>CREATE TABLE IF NOT EXISTS</code> y bloquea <code>INSERT</code>, <code>DELETE</code>, <code>DROP</code>, <code>TRUNCATE</code>, <code>ALTER</code>, <code>UPDATE</code> y <code>REPLACE</code>. Despues de aplicar se debe repetir F500 con <code>F500_DB_READBACK=1</code>.</p>
@@ -208,7 +213,7 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <span class="new-box-title">F484-F490 - Motor calculo QA NCRP/IAEA/UAQ:</span>
 <p>F484-F490 agrega una compuerta de QA numerico para el motor de calculo: LINAC 6 MV primario, LINAC 15 MV con neutrones, CT/RX NCRP147, Gamma Knife/Co-60, PET/NM TG-108 y ciclotron 18 MeV. Estos casos sirven para beta preliminar y regresion tecnica; una memoria clinica firmable requiere termino fuente, TVL/densidad, ocupacion, penetraciones, pagina/hash documental y revision FM/RSO.</p>
 <p><strong>Ruta de assets pesados:</strong> texturas/HDRI/decals en <code>public/medical3d/photoreal</code>; Unity WebGL real en <code>public/unity/radshield-medical-3d</code> con <code>index.html</code>, <code>Build/*</code> y <code>TemplateData/*</code>. Deben cargarse lazy/gated y probarse con QA visual/post-deploy sin cambiar calculos.</p>
-<p><strong>Cobertura F361-F505:</strong> F361-F398 reparacion post-beta y ventanas; F399-F430 renderer/canvas/calc BIM; F431-F454 gates renderer, BIM visual y post-beta; F455-F483 Babylon, Unity handoff y fotorrealismo; F484-F490 QA normativo del motor de calculo; F491-F498 DB regulatoria/materiales versionada; F499 seed dry-run revisable; F500 live gate/readback sin escritura; F501-F504 schema DB e intake de assets pesados; F505 aplicacion controlada de schema.</p>
+<p><strong>Cobertura F361-F507:</strong> F361-F398 reparacion post-beta y ventanas; F399-F430 renderer/canvas/calc BIM; F431-F454 gates renderer, BIM visual y post-beta; F455-F483 Babylon, Unity handoff y fotorrealismo; F484-F490 QA normativo del motor de calculo; F491-F498 DB regulatoria/materiales versionada; F499 seed dry-run revisable; F500 live gate/readback sin escritura; F501-F504 schema DB e intake de assets pesados; F505 aplicacion controlada de schema; F506-F507 trazabilidad page/hash y seed transaccional aprobado.</p>
 </div>
 <div class="new-box">
 <span class="new-box-title">F361 — Reparacion post-beta:</span>
@@ -223,12 +228,12 @@ pre, table, figure, img, svg, blockquote { max-width: 100%; box-sizing: border-b
 <p><strong>Cobertura F99-F360:</strong> F99-F124 canvas/menus/materiales; F125-F150 calculo/evidencia/release candidate; F151-F181 deploy/DB; F182-F230 recuperacion visual/canvas CAD; F231-F260 manuales/staging/deploy; F261-F292 OCR/RAG/APIs/memorias; F293-F330 3D/motores externos; F331-F360 caso Centro Neuro y beta no certificada.</p>
 </div>
 
-<h1 id="sec1">1. Introduccion a RadShield-MX F505</h1>
+<h1 id="sec1">1. Introduccion a RadShield-MX F506-F507</h1>
 
 <p>RadShield-MX es una plataforma integral de codigo abierto para el diseno, calculo y optimizacion de blindajes radiologicos en instalaciones medicas e industriales. Desarrollada en Mexico, cumple con la normativa de la Comision Nacional de Seguridad Nuclear y Salvaguardias (CNSNS) asi como con estandares internacionales.</p>
 
 <div class="info-box">
-<span class="info-box-title">VERSION F505 - Estadisticas del proyecto:</span>
+<span class="info-box-title">VERSION F506-F507 - Estadisticas del proyecto:</span>
 <table style="margin:0.3cm 0;font-size:10pt">
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Modulos:</strong></td><td>4,062+ modulos TypeScript/React</td></tr>
 <tr><td style="padding:0.1cm 0.5cm 0.1cm 0"><strong>Dialogos:</strong></td><td>220+ componentes de interfaz</td></tr>
@@ -302,11 +307,11 @@ Storage:   IndexedDB + LocalStorage + Cloud (tRPC)</pre>
 
 
 <!-- ==================== PARTE II ==================== -->
-<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F361)</span></div>
+<div class="part-divider" id="part2">PARTE II<br><span style="font-size:14pt;font-weight:400;">Historial de Versiones (v1-F507)</span></div>
 
-<h1 id="sec4">4. Control de Cambios Completo v1-F361</h1>
+<h1 id="sec4">4. Control de Cambios Completo v1-F507</h1>
 
-<p>El siguiente historial documenta todas las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F361, julio 2026). No se omite ninguna version; las fases sin cambios significativos se agrupan por periodo.</p>
+<p>El siguiente historial documenta las implementaciones desde el prototipo inicial (v1, 2025) hasta la version actual (F507, agosto 2026). Las fases F362-F507 se resumen en el addendum post-beta superior para mantener operable el manual sin romper su estructura historica.</p>
 
 <table class="version-table">
 <thead><tr><th style="width:10%">Fase</th><th style="width:12%">Version</th><th style="width:18%">Fecha</th><th>Modulos principales implementados</th></tr></thead>
@@ -1902,7 +1907,7 @@ Version del manual: F499 (sincronizado con codigo fuente)<br>
 Fecha de generacion: Agosto 2026<br>
 Total de secciones: 25 + 6 Apendices (A-F)<br>
 Total de referencias bibliograficas: 90 (R1-R90)<br>
-Cobertura de versiones: v1 - F361 (inclusive)<br>
+Cobertura de versiones: v1 - F507 (inclusive)<br>
 </div>
 
 </body>

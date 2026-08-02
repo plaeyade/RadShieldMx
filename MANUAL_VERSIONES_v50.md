@@ -1,5 +1,23 @@
 # RadShield-MX - Manual de Versiones
 
+# F506-F507 (2026-08-02) - Trazabilidad page/hash y seed controlado aprobado
+
+- F506-F507 agrega `src/lib/f506F507RegulatorySeedReadback.ts`.
+- Agrega `scripts/f506-f507-regulatory-seed-readback.mjs`.
+- F506 lee `document_chunks` solo con `F506_DB_READBACK=1` y resuelve fuentes con `page_ref`, hash de contenido, chunk coincidente y confianza.
+- F507 genera un seed plan con solo fuentes/materiales/valores `approved-reference` aptos para calculo.
+- Modo dry-run:
+  - `npm run prepare:f506-f507:regulatory-seed-readback`
+  - `npm run test:f506-f507:regulatory-seed-readback`
+- Modo live controlado:
+  - `F506_DB_READBACK=1`
+  - `F507_SEED_LIVE=1`
+  - `F507_CONFIRM_APPROVED_ONLY=1`
+  - `F507_CONFIRM_RESTORE_PROBE=1`
+  - `DATABASE_URL`
+- F507 no hace `DELETE`, `UPDATE`, `ALTER` ni overwrite. Si las tablas destino no estan vacias, aborta y hace rollback.
+- Despues de live seed: repetir F500 con `F500_DB_READBACK=1` y ejecutar F484-F490 contra los valores DB.
+
 # F505 (2026-08-01) - Aplicacion controlada de schema DB regulatoria/materiales
 
 - F505 agrega `src/lib/f505RegulatoryMaterialsSchemaApply.ts`.

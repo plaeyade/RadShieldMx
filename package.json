@@ -30,6 +30,8 @@
     "test:f501-f504:heavy-assets-db": "node scripts/check-f501-f504-heavy-assets-db-prep-contracts.mjs",
     "prepare:f505:regulatory-materials-schema": "node scripts/f505-regulatory-materials-schema-apply.mjs",
     "test:f505:regulatory-materials-schema": "node scripts/check-f505-regulatory-materials-schema-apply-contracts.mjs",
+    "prepare:f506-f507:regulatory-seed-readback": "node scripts/f506-f507-regulatory-seed-readback.mjs",
+    "test:f506-f507:regulatory-seed-readback": "node scripts/check-f506-f507-regulatory-seed-readback-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

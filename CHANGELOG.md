@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F506-F507 (2026-08-02) - Trazabilidad page/hash y seed controlado aprobado
+
+- Agrega `src/lib/f506F507RegulatorySeedReadback.ts`.
+- Agrega `scripts/f506-f507-regulatory-seed-readback.mjs` para leer `document_chunks`, resolver `page_ref`/hash por fuente y generar cola de revision.
+- F506 produce fuentes resueltas, fuentes pendientes y un plan F507 con solo `approved-reference`.
+- F507 ejecuta seed live solo con `F507_SEED_LIVE=1`, `F507_CONFIRM_APPROVED_ONLY=1`, `F507_CONFIRM_RESTORE_PROBE=1` y `DATABASE_URL`.
+- La escritura live corre dentro de transaccion; si una tabla ya tiene filas o falla un insert, hace rollback y no borra ni actualiza datos.
+- Comandos: `npm run prepare:f506-f507:regulatory-seed-readback` y `npm run test:f506-f507:regulatory-seed-readback`.
+
 # F505 (2026-08-01) - Aplicacion controlada de schema DB regulatoria/materiales
 
 - Agrega `src/lib/f505RegulatoryMaterialsSchemaApply.ts` y `scripts/f505-regulatory-materials-schema-apply.mjs`.
