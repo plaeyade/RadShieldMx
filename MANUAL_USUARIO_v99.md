@@ -1,5 +1,37 @@
 # Addendum F73 - Estabilizacion, DB, RAG, canvas y 3D
 
+## Addendum F491-F498 - DB regulatoria/materiales versionada
+
+F491-F498 consolida la base tecnica que debe alimentar Material Toolbox, Memoria IA, Evidence Pack, PDF, Medical 3D y calculo. El objetivo es que TVL, HVL, densidad, peso, costo, carga estructural, fuente, pagina y hash salgan de un registro controlado, no de constantes dispersas.
+
+Flujo de uso:
+
+1. Registrar fuente en `regulatory_sources`: NCRP, IAEA, UAQ, proveedor, laboratorio o memoria previa.
+2. Registrar material en `material_constants`: nombre, categoria, densidad, estado y fabricante si aplica.
+3. Registrar cada valor en `material_value_versions`: TVL/HVL/densidad/costo/espesor por energia, unidad, fuente, page_ref, hash y estado.
+4. Ligar material-fuente en `material_source_links` con uso permitido: calculo, reporte/evidencia, visual o estructura/costo.
+5. Ejecutar seed dry-run y revisar duplicados antes de escribir DB live.
+6. Ejecutar readback y F484-F490 despues del seed.
+
+Reglas:
+
+- `approved-reference` puede alimentar calculo preliminar y reportes.
+- `review-required` puede alimentar anexos, comparadores y evidencia, pero no constantes finales.
+- `candidate` sirve para revision tecnica, nunca para memoria firmable.
+- `blocked` no debe usarse hasta corregir fuente, valor, unidad o hash.
+
+Ruta DB recomendada:
+
+```text
+regulatory_sources
+material_constants
+material_value_versions
+material_source_links
+document_chunks
+```
+
+Antes de activar live se requiere `DATABASE_URL`, restore probe, `document_chunks` con fuente/pagina/hash, seed dry-run aprobado y revision profesional de materiales comerciales o de laboratorio.
+
 ## Addendum F484-F490 - Motor calculo QA NCRP/IAEA/UAQ
 
 F484-F490 agrega una compuerta de QA numerico para el motor de calculo antes de seguir cargando assets pesados o publicar otra version visual. La idea es sencilla: primero comprobar que el motor responde de forma estable en casos pequenos y trazables; despues se agregan texturas, HDRI, Unity WebGL o modelos pesados como capa visual.

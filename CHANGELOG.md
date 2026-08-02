@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+# F491-F498 (2026-08-01) - DB regulatoria/materiales versionada
+
+- **F491:** crea registro de fuentes regulatorias/materiales con autoridad, prioridad canonica, hash, page_ref, estado de revision y usos permitidos.
+- **F492:** normaliza materiales desde `MATERIALS_DB` con densidad, TVL primaria/secundaria, TVL neutronica, costo, espesores comerciales y warnings.
+- **F493:** aplica politica de deduplicacion/canon: NCRP/IAEA/UAQ gobiernan calculo; proveedor/lab/memorias quedan como evidencia hasta revision.
+- **F494:** define ruta DB dry-run-first con tablas `regulatory_sources`, `material_constants`, `material_value_versions` y `material_source_links`.
+- **F495:** integra guardrail de calculo: solo `approved-reference` puede alimentar constantes finales; materiales comerciales quedan fuera hasta aprobacion.
+- **F496:** conecta Memoria IA, PDF y Evidence Pack con fuente/pagina/hash/estado.
+- **F497:** conecta Material Toolbox, carga estructural, costo/tiempo y Medical 3D con la misma fuente versionada.
+- **F498:** bloquea release clinico hasta `DATABASE_URL`, seed/readback, restore probe, `document_chunks` canonico y F484-F490 post-seed.
+
 # F484-F490 (2026-08-01) - Motor calculo QA NCRP/IAEA/UAQ
 
 - **F484:** agrega caso QA LINAC 6 MV barrera primaria con TVL NCRP151 y cita UAQ.

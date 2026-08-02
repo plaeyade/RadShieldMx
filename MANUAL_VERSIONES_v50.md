@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F491-F498 (2026-08-01) - DB regulatoria/materiales versionada
+
+- F491-F498 agrega `src/lib/f491F498RegulatoryMaterialsDb.ts` como contrato unico de DB regulatoria/materiales.
+- F491 registra fuentes: NCRP/IAEA/UAQ/proveedor/laboratorio/memorias con autoridad, prioridad, hash, page_ref, estado y usos permitidos.
+- F492 registra materiales: densidad, TVL primaria/secundaria, TVL neutronica, costo, espesor comercial, fuente y advertencias.
+- F493-F495 evita que datos comerciales o de laboratorio entren al calculo final sin promocion `approved-reference`.
+- F496-F497 conecta Memoria IA, PDF, Evidence Pack, Material Toolbox, carga estructural/costo y Medical 3D.
+- F498 define prerequisitos live: `DATABASE_URL`, seed dry-run revisado, readback de `document_chunks`, restore probe y F484-F490 post-seed.
+- Comandos: `npm run prepare:f491-f498:regulatory-materials-db`, `npm run test:f491-f498:regulatory-materials-db` y `npm run test:f491-f498:regulatory-materials-db:unit`.
+
 # F484-F490 (2026-08-01) - Motor calculo QA NCRP/IAEA/UAQ
 
 - F484-F490 agrega `src/lib/f484F490NormativeQa.ts` como gate de regresion para el motor de calculo.
