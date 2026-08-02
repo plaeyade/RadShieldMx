@@ -71,6 +71,7 @@ import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } fro
 import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
 import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual';
 import { isEnabled } from '@/lib/featureFlags';
+import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -260,6 +261,7 @@ export default function CanvasArea({
   const [inspectorEditOpen, setInspectorEditOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; canvasX: number; canvasY: number } | null>(null);
   const [lastCanvasCommand, setLastCanvasCommand] = useState<string | null>(null);
+  const [lastF515EventAction, setLastF515EventAction] = useState<string>('stable');
   const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
@@ -317,6 +319,15 @@ export default function CanvasArea({
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
+      const routed = routeCanvasEventV2WithGate({
+        type: 'wheel',
+        mode: 'zoom',
+        x: e.nativeEvent.offsetX,
+        y: e.nativeEvent.offsetY,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+      }, true);
+      setLastF515EventAction(routed.action);
       const delta = e.deltaY > 0 ? 0.9 : 1.1;
       setCanvasState((p: CanvasState) => ({ ...p, scale: Math.max(0.1, Math.min(10, p.scale * delta)) }));
     } else {
@@ -1674,6 +1685,7 @@ export default function CanvasArea({
             <canvas
               ref={canvasRef}
               data-testid="f100-main-floorplan-canvas"
+              data-f515b-last-event-action={lastF515EventAction}
               className="absolute inset-0 w-full h-full"
               style={{
                 cursor: activeTool === 'barrier' || activeTool === 'measure' ? 'crosshair' :
@@ -1691,6 +1703,14 @@ export default function CanvasArea({
               onTouchEnd={onTouchEnd}
               onContextMenu={handleCanvasContextMenu}
             />
+
+            <span
+              data-testid="f515b-canvas-event-action"
+              className="sr-only"
+              aria-label="Ultima accion F515b del canvas"
+            >
+              {lastF515EventAction}
+            </span>
 
             <canvas
               ref={rendererV2OverlayCanvasRef}

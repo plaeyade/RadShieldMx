@@ -23,11 +23,22 @@ test('F446-F448 validates canvas surfaces, right click, quick actions and nonblo
   await expect(page.getByTestId('f446-surface-checks')).toBeVisible();
   await expect(page.getByTestId('f447-interaction-checks')).toBeVisible();
   await expect(page.getByTestId('f448-regression-gates')).toBeVisible();
+  const canvas = page.getByTestId('f100-main-floorplan-canvas');
 
   const overlayPointerEvents = await page
     .getByTestId('f442-f445-renderer-v2-overlay-canvas')
     .evaluate((node) => getComputedStyle(node).pointerEvents);
   expect(overlayPointerEvents).toBe('none');
+
+  const initialF515bAction = await canvas.evaluate((node) => node.getAttribute('data-f515b-last-event-action'));
+  expect(initialF515bAction).toBe('stable');
+  await canvas.hover({ position: { x: 500, y: 320 } });
+  await page.mouse.wheel(0, -240);
+  await page.keyboard.down(process.platform === 'darwin' ? 'Meta' : 'Control');
+  await page.mouse.wheel(0, -240);
+  await page.keyboard.up(process.platform === 'darwin' ? 'Meta' : 'Control');
+  await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('zoom-view');
+  await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'zoom-view');
 
   await page.getByTestId('f374-command-barrier').click();
   await expect(page.getByTestId('f98-active-canvas-tool-indicator')).toContainText(/barrera/i);
@@ -43,7 +54,6 @@ test('F446-F448 validates canvas surfaces, right click, quick actions and nonblo
   await page.getByTestId('f375-clean-workspace-toggle').click();
   await expect(page.getByTestId('f375-clean-guide-strip')).toBeVisible();
 
-  const canvas = page.getByTestId('f100-main-floorplan-canvas');
   await canvas.click({ button: 'right', position: { x: 640, y: 360 } });
   await expect(page.getByTestId('canvas-context-menu')).toBeVisible();
   await expect(page.getByTestId('canvas-context-action-barrier')).toBeVisible();
