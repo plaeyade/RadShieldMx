@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F519 - Manual de Usuario</title>
+  <title>RadShield-MX F524 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,13 +97,27 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F519</span>
+      <span class="pill">Version de manual: F524</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
     </div>
   </header>
   <main>
+    <section>
+      <h2>0A. Addendum F520-F524: Babylon Profundo Y Renderer v2</h2>
+      <p>F520-F524 conecta el canvas visual con Babylon profundo y Renderer v2. Babylon profundo se revisa desde Inspeccion 3D medica; Renderer v2 corre como overlay observable del canvas, sin reemplazar la ruta estable.</p>
+      <table>
+        <thead><tr><th>Carril</th><th>Que muestra</th><th>Regla de seguridad</th></tr></thead>
+        <tbody>
+          <tr><td>Babylon profundo</td><td>Picking, HUD, camaras, overlays, entidades seleccionables y export visual.</td><td>No genera calculo clinico ni reemplaza Three/R3F sin QA repetido.</td></tr>
+          <tr><td>Renderer v2</td><td>Instrucciones, passes y overlay visual conectado al plano.</td><td>Debe permanecer <code>pointer-events:none</code>; no toca botones, sidebar ni eventos.</td></tr>
+          <tr><td>Activacion profunda</td><td>Solo despues de F197/F207/F229/F446-F448 y rollback probado.</td><td><code>VITE_CANVAS_HIGH_RISK_CAD=false</code> es la salida de emergencia.</td></tr>
+        </tbody>
+      </table>
+      <div class="warn">No publicar Babylon ni Renderer v2 como motor principal hasta completar smoke visual, capturas, Evidence Pack y rollback. El canvas estable sigue en CanvasArea/useCanvas.</div>
+    </section>
+
     <section>
       <h2>0. Addendum F517-F519: Canvas Visual Reference</h2>
       <p>F517-F519 incorpora al canvas una lectura visual inspirada en las referencias enviadas: Project Manager palette, Catalogo clinico, Variantes A-E, Materiales y export PDF/DXF/IFC/GLB. El objetivo es reducir ruido visual y preparar un flujo de layout mas claro antes de tocar el renderer profundo.</p>
@@ -310,7 +324,7 @@
         </tbody>
       </table>
       <footer>
-        RadShield-MX F519. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
+        RadShield-MX F524. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
       </footer>
     </section>
   </main>

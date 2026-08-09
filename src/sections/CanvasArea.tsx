@@ -70,6 +70,7 @@ import { buildF439ToF441RendererGeometryCore } from '@/lib/f439ToF441RendererGeo
 import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } from '@/lib/f442ToF445RendererV2Runtime';
 import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
 import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual';
+import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -1036,6 +1037,9 @@ export default function CanvasArea({
     highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
   const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
+  const f520ToF524DeepRendererBabylon = buildF520F524DeepRendererBabylonContract({
+    renderer: f442ToF445RendererV2Runtime,
+  });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -1804,6 +1808,27 @@ export default function CanvasArea({
                 >
                   Sembrar equipos + Render 3D
                 </button>
+
+                <div
+                  data-testid="f520-f524-deep-renderer-babylon-canvas"
+                  className="mt-2 rounded-lg border border-[#d8d6cd] bg-white/85 p-2"
+                  title="F520-F524: renderer profundo como overlay seguro; Babylon profundo se valida en Inspeccion 3D"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F520+ Deep lane</div>
+                    <span className="rounded border border-[#bde6d1] bg-[#e8f6ef] px-1.5 py-0.5 text-[8px] font-bold text-[#238a61]">
+                      {f520ToF524DeepRendererBabylon.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-3 gap-1 text-[8px] text-[#71706a]">
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Instr {f520ToF524DeepRendererBabylon.rendererV2.instructions}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Passes {f520ToF524DeepRendererBabylon.rendererV2.passes}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Overlay {f520ToF524DeepRendererBabylon.activationPolicy.canRunAsOverlay ? 'si' : 'no'}</span>
+                  </div>
+                  <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
+                    Renderer v2 sigue pointer-events:none; CanvasArea/useCanvas no se reemplazan sin F197/F207/F229/F446.
+                  </div>
+                </div>
               </div>
             )}
 

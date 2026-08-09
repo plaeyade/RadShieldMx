@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F519 - Manual de Versiones</title>
+  <title>RadShield-MX F524 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,22 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F519</span>
+    <span class="pill">Version documental: F524</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0A. F520-F524 Deep renderer + Babylon</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F520</td><td>Une F517-F519 con carril profundo.</td><td>Catalogo visual, variantes, materiales y export pasan a backlog operativo.</td><td>Contrato <code>test:f520-f524:deep-renderer-babylon</code>.</td></tr>
+        <tr><td>F521</td><td>Babylon profundo queda visible en Inspeccion 3D.</td><td>Picking, HUD, camaras y overlays de evidencia.</td><td>No reemplaza Three/R3F sin QA repetido.</td></tr>
+        <tr><td>F522</td><td>Renderer v2 queda como overlay observable.</td><td>Instrucciones y passes visibles sin tomar eventos.</td><td><code>pointer-events:none</code>.</td></tr>
+        <tr><td>F523-F524</td><td>Politica de activacion y rollback.</td><td>Evita perder canvas/sidebar/botones.</td><td><code>VITE_CANVAS_HIGH_RISK_CAD=false</code> y <code>VITE_CANVAS_EVENT_CONTROLLER_V2=false</code>.</td></tr>
+      </tbody>
+    </table>
+
     <h2>0. F517-F519 Canvas Visual Reference</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>

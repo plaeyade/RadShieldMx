@@ -90,6 +90,7 @@ import { buildF515CanvasEventHardening } from '@/lib/f515CanvasEventHardening';
 import { buildF515F520PostBetaPlan } from '@/lib/f515F520PostBetaPlan';
 import { buildF517F519CanvasVisualReference } from '@/lib/f517F519CanvasVisualReference';
 import { buildF519NormativeQaExpansion } from '@/lib/f519NormativeQaExpansion';
+import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -107,6 +108,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F520-F524 Deep renderer + Babylon', current: 'deep lane gated', latest: 'Babylon profundo + renderer v2 overlay + activation/rollback policy', status: 'current', description: `F520-F524 une el panel F517-F519 con el carril profundo: ${buildF520F524DeepRendererBabylonContract().lanes.length} fases para catalogo operativo, Babylon interactivo, renderer v2 observable, gate de activacion y QA/rollback. Politica: canReplaceCanvasBase=${String(buildF520F524DeepRendererBabylonContract().activationPolicy.canReplaceCanvasBase)} hasta repetir F197/F207/F229/F446 y smoke visual.` },
   { name: 'F517-F519 Canvas visual reference', current: 'Project Manager palette + visual contract', latest: 'catalogo clinico + variantes A-E + materiales + PDF/DXF/IFC/GLB + render 3D', status: 'current', description: `Analiza ${buildF517F519CanvasVisualReference().visualPatterns.length} patrones de las referencias visuales del usuario y los traduce al canvas: paleta homogenea, catalogo clinico, variantes, editor inline, materiales y paquete BIM/PDF. Implementacion actual de bajo riesgo; drag/drop, inline editor y export BIM profundo pasan a F520+.` },
   { name: 'F515 canvas events + F516h manuals', current: 'event hardening harness + manuals rebuilt', latest: 'zoom-view + activate-tool + fit-view + export-png + open-evidence + run-calculation + open-medical-3d + HTML manuals', status: 'current', description: `F515/F516 valida ${buildF515CanvasEventHardening().scenarios.length} rutas de evento y mantiene fallback estable. Ya cubre zoom real, herramientas desde boton derecho, Ajustar vista, Exportar PNG, Abrir evidencia, Calcular blindaje e Inspeccion 3D medica desde boton derecho. Manuales vigentes: public/manual_usuario.html y public/manual_versiones.html por perfiles basico/intermedio/avanzado.` },
   { name: 'F519 QA numerico ampliado', current: 'barrier-role regression expansion', latest: 'primary/secondary/maze/door/penetration/controlled-zone base vs conservative checks', status: 'current', description: `F519 agrega ${buildF519NormativeQaExpansion().summary.totalCases} casos por rol de barrera y comparador base/conservador. Roles cubiertos: ${buildF519NormativeQaExpansion().summary.barrierRolesCovered.join(', ')}. Resultados siguen preliminares hasta DB-backed datasets y revision profesional.` },

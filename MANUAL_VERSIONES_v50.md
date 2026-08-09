@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F520-F524 (2026-08-09) - Deep renderer + Babylon gated
+
+- **F520:** convierte el panel visual F517-F519 en carril operativo para catalogo, variantes, materiales y export.
+- **F521:** Babylon profundo queda conectado a Inspeccion 3D con picking, HUD, camaras, overlays y export visual.
+- **F522:** renderer profundo queda como overlay observable, sin tomar eventos ni reemplazar `CanvasArea/useCanvas`.
+- **F523:** politica de activacion: `canReplaceCanvasBase=false`; no reemplazar canvas sin F197/F207/F229/F446 y smoke visual.
+- **F524:** QA/rollback: conservar Three/R3F, apagar `VITE_CANVAS_HIGH_RISK_CAD`, apagar `VITE_CANVAS_EVENT_CONTROLLER_V2` y ocultar overlay si tapa el canvas.
+
 # F517-F519 (2026-08-09) - Canvas Visual Reference
 
 - **F517 analisis visual:** traduce referencias tipo floorplan/Project Manager a RadShield: Catalogo clinico, Variantes A-E, Materiales y export PDF/DXF/IFC/GLB.

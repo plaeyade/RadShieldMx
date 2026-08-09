@@ -44,6 +44,7 @@ import {
 } from '@/lib/medical3D/pbrMaterialDatabase';
 import { buildF459F463VisualStack } from '@/lib/medical3D/f459F463VisualStack';
 import { buildF464F468VisualBetaContract } from '@/lib/medical3D/f464F468VisualBeta';
+import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 
 interface Props {
   open: boolean;
@@ -1707,6 +1708,10 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const babylonSmokeContract = useMemo(() => buildBabylonRuntimeSmokeContract(scene), [scene]);
   const babylonParityContract = useMemo(() => buildBabylonSceneParityContract(scene), [scene]);
   const babylonDeepContract = useMemo(() => buildBabylonDeepRuntimeContract(scene), [scene]);
+  const f520ToF524DeepRendererBabylon = useMemo(
+    () => buildF520F524DeepRendererBabylonContract({ babylon: babylonDeepContract }),
+    [babylonDeepContract],
+  );
   const unityExportedBuildContract = useMemo(() => buildUnityWebglExportedBuildContract(scene), [scene]);
   const f408UnitySceneExport = useMemo(() => buildF408UnitySceneExport(activeFloorPlan, preset), [activeFloorPlan, preset]);
   const f408UnityValidationWarnings = useMemo(() => validateF408UnitySceneExport(f408UnitySceneExport), [f408UnitySceneExport]);
@@ -2511,6 +2516,24 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 onStatusChange={setBabylonSmokeStatus}
                 deepContract={babylonDeepContract}
               />
+              <div
+                data-testid="f520-f524-deep-renderer-babylon-3d"
+                className="rounded border border-cyan-100 bg-white p-2 text-[10px] leading-relaxed text-slate-650"
+                title="F520-F524: Babylon profundo y renderer profundo con fallback estable"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="font-semibold text-slate-900">F520-F524 Deep renderer + Babylon</span>
+                  <Badge variant="outline" className="text-[9px]">{f520ToF524DeepRendererBabylon.status}</Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-1 text-[9px]" data-testid="f521-babylon-deep-summary">
+                  <span className="rounded bg-cyan-50 px-1 py-0.5">Pick {f520ToF524DeepRendererBabylon.babylon.pickableEntities}</span>
+                  <span className="rounded bg-cyan-50 px-1 py-0.5">Cam {f520ToF524DeepRendererBabylon.babylon.cameraModes.length}</span>
+                  <span className="rounded bg-cyan-50 px-1 py-0.5">Over {f520ToF524DeepRendererBabylon.babylon.overlays.length}</span>
+                </div>
+                <div className="mt-1 text-amber-700" data-testid="f523-deep-activation-policy">
+                  Reemplazo de canvas base: {String(f520ToF524DeepRendererBabylon.activationPolicy.canReplaceCanvasBase)}. Babylon y renderer v2 quedan visuales hasta repetir QA/rollback.
+                </div>
+              </div>
               <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportEngineHandoff}>
                 <Download className="w-3.5 h-3.5 mr-2" /> Exportar handoff 3D
               </Button>

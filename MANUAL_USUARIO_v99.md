@@ -1,4 +1,13 @@
-# Manual de Usuario RadShield-MX - F519 Canvas Visual
+# Manual de Usuario RadShield-MX - F524 Deep Renderer/Babylon
+
+## Addendum F520-F524 - Babylon profundo y renderer profundo
+
+F520-F524 conecta el canvas visual con dos carriles profundos:
+
+1. **Babylon profundo:** visible en `Inspeccion 3D medica`; muestra entidades seleccionables, HUD, camaras, overlays y export visual. Se usa para revisar bunker/sala, equipos, zonas y evidencia visual.
+2. **Renderer profundo:** visible en el canvas como estado F520+; usa renderer v2 como overlay seguro `pointer-events:none`, con instrucciones y passes, sin reemplazar `CanvasArea/useCanvas`.
+3. **Politica de seguridad:** el reemplazo del canvas base esta bloqueado. Antes de activarlo se deben repetir F197, F207, F229, F446-F448, QA visual y rollback con `VITE_CANVAS_HIGH_RISK_CAD=false`.
+4. **Impacto operativo:** permite avanzar en fotorrealismo, BIM visual y export de evidencia sin sacrificar botones, sidebar, menu contextual ni seleccion.
 
 ## Addendum F517-F519 - Referencias visuales y paleta Project Manager
 

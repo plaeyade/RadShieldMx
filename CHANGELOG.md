@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F520-F524 (2026-08-09) - Babylon profundo + renderer profundo gated
+
+- Agrega `src/lib/f520F524DeepRendererBabylon.ts` para unir el panel visual F517-F519 con Babylon profundo y renderer v2.
+- Canvas muestra estado F520-F524: instrucciones, passes y si el overlay renderer v2 puede correr sin tomar eventos.
+- Inspeccion 3D muestra resumen F520-F524: entidades seleccionables Babylon, camaras, overlays y politica de activacion.
+- Update Center declara la politica: `canReplaceCanvasBase=false` hasta repetir F197/F207/F229/F446, QA visual y rollback.
+- Agrega contrato `npm run test:f520-f524:deep-renderer-babylon`.
+
 # F517-F519 (2026-08-09) - Canvas Visual Reference + Project Manager palette
 
 - Analiza las referencias visuales enviadas por el usuario y las traduce a patrones RadShield: catalogo clinico, toolbar flotante, variantes A-E, editor inline, paleta de materiales y export PDF/DXF/IFC/GLB.
