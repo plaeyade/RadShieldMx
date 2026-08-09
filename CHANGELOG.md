@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F530-F534 (2026-08-09) - Equipment ghost placement preview
+
+- Agrega `src/lib/f530F534EquipmentPlacementPreview.ts` para convertir el perfil F525-F529 en preview de equipo.
+- Canvas muestra un `ghost` no persistente con footprint, etiqueta, punto candidato y estado de seguridad.
+- Agrega botones `Preview` y `Confirmar`, mas accion de boton derecho `Preview equipo aqui`.
+- El panel expone propiedades que alimentan 3D, Memoria IA, Evidence Pack y QA, sin escribir `floorPlan.sources`.
+- Agrega contrato `npm run test:f530-f534:equipment-placement-preview`.
+
 # F525-F529 (2026-08-09) - Clinical placement pack TX/NM/DX/CY
 
 - Agrega `src/lib/f525F529ClinicalPlacementPack.ts` con catalogo operativo para LINAC, Gamma Knife, PET/NM, DX/CT y ciclotron.

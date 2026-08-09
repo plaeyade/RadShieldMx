@@ -46,6 +46,7 @@
     "test:f517-f519:canvas-visual": "node scripts/check-f517-f519-canvas-visual-reference-contracts.mjs",
     "test:f520-f524:deep-renderer-babylon": "node scripts/check-f520-f524-deep-renderer-babylon-contracts.mjs",
     "test:f525-f529:clinical-placement": "node scripts/check-f525-f529-clinical-placement-contracts.mjs",
+    "test:f530-f534:equipment-placement-preview": "node scripts/check-f530-f534-equipment-placement-preview-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

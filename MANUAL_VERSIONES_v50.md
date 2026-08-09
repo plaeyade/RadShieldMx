@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F530-F534 (2026-08-09) - Equipment ghost placement preview
+
+- **F530:** agrega preview `ghost` no persistente del equipo seleccionado sobre el canvas.
+- **F531:** permite confirmar punto candidato desde centro visible o boton derecho `Preview equipo aqui`.
+- **F532:** expone propiedades: equipo, sala, material, footprint, perfil de memoria y ruta de evidencia.
+- **F533:** conecta el punto candidato con Inspeccion 3D, Memoria IA y Evidence Pack.
+- **F534:** mantiene `canPersistGeometry=false`; escritura permanente queda bloqueada hasta drag/drop/undo/redo E2E.
+
 # F525-F529 (2026-08-09) - Clinical placement pack
 
 - **F525:** agrega selector TX/NM/DX/CY persistente en canvas para preparar sembrado clinico.

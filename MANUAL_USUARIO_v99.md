@@ -1,4 +1,18 @@
-# Manual de Usuario RadShield-MX - F529 Clinical Placement
+# Manual de Usuario RadShield-MX - F534 Equipment Ghost Placement
+
+## Addendum F530-F534 - Preview ghost de equipo
+
+F530-F534 permite previsualizar el equipo seleccionado sobre el canvas antes de escribir geometria permanente. Sirve para probar ubicacion, footprint y enlace con 3D/Memoria IA sin arriesgar el plano.
+
+Uso:
+
+1. **Preview:** coloca un `ghost` del equipo en el centro visible del canvas. Muestra modalidad, equipo y footprint aproximado.
+2. **Preview equipo aqui:** desde boton derecho, coloca el `ghost` en la coordenada CAD donde se hizo clic.
+3. **Confirmar:** registra el punto candidato para handoff visual, 3D, Memoria IA y Evidence Pack.
+4. **Propiedades:** el panel muestra equipo, sala, material, perfil de memoria y ruta de evidencia.
+5. **Seguridad:** `canPersistGeometry=false`; no modifica `floorPlan.sources`, no cambia escala y no reemplaza el renderer base.
+
+Esta fase prepara el camino para drag/drop real, undo/redo fino y edicion inline, pero aun no activa escritura permanente.
 
 ## Addendum F525-F529 - Placement clinico TX/NM/DX/CY
 

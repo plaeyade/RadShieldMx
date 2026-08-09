@@ -72,6 +72,7 @@ import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
 import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { buildF525F529ClinicalPlacementPack, type F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
+import { buildF530F534EquipmentPlacementPreview, type F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPreview';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -273,6 +274,7 @@ export default function CanvasArea({
   const [lastF515EventAction, setLastF515EventAction] = useState<string>('stable');
   const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
   const [f525PlacementMode, setF525PlacementMode] = useState<F525F529Modality>(loadF525PlacementMode);
+  const [f530PlacementPoint, setF530PlacementPoint] = useState<F530F534PlacementPoint | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -597,6 +599,43 @@ export default function CanvasArea({
       description: `${selected.memoryProfile}: ${selected.room}`,
     });
     openMedical3DFromContext();
+  };
+
+  const makeF530ViewportCenterPoint = (): F530F534PlacementPoint => ({
+    x: (canvasSize.width / 2 - canvasState.offsetX) / canvasState.scale,
+    y: (canvasSize.height / 2 - canvasState.offsetY) / canvasState.scale,
+    source: 'viewport-center',
+  });
+
+  const previewF530EquipmentAtCenter = () => {
+    const point = makeF530ViewportCenterPoint();
+    setF530PlacementPoint(point);
+    setLastCanvasCommand(`F530 preview: ${f525ToF529ClinicalPlacement.defaultSelection.equipment}`);
+    toast.success('Preview fantasma preparado', {
+      description: `x ${point.x.toFixed(1)} / y ${point.y.toFixed(1)}`,
+    });
+  };
+
+  const previewF530EquipmentAtContext = () => {
+    const point: F530F534PlacementPoint = {
+      x: contextMenu?.canvasX ?? makeF530ViewportCenterPoint().x,
+      y: contextMenu?.canvasY ?? makeF530ViewportCenterPoint().y,
+      source: 'context-menu',
+    };
+    setF530PlacementPoint(point);
+    setLastCanvasCommand(`F530 context: ${f525ToF529ClinicalPlacement.defaultSelection.equipment}`);
+    toast.success('Preview fantasma en punto CAD', {
+      description: `x ${point.x.toFixed(1)} / y ${point.y.toFixed(1)}`,
+    });
+  };
+
+  const confirmF531EquipmentPoint = () => {
+    const point = f530PlacementPoint ?? makeF530ViewportCenterPoint();
+    setF530PlacementPoint(point);
+    setLastCanvasCommand(`F531 confirmado: ${f530ToF534EquipmentPreview.selected.equipment}`);
+    toast.success('Punto candidato confirmado', {
+      description: `No se escribio geometria permanente. x ${point.x.toFixed(1)} / y ${point.y.toFixed(1)}`,
+    });
   };
 
   const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -1075,6 +1114,11 @@ export default function CanvasArea({
   const f525ToF529ClinicalPlacement = buildF525F529ClinicalPlacementPack({
     deepLane: f520ToF524DeepRendererBabylon,
     selectedModality: f525PlacementMode,
+  });
+  const f530ToF534EquipmentPreview = buildF530F534EquipmentPlacementPreview({
+    pack: f525ToF529ClinicalPlacement,
+    point: f530PlacementPoint ?? undefined,
+    scale_m_per_pixel: floorPlan.scale_m_per_pixel,
   });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
@@ -1879,6 +1923,45 @@ export default function CanvasArea({
                 </div>
 
                 <div
+                  data-testid="f530-f534-equipment-placement-preview"
+                  className="mt-2 rounded-lg border border-[#d8d6cd] bg-white/90 p-2"
+                  title="F530-F534: preview fantasma, punto candidato y propiedades sin persistir geometria"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F530-F534 Ghost</div>
+                    <span className="rounded border border-[#d8d6cd] bg-[#eef3ec] px-1.5 py-0.5 text-[8px] font-bold text-[#238a61]">
+                      {f530ToF534EquipmentPreview.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
+                    {f530ToF534EquipmentPreview.ghost.label} / {f530ToF534EquipmentPreview.ghost.footprint_m.join(' x ')} m
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    <button
+                      type="button"
+                      data-testid="f530-preview-equipment-ghost"
+                      className="rounded bg-[#252525] px-1.5 py-1 text-[8px] font-black text-white hover:bg-[#111111]"
+                      title="Coloca un footprint fantasma en el centro visible del canvas"
+                      onClick={previewF530EquipmentAtCenter}
+                    >
+                      Preview
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="f531-confirm-equipment-point"
+                      className="rounded border border-[#238a61] bg-[#e8f6ef] px-1.5 py-1 text-[8px] font-black text-[#238a61] hover:bg-[#d9f0e5]"
+                      title="Confirma el punto candidato para 3D/Memoria IA sin escribir geometria permanente"
+                      onClick={confirmF531EquipmentPoint}
+                    >
+                      Confirmar
+                    </button>
+                  </div>
+                  <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
+                    Persistencia CAD: {String(f530ToF534EquipmentPreview.ghost.canPersistGeometry)}. Handoff alimenta 3D/Memoria/Evidence.
+                  </div>
+                </div>
+
+                <div
                   data-testid="f520-f524-deep-renderer-babylon-canvas"
                   className="mt-2 rounded-lg border border-[#d8d6cd] bg-white/85 p-2"
                   title="F520-F524: renderer profundo como overlay seguro; Babylon profundo se valida en Inspeccion 3D"
@@ -1897,6 +1980,27 @@ export default function CanvasArea({
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     Renderer v2 sigue pointer-events:none; CanvasArea/useCanvas no se reemplazan sin F197/F207/F229/F446.
                   </div>
+                </div>
+              </div>
+            )}
+
+            {f530PlacementPoint && (
+              <div
+                data-testid="f530-equipment-ghost-overlay"
+                className="pointer-events-none absolute z-10 rounded-xl border-2 border-dashed border-[#238a61] bg-[#e8f6ef]/35 shadow-[0_0_0_4px_rgba(35,138,97,0.12)]"
+                style={{
+                  left: f530PlacementPoint.x * canvasState.scale + canvasState.offsetX - (f530ToF534EquipmentPreview.ghost.footprint_px[0] * canvasState.scale) / 2,
+                  top: f530PlacementPoint.y * canvasState.scale + canvasState.offsetY - (f530ToF534EquipmentPreview.ghost.footprint_px[1] * canvasState.scale) / 2,
+                  width: Math.max(f530ToF534EquipmentPreview.ghost.footprint_px[0] * canvasState.scale, 42),
+                  height: Math.max(f530ToF534EquipmentPreview.ghost.footprint_px[1] * canvasState.scale, 42),
+                }}
+                title="F530 ghost overlay: previsualizacion no persistente del equipo"
+              >
+                <div className="absolute left-1 top-1 max-w-[180px] rounded bg-[#252525] px-2 py-1 text-[9px] font-black text-white shadow">
+                  {f530ToF534EquipmentPreview.selected.modality} / {f530ToF534EquipmentPreview.selected.equipment}
+                </div>
+                <div className="absolute bottom-1 right-1 rounded bg-white/90 px-1.5 py-0.5 text-[8px] font-bold text-[#238a61]">
+                  ghost no persistente
                 </div>
               </div>
             )}
@@ -2017,6 +2121,7 @@ export default function CanvasArea({
                 <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(runCalculationsFromContext)}>Calcular blindaje</button>
                 <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(openEvidencePackFromContext)}>Abrir evidencia</button>
                 <button type="button" data-testid="canvas-context-action-3d" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(openMedical3DFromContext)}>Inspeccion 3D medica</button>
+                <button type="button" data-testid="canvas-context-action-f530-ghost" className="block w-full px-2.5 py-1.5 text-left font-semibold text-emerald-700 hover:bg-emerald-50" onClick={() => runContextMenuAction(previewF530EquipmentAtContext)}>Preview equipo aqui</button>
                 <div className="border-t border-slate-100" />
                 <button
                   type="button"

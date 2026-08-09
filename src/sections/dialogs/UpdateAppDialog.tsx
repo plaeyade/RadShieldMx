@@ -92,6 +92,7 @@ import { buildF517F519CanvasVisualReference } from '@/lib/f517F519CanvasVisualRe
 import { buildF519NormativeQaExpansion } from '@/lib/f519NormativeQaExpansion';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { buildF525F529ClinicalPlacementPack } from '@/lib/f525F529ClinicalPlacementPack';
+import { buildF530F534EquipmentPlacementPreview } from '@/lib/f530F534EquipmentPlacementPreview';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -109,6 +110,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F530-F534 Equipment ghost placement', current: 'ghost preview + candidate point', latest: 'preview fantasma + confirmar punto + propiedades + menu contextual', status: 'current', description: `F530-F534 agrega preview no persistente del equipo seleccionado: ${buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).actions.length} acciones para ghost, punto candidato, propiedades y handoff. Politica: canPersistGeometry=${String(buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).ghost.canPersistGeometry)} hasta drag/drop/undo/redo E2E.` },
   { name: 'F525-F529 Clinical placement pack', current: 'TX/NM/DX/CY placement handoff', latest: 'catalogo clinico operable + seleccion persistente + handoff 3D/Memoria IA', status: 'current', description: `F525-F529 convierte el panel visual en acciones de bajo riesgo: ${buildF525F529ClinicalPlacementPack().catalog.length} perfiles clinicos, selector TX/NM/DX/CY, material/equipo/memoria y handoff a ${buildF525F529ClinicalPlacementPack().handoff.target}. Regla: canWriteCanvasGeometry=${String(buildF525F529ClinicalPlacementPack().handoff.canWriteCanvasGeometry)} hasta validar drag/drop profundo.` },
   { name: 'F520-F524 Deep renderer + Babylon', current: 'deep lane gated', latest: 'Babylon profundo + renderer v2 overlay + activation/rollback policy', status: 'current', description: `F520-F524 une el panel F517-F519 con el carril profundo: ${buildF520F524DeepRendererBabylonContract().lanes.length} fases para catalogo operativo, Babylon interactivo, renderer v2 observable, gate de activacion y QA/rollback. Politica: canReplaceCanvasBase=${String(buildF520F524DeepRendererBabylonContract().activationPolicy.canReplaceCanvasBase)} hasta repetir F197/F207/F229/F446 y smoke visual.` },
   { name: 'F517-F519 Canvas visual reference', current: 'Project Manager palette + visual contract', latest: 'catalogo clinico + variantes A-E + materiales + PDF/DXF/IFC/GLB + render 3D', status: 'current', description: `Analiza ${buildF517F519CanvasVisualReference().visualPatterns.length} patrones de las referencias visuales del usuario y los traduce al canvas: paleta homogenea, catalogo clinico, variantes, editor inline, materiales y paquete BIM/PDF. Implementacion actual de bajo riesgo; drag/drop, inline editor y export BIM profundo pasan a F520+.` },

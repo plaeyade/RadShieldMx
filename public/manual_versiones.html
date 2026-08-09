@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F529 - Manual de Versiones</title>
+  <title>RadShield-MX F534 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,23 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F529</span>
+    <span class="pill">Version documental: F534</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0A. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
+    <h2>0A. F530-F534 Equipment Ghost Preview</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F530</td><td>Preview ghost del equipo seleccionado.</td><td>Footprint visual sobre canvas sin modificar datos.</td><td>Contrato <code>test:f530-f534:equipment-placement-preview</code>.</td></tr>
+        <tr><td>F531</td><td>Punto candidato desde centro visible o boton derecho.</td><td>Permite probar ubicacion con coordenada CAD.</td><td>No escribe <code>floorPlan.sources</code>.</td></tr>
+        <tr><td>F532-F533</td><td>Propiedades y handoff a 3D/Memoria/Evidence.</td><td>Conecta el flujo plano -> equipo -> memoria.</td><td>Visual-only hasta E2E.</td></tr>
+        <tr><td>F534</td><td>Gate de persistencia CAD.</td><td>Evita cambios permanentes prematuros.</td><td><code>canPersistGeometry=false</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0B. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -42,7 +53,7 @@
       </tbody>
     </table>
 
-    <h2>0B. F520-F524 Deep renderer + Babylon</h2>
+    <h2>0C. F520-F524 Deep renderer + Babylon</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
