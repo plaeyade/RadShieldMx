@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F524 - Manual de Usuario</title>
+  <title>RadShield-MX F529 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F524</span>
+      <span class="pill">Version de manual: F529</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,7 +105,18 @@
   </header>
   <main>
     <section>
-      <h2>0A. Addendum F520-F524: Babylon Profundo Y Renderer v2</h2>
+      <h2>0A. Addendum F525-F529: Placement Clinico TX/NM/DX/CY</h2>
+      <p>F525-F529 convierte el panel visual del canvas en seleccion operativa de modalidad, sala, equipo, material y perfil de Memoria IA. El objetivo es preparar el sembrado visual y abrir Inspeccion 3D sin escribir geometria permanente.</p>
+      <table>
+        <thead><tr><th>Control</th><th>Funcion</th><th>Conexion</th><th>Seguridad</th></tr></thead>
+        <tbody>
+          <tr><td>Chips TX/NM/DX/CY</td><td>Seleccionan contexto clinico y persistente.</td><td>Actualizan equipo, sala, material y memoria.</td><td>No alteran barreras ni escala.</td></tr>
+          <tr><td>Sembrar equipos + Render 3D</td><td>Envia handoff visual del perfil elegido.</td><td>Abre <code>Inspeccion 3D medica</code>.</td><td><code>canWriteCanvasGeometry=false</code>.</td></tr>
+          <tr><td>Placement pack</td><td>Muestra equipo/material/memoria vigente.</td><td>Sirve como puente a Memoria IA y Evidence Pack.</td><td>Drag/drop profundo queda para fase posterior.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>0B. Addendum F520-F524: Babylon Profundo Y Renderer v2</h2>
       <p>F520-F524 conecta el canvas visual con Babylon profundo y Renderer v2. Babylon profundo se revisa desde Inspeccion 3D medica; Renderer v2 corre como overlay observable del canvas, sin reemplazar la ruta estable.</p>
       <table>
         <thead><tr><th>Carril</th><th>Que muestra</th><th>Regla de seguridad</th></tr></thead>
@@ -324,7 +335,7 @@
         </tbody>
       </table>
       <footer>
-        RadShield-MX F524. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
+        RadShield-MX F529. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
       </footer>
     </section>
   </main>

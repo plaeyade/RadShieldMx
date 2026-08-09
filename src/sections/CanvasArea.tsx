@@ -71,6 +71,7 @@ import { buildF442ToF445RendererV2Runtime, drawF442ToF445RendererV2Overlay } fro
 import { buildF446ToF448CanvasStrongQa } from '@/lib/f446ToF448CanvasStrongQa';
 import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
+import { buildF525F529ClinicalPlacementPack, type F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -87,6 +88,7 @@ const F201_WORKFLOW_COMPACT_KEY = 'radshield_canvas_workflow_compact_f201';
 const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const F216_SAVED_VIEWS_KEY = 'radshield_canvas_saved_views_f216';
 const F375_CANVAS_CHROME_MODE_KEY = 'radshield_canvas_chrome_mode_f375';
+const F525_PLACEMENT_MODE_KEY = 'radshield_canvas_f525_placement_mode';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: false,
   qa: false,
@@ -143,6 +145,12 @@ function loadF216SavedViews(): F216SavedCanvasView[] {
 function loadF375CanvasChromeMode(): F375CanvasChromeMode {
   if (typeof window === 'undefined') return 'clean';
   return window.localStorage.getItem(F375_CANVAS_CHROME_MODE_KEY) === 'guided' ? 'guided' : 'clean';
+}
+
+function loadF525PlacementMode(): F525F529Modality {
+  if (typeof window === 'undefined') return 'TX';
+  const stored = window.localStorage.getItem(F525_PLACEMENT_MODE_KEY);
+  return stored === 'TX' || stored === 'NM' || stored === 'DX' || stored === 'CY' ? stored : 'TX';
 }
 
 interface CanvasAreaProps {
@@ -264,6 +272,7 @@ export default function CanvasArea({
   const [lastCanvasCommand, setLastCanvasCommand] = useState<string | null>(null);
   const [lastF515EventAction, setLastF515EventAction] = useState<string>('stable');
   const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
+  const [f525PlacementMode, setF525PlacementMode] = useState<F525F529Modality>(loadF525PlacementMode);
   const containerRef = useRef<HTMLDivElement>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -565,6 +574,29 @@ export default function CanvasArea({
     setLastF515EventAction(routed.action);
     if (onOpenMedical3D) onOpenMedical3D();
     else onOpen3DViewer?.();
+  };
+
+  const selectF525PlacementMode = (mode: F525F529Modality) => {
+    setF525PlacementMode(mode);
+    if (typeof window !== 'undefined') window.localStorage.setItem(F525_PLACEMENT_MODE_KEY, mode);
+    const nextPack = buildF525F529ClinicalPlacementPack({
+      deepLane: f520ToF524DeepRendererBabylon,
+      selectedModality: mode,
+    });
+    const selected = nextPack.defaultSelection;
+    setLastCanvasCommand(`F525 ${selected.modality}: ${selected.equipment}`);
+    toast.success(`Perfil ${selected.modality} seleccionado`, {
+      description: `${selected.room} / ${selected.material}`,
+    });
+  };
+
+  const runF525PlacementHandoff = () => {
+    const selected = f525ToF529ClinicalPlacement.defaultSelection;
+    setLastCanvasCommand(`F529 handoff: ${selected.equipment}`);
+    toast.success('Handoff visual enviado a 3D', {
+      description: `${selected.memoryProfile}: ${selected.room}`,
+    });
+    openMedical3DFromContext();
   };
 
   const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -1039,6 +1071,10 @@ export default function CanvasArea({
   const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
   const f520ToF524DeepRendererBabylon = buildF520F524DeepRendererBabylonContract({
     renderer: f442ToF445RendererV2Runtime,
+  });
+  const f525ToF529ClinicalPlacement = buildF525F529ClinicalPlacementPack({
+    deepLane: f520ToF524DeepRendererBabylon,
+    selectedModality: f525PlacementMode,
   });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
@@ -1777,10 +1813,17 @@ export default function CanvasArea({
                     ['DX', 'bg-[#fff2bd]', 'Rayos X'],
                     ['CY', 'bg-[#eee8ed]', 'Ciclotron'],
                   ].map(([label, className, title]) => (
-                    <div key={label} className={`rounded-lg border border-[#5f6368]/60 ${className} px-1.5 py-1 text-center`} title={`${label}: ${title}`}>
+                    <button
+                      key={label}
+                      type="button"
+                      data-testid={`f525-modality-${label}`}
+                      className={`rounded-lg border ${f525PlacementMode === label ? 'border-[#238a61] ring-2 ring-[#bde6d1]' : 'border-[#5f6368]/60'} ${className} px-1.5 py-1 text-center transition hover:scale-[1.02]`}
+                      title={`${label}: ${title}. Selecciona perfil F525-F529 para sembrado visual y Memoria IA.`}
+                      onClick={() => selectF525PlacementMode(label as F525F529Modality)}
+                    >
                       <div className="text-[10px] font-black">{label}</div>
                       <div className="truncate text-[8px] text-[#71706a]">{title}</div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
@@ -1804,10 +1847,36 @@ export default function CanvasArea({
                   className="mt-2 w-full rounded-lg bg-[#252525] px-2 py-1.5 text-[10px] font-black text-white shadow-sm transition-colors hover:bg-[#111111]"
                   title="Abrir inspeccion 3D medica para sembrar equipos y render visual del bunker o sala"
                   aria-label="Sembrar equipos y abrir render 3D medico"
-                  onClick={openMedical3DFromContext}
+                  onClick={runF525PlacementHandoff}
                 >
                   Sembrar equipos + Render 3D
                 </button>
+
+                <div
+                  data-testid="f525-f529-clinical-placement-pack"
+                  className="mt-2 rounded-lg border border-[#d8d6cd] bg-[#eef3ec]/80 p-2"
+                  title="F525-F529: seleccion clinica de sala/equipo/material con handoff a 3D y Memoria IA"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[9px] font-black uppercase tracking-wide text-[#238a61]">F525-F529 Placement</div>
+                    <span className="rounded border border-[#d8d6cd] bg-white px-1.5 py-0.5 text-[8px] font-bold text-[#252525]">
+                      {f525ToF529ClinicalPlacement.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[10px] font-black text-[#252525]">
+                    {f525ToF529ClinicalPlacement.defaultSelection.equipment}
+                  </div>
+                  <div className="mt-0.5 text-[8px] leading-tight text-[#71706a]">
+                    {f525ToF529ClinicalPlacement.defaultSelection.room} / {f525ToF529ClinicalPlacement.defaultSelection.material}
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1 text-[8px] text-[#71706a]">
+                    <span className="rounded bg-white/80 px-1 py-0.5">{f525ToF529ClinicalPlacement.defaultSelection.memoryProfile}</span>
+                    <span className="rounded bg-white/80 px-1 py-0.5">Catalogo {f525ToF529ClinicalPlacement.catalog.length}</span>
+                  </div>
+                  <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
+                    {f525ToF529ClinicalPlacement.handoff.rule}
+                  </div>
+                </div>
 
                 <div
                   data-testid="f520-f524-deep-renderer-babylon-canvas"

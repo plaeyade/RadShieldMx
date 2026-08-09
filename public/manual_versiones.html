@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F524 - Manual de Versiones</title>
+  <title>RadShield-MX F529 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,23 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F524</span>
+    <span class="pill">Version documental: F529</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0A. F520-F524 Deep renderer + Babylon</h2>
+    <h2>0A. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F525</td><td>Selector persistente TX/NM/DX/CY en canvas.</td><td>Define modalidad antes del sembrado visual.</td><td>Contrato <code>test:f525-f529:clinical-placement</code>.</td></tr>
+        <tr><td>F526</td><td>Catalogo clinico con equipo, sala, material y perfil de memoria.</td><td>Prepara LINAC, Gamma Knife, PET/NM, DX/CT y ciclotron.</td><td>Sin escritura de geometria permanente.</td></tr>
+        <tr><td>F527-F528</td><td>Handoff a Inspeccion 3D y Memoria IA.</td><td>Conecta canvas visual con evidencia y render 3D.</td><td><code>canWriteCanvasGeometry=false</code>.</td></tr>
+        <tr><td>F529</td><td>Update Center, manuales y rollback sincronizados.</td><td>Evita botones desconectados y deja ruta a drag/drop profundo.</td><td>Repetir build y contratos F517/F520/F525.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0B. F520-F524 Deep renderer + Babylon</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>

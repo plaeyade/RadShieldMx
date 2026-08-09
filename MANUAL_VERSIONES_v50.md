@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F525-F529 (2026-08-09) - Clinical placement pack
+
+- **F525:** agrega selector TX/NM/DX/CY persistente en canvas para preparar sembrado clinico.
+- **F526:** vincula equipo, sala, material, footprint y perfil de Memoria IA por modalidad.
+- **F527:** conecta `Sembrar equipos + Render 3D` al handoff clinico hacia Inspeccion 3D.
+- **F528:** mantiene `canWriteCanvasGeometry=false`; no hay geometria permanente hasta drag/drop profundo.
+- **F529:** agrega contrato `test:f525-f529:clinical-placement`, Update Center y manuales. Siguiente paso: drag/drop/editor inline validado.
+
 # F520-F524 (2026-08-09) - Deep renderer + Babylon gated
 
 - **F520:** convierte el panel visual F517-F519 en carril operativo para catalogo, variantes, materiales y export.

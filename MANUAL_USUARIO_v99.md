@@ -1,4 +1,18 @@
-# Manual de Usuario RadShield-MX - F524 Deep Renderer/Babylon
+# Manual de Usuario RadShield-MX - F529 Clinical Placement
+
+## Addendum F525-F529 - Placement clinico TX/NM/DX/CY
+
+F525-F529 convierte el panel visual del canvas en una herramienta operativa de bajo riesgo para elegir modalidad, sala, equipo, material y perfil de Memoria IA antes de pasar a inspeccion 3D.
+
+Uso recomendado:
+
+1. **Seleccionar chip TX/NM/DX/CY:** define el contexto clinico. TX carga perfiles LINAC/Gamma Knife, NM carga PET/hot lab, DX carga CT/RX y CY carga ciclotron.
+2. **Revisar sala/equipo/material:** el panel muestra el equipo seleccionado, sala propuesta, material principal y perfil de memoria analitica.
+3. **Sembrar equipos + Render 3D:** abre `Inspeccion 3D medica` con el handoff del perfil. La accion registra el comando y conserva la ruta estable de 3D.
+4. **Seguridad:** F525-F529 no escribe geometria permanente ni reemplaza el renderer base. `canWriteCanvasGeometry=false` hasta validar drag/drop, editor inline y QA E2E.
+5. **Relacion con Memoria IA:** el perfil elegido prepara la ruta plano -> equipo -> barreras -> calculo -> cita -> evidencia -> PDF.
+
+Perfiles incluidos: TX/NM/DX/CY con Elekta Versa HD 15 MV, Elekta Esprit Gamma Knife, PET/CT 511 keV, CT diagnostico y Cyclone KIUBE 18 MeV.
 
 ## Addendum F520-F524 - Babylon profundo y renderer profundo
 

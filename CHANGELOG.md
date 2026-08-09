@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F525-F529 (2026-08-09) - Clinical placement pack TX/NM/DX/CY
+
+- Agrega `src/lib/f525F529ClinicalPlacementPack.ts` con catalogo operativo para LINAC, Gamma Knife, PET/NM, DX/CT y ciclotron.
+- El canvas ahora permite seleccionar chips TX/NM/DX/CY; la seleccion queda persistida y actualiza equipo, sala, material y perfil de Memoria IA.
+- `Sembrar equipos + Render 3D` usa el handoff F525-F529 para abrir Inspeccion 3D con contexto clinico, sin escribir geometria permanente.
+- Update Center declara `canWriteCanvasGeometry=false` hasta validar drag/drop/editor profundo.
+- Agrega contrato `npm run test:f525-f529:clinical-placement`.
+
 # F520-F524 (2026-08-09) - Babylon profundo + renderer profundo gated
 
 - Agrega `src/lib/f520F524DeepRendererBabylon.ts` para unir el panel visual F517-F519 con Babylon profundo y renderer v2.
