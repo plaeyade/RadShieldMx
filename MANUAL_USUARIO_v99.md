@@ -1,4 +1,23 @@
-# Manual de Usuario RadShield-MX - F534 Equipment Ghost Placement
+# Manual de Usuario RadShield-MX - F539 Equipment Ghost Visual QA
+
+## Addendum F535-F539 - QA visual E2E del ghost de equipo
+
+F535-F539 cierra la previsualizacion ghost con una prueba E2E dedicada. Esta fase no agrega persistencia CAD; agrega confianza visual y funcional para que el operador pueda usar el preview sin romper el canvas.
+
+Uso validado:
+
+1. **Preview:** crea el ghost del equipo seleccionado en el centro visible.
+2. **Boton derecho -> Preview equipo aqui:** mueve el ghost al punto CAD donde se hizo clic.
+3. **Confirmar:** conserva el punto candidato para 3D/Memoria IA/Evidence, sin escribir geometria permanente.
+4. **Zoom/controles:** el ghost no bloquea el canvas porque usa `pointer-events:none`; el harness sigue registrando `zoom-view`.
+5. **Evidencia:** la prueba genera captura en `outputs/f535_f539_equipment_ghost_visual/01_equipment_ghost_preview.png`.
+
+Validacion recomendada:
+
+- `npm run test:f535-f539:equipment-ghost-visual`
+- `npm run test:f535-f539:equipment-ghost-visual:e2e`
+
+Lo que sigue bloqueado por seguridad: drag/drop persistente, escritura en `floorPlan.sources`, undo/redo fino y reemplazo del renderer base.
 
 ## Addendum F530-F534 - Preview ghost de equipo
 

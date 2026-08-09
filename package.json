@@ -47,6 +47,8 @@
     "test:f520-f524:deep-renderer-babylon": "node scripts/check-f520-f524-deep-renderer-babylon-contracts.mjs",
     "test:f525-f529:clinical-placement": "node scripts/check-f525-f529-clinical-placement-contracts.mjs",
     "test:f530-f534:equipment-placement-preview": "node scripts/check-f530-f534-equipment-placement-preview-contracts.mjs",
+    "test:f535-f539:equipment-ghost-visual": "node scripts/check-f535-f539-equipment-ghost-visual-contracts.mjs",
+    "test:f535-f539:equipment-ghost-visual:e2e": "playwright test e2e/f535-f539-equipment-ghost-visual.spec.ts --project=chromium",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

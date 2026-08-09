@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F534 - Manual de Versiones</title>
+  <title>RadShield-MX F539 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F534</span>
+    <span class="pill">Version documental: F539</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0A. F530-F534 Equipment Ghost Preview</h2>
+    <h2>0A. F535-F539 Equipment Ghost Visual QA</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F535</td><td>E2E dedicado para panel F525/F530 y canvas visible.</td><td>Detecta regresiones visuales antes de publicar.</td><td>Contrato <code>test:f535-f539:equipment-ghost-visual</code>.</td></tr>
+        <tr><td>F536</td><td>Valida boton <code>Preview</code> y overlay ghost.</td><td>El operador ve footprint y etiqueta del equipo.</td><td>Captura <code>01_equipment_ghost_preview.png</code>.</td></tr>
+        <tr><td>F537</td><td>Valida <code>Preview equipo aqui</code> desde boton derecho.</td><td>El punto candidato puede salir del click contextual.</td><td>Menu contextual debe cerrar sin perder canvas.</td></tr>
+        <tr><td>F538</td><td>Valida <code>Confirmar</code> y no persistencia.</td><td>Handoff seguro a 3D/Memoria/Evidence.</td><td><code>canPersistGeometry=false</code>.</td></tr>
+        <tr><td>F539</td><td>Valida que el ghost no bloquee eventos.</td><td>El canvas sigue registrando <code>zoom-view</code>.</td><td><code>pointer-events:none</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0B. F530-F534 Equipment Ghost Preview</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -42,7 +54,7 @@
       </tbody>
     </table>
 
-    <h2>0B. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
+    <h2>0C. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -53,7 +65,7 @@
       </tbody>
     </table>
 
-    <h2>0C. F520-F524 Deep renderer + Babylon</h2>
+    <h2>0D. F520-F524 Deep renderer + Babylon</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>

@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F535-F539 (2026-08-09) - Equipment ghost visual QA
+
+- **F535:** agrega E2E de navegador para validar panel F525, panel F530-F534 y canvas visible.
+- **F536:** valida `Preview` con ghost visible, footprint minimo y etiqueta de modalidad/equipo.
+- **F537:** valida `Preview equipo aqui` desde boton derecho y movimiento del ghost al punto contextual.
+- **F538:** valida `Confirmar`, `canPersistGeometry=false` y continuidad del event harness con `zoom-view`.
+- **F539:** genera captura y manifiesto visual en `outputs/f535_f539_equipment_ghost_visual`, sin escribir geometria permanente.
+
 # F530-F534 (2026-08-09) - Equipment ghost placement preview
 
 - **F530:** agrega preview `ghost` no persistente del equipo seleccionado sobre el canvas.

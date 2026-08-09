@@ -2414,7 +2414,7 @@ export default function CanvasArea({
                 </div>
                 <div
                   data-testid="f411-bim-methodology-card"
-                  className="absolute right-14 top-2 z-20 hidden w-[304px] rounded-md border border-slate-700 bg-[#1c2631]/94 p-2 text-slate-100 shadow-xl backdrop-blur xl:block"
+                  className="pointer-events-none absolute right-14 top-2 z-20 hidden w-[304px] rounded-md border border-slate-700 bg-[#1c2631]/94 p-2 text-slate-100 shadow-xl backdrop-blur xl:block"
                   title={f411BimMethodology.bimDataNeeds.join(' ')}
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">

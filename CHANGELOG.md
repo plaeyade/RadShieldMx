@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F535-F539 (2026-08-09) - Equipment ghost visual QA
+
+- Agrega E2E `e2e/f535-f539-equipment-ghost-visual.spec.ts` para validar el preview ghost en navegador real.
+- Verifica boton `Preview`, accion de boton derecho `Preview equipo aqui`, boton `Confirmar`, overlay visible y captura `outputs/f535_f539_equipment_ghost_visual/01_equipment_ghost_preview.png`.
+- Comprueba que el overlay sea `pointer-events:none`, que no bloquee el event harness del canvas y que siga activo `zoom-view`.
+- Mantiene la politica de seguridad: ghost no persistente, sin escritura en `floorPlan.sources` y sin reemplazar renderer base.
+- Agrega contratos `npm run test:f535-f539:equipment-ghost-visual` y `npm run test:f535-f539:equipment-ghost-visual:e2e`.
+
 # F530-F534 (2026-08-09) - Equipment ghost placement preview
 
 - Agrega `src/lib/f530F534EquipmentPlacementPreview.ts` para convertir el perfil F525-F529 en preview de equipo.
