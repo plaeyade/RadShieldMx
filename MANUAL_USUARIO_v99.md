@@ -1,4 +1,18 @@
-# Manual de Usuario RadShield-MX - F516h
+# Manual de Usuario RadShield-MX - F519 Canvas Visual
+
+## Addendum F517-F519 - Referencias visuales y paleta Project Manager
+
+F517-F519 analiza las imagenes de referencia del usuario y las convierte en una guia visible para el canvas. La app adopta una paleta mas homogenea tipo Project Manager: fondo de trabajo verde grisaceo, paneles marfil, acento verde, bordes neutros y tarjetas pastel por modalidad.
+
+Uso recomendado en el canvas:
+
+1. **Catalogo clinico:** usarlo como referencia para organizar salas TX/NM/DX/CY, bunkers, laberintos, puertas, penetraciones, hot lab, sala de control y zonas publicas.
+2. **Variantes A-E:** representar alternativas de layout antes del calculo, para comparar geometria, flujo, blindaje, costo y evidencia.
+3. **Materiales:** consolidar TVL, densidad, peso, costo, tiempo, carga estructural, cita y hash antes de generar memoria.
+4. **Sembrar equipos + Render 3D:** abre la inspeccion 3D medica para revisar equipos, espesores, zonas controladas y visuales de evidencia.
+5. **PDF/DXF/IFC/GLB:** queda como ruta de salida prevista para paquete BIM, screenshot, Evidence Pack y Memoria IA.
+
+La fase actual es de bajo riesgo: el panel es visible y la accion 3D usa ruta estable. Drag/drop de catalogo, editor inline completo, variantes persistentes y export BIM profundo pasan a F520+.
 
 ## Addendum F516g-F516h - Calculo y 3D desde boton derecho
 

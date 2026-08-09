@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# F517-F519 (2026-08-09) - Canvas Visual Reference
+
+- **F517 analisis visual:** traduce referencias tipo floorplan/Project Manager a RadShield: Catalogo clinico, Variantes A-E, Materiales y export PDF/DXF/IFC/GLB.
+- **F518 paleta:** homogeneiza la lectura del canvas con workspace verde grisaceo, panel marfil, acento verde y tarjetas pastel TX/NM/DX/CY.
+- **F519 implementacion:** agrega panel visible y contrato de validacion sin tocar renderer base, eventos profundos, formulas ni DB.
+- **Siguiente fase:** F520+ debe convertir estos patrones en drag/drop real, editor inline, variantes persistentes y paquete BIM profundo.
+
 # F516g-F516h (2026-08-09) - Context calculation and medical 3D
 
 - **F516g canvas:** conecta `Canvas CAD -> Calcular blindaje` desde boton derecho al event harness como `run-calculation`.

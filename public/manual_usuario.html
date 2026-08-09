@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F516h - Manual de Usuario</title>
+  <title>RadShield-MX F519 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,13 +97,25 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F516h</span>
+      <span class="pill">Version de manual: F519</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
     </div>
   </header>
   <main>
+    <section>
+      <h2>0. Addendum F517-F519: Canvas Visual Reference</h2>
+      <p>F517-F519 incorpora al canvas una lectura visual inspirada en las referencias enviadas: Project Manager palette, Catalogo clinico, Variantes A-E, Materiales y export PDF/DXF/IFC/GLB. El objetivo es reducir ruido visual y preparar un flujo de layout mas claro antes de tocar el renderer profundo.</p>
+      <div class="grid">
+        <div class="card"><strong>Catalogo clinico</strong><br />Organiza salas TX/NM/DX/CY, bunker, laberinto, puerta, penetraciones, control, hot lab y areas publicas.</div>
+        <div class="card"><strong>Variantes A-E</strong><br />Permite pensar escenarios de distribucion antes del calculo de blindaje y memoria analitica.</div>
+        <div class="card"><strong>Materiales</strong><br />Conecta TVL, densidad, peso, costo, tiempo, carga estructural, cita y hash documental.</div>
+        <div class="card"><strong>Sembrar equipos + Render 3D</strong><br />Abre la inspeccion 3D medica usando la ruta estable del visor para revisar equipos y evidencia visual.</div>
+      </div>
+      <div class="note">Estado: implementacion de bajo riesgo visible en canvas. Drag/drop real, editor inline, variantes persistentes y export BIM profundo quedan para F520+.</div>
+    </section>
+
     <nav class="toc" aria-label="Indice">
       <a href="#inicio">1. Inicio rapido</a>
       <a href="#perfiles">2. Perfiles de usuario</a>
@@ -298,7 +310,7 @@
         </tbody>
       </table>
       <footer>
-        RadShield-MX F516h. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
+        RadShield-MX F519. Manual actualizado el 2026-08-09. Archivo: <code>public/manual_usuario.html</code>. Manual de versiones: <code>public/manual_versiones.html</code>.
       </footer>
     </section>
   </main>

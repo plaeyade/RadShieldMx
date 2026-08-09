@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F516h - Manual de Versiones</title>
+  <title>RadShield-MX F519 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,21 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F516h</span>
+    <span class="pill">Version documental: F519</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F517-F519 Canvas Visual Reference</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>
+      <tbody>
+        <tr><td>F517</td><td>Analisis de referencias visuales tipo Project Manager, catalogo, variantes, materiales y export.</td><td>Define una lectura mas limpia del canvas clinico.</td><td>Contrato <code>test:f517-f519:canvas-visual</code>.</td></tr>
+        <tr><td>F518</td><td>Paleta homogenea: workspace verde grisaceo, panel marfil, acento verde y tarjetas TX/NM/DX/CY.</td><td>Menos ruido visual y mejor continuidad con BIM/Project Manager.</td><td>Panel visible en canvas y Update Center.</td></tr>
+        <tr><td>F519</td><td>Ruta F520+ para drag/drop, editor inline, variantes persistentes y paquete PDF/DXF/IFC/GLB.</td><td>Convierte las referencias en roadmap de implementacion profunda.</td><td>Manual, changelog y contrato sincronizados.</td></tr>
+      </tbody>
+    </table>
+
     <h2>1. Como Leer Las Versiones</h2>
     <table>
       <thead><tr><th>Perfil</th><th>Que revisar</th><th>Riesgo</th></tr></thead>

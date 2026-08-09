@@ -88,6 +88,7 @@ import { buildF510DiagnosticPetTvlPromotion } from '@/lib/f510DiagnosticPetTvlPr
 import { buildF511F514BetaClosure } from '@/lib/f511F514BetaClosure';
 import { buildF515CanvasEventHardening } from '@/lib/f515CanvasEventHardening';
 import { buildF515F520PostBetaPlan } from '@/lib/f515F520PostBetaPlan';
+import { buildF517F519CanvasVisualReference } from '@/lib/f517F519CanvasVisualReference';
 import { buildF519NormativeQaExpansion } from '@/lib/f519NormativeQaExpansion';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
@@ -106,6 +107,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F517-F519 Canvas visual reference', current: 'Project Manager palette + visual contract', latest: 'catalogo clinico + variantes A-E + materiales + PDF/DXF/IFC/GLB + render 3D', status: 'current', description: `Analiza ${buildF517F519CanvasVisualReference().visualPatterns.length} patrones de las referencias visuales del usuario y los traduce al canvas: paleta homogenea, catalogo clinico, variantes, editor inline, materiales y paquete BIM/PDF. Implementacion actual de bajo riesgo; drag/drop, inline editor y export BIM profundo pasan a F520+.` },
   { name: 'F515 canvas events + F516h manuals', current: 'event hardening harness + manuals rebuilt', latest: 'zoom-view + activate-tool + fit-view + export-png + open-evidence + run-calculation + open-medical-3d + HTML manuals', status: 'current', description: `F515/F516 valida ${buildF515CanvasEventHardening().scenarios.length} rutas de evento y mantiene fallback estable. Ya cubre zoom real, herramientas desde boton derecho, Ajustar vista, Exportar PNG, Abrir evidencia, Calcular blindaje e Inspeccion 3D medica desde boton derecho. Manuales vigentes: public/manual_usuario.html y public/manual_versiones.html por perfiles basico/intermedio/avanzado.` },
   { name: 'F519 QA numerico ampliado', current: 'barrier-role regression expansion', latest: 'primary/secondary/maze/door/penetration/controlled-zone base vs conservative checks', status: 'current', description: `F519 agrega ${buildF519NormativeQaExpansion().summary.totalCases} casos por rol de barrera y comparador base/conservador. Roles cubiertos: ${buildF519NormativeQaExpansion().summary.barrierRolesCovered.join(', ')}. Resultados siguen preliminares hasta DB-backed datasets y revision profesional.` },
   { name: 'F515-F520 post-beta', current: 'post-beta execution board', latest: 'renderer events + Babylon deep + Unity build gate + ENDF/XCOM/ICRU DB + numeric QA + RAG memories', status: 'current', description: `Ordena ${buildF515F520PostBetaPlan().phaseRange}: ${buildF515F520PostBetaPlan().tracks.length} tracks posteriores a beta. Primero renderer/eventos y QA numerico; Unity queda bloqueado hasta build exportado real; DB ENDF/XCOM/ICRU queda gated por datasets approved-reference.` },

@@ -43,6 +43,7 @@
     "prepare:f515-f519:hardening": "node scripts/f515-f519-hardening-audit.mjs",
     "test:f515-f519:hardening": "node scripts/check-f515-f519-hardening-contracts.mjs",
     "test:f515-f519:hardening:values": "node scripts/check-f515-f519-hardening-values.mjs",
+    "test:f517-f519:canvas-visual": "node scripts/check-f517-f519-canvas-visual-reference-contracts.mjs",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

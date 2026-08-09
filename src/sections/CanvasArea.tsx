@@ -1748,6 +1748,65 @@ export default function CanvasArea({
               </div>
             )}
 
+            {!f375IsCleanWorkspace && (
+              <div
+                data-testid="f517-f519-canvas-visual-reference-panel"
+                className="pointer-events-auto absolute right-3 top-3 z-20 hidden w-[292px] rounded-xl border border-[#d8d6cd] bg-[#fffdf8]/96 p-2 text-[#252525] shadow-xl backdrop-blur xl:block"
+                aria-label="F517 a F519: referencias visuales aplicadas al canvas"
+                title="F517-F519: paleta Project Manager, catalogo clinico, variantes, materiales y export BIM/PDF"
+              >
+                <div className="flex items-start justify-between gap-2 border-b border-[#d8d6cd] pb-1.5">
+                  <div>
+                    <div className="text-[9px] font-bold uppercase tracking-wide text-[#238a61]">F517-F519 Canvas Visual</div>
+                    <div className="text-[11px] font-black text-[#252525]">Project Manager palette</div>
+                    <div className="text-[9px] text-[#71706a]">Catalogo clinico + variantes + materiales + export</div>
+                  </div>
+                  <div className="rounded-lg border border-[#bde6d1] bg-[#e8f6ef] px-2 py-1 text-[9px] font-bold text-[#238a61]">
+                    Snap
+                  </div>
+                </div>
+
+                <div className="mt-2 grid grid-cols-4 gap-1" aria-label="Paleta de modalidad del canvas">
+                  {[
+                    ['TX', 'bg-[#f6d8ce]', 'Bunker'],
+                    ['NM', 'bg-[#dcebf7]', 'Hot lab'],
+                    ['DX', 'bg-[#fff2bd]', 'Rayos X'],
+                    ['CY', 'bg-[#eee8ed]', 'Ciclotron'],
+                  ].map(([label, className, title]) => (
+                    <div key={label} className={`rounded-lg border border-[#5f6368]/60 ${className} px-1.5 py-1 text-center`} title={`${label}: ${title}`}>
+                      <div className="text-[10px] font-black">{label}</div>
+                      <div className="truncate text-[8px] text-[#71706a]">{title}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-2 grid grid-cols-2 gap-1.5">
+                  {[
+                    ['Catalogo clinico', 'Salas, laberintos, puertas y penetraciones'],
+                    ['Variantes A-E', 'Escenarios de layout antes del calculo'],
+                    ['Materiales', 'TVL, densidad, peso, costo y cita'],
+                    ['PDF/DXF/IFC/GLB', 'Paquete visual + Evidence Pack'],
+                  ].map(([label, detail]) => (
+                    <div key={label} className="rounded-lg border border-[#d8d6cd] bg-white/80 px-2 py-1">
+                      <div className="text-[9px] font-black text-[#252525]">{label}</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">{detail}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  data-testid="f517-f519-furnish-render-action"
+                  className="mt-2 w-full rounded-lg bg-[#252525] px-2 py-1.5 text-[10px] font-black text-white shadow-sm transition-colors hover:bg-[#111111]"
+                  title="Abrir inspeccion 3D medica para sembrar equipos y render visual del bunker o sala"
+                  aria-label="Sembrar equipos y abrir render 3D medico"
+                  onClick={openMedical3DFromContext}
+                >
+                  Sembrar equipos + Render 3D
+                </button>
+              </div>
+            )}
+
             {/* Main floor plan canvas */}
             <canvas
               ref={canvasRef}

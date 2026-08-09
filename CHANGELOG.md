@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F517-F519 (2026-08-09) - Canvas Visual Reference + Project Manager palette
+
+- Analiza las referencias visuales enviadas por el usuario y las traduce a patrones RadShield: catalogo clinico, toolbar flotante, variantes A-E, editor inline, paleta de materiales y export PDF/DXF/IFC/GLB.
+- Agrega `src/lib/f517F519CanvasVisualReference.ts` con contrato de implementacion y ruta F520+ para pasar de visible-contract a interaccion real.
+- Agrega panel visible en el canvas con paleta tipo Project Manager: workspace verde grisaceo, panel marfil, acento verde y swatches TX/NM/DX/CY.
+- Conecta el panel a `Sembrar equipos + Render 3D` sin tocar renderer base, geometria, DB ni formulas.
+- Actualiza Update Center, manuales y contrato `npm run test:f517-f519:canvas-visual`.
+
 # F516g-F516h (2026-08-09) - Context calculation and medical 3D harness
 
 - `Canvas CAD -> Calcular blindaje` desde boton derecho ahora pasa por el event harness como `run-calculation`.
