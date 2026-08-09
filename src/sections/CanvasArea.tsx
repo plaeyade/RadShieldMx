@@ -532,6 +532,17 @@ export default function CanvasArea({
     onExportPNG();
   };
 
+  const openEvidencePackFromContext = () => {
+    const routed = routeCanvasEventV2WithGate({
+      type: 'pointerdown',
+      mode: 'evidence',
+      x: contextMenu?.canvasX ?? 0,
+      y: contextMenu?.canvasY ?? 0,
+    }, true);
+    setLastF515EventAction(routed.action);
+    onOpenEvidencePack?.();
+  };
+
   const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1828,7 +1839,7 @@ export default function CanvasArea({
                 <button type="button" data-testid="canvas-context-action-fit" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(fitCanvasViewFromContext)}>Ajustar vista</button>
                 <button type="button" data-testid="canvas-context-action-export" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(exportCanvasPngFromContext)}>Exportar PNG</button>
                 <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
-                <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenEvidencePack)}>Abrir evidencia</button>
+                <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(openEvidencePackFromContext)}>Abrir evidencia</button>
                 <button type="button" data-testid="canvas-context-action-3d" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenMedical3D ?? onOpen3DViewer)}>Inspeccion 3D medica</button>
                 <div className="border-t border-slate-100" />
                 <button

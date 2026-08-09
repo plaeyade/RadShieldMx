@@ -1,5 +1,11 @@
 # RadShield-MX - Manual de Versiones
 
+# F516f (2026-08-09) - Context evidence pack
+
+- **F516f canvas:** conecta `Canvas CAD -> Abrir evidencia` desde el menu de boton derecho al event harness.
+- La accion registra `open-evidence`, conserva `onOpenEvidencePack` como ruta estable y queda cubierta por E2E.
+- La secuencia F515b-F516f ya cubre `zoom-view`, `activate-tool`, `fit-view`, `export-png` y `open-evidence`.
+
 # F516e (2026-08-02) - Context PNG export
 
 - **F516e canvas:** conecta `Canvas CAD -> Exportar PNG` desde el menu de boton derecho al event harness.

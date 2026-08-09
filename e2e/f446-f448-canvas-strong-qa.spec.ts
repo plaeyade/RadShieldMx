@@ -78,6 +78,14 @@ test('F446-F448 validates canvas surfaces, right click, quick actions and nonblo
   await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('export-png');
   await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'export-png');
 
+  await canvas.click({ button: 'right', position: { x: 760, y: 450 } });
+  await expect(page.getByTestId('canvas-context-menu')).toBeVisible();
+  await page.getByTestId('canvas-context-action-evidence').click();
+  await expect(page.getByTestId('canvas-context-menu')).toBeHidden();
+  await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('open-evidence');
+  await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'open-evidence');
+  await page.keyboard.press('Escape');
+
   const screenshot = path.join(outputDir, '01_canvas_strong_qa.png');
   await page.screenshot({ path: screenshot, fullPage: false });
   await writeFile(

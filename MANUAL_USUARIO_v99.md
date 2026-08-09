@@ -1,10 +1,22 @@
-# Manual de Usuario RadShield-MX - F516d
+# Manual de Usuario RadShield-MX - F516f
+
+## Addendum F516f - Evidencia desde boton derecho
+
+F516f conecta `Canvas CAD -> Abrir evidencia` desde el menu contextual al event harness. La accion real conserva `onOpenEvidencePack`, por lo que el Evidence Pack sigue abriendo por la ruta estable; lo nuevo es que la accion queda trazada como `open-evidence` y cubierta por E2E.
+
+Secuencia vigente de acciones reales de bajo riesgo:
+
+1. F515b: `Ctrl/Meta + rueda` -> `zoom-view`.
+2. F516c: `Medir/cota` desde boton derecho -> `activate-tool`.
+3. F516d: `Ajustar vista` desde boton derecho -> `fit-view`.
+4. F516e: `Exportar PNG` desde boton derecho -> `export-png`.
+5. F516f: `Abrir evidencia` desde boton derecho -> `open-evidence`.
 
 ## Addendum F516e - Exportar PNG desde boton derecho
 
 F516e conecta `Canvas CAD -> Exportar PNG` desde el menu contextual al event harness. La accion real sigue usando `onExportPNG`, por lo que no cambia la ruta estable de exportacion ni el renderer. Lo nuevo es que el harness registra `export-png` y el E2E confirma que el menu contextual se cierra, el canvas queda visible y la accion queda trazada.
 
-Secuencia vigente de acciones reales de bajo riesgo:
+Secuencia previa de acciones reales de bajo riesgo:
 
 1. F515b: `Ctrl/Meta + rueda` -> `zoom-view`.
 2. F516c: `Medir/cota` desde boton derecho -> `activate-tool`.
