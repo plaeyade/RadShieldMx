@@ -11,6 +11,8 @@ export type CanvasEventModeV2 =
   | 'tool'
   | 'export'
   | 'evidence'
+  | 'calculation'
+  | 'medical3d'
   | 'delete'
   | 'undo';
 
@@ -43,6 +45,8 @@ export interface CanvasEventActionV2 {
     | 'activate-tool'
     | 'export-png'
     | 'open-evidence'
+    | 'run-calculation'
+    | 'open-medical-3d'
     | 'delete-selection'
     | 'undo-last'
     | 'ignore';
@@ -64,7 +68,7 @@ export function getCanvasEventControllerV2Status(): CanvasEventControllerV2Statu
     enabled: isEnabled('canvasEventControllerV2'),
     gatedBy: ['VITE_CANVAS_HIGH_RISK_CAD', 'VITE_CANVAS_EVENT_CONTROLLER_V2'],
     safeDefault: 'route-to-stable-useCanvas',
-    coveredModes: ['select', 'drag', 'snap', 'lasso', 'pan', 'zoom', 'fit', 'tool', 'export', 'evidence', 'delete', 'undo'],
+    coveredModes: ['select', 'drag', 'snap', 'lasso', 'pan', 'zoom', 'fit', 'tool', 'export', 'evidence', 'calculation', 'medical3d', 'delete', 'undo'],
     requiredE2E: [
       'canvas remains nonblank',
       'wall drag preserves geometry',
@@ -113,6 +117,12 @@ export function routeCanvasEventV2(event: CanvasPointerEventV2): CanvasEventActi
   }
   if (event.mode === 'evidence' && event.type === 'pointerdown') {
     return { action: 'open-evidence', reason: 'context menu evidence pack routed through event harness', requiresE2E: true };
+  }
+  if (event.mode === 'calculation' && event.type === 'pointerdown') {
+    return { action: 'run-calculation', reason: 'context menu shielding calculation routed through event harness', requiresE2E: true };
+  }
+  if (event.mode === 'medical3d' && event.type === 'pointerdown') {
+    return { action: 'open-medical-3d', reason: 'context menu medical 3D inspection routed through event harness', requiresE2E: true };
   }
   if (event.mode === 'tool' && event.type === 'pointerdown') {
     return { action: 'activate-tool', reason: 'canvas UI tool command routed through event harness', requiresE2E: true };

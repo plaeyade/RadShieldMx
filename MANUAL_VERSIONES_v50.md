@@ -1,5 +1,11 @@
 # RadShield-MX - Manual de Versiones
 
+# F516g-F516h (2026-08-09) - Context calculation and medical 3D
+
+- **F516g canvas:** conecta `Canvas CAD -> Calcular blindaje` desde boton derecho al event harness como `run-calculation`.
+- **F516h canvas:** conecta `Canvas CAD -> Inspeccion 3D medica` desde boton derecho al event harness como `open-medical-3d`.
+- La secuencia F515b-F516h ya cubre `zoom-view`, `activate-tool`, `fit-view`, `export-png`, `open-evidence`, `run-calculation` y `open-medical-3d`.
+
 # F516f (2026-08-09) - Context evidence pack
 
 - **F516f canvas:** conecta `Canvas CAD -> Abrir evidencia` desde el menu de boton derecho al event harness.

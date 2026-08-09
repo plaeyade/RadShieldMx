@@ -1,4 +1,18 @@
-# Manual de Usuario RadShield-MX - F516f
+# Manual de Usuario RadShield-MX - F516h
+
+## Addendum F516g-F516h - Calculo y 3D desde boton derecho
+
+F516g conecta `Canvas CAD -> Calcular blindaje` desde el menu contextual al event harness como `run-calculation`. F516h conecta `Canvas CAD -> Inspeccion 3D medica` como `open-medical-3d`. Ambas rutas conservan los callbacks estables (`onRunCalculations`, `onOpenMedical3D`/`onOpen3DViewer`) y quedan cubiertas por E2E.
+
+Secuencia vigente de acciones reales de bajo riesgo:
+
+1. F515b: `Ctrl/Meta + rueda` -> `zoom-view`.
+2. F516c: `Medir/cota` desde boton derecho -> `activate-tool`.
+3. F516d: `Ajustar vista` desde boton derecho -> `fit-view`.
+4. F516e: `Exportar PNG` desde boton derecho -> `export-png`.
+5. F516f: `Abrir evidencia` desde boton derecho -> `open-evidence`.
+6. F516g: `Calcular blindaje` desde boton derecho -> `run-calculation`.
+7. F516h: `Inspeccion 3D medica` desde boton derecho -> `open-medical-3d`.
 
 ## Addendum F516f - Evidencia desde boton derecho
 

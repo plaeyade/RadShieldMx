@@ -6,6 +6,8 @@ const eventCases = [
   ['context tool command', true, 'pointerdown', 'tool', 1, 1, undefined, undefined, 'activate-tool'],
   ['context PNG export', true, 'pointerdown', 'export', 1, 1, undefined, undefined, 'export-png'],
   ['context evidence pack', true, 'pointerdown', 'evidence', 1, 1, undefined, undefined, 'open-evidence'],
+  ['context shielding calculation', true, 'pointerdown', 'calculation', 1, 1, undefined, undefined, 'run-calculation'],
+  ['context medical 3D', true, 'pointerdown', 'medical3d', 1, 1, undefined, undefined, 'open-medical-3d'],
   ['snap preview', true, 'pointermove', 'snap', 1, 1, undefined, undefined, 'snap-preview'],
   ['delete key', true, 'keydown', 'delete', 0, 0, 'Delete', undefined, 'delete-selection'],
   ['undo key', true, 'keydown', 'undo', 0, 0, 'z', true, 'undo-last'],
@@ -21,6 +23,8 @@ function routeHarness([, enabled, type, mode, x, y, key, ctrlKey]) {
   if (mode === 'tool' && type === 'pointerdown') return 'activate-tool';
   if (mode === 'export' && type === 'pointerdown') return 'export-png';
   if (mode === 'evidence' && type === 'pointerdown') return 'open-evidence';
+  if (mode === 'calculation' && type === 'pointerdown') return 'run-calculation';
+  if (mode === 'medical3d' && type === 'pointerdown') return 'open-medical-3d';
   if (mode === 'snap' && type === 'pointermove') return 'snap-preview';
   return 'route-to-stable-useCanvas';
 }

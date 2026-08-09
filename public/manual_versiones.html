@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F516f - Manual de Versiones</title>
+  <title>RadShield-MX F516h - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,7 +26,7 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F516f</span>
+    <span class="pill">Version documental: F516h</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
@@ -41,7 +41,7 @@
       </tbody>
     </table>
 
-    <h2>2. Version Vigente F515b-F516f</h2>
+    <h2>2. Version Vigente F515b-F516h</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Boton/accion afectada</th><th>Validacion</th></tr></thead>
       <tbody>
@@ -50,7 +50,9 @@
         <tr><td>F516d</td><td>Conecta Ajustar vista desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Ajustar vista</code>.</td><td>Accion reporta <code>fit-view</code> y mantiene canvas visible.</td></tr>
         <tr><td>F516e</td><td>Conecta Exportar PNG desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Exportar PNG</code>.</td><td>Accion reporta <code>export-png</code> y usa ruta estable.</td></tr>
         <tr><td>F516f</td><td>Conecta Abrir evidencia desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Abrir evidencia</code>.</td><td>Accion reporta <code>open-evidence</code> y usa ruta estable.</td></tr>
-        <tr><td>F516f docs</td><td>Manual de usuario y versiones actualizados.</td><td>Manual, Update Center, ayuda.</td><td>HTML estatico y MD sincronizados.</td></tr>
+        <tr><td>F516g</td><td>Conecta Calcular blindaje desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Calcular blindaje</code>.</td><td>Accion reporta <code>run-calculation</code> y usa ruta estable.</td></tr>
+        <tr><td>F516h</td><td>Conecta Inspeccion 3D medica desde menu de boton derecho.</td><td><code>Canvas CAD &gt; Inspeccion 3D medica</code>.</td><td>Accion reporta <code>open-medical-3d</code> y usa ruta estable.</td></tr>
+        <tr><td>F516h docs</td><td>Manual de usuario y versiones actualizados.</td><td>Manual, Update Center, ayuda.</td><td>HTML estatico y MD sincronizados.</td></tr>
       </tbody>
     </table>
 
@@ -66,7 +68,7 @@
         <tr><td>F301-F360</td><td>Three/R3F, Babylon preliminar, Unity gate, caso Centro Neuro y visuales 3D.</td><td>Inspeccion 3D/BIM y narrativa visual.</td></tr>
         <tr><td>F361-F430</td><td>Menu Archivo, quick actions, BIM/Revit-like UI, renderer profundo, calculo por rol y memoria automatica.</td><td>Canvas mas profesional y metodologia mas trazable.</td></tr>
         <tr><td>F431-F514</td><td>Beta visual publicable, DB live QA, materiales versionados, paquete beta y cierre post-deploy.</td><td>Pruebas reales sin claims clinicos certificados.</td></tr>
-        <tr><td>F515-F516f</td><td>Hardening incremental de eventos reales del canvas y manuales renovados.</td><td>Menos riesgo al mejorar renderer/eventos base.</td></tr>
+        <tr><td>F515-F516h</td><td>Hardening incremental de eventos reales del canvas y manuales renovados.</td><td>Menos riesgo al mejorar renderer/eventos base.</td></tr>
       </tbody>
     </table>
 
@@ -76,7 +78,7 @@
       <tbody>
         <tr><td>Archivo</td><td>F404-F407</td><td>Gestiona proyecto, import/export, reportes y manuales.</td><td>Seguir verificando submenus con datos reales.</td></tr>
         <tr><td>Acceso rapido DX/TX/NM/CY</td><td>F112-F186</td><td>Cambia contexto de modalidad y accesos.</td><td>Conectar mas estado persistente por perfil.</td></tr>
-        <tr><td>Canvas boton derecho</td><td>F516c-F516f</td><td>Activa herramientas, ajuste de vista, export PNG y Evidence Pack desde harness.</td><td>Agregar calculo al harness con guardas.</td></tr>
+        <tr><td>Canvas boton derecho</td><td>F516c-F516h</td><td>Activa herramientas, ajuste de vista, export PNG, Evidence Pack, calculo y 3D desde harness.</td><td>Pasar a renderer base v2 con guardas.</td></tr>
         <tr><td>Mat</td><td>F186-F246</td><td>Compara TVL, densidad, peso, costo, tiempo y estructura.</td><td>Ampliar DB tecnica approved-reference.</td></tr>
         <tr><td>Memoria IA</td><td>F102-F430</td><td>Convierte calculo/evidencia en memoria preliminar.</td><td>Mas memorias reales y citation picker vivo.</td></tr>
         <tr><td>3D/BIM</td><td>F301-F455</td><td>Inspeccion visual, capas, barreras y narrativa BIM.</td><td>Babylon profundo y Unity build real.</td></tr>

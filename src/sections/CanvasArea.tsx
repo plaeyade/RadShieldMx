@@ -543,6 +543,29 @@ export default function CanvasArea({
     onOpenEvidencePack?.();
   };
 
+  const runCalculationsFromContext = () => {
+    const routed = routeCanvasEventV2WithGate({
+      type: 'pointerdown',
+      mode: 'calculation',
+      x: contextMenu?.canvasX ?? 0,
+      y: contextMenu?.canvasY ?? 0,
+    }, true);
+    setLastF515EventAction(routed.action);
+    onRunCalculations?.();
+  };
+
+  const openMedical3DFromContext = () => {
+    const routed = routeCanvasEventV2WithGate({
+      type: 'pointerdown',
+      mode: 'medical3d',
+      x: contextMenu?.canvasX ?? 0,
+      y: contextMenu?.canvasY ?? 0,
+    }, true);
+    setLastF515EventAction(routed.action);
+    if (onOpenMedical3D) onOpenMedical3D();
+    else onOpen3DViewer?.();
+  };
+
   const handleCanvasContextMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1838,9 +1861,9 @@ export default function CanvasArea({
                 <button type="button" data-testid="canvas-context-action-measure" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(() => activateCanvasToolFromContext('measure'))}>Medir / cota</button>
                 <button type="button" data-testid="canvas-context-action-fit" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(fitCanvasViewFromContext)}>Ajustar vista</button>
                 <button type="button" data-testid="canvas-context-action-export" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(exportCanvasPngFromContext)}>Exportar PNG</button>
-                <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onRunCalculations)}>Calcular blindaje</button>
+                <button type="button" data-testid="canvas-context-action-calc" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(runCalculationsFromContext)}>Calcular blindaje</button>
                 <button type="button" data-testid="canvas-context-action-evidence" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(openEvidencePackFromContext)}>Abrir evidencia</button>
-                <button type="button" data-testid="canvas-context-action-3d" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(onOpenMedical3D ?? onOpen3DViewer)}>Inspeccion 3D medica</button>
+                <button type="button" data-testid="canvas-context-action-3d" className="block w-full px-2.5 py-1.5 text-left hover:bg-orange-50" onClick={() => runContextMenuAction(openMedical3DFromContext)}>Inspeccion 3D medica</button>
                 <div className="border-t border-slate-100" />
                 <button
                   type="button"

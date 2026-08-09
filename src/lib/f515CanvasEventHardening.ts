@@ -89,6 +89,20 @@ export const F515_CANVAS_EVENT_SCENARIOS: F515CanvasEventScenario[] = [
     e2eName: 'context menu evidence pack opens stable evidence surface through harness',
   },
   {
+    id: 'f516g-context-calculation-routes-to-harness',
+    event: { type: 'pointerdown', mode: 'calculation', x: 220, y: 240 },
+    expectedAction: 'run-calculation',
+    stableFallbackRequired: false,
+    e2eName: 'context menu shielding calculation keeps stable calculation callback through harness',
+  },
+  {
+    id: 'f516h-context-medical3d-routes-to-harness',
+    event: { type: 'pointerdown', mode: 'medical3d', x: 240, y: 260 },
+    expectedAction: 'open-medical-3d',
+    stableFallbackRequired: false,
+    e2eName: 'context menu medical 3D inspection opens stable lazy surface through harness',
+  },
+  {
     id: 'f515-lasso-start-update-finish',
     event: { type: 'pointerdown', mode: 'lasso', x: 20, y: 30 },
     expectedAction: 'start-selection',
@@ -165,6 +179,12 @@ export function routeCanvasEventV2WithGate(event: CanvasPointerEventV2, forceEna
   if (event.mode === 'evidence' && event.type === 'pointerdown') {
     return { action: 'open-evidence', reason: 'context menu evidence pack routed through event harness', requiresE2E: true };
   }
+  if (event.mode === 'calculation' && event.type === 'pointerdown') {
+    return { action: 'run-calculation', reason: 'context menu shielding calculation routed through event harness', requiresE2E: true };
+  }
+  if (event.mode === 'medical3d' && event.type === 'pointerdown') {
+    return { action: 'open-medical-3d', reason: 'context menu medical 3D inspection routed through event harness', requiresE2E: true };
+  }
   if (event.mode === 'tool' && event.type === 'pointerdown') {
     return { action: 'activate-tool', reason: 'canvas UI tool command routed through event harness', requiresE2E: true };
   }
@@ -227,6 +247,8 @@ export function buildF515CanvasEventHardening(): F515CanvasEventHardeningContrac
       'right-click/context fit view routes through F516d harness and keeps canvas visible',
       'right-click/context export PNG routes through F516e harness and uses stable export path',
       'right-click/context evidence pack routes through F516f harness and opens stable evidence surface',
+      'right-click/context calculation routes through F516g harness and keeps stable calculation callback',
+      'right-click/context medical 3D routes through F516h harness and keeps stable lazy viewer callback',
       'quick actions still dispatch their dialog/store action',
       'drag preview does not commit geometry before pointerup',
       'lasso selection has escape/cancel behavior',

@@ -84,6 +84,22 @@ test('F446-F448 validates canvas surfaces, right click, quick actions and nonblo
   await expect(page.getByTestId('canvas-context-menu')).toBeHidden();
   await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('open-evidence');
   await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'open-evidence');
+  await page.getByTestId('f392-evidence-pack-fullscreen-shell-close').click();
+  await expect(page.getByTestId('f392-evidence-pack-fullscreen-shell')).toBeHidden();
+
+  await canvas.click({ button: 'right', position: { x: 790, y: 480 } });
+  await expect(page.getByTestId('canvas-context-menu')).toBeVisible();
+  await page.getByTestId('canvas-context-action-calc').click();
+  await expect(page.getByTestId('canvas-context-menu')).toBeHidden();
+  await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('run-calculation');
+  await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'run-calculation');
+
+  await canvas.click({ button: 'right', position: { x: 820, y: 510 } });
+  await expect(page.getByTestId('canvas-context-menu')).toBeVisible();
+  await page.getByTestId('canvas-context-action-3d').click();
+  await expect(page.getByTestId('canvas-context-menu')).toBeHidden();
+  await expect(page.getByTestId('f515b-canvas-event-action')).toContainText('open-medical-3d');
+  await expect(canvas).toHaveAttribute('data-f515b-last-event-action', 'open-medical-3d');
   await page.keyboard.press('Escape');
 
   const screenshot = path.join(outputDir, '01_canvas_strong_qa.png');

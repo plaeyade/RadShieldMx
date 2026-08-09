@@ -1,5 +1,11 @@
 # RadShield-MX - Fases recientes
 
+# F516g-F516h (2026-08-09) - Context calculation and medical 3D harness
+
+- `Canvas CAD -> Calcular blindaje` desde boton derecho ahora pasa por el event harness como `run-calculation`.
+- `Canvas CAD -> Inspeccion 3D medica` desde boton derecho ahora pasa por el event harness como `open-medical-3d`.
+- Ambas acciones conservan sus callbacks estables y amplian el E2E del canvas sin tocar geometria, renderer, formulas ni DB.
+
 # F516f (2026-08-09) - Context Evidence Pack harness
 
 - `Canvas CAD -> Abrir evidencia` desde boton derecho ahora pasa por el event harness F515/F516.
