@@ -1,4 +1,49 @@
-# Manual de Usuario RadShield-MX - F580 Unity WebGL + DB Tecnica
+# Manual de Usuario RadShield-MX - F585 QA Normativo Numerico
+
+## Addendum F581-F585 - QA normativo numerico ampliado NCRP/IAEA/UAQ
+
+F581-F585 agrega una compuerta visible de control numerico para revisar que el motor de calculo mantenga resultados consistentes en casos tipo. La fase no pretende certificar clinicamente la app; sirve para detectar regresiones y documentar tolerancias antes de usar datos reales de proyecto.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho, ubique **F581-F585 QA normativo**.
+3. Revise el estado:
+   - `qa-expanded-pass`: los fixtures numericos pasan dentro de tolerancia.
+   - `qa-expanded-review`: uno o mas fixtures requieren revision.
+4. Revise el resumen de casos, normas cubiertas, roles de barrera y delta maximo.
+5. Abra los detalles de cada caso con hover para ver citas y advertencias.
+
+### Que cubre
+
+- LINAC 6 MV barrera primaria NCRP 151.
+- LINAC 15 MV secundaria con revision neutronica IAEA/NCRP.
+- CT/RX puerta plomada y sala de control NCRP 147.
+- Gamma Knife/Co-60 con fuente secundaria publica.
+- PET/NM 511 keV hot lab y zona controlada.
+- Ciclotron 18 MeV con laberinto, concreto alta densidad y neutrones.
+- Penetraciones HVAC/sleeve y continuidad de blindaje.
+- Densidad, espesor y carga estructural preliminar.
+
+### Advertencias que debe atender el usuario
+
+- `TVL no versionado`: falta asociar TVL a fuente, pagina y hash documental.
+- `material sin densidad validada`: el material no debe firmarse sin ficha/lab/proveedor revisado.
+- `energia >10 MV requiere neutrones`: aplica a LINAC de alta energia y ciclotron.
+- `penetracion requiere continuidad de blindaje`: revisar ductos, sleeves, puertas, charolas y huecos.
+- `resultado preliminar requiere revision RSO/fisico medico`: obligatorio antes de memoria firmable.
+
+### Limites
+
+- Estos fixtures son QA de regresion; no sustituyen geometria real, workload real ni revision profesional.
+- La certificacion clinica sigue bloqueada hasta DB tecnica versionada, QA DB-backed y evidencia pagina/hash.
+- La beta puede mostrar calculo preliminar, pero no debe presentarse como memoria analitica firmada.
+
+Validacion recomendada:
+
+- `npm run test:f581-f585:normative-qa`
+- `npm run test:f581-f585:normative-qa:values`
+- `npm run test:f581-f585:normative-qa:e2e`
 
 ## Addendum F571-F580 - Unity WebGL real y DB tecnica regulatoria/materiales
 

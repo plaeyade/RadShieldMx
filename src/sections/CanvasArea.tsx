@@ -80,6 +80,7 @@ import { buildF556F560PostBetaDeepStack } from '@/lib/f556F560PostBetaDeepStack'
 import { buildF561F565RendererEventControllerV2 } from '@/lib/f561F565RendererEventControllerV2';
 import { buildF566F570PostBetaProductionReadiness } from '@/lib/f566F570PostBetaProductionReadiness';
 import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechnicalClosure';
+import { buildF581F585ExpandedNormativeNumericQa } from '@/lib/f581F585ExpandedNormativeNumericQa';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1328,6 +1329,7 @@ export default function CanvasArea({
     regulatoryDb: buildF491F498RegulatoryMaterialsDb(),
     heavyAssetsDbPrep: buildF501F504HeavyAssetsDbPrep(),
   });
+  const f581ToF585ExpandedNormativeQa = buildF581F585ExpandedNormativeNumericQa();
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -2552,6 +2554,67 @@ export default function CanvasArea({
                     className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
                   >
                     Unity real {f571ToF580UnityDbTechnicalClosure.releaseRules.canClaimUnityRealRuntime ? 'ready' : 'blocked'}; seed live NO; DB completa {f571ToF580UnityDbTechnicalClosure.releaseRules.canClaimCompleteRegulatoryDb ? 'ready' : 'gated'}; calculo clinico certificado NO.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f581-f585-expanded-normative-qa"
+                  className="mt-2 rounded-lg border border-[#b7c9bc] bg-[#f8fff8]/95 p-2"
+                  title="F581-F585: QA normativo numerico ampliado NCRP/IAEA/UAQ con tolerancias, advertencias y gate clinico"
+                  aria-label="F581 a F585 QA normativo numerico ampliado"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F581-F585 QA normativo</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">NCRP / IAEA / UAQ + unidades + warnings</div>
+                    </div>
+                    <span
+                      data-testid="f581-f585-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f581ToF585ExpandedNormativeQa.status === 'qa-expanded-pass'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : 'border-[#fde68a] bg-[#fffbeb] text-[#a16207]'
+                      }`}
+                    >
+                      {f581ToF585ExpandedNormativeQa.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f581-f585-summary"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={`Heredado: F484-F490 ${f581ToF585ExpandedNormativeQa.baseCoverage.f484F490Cases} casos; F519 ${f581ToF585ExpandedNormativeQa.baseCoverage.f519Cases} casos`}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">Pass {f581ToF585ExpandedNormativeQa.summary.passedCases}/{f581ToF585ExpandedNormativeQa.summary.totalCases}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Norm {f581ToF585ExpandedNormativeQa.summary.standardsCovered.length}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#7c3aed]">Roles {f581ToF585ExpandedNormativeQa.summary.rolesCovered.length}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#c2410c]">Delta {f581ToF585ExpandedNormativeQa.summary.maxDeltaPct}%</span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f581ToF585ExpandedNormativeQa.results.slice(0, 5).map((item) => (
+                      <div
+                        key={item.caseId}
+                        data-testid={`f581-f585-case-${item.caseId}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${item.citationIds.join(', ')} | ${item.warnings.join(' | ')}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{item.phase} {item.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            item.status === 'pass' ? 'bg-[#e8f6ef] text-[#238a61]' : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {item.calculatedThickness_mm} mm
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{item.standard} / {item.barrierRole} / delta {item.deltaPct}%</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f581-f585-gates"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f581ToF585ExpandedNormativeQa.releaseBlockers.join(' | ')}
+                  >
+                    Beta QA {f581ToF585ExpandedNormativeQa.gates.canPublishBetaNumericQa ? 'permitida' : 'review'}; DB-backed SI; fisico/RSO SI; certificacion clinica NO.
                   </div>
                 </div>
               </div>

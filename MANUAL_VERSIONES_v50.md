@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F581-F585 (2026-08-10) - QA Normativo Numerico Ampliado
+
+- **F581:** amplía fixtures LINAC NCRP 151: barrera primaria 6 MV, secundaria 15 MV y advertencia neutronica.
+- **F582:** agrega fixtures diagnosticos NCRP 147: puerta plomada y sala de control con equivalencia Pb.
+- **F583:** agrega Gamma Knife/Co-60 y PET/NM TG-108 como casos de regresion con citas y advertencias.
+- **F584:** agrega ciclotron 18 MeV y penetraciones HVAC/sleeve con penalizacion de continuidad de blindaje.
+- **F585:** agrega chequeo de unidades, densidad/carga estructural y gate de certificacion clinica bloqueado.
+
+Decision: F581-F585 permite QA numerico ampliado para beta preliminar, pero mantiene bloqueado cualquier claim clinico certificado hasta DB-backed datasets, paginas/hash y revision profesional.
+
 # F571-F580 (2026-08-09) - Unity WebGL Real + DB Tecnica Regulatoria/Materiales
 
 - **F571:** intake de build Unity WebGL exportado. La carpeta esperada es `public/unity/radshield-medical-3d` con `index.html`, `Build` y `TemplateData`.

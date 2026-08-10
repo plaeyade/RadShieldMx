@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F581-F585 (2026-08-10) - QA normativo numerico ampliado NCRP/IAEA/UAQ
+
+- Agregado contrato `radshield-mx.calc.normative-qa.f581-f585.v1` para ampliar QA numerico del motor de calculo.
+- Cubre 9 fixtures adicionales sobre NCRP 151, NCRP 147, IAEA SRS-47, UAQ y AAPM TG-108.
+- Los casos incluyen barrera primaria, secundaria, puerta, laberinto, penetracion HVAC/sleeve, zona controlada PET/NM y chequeo de densidad/carga estructural.
+- Canvas muestra panel F581-F585 con conteo pass/total, normas, roles, delta maximo y casos visibles.
+- Se agregan advertencias clinicas obligatorias: distancia menor a 0.3 m, TVL no versionado, material sin densidad validada, energia >10 MV/neutrones y revision RSO/fisico medico.
+- Gate de release: permite beta numerica preliminar si todos los fixtures pasan, pero bloquea certificacion clinica hasta DB-backed datasets, hash/pagina y revision profesional.
+- Agregado E2E visual con capturas dedicadas: panel F581-F585, canvas completo y accion real de pointer heredada.
+
 # F571-F580 (2026-08-09) - Unity WebGL real + DB tecnica regulatoria/materiales
 
 - Agregado contrato `radshield-mx.f571-f580.unity-db-technical-closure.v1` para cerrar el carril Unity WebGL real y la DB tecnica regulatoria/materiales.

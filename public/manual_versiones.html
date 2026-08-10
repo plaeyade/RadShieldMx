@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F580 - Manual de Versiones</title>
+  <title>RadShield-MX F585 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F580</span>
-    <span class="pill">Fecha: 2026-08-09</span>
+    <span class="pill">Version documental: F585</span>
+    <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F581-F585 QA Normativo Numerico Ampliado</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F581</td><td>Fixtures LINAC NCRP 151.</td><td>Barrera primaria 6 MV y secundaria 15 MV con warning neutronico.</td><td>No uso clinico sin source term real.</td></tr>
+        <tr><td>F582</td><td>Fixtures diagnosticos NCRP 147.</td><td>Puerta plomada y sala de control con equivalencia Pb.</td><td>TVL/kVp/workload deben versionarse.</td></tr>
+        <tr><td>F583</td><td>Gamma Knife y PET/NM.</td><td>Co-60, 511 keV, zona controlada y citas IAEA/TG-108.</td><td>Requiere proveedor/workflow real.</td></tr>
+        <tr><td>F584</td><td>Ciclotron y penetraciones.</td><td>Laberinto, alta densidad, neutrones y HVAC/sleeves.</td><td>Continuidad de blindaje obligatoria.</td></tr>
+        <tr><td>F585</td><td>Unidades/densidad/carga estructural.</td><td>Chequea mm, densidad kg/m3, kg/m2 y gates.</td><td>Certificacion clinica bloqueada.</td></tr>
+      </tbody>
+    </table>
+    <p class="warn"><strong>Decision:</strong> F581-F585 amplia QA para beta preliminar, pero mantiene bloqueado el reclamo clinico certificado hasta DB-backed datasets y revision profesional.</p>
+
     <h2>0. F571-F580 Unity WebGL Real + DB Tecnica</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
