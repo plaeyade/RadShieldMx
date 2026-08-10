@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F561-F565 (2026-08-09) - Renderer/event controller v2 observable
+
+- Agregado contrato `radshield-mx.f561-f565.renderer-event-controller-v2.v1` para conectar renderer base v2 con el harness de eventos sin reemplazar `useCanvas`.
+- Canvas ahora envuelve `onMouseDown`, `onMouseMove` y `onMouseUp` con F561: primero registra/rutea evento v2 y despues ejecuta el handler estable.
+- Panel visual F561-F565 agregado al tablero derecho con carriles de adaptador de eventos, overlay de seleccion, ruteo, rollback/undo y E2E.
+- Agregado E2E visual con capturas para comprobar canvas visible, panel F561-F565 y click real que actualiza `f515b-canvas-event-action`.
+- Politica: overlay sin `pointer-events`, sin mutar geometria, sin cambiar calculos, sin tocar DB; rollback directo a handlers estables.
+
 # F556-F560 (2026-08-09) - Post-beta profunda: renderer, Babylon, Unity, DB y QA
 
 - Agrega `src/lib/f556F560PostBetaDeepStack.ts` como contrato de profundizacion post-beta.

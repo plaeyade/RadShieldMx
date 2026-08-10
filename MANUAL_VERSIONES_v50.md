@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F561-F565 (2026-08-09) - Renderer/Event Controller V2 Observable
+
+- **F561:** adaptador real de eventos pointer del canvas. `onMouseDown`, `onMouseMove` y `onMouseUp` pasan por el harness y luego por el handler estable.
+- **F562:** puente con overlay renderer v2 sin capturar eventos; sirve para lectura visual y seleccion futura.
+- **F563:** ruteo seguro por modo CAD: seleccionar, pan, snap, tool, zoom, contexto y acciones conectadas.
+- **F564:** rollback/undo antes de mutar; esta fase no escribe geometria persistente ni altera calculos.
+- **F565:** E2E visual dedicado con capturas y manifiesto de QA.
+
+Decision: F561-F565 inicia el renderer/event controller v2 de forma observable. El canvas estable sigue siendo canonico.
+
 # F556-F560 (2026-08-09) - Post-beta profunda
 
 - **F556:** agrega tablero post-beta profundo para renderer base v2. Se permite preview/overlay, pero `CanvasArea/useCanvas` siguen como fuente estable.

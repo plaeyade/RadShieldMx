@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F560 - Manual de Usuario</title>
+  <title>RadShield-MX F565 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F560</span>
+      <span class="pill">Version de manual: F565</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,7 +105,23 @@
   </header>
   <main>
     <section>
-      <h2>0. Addendum F556-F560: Post-Beta Profunda</h2>
+      <h2>0. Addendum F561-F565: Renderer/Event Controller V2 Observable</h2>
+      <p>F561-F565 conecta los eventos reales de mouse del canvas a un harness v2 antes de llamar al handler estable. Esto permite observar ruteo, seleccion futura y overlay renderer v2 sin romper el canvas productivo.</p>
+      <table>
+        <thead><tr><th>Fase</th><th>Funcion</th><th>Que debe ver el usuario</th><th>Rollback</th></tr></thead>
+        <tbody>
+          <tr><td>F561</td><td>Adaptador pointer.</td><td>El panel indica <code>Wrap ON</code>; los clicks actualizan el harness.</td><td>Volver a handlers directos.</td></tr>
+          <tr><td>F562</td><td>Overlay de seleccion/lectura.</td><td>El overlay sigue visible sin capturar eventos.</td><td>Ocultar <code>f442-f445-renderer-v2-overlay-canvas</code>.</td></tr>
+          <tr><td>F563</td><td>Ruteo por modo CAD.</td><td>Seleccion, pan, snap y herramientas registran accion sin bloquear el flujo estable.</td><td>Forzar <code>route-to-stable-useCanvas</code>.</td></tr>
+          <tr><td>F564</td><td>Undo/rollback antes de mutar.</td><td>No se escribe geometria ni calculos en esta fase.</td><td>Desactivar wrappers.</td></tr>
+          <tr><td>F565</td><td>E2E visual.</td><td>Capturas del panel y de una accion real de pointer.</td><td>Repetir F556-F560/F229 si falla.</td></tr>
+        </tbody>
+      </table>
+      <div class="ok">Validacion: <code>npm run test:f561-f565:event-controller</code> y <code>npm run test:f561-f565:event-controller:e2e</code>.</div>
+      <div class="warn">F561-F565 no reemplaza <code>useCanvas</code>; solo observa/rutea y despues ejecuta la ruta estable.</div>
+    </section>
+    <section>
+      <h2>0A. Addendum F556-F560: Post-Beta Profunda</h2>
       <p>F556-F560 agrega un tablero visible para gobernar la etapa post-beta: renderer base v2, Babylon real, Unity real, base tecnica completa y QA normativo ampliado. El tablero no sustituye al canvas estable; muestra que esta listo, que esta en preview y que sigue bloqueado por assets, datasets o E2E.</p>
       <table>
         <thead><tr><th>Carril</th><th>Uso</th><th>Estado esperado</th><th>Gate antes de produccion</th></tr></thead>
@@ -120,7 +136,7 @@
       <div class="ok">Validacion: <code>npm run test:f556-f560:post-beta-deep</code> y <code>npm run test:f556-f560:post-beta-deep:e2e</code>.</div>
       <div class="warn">F556-F560 no declara certificacion clinica: Unity no firma calculos, Babylon no reemplaza Three/R3F y las texturas PBR no modifican valores tecnicos.</div>
 
-      <h2>0A. Addendum F550-F555: Cierre Beta Funcional Y Paleta BIM</h2>
+      <h2>0B. Addendum F550-F555: Cierre Beta Funcional Y Paleta BIM</h2>
       <p>F550-F555 agrega un panel visible para cerrar la beta funcional con conexiones reales, reversibles y auditables. El objetivo es distinguir que ya opera dentro del frontend y que sigue gated por falta de E2E, build Unity, assets pesados o QA normativo.</p>
       <table>
         <thead><tr><th>Track</th><th>Estado</th><th>Uso</th><th>Limite</th></tr></thead>
@@ -136,7 +152,7 @@
       <div class="ok">Validacion: <code>npm run test:f550-f555:functional-beta</code> y <code>npm run test:f550-f555:functional-beta:e2e</code>.</div>
       <div class="warn">F550-F555 no habilita Unity clinico, no reemplaza renderer base y no declara certificacion del motor de calculo.</div>
 
-      <h2>0B. Addendum F545-F549: Crear Fuente Real Desde Ghost</h2>
+      <h2>0C. Addendum F545-F549: Crear Fuente Real Desde Ghost</h2>
       <p>F545-F549 convierte el ghost arrastrado en una fuente real del canvas. La fuente queda seleccionada y visible por el renderer existente, pero no se crean barreras ni se recalcula en silencio.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th><th>Gate</th></tr></thead>

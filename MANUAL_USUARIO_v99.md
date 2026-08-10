@@ -1,5 +1,31 @@
 # Manual de Usuario RadShield-MX - F560 Post-Beta Profunda
 
+## Addendum F561-F565 - Renderer/Event Controller V2 observable
+
+F561-F565 agrega una capa de eventos observable al canvas. Su objetivo no es cambiar como dibuja o selecciona el usuario de golpe, sino probar el nuevo controlador con acciones reales y conservar el flujo estable.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho, localice **F561-F565 Event controller v2**.
+3. Haga click, mueva el mouse o use herramientas del canvas.
+4. El harness actualiza el indicador oculto `f515b-canvas-event-action` y despues ejecuta el handler estable.
+5. Si algo visual se comporta mal, el rollback es directo: volver a handlers estables y ocultar overlay renderer v2.
+
+### Que aporta
+
+- Permite probar eventos reales sin romper `useCanvas`.
+- Conserva dibujo, seleccion, pan, zoom y menu contextual por la ruta estable.
+- Deja preparada la siguiente migracion: seleccion avanzada, snapping, lasso, grips y overlays conectados.
+- Genera evidencia visual E2E para decidir si el renderer/event controller puede profundizar.
+
+### Limites
+
+- No sustituye el renderer base.
+- No muta geometria persistente.
+- No cambia calculos, TVL, materiales ni reportes.
+- No habilita una edicion CAD completa todavia; prepara el carril seguro para hacerlo.
+
 ## Addendum F556-F560 - Renderer profundo, Babylon, Unity, DB tecnica y QA normativo
 
 F556-F560 agrega un tablero post-beta profundo dentro del canvas. Su funcion es separar claramente lo que ya puede usarse en beta de lo que requiere assets, datasets o E2E antes de publicarse como capacidad productiva completa.

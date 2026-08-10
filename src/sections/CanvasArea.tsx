@@ -77,6 +77,7 @@ import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBetaClosure';
 import { buildF556F560PostBetaDeepStack } from '@/lib/f556F560PostBetaDeepStack';
+import { buildF561F565RendererEventControllerV2 } from '@/lib/f561F565RendererEventControllerV2';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildMedicalScene, type MedicalRoomPreset } from '@/lib/medical3D/sceneBuilder';
 import { buildBabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
@@ -84,7 +85,8 @@ import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebgl
 import { buildAdvancedPhotorealPackContract } from '@/lib/medical3D/advancedPhotorealPack';
 import { buildDefaultPbrMaterialDatabase, buildPbrMaterialDbUpdate } from '@/lib/medical3D/pbrMaterialDatabase';
 import { isEnabled } from '@/lib/featureFlags';
-import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
+import { buildF515CanvasEventHardening, routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
+import type { CanvasEventModeV2 } from '@/lib/canvas/eventControllerV2';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
 
 type F188CanvasPanelKey = 'workflow' | 'qa' | 'continuity';
@@ -373,6 +375,45 @@ export default function CanvasArea({
       onWheel(e);
     }
   }, [onWheel, setCanvasState]);
+
+  const getF561PointerMode = (eventType: 'pointerdown' | 'pointermove' | 'pointerup'): CanvasEventModeV2 => {
+    if (activeTool === 'pan') return 'pan';
+    if (canvasState.snapToGrid && eventType === 'pointermove') return 'snap';
+    if (activeTool === 'select') return 'select';
+    return 'tool';
+  };
+
+  const routeF561PointerEvent = (
+    event: React.MouseEvent<HTMLCanvasElement>,
+    eventType: 'pointerdown' | 'pointermove' | 'pointerup',
+  ) => {
+    const routed = routeCanvasEventV2WithGate({
+      type: eventType,
+      mode: getF561PointerMode(eventType),
+      x: event.nativeEvent.offsetX,
+      y: event.nativeEvent.offsetY,
+      shiftKey: event.shiftKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      altKey: event.altKey,
+    }, true);
+    setLastF515EventAction(routed.action);
+  };
+
+  const handleF561MouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    routeF561PointerEvent(event, 'pointerdown');
+    onMouseDown(event);
+  };
+
+  const handleF561MouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    routeF561PointerEvent(event, 'pointermove');
+    onMouseMove(event);
+  };
+
+  const handleF561MouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    routeF561PointerEvent(event, 'pointerup');
+    onMouseUp(event);
+  };
 
   const hasResults = barrierResults.length > 0;
   const controlledZoneSummary = getControlledZoneCanvasSummary(floorPlan);
@@ -1249,6 +1290,12 @@ export default function CanvasArea({
     photoreal: f556AdvancedPhotoreal,
     pbrDb: f556PbrMaterialDb,
     normativeQa: f556NormativeQa,
+  });
+  const f561ToF565RendererEventController = buildF561F565RendererEventControllerV2({
+    postBeta: f556ToF560PostBetaDeepStack,
+    eventHardening: buildF515CanvasEventHardening(),
+    rendererRuntime: f442ToF445RendererV2Runtime,
+    pointerWrappersActive: true,
   });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
@@ -2275,6 +2322,65 @@ export default function CanvasArea({
                     Reglas: renderer base no reemplaza canvas; Babylon no es primario; Unity no firma calculos; PBR no cambia TVL/densidad/costo; QA normativo manda release clinico.
                   </div>
                 </div>
+
+                <div
+                  data-testid="f561-f565-renderer-event-controller"
+                  className="mt-2 rounded-lg border border-[#c9c4b6] bg-[#f8fbff]/95 p-2"
+                  title="F561-F565: renderer/event controller v2 conectado como observador seguro antes del handler estable"
+                  aria-label="F561 a F565 renderer event controller v2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F561-F565 Event controller v2</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Pointer wrappers + overlay + rollback</div>
+                    </div>
+                    <span
+                      data-testid="f561-f565-status"
+                      className="rounded border border-[#d8d6cd] bg-[#eff6ff] px-1.5 py-0.5 text-[8px] font-black text-[#1d4ed8]"
+                    >
+                      {f561ToF565RendererEventController.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f561-event-harness-summary"
+                    className="mt-1 grid grid-cols-3 gap-1 text-[8px]"
+                    title={`Politica: ${f561ToF565RendererEventController.eventHarness.mutationPolicy}`}
+                  >
+                    <span className="rounded bg-white px-1 py-0.5">Wrap {f561ToF565RendererEventController.eventHarness.pointerWrappersActive ? 'ON' : 'OFF'}</span>
+                    <span className="rounded bg-white px-1 py-0.5">QA {f561ToF565RendererEventController.qa.passedScenarioCount}/{f561ToF565RendererEventController.qa.totalScenarioCount}</span>
+                    <span className="rounded bg-white px-1 py-0.5">Instr {f561ToF565RendererEventController.rendererBridge.instructions}</span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f561ToF565RendererEventController.lanes.map((lane) => (
+                      <div
+                        key={lane.id}
+                        data-testid={`f561-f565-lane-${lane.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${lane.evidence} Rollback: ${lane.rollback}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{lane.phase} {lane.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            lane.status === 'ready'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : lane.status === 'preview'
+                                ? 'bg-[#eff6ff] text-[#1d4ed8]'
+                                : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {lane.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{lane.evidence}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f561-f565-rollback"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                  >
+                    Reversible: handlers estables siguen canonicos, overlay sin pointer-events, sin mutar geometria ni calculos.
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2326,9 +2432,9 @@ export default function CanvasArea({
                         freehandEnabled ? 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\'%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'2\' fill=\'%23ef4444\'/%3E%3C/svg%3E") 10 10, crosshair' : 'default',
                 opacity: layers.find(l => l.id === 'architecture')?.opacity ?? 1,
               }}
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
+              onMouseDown={handleF561MouseDown}
+              onMouseMove={handleF561MouseMove}
+              onMouseUp={handleF561MouseUp}
               onWheel={handleWheel}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}

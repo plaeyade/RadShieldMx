@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F560 - Manual de Versiones</title>
+  <title>RadShield-MX F565 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F560</span>
+    <span class="pill">Version documental: F565</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0. F556-F560 Post-Beta Profunda</h2>
+    <h2>0. F561-F565 Renderer/Event Controller V2 Observable</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F561</td><td>Wrapper real de eventos mouse.</td><td>Registra/rutea evento v2 y despues llama al handler estable.</td><td>No reemplazar <code>useCanvas</code>.</td></tr>
+        <tr><td>F562</td><td>Bridge overlay/seleccion.</td><td>Renderer v2 puede observar entidades sin capturar pointer-events.</td><td>Overlay no muta geometria.</td></tr>
+        <tr><td>F563</td><td>Ruteo por modo CAD.</td><td>Seleccion, pan, snap y tools quedan trazados por harness.</td><td>E2E de click real.</td></tr>
+        <tr><td>F564</td><td>Rollback/undo policy.</td><td>Sin escritura persistente; rollback directo a handlers estables.</td><td>Apagar flags si aparece regresion.</td></tr>
+        <tr><td>F565</td><td>E2E visual y manifiesto.</td><td>Capturas de panel y accion pointer.</td><td>Repetir F229/F556 si falla.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0A. F556-F560 Post-Beta Profunda</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
