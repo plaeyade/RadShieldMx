@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F571-F580 (2026-08-09) - Unity WebGL real + DB tecnica regulatoria/materiales
+
+- Agregado contrato `radshield-mx.f571-f580.unity-db-technical-closure.v1` para cerrar el carril Unity WebGL real y la DB tecnica regulatoria/materiales.
+- Canvas muestra panel F571-F580 con cinco tracks: intake de build Unity exportado, bridge runtime, QA visual Unity, registro DB tecnica y gate de DB completa.
+- Unity no se simula: si `public/unity/radshield-medical-3d` no contiene `index.html`, `Build` y `TemplateData`, el panel queda en `unity-build-blocked`.
+- DB tecnica queda visible con fuentes, materiales, tablas, colecciones requeridas ENDF/XCOM/ICRU y bloqueo de seed live.
+- Reglas de release: no seed live, no claims Unity runtime sin build real, no calculo clinico certificado, no DB completa hasta resolver valores en revision y datasets versionados.
+- Agregado E2E visual con capturas dedicadas: panel F571-F580, canvas completo y accion real de pointer heredada de F561/F515.
+
 # F566-F570 (2026-08-09) - Readiness productivo post-beta
 
 - Agregado contrato `radshield-mx.f566-f570.post-beta-production-readiness.v1` para cerrar la etapa post-beta con una matriz visible y reversible.

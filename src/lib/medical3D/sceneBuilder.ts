@@ -64,6 +64,19 @@ export interface MedicalScene {
 
 const MIN_ROOM_SIZE_M = 7;
 const DEFAULT_CEILING_M = 3.1;
+const DEFAULT_MEDICAL_SCENE_FLOOR_PLAN: FloorPlan = {
+  id: 'default-medical-scene-floorplan',
+  name: 'Plano medico sin cargar',
+  imageUrl: null,
+  scale_m_per_pixel: 0.01,
+  width_pixels: 900,
+  height_pixels: 700,
+  barriers: [],
+  sources: [],
+  occupiedRegions: [],
+  regions: [],
+  criticalPoints: [],
+};
 
 function materialThickness(barrier: Barrier): number {
   if (typeof barrier.requiredThickness_mm === 'number') return barrier.requiredThickness_mm;
@@ -97,10 +110,11 @@ function presetLabel(preset: MedicalRoomPreset): string {
   return labels[preset];
 }
 
-export function buildMedicalScene(floorPlan: FloorPlan, preset: MedicalRoomPreset): MedicalScene {
-  const scale = floorPlan.scale_m_per_pixel || 0.01;
-  const barriers = floorPlan.barriers || [];
-  const sources = floorPlan.sources || [];
+export function buildMedicalScene(floorPlan: FloorPlan = DEFAULT_MEDICAL_SCENE_FLOOR_PLAN, preset: MedicalRoomPreset = 'linac'): MedicalScene {
+  const safeFloorPlan = floorPlan ?? DEFAULT_MEDICAL_SCENE_FLOOR_PLAN;
+  const scale = safeFloorPlan.scale_m_per_pixel || 0.01;
+  const barriers = safeFloorPlan.barriers || [];
+  const sources = safeFloorPlan.sources || [];
   const points = [
     ...barriers.flatMap((b) => [[b.x1, b.y1], [b.x2, b.y2]] as Array<[number, number]>),
     ...sources.map((s) => [s.x, s.y] as [number, number]),
@@ -170,7 +184,7 @@ export function buildMedicalScene(floorPlan: FloorPlan, preset: MedicalRoomPrese
     intensity: 0.35 - index * 0.08,
   })));
 
-  const zones = (floorPlan.occupiedRegions || [])
+  const zones = (safeFloorPlan.occupiedRegions || [])
     .filter((region) => region.points.length >= 3)
     .map((region): MedicalZone => {
       const points = region.points.map((point) => [point.x * scale, 0.012, point.y * scale] as [number, number, number]);

@@ -79,7 +79,10 @@ import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBeta
 import { buildF556F560PostBetaDeepStack } from '@/lib/f556F560PostBetaDeepStack';
 import { buildF561F565RendererEventControllerV2 } from '@/lib/f561F565RendererEventControllerV2';
 import { buildF566F570PostBetaProductionReadiness } from '@/lib/f566F570PostBetaProductionReadiness';
+import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechnicalClosure';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
+import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
+import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
 import { buildMedicalScene, type MedicalRoomPreset } from '@/lib/medical3D/sceneBuilder';
 import { buildBabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
 import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebglExportedBuild';
@@ -107,6 +110,19 @@ const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: false,
   qa: false,
   continuity: false,
+};
+const DEFAULT_CANVAS_FLOOR_PLAN: FloorPlan = {
+  id: 'canvas-default-floorplan',
+  name: 'Plano sin cargar',
+  imageUrl: null,
+  scale_m_per_pixel: 0.01,
+  width_pixels: 1200,
+  height_pixels: 800,
+  barriers: [],
+  sources: [],
+  occupiedRegions: [],
+  regions: [],
+  criticalPoints: [],
 };
 
 function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
@@ -272,7 +288,7 @@ export default function CanvasArea({
   activeTool = 'select',
   setActiveTool,
   hoverInfo = null,
-  floorPlan,
+  floorPlan = DEFAULT_CANVAS_FLOOR_PLAN,
   // v65
   layers = [],
   freehandStrokes = [],
@@ -968,10 +984,13 @@ export default function CanvasArea({
     hasSampleLines: sampleLines.length > 0,
     selectedCount: canvasState.selectedIds.length || (canvasState.selectedId ? 1 : 0),
   });
+  const floorPlanScale = Number.isFinite(floorPlan?.scale_m_per_pixel) && (floorPlan?.scale_m_per_pixel ?? 0) > 0
+    ? floorPlan!.scale_m_per_pixel
+    : 0.05;
   const f228StaticRendererHelpers = buildF228StaticRendererHelpers({
     hasFloorPlanImage: Boolean(floorPlan?.imageUrl),
     scale: canvasState.scale,
-    scale_m_per_pixel: floorPlan.scale_m_per_pixel,
+    scale_m_per_pixel: floorPlanScale,
   });
   const f387RendererBaseV2 = buildRendererBaseV2Summary({
     heatmapPointCount,
@@ -987,7 +1006,7 @@ export default function CanvasArea({
     snapToGrid: canvasState.snapToGrid,
     visualMode,
     hasExport: Boolean(onExportPNG),
-    hasFloorPlanScale: Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0,
+    hasFloorPlanScale: Number.isFinite(floorPlanScale) && floorPlanScale > 0,
   });
   const f230PostF229CoverageGate = buildF230PostF229CoverageGate({
     f198Menus: true,
@@ -1268,7 +1287,7 @@ export default function CanvasArea({
   const f530ToF534EquipmentPreview = buildF530F534EquipmentPlacementPreview({
     pack: f525ToF529ClinicalPlacement,
     point: f530PlacementPoint ?? undefined,
-    scale_m_per_pixel: floorPlan.scale_m_per_pixel,
+    scale_m_per_pixel: floorPlanScale,
   });
   const f540ToF544GhostDragGate = buildF540F544GhostDragGate();
   const f545ToF549GhostSourceCommit = buildF545F549GhostSourceCommit();
@@ -1303,6 +1322,11 @@ export default function CanvasArea({
     eventController: f561ToF565RendererEventController,
     visualScreenshotsReady: true,
     publicBetaAlreadyTested: true,
+  });
+  const f571ToF580UnityDbTechnicalClosure = buildF571F580UnityDbTechnicalClosure({
+    unity: f556UnityExportedBuild,
+    regulatoryDb: buildF491F498RegulatoryMaterialsDb(),
+    heavyAssetsDbPrep: buildF501F504HeavyAssetsDbPrep(),
   });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
@@ -2454,6 +2478,80 @@ export default function CanvasArea({
                     className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
                   >
                     Beta estatica {f566ToF570PostBetaProductionReadiness.releaseRules.canPublishStaticBeta ? 'permitida' : 'gated'}; no reemplazar renderer; no Monte Carlo clinico; Unity visual-only; rollback obligatorio.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f571-f580-unity-db-closure"
+                  className="mt-2 rounded-lg border border-[#c9c4b6] bg-[#f7fbff]/95 p-2"
+                  title="F571-F580: Unity WebGL real con build exportado + DB tecnica regulatoria/materiales versionada"
+                  aria-label="F571 a F580 Unity WebGL y DB tecnica"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F571-F580 Unity + DB tecnica</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Build Unity real + materiales regulatorios versionables</div>
+                    </div>
+                    <span
+                      data-testid="f571-f580-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f571ToF580UnityDbTechnicalClosure.status === 'unity-db-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f571ToF580UnityDbTechnicalClosure.status === 'unity-build-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#fde68a] bg-[#fffbeb] text-[#a16207]'
+                      }`}
+                    >
+                      {f571ToF580UnityDbTechnicalClosure.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1 text-[8px]">
+                    <span
+                      data-testid="f571-f575-unity-build-summary"
+                      className="rounded bg-white/85 px-1 py-0.5 font-bold text-[#334155]"
+                      title={`Esperados: ${f571ToF580UnityDbTechnicalClosure.unity.expectedFiles.join(', ')}. Faltantes: ${f571ToF580UnityDbTechnicalClosure.unity.missing.join(', ') || 'ninguno'}`}
+                    >
+                      Unity {f571ToF580UnityDbTechnicalClosure.unity.liveBuildReady ? 'ready' : 'blocked'} - {f571ToF580UnityDbTechnicalClosure.unity.launchMode}
+                    </span>
+                    <span
+                      data-testid="f576-f580-technical-db-summary"
+                      className="rounded bg-white/85 px-1 py-0.5 font-bold text-[#334155]"
+                      title={`Colecciones: ${f571ToF580UnityDbTechnicalClosure.technicalDb.requiredCollections.join(' | ')}`}
+                    >
+                      DB {f571ToF580UnityDbTechnicalClosure.technicalDb.totalSources} src / {f571ToF580UnityDbTechnicalClosure.technicalDb.totalMaterials} mat
+                    </span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f571ToF580UnityDbTechnicalClosure.tracks.map((track) => (
+                      <div
+                        key={track.id}
+                        data-testid={`f571-f580-track-${track.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${track.evidence} Requerido: ${track.requiredAction}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{track.phase} {track.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            track.status === 'ready'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : track.status === 'preview'
+                                ? 'bg-[#eff6ff] text-[#1d4ed8]'
+                                : track.status === 'blocked'
+                                  ? 'bg-[#fff1f2] text-[#b91c1c]'
+                                  : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {track.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{track.evidence}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f571-f580-release-rules"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                  >
+                    Unity real {f571ToF580UnityDbTechnicalClosure.releaseRules.canClaimUnityRealRuntime ? 'ready' : 'blocked'}; seed live NO; DB completa {f571ToF580UnityDbTechnicalClosure.releaseRules.canClaimCompleteRegulatoryDb ? 'ready' : 'gated'}; calculo clinico certificado NO.
                   </div>
                 </div>
               </div>

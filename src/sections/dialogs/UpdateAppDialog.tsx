@@ -96,6 +96,8 @@ import { buildF530F534EquipmentPlacementPreview } from '@/lib/f530F534EquipmentP
 import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBetaClosure';
+import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechnicalClosure';
+import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebglExportedBuild';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -113,6 +115,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F571-F580 Unity WebGL real + DB tecnica', current: buildF571F580UnityDbTechnicalClosure({ unity: buildUnityWebglExportedBuildContract(buildMedicalScene()), regulatoryDb: buildF491F498RegulatoryMaterialsDb(), heavyAssetsDbPrep: buildF501F504HeavyAssetsDbPrep() }).status, latest: 'Unity exported build gate + regulatory/materials technical DB closure', status: 'current', description: 'F571-F580 agrega cierre productivo para Unity WebGL real y DB tecnica regulatoria/materiales: detecta si faltan index.html, Build y TemplateData, bloquea claims Unity runtime cuando no hay build exportado, mantiene Three/R3F como fallback, enumera tablas/fuentes/materiales requeridos y prohíbe seed live o calculo clinico certificado hasta datasets versionados, restore probe y QA DB-backed.' },
   { name: 'F566-F570 Post-beta production readiness', current: 'readiness gated', latest: 'visual snapshots + real connections + heavy asset intake + reversible activation + production smoke', status: 'current', description: 'F566-F570 agrega una matriz visible para cerrar la etapa post-beta antes del siguiente release: exige capturas, confirma conexiones reales/reversibles, separa assets pesados y motores externos, mantiene activacion reversible y define smoke productivo. No reemplaza renderer, no habilita Monte Carlo clinico y conserva rollback obligatorio.' },
   { name: 'F561-F565 Renderer/event controller v2', current: 'event controller preview', latest: 'pointer wrappers + stable handlers + overlay bridge + E2E visual', status: 'current', description: 'F561-F565 conecta mouse down/move/up al harness de eventos v2 antes de llamar al handler estable del canvas. Sirve para probar ruteo real, seleccion/overlay y rollback sin mutar geometria, calculos ni DB. Incluye panel visible, contrato y E2E con captura.' },
   { name: 'F556-F560 Post-beta profunda', current: 'deep stack gated', latest: 'renderer base v2 + Babylon real + Unity real + DB tecnica + QA normativo', status: 'current', description: 'F556-F560 agrega tablero post-beta profundo en el canvas: renderer v2 como preview no reemplazante, Babylon profundo con escena pickable, Unity bloqueado hasta build exportado real, DB tecnica PBR/ENDF/XCOM/ICRU en ruta versionada y QA normativo ampliado como gate antes de uso clinico.' },

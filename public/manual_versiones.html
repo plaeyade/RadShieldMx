@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F570 - Manual de Versiones</title>
+  <title>RadShield-MX F580 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,25 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F570</span>
+    <span class="pill">Version documental: F580</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0. F566-F570 Readiness Productivo Post-Beta</h2>
+    <h2>0. F571-F580 Unity WebGL Real + DB Tecnica</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F571</td><td>Intake de build Unity WebGL exportado.</td><td>Busca build real en <code>public/unity/radshield-medical-3d</code>.</td><td>Requiere <code>index.html</code>, <code>Build</code> y <code>TemplateData</code>.</td></tr>
+        <tr><td>F572</td><td>Bridge runtime Unity/RadShield.</td><td>Define handoff JSON y eventos <code>postMessage</code>.</td><td>Validar con build real.</td></tr>
+        <tr><td>F573-F575</td><td>Launch/rollback/QA visual.</td><td>Iframe/new-tab controlado, fallback Three/R3F y capturas.</td><td>Sin build real solo contrato, no runtime.</td></tr>
+        <tr><td>F576-F578</td><td>DB tecnica versionable.</td><td>Fuentes, materiales, valores, pagina, hash, XCOM/ICRU/ENDF.</td><td>No seed live sin restore probe/readback.</td></tr>
+        <tr><td>F579-F580</td><td>Gate de claims tecnicos.</td><td>Bloquea calculo clinico certificado y DB completa hasta QA DB-backed.</td><td>Cero valores en revision y datasets completos.</td></tr>
+      </tbody>
+    </table>
+    <p class="warn"><strong>Decision:</strong> F571-F580 prepara capacidades productivas, pero bloquea correctamente Unity real y DB completa si faltan archivos o datasets.</p>
+
+    <h2>0A. F566-F570 Readiness Productivo Post-Beta</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>

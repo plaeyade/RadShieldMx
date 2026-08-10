@@ -1,5 +1,20 @@
 # RadShield-MX - Manual de Versiones
 
+# F571-F580 (2026-08-09) - Unity WebGL Real + DB Tecnica Regulatoria/Materiales
+
+- **F571:** intake de build Unity WebGL exportado. La carpeta esperada es `public/unity/radshield-medical-3d` con `index.html`, `Build` y `TemplateData`.
+- **F572:** bridge runtime Unity/RadShield con formato de handoff JSON y eventos `postMessage` para `scene-ready`, `snapshot-request` y `camera-bookmark`.
+- **F573:** reglas de lanzamiento visual: Unity puede abrir en iframe/new-tab solo si el build real existe; Three/R3F sigue como fallback.
+- **F574:** rollback operativo: desactivar URL/build Unity si falla smoke y no usar Unity para calculo firmable.
+- **F575:** QA visual Unity con capturas y manifiesto; si no hay build real, solo se valida contrato.
+- **F576:** registro DB tecnica: fuentes regulatorias, materiales, versiones de valores y enlaces fuente/material.
+- **F577:** colecciones requeridas: `document_chunks` canonicos, XCOM, ICRU/NIST, ENDF y valores vendor/lab con revision.
+- **F578:** bloqueo de seed live: no se escribe DB sin restore probe, readback y flags explicitos.
+- **F579:** bloqueo de claims clinicos certificados: no basta PBR, fotorrealismo ni Unity visual.
+- **F580:** gate de DB completa: requiere datasets versionados, cero valores en revision y QA numerico DB-backed.
+
+Decision: F571-F580 deja lista la ruta productiva, pero bloquea correctamente lo que aun falta: build Unity real exportado y DB tecnica completa versionada.
+
 # F566-F570 (2026-08-09) - Readiness productivo post-beta
 
 - **F566:** snapshot visual obligatorio: panel, canvas y accion real quedan con capturas en `outputs/f566_f570_post_beta_readiness`.

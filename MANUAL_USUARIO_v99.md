@@ -1,4 +1,37 @@
-# Manual de Usuario RadShield-MX - F570 Readiness Post-Beta
+# Manual de Usuario RadShield-MX - F580 Unity WebGL + DB Tecnica
+
+## Addendum F571-F580 - Unity WebGL real y DB tecnica regulatoria/materiales
+
+F571-F580 agrega una compuerta visible para dos temas de alto impacto: un build Unity WebGL exportado real y una base tecnica regulatoria/materiales lista para versionarse. La app ya sabe distinguir entre preview, build real disponible y bloqueo por archivos faltantes.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho, localice **F571-F580 Unity + DB tecnica**.
+3. Revise el estado principal:
+   - `unity-build-blocked`: falta copiar un build Unity WebGL real.
+   - `unity-db-gated`: Unity existe, pero la DB tecnica todavia no puede declararse completa.
+   - `unity-db-ready`: solo cuando build Unity y DB tecnica versionada superen los gates.
+4. En el resumen Unity, revise si faltan `index.html`, carpeta `Build` o carpeta `TemplateData`.
+5. En el resumen DB, revise fuentes, materiales, colecciones requeridas y reglas de release.
+
+### Que aporta
+
+- Evita confundir un visor 3D estable Three/R3F con un runtime Unity real.
+- Deja una ruta clara para copiar el build Unity WebGL exportado a `public/unity/radshield-medical-3d`.
+- Expone la DB tecnica que debe contener fuentes, materiales, valores versionados, pagina, hash, TVL, densidad, costo y carga estructural.
+- Bloquea seed live, claims clinicos certificados y DB completa hasta tener restore probe, readback y datasets versionados ENDF/XCOM/ICRU.
+
+### Limites
+
+- Si no existe build Unity exportado, no hay runtime Unity real; la app conserva Three/R3F como fallback.
+- La DB tecnica no alimenta calculo clinico certificado hasta completar QA DB-backed y revision profesional.
+- Los materiales en revision no se promueven a calculo final.
+
+Validacion recomendada:
+
+- `npm run test:f571-f580:unity-db-closure`
+- `npm run test:f571-f580:unity-db-closure:e2e`
 
 ## Addendum F566-F570 - Readiness productivo post-beta
 
