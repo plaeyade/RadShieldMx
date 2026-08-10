@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F625 - Manual de Usuario</title>
+  <title>RadShield-MX F630 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F625</span>
+      <span class="pill">Version de manual: F630</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,18 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F626-F630: Scheduler Del Renderer Profundo</h2>
+    <p>F626-F630 agrega presupuesto de frame, render queue por capas, cache key e invalidacion segura. La fase prepara redibujado por regiones sin sustituir el canvas estable ni tocar calculos.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Panel F626-F630</td><td>Revise Q, frames, ms y warnings.</td><td>Que la cola de render respete presupuesto.</td><td>Dibujar F621-F625 en una sola pasada.</td></tr>
+        <tr><td>Cache key</td><td>Revise la firma <code>f626-*</code>.</td><td>Que escala, viewport, geometria y materiales invaliden cache.</td><td>Borrar cache key y recalcular queue.</td></tr>
+        <tr><td>Scheduler HUD</td><td>Observe frames/ms/cache en el overlay.</td><td>Que el plan visual no capture eventos.</td><td>Overlay <code>pointer-events:none</code>.</td></tr>
+      </tbody>
+    </table>
+    <div class="ok"><strong>Validacion:</strong> <code>npm run test:f626-f630:renderer-scheduler</code>, <code>npm run test:f626-f630:renderer-scheduler:values</code> y <code>npm run test:f626-f630:renderer-scheduler:e2e</code>.</div>
+
     <h2>0. Addendum F621-F625: Renderer Base Profundo</h2>
     <p>F621-F625 agrega una capa de lectura profunda del renderer sin sustituir el canvas estable. Convierte overlays F442-F445 en comandos de render, revisa viewport clipping, agrupa por capas/pass y dibuja dirty regions sobre un overlay sin eventos.</p>
     <table>

@@ -1,4 +1,30 @@
-# Manual de Usuario RadShield-MX - F625 Renderer Base Profundo
+# Manual de Usuario RadShield-MX - F630 Renderer Scheduler
+
+## Addendum F626-F630 - Scheduler del renderer profundo
+
+F626-F630 agrega una capa de planificacion para el renderer profundo. El objetivo es preparar el canvas para redibujar por regiones y capas, no todo el plano completo. La fase sigue en modo preview: no reemplaza eventos, no reemplaza `useCanvas` y no cambia calculos.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F626-F630 scheduler**.
+3. Revise **Q** para saber cuantos grupos estan en cola.
+4. Revise **F** para ver cuantos frames estimados requiere el redraw.
+5. Revise el indicador de ms para confirmar que el presupuesto de frame no esta rebasado.
+6. Revise la firma `f626-*`; cambia cuando cambian escala, viewport, geometria, materiales o modo visual.
+
+### Logica de seguridad
+
+- La queue no escribe geometria: solo ordena comandos de render derivados de F621-F625.
+- La invalidacion se activa por escala, offset, canvas-size, barreras, fuentes, regiones, modo visual y material overlay.
+- Si se rompe el scheduler, el rollback es dibujar F621-F625 en una sola pasada.
+- El renderer base canonico y los eventos de canvas permanecen intactos.
+
+### Validacion tecnica
+
+- `npm run test:f626-f630:renderer-scheduler`
+- `npm run test:f626-f630:renderer-scheduler:values`
+- `npm run test:f626-f630:renderer-scheduler:e2e`
 
 ## Addendum F621-F625 - Renderer base profundo
 

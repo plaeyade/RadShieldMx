@@ -84,6 +84,7 @@ import { buildF581F585ExpandedNormativeNumericQa } from '@/lib/f581F585ExpandedN
 import { buildF586F590NormativeDatasetQa } from '@/lib/f586F590NormativeDatasetQa';
 import { buildF591F620GeneralImprovements, type F591F620InspectorMode } from '@/lib/f591F620GeneralImprovements';
 import { buildF621F625RendererBaseDeep, drawF621F625RendererBaseDeepHud } from '@/lib/f621F625RendererBaseDeep';
+import { buildF626F630RendererBaseScheduler, drawF626F630RendererSchedulerHud } from '@/lib/f626F630RendererBaseScheduler';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1295,6 +1296,11 @@ export default function CanvasArea({
     offsetX: canvasState.offsetX,
     offsetY: canvasState.offsetY,
   });
+  const f626ToF630RendererBaseScheduler = buildF626F630RendererBaseScheduler(f621ToF625RendererBaseDeep, {
+    targetFps: 60,
+    maxCommandsPerFrame: canvasChromeMode === 'guided' ? 6 : 10,
+    highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+  });
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -1427,6 +1433,7 @@ export default function CanvasArea({
     drawF621F625RendererBaseDeepHud(ctx, f621ToF625RendererBaseDeep, {
       showDirtyRegions: visualMode === 'structure' || canvasChromeMode === 'guided',
     });
+    drawF626F630RendererSchedulerHud(ctx, f626ToF630RendererBaseScheduler);
   }, [
     canvasChromeMode,
     canvasSize.height,
@@ -1436,6 +1443,7 @@ export default function CanvasArea({
     canvasState.scale,
     f442ToF445RendererV2Runtime,
     f621ToF625RendererBaseDeep,
+    f626ToF630RendererBaseScheduler,
     visualMode,
   ]);
 
@@ -2309,6 +2317,64 @@ export default function CanvasArea({
                     title={f621ToF625RendererBaseDeep.rollback.join(' | ')}
                   >
                     {f621ToF625RendererBaseDeep.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f626-f630-renderer-scheduler"
+                  className="mt-2 rounded-lg border border-[#c7d2fe] bg-[#f8fbff]/95 p-2"
+                  title="F626-F630: scheduler de renderer profundo con presupuesto de frame, queue, cache key e invalidacion segura"
+                  aria-label="F626 a F630 scheduler renderer base profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#3730a3]">F626-F630 scheduler</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Frame budget + queue + cache key</div>
+                    </div>
+                    <span
+                      data-testid="f626-f630-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f626ToF630RendererBaseScheduler.status === 'renderer-scheduler-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f626ToF630RendererBaseScheduler.status === 'renderer-scheduler-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#c7d2fe] bg-[#eef2ff] text-[#3730a3]'
+                      }`}
+                    >
+                      {f626ToF630RendererBaseScheduler.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f626-f630-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={`Cache ${f626ToF630RendererBaseScheduler.invalidation.cacheKey}`}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#3730a3]">Q {f626ToF630RendererBaseScheduler.queue.length}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">F {f626ToF630RendererBaseScheduler.telemetry.estimatedFrames}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">{f626ToF630RendererBaseScheduler.telemetry.estimatedFrameMs}ms</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">W {f626ToF630RendererBaseScheduler.telemetry.warningQueueItems}</span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f626ToF630RendererBaseScheduler.queue.slice(0, 4).map((item) => (
+                      <div
+                        key={item.id}
+                        data-testid={`f626-f630-queue-${item.layer}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${item.reason}; dirty ${item.dirtyAreaPx}px2; frame ${item.scheduledFrame}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{item.layer}</span>
+                          <span className="rounded bg-[#eef2ff] px-1 py-0.5 text-[7px] font-black text-[#3730a3]">P{item.priority}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f626-f630-invalidation"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f626ToF630RendererBaseScheduler.rollback.join(' | ')}
+                  >
+                    {f626ToF630RendererBaseScheduler.invalidation.cacheKey} | invalida: {f626ToF630RendererBaseScheduler.invalidation.invalidatesOn.slice(0, 4).join(', ')}
                   </div>
                 </div>
 

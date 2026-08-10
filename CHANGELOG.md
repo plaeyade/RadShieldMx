@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F626-F630 (2026-08-10) - Scheduler del renderer profundo
+
+- Agregado `src/lib/f626F630RendererBaseScheduler.ts` con contrato `radshield-mx.canvas.renderer-base-scheduler.f626-f630.v1`.
+- F626 define presupuesto de frame: FPS objetivo, ms disponibles y maximo de comandos por frame.
+- F627 crea queue por pass/capa con prioridad por dirty region, visibilidad y warnings.
+- F628 genera firma de invalidacion: viewport, command key, dirty key y `cacheKey` reproducible.
+- F629-F630 agrega gates de presupuesto seguro, cache key y no reemplazo de renderer base.
+- Canvas muestra panel F626-F630 y HUD scheduler; todo sigue sobre overlay visual sin sustituir `useCanvas`.
+- Update Center y manuales registran `renderer-scheduler-preview`; E2E genera capturas en `outputs/f626_f630_renderer_scheduler`.
+
 # F621-F625 (2026-08-10) - Renderer base profundo
 
 - Agregado `src/lib/f621F625RendererBaseDeep.ts` con contrato `radshield-mx.canvas.renderer-base-deep.f621-f625.v1`.

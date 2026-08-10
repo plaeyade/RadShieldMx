@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F625 - Manual de Versiones</title>
+  <title>RadShield-MX F630 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F625</span>
+    <span class="pill">Version documental: F630</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F626-F630 Renderer Scheduler</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F626</td><td>Presupuesto de frame.</td><td>Define FPS objetivo, ms disponibles y comandos por frame.</td><td>No bloquear interaccion.</td></tr>
+        <tr><td>F627</td><td>Queue por capas/pass.</td><td>Prioriza dirty regions, visibilidad y warnings.</td><td>Solo plan visual.</td></tr>
+        <tr><td>F628</td><td>Cache key e invalidacion.</td><td>Firma viewport, comandos y dirty regions.</td><td>Invalidar al cambiar escala, geometria o materiales.</td></tr>
+        <tr><td>F629</td><td>Gate de presupuesto.</td><td>Compara ms estimados contra frame budget.</td><td>Bloquear si excede.</td></tr>
+        <tr><td>F630</td><td>No reemplazo de renderer base.</td><td>Conserva <code>useCanvas</code> y overlay sin eventos.</td><td>Rollback a F621-F625.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F626-F630 queda en <code>renderer-scheduler-preview</code>: prepara performance/invalidacion, no sustituye el canvas estable.</p>
+
     <h2>0. F621-F625 Renderer base profundo</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

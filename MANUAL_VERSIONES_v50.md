@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F626-F630 (2026-08-10) - Renderer Scheduler
+
+- **F626:** presupuesto de frame con FPS objetivo, ms maximos y comandos maximos por frame.
+- **F627:** render queue por capas/pass con prioridad por dirty region, visibilidad y warnings.
+- **F628:** firma de invalidacion con viewport key, command key, dirty key y cache key.
+- **F629:** gates de disponibilidad y presupuesto seguro.
+- **F630:** gate de no reemplazo del renderer base y rollback a F621-F625 en una sola pasada.
+
+Decision: `renderer-scheduler-preview` prepara invalidacion parcial y scheduling visual sin sustituir canvas, eventos ni motor de calculo. Es base para futuras mejoras de performance del renderer profundo.
+
 # F621-F625 (2026-08-10) - Renderer Base Profundo
 
 - **F621:** convierte instrucciones F442-F445 en comandos normalizados con bounds en pantalla, evidencia, warnings y capa.
