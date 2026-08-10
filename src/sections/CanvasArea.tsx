@@ -75,6 +75,7 @@ import { buildF525F529ClinicalPlacementPack, type F525F529Modality } from '@/lib
 import { buildF530F534EquipmentPlacementPreview, type F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPreview';
 import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
+import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBetaClosure';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -1213,6 +1214,10 @@ export default function CanvasArea({
   });
   const f540ToF544GhostDragGate = buildF540F544GhostDragGate();
   const f545ToF549GhostSourceCommit = buildF545F549GhostSourceCommit();
+  const f550ToF555FunctionalBetaClosure = buildF550F555FunctionalBetaClosure({
+    babylonRuntimePresent: true,
+    e2eVisualReady: false,
+  });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -2096,6 +2101,79 @@ export default function CanvasArea({
                   </div>
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     Renderer v2 sigue pointer-events:none; CanvasArea/useCanvas no se reemplazan sin F197/F207/F229/F446.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f550-f555-functional-beta-closure"
+                  className="mt-2 rounded-lg border border-[#b7c9bc] bg-[#eef3ec]/95 p-2"
+                  title="F550-F555: cierre beta funcional con conexiones reales, reversibilidad, paleta BIM, motores visuales y gates productivos"
+                  aria-label="F550 a F555 cierre beta funcional"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#238a61]">F550-F555 Beta funcional</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Conexiones reales + reversibles + motores gated</div>
+                    </div>
+                    <span
+                      data-testid="f550-f555-release-status"
+                      className="rounded border border-[#238a61]/30 bg-white px-1.5 py-0.5 text-[8px] font-black text-[#238a61]"
+                    >
+                      {f550ToF555FunctionalBetaClosure.releaseStatus}
+                    </span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-4 gap-1 text-[8px]">
+                    <span className="rounded bg-white px-1 py-0.5 text-center font-bold text-[#238a61]">Real {f550ToF555FunctionalBetaClosure.counts.realTracks}</span>
+                    <span className="rounded bg-white px-1 py-0.5 text-center font-bold text-[#a16207]">Gate {f550ToF555FunctionalBetaClosure.counts.gatedTracks}</span>
+                    <span className="rounded bg-white px-1 py-0.5 text-center font-bold text-[#b91c1c]">Assets {f550ToF555FunctionalBetaClosure.counts.missingAssetTracks}</span>
+                    <span className="rounded bg-white px-1 py-0.5 text-center font-bold text-[#1d4ed8]">E2E {f550ToF555FunctionalBetaClosure.counts.needsE2ETracks}</span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f550ToF555FunctionalBetaClosure.tracks.slice(0, 6).map((track) => (
+                      <div
+                        key={track.id}
+                        data-testid={`f550-f555-track-${track.id}`}
+                        className="rounded border border-white/70 bg-white/85 px-1.5 py-1"
+                        title={`${track.realConnection} Reversible: ${track.reversibleBy} Siguiente gate: ${track.nextGate}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{track.phase} {track.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            track.status === 'real'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : track.status === 'missing-assets'
+                                ? 'bg-[#fff1f2] text-[#b91c1c]'
+                                : track.status === 'needs-e2e'
+                                  ? 'bg-[#eff6ff] text-[#1d4ed8]'
+                                  : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {track.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f551-bim-complete-palette"
+                    className="mt-1 grid grid-cols-8 gap-1"
+                    aria-label="Paleta BIM completa F551"
+                  >
+                    {f550ToF555FunctionalBetaClosure.palette.map((token) => (
+                      <span
+                        key={token.id}
+                        data-testid={`f551-palette-${token.id}`}
+                        className="h-5 rounded border border-white shadow-sm"
+                        style={{ backgroundColor: token.hex }}
+                        title={`${token.label}: ${token.role} (${token.hex})`}
+                        aria-label={`${token.label} ${token.hex}`}
+                      />
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f550-f555-rollback-policy"
+                    className="mt-1 rounded border border-white/70 bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#71706a]"
+                  >
+                    Reversible: callbacks existentes, fallback Three/R3F, assets lazy y renderer base sin reemplazo.
                   </div>
                 </div>
               </div>

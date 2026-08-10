@@ -1,4 +1,36 @@
-# Manual de Usuario RadShield-MX - F549 Ghost Source Commit
+# Manual de Usuario RadShield-MX - F555 Functional Beta Closure
+
+## Addendum F550-F555 - Cierre beta funcional y paleta BIM
+
+F550-F555 agrega un panel visible de cierre beta funcional dentro del canvas. Sirve para revisar que las conexiones nuevas sean reales, reversibles y separadas por riesgo antes de publicar otra beta.
+
+Uso:
+
+1. Abra el canvas en modo guia.
+2. Revise el panel **F550-F555 Beta funcional** dentro del panel visual derecho.
+3. Verifique los contadores: `Real`, `Gate`, `Assets` y `E2E`.
+4. Revise la **paleta BIM completa**: workspace, Project Manager, modalidades DX/TX/NM/CY, roles de barrera, heatmap y materiales.
+5. Use `Preview` y `Crear fuente` para comprobar que el flujo ghost -> fuente real sigue conectado.
+
+Interpretacion:
+
+- **Real:** conexion operativa dentro del frontend actual.
+- **Gate:** requiere validacion mayor antes de reemplazar una ruta estable.
+- **Assets:** falta copiar archivos pesados reales, por ejemplo HDRI/PBR/decals o build Unity WebGL.
+- **E2E:** requiere smoke visual dedicado antes de declarar productivo.
+
+Seguridad:
+
+- Three/R3F sigue como motor visual principal y fallback.
+- Babylon no reemplaza Three hasta E2E visual repetido.
+- Unity WebGL no calcula blindaje; solo puede ser visor visual cuando exista build exportado real.
+- El renderer base del canvas no se reemplaza en F550-F555.
+- Fotorrealismo no modifica TVL, densidad, costos, carga estructural ni citas.
+
+Validacion recomendada:
+
+- `npm run test:f550-f555:functional-beta`
+- `npm run test:f550-f555:functional-beta:e2e`
 
 ## Addendum F545-F549 - Crear fuente real desde ghost
 

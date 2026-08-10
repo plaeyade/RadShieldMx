@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F549 - Manual de Usuario</title>
+  <title>RadShield-MX F555 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F549</span>
+      <span class="pill">Version de manual: F555</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,7 +105,23 @@
   </header>
   <main>
     <section>
-      <h2>0A. Addendum F545-F549: Crear Fuente Real Desde Ghost</h2>
+      <h2>0A. Addendum F550-F555: Cierre Beta Funcional Y Paleta BIM</h2>
+      <p>F550-F555 agrega un panel visible para cerrar la beta funcional con conexiones reales, reversibles y auditables. El objetivo es distinguir que ya opera dentro del frontend y que sigue gated por falta de E2E, build Unity, assets pesados o QA normativo.</p>
+      <table>
+        <thead><tr><th>Track</th><th>Estado</th><th>Uso</th><th>Limite</th></tr></thead>
+        <tbody>
+          <tr><td>Conexiones reales</td><td>Gated por E2E total</td><td>Canvas, ribbon BIM, quick commands, boton derecho, ghost drag y Crear fuente usan callbacks existentes.</td><td>Validar menu por menu contra URL beta.</td></tr>
+          <tr><td>Paleta BIM completa</td><td>Visible</td><td>Workspace, Project Manager, modalidades, roles de barrera, heatmap y materiales.</td><td>Aplicacion global a dialogos queda para siguiente iteracion.</td></tr>
+          <tr><td>Three/R3F</td><td>Principal</td><td>Motor visual productivo y fallback obligatorio.</td><td>No certifica calculo clinico.</td></tr>
+          <tr><td>Babylon</td><td>Needs E2E</td><td>Escena profunda opcional con fallback Three/R3F.</td><td>No reemplazar Three sin smoke visual repetido.</td></tr>
+          <tr><td>Unity WebGL</td><td>Missing assets</td><td>Visor externo opcional cuando exista build exportado.</td><td>Faltan <code>Build</code> y <code>TemplateData</code>; no calcula blindaje.</td></tr>
+          <tr><td>Fotorrealismo pesado</td><td>Missing assets</td><td>HDRI, PBR y decals para comunicacion visual.</td><td>No modifica TVL, densidad, costo, formula ni cita.</td></tr>
+        </tbody>
+      </table>
+      <div class="ok">Validacion: <code>npm run test:f550-f555:functional-beta</code> y <code>npm run test:f550-f555:functional-beta:e2e</code>.</div>
+      <div class="warn">F550-F555 no habilita Unity clinico, no reemplaza renderer base y no declara certificacion del motor de calculo.</div>
+
+      <h2>0B. Addendum F545-F549: Crear Fuente Real Desde Ghost</h2>
       <p>F545-F549 convierte el ghost arrastrado en una fuente real del canvas. La fuente queda seleccionada y visible por el renderer existente, pero no se crean barreras ni se recalcula en silencio.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th><th>Gate</th></tr></thead>
@@ -119,7 +135,7 @@
       <div class="ok">Validacion: <code>npm run test:f545-f549:ghost-source-commit</code> y <code>npm run test:f545-f549:ghost-source-commit:e2e</code>.</div>
       <div class="warn">La fuente creada requiere revision de escala, workload, colindancias, barreras y memoria analitica antes de uso profesional.</div>
 
-      <h2>0B. Addendum F540-F544: Ghost Drag Gate No Persistente</h2>
+      <h2>0C. Addendum F540-F544: Ghost Drag Gate No Persistente</h2>
       <p>F540-F544 agrega movimiento real del ghost de equipo con un handle interno. El overlay completo sigue dejando pasar eventos al canvas, pero el area del ghost permite arrastrar el punto candidato sin escribir geometria permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th><th>Gate</th></tr></thead>
@@ -133,7 +149,7 @@
       <div class="ok">Validacion: <code>npm run test:f540-f544:ghost-drag</code> y <code>npm run test:f540-f544:ghost-drag:e2e</code>.</div>
       <div class="warn">Persistencia CAD, snap del footprint, colisiones, undo/redo fino y seleccion multi-equipo quedan para fase posterior.</div>
 
-      <h2>0C. Addendum F535-F539: QA Visual E2E Del Equipment Ghost</h2>
+      <h2>0D. Addendum F535-F539: QA Visual E2E Del Equipment Ghost</h2>
       <p>F535-F539 valida el preview ghost en navegador real. La prueba revisa boton <code>Preview</code>, accion contextual <code>Preview equipo aqui</code>, boton <code>Confirmar</code>, overlay visible, captura visual y continuidad del event harness.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th></tr></thead>
@@ -147,7 +163,7 @@
       <div class="ok">Evidencia: <code>outputs/f535_f539_equipment_ghost_visual/01_equipment_ghost_preview.png</code>.</div>
       <div class="warn">Persistencia CAD, drag/drop, undo/redo fino y reemplazo del renderer base siguen bloqueados hasta una fase dedicada.</div>
 
-      <h2>0D. Addendum F530-F534: Equipment Ghost Preview</h2>
+      <h2>0E. Addendum F530-F534: Equipment Ghost Preview</h2>
       <p>F530-F534 agrega un ghost visual del equipo seleccionado. Es una previsualizacion segura para revisar ubicacion y footprint antes de convertirlo en geometria CAD permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Conexion</th><th>Seguridad</th></tr></thead>
@@ -158,7 +174,7 @@
         </tbody>
       </table>
 
-      <h2>0E. Addendum F525-F529: Placement Clinico TX/NM/DX/CY</h2>
+      <h2>0F. Addendum F525-F529: Placement Clinico TX/NM/DX/CY</h2>
       <p>F525-F529 convierte el panel visual del canvas en seleccion operativa de modalidad, sala, equipo, material y perfil de Memoria IA. El objetivo es preparar el sembrado visual y abrir Inspeccion 3D sin escribir geometria permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Conexion</th><th>Seguridad</th></tr></thead>
@@ -169,7 +185,7 @@
         </tbody>
       </table>
 
-      <h2>0D. Addendum F520-F524: Babylon Profundo Y Renderer v2</h2>
+      <h2>0G. Addendum F520-F524: Babylon Profundo Y Renderer v2</h2>
       <p>F520-F524 conecta el canvas visual con Babylon profundo y Renderer v2. Babylon profundo se revisa desde Inspeccion 3D medica; Renderer v2 corre como overlay observable del canvas, sin reemplazar la ruta estable.</p>
       <table>
         <thead><tr><th>Carril</th><th>Que muestra</th><th>Regla de seguridad</th></tr></thead>

@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F550-F555 (2026-08-09) - Functional beta closure + BIM palette
+
+- Agrega `src/lib/f550F555FunctionalBetaClosure.ts` como contrato de cierre beta funcional.
+- Canvas muestra panel F550-F555 con tracks de conexiones, paleta BIM, Three/R3F, Babylon, Unity, fotorrealismo, renderer profundo y motor de calculo.
+- Agrega paleta BIM completa visible: workspace, Project Manager, panel marfil, modalidades DX/TX/NM/CY, roles de barrera, heatmap y materiales.
+- Mantiene politica reversible: callbacks existentes, fallback Three/R3F, assets lazy, Unity visual-only y `canvasBaseReplacementAllowed=false`.
+- Unity queda gated hasta copiar build WebGL real (`Build` + `TemplateData`); fotorrealismo pesado queda gated hasta HDRI/texturas PBR/decals reales.
+- Agrega contrato `npm run test:f550-f555:functional-beta` y E2E visual `npm run test:f550-f555:functional-beta:e2e`.
+
 # F545-F549 (2026-08-09) - Ghost source commit
 
 - Agrega `src/lib/f545F549GhostSourceCommit.ts` para gobernar el alta real de fuentes desde el ghost.

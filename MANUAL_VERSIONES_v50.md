@@ -1,5 +1,14 @@
 # RadShield-MX - Manual de Versiones
 
+# F550-F555 (2026-08-09) - Functional Beta Closure
+
+- **F550:** agrega auditoria visible de conexiones reales y reversibles: canvas, ribbon BIM, quick commands, boton derecho, ghost drag y `Crear fuente`.
+- **F551:** formaliza paleta BIM completa para workspace, Project Manager, roles de blindaje, modalidades, heatmap y materiales.
+- **F552:** conserva Three/R3F como motor productivo y fallback visual obligatorio.
+- **F553:** Babylon queda profundo/gated: runtime y contratos existen, pero no reemplaza Three sin E2E visual repetido.
+- **F554:** Unity WebGL y fotorrealismo pesado quedan preparados pero bloqueados hasta build exportado, HDRI, PBR y decals reales.
+- **F555:** cierra beta funcional con politica de rollback: no reemplazar renderer base, no usar Unity para calculo clinico, mantener assets lazy y repetir smoke visual antes de publicar.
+
 # F545-F549 (2026-08-09) - Ghost source commit
 
 - **F545:** agrega boton `Crear fuente` para promover el ghost a `RadiationSource` real.
