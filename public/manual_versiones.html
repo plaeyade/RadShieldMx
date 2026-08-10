@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F585 - Manual de Versiones</title>
+  <title>RadShield-MX F590 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F585</span>
+    <span class="pill">Version documental: F590</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F586-F590 Dataset Normativo QA Versionado</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F586</td><td>Fuente canonica por norma.</td><td>Cada fixture apunta a NCRP/IAEA/AAPM/UAQ o memoria real.</td><td>Fuente no revisada no se promueve.</td></tr>
+        <tr><td>F587</td><td>Hash y pagina.</td><td>Agrega <code>document_chunks</code>, <code>pageRef</code> y hash estable.</td><td>Pagina simbolica debe reemplazarse por pagina real.</td></tr>
+        <tr><td>F588</td><td>Tolerancia por norma.</td><td>Declara margen para NCRP/IAEA/UAQ/AAPM.</td><td>No modificar sin QA numerico.</td></tr>
+        <tr><td>F589</td><td>Matriz modalidad-barrera.</td><td>Conecta modalidad, rol de barrera, fuente y evidencia.</td><td>Debe cubrir roles criticos.</td></tr>
+        <tr><td>F590</td><td>Gate de promocion.</td><td>Beta dataset QA permitida; seed live y certificacion bloqueados.</td><td>Requiere DB/readback/restore/revision profesional.</td></tr>
+      </tbody>
+    </table>
+    <p class="warn"><strong>Decision:</strong> F586-F590 mejora la trazabilidad documental del QA, pero no activa seed live ni uso clinico certificado.</p>
+
     <h2>0. F581-F585 QA Normativo Numerico Ampliado</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

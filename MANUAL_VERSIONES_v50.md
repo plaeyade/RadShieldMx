@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F586-F590 (2026-08-10) - Dataset Normativo QA Versionado
+
+- **F586:** enlaza cada caso numerico ampliado a una fuente canonica NCRP/IAEA/UAQ/AAPM.
+- **F587:** exige `document_chunks`, referencia de pagina y hash estable antes de promocion DB.
+- **F588:** declara tolerancias por norma y advertencias clinicas obligatorias.
+- **F589:** cruza modalidad con rol de barrera: primaria, secundaria, puerta, laberinto, penetracion y zona controlada.
+- **F590:** agrega gate de promocion: beta dataset QA permitida, seed live automatico bloqueado y certificacion clinica bloqueada.
+
+Decision: F586-F590 mejora trazabilidad documental del QA numerico. No reingresa documentos ni activa seed live; prepara la matriz para DB real, restore probe y revision profesional.
+
 # F581-F585 (2026-08-10) - QA Normativo Numerico Ampliado
 
 - **F581:** amplía fixtures LINAC NCRP 151: barrera primaria 6 MV, secundaria 15 MV y advertencia neutronica.

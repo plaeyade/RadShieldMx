@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F585 - Manual de Usuario</title>
+  <title>RadShield-MX F590 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F585</span>
+      <span class="pill">Version de manual: F590</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,20 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F586-F590: Dataset Normativo QA Versionado</h2>
+    <p>F586-F590 agrega una capa documental al QA numerico. Cada caso heredado de F581-F585 debe apuntar a fuente canonica, referencia <code>document_chunks</code>, pagina/hash, tolerancia y estado de promocion a DB.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>Panel F586-F590</td><td>Revise el panel derecho debajo de F581-F585.</td><td>Casos, fuentes canonicas, seed requerido y bloqueo clinico.</td><td>Si aparece review, no promover dataset.</td></tr>
+        <tr><td>Source/Page/Hash</td><td>Pase el cursor sobre las filas de casos.</td><td>Fuente normativa, <code>pageRef</code> y hash estable.</td><td>Los <code>pageRef</code> simbolicos deben sustituirse por paginas reales.</td></tr>
+        <tr><td>Tolerancia por norma</td><td>Use el badge <code>tol</code> para cada caso.</td><td>NCRP/IAEA/UAQ/AAPM quedan con margen explicito.</td><td>No cambiar tolerancias sin QA numerico.</td></tr>
+        <tr><td>Gate DB</td><td>Lea el bloque inferior del panel.</td><td>Document chunks requeridos, seed live NO y certificacion clinica NO.</td><td>Requiere deduplicacion, restore probe y revision FM/RSO.</td></tr>
+      </tbody>
+    </table>
+    <div class="warn"><strong>Importante:</strong> F586-F590 no reingesta documentos ni activa base de datos productiva; prepara la matriz auditable para hacerlo de forma controlada.</div>
+    <p>Validacion: <code>npm run test:f586-f590:normative-dataset-qa</code>, <code>npm run test:f586-f590:normative-dataset-qa:values</code> y <code>npm run test:f586-f590:normative-dataset-qa:e2e</code>.</p>
+
     <h2>0. Addendum F581-F585: QA Normativo Numerico Ampliado</h2>
     <p>F581-F585 agrega control numerico ampliado para verificar que el motor mantiene resultados consistentes en fixtures NCRP/IAEA/UAQ antes de usar datos reales de proyecto.</p>
     <table>

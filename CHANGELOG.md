@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F586-F590 (2026-08-10) - Dataset normativo QA versionado
+
+- Agregado contrato `radshield-mx.calc.normative-dataset-qa.f586-f590.v1` para convertir fixtures F581-F585 en casos con fuente, pagina, hash, tolerancia y estado de promocion.
+- F586 define fuente canonica por norma: NCRP151, NCRP147, IAEA-SRS47, AAPM-TG108 y UAQ/memorias reales.
+- F587-F588 agregan `document_chunks:*`, hash estable y tolerancias por familia normativa.
+- F589-F590 agregan matriz modalidad-barrera y gate explicito: beta dataset QA permitida, seed live automatico NO, certificacion clinica NO.
+- Canvas muestra panel F586-F590 debajo del QA F581-F585 y Update Center documenta el nuevo estado.
+- Agregado E2E visual con capturas dedicadas: panel dataset, canvas completo y Update Center.
+
 # F581-F585 (2026-08-10) - QA normativo numerico ampliado NCRP/IAEA/UAQ
 
 - Agregado contrato `radshield-mx.calc.normative-qa.f581-f585.v1` para ampliar QA numerico del motor de calculo.

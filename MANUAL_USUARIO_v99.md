@@ -1,4 +1,33 @@
-# Manual de Usuario RadShield-MX - F585 QA Normativo Numerico
+# Manual de Usuario RadShield-MX - F590 Dataset Normativo QA
+
+## Addendum F586-F590 - Dataset normativo QA con fuente, pagina y hash
+
+F586-F590 agrega una segunda capa sobre el QA numerico F581-F585. Su objetivo es revisar si cada caso de prueba tiene una fuente normativa o memoria de soporte, una referencia `document_chunks`, hash estable, tolerancia por norma y estado de promocion para DB. Esta fase no recalcula blindajes finales; ordena la evidencia que alimentara DB, Memoria IA, Evidence Pack y PDF.
+
+### Como usarlo
+
+1. Abra la app y cargue el demo o un proyecto.
+2. En el canvas, ubique el panel derecho de QA.
+3. Debajo de **F581-F585 QA normativo**, revise **F586-F590 dataset normativo**.
+4. Verifique los indicadores:
+   - **Casos:** total de fixtures heredados con dataset asociado.
+   - **Fuentes:** fuentes canonicas NCRP/IAEA/AAPM/UAQ.
+   - **Seed:** casos que aun requieren seed DB real.
+   - **Clin:** casos bloqueados para certificacion clinica.
+5. Pase el cursor sobre cada fila para ver `sourceId`, `pageRef` y `hash`.
+
+### Logica de seguridad
+
+- Si el panel marca `dataset-qa-ready`, el dataset es aceptable para beta QA preliminar.
+- `seed live NO` significa que no se cargara automaticamente a DB productiva.
+- `certificacion clinica NO` significa que la app todavia requiere DB-backed datasets, paginas reales, hashes revisados y firma/revision FM/RSO.
+- Los `pageRef` simbolicos tipo `document_chunks:NCRP151:*` deben reemplazarse por paginas reales tras ingesta/deduplicacion.
+
+### Validacion tecnica
+
+- `npm run test:f586-f590:normative-dataset-qa`
+- `npm run test:f586-f590:normative-dataset-qa:values`
+- `npm run test:f586-f590:normative-dataset-qa:e2e`
 
 ## Addendum F581-F585 - QA normativo numerico ampliado NCRP/IAEA/UAQ
 

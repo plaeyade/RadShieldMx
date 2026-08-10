@@ -81,6 +81,7 @@ import { buildF561F565RendererEventControllerV2 } from '@/lib/f561F565RendererEv
 import { buildF566F570PostBetaProductionReadiness } from '@/lib/f566F570PostBetaProductionReadiness';
 import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechnicalClosure';
 import { buildF581F585ExpandedNormativeNumericQa } from '@/lib/f581F585ExpandedNormativeNumericQa';
+import { buildF586F590NormativeDatasetQa } from '@/lib/f586F590NormativeDatasetQa';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1330,6 +1331,7 @@ export default function CanvasArea({
     heavyAssetsDbPrep: buildF501F504HeavyAssetsDbPrep(),
   });
   const f581ToF585ExpandedNormativeQa = buildF581F585ExpandedNormativeNumericQa();
+  const f586ToF590NormativeDatasetQa = buildF586F590NormativeDatasetQa();
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -2615,6 +2617,65 @@ export default function CanvasArea({
                     title={f581ToF585ExpandedNormativeQa.releaseBlockers.join(' | ')}
                   >
                     Beta QA {f581ToF585ExpandedNormativeQa.gates.canPublishBetaNumericQa ? 'permitida' : 'review'}; DB-backed SI; fisico/RSO SI; certificacion clinica NO.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f586-f590-normative-dataset-qa"
+                  className="mt-2 rounded-lg border border-[#d6c7a8] bg-[#fffaf0]/95 p-2"
+                  title="F586-F590: dataset normativo versionado con source/page/hash/tolerancia y gate DB"
+                  aria-label="F586 a F590 dataset normativo QA"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F586-F590 dataset normativo</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">fuente / pagina / hash / tolerancia / DB gate</div>
+                    </div>
+                    <span
+                      data-testid="f586-f590-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f586ToF590NormativeDatasetQa.status === 'dataset-qa-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : 'border-[#fde68a] bg-[#fffbeb] text-[#a16207]'
+                      }`}
+                    >
+                      {f586ToF590NormativeDatasetQa.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f586-f590-summary"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={`F581-F585 heredado: ${f586ToF590NormativeDatasetQa.inheritedF581F585Status}`}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Casos {f586ToF590NormativeDatasetQa.summary.totalCases}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">Fuentes {f586ToF590NormativeDatasetQa.summary.canonicalSources}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">Seed {f586ToF590NormativeDatasetQa.summary.dbSeedRequired}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#be123c]">Clin {f586ToF590NormativeDatasetQa.summary.clinicalBlocked}</span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f586ToF590NormativeDatasetQa.cases.slice(0, 4).map((item) => (
+                      <div
+                        key={item.id}
+                        data-testid={`f586-f590-case-${item.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${item.sourceId} | ${item.sourcePage} | ${item.sourceHash}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{item.phase} {item.standard} {item.barrierRole}</span>
+                          <span className="rounded bg-[#fef3c7] px-1 py-0.5 text-[7px] font-black text-[#92400e]">
+                            tol {item.tolerancePct}%
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{item.sourcePage} / {item.sourceHash}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f586-f590-gates"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#f7f2e8]/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f586ToF590NormativeDatasetQa.releaseBlockers.join(' | ')}
+                  >
+                    Beta dataset {f586ToF590NormativeDatasetQa.gates.canPublishBetaDatasetQa ? 'permitida' : 'review'}; document_chunks SI; seed live NO; certificacion clinica NO.
                   </div>
                 </div>
               </div>
