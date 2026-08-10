@@ -1,4 +1,29 @@
-# Manual de Usuario RadShield-MX - F590 Dataset Normativo QA
+# Manual de Usuario RadShield-MX - F620 Mejoras Generales Prioritarias
+
+## Addendum F591-F620 - Mejoras generales prioritarias
+
+F591-F620 consolida las mejoras mas convenientes ahora para que la beta sea mas usable: menos ruido en canvas, QA profundo expandible, DB real como requisito de claims clinicos, Unity limitado a visualizacion, comparacion futura con memorias reales y Memoria IA mas operacional.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. Revise el panel derecho **F591-F620 mejoras generales**.
+3. Por defecto vera el inspector compacto. Esto oculta F550-F590 para liberar espacio del plano.
+4. Use **Expandir QA** solo cuando necesite auditoria visual, capturas o validacion F550-F590.
+5. En Memoria IA revise **F611-F615 Memoria IA productiva** para confirmar el flujo plano -> equipo -> barreras -> calculo -> cita -> evidencia -> PDF.
+
+### Logica de seguridad
+
+- Unity es visual-only: no calcula blindajes ni firma resultados.
+- DB real sigue obligatoria para claims clinicos: `document_chunks`, pagina/hash, readback, restore probe y revision FM/RSO.
+- Las memorias reales aprobadas deben convertirse en casos fixture con inputs, outputs, citas y tolerancias.
+- El modo compacto no borra informacion; solo la colapsa para evitar saturacion del canvas.
+
+### Validacion tecnica
+
+- `npm run test:f591-f620:general-improvements`
+- `npm run test:f591-f620:general-improvements:values`
+- `npm run test:f591-f620:general-improvements:e2e`
 
 ## Addendum F586-F590 - Dataset normativo QA con fuente, pagina y hash
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F590 - Manual de Versiones</title>
+  <title>RadShield-MX F620 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,25 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F590</span>
+    <span class="pill">Version documental: F620</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F591-F620 Mejoras Generales Prioritarias</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F591-F595</td><td>Inspector QA compacto.</td><td>F550-F590 queda expandible para auditoria y el canvas queda menos saturado.</td><td>Expandir QA para capturas o pruebas profundas.</td></tr>
+        <tr><td>F596-F600</td><td>Ruta DB real.</td><td>Documenta que DB viva, hashes, paginas, readback y restore probe son obligatorios.</td><td>No claims clinicos sin DB-backed datasets.</td></tr>
+        <tr><td>F601-F605</td><td>QA con memorias reales.</td><td>Prepara fixtures reales por modalidad: LINAC, Gamma Knife, PET/NM, HDR y ciclotron.</td><td>Requiere aprobacion y trazabilidad.</td></tr>
+        <tr><td>F606-F610</td><td>Unity visual-only.</td><td>Permite recorrido/visual evidence sin tocar formulas.</td><td>Build WebGL real obligatorio para runtime.</td></tr>
+        <tr><td>F611-F615</td><td>Memoria IA productiva.</td><td>Flujo plano -> equipo -> barreras -> calculo -> cita -> evidencia -> PDF.</td><td>Borrador preliminar hasta revision FM/RSO.</td></tr>
+        <tr><td>F616-F620</td><td>Consolidacion release.</td><td>Prioriza smoke, rollback, capturas y documentacion antes de nuevas funciones grandes.</td><td>Repetir QA antes de publicar dist.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F591-F620 mejora usabilidad y trazabilidad sin reemplazar canvas, renderer ni motor de calculo.</p>
+
     <h2>0. F586-F590 Dataset Normativo QA Versionado</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

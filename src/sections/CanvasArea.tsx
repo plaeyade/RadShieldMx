@@ -82,6 +82,7 @@ import { buildF566F570PostBetaProductionReadiness } from '@/lib/f566F570PostBeta
 import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechnicalClosure';
 import { buildF581F585ExpandedNormativeNumericQa } from '@/lib/f581F585ExpandedNormativeNumericQa';
 import { buildF586F590NormativeDatasetQa } from '@/lib/f586F590NormativeDatasetQa';
+import { buildF591F620GeneralImprovements, type F591F620InspectorMode } from '@/lib/f591F620GeneralImprovements';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -108,6 +109,7 @@ const F191_VISUAL_MODE_KEY = 'radshield_canvas_visual_mode_f191';
 const F216_SAVED_VIEWS_KEY = 'radshield_canvas_saved_views_f216';
 const F375_CANVAS_CHROME_MODE_KEY = 'radshield_canvas_chrome_mode_f375';
 const F525_PLACEMENT_MODE_KEY = 'radshield_canvas_f525_placement_mode';
+const F591_QA_INSPECTOR_MODE_KEY = 'radshield_canvas_qa_inspector_mode_f591';
 const DEFAULT_F188_PANEL_VISIBILITY: Record<F188CanvasPanelKey, boolean> = {
   workflow: false,
   qa: false,
@@ -139,6 +141,11 @@ function loadF188PanelVisibility(): Record<F188CanvasPanelKey, boolean> {
   } catch {
     return DEFAULT_F188_PANEL_VISIBILITY;
   }
+}
+
+function loadF591QaInspectorMode(): F591F620InspectorMode {
+  if (typeof window === 'undefined') return 'compact';
+  return window.localStorage.getItem(F591_QA_INSPECTOR_MODE_KEY) === 'expanded' ? 'expanded' : 'compact';
 }
 
 function loadF188WorkflowDock(): F188WorkflowDock {
@@ -315,6 +322,7 @@ export default function CanvasArea({
   const [lastF515EventAction, setLastF515EventAction] = useState<string>('stable');
   const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
   const [f525PlacementMode, setF525PlacementMode] = useState<F525F529Modality>(loadF525PlacementMode);
+  const [f591QaInspectorMode, setF591QaInspectorMode] = useState<F591F620InspectorMode>(loadF591QaInspectorMode);
   const [f530PlacementPoint, setF530PlacementPoint] = useState<F530F534PlacementPoint | null>(null);
   const [f540DraggingGhost, setF540DraggingGhost] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -592,6 +600,15 @@ export default function CanvasArea({
       setLegendCollapsed(false);
     }
     toast.success(nextMode === 'clean' ? 'Canvas limpio activado' : 'Canvas guia activado');
+  };
+
+  const toggleF591QaInspector = () => {
+    setF591QaInspectorMode((previousMode) => {
+      const nextMode: F591F620InspectorMode = previousMode === 'compact' ? 'expanded' : 'compact';
+      if (typeof window !== 'undefined') window.localStorage.setItem(F591_QA_INSPECTOR_MODE_KEY, nextMode);
+      toast.success(nextMode === 'compact' ? 'Inspector QA compacto' : 'Inspector QA expandido');
+      return nextMode;
+    });
   };
 
   const activateCanvasTool = (tool: F191CanvasTool) => {
@@ -1332,6 +1349,13 @@ export default function CanvasArea({
   });
   const f581ToF585ExpandedNormativeQa = buildF581F585ExpandedNormativeNumericQa();
   const f586ToF590NormativeDatasetQa = buildF586F590NormativeDatasetQa();
+  const f591ToF620GeneralImprovements = buildF591F620GeneralImprovements({
+    inspectorMode: f591QaInspectorMode,
+    canvasPanelsVisible: panelVisibility.workflow || panelVisibility.qa || panelVisibility.continuity,
+    unity: f571ToF580UnityDbTechnicalClosure,
+    numericQa: f581ToF585ExpandedNormativeQa,
+    datasetQa: f586ToF590NormativeDatasetQa,
+  });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -2219,6 +2243,72 @@ export default function CanvasArea({
                 </div>
 
                 <div
+                  data-testid="f591-f620-general-improvements"
+                  className="mt-2 rounded-lg border border-[#b7c9bc] bg-[#f8faf6]/95 p-2"
+                  title="F591-F620: mejoras generales prioritarias, inspector QA compacto, DB live gate, Unity visual-only, memorias reales y release consolidation"
+                  aria-label="F591 a F620 mejoras generales prioritarias"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F591-F620 mejoras generales</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Canvas limpio + DB gate + Unity visual + Memoria IA</div>
+                    </div>
+                    <span
+                      data-testid="f591-f620-status"
+                      className="rounded border border-[#238a61]/30 bg-white px-1.5 py-0.5 text-[8px] font-black text-[#238a61]"
+                    >
+                      {f591ToF620GeneralImprovements.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f591-f620-summary"
+                    className="mt-1 grid grid-cols-3 gap-1 text-[8px]"
+                    title={`Tracks criticos release: ${f591ToF620GeneralImprovements.summary.releaseCriticalTracks}`}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">Listos {f591ToF620GeneralImprovements.summary.implementedTracks}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">Gates {f591ToF620GeneralImprovements.summary.gatedTracks}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Modo {f591ToF620GeneralImprovements.inspectorMode}</span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f591ToF620GeneralImprovements.tracks.map((track) => (
+                      <div
+                        key={track.id}
+                        data-testid={`f591-f620-track-${track.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${track.impact} Siguiente: ${track.nextAction}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{track.phaseRange} {track.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            track.status === 'implemented' || track.status === 'ready'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : track.status === 'requires-db' || track.status === 'requires-real-cases'
+                                ? 'bg-[#fff1f2] text-[#b91c1c]'
+                                : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {track.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1 flex items-center justify-between gap-2 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    <span data-testid="f591-f620-gates">DB real SI; memorias reales SI; Unity visual-only; certificacion clinica NO.</span>
+                    <button
+                      type="button"
+                      data-testid="f591-toggle-qa-inspector"
+                      className="rounded border border-[#238a61]/30 bg-[#e8f6ef] px-2 py-0.5 text-[8px] font-black text-[#238a61] hover:bg-white"
+                      onClick={toggleF591QaInspector}
+                      title="Alternar inspector QA compacto/expandido. Compacto reduce saturacion; expandido muestra F550-F590 completo."
+                    >
+                      {f591QaInspectorMode === 'compact' ? 'Expandir QA' : 'Compactar QA'}
+                    </button>
+                  </div>
+                </div>
+
+                {f591QaInspectorMode === 'expanded' && (
+                  <>
+                <div
                   data-testid="f550-f555-functional-beta-closure"
                   className="mt-2 rounded-lg border border-[#b7c9bc] bg-[#eef3ec]/95 p-2"
                   title="F550-F555: cierre beta funcional con conexiones reales, reversibilidad, paleta BIM, motores visuales y gates productivos"
@@ -2678,6 +2768,8 @@ export default function CanvasArea({
                     Beta dataset {f586ToF590NormativeDatasetQa.gates.canPublishBetaDatasetQa ? 'permitida' : 'review'}; document_chunks SI; seed live NO; certificacion clinica NO.
                   </div>
                 </div>
+                  </>
+                )}
               </div>
             )}
 

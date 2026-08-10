@@ -11,6 +11,7 @@ test('F561-F565 renderer/event controller v2 observes real canvas pointers and k
   await page.addInitScript(() => {
     localStorage.setItem('radshield-e2e-controls', 'true');
     localStorage.setItem('radshield_canvas_chrome_mode_f375', 'guided');
+    localStorage.setItem('radshield_canvas_qa_inspector_mode_f591', 'expanded');
     localStorage.setItem('radshield_canvas_f525_placement_mode', 'TX');
   });
   await page.setViewportSize({ width: 1600, height: 960 });

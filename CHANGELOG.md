@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F591-F620 (2026-08-10) - Mejoras generales prioritarias
+
+- Agregado contrato `radshield-mx.general-improvements.f591-f620.v1` para consolidar las mejoras mas convenientes antes de seguir agregando funciones grandes.
+- Canvas ahora tiene inspector QA compacto por defecto: F550-F590 queda expandible bajo demanda para reducir saturacion visual del plano.
+- F596-F600 documenta que DB real, `document_chunks`, readback y restore probe son obligatorios antes de claims clinicos certificados.
+- F601-F605 deja ruta explicita para comparar motor de calculo contra memorias analiticas reales aprobadas.
+- F606-F610 mantiene Unity como visualizador/recorrido, no como motor de calculo ni fuente firmable.
+- F611-F615 agrega flujo productivo en Memoria IA: plano -> equipo -> barreras -> calculo -> cita -> evidencia -> PDF.
+- F616-F620 prioriza consolidacion, rollback, capturas y smoke antes de nuevas features pesadas.
+
 # F586-F590 (2026-08-10) - Dataset normativo QA versionado
 
 - Agregado contrato `radshield-mx.calc.normative-dataset-qa.f586-f590.v1` para convertir fixtures F581-F585 en casos con fuente, pagina, hash, tolerancia y estado de promocion.

@@ -1,5 +1,16 @@
 # RadShield-MX - Manual de Versiones
 
+# F591-F620 (2026-08-10) - Mejoras Generales Prioritarias
+
+- **F591-F595:** canvas con inspector QA compacto por defecto y detalle F550-F590 expandible.
+- **F596-F600:** ruta DB real obligatoria antes de claims clinicos certificados.
+- **F601-F605:** ruta de QA contra memorias reales aprobadas por modalidad.
+- **F606-F610:** Unity queda como visualizador/recorrido, no como motor de calculo.
+- **F611-F615:** Memoria IA se refuerza como flujo plano -> equipo -> barreras -> calculo -> cita -> evidencia -> PDF.
+- **F616-F620:** consolidacion release: capturas, rollback, smoke y documentacion antes de nuevas funciones pesadas.
+
+Decision: F591-F620 reduce saturacion y mejora operacion sin reemplazar renderer, eventos ni calculos. Las compuertas clinicas siguen bloqueadas hasta DB real, datasets versionados y revision profesional.
+
 # F586-F590 (2026-08-10) - Dataset Normativo QA Versionado
 
 - **F586:** enlaza cada caso numerico ampliado a una fuente canonica NCRP/IAEA/UAQ/AAPM.

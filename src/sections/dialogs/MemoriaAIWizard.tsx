@@ -50,6 +50,7 @@ import { buildF208CanvasReportingLayer, formatF208CanvasReportingLayerText } fro
 import { buildF218ReportHandoff, formatF218ReportHandoffText } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration, formatF367F370ReleaseIntegrationText } from '@/lib/f367F370ReleaseIntegration';
 import { buildF409OutputSurfaceIntegration, formatF409OutputSurfaceIntegrationText } from '@/lib/f409OutputSurfaceIntegration';
+import { buildF591F620GeneralImprovements, formatF591F620GeneralImprovementsMarkdown } from '@/lib/f591F620GeneralImprovements';
 import { useAppStore } from '@/stores/appStore';
 import type { FloorPlan } from '@/types/radshield';
 
@@ -222,6 +223,8 @@ export default function MemoriaAIWizard({
   const f367F370ReleaseIntegrationText = useMemo(() => formatF367F370ReleaseIntegrationText(f367F370ReleaseIntegration), [f367F370ReleaseIntegration]);
   const f409OutputIntegration = useMemo(() => buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const f409OutputIntegrationText = useMemo(() => formatF409OutputSurfaceIntegrationText(f409OutputIntegration), [f409OutputIntegration]);
+  const f591GeneralImprovements = useMemo(() => buildF591F620GeneralImprovements(), []);
+  const f591GeneralImprovementsText = useMemo(() => formatF591F620GeneralImprovementsMarkdown(f591GeneralImprovements), [f591GeneralImprovements]);
   const f117Handoff = useMemo(() => buildF117ModalityHandoff(), []);
   const f118SuggestedEquipmentKey = f117Handoff.memoriaDefaults.recommendedEquipmentKeys.find((key) => EQUIPMENT_DB[key]) || '';
   const f102DesignPlan = useMemo(() => buildF102MemoryDesignPlan({
@@ -320,7 +323,8 @@ export default function MemoriaAIWizard({
     const f218Section = `\n7.11 HANDOFF VISUAL F218\n${f218ReportHandoffText}\n`;
     const f367F370Section = `\n7.12 INTEGRACION F367-F370 / 3D, UNITY, MOTORES EXTERNOS Y BETA\n${f367F370ReleaseIntegrationText}\n`;
     const f409Section = `\n7.13 INTEGRACION F409 / SALIDAS REALES F405-F408\n${f409OutputIntegrationText}\n`;
-    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}\n${improvementSection}`.trim();
+    const f591Section = `\n7.14 MEJORAS GENERALES F591-F620 / FLUJO PRODUCTIVO\n${f591GeneralImprovementsText}\n`;
+    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}\n${improvementSection}`.trim();
     return `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO
 
 1. DATOS DEL PROYECTO
@@ -388,10 +392,11 @@ ${f208Section}
 ${f218Section}
 ${f367F370Section}
 ${f409Section}
+${f591Section}
 ${evidenceSection}
 ${improvementSection}
 `;
-  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, f409OutputIntegrationText, evidenceSection, memoriaAIPlan]);
+  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, f409OutputIntegrationText, f591GeneralImprovementsText, evidenceSection, memoriaAIPlan]);
 
   // ─── Export handlers ───
   const exportPDF = useCallback(() => {
@@ -718,6 +723,28 @@ ${improvementSection}
                 ))}
               </div>
               <div className="mt-1 truncate">{f208CanvasReporting.nextActions.join(' | ')}</div>
+            </div>
+            <div data-testid="f611-f615-memoria-productive-workflow" className="col-span-6 rounded border border-emerald-100 bg-emerald-50 px-2 py-1 text-emerald-950">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-semibold">F611-F615 Memoria IA productiva</div>
+                <Badge className="h-4 bg-emerald-100 text-emerald-700 text-[9px]">{f591GeneralImprovements.status}</Badge>
+              </div>
+              <div className="mt-1 grid grid-cols-6 gap-1 text-[9px]">
+                {['Plano', 'Equipo', 'Barreras', 'Calculo', 'Cita', 'PDF'].map((step) => (
+                  <div key={step} className="rounded bg-white/75 border border-emerald-100 px-2 py-1 text-center font-semibold">
+                    {step}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-1 grid grid-cols-3 gap-1 text-[9px]">
+                {f591GeneralImprovements.tracks.slice(0, 3).map((track) => (
+                  <div key={track.id} className="rounded bg-white/75 border border-emerald-100 px-2 py-1" title={track.nextAction}>
+                    <div className="text-[8px] uppercase text-emerald-700 font-bold">{track.phaseRange}</div>
+                    <div className="truncate">{track.status}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-1 truncate text-[8px] text-emerald-800">DB real, paginas/hash y revision FM/RSO siguen requeridas para claim clinico certificado.</div>
             </div>
             <div data-testid="f218-report-handoff-memoria" className="col-span-6 rounded border border-teal-100 bg-teal-50 px-2 py-1 text-teal-900">
               <div className="flex items-center justify-between gap-2">

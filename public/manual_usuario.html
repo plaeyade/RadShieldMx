@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F590 - Manual de Usuario</title>
+  <title>RadShield-MX F620 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F590</span>
+      <span class="pill">Version de manual: F620</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,20 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F591-F620: Mejoras Generales Prioritarias</h2>
+    <p>F591-F620 consolida las mejoras mas convenientes para operar la beta con menos saturacion: inspector QA compacto, ruta DB real, Unity visual-only, memorias reales como QA futuro, Memoria IA productiva y consolidacion release.</p>
+    <table>
+      <thead><tr><th>Track</th><th>Uso</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>Canvas compacto</td><td>Use el panel F591-F620 y el boton Expandir/Compactar QA.</td><td>Libera el plano ocultando F550-F590 por defecto.</td><td>No borra QA; solo lo colapsa.</td></tr>
+        <tr><td>DB real</td><td>Revise gates de document_chunks, pagina/hash, restore probe y readback.</td><td>Evita claims clinicos sin evidencia DB-backed.</td><td>Seed live manual y validado.</td></tr>
+        <tr><td>Memorias reales</td><td>Promueva casos aprobados a fixtures con input/output/cita.</td><td>Fortalece motor de calculo contra casos reales.</td><td>No usar como canon sin revision FM/RSO.</td></tr>
+        <tr><td>Unity visual-only</td><td>Uselo para recorrido y evidencia visual.</td><td>No altera calculos ni fuentes normativas.</td><td>Requiere build WebGL real para runtime.</td></tr>
+        <tr><td>Memoria IA</td><td>Flujo plano, equipo, barreras, calculo, cita, evidencia y PDF.</td><td>Hace operativo el borrador documental.</td><td>Siempre preliminar hasta revision profesional.</td></tr>
+      </tbody>
+    </table>
+    <div class="ok"><strong>Validacion:</strong> <code>npm run test:f591-f620:general-improvements</code>, <code>npm run test:f591-f620:general-improvements:values</code> y <code>npm run test:f591-f620:general-improvements:e2e</code>.</div>
+
     <h2>0. Addendum F586-F590: Dataset Normativo QA Versionado</h2>
     <p>F586-F590 agrega una capa documental al QA numerico. Cada caso heredado de F581-F585 debe apuntar a fuente canonica, referencia <code>document_chunks</code>, pagina/hash, tolerancia y estado de promocion a DB.</p>
     <table>
