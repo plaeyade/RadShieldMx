@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F636-F640 (2026-08-10) - Hit-test Shadow Map
+
+- **F636:** deriva targets seleccionables desde comandos visibles F621 con bounds, centro, capa y zIndex.
+- **F637:** agrupa targets por tile bucket usando atlas F631-F635.
+- **F638:** calcula pointer probe: tile actual, candidatos y candidato primario.
+- **F639:** gate de atlas disponible y targets visibles.
+- **F640:** gate de reversibilidad: conserva eventos legacy y no reemplaza `useCanvas`.
+
+Decision: `hit-test-shadow-preview` prepara seleccion futura del renderer profundo. No cambia seleccion real, no toma eventos y no altera calculos hasta E2E de eventos.
+
 # F631-F635 (2026-08-10) - Tile Invalidation Atlas
 
 - **F631:** crea grid de tiles sobre el viewport y marca tiles dirty por interseccion con dirty regions.

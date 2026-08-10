@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F635 - Manual de Usuario</title>
+  <title>RadShield-MX F640 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F635</span>
+      <span class="pill">Version de manual: F640</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F636-F640: Hit-test Shadow</h2>
+    <p>F636-F640 crea un shadow map de hit-test para identificar candidatos de seleccion desde el renderer profundo. Es una capa de diagnostico reversible; no cambia seleccion real, boton derecho, snapping, drag ni calculos.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Targets</td><td>Revise T en el panel F636-F640.</td><td>Cuantos objetos visibles podrian seleccionarse.</td><td>Ocultar shadow map.</td></tr>
+        <tr><td>Buckets</td><td>Revise B ocupados/total.</td><td>Que el atlas de tiles permite acotar busqueda.</td><td>Volver a F631-F635.</td></tr>
+        <tr><td>Probe</td><td>Revise tile, candidato primario y modo preview.</td><td>Correspondencia visual pointer-candidato.</td><td>No enlazar a seleccion real.</td></tr>
+        <tr><td>Overlay turquesa</td><td>Observe candidatos resaltados sobre el canvas.</td><td>Que el diagnostico no tape el plano ni capture eventos.</td><td>Mantener useCanvas canonico.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F636-F640 queda en <code>hit-test-shadow-preview</code>. Es preparacion para seleccion avanzada, no activacion de eventos nuevos.</p>
+
     <h2>0. Addendum F631-F635: Tile Atlas E Invalidacion Parcial</h2>
     <p>F631-F635 divide el viewport en tiles y marca tiles sucios por interseccion con dirty regions. Es una base visual para redibujado parcial; no toca eventos ni calculos.</p>
     <table>

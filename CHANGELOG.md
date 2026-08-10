@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F636-F640 (2026-08-10) - hit-test shadow y candidatos reversibles
+
+- Agregado `src/lib/f636F640RendererHitTestShadow.ts` con contrato `radshield-mx.canvas.renderer-hit-test-shadow.f636-f640.v1`.
+- F636 deriva targets seleccionables desde comandos F621 visibles, con bounds, centro, capa, zIndex y tiles asociados.
+- F637 agrupa targets por buckets de tiles F631-F635 y calcula candidato superior por zIndex.
+- F638 crea pointer probe de candidatos sin escribir seleccion real.
+- F639-F640 agrega gates de atlas disponible, targets visibles y preservacion de eventos legacy.
+- Canvas dibuja overlay turquesa de candidatos y panel F636-F640 con targets, buckets, probe y gates.
+- La fase sigue en preview reversible: no modifica `useCanvas`, drag, snapping, boton derecho ni calculos.
+
 # F631-F635 (2026-08-10) - tile atlas e invalidacion parcial
 
 - Agregado `src/lib/f631F635RendererTileInvalidation.ts` con contrato `radshield-mx.canvas.renderer-tile-invalidation.f631-f635.v1`.

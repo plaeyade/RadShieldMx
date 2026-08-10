@@ -86,6 +86,7 @@ import { buildF591F620GeneralImprovements, type F591F620InspectorMode } from '@/
 import { buildF621F625RendererBaseDeep, drawF621F625RendererBaseDeepHud } from '@/lib/f621F625RendererBaseDeep';
 import { buildF626F630RendererBaseScheduler, drawF626F630RendererSchedulerHud } from '@/lib/f626F630RendererBaseScheduler';
 import { buildF631F635RendererTileInvalidation, drawF631F635TileInvalidationOverlay } from '@/lib/f631F635RendererTileInvalidation';
+import { buildF636F640RendererHitTestShadow, drawF636F640HitTestShadowOverlay } from '@/lib/f636F640RendererHitTestShadow';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1312,6 +1313,17 @@ export default function CanvasArea({
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
     },
   );
+  const f636ToF640RendererHitTestShadow = buildF636F640RendererHitTestShadow(
+    f621ToF625RendererBaseDeep,
+    f631ToF635RendererTileInvalidation,
+    {
+      pointer: {
+        x: Math.round(canvasSize.width * 0.48),
+        y: Math.round(canvasSize.height * 0.44),
+      },
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+    },
+  );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -1448,6 +1460,9 @@ export default function CanvasArea({
     drawF631F635TileInvalidationOverlay(ctx, f631ToF635RendererTileInvalidation, {
       showCleanTiles: visualMode === 'structure',
     });
+    drawF636F640HitTestShadowOverlay(ctx, f636ToF640RendererHitTestShadow, {
+      showAllCandidates: visualMode === 'structure',
+    });
   }, [
     canvasChromeMode,
     canvasSize.height,
@@ -1459,6 +1474,7 @@ export default function CanvasArea({
     f621ToF625RendererBaseDeep,
     f626ToF630RendererBaseScheduler,
     f631ToF635RendererTileInvalidation,
+    f636ToF640RendererHitTestShadow,
     visualMode,
   ]);
 
@@ -2448,6 +2464,71 @@ export default function CanvasArea({
                     title={f631ToF635RendererTileInvalidation.rollback.join(' | ')}
                   >
                     {f631ToF635RendererTileInvalidation.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f636-f640-renderer-hit-test-shadow"
+                  className="mt-2 rounded-lg border border-[#99f6e4] bg-[#f0fdfa]/95 p-2"
+                  title="F636-F640: shadow map de hit-test y candidatos de seleccion sin tocar eventos legacy"
+                  aria-label="F636 a F640 hit test shadow renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#0f766e]">F636-F640 hit shadow</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Candidatos por tile, preview reversible</div>
+                    </div>
+                    <span
+                      data-testid="f636-f640-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f636ToF640RendererHitTestShadow.status === 'hit-test-shadow-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f636ToF640RendererHitTestShadow.status === 'hit-test-shadow-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#99f6e4] bg-[#ccfbf1] text-[#0f766e]'
+                      }`}
+                    >
+                      {f636ToF640RendererHitTestShadow.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f636-f640-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f636ToF640RendererHitTestShadow.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0f766e]">T {f636ToF640RendererHitTestShadow.metrics.selectableTargets}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">B {f636ToF640RendererHitTestShadow.metrics.occupiedBuckets}/{f636ToF640RendererHitTestShadow.metrics.bucketCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">Max {f636ToF640RendererHitTestShadow.metrics.maxTargetsPerBucket}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">{f636ToF640RendererHitTestShadow.probe.candidateIds.length} cand</span>
+                  </div>
+                  <div
+                    data-testid="f636-f640-probe"
+                    className="mt-1 truncate rounded border border-[#ccfbf1] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#0f766e]"
+                    title={f636ToF640RendererHitTestShadow.probe.candidateIds.join(', ') || 'sin candidatos'}
+                  >
+                    {f636ToF640RendererHitTestShadow.probe.tileId ?? 'sin tile'} | {f636ToF640RendererHitTestShadow.probe.primaryCandidateId ?? 'sin candidato'} | {f636ToF640RendererHitTestShadow.probe.reversibleAction}
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f636ToF640RendererHitTestShadow.targets.filter((target) => target.selectable).slice(0, 4).map((target) => (
+                      <div
+                        key={target.id}
+                        data-testid={`f636-f640-target-${target.layer}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${target.primitive}; ${target.reason}; tiles ${target.tileIds.join(', ')}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{target.layer}</span>
+                          <span className="rounded bg-[#ccfbf1] px-1 py-0.5 text-[7px] font-black text-[#0f766e]">Z{target.zIndex}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f636-f640-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f636ToF640RendererHitTestShadow.rollback.join(' | ')}
+                  >
+                    {f636ToF640RendererHitTestShadow.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

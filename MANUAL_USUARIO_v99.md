@@ -1,4 +1,32 @@
-# Manual de Usuario RadShield-MX - F635 Tile Atlas
+# Manual de Usuario RadShield-MX - F640 Hit-test Shadow
+
+## Addendum F636-F640 - Hit-test shadow y candidatos reversibles
+
+F636-F640 agrega una capa de diagnostico para seleccion futura del renderer profundo. El sistema toma comandos visibles del renderer F621, los cruza con tiles F631-F635 y crea candidatos de seleccion por bucket. Por ahora es **preview reversible**: muestra que objeto podria seleccionarse, pero no reemplaza seleccion real, grips, snapping, boton derecho ni `useCanvas`.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F636-F640 hit shadow**.
+3. Revise **T** para targets seleccionables detectados.
+4. Revise **B** para buckets de tiles ocupados.
+5. Revise **Max** para densidad maxima de candidatos por tile.
+6. Revise **probe** para saber que tile y candidato primario detecta el pointer de prueba.
+7. En el canvas vera overlay turquesa sobre candidatos; el target primario queda resaltado.
+
+### Logica de seguridad
+
+- El hit-test shadow no cambia la seleccion real.
+- El hit-test shadow no captura pointer events.
+- El boton derecho, drag, pan, zoom, snapping y herramientas legacy siguen en `useCanvas`.
+- Si falla el atlas F631-F635, F636-F640 se bloquea.
+- Rollback: ocultar F636-F640 y conservar F631-F635/F621-F625 como diagnostico visual.
+
+### Validacion tecnica
+
+- `npm run test:f636-f640:renderer-hit-test-shadow`
+- `npm run test:f636-f640:renderer-hit-test-shadow:values`
+- `npm run test:f636-f640:renderer-hit-test-shadow:e2e`
 
 ## Addendum F631-F635 - Tile atlas e invalidacion parcial
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F635 - Manual de Versiones</title>
+  <title>RadShield-MX F640 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F635</span>
+    <span class="pill">Version documental: F640</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F636-F640 Hit-test Shadow</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F636</td><td>Targets seleccionables.</td><td>Deriva bounds, centro, capa y zIndex desde F621.</td><td>Solo comandos visibles.</td></tr>
+        <tr><td>F637</td><td>Tile buckets.</td><td>Agrupa candidatos por tile F631.</td><td>No captura eventos.</td></tr>
+        <tr><td>F638</td><td>Pointer probe.</td><td>Detecta tile/candidato primario de prueba.</td><td>Preview-only.</td></tr>
+        <tr><td>F639</td><td>Gates de disponibilidad.</td><td>Bloquea si atlas o targets no existen.</td><td>Volver a F631.</td></tr>
+        <tr><td>F640</td><td>Reversibilidad.</td><td>Conserva useCanvas y eventos legacy.</td><td>E2E de eventos antes de activar.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F636-F640 queda en <code>hit-test-shadow-preview</code>: base para seleccion avanzada sin reemplazar canvas.</p>
+
     <h2>0. F631-F635 Tile Invalidation Atlas</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
