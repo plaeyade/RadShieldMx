@@ -1,4 +1,40 @@
-# Manual de Usuario RadShield-MX - F560 Post-Beta Profunda
+# Manual de Usuario RadShield-MX - F570 Readiness Post-Beta
+
+## Addendum F566-F570 - Readiness productivo post-beta
+
+F566-F570 agrega una matriz visible para decidir si una beta puede publicarse sin confundir preview visual con capacidad clinica final.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho, localice **F566-F570 Readiness post-beta**.
+3. Revise los tracks:
+   - `Snapshot visual obligatorio`: confirma que existen capturas del panel, canvas y accion real.
+   - `Conexiones reales reversibles`: confirma que F561/F515 siguen ruteando acciones reales sin romper handlers estables.
+   - `Assets pesados y motores externos`: muestra si Unity, DB tecnica y datasets completos siguen bloqueados.
+   - `Activacion reversible`: recuerda que renderer/Babylon/PBR siguen con fallback y rollback.
+   - `Smoke productivo post-beta`: indica que se debe repetir build, URL publica, capturas y manuales.
+4. Use la matriz de activacion para distinguir renderer observable, Babylon preview, Unity con build externo, DB versionada y QA normativo.
+
+### Que aporta
+
+- Evita publicar funciones como productivas cuando aun son preview.
+- Obliga a conservar capturas por cada cambio visual.
+- Mantiene el canvas estable como canon hasta nuevas pruebas E2E.
+- Separa fotorrealismo visual de datos tecnicos: TVL, densidad, costo, carga estructural y citas no cambian por texturas.
+
+### Limites
+
+- No reemplaza el renderer base.
+- No habilita Unity como motor de calculo.
+- No declara Monte Carlo clinico certificado.
+- No completa la DB ENDF/XCOM/ICRU.
+- No sustituye QA normativo ni revision profesional.
+
+Validacion recomendada:
+
+- `npm run test:f566-f570:post-beta-readiness`
+- `npm run test:f566-f570:post-beta-readiness:e2e`
 
 ## Addendum F561-F565 - Renderer/Event Controller V2 observable
 

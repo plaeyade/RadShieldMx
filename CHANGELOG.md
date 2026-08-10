@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F566-F570 (2026-08-09) - Readiness productivo post-beta
+
+- Agregado contrato `radshield-mx.f566-f570.post-beta-production-readiness.v1` para cerrar la etapa post-beta con una matriz visible y reversible.
+- Canvas muestra panel F566-F570 con cinco tracks: capturas obligatorias, conexiones reales, intake de assets pesados, activacion reversible y smoke productivo.
+- El panel separa lo publicable como beta estatica de lo que sigue bloqueado: Unity WebGL real, datasets ENDF/XCOM/ICRU completos y claims clinicos/Monte Carlo.
+- Agregado E2E visual con capturas dedicadas: panel F566-F570, canvas completo y accion real de pointer heredada de F561/F515.
+- Politica: no reemplazar renderer, no usar Unity para calculos firmables, no declarar Monte Carlo clinico y mantener rollback obligatorio.
+
 # F561-F565 (2026-08-09) - Renderer/event controller v2 observable
 
 - Agregado contrato `radshield-mx.f561-f565.renderer-event-controller-v2.v1` para conectar renderer base v2 con el harness de eventos sin reemplazar `useCanvas`.

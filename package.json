@@ -59,6 +59,8 @@
     "test:f556-f560:post-beta-deep:e2e": "playwright test e2e/f556-f560-post-beta-deep-stack.spec.ts --project=chromium",
     "test:f561-f565:event-controller": "node scripts/check-f561-f565-renderer-event-controller-contracts.mjs",
     "test:f561-f565:event-controller:e2e": "playwright test e2e/f561-f565-renderer-event-controller.spec.ts --project=chromium",
+    "test:f566-f570:post-beta-readiness": "node scripts/check-f566-f570-post-beta-readiness-contracts.mjs",
+    "test:f566-f570:post-beta-readiness:e2e": "playwright test e2e/f566-f570-post-beta-readiness.spec.ts --project=chromium",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F566-F570 (2026-08-09) - Readiness productivo post-beta
+
+- **F566:** snapshot visual obligatorio: panel, canvas y accion real quedan con capturas en `outputs/f566_f570_post_beta_readiness`.
+- **F567:** confirma conexiones reales reversibles: event controller v2 observa punteros y llama handlers estables.
+- **F568:** separa assets pesados y motores externos: Unity WebGL real y datasets ENDF/XCOM/ICRU siguen bloqueados hasta entrega/versionado.
+- **F569:** define activacion reversible: renderer v2 observable, Babylon preview con fallback Three/R3F, PBR visual-only y rollback por lane.
+- **F570:** smoke productivo post-beta: build, URL, capturas, manuales y QA antes de release.
+
+Decision: F566-F570 permite publicar beta estatica si el smoke visual pasa, pero bloquea claims clinicos, Monte Carlo certificado y sustitucion del renderer base.
+
 # F561-F565 (2026-08-09) - Renderer/Event Controller V2 Observable
 
 - **F561:** adaptador real de eventos pointer del canvas. `onMouseDown`, `onMouseMove` y `onMouseUp` pasan por el harness y luego por el handler estable.

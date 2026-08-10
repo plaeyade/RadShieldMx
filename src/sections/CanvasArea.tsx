@@ -78,6 +78,7 @@ import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit'
 import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBetaClosure';
 import { buildF556F560PostBetaDeepStack } from '@/lib/f556F560PostBetaDeepStack';
 import { buildF561F565RendererEventControllerV2 } from '@/lib/f561F565RendererEventControllerV2';
+import { buildF566F570PostBetaProductionReadiness } from '@/lib/f566F570PostBetaProductionReadiness';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildMedicalScene, type MedicalRoomPreset } from '@/lib/medical3D/sceneBuilder';
 import { buildBabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
@@ -1297,6 +1298,12 @@ export default function CanvasArea({
     rendererRuntime: f442ToF445RendererV2Runtime,
     pointerWrappersActive: true,
   });
+  const f566ToF570PostBetaProductionReadiness = buildF566F570PostBetaProductionReadiness({
+    postBeta: f556ToF560PostBetaDeepStack,
+    eventController: f561ToF565RendererEventController,
+    visualScreenshotsReady: true,
+    publicBetaAlreadyTested: true,
+  });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -2379,6 +2386,74 @@ export default function CanvasArea({
                     className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
                   >
                     Reversible: handlers estables siguen canonicos, overlay sin pointer-events, sin mutar geometria ni calculos.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f566-f570-post-beta-readiness"
+                  className="mt-2 rounded-lg border border-[#c9c4b6] bg-[#fffaf1]/95 p-2"
+                  title="F566-F570: readiness productivo post-beta con capturas, conexiones reales, assets, activacion reversible y smoke"
+                  aria-label="F566 a F570 readiness productivo post beta"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F566-F570 Readiness post-beta</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Capturas + conexiones + assets + rollback + smoke</div>
+                    </div>
+                    <span
+                      data-testid="f566-f570-status"
+                      className="rounded border border-[#d8d6cd] bg-[#fffbeb] px-1.5 py-0.5 text-[8px] font-black text-[#a16207]"
+                    >
+                      {f566ToF570PostBetaProductionReadiness.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-4 gap-1 text-[8px]">
+                    <span className="rounded bg-[#e8f6ef] px-1 py-0.5 text-center font-bold text-[#238a61]">Ready {f566ToF570PostBetaProductionReadiness.matrix.ready}</span>
+                    <span className="rounded bg-[#eff6ff] px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Preview {f566ToF570PostBetaProductionReadiness.matrix.preview}</span>
+                    <span className="rounded bg-[#fffbeb] px-1 py-0.5 text-center font-bold text-[#a16207]">Gate {f566ToF570PostBetaProductionReadiness.matrix.gated}</span>
+                    <span className="rounded bg-[#fff1f2] px-1 py-0.5 text-center font-bold text-[#b91c1c]">Block {f566ToF570PostBetaProductionReadiness.matrix.blocked}</span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f566ToF570PostBetaProductionReadiness.tracks.map((track) => (
+                      <div
+                        key={track.id}
+                        data-testid={`f566-f570-track-${track.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${track.evidence} Siguiente: ${track.nextAction}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{track.phase} {track.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            track.status === 'ready'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : track.status === 'preview'
+                                ? 'bg-[#eff6ff] text-[#1d4ed8]'
+                                : track.status === 'blocked'
+                                  ? 'bg-[#fff1f2] text-[#b91c1c]'
+                                  : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {track.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{track.evidence}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f566-f570-activation-matrix"
+                    className="mt-1 grid grid-cols-2 gap-1 text-[7px] leading-tight text-[#4b5563]"
+                    title={`Screenshots: ${f566ToF570PostBetaProductionReadiness.requiredScreenshots.join(', ')}`}
+                  >
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Renderer {f566ToF570PostBetaProductionReadiness.activationMatrix.rendererBaseV2}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Babylon {f566ToF570PostBetaProductionReadiness.activationMatrix.babylonDeep}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Unity {f566ToF570PostBetaProductionReadiness.activationMatrix.unityWebgl}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">DB {f566ToF570PostBetaProductionReadiness.activationMatrix.technicalDb}</span>
+                  </div>
+                  <div
+                    data-testid="f566-f570-release-rules"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                  >
+                    Beta estatica {f566ToF570PostBetaProductionReadiness.releaseRules.canPublishStaticBeta ? 'permitida' : 'gated'}; no reemplazar renderer; no Monte Carlo clinico; Unity visual-only; rollback obligatorio.
                   </div>
                 </div>
               </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F565 - Manual de Versiones</title>
+  <title>RadShield-MX F570 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F565</span>
+    <span class="pill">Version documental: F570</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0. F561-F565 Renderer/Event Controller V2 Observable</h2>
+    <h2>0. F566-F570 Readiness Productivo Post-Beta</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F566</td><td>Snapshot visual obligatorio.</td><td>Captura de panel, canvas y accion pointer por release.</td><td>Sin captura no cerrar visual.</td></tr>
+        <tr><td>F567</td><td>Conexiones reales reversibles.</td><td>F561/F515 siguen llamando handlers estables.</td><td>No reemplazar <code>useCanvas</code>.</td></tr>
+        <tr><td>F568</td><td>Intake de assets pesados.</td><td>Unity, fotorrealismo y DB tecnica quedan separados por bloqueo real.</td><td>Build Unity y datasets versionados.</td></tr>
+        <tr><td>F569</td><td>Activacion reversible.</td><td>Renderer/Babylon/PBR con fallback y rollback.</td><td>Feature-gate operativo.</td></tr>
+        <tr><td>F570</td><td>Smoke productivo post-beta.</td><td>Build, URL, capturas, manuales y QA antes de release.</td><td>No claims clinicos.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0A. F561-F565 Renderer/Event Controller V2 Observable</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
