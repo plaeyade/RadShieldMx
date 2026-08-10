@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F544 - Manual de Usuario</title>
+  <title>RadShield-MX F549 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F544</span>
+      <span class="pill">Version de manual: F549</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,7 +105,21 @@
   </header>
   <main>
     <section>
-      <h2>0A. Addendum F540-F544: Ghost Drag Gate No Persistente</h2>
+      <h2>0A. Addendum F545-F549: Crear Fuente Real Desde Ghost</h2>
+      <p>F545-F549 convierte el ghost arrastrado en una fuente real del canvas. La fuente queda seleccionada y visible por el renderer existente, pero no se crean barreras ni se recalcula en silencio.</p>
+      <table>
+        <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th><th>Gate</th></tr></thead>
+        <tbody>
+          <tr><td><code>Crear fuente</code></td><td>Promueve el ghost a <code>RadiationSource</code>.</td><td>La fuente aparece en el canvas y en el conteo de fuentes activas.</td><td>Undo disponible.</td></tr>
+          <tr><td>Seleccion automatica</td><td>Marca la fuente creada como seleccionada.</td><td>Inspector, grips/movimiento y rotacion quedan disponibles.</td><td>No cambia barreras.</td></tr>
+          <tr><td>Mapeo TX/NM/DX/CY</td><td>Asigna modalidad, workload, use factor, footprint y variante.</td><td>Equipo preparado para calculo/memoria posterior.</td><td>Datos preliminares.</td></tr>
+          <tr><td>Ghost cleanup</td><td>Oculta el ghost despues del alta.</td><td>No hay doble lectura visual.</td><td>No reemplaza renderer base.</td></tr>
+        </tbody>
+      </table>
+      <div class="ok">Validacion: <code>npm run test:f545-f549:ghost-source-commit</code> y <code>npm run test:f545-f549:ghost-source-commit:e2e</code>.</div>
+      <div class="warn">La fuente creada requiere revision de escala, workload, colindancias, barreras y memoria analitica antes de uso profesional.</div>
+
+      <h2>0B. Addendum F540-F544: Ghost Drag Gate No Persistente</h2>
       <p>F540-F544 agrega movimiento real del ghost de equipo con un handle interno. El overlay completo sigue dejando pasar eventos al canvas, pero el area del ghost permite arrastrar el punto candidato sin escribir geometria permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th><th>Gate</th></tr></thead>
@@ -119,7 +133,7 @@
       <div class="ok">Validacion: <code>npm run test:f540-f544:ghost-drag</code> y <code>npm run test:f540-f544:ghost-drag:e2e</code>.</div>
       <div class="warn">Persistencia CAD, snap del footprint, colisiones, undo/redo fino y seleccion multi-equipo quedan para fase posterior.</div>
 
-      <h2>0B. Addendum F535-F539: QA Visual E2E Del Equipment Ghost</h2>
+      <h2>0C. Addendum F535-F539: QA Visual E2E Del Equipment Ghost</h2>
       <p>F535-F539 valida el preview ghost en navegador real. La prueba revisa boton <code>Preview</code>, accion contextual <code>Preview equipo aqui</code>, boton <code>Confirmar</code>, overlay visible, captura visual y continuidad del event harness.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Resultado esperado</th></tr></thead>
@@ -133,7 +147,7 @@
       <div class="ok">Evidencia: <code>outputs/f535_f539_equipment_ghost_visual/01_equipment_ghost_preview.png</code>.</div>
       <div class="warn">Persistencia CAD, drag/drop, undo/redo fino y reemplazo del renderer base siguen bloqueados hasta una fase dedicada.</div>
 
-      <h2>0C. Addendum F530-F534: Equipment Ghost Preview</h2>
+      <h2>0D. Addendum F530-F534: Equipment Ghost Preview</h2>
       <p>F530-F534 agrega un ghost visual del equipo seleccionado. Es una previsualizacion segura para revisar ubicacion y footprint antes de convertirlo en geometria CAD permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Conexion</th><th>Seguridad</th></tr></thead>
@@ -144,7 +158,7 @@
         </tbody>
       </table>
 
-      <h2>0D. Addendum F525-F529: Placement Clinico TX/NM/DX/CY</h2>
+      <h2>0E. Addendum F525-F529: Placement Clinico TX/NM/DX/CY</h2>
       <p>F525-F529 convierte el panel visual del canvas en seleccion operativa de modalidad, sala, equipo, material y perfil de Memoria IA. El objetivo es preparar el sembrado visual y abrir Inspeccion 3D sin escribir geometria permanente.</p>
       <table>
         <thead><tr><th>Control</th><th>Funcion</th><th>Conexion</th><th>Seguridad</th></tr></thead>

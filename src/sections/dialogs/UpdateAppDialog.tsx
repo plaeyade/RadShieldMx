@@ -94,6 +94,7 @@ import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRend
 import { buildF525F529ClinicalPlacementPack } from '@/lib/f525F529ClinicalPlacementPack';
 import { buildF530F534EquipmentPlacementPreview } from '@/lib/f530F534EquipmentPlacementPreview';
 import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
+import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -111,6 +112,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F545-F549 Ghost source commit', current: 'fuente real desde ghost', latest: 'crear fuente + seleccion + undo gate + sin barreras nuevas', status: 'current', description: `F545-F549 promueve el ghost arrastrado a RadiationSource real y seleccionable. Politica: canCreateRadiationSource=${String(buildF545F549GhostSourceCommit().gate.canCreateRadiationSource)}, canWriteBarriers=${String(buildF545F549GhostSourceCommit().gate.canWriteBarriers)}, canReplaceRenderer=${String(buildF545F549GhostSourceCommit().gate.canReplaceRenderer)}. Rollback por undo existente.` },
   { name: 'F540-F544 Ghost drag gate', current: 'drag preview no persistente', latest: 'handle arrastrable + pointer-events pass-through + gate CAD false', status: 'current', description: `F540-F544 permite mover el ghost del equipo con un handle interno sin bloquear el canvas base. Politica: canDragPreview=${String(buildF540F544GhostDragGate().interaction.canDragPreview)}, canPersistGeometry=${String(buildF540F544GhostDragGate().interaction.canPersistGeometry)}. El punto alimenta 3D/Memoria/Evidence solo despues de Confirmar.` },
   { name: 'F535-F539 Equipment ghost visual QA', current: 'E2E visual + screenshot', latest: 'preview center + preview context + confirm + pointer-events gate + zoom continuity', status: 'current', description: 'F535-F539 agrega smoke E2E dedicado para el ghost de equipo: valida panel F525/F530, boton Preview, boton derecho Preview equipo aqui, Confirmar, captura visual y que el overlay no bloquee eventos del canvas. Persistencia CAD sigue bloqueada hasta drag/drop/undo/redo validado.' },
   { name: 'F530-F534 Equipment ghost placement', current: 'ghost preview + candidate point', latest: 'preview fantasma + confirmar punto + propiedades + menu contextual', status: 'current', description: `F530-F534 agrega preview no persistente del equipo seleccionado: ${buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).actions.length} acciones para ghost, punto candidato, propiedades y handoff. Politica: canPersistGeometry=${String(buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).ghost.canPersistGeometry)} hasta drag/drop/undo/redo E2E.` },

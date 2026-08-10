@@ -84,6 +84,9 @@ import { useRoomTemplates } from '@/hooks/useRoomTemplates';
 import { useSmartBarrier } from '@/hooks/useSmartBarrier';
 import SourceSelector from '@/sections/SourceSelector';
 import type { SourceItem } from '@/sections/SourceSelector';
+import type { F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
+import type { F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPreview';
+import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import StatusBar from '@/sections/StatusBar';
 import WelcomeScreen from '@/sections/WelcomeScreen';
 
@@ -1393,6 +1396,56 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     });
   }, [canvasRef, canvasState, setFloorPlan]);
 
+  const handleCommitGhostSource = useCallback((payload: {
+    point: F530F534PlacementPoint;
+    equipment: string;
+    modality: F525F529Modality;
+    room: string;
+    material: string;
+    memoryProfile: string;
+    footprint_m: [number, number];
+  }) => {
+    const contract = buildF545F549GhostSourceCommit();
+    const defaults = contract.sourceDefaults[payload.modality];
+    const sourceId = `f545-${payload.modality.toLowerCase()}-${Date.now()}`;
+    const modalityByEquipment =
+      payload.equipment.toLowerCase().includes('gamma knife')
+        ? MODALITIES.find(item => item.id === 'gamma-knife')
+        : payload.modality === 'CY'
+          ? {
+              ...(MODALITIES.find(item => item.id === defaults.modalityId) ?? MODALITIES[0]),
+              id: 'cyclotron-18mev',
+              name: 'Ciclotron KIUBE - 18 MeV',
+              energyLabel: '18 MeV protones',
+            }
+          : MODALITIES.find(item => item.id === defaults.modalityId);
+    const modality = modalityByEquipment ?? MODALITIES[0];
+    const nextSource: RadiationSource = {
+      id: sourceId,
+      x: payload.point.x,
+      y: payload.point.y,
+      name: payload.equipment,
+      modality,
+      workloadValue: defaults.workloadValue,
+      workloadUnit: modality.unit,
+      isocenterHeight_m: modality.isocenterHeightDefault_m ?? 1.3,
+      useFactor: defaults.useFactor,
+      workloadHoursPerWeek: defaults.workloadHoursPerWeek,
+      rotationDeg: 0,
+      footprint_m: {
+        width: payload.footprint_m[0],
+        depth: payload.footprint_m[1],
+      },
+      manufacturerVariant: `${defaults.manufacturerVariant} | ${payload.room} | ${payload.memoryProfile}`,
+    };
+    setFloorPlan(prev => ({ ...prev, sources: [...prev.sources, nextSource] }));
+    setCanvasState(prev => ({ ...prev, selectedId: sourceId, selectedIds: [sourceId] }));
+    toast.success('Fuente real agregada al canvas', {
+      description: `${payload.equipment} / ${payload.material}`,
+    });
+    return sourceId;
+  }, [setCanvasState, setFloorPlan]);
+
   // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / ? / Ctrl+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -2082,6 +2135,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   onAddCriticalPoint={handleAddCriticalPointDraft}
                   onOpenShieldingPresets={handleShieldingPresetApply}
                   onUpdateSelected={handleUpdateSelected}
+                  onCommitGhostSource={handleCommitGhostSource}
                   onDuplicateSelected={handleDuplicateSelected}
                   onDeleteSelected={deleteSelected}
                   onAuditSnapshot={handleAuditSnapshot}

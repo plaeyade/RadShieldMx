@@ -74,6 +74,7 @@ import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRend
 import { buildF525F529ClinicalPlacementPack, type F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
 import { buildF530F534EquipmentPlacementPreview, type F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPreview';
 import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
+import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -183,6 +184,15 @@ interface CanvasAreaProps {
   onAddCriticalPoint?: () => void;
   onOpenShieldingPresets?: () => void;
   onUpdateSelected?: (updates: Partial<Barrier | RadiationSource | OccupiedRegion | CriticalPoint>) => void;
+  onCommitGhostSource?: (payload: {
+    point: F530F534PlacementPoint;
+    equipment: string;
+    modality: F525F529Modality;
+    room: string;
+    material: string;
+    memoryProfile: string;
+    footprint_m: [number, number];
+  }) => string | void;
   onDuplicateSelected?: () => void;
   onDeleteSelected?: () => void;
   onAuditSnapshot?: () => void;
@@ -232,6 +242,7 @@ export default function CanvasArea({
   onAddCriticalPoint,
   onOpenShieldingPresets,
   onUpdateSelected,
+  onCommitGhostSource,
   onDuplicateSelected,
   onDeleteSelected,
   onAuditSnapshot,
@@ -643,6 +654,30 @@ export default function CanvasArea({
     setLastCanvasCommand(`F531 confirmado: ${f530ToF534EquipmentPreview.selected.equipment}`);
     toast.success('Punto candidato confirmado', {
       description: `No se escribio geometria permanente. x ${point.x.toFixed(1)} / y ${point.y.toFixed(1)}`,
+    });
+  };
+
+  const commitF545GhostSource = () => {
+    if (!onCommitGhostSource) {
+      toast.error('Persistencia de fuente no conectada', {
+        description: 'F545 requiere callback desde ShieldingDesigner.',
+      });
+      return;
+    }
+    const point = f530PlacementPoint ?? makeF530ViewportCenterPoint();
+    const sourceId = onCommitGhostSource({
+      point,
+      equipment: f530ToF534EquipmentPreview.selected.equipment,
+      modality: f530ToF534EquipmentPreview.selected.modality as F525F529Modality,
+      room: f530ToF534EquipmentPreview.selected.room,
+      material: f530ToF534EquipmentPreview.selected.material,
+      memoryProfile: f530ToF534EquipmentPreview.selected.memoryProfile,
+      footprint_m: f530ToF534EquipmentPreview.ghost.footprint_m,
+    });
+    setF530PlacementPoint(null);
+    setLastCanvasCommand(`F545 fuente creada: ${f530ToF534EquipmentPreview.selected.equipment}`);
+    toast.success('Fuente creada desde ghost', {
+      description: sourceId ? `Seleccionada: ${sourceId}` : 'Alta enviada al floorplan.',
     });
   };
 
@@ -1177,6 +1212,7 @@ export default function CanvasArea({
     scale_m_per_pixel: floorPlan.scale_m_per_pixel,
   });
   const f540ToF544GhostDragGate = buildF540F544GhostDragGate();
+  const f545ToF549GhostSourceCommit = buildF545F549GhostSourceCommit();
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -1993,7 +2029,7 @@ export default function CanvasArea({
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     {f530ToF534EquipmentPreview.ghost.label} / {f530ToF534EquipmentPreview.ghost.footprint_m.join(' x ')} m
                   </div>
-                  <div className="mt-1 grid grid-cols-2 gap-1">
+                  <div className="mt-1 grid grid-cols-3 gap-1">
                     <button
                       type="button"
                       data-testid="f530-preview-equipment-ghost"
@@ -2012,6 +2048,15 @@ export default function CanvasArea({
                     >
                       Confirmar
                     </button>
+                    <button
+                      type="button"
+                      data-testid="f545-commit-ghost-source"
+                      className="rounded border border-[#f97316] bg-[#fff7ed] px-1.5 py-1 text-[8px] font-black text-[#c2410c] hover:bg-[#ffedd5]"
+                      title="Crea una fuente real seleccionable desde el ghost. Reversible por undo."
+                      onClick={commitF545GhostSource}
+                    >
+                      Crear fuente
+                    </button>
                   </div>
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     Persistencia CAD: {String(f530ToF534EquipmentPreview.ghost.canPersistGeometry)}. Handoff alimenta 3D/Memoria/Evidence.
@@ -2023,6 +2068,13 @@ export default function CanvasArea({
                   >
                     Drag {f540ToF544GhostDragGate.interaction.canDragPreview ? 'activo' : 'bloqueado'} / Persistencia CAD {String(f540ToF544GhostDragGate.interaction.canPersistGeometry)}
                     {f540DraggingGhost ? ' / moviendo' : ''}
+                  </div>
+                  <div
+                    data-testid="f545-f549-ghost-source-commit-gate"
+                    className="mt-1 rounded border border-[#fed7aa] bg-[#fff7ed] px-1.5 py-1 text-[8px] font-bold text-[#c2410c]"
+                    title="F545-F549: crea fuente real desde el ghost, sin escribir barreras ni reemplazar renderer"
+                  >
+                    Crear fuente {f545ToF549GhostSourceCommit.gate.canCreateRadiationSource ? 'activo' : 'bloqueado'} / Barreras {String(f545ToF549GhostSourceCommit.gate.canWriteBarriers)}
                   </div>
                 </div>
 

@@ -1,4 +1,28 @@
-# Manual de Usuario RadShield-MX - F544 Ghost Drag Gate
+# Manual de Usuario RadShield-MX - F549 Ghost Source Commit
+
+## Addendum F545-F549 - Crear fuente real desde ghost
+
+F545-F549 activa el primer puente productivo del flujo visual: el `ghost` arrastrado puede convertirse en una fuente real del canvas. La fuente queda seleccionada, aparece en el conteo de fuentes activas, se dibuja con el renderer existente y puede retirarse con undo.
+
+Uso:
+
+1. **Preview:** cree el ghost del equipo desde F530-F534.
+2. **Arrastrar:** mueva el ghost al punto candidato.
+3. **Crear fuente:** pulse `Crear fuente`. El sistema crea un `RadiationSource` real con modalidad, workload, use factor, footprint y variante de fabricante.
+4. **Seleccion automatica:** la nueva fuente queda seleccionada para moverla, rotarla o editarla desde inspector.
+5. **Rollback:** use undo para retirar la fuente si la ubicacion no es correcta.
+
+Seguridad:
+
+- No se crean barreras automaticamente.
+- No se reemplaza el renderer base.
+- No se recalcula blindaje de forma silenciosa.
+- La fuente es preliminar hasta revisar workload, escala, geometria, colindancias y memoria analitica.
+
+Validacion recomendada:
+
+- `npm run test:f545-f549:ghost-source-commit`
+- `npm run test:f545-f549:ghost-source-commit:e2e`
 
 ## Addendum F540-F544 - Arrastre seguro del ghost de equipo
 

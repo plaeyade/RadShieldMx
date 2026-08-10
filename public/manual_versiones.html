@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F544 - Manual de Versiones</title>
+  <title>RadShield-MX F549 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F544</span>
+    <span class="pill">Version documental: F549</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0A. F540-F544 Ghost Drag Gate No Persistente</h2>
+    <h2>0A. F545-F549 Ghost Source Commit</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F545</td><td>Boton <code>Crear fuente</code> desde ghost.</td><td>Alta real de <code>RadiationSource</code>.</td><td>Contrato <code>test:f545-f549:ghost-source-commit</code>.</td></tr>
+        <tr><td>F546</td><td>Mapeo TX/NM/DX/CY a modalidad/workload/footprint.</td><td>Fuente lista para edicion y calculo posterior.</td><td>Valores preliminares.</td></tr>
+        <tr><td>F547</td><td>Seleccion automatica.</td><td>Inspector y manipulacion quedan disponibles.</td><td>Sin crear barreras.</td></tr>
+        <tr><td>F548</td><td>Ghost cleanup despues del commit.</td><td>Evita duplicidad visual.</td><td>Renderer base intacto.</td></tr>
+        <tr><td>F549</td><td>E2E con captura del alta desde ghost.</td><td>Evidencia visual para QA.</td><td>Rollback por undo.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0B. F540-F544 Ghost Drag Gate No Persistente</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -43,7 +55,7 @@
       </tbody>
     </table>
 
-    <h2>0B. F535-F539 Equipment Ghost Visual QA</h2>
+    <h2>0C. F535-F539 Equipment Ghost Visual QA</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -55,7 +67,7 @@
       </tbody>
     </table>
 
-    <h2>0C. F530-F534 Equipment Ghost Preview</h2>
+    <h2>0D. F530-F534 Equipment Ghost Preview</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -66,7 +78,7 @@
       </tbody>
     </table>
 
-    <h2>0D. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
+    <h2>0E. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>

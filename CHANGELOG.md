@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F545-F549 (2026-08-09) - Ghost source commit
+
+- Agrega `src/lib/f545F549GhostSourceCommit.ts` para gobernar el alta real de fuentes desde el ghost.
+- Canvas incorpora boton `Crear fuente`: convierte el punto ghost arrastrado en `RadiationSource` real, seleccionable y visible por el renderer existente.
+- `ShieldingDesigner` mapea TX/NM/DX/CY a modalidad, workload, use factor, footprint y variante de fabricante.
+- El ghost se limpia despues del commit para evitar duplicidad visual; rollback por undo/redo existente.
+- La fase no escribe barreras, no cambia calculos y no reemplaza renderer base.
+- Agrega contrato `npm run test:f545-f549:ghost-source-commit` y E2E `npm run test:f545-f549:ghost-source-commit:e2e`.
+
 # F540-F544 (2026-08-09) - Ghost drag gate no persistente
 
 - Agrega `src/lib/f540F544GhostDragGate.ts` para formalizar el arrastre seguro del ghost de equipo.

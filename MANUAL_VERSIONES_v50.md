@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F545-F549 (2026-08-09) - Ghost source commit
+
+- **F545:** agrega boton `Crear fuente` para promover el ghost a `RadiationSource` real.
+- **F546:** mapea modalidad/equipo a workload, use factor, footprint, altura de isocentro y variante de fabricante.
+- **F547:** selecciona automaticamente la fuente creada para inspector, grips y movimiento.
+- **F548:** limpia el ghost despues del commit para evitar doble lectura visual.
+- **F549:** agrega QA contractual/E2E y rollback por undo/redo existente; no crea barreras ni reemplaza renderer.
+
 # F540-F544 (2026-08-09) - Ghost drag gate no persistente
 
 - **F540:** agrega handle arrastrable interno al ghost de equipo sin bloquear el canvas base.
