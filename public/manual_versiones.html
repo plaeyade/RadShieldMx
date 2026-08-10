@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F630 - Manual de Versiones</title>
+  <title>RadShield-MX F635 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F630</span>
+    <span class="pill">Version documental: F635</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F631-F635 Tile Invalidation Atlas</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F631</td><td>Grid de tiles.</td><td>Divide el viewport y marca tiles sucios.</td><td>Tile size acotado.</td></tr>
+        <tr><td>F632</td><td>Cobertura por capa.</td><td>Relaciona layers con tiles afectados.</td><td>Sin eventos.</td></tr>
+        <tr><td>F633</td><td>Dirty ratio.</td><td>Bloquea si casi todo el viewport queda dirty.</td><td>Usar redraw completo.</td></tr>
+        <tr><td>F634</td><td>Cache enlazado.</td><td>Conecta cache F626 con cache F631.</td><td>Invalidar al cambiar geometry/material.</td></tr>
+        <tr><td>F635</td><td>No hit testing.</td><td>Tiles son diagnostico, no interaccion.</td><td>E2E extendido antes de activar.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F631-F635 queda en <code>tile-invalidation-preview</code>: base para performance futura sin reemplazar canvas.</p>
+
     <h2>0. F626-F630 Renderer Scheduler</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

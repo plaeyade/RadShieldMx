@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F631-F635 (2026-08-10) - tile atlas e invalidacion parcial
+
+- Agregado `src/lib/f631F635RendererTileInvalidation.ts` con contrato `radshield-mx.canvas.renderer-tile-invalidation.f631-f635.v1`.
+- F631 divide el viewport en tiles configurables y marca tiles sucios segun dirty regions F621-F625.
+- F632 calcula cobertura por capa: tile ids, comandos y cantidad de tiles dirty por pass/layer.
+- F633-F635 agrega gates de scheduler disponible, dirty ratio acotado, cache enlazado y no sustitucion de canvas.
+- Canvas dibuja overlay de tiles sucios y panel F631-F635 con total, grid, tile size, dirty ratio y gates.
+- La fase sigue en preview: los tiles no participan en eventos, hit testing ni calculos hasta E2E extendido.
+
 # F626-F630 (2026-08-10) - Scheduler del renderer profundo
 
 - Agregado `src/lib/f626F630RendererBaseScheduler.ts` con contrato `radshield-mx.canvas.renderer-base-scheduler.f626-f630.v1`.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F630 - Manual de Usuario</title>
+  <title>RadShield-MX F635 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F630</span>
+      <span class="pill">Version de manual: F635</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,18 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F631-F635: Tile Atlas E Invalidacion Parcial</h2>
+    <p>F631-F635 divide el viewport en tiles y marca tiles sucios por interseccion con dirty regions. Es una base visual para redibujado parcial; no toca eventos ni calculos.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Tile Atlas</td><td>Revise tiles dirty/total y grid.</td><td>Cuanta superficie del canvas necesita redibujarse.</td><td>Ocultar atlas y usar scheduler F626.</td></tr>
+        <tr><td>Cobertura por capa</td><td>Revise las filas de barreras, equipos y zonas.</td><td>Que cada capa afecte solo tiles necesarios.</td><td>Conservar dirty regions F621.</td></tr>
+        <tr><td>Overlay violeta</td><td>Observe tiles sucios sobre el canvas.</td><td>Que el diagnostico sea visible sin capturar eventos.</td><td>No usar tiles para hit testing.</td></tr>
+      </tbody>
+    </table>
+    <div class="ok"><strong>Validacion:</strong> <code>npm run test:f631-f635:renderer-tile-invalidation</code>, <code>npm run test:f631-f635:renderer-tile-invalidation:values</code> y <code>npm run test:f631-f635:renderer-tile-invalidation:e2e</code>.</div>
+
     <h2>0. Addendum F626-F630: Scheduler Del Renderer Profundo</h2>
     <p>F626-F630 agrega presupuesto de frame, render queue por capas, cache key e invalidacion segura. La fase prepara redibujado por regiones sin sustituir el canvas estable ni tocar calculos.</p>
     <table>

@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F631-F635 (2026-08-10) - Tile Invalidation Atlas
+
+- **F631:** crea grid de tiles sobre el viewport y marca tiles dirty por interseccion con dirty regions.
+- **F632:** calcula cobertura por capa/pass: tile ids, tiles sucios y comandos asociados.
+- **F633:** gate de scheduler disponible y dirty ratio acotado.
+- **F634:** enlaza cache F626 con cache F631 para invalidacion parcial.
+- **F635:** confirma que los tiles no sustituyen eventos, hit testing ni renderer base.
+
+Decision: `tile-invalidation-preview` agrega base visual para redibujado parcial. No se usa para interaccion ni calculo hasta E2E extendido.
+
 # F626-F630 (2026-08-10) - Renderer Scheduler
 
 - **F626:** presupuesto de frame con FPS objetivo, ms maximos y comandos maximos por frame.

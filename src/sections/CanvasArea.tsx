@@ -85,6 +85,7 @@ import { buildF586F590NormativeDatasetQa } from '@/lib/f586F590NormativeDatasetQ
 import { buildF591F620GeneralImprovements, type F591F620InspectorMode } from '@/lib/f591F620GeneralImprovements';
 import { buildF621F625RendererBaseDeep, drawF621F625RendererBaseDeepHud } from '@/lib/f621F625RendererBaseDeep';
 import { buildF626F630RendererBaseScheduler, drawF626F630RendererSchedulerHud } from '@/lib/f626F630RendererBaseScheduler';
+import { buildF631F635RendererTileInvalidation, drawF631F635TileInvalidationOverlay } from '@/lib/f631F635RendererTileInvalidation';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1301,6 +1302,16 @@ export default function CanvasArea({
     maxCommandsPerFrame: canvasChromeMode === 'guided' ? 6 : 10,
     highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
   });
+  const f631ToF635RendererTileInvalidation = buildF631F635RendererTileInvalidation(
+    f621ToF625RendererBaseDeep,
+    f626ToF630RendererBaseScheduler,
+    {
+      width: canvasSize.width,
+      height: canvasSize.height,
+      tileSize: canvasChromeMode === 'guided' ? 160 : 220,
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+    },
+  );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -1434,6 +1445,9 @@ export default function CanvasArea({
       showDirtyRegions: visualMode === 'structure' || canvasChromeMode === 'guided',
     });
     drawF626F630RendererSchedulerHud(ctx, f626ToF630RendererBaseScheduler);
+    drawF631F635TileInvalidationOverlay(ctx, f631ToF635RendererTileInvalidation, {
+      showCleanTiles: visualMode === 'structure',
+    });
   }, [
     canvasChromeMode,
     canvasSize.height,
@@ -1444,6 +1458,7 @@ export default function CanvasArea({
     f442ToF445RendererV2Runtime,
     f621ToF625RendererBaseDeep,
     f626ToF630RendererBaseScheduler,
+    f631ToF635RendererTileInvalidation,
     visualMode,
   ]);
 
@@ -2375,6 +2390,64 @@ export default function CanvasArea({
                     title={f626ToF630RendererBaseScheduler.rollback.join(' | ')}
                   >
                     {f626ToF630RendererBaseScheduler.invalidation.cacheKey} | invalida: {f626ToF630RendererBaseScheduler.invalidation.invalidatesOn.slice(0, 4).join(', ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f631-f635-renderer-tile-invalidation"
+                  className="mt-2 rounded-lg border border-[#ddd6fe] bg-[#fbfaff]/95 p-2"
+                  title="F631-F635: atlas de tiles e invalidacion parcial para renderer profundo"
+                  aria-label="F631 a F635 atlas de tiles renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#6d28d9]">F631-F635 tile atlas</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Invalidacion parcial por tiles</div>
+                    </div>
+                    <span
+                      data-testid="f631-f635-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f631ToF635RendererTileInvalidation.status === 'tile-invalidation-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f631ToF635RendererTileInvalidation.status === 'tile-invalidation-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#ddd6fe] bg-[#f3e8ff] text-[#6d28d9]'
+                      }`}
+                    >
+                      {f631ToF635RendererTileInvalidation.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f631-f635-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f631ToF635RendererTileInvalidation.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#6d28d9]">Tiles {f631ToF635RendererTileInvalidation.metrics.dirtyTiles}/{f631ToF635RendererTileInvalidation.metrics.totalTiles}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">{f631ToF635RendererTileInvalidation.metrics.cols}x{f631ToF635RendererTileInvalidation.metrics.rows}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">{f631ToF635RendererTileInvalidation.tileSize}px</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">{f631ToF635RendererTileInvalidation.metrics.dirtyRatio}%</span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f631ToF635RendererTileInvalidation.coverage.slice(0, 4).map((item) => (
+                      <div
+                        key={item.layer}
+                        data-testid={`f631-f635-coverage-${item.layer}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${item.tileIds.join(', ') || 'sin tiles sucios'} | comandos ${item.commandCount}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{item.layer}</span>
+                          <span className="rounded bg-[#f3e8ff] px-1 py-0.5 text-[7px] font-black text-[#6d28d9]">{item.dirtyTileCount}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f631-f635-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f631ToF635RendererTileInvalidation.rollback.join(' | ')}
+                  >
+                    {f631ToF635RendererTileInvalidation.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

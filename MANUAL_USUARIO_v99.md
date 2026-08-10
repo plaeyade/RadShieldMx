@@ -1,4 +1,30 @@
-# Manual de Usuario RadShield-MX - F630 Renderer Scheduler
+# Manual de Usuario RadShield-MX - F635 Tile Atlas
+
+## Addendum F631-F635 - Tile atlas e invalidacion parcial
+
+F631-F635 divide el viewport del canvas en tiles y marca cuales intersectan dirty regions del renderer profundo. Esto prepara redibujado parcial por zonas. Todavia no se usa para eventos, hit testing ni calculo: es una capa visual y de diagnostico.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F631-F635 tile atlas**.
+3. Revise **Tiles dirty/total** para medir que tanto del viewport necesita redibujarse.
+4. Revise el grid `cols x rows` y el tamano de tile.
+5. Revise la cobertura por capa: barreras, equipos, zonas, penetraciones o evidencia.
+6. En el canvas vera tiles sucios en overlay violeta tenue.
+
+### Logica de seguridad
+
+- Los tiles no capturan eventos.
+- Los tiles no sustituyen seleccion, grips, snapping, boton derecho ni calculos.
+- Si el dirty ratio se vuelve demasiado alto, el atlas se bloquea y se usa scheduler F626-F630.
+- Rollback: ocultar atlas y mantener dirty regions F621-F625 como diagnostico visual.
+
+### Validacion tecnica
+
+- `npm run test:f631-f635:renderer-tile-invalidation`
+- `npm run test:f631-f635:renderer-tile-invalidation:values`
+- `npm run test:f631-f635:renderer-tile-invalidation:e2e`
 
 ## Addendum F626-F630 - Scheduler del renderer profundo
 
