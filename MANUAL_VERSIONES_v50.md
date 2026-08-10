@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F646-F650 (2026-08-10) - Selection Transaction Preview
+
+- **F646:** draft de operacion `select-preview`, `draw-preview`, `pan-preview` o `noop-preview`.
+- **F647:** snapshot before/after de seleccion simulada.
+- **F648:** rollback token para restaurar seleccion en fases futuras.
+- **F649:** gates de dry-run disponible y rollback token.
+- **F650:** gate de no commit real; no llama `setCanvasState` ni toca geometria.
+
+Decision: `selection-transaction-preview` prepara commit/rollback seguro antes de activar eventos profundos. Sigue sin escribir seleccion real.
+
 # F641-F645 (2026-08-10) - Event Dry-run Bridge
 
 - **F641:** snapshot legacy: herramienta activa, seleccion, multi-seleccion, snap y owner `useCanvas`.

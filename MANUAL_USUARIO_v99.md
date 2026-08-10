@@ -1,4 +1,32 @@
-# Manual de Usuario RadShield-MX - F645 Event Dry-run
+# Manual de Usuario RadShield-MX - F650 Selection Transaction
+
+## Addendum F646-F650 - Selection Transaction Preview
+
+F646-F650 agrega una transaccion simulada de seleccion. Toma el intent F641-F645 y calcula un before/after de seleccion, junto con un rollback token. Es una preparacion para activar eventos profundos mas adelante, pero por ahora no escribe en el canvas real.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F646-F650 selection tx**.
+3. Revise **Chg** para saber si la seleccion simulada cambiaria.
+4. Revise **B** y **A** para conteos before/after.
+5. Revise la operacion: `select-preview`, `draw-preview`, `pan-preview` o `noop-preview`.
+6. Revise el draft para ver target, instruction y capa prevista.
+7. Revise el rollback token; debe iniciar con `f648-rollback`.
+
+### Logica de seguridad
+
+- No ejecuta commit real.
+- No llama `setCanvasState`.
+- No modifica `selectedId`, `selectedIds`, geometria ni calculos.
+- El rollback token queda listo para fases futuras donde se active commit real.
+- Rollback: descartar F646-F650 y volver a F641-F645 dry-run.
+
+### Validacion tecnica
+
+- `npm run test:f646-f650:renderer-selection-transaction`
+- `npm run test:f646-f650:renderer-selection-transaction:values`
+- `npm run test:f646-f650:renderer-selection-transaction:e2e`
 
 ## Addendum F641-F645 - Event dry-run bridge
 

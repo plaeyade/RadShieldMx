@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F645 - Manual de Versiones</title>
+  <title>RadShield-MX F650 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F645</span>
+    <span class="pill">Version documental: F650</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F646-F650 Selection Transaction</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F646</td><td>Draft de operacion.</td><td>Define select/draw/pan/noop preview.</td><td>Solo lectura.</td></tr>
+        <tr><td>F647</td><td>Snapshot before/after.</td><td>Simula seleccion futura.</td><td>No muta canvas.</td></tr>
+        <tr><td>F648</td><td>Rollback token.</td><td>Prepara reversa auditable.</td><td>Token obligatorio.</td></tr>
+        <tr><td>F649</td><td>Gates de dry-run y rollback.</td><td>Bloquea si F641 falla.</td><td>Volver a dry-run.</td></tr>
+        <tr><td>F650</td><td>No commit real.</td><td>Evita setCanvasState y geometria.</td><td>E2E antes de activar.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F646-F650 queda en <code>selection-transaction-preview</code>: commit/rollback simulado sin reemplazar canvas.</p>
+
     <h2>0. F641-F645 Event Dry-run</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

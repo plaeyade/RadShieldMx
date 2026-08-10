@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F645 - Manual de Usuario</title>
+  <title>RadShield-MX F650 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F645</span>
+      <span class="pill">Version de manual: F650</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F646-F650: Selection Transaction</h2>
+    <p>F646-F650 crea una transaccion simulada de seleccion con draft, before/after y rollback token. Sirve para probar commit/rollback futuro sin escribir seleccion real.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Draft</td><td>Revise operacion y target previsto.</td><td>Que el intent F641 tenga una salida coherente.</td><td>Descartar draft.</td></tr>
+        <tr><td>Snapshot</td><td>Compare before/after.</td><td>Que el cambio sea visible sin commit real.</td><td>Restaurar before.</td></tr>
+        <tr><td>Rollback token</td><td>Debe iniciar con f648-rollback.</td><td>Que exista ruta de reversa.</td><td>Usar token en fase futura.</td></tr>
+        <tr><td>Gates</td><td>Revise OK/NO.</td><td>Que no se llame setCanvasState.</td><td>Volver a F641-F645.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F646-F650 queda en <code>selection-transaction-preview</code>. No modifica <code>selectedId</code>, <code>selectedIds</code> ni geometria.</p>
+
     <h2>0. Addendum F641-F645: Event Dry-run</h2>
     <p>F641-F645 compara el candidato del renderer profundo contra el estado legacy del canvas. Deriva un intent <code>pointerdown-preview</code> y lo muestra, pero no ejecuta seleccion ni modifica geometria.</p>
     <table>

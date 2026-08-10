@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F646-F650 (2026-08-10) - transaccion simulada de seleccion
+
+- Agregado `src/lib/f646F650RendererSelectionTransaction.ts` con contrato `radshield-mx.canvas.renderer-selection-transaction.f646-f650.v1`.
+- F646 crea draft de operacion: select/draw/pan/noop en modo preview.
+- F647 calcula snapshot before/after de seleccion simulada sin escribir estado real.
+- F648 genera rollback token para restaurar seleccion si en fases futuras se activa commit real.
+- F649-F650 agrega gates de dry-run disponible, rollback token y no commit real.
+- Canvas muestra panel F646-F650 con operacion, before/after, rollback token y gates.
+- Sigue en preview: no llama `setCanvasState`, no modifica `selectedId`, no toca geometria ni eventos.
+
 # F641-F645 (2026-08-10) - event dry-run bridge
 
 - Agregado `src/lib/f641F645RendererEventDryRun.ts` con contrato `radshield-mx.canvas.renderer-event-dry-run.f641-f645.v1`.

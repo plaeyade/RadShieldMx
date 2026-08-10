@@ -88,6 +88,7 @@ import { buildF626F630RendererBaseScheduler, drawF626F630RendererSchedulerHud } 
 import { buildF631F635RendererTileInvalidation, drawF631F635TileInvalidationOverlay } from '@/lib/f631F635RendererTileInvalidation';
 import { buildF636F640RendererHitTestShadow, drawF636F640HitTestShadowOverlay } from '@/lib/f636F640RendererHitTestShadow';
 import { buildF641F645RendererEventDryRun } from '@/lib/f641F645RendererEventDryRun';
+import { buildF646F650RendererSelectionTransaction } from '@/lib/f646F650RendererSelectionTransaction';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1332,6 +1333,12 @@ export default function CanvasArea({
       selectedId: canvasState.selectedId,
       selectedIds: canvasState.selectedIds,
       snapToGrid: canvasState.snapToGrid,
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+    },
+  );
+  const f646ToF650RendererSelectionTransaction = buildF646F650RendererSelectionTransaction(
+    f641ToF645RendererEventDryRun,
+    {
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
     },
   );
@@ -2597,6 +2604,70 @@ export default function CanvasArea({
                     title={f641ToF645RendererEventDryRun.rollback.join(' | ')}
                   >
                     {f641ToF645RendererEventDryRun.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f646-f650-renderer-selection-transaction"
+                  className="mt-2 rounded-lg border border-[#bfdbfe] bg-[#eff6ff]/95 p-2"
+                  title="F646-F650: transaccion simulada de seleccion con before/after y rollback token sin commit real"
+                  aria-label="F646 a F650 transaccion simulada de seleccion renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#1d4ed8]">F646-F650 selection tx</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Commit/rollback simulado, sin setCanvasState</div>
+                    </div>
+                    <span
+                      data-testid="f646-f650-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f646ToF650RendererSelectionTransaction.status === 'selection-transaction-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f646ToF650RendererSelectionTransaction.status === 'selection-transaction-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#bfdbfe] bg-[#dbeafe] text-[#1d4ed8]'
+                      }`}
+                    >
+                      {f646ToF650RendererSelectionTransaction.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f646-f650-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f646ToF650RendererSelectionTransaction.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Chg {f646ToF650RendererSelectionTransaction.metrics.changedCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">B {f646ToF650RendererSelectionTransaction.metrics.beforeCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">A {f646ToF650RendererSelectionTransaction.metrics.afterCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">{f646ToF650RendererSelectionTransaction.draft.operation}</span>
+                  </div>
+                  <div
+                    data-testid="f646-f650-draft"
+                    className="mt-1 truncate rounded border border-[#bfdbfe] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#1d4ed8]"
+                    title={f646ToF650RendererSelectionTransaction.draft.reason}
+                  >
+                    {f646ToF650RendererSelectionTransaction.draft.operationId} | {f646ToF650RendererSelectionTransaction.draft.instructionId ?? 'sin instruction'} | {f646ToF650RendererSelectionTransaction.draft.layer ?? 'sin capa'}
+                  </div>
+                  <div
+                    data-testid="f646-f650-snapshot"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={`before ${f646ToF650RendererSelectionTransaction.snapshot.beforeSelectedIds.join(', ') || 'none'} -> after ${f646ToF650RendererSelectionTransaction.snapshot.afterSelectedIds.join(', ') || 'none'}`}
+                  >
+                    before: {f646ToF650RendererSelectionTransaction.snapshot.beforeSelectedId ?? 'none'} | after: {f646ToF650RendererSelectionTransaction.snapshot.afterSelectedId ?? 'none'} | changed: {f646ToF650RendererSelectionTransaction.snapshot.changed ? 'SI' : 'NO'}
+                  </div>
+                  <div
+                    data-testid="f646-f650-rollback-token"
+                    className="mt-1 truncate rounded border border-[#bfdbfe] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#1d4ed8]"
+                    title={`Restaura ${f646ToF650RendererSelectionTransaction.rollbackToken.restoresSelectedIds.join(', ') || 'sin seleccion'}`}
+                  >
+                    {f646ToF650RendererSelectionTransaction.rollbackToken.token} | rollback {f646ToF650RendererSelectionTransaction.rollbackToken.canRollback ? 'OK' : 'NO'}
+                  </div>
+                  <div
+                    data-testid="f646-f650-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f646ToF650RendererSelectionTransaction.rollback.join(' | ')}
+                  >
+                    {f646ToF650RendererSelectionTransaction.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 
