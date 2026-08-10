@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F640 - Manual de Versiones</title>
+  <title>RadShield-MX F645 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F640</span>
+    <span class="pill">Version documental: F645</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F641-F645 Event Dry-run</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F641</td><td>Snapshot legacy.</td><td>Herramienta, seleccion, snap y owner useCanvas.</td><td>Solo lectura.</td></tr>
+        <tr><td>F642</td><td>Intent pointerdown-preview.</td><td>Predice seleccion/dibujo/pan/noop.</td><td>No ejecuta accion.</td></tr>
+        <tr><td>F643</td><td>Comparacion.</td><td>Candidato previsto vs seleccion actual.</td><td>No muta seleccion.</td></tr>
+        <tr><td>F644</td><td>Gates de disponibilidad.</td><td>Bloquea si shadow o intent fallan.</td><td>Volver a F636.</td></tr>
+        <tr><td>F645</td><td>Reversibilidad de eventos.</td><td>Evita setCanvasState y preserve legacy.</td><td>E2E antes de activar.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F641-F645 queda en <code>event-dry-run-preview</code>: puente seco de eventos sin reemplazar canvas.</p>
+
     <h2>0. F636-F640 Hit-test Shadow</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

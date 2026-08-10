@@ -1,4 +1,32 @@
-# Manual de Usuario RadShield-MX - F640 Hit-test Shadow
+# Manual de Usuario RadShield-MX - F645 Event Dry-run
+
+## Addendum F641-F645 - Event dry-run bridge
+
+F641-F645 compara el candidato del renderer profundo contra el estado real legacy del canvas. Es un puente seco: deriva que accion podria ejecutarse ante un `pointerdown-preview`, pero no dispara esa accion. Sirve para validar seleccion futura sin romper boton derecho, seleccion multiple, drag, snapping ni herramientas actuales.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F641-F645 event dry-run**.
+3. Revise **Cand** para candidatos heredados de F636.
+4. Revise **Sel** para seleccion legacy actual.
+5. Revise el nombre de herramienta activa y estado Snap/Free.
+6. Revise **intent**: `select-candidate`, `draw-with-active-tool`, `pan-canvas` o `noop`.
+7. Revise **comparison** para saber si la seleccion legacy coincide o no con el candidato previsto.
+
+### Logica de seguridad
+
+- No ejecuta `setCanvasState`.
+- No cambia `selectedId` ni `selectedIds`.
+- No modifica geometria, drag, snapping ni eventos.
+- `useCanvas` sigue siendo el owner canonico.
+- Rollback: ocultar F641-F645 y conservar F636-F640 como overlay visual.
+
+### Validacion tecnica
+
+- `npm run test:f641-f645:renderer-event-dry-run`
+- `npm run test:f641-f645:renderer-event-dry-run:values`
+- `npm run test:f641-f645:renderer-event-dry-run:e2e`
 
 ## Addendum F636-F640 - Hit-test shadow y candidatos reversibles
 

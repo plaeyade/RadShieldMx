@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F641-F645 (2026-08-10) - event dry-run bridge
+
+- Agregado `src/lib/f641F645RendererEventDryRun.ts` con contrato `radshield-mx.canvas.renderer-event-dry-run.f641-f645.v1`.
+- F641 captura snapshot legacy: herramienta activa, seleccion, multi-seleccion, snap y owner `useCanvas`.
+- F642 deriva intent `pointerdown-preview` desde candidato F636 sin ejecutar accion.
+- F643 compara candidato previsto contra seleccion legacy y explica mismatch.
+- F644-F645 agrega gates de shadow disponible, intent derivado y preservacion de eventos legacy.
+- Canvas muestra panel F641-F645 con candidatos, seleccion, herramienta, intent, comparacion y rollback.
+- Sigue en preview: no llama `setCanvasState`, no selecciona objetos, no ejecuta drag ni cambia geometria.
+
 # F636-F640 (2026-08-10) - hit-test shadow y candidatos reversibles
 
 - Agregado `src/lib/f636F640RendererHitTestShadow.ts` con contrato `radshield-mx.canvas.renderer-hit-test-shadow.f636-f640.v1`.

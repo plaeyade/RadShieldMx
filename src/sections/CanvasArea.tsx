@@ -87,6 +87,7 @@ import { buildF621F625RendererBaseDeep, drawF621F625RendererBaseDeepHud } from '
 import { buildF626F630RendererBaseScheduler, drawF626F630RendererSchedulerHud } from '@/lib/f626F630RendererBaseScheduler';
 import { buildF631F635RendererTileInvalidation, drawF631F635TileInvalidationOverlay } from '@/lib/f631F635RendererTileInvalidation';
 import { buildF636F640RendererHitTestShadow, drawF636F640HitTestShadowOverlay } from '@/lib/f636F640RendererHitTestShadow';
+import { buildF641F645RendererEventDryRun } from '@/lib/f641F645RendererEventDryRun';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1324,6 +1325,16 @@ export default function CanvasArea({
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
     },
   );
+  const f641ToF645RendererEventDryRun = buildF641F645RendererEventDryRun(
+    f636ToF640RendererHitTestShadow,
+    {
+      activeTool,
+      selectedId: canvasState.selectedId,
+      selectedIds: canvasState.selectedIds,
+      snapToGrid: canvasState.snapToGrid,
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+    },
+  );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -2529,6 +2540,63 @@ export default function CanvasArea({
                     title={f636ToF640RendererHitTestShadow.rollback.join(' | ')}
                   >
                     {f636ToF640RendererHitTestShadow.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f641-f645-renderer-event-dry-run"
+                  className="mt-2 rounded-lg border border-[#fed7aa] bg-[#fff7ed]/95 p-2"
+                  title="F641-F645: dry-run de eventos compara candidato del renderer profundo contra seleccion legacy sin ejecutar acciones"
+                  aria-label="F641 a F645 dry run de eventos del renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#c2410c]">F641-F645 event dry-run</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Intent preview vs legacy useCanvas</div>
+                    </div>
+                    <span
+                      data-testid="f641-f645-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f641ToF645RendererEventDryRun.status === 'event-dry-run-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f641ToF645RendererEventDryRun.status === 'event-dry-run-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#fed7aa] bg-[#ffedd5] text-[#c2410c]'
+                      }`}
+                    >
+                      {f641ToF645RendererEventDryRun.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f641-f645-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f641ToF645RendererEventDryRun.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#c2410c]">Cand {f641ToF645RendererEventDryRun.metrics.candidateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">Sel {f641ToF645RendererEventDryRun.metrics.selectedCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">{f641ToF645RendererEventDryRun.legacy.activeTool}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">{f641ToF645RendererEventDryRun.legacy.snapToGrid ? 'Snap' : 'Free'}</span>
+                  </div>
+                  <div
+                    data-testid="f641-f645-intent"
+                    className="mt-1 truncate rounded border border-[#fed7aa] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#c2410c]"
+                    title={f641ToF645RendererEventDryRun.intent.reason}
+                  >
+                    {f641ToF645RendererEventDryRun.intent.action} | {f641ToF645RendererEventDryRun.intent.predictedLayer ?? 'sin capa'} | {f641ToF645RendererEventDryRun.intent.predictedTargetId ?? 'sin target'}
+                  </div>
+                  <div
+                    data-testid="f641-f645-comparison"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f641ToF645RendererEventDryRun.comparison.mismatchReason}
+                  >
+                    Legacy match: {f641ToF645RendererEventDryRun.comparison.legacySelectionMatchesCandidate ? 'SI' : 'NO'} | selection: {f641ToF645RendererEventDryRun.comparison.legacySelectionPresent ? 'SI' : 'NO'} | candidate: {f641ToF645RendererEventDryRun.comparison.candidatePresent ? 'SI' : 'NO'}
+                  </div>
+                  <div
+                    data-testid="f641-f645-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f641ToF645RendererEventDryRun.rollback.join(' | ')}
+                  >
+                    {f641ToF645RendererEventDryRun.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F641-F645 (2026-08-10) - Event Dry-run Bridge
+
+- **F641:** snapshot legacy: herramienta activa, seleccion, multi-seleccion, snap y owner `useCanvas`.
+- **F642:** intent `pointerdown-preview` derivado desde candidato F636.
+- **F643:** comparacion entre seleccion legacy y candidato previsto.
+- **F644:** gates de shadow disponible e intent derivado.
+- **F645:** gate de reversibilidad: no ejecuta `setCanvasState`, no toca eventos ni geometria.
+
+Decision: `event-dry-run-preview` permite probar la ruta futura de eventos sin activar seleccion real. Es requisito previo antes de renderer/eventos profundos.
+
 # F636-F640 (2026-08-10) - Hit-test Shadow Map
 
 - **F636:** deriva targets seleccionables desde comandos visibles F621 con bounds, centro, capa y zIndex.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F640 - Manual de Usuario</title>
+  <title>RadShield-MX F645 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F640</span>
+      <span class="pill">Version de manual: F645</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F641-F645: Event Dry-run</h2>
+    <p>F641-F645 compara el candidato del renderer profundo contra el estado legacy del canvas. Deriva un intent <code>pointerdown-preview</code> y lo muestra, pero no ejecuta seleccion ni modifica geometria.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Snapshot legacy</td><td>Revise herramienta, seleccion y snap.</td><td>Que useCanvas sigue siendo owner.</td><td>Mantener flujo legacy.</td></tr>
+        <tr><td>Intent</td><td>Revise select-candidate/draw/pan/noop.</td><td>Que el evento previsto sea coherente.</td><td>No ejecutar intent.</td></tr>
+        <tr><td>Comparison</td><td>Revise match entre seleccion y candidato.</td><td>Que no haya sustitucion silenciosa.</td><td>Volver a F636-F640.</td></tr>
+        <tr><td>Gates</td><td>Revise OK/NO.</td><td>Que no se active seleccion real sin E2E.</td><td>Ocultar panel F641-F645.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F641-F645 queda en <code>event-dry-run-preview</code>. Es puente de eventos, no reemplazo de <code>useCanvas</code>.</p>
+
     <h2>0. Addendum F636-F640: Hit-test Shadow</h2>
     <p>F636-F640 crea un shadow map de hit-test para identificar candidatos de seleccion desde el renderer profundo. Es una capa de diagnostico reversible; no cambia seleccion real, boton derecho, snapping, drag ni calculos.</p>
     <table>
