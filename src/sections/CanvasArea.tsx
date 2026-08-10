@@ -83,6 +83,7 @@ import { buildF571F580UnityDbTechnicalClosure } from '@/lib/f571F580UnityDbTechn
 import { buildF581F585ExpandedNormativeNumericQa } from '@/lib/f581F585ExpandedNormativeNumericQa';
 import { buildF586F590NormativeDatasetQa } from '@/lib/f586F590NormativeDatasetQa';
 import { buildF591F620GeneralImprovements, type F591F620InspectorMode } from '@/lib/f591F620GeneralImprovements';
+import { buildF621F625RendererBaseDeep, drawF621F625RendererBaseDeepHud } from '@/lib/f621F625RendererBaseDeep';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1287,6 +1288,13 @@ export default function CanvasArea({
     highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
   const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
+  const f621ToF625RendererBaseDeep = buildF621F625RendererBaseDeep(f442ToF445RendererV2Runtime, {
+    width: canvasSize.width,
+    height: canvasSize.height,
+    scale: canvasState.scale,
+    offsetX: canvasState.offsetX,
+    offsetY: canvasState.offsetY,
+  });
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -1416,6 +1424,9 @@ export default function CanvasArea({
         previewOpacity: canvasChromeMode === 'guided' ? 0.62 : 0.82,
       },
     );
+    drawF621F625RendererBaseDeepHud(ctx, f621ToF625RendererBaseDeep, {
+      showDirtyRegions: visualMode === 'structure' || canvasChromeMode === 'guided',
+    });
   }, [
     canvasChromeMode,
     canvasSize.height,
@@ -1424,6 +1435,7 @@ export default function CanvasArea({
     canvasState.offsetY,
     canvasState.scale,
     f442ToF445RendererV2Runtime,
+    f621ToF625RendererBaseDeep,
     visualMode,
   ]);
 
@@ -2239,6 +2251,64 @@ export default function CanvasArea({
                   </div>
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     Renderer v2 sigue pointer-events:none; CanvasArea/useCanvas no se reemplazan sin F197/F207/F229/F446.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f621-f625-renderer-base-deep"
+                  className="mt-2 rounded-lg border border-[#bdd7e7] bg-[#f7fbff]/95 p-2"
+                  title="F621-F625: renderer base profundo con comandos, clipping, dirty regions y HUD seguro"
+                  aria-label="F621 a F625 renderer base profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#075985]">F621-F625 renderer profundo</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Comandos + viewport clipping + dirty regions</div>
+                    </div>
+                    <span
+                      data-testid="f621-f625-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f621ToF625RendererBaseDeep.status === 'renderer-base-deep-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f621ToF625RendererBaseDeep.status === 'renderer-base-deep-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#bae6fd] bg-[#e0f2fe] text-[#0369a1]'
+                      }`}
+                    >
+                      {f621ToF625RendererBaseDeep.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f621-f625-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={`Viewport ${f621ToF625RendererBaseDeep.metrics.viewport}`}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">Cmd {f621ToF625RendererBaseDeep.metrics.visibleCommands}/{f621ToF625RendererBaseDeep.metrics.totalCommands}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#238a61]">Pass {f621ToF625RendererBaseDeep.metrics.passGroups}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">Warn {f621ToF625RendererBaseDeep.metrics.warningCommands}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#475569]">Hidden {f621ToF625RendererBaseDeep.metrics.hiddenCommands}</span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {f621ToF625RendererBaseDeep.passGroups.slice(0, 4).map((group) => (
+                      <div
+                        key={group.id}
+                        data-testid={`f621-f625-pass-${group.layer}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={group.dirtyBounds ? `Dirty ${Math.round(group.dirtyBounds.width)}x${Math.round(group.dirtyBounds.height)}` : 'Sin dirty region visible'}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{group.layer}</span>
+                          <span className="rounded bg-[#e0f2fe] px-1 py-0.5 text-[7px] font-black text-[#0369a1]">{group.visibleCommandCount}/{group.commandIds.length}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f621-f625-gates"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f621ToF625RendererBaseDeep.rollback.join(' | ')}
+                  >
+                    {f621ToF625RendererBaseDeep.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

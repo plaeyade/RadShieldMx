@@ -1,4 +1,30 @@
-# Manual de Usuario RadShield-MX - F620 Mejoras Generales Prioritarias
+# Manual de Usuario RadShield-MX - F625 Renderer Base Profundo
+
+## Addendum F621-F625 - Renderer base profundo
+
+F621-F625 agrega una capa de lectura profunda del renderer sin sustituir el canvas estable. Convierte los overlays F442-F445 en comandos de render, revisa que esten dentro del viewport, agrupa por capas/pass y dibuja un HUD de dirty regions sobre un overlay sin eventos.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia o estructura.
+2. En el panel derecho ubique **F621-F625 renderer profundo**.
+3. Revise **Cmd visible/total** para saber que se esta dibujando dentro del viewport.
+4. Revise **Pass** para confirmar agrupacion por capa: barreras, equipos, zonas, penetraciones o evidencia.
+5. Revise **Warn** para detectar comandos que arrastran advertencias heredadas del renderer F442.
+6. Use el HUD superior izquierdo para confirmar viewport, estado y conteo rapido mientras mueve o cambia escala.
+
+### Logica de seguridad
+
+- El overlay es `pointer-events:none`; no captura clics, boton derecho, drag, grips ni snapping.
+- `useCanvas` sigue siendo la fuente canonica de eventos, geometria y acciones.
+- El renderer base profundo no calcula blindajes; solo prepara trazabilidad visual para BIM/canvas avanzado.
+- Si algun gate queda bloqueado, el HUD se oculta y se conserva el renderer previo.
+
+### Validacion tecnica
+
+- `npm run test:f621-f625:renderer-base-deep`
+- `npm run test:f621-f625:renderer-base-deep:values`
+- `npm run test:f621-f625:renderer-base-deep:e2e`
 
 ## Addendum F591-F620 - Mejoras generales prioritarias
 

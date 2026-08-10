@@ -1,5 +1,16 @@
 # RadShield-MX - Fases recientes
 
+# F621-F625 (2026-08-10) - Renderer base profundo
+
+- Agregado `src/lib/f621F625RendererBaseDeep.ts` con contrato `radshield-mx.canvas.renderer-base-deep.f621-f625.v1`.
+- F621 normaliza instrucciones F442-F445 en comandos de render con `screenBounds`, capa, `zIndex`, evidencia y warnings.
+- F622 agrupa comandos por pass/capa y calcula `dirty regions` para depuracion visual y futura invalidacion parcial.
+- F623-F625 agrega gates de seguridad: runtime no bloqueado, lista de comandos, clipping de viewport y overlay sin eventos.
+- Canvas muestra panel F621-F625 con comandos visibles/totales, pass groups, warnings, hidden commands y gates OK/NO.
+- Overlay HUD dibuja regiones sucias solo sobre `canvas.pointer-events-none`; no reemplaza `useCanvas`, no toma eventos, no muta geometria ni calculos.
+- Update Center registra la fase como `renderer-base-deep-preview`.
+- Agregado harness de contrato, valores y E2E con capturas dedicadas en `outputs/f621_f625_renderer_base_deep`.
+
 # F591-F620 (2026-08-10) - Mejoras generales prioritarias
 
 - Agregado contrato `radshield-mx.general-improvements.f591-f620.v1` para consolidar las mejoras mas convenientes antes de seguir agregando funciones grandes.

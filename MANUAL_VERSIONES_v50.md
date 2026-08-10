@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F621-F625 (2026-08-10) - Renderer Base Profundo
+
+- **F621:** convierte instrucciones F442-F445 en comandos normalizados con bounds en pantalla, evidencia, warnings y capa.
+- **F622:** agrupa comandos por pass/capa y calcula dirty regions para depuracion visual e invalidacion futura.
+- **F623:** gate de runtime: bloquea si F442-F445 esta bloqueado o no hay comandos.
+- **F624:** gate de viewport clipping: separa comandos visibles y ocultos sin borrar nada.
+- **F625:** gate pointer-safe: confirma que el overlay no toca eventos y conserva `useCanvas`.
+
+Decision: `renderer-base-deep-preview` queda habilitado como capa de lectura visual. No reemplaza renderer base, no cambia eventos, no altera calculos y tiene rollback inmediato ocultando HUD/panel F621-F625.
+
 # F591-F620 (2026-08-10) - Mejoras Generales Prioritarias
 
 - **F591-F595:** canvas con inspector QA compacto por defecto y detalle F550-F590 expandible.

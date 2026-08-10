@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F620 - Manual de Usuario</title>
+  <title>RadShield-MX F625 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F620</span>
+      <span class="pill">Version de manual: F625</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,18 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F621-F625: Renderer Base Profundo</h2>
+    <p>F621-F625 agrega una capa de lectura profunda del renderer sin sustituir el canvas estable. Convierte overlays F442-F445 en comandos de render, revisa viewport clipping, agrupa por capas/pass y dibuja dirty regions sobre un overlay sin eventos.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Panel F621-F625</td><td>Revise comandos visibles/totales, pass groups, warnings y hidden commands.</td><td>Que el renderer profundo tenga comandos trazables y agrupados por capa.</td><td>Ocultar panel/HUD y conservar F442.</td></tr>
+        <tr><td>HUD overlay</td><td>Observe viewport, estado y conteos en la esquina superior izquierda.</td><td>Que dirty regions se dibujen sin bloquear clics.</td><td>Overlay <code>pointer-events:none</code>.</td></tr>
+        <tr><td>Gates</td><td>Confirme Runtime, Comandos, Clipping y Overlay sin eventos.</td><td>Que <code>useCanvas</code> siga siendo fuente canonica de eventos.</td><td>No reemplaza renderer base ni muta geometria.</td></tr>
+      </tbody>
+    </table>
+    <div class="ok"><strong>Validacion:</strong> <code>npm run test:f621-f625:renderer-base-deep</code>, <code>npm run test:f621-f625:renderer-base-deep:values</code> y <code>npm run test:f621-f625:renderer-base-deep:e2e</code>.</div>
+
     <h2>0. Addendum F591-F620: Mejoras Generales Prioritarias</h2>
     <p>F591-F620 consolida las mejoras mas convenientes para operar la beta con menos saturacion: inspector QA compacto, ruta DB real, Unity visual-only, memorias reales como QA futuro, Memoria IA productiva y consolidacion release.</p>
     <table>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F620 - Manual de Versiones</title>
+  <title>RadShield-MX F625 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F620</span>
+    <span class="pill">Version documental: F625</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F621-F625 Renderer base profundo</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F621</td><td>Comandos de render normalizados.</td><td>Convierte F442-F445 en comandos con screen bounds, capa, evidencia y warnings.</td><td>No reemplaza renderer base.</td></tr>
+        <tr><td>F622</td><td>Pass groups y dirty regions.</td><td>Agrupa por capa y calcula regiones sucias para depuracion visual.</td><td>Solo overlay visual.</td></tr>
+        <tr><td>F623</td><td>Gate de runtime.</td><td>Bloquea si F442-F445 esta bloqueado o sin comandos.</td><td>Rollback a overlay F442.</td></tr>
+        <tr><td>F624</td><td>Viewport clipping.</td><td>Distingue comandos visibles y ocultos sin borrar instrucciones.</td><td>Sin mutar geometria.</td></tr>
+        <tr><td>F625</td><td>Overlay pointer-safe.</td><td>Confirma que el HUD usa <code>pointer-events:none</code> y conserva <code>useCanvas</code>.</td><td>Eventos legacy intactos.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F621-F625 queda en <code>renderer-base-deep-preview</code>: es trazabilidad visual profunda, no sustitucion del canvas ni motor de calculo.</p>
+
     <h2>0. F591-F620 Mejoras Generales Prioritarias</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
