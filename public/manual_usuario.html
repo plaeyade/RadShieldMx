@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F555 - Manual de Usuario</title>
+  <title>RadShield-MX F560 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F555</span>
+      <span class="pill">Version de manual: F560</span>
       <span class="pill">Fecha: 2026-08-09</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,21 @@
   </header>
   <main>
     <section>
+      <h2>0. Addendum F556-F560: Post-Beta Profunda</h2>
+      <p>F556-F560 agrega un tablero visible para gobernar la etapa post-beta: renderer base v2, Babylon real, Unity real, base tecnica completa y QA normativo ampliado. El tablero no sustituye al canvas estable; muestra que esta listo, que esta en preview y que sigue bloqueado por assets, datasets o E2E.</p>
+      <table>
+        <thead><tr><th>Carril</th><th>Uso</th><th>Estado esperado</th><th>Gate antes de produccion</th></tr></thead>
+        <tbody>
+          <tr><td>Renderer base v2</td><td>Overlay/preview observable.</td><td>Preview.</td><td>No reemplazar <code>CanvasArea/useCanvas</code> hasta repetir F197/F207/F229/F446.</td></tr>
+          <tr><td>Babylon real</td><td>Escena medica con muros, equipos, zonas, camaras y picking.</td><td>Preview.</td><td>E2E de HUD, seleccion, camaras, overlays y export visual.</td></tr>
+          <tr><td>Unity WebGL</td><td>Visor externo o embebido de recorrido.</td><td>Bloqueado si falta build.</td><td>Copiar <code>public/unity/radshield-medical-3d</code> con <code>Build</code> y <code>TemplateData</code>.</td></tr>
+          <tr><td>DB tecnica</td><td>PBR/materiales y ruta ENDF/XCOM/ICRU.</td><td>Preview.</td><td>Versionar energia, mezcla, densidad, TVL, costo, carga estructural, pagina y hash.</td></tr>
+          <tr><td>QA normativo</td><td>Casos NCRP/IAEA/UAQ preliminares.</td><td>Gate de release clinico.</td><td>Agregar casos reales por barrera, penetracion, ocupacion y memoria firmada.</td></tr>
+        </tbody>
+      </table>
+      <div class="ok">Validacion: <code>npm run test:f556-f560:post-beta-deep</code> y <code>npm run test:f556-f560:post-beta-deep:e2e</code>.</div>
+      <div class="warn">F556-F560 no declara certificacion clinica: Unity no firma calculos, Babylon no reemplaza Three/R3F y las texturas PBR no modifican valores tecnicos.</div>
+
       <h2>0A. Addendum F550-F555: Cierre Beta Funcional Y Paleta BIM</h2>
       <p>F550-F555 agrega un panel visible para cerrar la beta funcional con conexiones reales, reversibles y auditables. El objetivo es distinguir que ya opera dentro del frontend y que sigue gated por falta de E2E, build Unity, assets pesados o QA normativo.</p>
       <table>

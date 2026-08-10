@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F556-F560 (2026-08-09) - Post-beta profunda: renderer, Babylon, Unity, DB y QA
+
+- Agrega `src/lib/f556F560PostBetaDeepStack.ts` como contrato de profundizacion post-beta.
+- Canvas muestra panel F556-F560 con cinco carriles: renderer base v2, Babylon real profundo, Unity WebGL real, DB tecnica y QA normativo ampliado.
+- El panel se alimenta de contratos existentes: escena medica, Babylon deep runtime, Unity exported build gate, PBR/photoreal DB y QA NCRP/IAEA/UAQ F484-F490.
+- Mantiene reglas de seguridad: renderer base no reemplaza canvas, Babylon no es primario, Unity no firma calculos y PBR/fotorealismo no modifica TVL/densidad/costos.
+- DB tecnica queda marcada como ruta completa ENDF/XCOM/ICRU + materiales proveedor con hash/pagina/evidencia.
+- Agrega contrato `npm run test:f556-f560:post-beta-deep` y E2E visual `npm run test:f556-f560:post-beta-deep:e2e`.
+
 # F550-F555 (2026-08-09) - Functional beta closure + BIM palette
 
 - Agrega `src/lib/f550F555FunctionalBetaClosure.ts` como contrato de cierre beta funcional.

@@ -76,6 +76,13 @@ import { buildF530F534EquipmentPlacementPreview, type F530F534PlacementPoint } f
 import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import { buildF550F555FunctionalBetaClosure } from '@/lib/f550F555FunctionalBetaClosure';
+import { buildF556F560PostBetaDeepStack } from '@/lib/f556F560PostBetaDeepStack';
+import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
+import { buildMedicalScene, type MedicalRoomPreset } from '@/lib/medical3D/sceneBuilder';
+import { buildBabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
+import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebglExportedBuild';
+import { buildAdvancedPhotorealPackContract } from '@/lib/medical3D/advancedPhotorealPack';
+import { buildDefaultPbrMaterialDatabase, buildPbrMaterialDbUpdate } from '@/lib/medical3D/pbrMaterialDatabase';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -1200,8 +1207,17 @@ export default function CanvasArea({
     highRiskFlagEnabled: isEnabled('canvasHighRiskCad'),
   });
   const f442ToF445RendererV2Runtime = buildF442ToF445RendererV2Runtime(f439ToF441RendererGeometryCore);
+  const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
+    TX: 'linac',
+    NM: 'petct',
+    DX: 'ct',
+    CY: 'radiofarmacia',
+  };
+  const f556MedicalScene = buildMedicalScene(floorPlan, f556MedicalPresetByModality[f525PlacementMode]);
+  const f556BabylonDeepRuntime = buildBabylonDeepRuntimeContract(f556MedicalScene);
   const f520ToF524DeepRendererBabylon = buildF520F524DeepRendererBabylonContract({
     renderer: f442ToF445RendererV2Runtime,
+    babylon: f556BabylonDeepRuntime,
   });
   const f525ToF529ClinicalPlacement = buildF525F529ClinicalPlacementPack({
     deepLane: f520ToF524DeepRendererBabylon,
@@ -1217,6 +1233,22 @@ export default function CanvasArea({
   const f550ToF555FunctionalBetaClosure = buildF550F555FunctionalBetaClosure({
     babylonRuntimePresent: true,
     e2eVisualReady: false,
+  });
+  const f556PbrMaterialDb = buildPbrMaterialDbUpdate(buildDefaultPbrMaterialDatabase('2026-08-09T00:00:00.000Z'), '2026-08-09T00:00:00.000Z');
+  const f556UnityExportedBuild = buildUnityWebglExportedBuildContract(f556MedicalScene);
+  const f556AdvancedPhotoreal = buildAdvancedPhotorealPackContract({
+    scene: f556MedicalScene,
+    pbrMaterialDb: f556PbrMaterialDb,
+    photorealEnabled: true,
+  });
+  const f556NormativeQa = buildF484F490NormativeQa();
+  const f556ToF560PostBetaDeepStack = buildF556F560PostBetaDeepStack({
+    betaClosure: f550ToF555FunctionalBetaClosure,
+    deepRenderer: f520ToF524DeepRendererBabylon,
+    unity: f556UnityExportedBuild,
+    photoreal: f556AdvancedPhotoreal,
+    pbrDb: f556PbrMaterialDb,
+    normativeQa: f556NormativeQa,
   });
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
@@ -1933,7 +1965,7 @@ export default function CanvasArea({
             {!f375IsCleanWorkspace && (
               <div
                 data-testid="f517-f519-canvas-visual-reference-panel"
-                className="pointer-events-auto absolute right-3 top-3 z-20 hidden w-[292px] rounded-xl border border-[#d8d6cd] bg-[#fffdf8]/96 p-2 text-[#252525] shadow-xl backdrop-blur xl:block"
+                className="pointer-events-auto absolute right-3 top-3 z-20 hidden max-h-[calc(100vh-96px)] w-[292px] overflow-y-auto rounded-xl border border-[#d8d6cd] bg-[#fffdf8]/96 p-2 text-[#252525] shadow-xl backdrop-blur xl:block"
                 aria-label="F517 a F519: referencias visuales aplicadas al canvas"
                 title="F517-F519: paleta Project Manager, catalogo clinico, variantes, materiales y export BIM/PDF"
               >
@@ -2174,6 +2206,73 @@ export default function CanvasArea({
                     className="mt-1 rounded border border-white/70 bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#71706a]"
                   >
                     Reversible: callbacks existentes, fallback Three/R3F, assets lazy y renderer base sin reemplazo.
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f556-f560-post-beta-deep-stack"
+                  className="mt-2 rounded-lg border border-[#c9c4b6] bg-[#fffdf8]/95 p-2"
+                  title="F556-F560: post-beta profunda con renderer base v2, Babylon real, Unity real, DB tecnica y QA normativo ampliado"
+                  aria-label="F556 a F560 post beta profunda"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#252525]">F556-F560 Post-beta profunda</div>
+                      <div className="text-[8px] leading-tight text-[#71706a]">Renderer v2 + Babylon + Unity + DB tecnica + QA</div>
+                    </div>
+                    <span
+                      data-testid="f556-f560-status"
+                      className="rounded border border-[#d8d6cd] bg-[#eef3ec] px-1.5 py-0.5 text-[8px] font-black text-[#238a61]"
+                    >
+                      {f556ToF560PostBetaDeepStack.status}
+                    </span>
+                  </div>
+                  <div className="mt-1 grid grid-cols-4 gap-1 text-[8px]">
+                    <span className="rounded bg-[#e8f6ef] px-1 py-0.5 text-center font-bold text-[#238a61]">Ready {f556ToF560PostBetaDeepStack.matrix.ready}</span>
+                    <span className="rounded bg-[#eff6ff] px-1 py-0.5 text-center font-bold text-[#1d4ed8]">Preview {f556ToF560PostBetaDeepStack.matrix.preview}</span>
+                    <span className="rounded bg-[#fffbeb] px-1 py-0.5 text-center font-bold text-[#a16207]">Gate {f556ToF560PostBetaDeepStack.matrix.gated}</span>
+                    <span className="rounded bg-[#fff1f2] px-1 py-0.5 text-center font-bold text-[#b91c1c]">Block {f556ToF560PostBetaDeepStack.matrix.blocked}</span>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {f556ToF560PostBetaDeepStack.lanes.map((lane) => (
+                      <div
+                        key={lane.id}
+                        data-testid={`f556-f560-lane-${lane.id}`}
+                        className="rounded border border-[#d8d6cd] bg-white/85 px-1.5 py-1"
+                        title={`${lane.evidence} Siguiente gate: ${lane.nextGate}`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[8px] font-black text-[#252525]">{lane.phase} {lane.label}</span>
+                          <span className={`rounded px-1 py-0.5 text-[7px] font-black ${
+                            lane.status === 'ready'
+                              ? 'bg-[#e8f6ef] text-[#238a61]'
+                              : lane.status === 'preview'
+                                ? 'bg-[#eff6ff] text-[#1d4ed8]'
+                                : lane.status === 'blocked'
+                                  ? 'bg-[#fff1f2] text-[#b91c1c]'
+                                  : 'bg-[#fffbeb] text-[#a16207]'
+                          }`}>
+                            {lane.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[7px] text-[#71706a]">{lane.evidence}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    data-testid="f559-technical-db-summary"
+                    className="mt-1 grid grid-cols-3 gap-1 text-[8px]"
+                    title={f556ToF560PostBetaDeepStack.technicalDb.requiredCollections.join(' | ')}
+                  >
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">PBR {f556ToF560PostBetaDeepStack.technicalDb.pbrMaterials}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">QA {f556ToF560PostBetaDeepStack.normativeQa.passedCases}/{f556ToF560PostBetaDeepStack.normativeQa.totalCases}</span>
+                    <span className="rounded bg-[#eef3ec] px-1 py-0.5">Unity {f556ToF560PostBetaDeepStack.visualStack.unityBuild}</span>
+                  </div>
+                  <div
+                    data-testid="f556-f560-activation-rules"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-[#eef3ec]/70 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                  >
+                    Reglas: renderer base no reemplaza canvas; Babylon no es primario; Unity no firma calculos; PBR no cambia TVL/densidad/costo; QA normativo manda release clinico.
                   </div>
                 </div>
               </div>

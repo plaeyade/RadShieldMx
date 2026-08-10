@@ -55,6 +55,8 @@
     "test:f545-f549:ghost-source-commit:e2e": "playwright test e2e/f545-f549-ghost-source-commit.spec.ts --project=chromium",
     "test:f550-f555:functional-beta": "node scripts/check-f550-f555-functional-beta-closure-contracts.mjs",
     "test:f550-f555:functional-beta:e2e": "playwright test e2e/f550-f555-functional-beta-closure.spec.ts --project=chromium",
+    "test:f556-f560:post-beta-deep": "node scripts/check-f556-f560-post-beta-deep-stack-contracts.mjs",
+    "test:f556-f560:post-beta-deep:e2e": "playwright test e2e/f556-f560-post-beta-deep-stack.spec.ts --project=chromium",
     "test:smoke:static": "playwright test static-deploy --project=chromium",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

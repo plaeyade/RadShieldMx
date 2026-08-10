@@ -1,4 +1,40 @@
-# Manual de Usuario RadShield-MX - F555 Functional Beta Closure
+# Manual de Usuario RadShield-MX - F560 Post-Beta Profunda
+
+## Addendum F556-F560 - Renderer profundo, Babylon, Unity, DB tecnica y QA normativo
+
+F556-F560 agrega un tablero post-beta profundo dentro del canvas. Su funcion es separar claramente lo que ya puede usarse en beta de lo que requiere assets, datasets o E2E antes de publicarse como capacidad productiva completa.
+
+Uso:
+
+1. Abra el canvas en modo guia.
+2. Revise el panel **F556-F560 Post-beta profunda** debajo del cierre beta F550-F555.
+3. Lea los carriles:
+   - `Renderer base v2`: preview/overlay, sin reemplazar eventos base.
+   - `Babylon real profundo`: escena interactiva con muros/equipos/zonas y picking.
+   - `Unity WebGL real`: visor bloqueado hasta copiar build exportado.
+   - `DB tecnica completa`: ruta ENDF/XCOM/ICRU, materiales, TVL, densidad, costo, carga estructural, pagina y hash.
+   - `QA normativo ampliado`: casos NCRP/IAEA/UAQ usados como gate preliminar.
+4. Use el resumen `PBR`, `QA` y `Unity` para saber si faltan assets o datasets.
+
+Interpretacion:
+
+- **Ready:** capacidad verificable para beta o QA.
+- **Preview:** visible y conectada, pero aun no reemplaza rutas estables.
+- **Gated:** requiere mas pruebas, assets o datasets.
+- **Blocked:** falta un elemento externo, por ejemplo build Unity WebGL real.
+
+Reglas de seguridad:
+
+- El renderer base v2 no reemplaza el canvas hasta repetir smoke F197/F207/F229/F446.
+- Babylon no se vuelve motor principal hasta validar picking, camaras, overlays y export.
+- Unity no firma calculos clinicos; solo visualiza escenas exportadas.
+- Texturas PBR/fotorealismo no cambian TVL, densidad, costo ni carga estructural.
+- QA normativo debe pasar con documentos/datasets versionados antes de release clinico.
+
+Validacion recomendada:
+
+- `npm run test:f556-f560:post-beta-deep`
+- `npm run test:f556-f560:post-beta-deep:e2e`
 
 ## Addendum F550-F555 - Cierre beta funcional y paleta BIM
 

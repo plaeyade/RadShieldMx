@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F556-F560 (2026-08-09) - Post-beta profunda
+
+- **F556:** agrega tablero post-beta profundo para renderer base v2. Se permite preview/overlay, pero `CanvasArea/useCanvas` siguen como fuente estable.
+- **F557:** conecta Babylon profundo con escena medica real: muros, equipos, zonas, camaras, overlays y entidades seleccionables.
+- **F558:** mantiene Unity WebGL como visor real bloqueado hasta copiar build exportado (`index.html`, `Build/*`, `TemplateData/*`) y pasar E2E.
+- **F559:** expone DB tecnica: PBR/materiales actuales y ruta obligatoria para ENDF/XCOM/ICRU, mezclas, densidad, TVL, costo, carga estructural, pagina y hash.
+- **F560:** muestra QA normativo ampliado NCRP/IAEA/UAQ como gate de release clinico. Los casos pasan para beta preliminar, pero no sustituyen revision profesional ni datasets completos.
+
 # F550-F555 (2026-08-09) - Functional Beta Closure
 
 - **F550:** agrega auditoria visible de conexiones reales y reversibles: canvas, ribbon BIM, quick commands, boton derecho, ghost drag y `Crear fuente`.

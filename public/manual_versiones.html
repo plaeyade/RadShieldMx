@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F555 - Manual de Versiones</title>
+  <title>RadShield-MX F560 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,23 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F555</span>
+    <span class="pill">Version documental: F560</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F556-F560 Post-Beta Profunda</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F556</td><td>Tablero renderer base v2.</td><td>Permite observar overlay/runtime sin reemplazar canvas.</td><td>F197/F207/F229/F446 antes de eventos base.</td></tr>
+        <tr><td>F557</td><td>Babylon profundo conectado a escena medica.</td><td>Muros, equipos, zonas, picking, camaras y overlays quedan visibles como preview.</td><td>E2E visual dedicado.</td></tr>
+        <tr><td>F558</td><td>Unity WebGL real como build gate.</td><td>El sistema detecta si falta build exportado.</td><td>Copiar <code>Build</code>, <code>TemplateData</code> e <code>index.html</code>.</td></tr>
+        <tr><td>F559</td><td>DB tecnica completa en ruta.</td><td>Materiales PBR actuales mas ruta ENDF/XCOM/ICRU.</td><td>Versionar pagina/hash/densidad/TVL/costo/carga.</td></tr>
+        <tr><td>F560</td><td>QA normativo ampliado visible.</td><td>NCRP/IAEA/UAQ funciona como gate preliminar.</td><td>Mas casos reales antes de release clinico.</td></tr>
+      </tbody>
+    </table>
+
     <h2>0A. F550-F555 Functional Beta Closure</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
