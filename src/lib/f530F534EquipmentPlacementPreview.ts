@@ -3,7 +3,7 @@ import type { F525F529ClinicalPlacementPack } from '@/lib/f525F529ClinicalPlacem
 export interface F530F534PlacementPoint {
   x: number;
   y: number;
-  source: 'viewport-center' | 'context-menu' | 'manual';
+  source: 'viewport-center' | 'context-menu' | 'manual' | 'drag';
 }
 
 export interface F530F534EquipmentPlacementPreview {

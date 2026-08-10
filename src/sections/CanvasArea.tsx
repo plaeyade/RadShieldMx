@@ -73,6 +73,7 @@ import { buildF449ToF453BimMemoryVisual } from '@/lib/f449ToF453BimMemoryVisual'
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { buildF525F529ClinicalPlacementPack, type F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
 import { buildF530F534EquipmentPlacementPreview, type F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPreview';
+import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { isEnabled } from '@/lib/featureFlags';
 import { routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -275,7 +276,14 @@ export default function CanvasArea({
   const [canvasChromeMode, setCanvasChromeMode] = useState<F375CanvasChromeMode>(loadF375CanvasChromeMode);
   const [f525PlacementMode, setF525PlacementMode] = useState<F525F529Modality>(loadF525PlacementMode);
   const [f530PlacementPoint, setF530PlacementPoint] = useState<F530F534PlacementPoint | null>(null);
+  const [f540DraggingGhost, setF540DraggingGhost] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const f540DragStartRef = useRef<{
+    pointerId: number;
+    startClientX: number;
+    startClientY: number;
+    startPoint: F530F534PlacementPoint;
+  } | null>(null);
   // v65: Freehand canvas overlay ref
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
   const rendererV2OverlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -635,6 +643,54 @@ export default function CanvasArea({
     setLastCanvasCommand(`F531 confirmado: ${f530ToF534EquipmentPreview.selected.equipment}`);
     toast.success('Punto candidato confirmado', {
       description: `No se escribio geometria permanente. x ${point.x.toFixed(1)} / y ${point.y.toFixed(1)}`,
+    });
+  };
+
+  const startF540GhostDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const point = f530PlacementPoint ?? makeF530ViewportCenterPoint();
+    f540DragStartRef.current = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startPoint: point,
+    };
+    setF540DraggingGhost(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setLastCanvasCommand(`F540 drag start: ${f530ToF534EquipmentPreview.selected.equipment}`);
+  };
+
+  const moveF540GhostDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = f540DragStartRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const scale = canvasState.scale > 0 ? canvasState.scale : 1;
+    const dx = (event.clientX - drag.startClientX) / scale;
+    const dy = (event.clientY - drag.startClientY) / scale;
+    setF530PlacementPoint({
+      x: drag.startPoint.x + dx,
+      y: drag.startPoint.y + dy,
+      source: 'drag',
+    });
+  };
+
+  const endF540GhostDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = f540DragStartRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    f540DragStartRef.current = null;
+    setF540DraggingGhost(false);
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture can already be released by the browser on cancel.
+    }
+    setLastCanvasCommand(`F541 drag end: ${f530ToF534EquipmentPreview.selected.equipment}`);
+    toast.success('Ghost reubicado', {
+      description: 'Preview no persistente; use Confirmar para handoff.',
     });
   };
 
@@ -1120,6 +1176,7 @@ export default function CanvasArea({
     point: f530PlacementPoint ?? undefined,
     scale_m_per_pixel: floorPlan.scale_m_per_pixel,
   });
+  const f540ToF544GhostDragGate = buildF540F544GhostDragGate();
   const f446ToF448CanvasStrongQa = buildF446ToF448CanvasStrongQa({
     sidebarVisible: true,
     canvasVisible: true,
@@ -1959,6 +2016,14 @@ export default function CanvasArea({
                   <div className="mt-1 text-[8px] leading-tight text-[#71706a]">
                     Persistencia CAD: {String(f530ToF534EquipmentPreview.ghost.canPersistGeometry)}. Handoff alimenta 3D/Memoria/Evidence.
                   </div>
+                  <div
+                    data-testid="f540-f544-ghost-drag-gate"
+                    className="mt-1 rounded border border-[#bde6d1] bg-[#eef3ec] px-1.5 py-1 text-[8px] font-bold text-[#238a61]"
+                    title="F540-F544: el ghost se puede arrastrar, pero sigue sin crear geometria CAD permanente"
+                  >
+                    Drag {f540ToF544GhostDragGate.interaction.canDragPreview ? 'activo' : 'bloqueado'} / Persistencia CAD {String(f540ToF544GhostDragGate.interaction.canPersistGeometry)}
+                    {f540DraggingGhost ? ' / moviendo' : ''}
+                  </div>
                 </div>
 
                 <div
@@ -1987,6 +2052,8 @@ export default function CanvasArea({
             {f530PlacementPoint && (
               <div
                 data-testid="f530-equipment-ghost-overlay"
+                data-f540-can-persist="false"
+                data-f540-dragging={String(f540DraggingGhost)}
                 className="pointer-events-none absolute z-10 rounded-xl border-2 border-dashed border-[#238a61] bg-[#e8f6ef]/35 shadow-[0_0_0_4px_rgba(35,138,97,0.12)]"
                 style={{
                   left: f530PlacementPoint.x * canvasState.scale + canvasState.offsetX - (f530ToF534EquipmentPreview.ghost.footprint_px[0] * canvasState.scale) / 2,
@@ -1996,6 +2063,18 @@ export default function CanvasArea({
                 }}
                 title="F530 ghost overlay: previsualizacion no persistente del equipo"
               >
+                <div
+                  data-testid="f540-equipment-ghost-drag-handle"
+                  className="pointer-events-auto absolute inset-0 cursor-grab rounded-xl touch-none active:cursor-grabbing"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Mover ghost no persistente del equipo"
+                  title="Arrastre para mover el ghost. No crea geometria permanente."
+                  onPointerDown={startF540GhostDrag}
+                  onPointerMove={moveF540GhostDrag}
+                  onPointerUp={endF540GhostDrag}
+                  onPointerCancel={endF540GhostDrag}
+                />
                 <div className="absolute left-1 top-1 max-w-[180px] rounded bg-[#252525] px-2 py-1 text-[9px] font-black text-white shadow">
                   {f530ToF534EquipmentPreview.selected.modality} / {f530ToF534EquipmentPreview.selected.equipment}
                 </div>

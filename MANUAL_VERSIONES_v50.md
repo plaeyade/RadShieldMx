@@ -1,5 +1,13 @@
 # RadShield-MX - Manual de Versiones
 
+# F540-F544 (2026-08-09) - Ghost drag gate no persistente
+
+- **F540:** agrega handle arrastrable interno al ghost de equipo sin bloquear el canvas base.
+- **F541:** convierte movimiento de puntero a coordenadas CAD usando escala y offset actuales.
+- **F542:** conserva el punto movido como candidato con `source: 'drag'`, sin escribir geometria permanente.
+- **F543:** `Confirmar` usa el punto reubicado para handoff a 3D/Memoria IA/Evidence.
+- **F544:** mantiene `canPersistGeometry=false` hasta E2E de persistencia, undo/redo, seleccion y colisiones.
+
 # F535-F539 (2026-08-09) - Equipment ghost visual QA
 
 - **F535:** agrega E2E de navegador para validar panel F525, panel F530-F534 y canvas visible.

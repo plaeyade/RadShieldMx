@@ -1,4 +1,23 @@
-# Manual de Usuario RadShield-MX - F539 Equipment Ghost Visual QA
+# Manual de Usuario RadShield-MX - F544 Ghost Drag Gate
+
+## Addendum F540-F544 - Arrastre seguro del ghost de equipo
+
+F540-F544 agrega movimiento real del `ghost` de equipo sobre el canvas sin convertirlo todavia en geometria permanente. Es la primera capa de drag controlado para preparar un sembrado CAD serio sin arriesgar el plano.
+
+Uso:
+
+1. **Preview:** cree el ghost del equipo seleccionado desde el panel F530-F534.
+2. **Arrastrar ghost:** coloque el cursor sobre el rectangulo fantasma y arrastre. El handle interno mueve el punto candidato.
+3. **Soltar:** el estado muestra `F541 drag end`; el ghost queda reubicado.
+4. **Confirmar:** use `Confirmar` para enviar el punto a 3D/Memoria IA/Evidence como contexto preliminar.
+5. **Seguridad:** `canPersistGeometry=false`; no se escribe `floorPlan.sources` y no se reemplaza el renderer base.
+
+Validacion recomendada:
+
+- `npm run test:f540-f544:ghost-drag`
+- `npm run test:f540-f544:ghost-drag:e2e`
+
+Lo que sigue bloqueado por seguridad: persistencia CAD del equipo, colisiones, snap real del footprint, undo/redo fino y seleccion multi-equipo.
 
 ## Addendum F535-F539 - QA visual E2E del ghost de equipo
 

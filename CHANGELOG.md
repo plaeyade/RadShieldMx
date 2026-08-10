@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F540-F544 (2026-08-09) - Ghost drag gate no persistente
+
+- Agrega `src/lib/f540F544GhostDragGate.ts` para formalizar el arrastre seguro del ghost de equipo.
+- Canvas incorpora `f540-equipment-ghost-drag-handle`: el ghost se puede mover con mouse/puntero sin capturar todo el overlay ni bloquear el canvas base.
+- Mantiene `pointer-events:none` en el overlay y `pointer-events:auto` solo en el handle interno.
+- El punto movido queda con `source: 'drag'`, alimenta Confirmar/3D/Memoria/Evidence, pero sigue sin escribir `floorPlan.sources`.
+- Agrega contrato `npm run test:f540-f544:ghost-drag` y E2E `npm run test:f540-f544:ghost-drag:e2e`.
+
 # F535-F539 (2026-08-09) - Equipment ghost visual QA
 
 - Agrega E2E `e2e/f535-f539-equipment-ghost-visual.spec.ts` para validar el preview ghost en navegador real.

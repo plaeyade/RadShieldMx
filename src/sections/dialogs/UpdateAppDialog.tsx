@@ -93,6 +93,7 @@ import { buildF519NormativeQaExpansion } from '@/lib/f519NormativeQaExpansion';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { buildF525F529ClinicalPlacementPack } from '@/lib/f525F529ClinicalPlacementPack';
 import { buildF530F534EquipmentPlacementPreview } from '@/lib/f530F534EquipmentPlacementPreview';
+import { buildF540F544GhostDragGate } from '@/lib/f540F544GhostDragGate';
 import { buildF96DropdownMigrationSummary } from '@/lib/f96DropdownMigration';
 import { buildF97DropdownMigrationSummary } from '@/lib/f97DropdownMigration';
 import { summarizeF98ReleaseGaps } from '@/lib/f98UnifiedIconography';
@@ -110,6 +111,7 @@ interface UpdateItem {
 }
 
 const PLATFORM_UPDATES: UpdateItem[] = [
+  { name: 'F540-F544 Ghost drag gate', current: 'drag preview no persistente', latest: 'handle arrastrable + pointer-events pass-through + gate CAD false', status: 'current', description: `F540-F544 permite mover el ghost del equipo con un handle interno sin bloquear el canvas base. Politica: canDragPreview=${String(buildF540F544GhostDragGate().interaction.canDragPreview)}, canPersistGeometry=${String(buildF540F544GhostDragGate().interaction.canPersistGeometry)}. El punto alimenta 3D/Memoria/Evidence solo despues de Confirmar.` },
   { name: 'F535-F539 Equipment ghost visual QA', current: 'E2E visual + screenshot', latest: 'preview center + preview context + confirm + pointer-events gate + zoom continuity', status: 'current', description: 'F535-F539 agrega smoke E2E dedicado para el ghost de equipo: valida panel F525/F530, boton Preview, boton derecho Preview equipo aqui, Confirmar, captura visual y que el overlay no bloquee eventos del canvas. Persistencia CAD sigue bloqueada hasta drag/drop/undo/redo validado.' },
   { name: 'F530-F534 Equipment ghost placement', current: 'ghost preview + candidate point', latest: 'preview fantasma + confirmar punto + propiedades + menu contextual', status: 'current', description: `F530-F534 agrega preview no persistente del equipo seleccionado: ${buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).actions.length} acciones para ghost, punto candidato, propiedades y handoff. Politica: canPersistGeometry=${String(buildF530F534EquipmentPlacementPreview({ pack: buildF525F529ClinicalPlacementPack() }).ghost.canPersistGeometry)} hasta drag/drop/undo/redo E2E.` },
   { name: 'F525-F529 Clinical placement pack', current: 'TX/NM/DX/CY placement handoff', latest: 'catalogo clinico operable + seleccion persistente + handoff 3D/Memoria IA', status: 'current', description: `F525-F529 convierte el panel visual en acciones de bajo riesgo: ${buildF525F529ClinicalPlacementPack().catalog.length} perfiles clinicos, selector TX/NM/DX/CY, material/equipo/memoria y handoff a ${buildF525F529ClinicalPlacementPack().handoff.target}. Regla: canWriteCanvasGeometry=${String(buildF525F529ClinicalPlacementPack().handoff.canWriteCanvasGeometry)} hasta validar drag/drop profundo.` },

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F539 - Manual de Versiones</title>
+  <title>RadShield-MX F544 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,12 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F539</span>
+    <span class="pill">Version documental: F544</span>
     <span class="pill">Fecha: 2026-08-09</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
-    <h2>0A. F535-F539 Equipment Ghost Visual QA</h2>
+    <h2>0A. F540-F544 Ghost Drag Gate No Persistente</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F540</td><td>Handle arrastrable interno para el ghost.</td><td>Permite mover equipo candidato sin bloquear canvas.</td><td>Overlay sigue <code>pointer-events:none</code>.</td></tr>
+        <tr><td>F541</td><td>Movimiento con conversion por escala y offset.</td><td>El punto queda en coordenadas CAD.</td><td>Estado <code>F541 drag end</code>.</td></tr>
+        <tr><td>F542</td><td>Punto candidato con <code>source: drag</code>.</td><td>Sirve para Confirmar, 3D, Memoria y Evidence.</td><td>No escribe <code>floorPlan.sources</code>.</td></tr>
+        <tr><td>F543</td><td>Confirmacion posterior al drag.</td><td>Handoff seguro para flujo visual.</td><td><code>canPersistGeometry=false</code>.</td></tr>
+        <tr><td>F544</td><td>Gate de persistencia CAD permanente.</td><td>Evita altas reales sin undo/redo, colisiones y QA.</td><td>Contrato <code>test:f540-f544:ghost-drag</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>0B. F535-F539 Equipment Ghost Visual QA</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -43,7 +55,7 @@
       </tbody>
     </table>
 
-    <h2>0B. F530-F534 Equipment Ghost Preview</h2>
+    <h2>0C. F530-F534 Equipment Ghost Preview</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
@@ -54,7 +66,7 @@
       </tbody>
     </table>
 
-    <h2>0C. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
+    <h2>0D. F525-F529 Clinical Placement TX/NM/DX/CY</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
       <tbody>
