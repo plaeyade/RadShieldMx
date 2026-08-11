@@ -89,6 +89,7 @@ import { buildF631F635RendererTileInvalidation, drawF631F635TileInvalidationOver
 import { buildF636F640RendererHitTestShadow, drawF636F640HitTestShadowOverlay } from '@/lib/f636F640RendererHitTestShadow';
 import { buildF641F645RendererEventDryRun } from '@/lib/f641F645RendererEventDryRun';
 import { buildF646F650RendererSelectionTransaction } from '@/lib/f646F650RendererSelectionTransaction';
+import { buildF651F655RendererActivationQa } from '@/lib/f651F655RendererActivationQa';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1340,6 +1341,13 @@ export default function CanvasArea({
     f641ToF645RendererEventDryRun,
     {
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+    },
+  );
+  const f651ToF655RendererActivationQa = buildF651F655RendererActivationQa(
+    f646ToF650RendererSelectionTransaction,
+    {
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+      legacyE2eObserved: false,
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -2668,6 +2676,63 @@ export default function CanvasArea({
                     title={f646ToF650RendererSelectionTransaction.rollback.join(' | ')}
                   >
                     {f646ToF650RendererSelectionTransaction.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f651-f655-renderer-activation-qa"
+                  className="mt-2 rounded-lg border border-[#c4b5fd] bg-[#f5f3ff]/95 p-2"
+                  title="F651-F655: QA de activacion controlada compara seleccion simulada, rollback y requisito E2E legacy"
+                  aria-label="F651 a F655 QA de activacion controlada del renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#5b21b6]">F651-F655 activation QA</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Gates para activar eventos bajo flag</div>
+                    </div>
+                    <span
+                      data-testid="f651-f655-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f651ToF655RendererActivationQa.status === 'activation-qa-ready'
+                          ? 'border-[#bbf7d0] bg-[#e8f6ef] text-[#238a61]'
+                          : f651ToF655RendererActivationQa.status === 'activation-qa-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#c4b5fd] bg-[#ede9fe] text-[#5b21b6]'
+                      }`}
+                    >
+                      {f651ToF655RendererActivationQa.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f651-f655-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f651ToF655RendererActivationQa.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#5b21b6]">G {f651ToF655RendererActivationQa.metrics.passCount}/{f651ToF655RendererActivationQa.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#a16207]">Risk {f651ToF655RendererActivationQa.risk.level}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">S {f651ToF655RendererActivationQa.metrics.riskScore}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">{f651ToF655RendererActivationQa.expectation.source}</span>
+                  </div>
+                  <div
+                    data-testid="f651-f655-decision"
+                    className="mt-1 truncate rounded border border-[#c4b5fd] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#5b21b6]"
+                    title={f651ToF655RendererActivationQa.decision.reason}
+                  >
+                    {f651ToF655RendererActivationQa.decision.recommendation} | {f651ToF655RendererActivationQa.comparison.evidence}
+                  </div>
+                  <div
+                    data-testid="f651-f655-risk"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f651ToF655RendererActivationQa.risk.reasons.join(' | ')}
+                  >
+                    {f651ToF655RendererActivationQa.risk.reasons.slice(0, 2).join(' | ')}
+                  </div>
+                  <div
+                    data-testid="f651-f655-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f651ToF655RendererActivationQa.rollback.join(' | ')}
+                  >
+                    {f651ToF655RendererActivationQa.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

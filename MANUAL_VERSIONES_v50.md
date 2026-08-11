@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F651-F655 (2026-08-10) - Activation QA Gate
+
+- **F651:** expectativa legacy de seleccion desde snapshot F646-F650.
+- **F652:** comparacion seleccion/rollback/operacion soportada.
+- **F653:** riesgo por E2E legacy faltante, flag alto riesgo u operacion no soportada.
+- **F654:** gates de transaccion, seleccion y rollback.
+- **F655:** gate de click legacy real antes de activar owner de eventos.
+
+Decision: `activation-qa-preview` mantiene eventos profundos apagados hasta repetir E2E legacy antes/despues. Es el paso previo a una activacion bajo feature flag.
+
 # F646-F650 (2026-08-10) - Selection Transaction Preview
 
 - **F646:** draft de operacion `select-preview`, `draw-preview`, `pan-preview` o `noop-preview`.

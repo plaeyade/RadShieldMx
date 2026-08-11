@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F650 - Manual de Versiones</title>
+  <title>RadShield-MX F655 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F650</span>
+    <span class="pill">Version documental: F655</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F651-F655 Activation QA</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F651</td><td>Expectation legacy.</td><td>Define seleccion esperada.</td><td>Fuente clara.</td></tr>
+        <tr><td>F652</td><td>Comparacion.</td><td>Seleccion, rollback y operacion.</td><td>Consistencia.</td></tr>
+        <tr><td>F653</td><td>Riesgo.</td><td>Detecta E2E faltante o flag alto riesgo.</td><td>Nivel bajo/medio/alto.</td></tr>
+        <tr><td>F654</td><td>Gates QA.</td><td>Transaccion, seleccion y rollback.</td><td>OK obligatorio.</td></tr>
+        <tr><td>F655</td><td>Click legacy requerido.</td><td>Evita activar eventos sin E2E real.</td><td>Mantener preview.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F651-F655 queda en <code>activation-qa-preview</code>: no activa owner de eventos profundos.</p>
+
     <h2>0. F646-F650 Selection Transaction</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

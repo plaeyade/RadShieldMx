@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F651-F655 (2026-08-10) - QA de activacion controlada
+
+- Agregado `src/lib/f651F655RendererActivationQa.ts` con contrato `radshield-mx.canvas.renderer-activation-qa.f651-f655.v1`.
+- F651 define expectativa legacy a partir del snapshot before/after F646-F650.
+- F652 compara seleccion esperada, rollback y operacion soportada.
+- F653 calcula riesgo: E2E legacy faltante, flag alto riesgo y operaciones no soportadas.
+- F654-F655 agrega gates de transaccion disponible, seleccion consistente, rollback consistente y click legacy requerido.
+- Canvas muestra panel F651-F655 con gates, riesgo, decision y recomendacion.
+- Decision actual: mantener preview hasta observar click legacy real en E2E antes de activar eventos profundos.
+
 # F646-F650 (2026-08-10) - transaccion simulada de seleccion
 
 - Agregado `src/lib/f646F650RendererSelectionTransaction.ts` con contrato `radshield-mx.canvas.renderer-selection-transaction.f646-f650.v1`.

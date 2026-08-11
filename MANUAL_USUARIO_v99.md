@@ -1,4 +1,32 @@
-# Manual de Usuario RadShield-MX - F650 Selection Transaction
+# Manual de Usuario RadShield-MX - F655 Activation QA
+
+## Addendum F651-F655 - Activation QA
+
+F651-F655 revisa si la ruta de seleccion simulada ya podria pasar a pruebas bajo feature flag. Compara expectativa legacy, snapshot before/after, rollback token y riesgo. La decision actual es conservar preview hasta ejecutar E2E con click legacy real.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F651-F655 activation QA**.
+3. Revise **G** para gates aprobados/totales.
+4. Revise **Risk** y **S** para el nivel de riesgo.
+5. Revise **decision**: `keep-preview`, `eligible-for-flagged-e2e` o `blocked`.
+6. Revise **risk**: normalmente indicara que falta E2E de click legacy real.
+7. No active eventos profundos si el gate `E2E legacy requerido` esta en NO.
+
+### Logica de seguridad
+
+- No activa owner de eventos del renderer profundo.
+- No cambia seleccion real.
+- Bloquea activacion si rollback o seleccion no son consistentes.
+- Mantiene preview hasta tener E2E antes/despues con click legacy real.
+- Rollback: conservar F646-F650 y F641-F645 como diagnostico.
+
+### Validacion tecnica
+
+- `npm run test:f651-f655:renderer-activation-qa`
+- `npm run test:f651-f655:renderer-activation-qa:values`
+- `npm run test:f651-f655:renderer-activation-qa:e2e`
 
 ## Addendum F646-F650 - Selection Transaction Preview
 

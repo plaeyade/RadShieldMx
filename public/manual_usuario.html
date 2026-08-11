@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F650 - Manual de Usuario</title>
+  <title>RadShield-MX F655 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F650</span>
+      <span class="pill">Version de manual: F655</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F651-F655: Activation QA</h2>
+    <p>F651-F655 evalua si la ruta de eventos profundos puede pasar a pruebas bajo feature flag. Compara seleccion simulada, rollback y requisito de click legacy real.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Expectation</td><td>Revise fuente transaction-after o legacy-before.</td><td>Que la seleccion esperada sea clara.</td><td>Volver a F646.</td></tr>
+        <tr><td>Comparison</td><td>Revise selection/rollback/operation.</td><td>Que la ruta sea consistente.</td><td>Bloquear activacion.</td></tr>
+        <tr><td>Risk</td><td>Revise nivel y razones.</td><td>Que falte solo E2E legacy, no logica base.</td><td>Mantener preview.</td></tr>
+        <tr><td>Decision</td><td>keep-preview / eligible / blocked.</td><td>Que no se active sin evidencia.</td><td>Repetir E2E.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F651-F655 queda en <code>activation-qa-preview</code>. Requiere click legacy real en E2E antes de activar eventos profundos.</p>
+
     <h2>0. Addendum F646-F650: Selection Transaction</h2>
     <p>F646-F650 crea una transaccion simulada de seleccion con draft, before/after y rollback token. Sirve para probar commit/rollback futuro sin escribir seleccion real.</p>
     <table>
