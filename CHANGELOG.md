@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F656-F660 (2026-08-10) - sonda de click legacy
+
+- Agregado `src/lib/f656F660RendererLegacyClickProbe.ts` con contrato `radshield-mx.canvas.renderer-legacy-click-probe.f656-f660.v1`.
+- F656 registra observacion de click legacy: tipo de evento, punto, herramienta, seleccion y evidencia.
+- F657 compara seleccion observada contra la expectativa F651-F655.
+- F658 verifica seguridad de ownership: `useCanvas` debe seguir procesando eventos y no debe haber mutacion de geometria.
+- F659-F660 agrega gates de QA disponible, click observado, prediccion coincidente, owner preservado y geometria sin mutacion.
+- Canvas muestra panel F656-F660 con estado, gates, decision y rollback.
+- Decision actual: `legacy-click-probe-preview`; no se activa ownership profundo hasta tener click legacy observado y coincidente.
+
 # F651-F655 (2026-08-10) - QA de activacion controlada
 
 - Agregado `src/lib/f651F655RendererActivationQa.ts` con contrato `radshield-mx.canvas.renderer-activation-qa.f651-f655.v1`.

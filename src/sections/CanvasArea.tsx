@@ -90,6 +90,7 @@ import { buildF636F640RendererHitTestShadow, drawF636F640HitTestShadowOverlay } 
 import { buildF641F645RendererEventDryRun } from '@/lib/f641F645RendererEventDryRun';
 import { buildF646F650RendererSelectionTransaction } from '@/lib/f646F650RendererSelectionTransaction';
 import { buildF651F655RendererActivationQa } from '@/lib/f651F655RendererActivationQa';
+import { buildF656F660RendererLegacyClickProbe } from '@/lib/f656F660RendererLegacyClickProbe';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1348,6 +1349,16 @@ export default function CanvasArea({
     {
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
       legacyE2eObserved: false,
+    },
+  );
+  const f656ToF660RendererLegacyClickProbe = buildF656F660RendererLegacyClickProbe(
+    f651ToF655RendererActivationQa,
+    {
+      activeTool,
+      selectedId: canvasState.selectedId,
+      selectedIds: canvasState.selectedIds,
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+      observed: false,
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -2733,6 +2744,63 @@ export default function CanvasArea({
                     title={f651ToF655RendererActivationQa.rollback.join(' | ')}
                   >
                     {f651ToF655RendererActivationQa.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f656-f660-renderer-legacy-click-probe"
+                  className="mt-2 rounded-lg border border-[#a7f3d0] bg-[#ecfdf5]/95 p-2"
+                  title="F656-F660: sonda de click legacy antes de transferir eventos al renderer profundo"
+                  aria-label="F656 a F660 sonda de click legacy del renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#047857]">F656-F660 legacy click probe</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Click real + owner useCanvas + rollback</div>
+                    </div>
+                    <span
+                      data-testid="f656-f660-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f656ToF660RendererLegacyClickProbe.status === 'legacy-click-probe-ready'
+                          ? 'border-[#bbf7d0] bg-white text-[#047857]'
+                          : f656ToF660RendererLegacyClickProbe.status === 'legacy-click-probe-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#a7f3d0] bg-[#d1fae5] text-[#047857]'
+                      }`}
+                    >
+                      {f656ToF660RendererLegacyClickProbe.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f656-f660-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f656ToF660RendererLegacyClickProbe.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">G {f656ToF660RendererLegacyClickProbe.metrics.passCount}/{f656ToF660RendererLegacyClickProbe.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">{f656ToF660RendererLegacyClickProbe.observation.eventType}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Sel {f656ToF660RendererLegacyClickProbe.metrics.observedSelectionCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#7c2d12]">{f656ToF660RendererLegacyClickProbe.safety.owner}</span>
+                  </div>
+                  <div
+                    data-testid="f656-f660-decision"
+                    className="mt-1 truncate rounded border border-[#a7f3d0] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#047857]"
+                    title={f656ToF660RendererLegacyClickProbe.decision.reason}
+                  >
+                    {f656ToF660RendererLegacyClickProbe.decision.recommendation} | {f656ToF660RendererLegacyClickProbe.comparison.selectionDelta}
+                  </div>
+                  <div
+                    data-testid="f656-f660-safety"
+                    className="mt-1 rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f656ToF660RendererLegacyClickProbe.rollback.join(' | ')}
+                  >
+                    {f656ToF660RendererLegacyClickProbe.safety.evidence}
+                  </div>
+                  <div
+                    data-testid="f656-f660-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f656ToF660RendererLegacyClickProbe.observation.evidenceId}
+                  >
+                    {f656ToF660RendererLegacyClickProbe.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

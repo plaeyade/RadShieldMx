@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F656-F660 (2026-08-10) - Legacy Click Probe
+
+- **F656:** observacion de click legacy: evento, punto, herramienta, seleccion y evidencia.
+- **F657:** comparacion entre seleccion observada y expectativa F651.
+- **F658:** seguridad de ownership: `useCanvas` preservado, sin mutacion geometrica.
+- **F659:** gates de QA disponible, click observado y prediccion coincidente.
+- **F660:** gates de owner preservado y geometria sin mutacion.
+
+Decision: `legacy-click-probe-preview` mantiene el renderer profundo en lectura/preview. Solo una observacion E2E real y coincidente lo vuelve candidato a `eligible-for-owner-flag`.
+
 # F651-F655 (2026-08-10) - Activation QA Gate
 
 - **F651:** expectativa legacy de seleccion desde snapshot F646-F650.

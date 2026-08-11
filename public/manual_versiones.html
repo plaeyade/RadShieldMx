@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F655 - Manual de Versiones</title>
+  <title>RadShield-MX F660 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F655</span>
+    <span class="pill">Version documental: F660</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F656-F660 Legacy Click Probe</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F656</td><td>Observacion de click legacy.</td><td>Registra evento, punto, herramienta, seleccion y evidencia.</td><td>Click E2E requerido.</td></tr>
+        <tr><td>F657</td><td>Comparacion con F651.</td><td>Contrasta seleccion observada vs esperada.</td><td>Coincidencia obligatoria.</td></tr>
+        <tr><td>F658</td><td>Owner safety.</td><td>Confirma que useCanvas conserva eventos.</td><td>No ownership profundo.</td></tr>
+        <tr><td>F659</td><td>Gates de observacion.</td><td>QA disponible, click observado y prediccion coincidente.</td><td>OK antes de avanzar.</td></tr>
+        <tr><td>F660</td><td>Gates de reversibilidad.</td><td>Owner preservado y geometria sin mutacion.</td><td>Rollback inmediato si falla.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F656-F660 queda en <code>legacy-click-probe-preview</code>: el renderer profundo no toma eventos todavia.</p>
+
     <h2>0. F651-F655 Activation QA</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

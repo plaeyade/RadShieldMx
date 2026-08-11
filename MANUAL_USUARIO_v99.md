@@ -1,4 +1,31 @@
-# Manual de Usuario RadShield-MX - F655 Activation QA
+# Manual de Usuario RadShield-MX - F660 Legacy Click Probe
+
+## Addendum F656-F660 - Legacy Click Probe
+
+F656-F660 agrega una sonda previa al cambio de ownership del canvas. Su objetivo es confirmar que un click legacy real puede observarse, compararse con la expectativa F651 y mantenerse reversible antes de permitir que el renderer profundo tome cualquier accion.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F656-F660 legacy click probe**.
+3. Revise **G** para gates aprobados/totales.
+4. Revise el tipo de evento: debe cambiar de `not-observed` a `pointerdown-legacy` solo cuando exista E2E observado.
+5. Revise **decision**: `keep-preview`, `eligible-for-owner-flag` o `blocked`.
+6. Confirme que el owner siga siendo `useCanvas`.
+7. No active ownership profundo si `Click legacy observado` o `Prediccion coincide` estan en NO.
+
+### Logica de seguridad
+
+- `useCanvas` sigue siendo el owner canonico de eventos.
+- No modifica geometria, seleccion, cotas, capas, snapping ni calculos.
+- Bloquea si detecta mutacion de geometria o si el owner profundo se activo antes de tiempo.
+- Rollback: volver a F636-F645 para revisar hit-test/dry-run si el click observado no coincide.
+
+### Validacion tecnica
+
+- `npm run test:f656-f660:renderer-legacy-click-probe`
+- `npm run test:f656-f660:renderer-legacy-click-probe:values`
+- `npm run test:f656-f660:renderer-legacy-click-probe:e2e`
 
 ## Addendum F651-F655 - Activation QA
 

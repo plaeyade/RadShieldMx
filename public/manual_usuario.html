@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F655 - Manual de Usuario</title>
+  <title>RadShield-MX F660 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F655</span>
+      <span class="pill">Version de manual: F660</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F656-F660: Legacy Click Probe</h2>
+    <p>F656-F660 agrega una sonda previa al cambio de ownership del canvas. Observa click legacy, compara la seleccion contra F651-F655 y confirma que <code>useCanvas</code> conserve el control antes de cualquier activacion profunda.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Estado</td><td><code>legacy-click-probe-preview</code></td><td>La sonda existe pero aun falta click E2E observado.</td><td>Mantener preview.</td></tr>
+        <tr><td>Click legacy</td><td>Evento, punto, herramienta y seleccion.</td><td>Que el comportamiento real sea comparable con la prediccion.</td><td>Volver a F641-F645 si no coincide.</td></tr>
+        <tr><td>Owner</td><td><code>useCanvas</code></td><td>Que el renderer profundo no tome eventos prematuramente.</td><td>Desactivar flag alto riesgo.</td></tr>
+        <tr><td>Geometria</td><td>Sin mutacion.</td><td>Que no cambien barreras, cotas, capas ni equipos.</td><td>Repetir smoke F197/F207/F229.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F656-F660 queda en <code>legacy-click-probe-preview</code>. Solo un click legacy observado y coincidente permite avanzar a prueba bajo owner flag.</p>
+
     <h2>0. Addendum F651-F655: Activation QA</h2>
     <p>F651-F655 evalua si la ruta de eventos profundos puede pasar a pruebas bajo feature flag. Compara seleccion simulada, rollback y requisito de click legacy real.</p>
     <table>
