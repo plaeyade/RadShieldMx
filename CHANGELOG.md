@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F661-F665 (2026-08-10) - bridge de click observado
+
+- Agregado `src/lib/f661F665RendererObservedClickBridge.ts` con contrato `radshield-mx.canvas.renderer-observed-click-bridge.f661-f665.v1`.
+- F661 captura click real desde `handleF561MouseDown` despues de llamar el handler legacy.
+- F662 estabiliza seleccion observada y compara contra la prediccion F656-F660.
+- F663 confirma que `useCanvas` conserva ownership y que no hubo mutacion geometrica.
+- F664-F665 agrega gates de click capturado, seleccion estabilizada, prediccion confirmada, owner preservado y geometria sin mutacion.
+- Canvas muestra panel F661-F665 y E2E hace click real sobre `f100-main-floorplan-canvas`.
+- Decision actual: mantener preview si no hay seleccion estabilizada/coincidente; no se activa owner profundo.
+
 # F656-F660 (2026-08-10) - sonda de click legacy
 
 - Agregado `src/lib/f656F660RendererLegacyClickProbe.ts` con contrato `radshield-mx.canvas.renderer-legacy-click-probe.f656-f660.v1`.

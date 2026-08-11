@@ -1,4 +1,31 @@
-# Manual de Usuario RadShield-MX - F660 Legacy Click Probe
+# Manual de Usuario RadShield-MX - F665 Observed Click Bridge
+
+## Addendum F661-F665 - Observed Click Bridge
+
+F661-F665 conecta la sonda anterior con un click real del canvas. El click se registra despues de ejecutar el handler legacy, por lo que la app sigue usando `useCanvas` como flujo canonico. Esta fase sirve para demostrar evidencia real antes de cualquier cambio de ownership del renderer profundo.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F661-F665 observed click**.
+3. Haga click sobre el canvas principal.
+4. Revise que **receipt** cambie de `click legacy pendiente` a coordenadas de click.
+5. Revise **G**: click capturado, owner y geometria deben estar OK.
+6. Si falta seleccion estabilizada o prediccion confirmada, la decision correcta sigue siendo `keep-preview`.
+7. No active owner profundo hasta que el panel marque `eligible-for-controlled-owner-test`.
+
+### Logica de seguridad
+
+- El click real pasa primero por `routeF561PointerEvent` y `onMouseDown`.
+- El bridge solo observa y guarda evidencia ligera.
+- No modifica barreras, fuentes, capas, cotas, snapping, reportes ni calculos.
+- Si hay mutacion geometrica o ownership profundo prematuro, la fase queda bloqueada.
+
+### Validacion tecnica
+
+- `npm run test:f661-f665:renderer-observed-click-bridge`
+- `npm run test:f661-f665:renderer-observed-click-bridge:values`
+- `npm run test:f661-f665:renderer-observed-click-bridge:e2e`
 
 ## Addendum F656-F660 - Legacy Click Probe
 

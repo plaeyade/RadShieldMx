@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F660 - Manual de Versiones</title>
+  <title>RadShield-MX F665 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F660</span>
+    <span class="pill">Version documental: F665</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F661-F665 Observed Click Bridge</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F661</td><td>Click real observado.</td><td>Captura coordenada, herramienta y evidencia.</td><td>Pointerdown legacy.</td></tr>
+        <tr><td>F662</td><td>Seleccion estabilizada.</td><td>Compara seleccion contra prediccion.</td><td>Coincidencia antes de activar.</td></tr>
+        <tr><td>F663</td><td>Mutation guard.</td><td>Owner useCanvas, sin renderer ownership.</td><td>No mutacion geometrica.</td></tr>
+        <tr><td>F664</td><td>Gates de observacion.</td><td>Click, seleccion y prediccion.</td><td>OK para owner test.</td></tr>
+        <tr><td>F665</td><td>Gates de seguridad.</td><td>Owner y geometria preservados.</td><td>Rollback inmediato si falla.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F661-F665 queda en <code>observed-click-bridge-partial</code>: evidencia real sin activar eventos profundos.</p>
+
     <h2>0. F656-F660 Legacy Click Probe</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

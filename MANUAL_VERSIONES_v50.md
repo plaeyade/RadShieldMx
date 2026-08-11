@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F661-F665 (2026-08-10) - Observed Click Bridge
+
+- **F661:** captura click real desde el wrapper legacy `handleF561MouseDown`.
+- **F662:** estabiliza seleccion observada y la compara contra F656-F660.
+- **F663:** confirma owner `useCanvas`, sin ownership profundo y sin mutacion geometrica.
+- **F664:** gates de click capturado, seleccion estabilizada y prediccion confirmada.
+- **F665:** gates de owner preservado y geometria intacta.
+
+Decision: `observed-click-bridge-partial` permite evidencia real sin activar renderer profundo. Si no hay seleccion estabilizada/coincidente, se mantiene `keep-preview`.
+
 # F656-F660 (2026-08-10) - Legacy Click Probe
 
 - **F656:** observacion de click legacy: evento, punto, herramienta, seleccion y evidencia.

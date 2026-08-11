@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F660 - Manual de Usuario</title>
+  <title>RadShield-MX F665 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F660</span>
+      <span class="pill">Version de manual: F665</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F661-F665: Observed Click Bridge</h2>
+    <p>F661-F665 registra un click real del canvas despues del handler legacy. Sirve para validar evidencia real antes de mover ownership al renderer profundo.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Receipt</td><td>Coordenada y herramienta del click.</td><td>Que existe click real sobre canvas.</td><td>Borrar evidencia y volver a F656.</td></tr>
+        <tr><td>Seleccion</td><td>Seleccion observada tras click.</td><td>Que la seleccion se estabiliza y coincide.</td><td>Revisar hit-test/dry-run.</td></tr>
+        <tr><td>Owner</td><td><code>useCanvas</code></td><td>Que eventos legacy siguen activos.</td><td>Desactivar flag profundo.</td></tr>
+        <tr><td>Geometria</td><td>Sin mutacion.</td><td>Que el click no altero barreras/cotas/equipos fuera del flujo.</td><td>Repetir E2E visual.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F661-F665 queda en <code>observed-click-bridge-partial</code> hasta que seleccion y prediccion coincidan.</p>
+
     <h2>0. Addendum F656-F660: Legacy Click Probe</h2>
     <p>F656-F660 agrega una sonda previa al cambio de ownership del canvas. Observa click legacy, compara la seleccion contra F651-F655 y confirma que <code>useCanvas</code> conserve el control antes de cualquier activacion profunda.</p>
     <table>

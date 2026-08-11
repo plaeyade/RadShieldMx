@@ -91,6 +91,7 @@ import { buildF641F645RendererEventDryRun } from '@/lib/f641F645RendererEventDry
 import { buildF646F650RendererSelectionTransaction } from '@/lib/f646F650RendererSelectionTransaction';
 import { buildF651F655RendererActivationQa } from '@/lib/f651F655RendererActivationQa';
 import { buildF656F660RendererLegacyClickProbe } from '@/lib/f656F660RendererLegacyClickProbe';
+import { buildF661F665RendererObservedClickBridge } from '@/lib/f661F665RendererObservedClickBridge';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -333,6 +334,14 @@ export default function CanvasArea({
   const [f591QaInspectorMode, setF591QaInspectorMode] = useState<F591F620InspectorMode>(loadF591QaInspectorMode);
   const [f530PlacementPoint, setF530PlacementPoint] = useState<F530F534PlacementPoint | null>(null);
   const [f540DraggingGhost, setF540DraggingGhost] = useState(false);
+  const [f661ObservedClick, setF661ObservedClick] = useState<{
+    x: number;
+    y: number;
+    activeTool: string;
+    selectedId: string | null;
+    selectedIds: string[];
+    evidenceId: string;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const f540DragStartRef = useRef<{
     pointerId: number;
@@ -438,6 +447,21 @@ export default function CanvasArea({
   const handleF561MouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     routeF561PointerEvent(event, 'pointerdown');
     onMouseDown(event);
+    const evidenceId = `f661-click-${Math.round(event.nativeEvent.offsetX)}-${Math.round(event.nativeEvent.offsetY)}-${Date.now()}`;
+    const observedClick = {
+      x: Math.round(event.nativeEvent.offsetX),
+      y: Math.round(event.nativeEvent.offsetY),
+      activeTool,
+      selectedId: canvasState.selectedId,
+      selectedIds: canvasState.selectedIds,
+      evidenceId,
+    };
+    setF661ObservedClick(observedClick);
+    try {
+      window.localStorage.setItem('radshield_canvas_f661_last_click', JSON.stringify(observedClick));
+    } catch {
+      // Local storage is optional; the in-memory bridge is enough for E2E.
+    }
   };
 
   const handleF561MouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -1355,10 +1379,24 @@ export default function CanvasArea({
     f651ToF655RendererActivationQa,
     {
       activeTool,
-      selectedId: canvasState.selectedId,
-      selectedIds: canvasState.selectedIds,
+      selectedId: f661ObservedClick?.selectedId ?? canvasState.selectedId,
+      selectedIds: f661ObservedClick?.selectedIds ?? canvasState.selectedIds,
+      point: f661ObservedClick ? { x: f661ObservedClick.x, y: f661ObservedClick.y } : null,
+      evidenceId: f661ObservedClick?.evidenceId,
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
-      observed: false,
+      observed: Boolean(f661ObservedClick),
+    },
+  );
+  const f661ToF665RendererObservedClickBridge = buildF661F665RendererObservedClickBridge(
+    f656ToF660RendererLegacyClickProbe,
+    {
+      observed: Boolean(f661ObservedClick),
+      point: f661ObservedClick ? { x: f661ObservedClick.x, y: f661ObservedClick.y } : null,
+      activeTool: f661ObservedClick?.activeTool ?? activeTool,
+      selectedId: f661ObservedClick?.selectedId ?? canvasState.selectedId,
+      selectedIds: f661ObservedClick?.selectedIds ?? canvasState.selectedIds,
+      evidenceId: f661ObservedClick?.evidenceId,
+      deepRendererEventOwnership: isEnabled('canvasHighRiskCad'),
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -2801,6 +2839,65 @@ export default function CanvasArea({
                     title={f656ToF660RendererLegacyClickProbe.observation.evidenceId}
                   >
                     {f656ToF660RendererLegacyClickProbe.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f661-f665-renderer-observed-click-bridge"
+                  className="mt-2 rounded-lg border border-[#bae6fd] bg-[#eff6ff]/95 p-2"
+                  title="F661-F665: bridge de click legacy observado sin cambiar ownership del canvas"
+                  aria-label="F661 a F665 bridge de click observado del renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#0369a1]">F661-F665 observed click</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Evidencia real sin owner profundo</div>
+                    </div>
+                    <span
+                      data-testid="f661-f665-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f661ToF665RendererObservedClickBridge.status === 'observed-click-bridge-ready'
+                          ? 'border-[#bbf7d0] bg-white text-[#047857]'
+                          : f661ToF665RendererObservedClickBridge.status === 'observed-click-bridge-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#bae6fd] bg-[#e0f2fe] text-[#0369a1]'
+                      }`}
+                    >
+                      {f661ToF665RendererObservedClickBridge.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f661-f665-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f661ToF665RendererObservedClickBridge.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">G {f661ToF665RendererObservedClickBridge.metrics.passCount}/{f661ToF665RendererObservedClickBridge.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">{f661ToF665RendererObservedClickBridge.receipt.eventType}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Sel {f661ToF665RendererObservedClickBridge.metrics.selectedCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#7c2d12]">{f661ToF665RendererObservedClickBridge.mutationGuard.owner}</span>
+                  </div>
+                  <div
+                    data-testid="f661-f665-receipt"
+                    className="mt-1 truncate rounded border border-[#bae6fd] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#0369a1]"
+                    title={f661ToF665RendererObservedClickBridge.receipt.evidenceId}
+                  >
+                    {f661ToF665RendererObservedClickBridge.receipt.observed
+                      ? `click ${f661ToF665RendererObservedClickBridge.receipt.point?.x ?? 0},${f661ToF665RendererObservedClickBridge.receipt.point?.y ?? 0} / ${f661ToF665RendererObservedClickBridge.receipt.activeTool}`
+                      : 'click legacy pendiente'}
+                  </div>
+                  <div
+                    data-testid="f661-f665-decision"
+                    className="mt-1 truncate rounded border border-[#bae6fd] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#0369a1]"
+                    title={f661ToF665RendererObservedClickBridge.decision.reason}
+                  >
+                    {f661ToF665RendererObservedClickBridge.decision.recommendation} | {f661ToF665RendererObservedClickBridge.stabilization.evidence}
+                  </div>
+                  <div
+                    data-testid="f661-f665-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f661ToF665RendererObservedClickBridge.rollback.join(' | ')}
+                  >
+                    {f661ToF665RendererObservedClickBridge.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 
