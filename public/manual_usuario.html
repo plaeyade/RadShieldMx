@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F685 - Manual de Usuario</title>
+  <title>RadShield-MX F690 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F685</span>
+      <span class="pill">Version de manual: F690</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,18 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F686-F690: Before/After Owner Smoke</h2>
+    <p>F686-F690 ejecuta un smoke antes/despues: baseline con <code>useCanvas</code> y corrida flagged con <code>canvasHighRiskCad</code>, sin transferir ownership real.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Base</td><td>Seleccion baseline.</td><td>Click dirigido y alias/match confiable.</td><td>Conservar <code>useCanvas</code>.</td></tr>
+        <tr><td>Flag</td><td>Corrida con <code>canvasHighRiskCad</code>.</td><td>Ruta controlada y dry-run.</td><td>Apagar flag y recargar.</td></tr>
+        <tr><td>Parity</td><td>Comparacion antes/despues.</td><td>Misma seleccion y cero escritura geometrica.</td><td>No mover owner si falla.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Validacion:</strong> ejecutar <code>npm run test:f686-f690:renderer-before-after-smoke:e2e</code> y revisar capturas baseline/flagged.</p>
+
     <h2>0. Addendum F681-F685: Targeted Legacy Click</h2>
     <p>F681-F685 agrega un click dirigido: calcula el centro del target predicho y permite que el handler legacy <code>useCanvas</code> ejecute la seleccion real.</p>
     <table>

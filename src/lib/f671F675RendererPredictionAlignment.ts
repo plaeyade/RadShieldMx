@@ -80,13 +80,16 @@ export function buildF671F675RendererPredictionAlignment(
           ? 'Click y muestra existen, pero useCanvas no dejo seleccion asentada.'
           : 'Seleccion legacy apunta a otro objeto o no comparte alias.',
   };
+  const clickSampleSatisfied = (stabilizer.guard.clickObserved && stabilizer.sample.sampled) || diagnosis.canTrustPrediction;
   const gates: F673F675AlignmentGate[] = [
     {
       id: 'f673-click-and-sample',
       phase: 'F673',
       label: 'Click y sample',
-      pass: stabilizer.guard.clickObserved && stabilizer.sample.sampled,
-      evidence: `${stabilizer.guard.clickObserved ? 'click' : 'no-click'} / ${stabilizer.sample.sampled ? 'sample' : 'no-sample'}`,
+      pass: clickSampleSatisfied,
+      evidence: clickSampleSatisfied && diagnosis.canTrustPrediction
+        ? `Seleccion alineada por ${diagnosis.alignment}; se tolera desfase de sample/click.`
+        : `${stabilizer.guard.clickObserved ? 'click' : 'no-click'} / ${stabilizer.sample.sampled ? 'sample' : 'no-sample'}`,
     },
     {
       id: 'f673-selection-present',

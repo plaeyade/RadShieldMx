@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F686-F690 (2026-08-10) - Before/After Owner Smoke
+
+- **F686:** baseline `useCanvas` con click dirigido y seleccion alineada.
+- **F687:** ruta flagged `deep-renderer-v2` bajo `canvasHighRiskCad`.
+- **F688:** paridad esperada antes/despues: misma seleccion, sin escritura.
+- **F689:** gates de baseline y ruta flagged controlada.
+- **F690:** gates de paridad observada, no geometry write y rollback listo.
+
+Decision: `before-after-smoke-preview` hasta ejecutar E2E comparativo. No transfiere ownership real.
+
 # F681-F685 (2026-08-10) - Targeted Legacy Click
 
 - **F681:** resuelve el target esperado contra aliases del hit-test shadow.

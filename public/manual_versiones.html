@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F685 - Manual de Versiones</title>
+  <title>RadShield-MX F690 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F685</span>
+    <span class="pill">Version documental: F690</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F686-F690 Before/After Owner Smoke</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F686</td><td>Baseline.</td><td>Confirma useCanvas con click dirigido.</td><td>Seleccion alineada.</td></tr>
+        <tr><td>F687</td><td>Flagged route.</td><td>Modela deep-renderer-v2 bajo flag.</td><td>Flag controlado.</td></tr>
+        <tr><td>F688</td><td>Parity.</td><td>Antes/despues debe conservar seleccion.</td><td>E2E observado.</td></tr>
+        <tr><td>F689</td><td>Gates de ruta.</td><td>Baseline y flagged listos.</td><td>OK antes de avanzar.</td></tr>
+        <tr><td>F690</td><td>Rollback.</td><td>Sin geometry write y rollback listo.</td><td>No ownership real.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F686-F690 mantiene preview hasta paridad observada; no mueve owner real.</p>
+
     <h2>0. F681-F685 Targeted Legacy Click</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

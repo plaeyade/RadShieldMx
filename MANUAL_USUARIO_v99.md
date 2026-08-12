@@ -1,4 +1,23 @@
-# Manual de Usuario RadShield-MX - F685 Targeted Legacy Click
+# Manual de Usuario RadShield-MX - F690 Before/After Owner Smoke
+
+## Addendum F686-F690 - Before/After Owner Smoke
+
+F686-F690 compara el comportamiento baseline de `useCanvas` contra una corrida con `canvasHighRiskCad` activado. Es un **smoke antes/despues**: verifica que el click dirigido siga seleccionando el mismo target, que exista rollback y que no se escriba geometria.
+
+### Como usarlo
+
+1. Ejecute primero F681-F685 para confirmar que el click dirigido al target predicho alinea la seleccion.
+2. Abra el panel **F686-F690 before/after**.
+3. Revise **Base**: debe estar OK cuando `useCanvas` selecciona el target por match o alias.
+4. Revise **Flag**: indica si la corrida esta con `canvasHighRiskCad` apagado o encendido.
+5. Revise **Parity**: queda pendiente hasta ejecutar E2E antes/despues.
+6. No se debe mover ownership real mientras `Paridad antes/despues` no este OK.
+
+### Validacion tecnica
+
+- `npm run test:f686-f690:renderer-before-after-smoke`
+- `npm run test:f686-f690:renderer-before-after-smoke:values`
+- `npm run test:f686-f690:renderer-before-after-smoke:e2e`
 
 ## Addendum F681-F685 - Targeted Legacy Click
 

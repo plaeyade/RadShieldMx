@@ -96,6 +96,7 @@ import { buildF666F670RendererSelectionStabilizer } from '@/lib/f666F670Renderer
 import { buildF671F675RendererPredictionAlignment } from '@/lib/f671F675RendererPredictionAlignment';
 import { buildF676F680RendererOwnerSmoke } from '@/lib/f676F680RendererOwnerSmoke';
 import { buildF681F685RendererTargetedLegacyClick } from '@/lib/f681F685RendererTargetedLegacyClick';
+import { buildF686F690RendererOwnerBeforeAfterSmoke } from '@/lib/f686F690RendererOwnerBeforeAfterSmoke';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1423,7 +1424,7 @@ export default function CanvasArea({
       selectedId: f661ObservedClick?.selectedId ?? canvasState.selectedId,
       selectedIds: f661ObservedClick?.selectedIds ?? canvasState.selectedIds,
       evidenceId: f661ObservedClick?.evidenceId,
-      deepRendererEventOwnership: isEnabled('canvasHighRiskCad'),
+      deepRendererEventOwnership: isEnabled('canvasHighRiskCad') && isEnabled('canvasEventControllerV2'),
     },
   );
   const f666ToF670RendererSelectionStabilizer = buildF666F670RendererSelectionStabilizer(
@@ -1449,6 +1450,16 @@ export default function CanvasArea({
     {
       highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
       beforeAfterSmokePassed: false,
+    },
+  );
+  const f686BeforeAfterObserved = typeof window !== 'undefined'
+    && window.localStorage.getItem('radshield_canvas_f686_before_after_observed') === 'true';
+  const f686ToF690RendererOwnerBeforeAfterSmoke = buildF686F690RendererOwnerBeforeAfterSmoke(
+    f676ToF680RendererOwnerSmoke,
+    f681ToF685RendererTargetedLegacyClick,
+    {
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+      beforeAfterObserved: f686BeforeAfterObserved,
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -3096,6 +3107,35 @@ export default function CanvasArea({
                   </div>
                   <div data-testid="f676-f680-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
                     {f676ToF680RendererOwnerSmoke.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f686-f690-renderer-before-after-smoke"
+                  className="mt-2 rounded-lg border border-[#bbf7d0] bg-[#ecfdf5]/95 p-2"
+                  title="F686-F690: smoke antes/despues, compara baseline useCanvas contra ruta flagged sin escribir geometria"
+                  aria-label="F686 a F690 smoke antes despues del owner renderer"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#047857]">F686-F690 before/after</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Baseline + flag + parity + rollback</div>
+                    </div>
+                    <span data-testid="f686-f690-status" className="rounded border border-[#bbf7d0] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#047857]">
+                      {f686ToF690RendererOwnerBeforeAfterSmoke.status}
+                    </span>
+                  </div>
+                  <div data-testid="f686-f690-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f686ToF690RendererOwnerBeforeAfterSmoke.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">G {f686ToF690RendererOwnerBeforeAfterSmoke.metrics.passCount}/{f686ToF690RendererOwnerBeforeAfterSmoke.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">Base {f686ToF690RendererOwnerBeforeAfterSmoke.baseline.selectionAligned ? 'OK' : 'NO'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Flag {f686ToF690RendererOwnerBeforeAfterSmoke.flagged.flagEnabled ? 'ON' : 'OFF'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#7c2d12]">Parity {f686ToF690RendererOwnerBeforeAfterSmoke.parity.observed ? 'OK' : 'PEND'}</span>
+                  </div>
+                  <div data-testid="f686-f690-decision" className="mt-1 rounded border border-[#bbf7d0] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#047857]" title={f686ToF690RendererOwnerBeforeAfterSmoke.decision.reason}>
+                    {f686ToF690RendererOwnerBeforeAfterSmoke.decision.recommendation} | {f686ToF690RendererOwnerBeforeAfterSmoke.baseline.evidence}
+                  </div>
+                  <div data-testid="f686-f690-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f686ToF690RendererOwnerBeforeAfterSmoke.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

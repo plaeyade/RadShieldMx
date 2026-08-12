@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F686-F690 (2026-08-10) - before/after owner smoke
+
+- Agregado `src/lib/f686F690RendererOwnerBeforeAfterSmoke.ts` con contrato `radshield-mx.canvas.renderer-owner-before-after-smoke.f686-f690.v1`.
+- F686 define baseline `useCanvas` con click dirigido y alineacion confiable.
+- F687 modela ruta flagged `canvasHighRiskCad` como dry-run controlado.
+- F688 compara paridad antes/despues sin escribir geometria.
+- F689-F690 agrega gates de baseline, ruta flagged, paridad observada, no geometry write y rollback.
+- E2E corre baseline y flagged, captura ambas pantallas y guarda manifiesto comparativo.
+
 # F681-F685 (2026-08-10) - targeted legacy click
 
 - Agregado `src/lib/f681F685RendererTargetedLegacyClick.ts` con contrato `radshield-mx.canvas.renderer-targeted-legacy-click.f681-f685.v1`.
