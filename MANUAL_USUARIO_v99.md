@@ -1,4 +1,59 @@
-# Manual de Usuario RadShield-MX - F670 Selection Stabilizer
+# Manual de Usuario RadShield-MX - F680 Alignment And Owner Smoke
+
+## Addendum F676-F680 - Owner Smoke Gate
+
+F676-F680 prepara el primer smoke de ownership del renderer profundo, pero lo deja bloqueado por seguridad hasta que F671-F675 confirme que la prediccion del renderer coincide con la seleccion legacy asentada. En esta etapa **Owner Smoke** no cambia el propietario real del canvas: `useCanvas` sigue siendo la fuente canonica de eventos.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. Localice el panel **F676-F680 owner smoke**.
+3. Revise **Decision**: debe mostrar `blocked`, `keep-usecanvas` o `run-flagged-owner-smoke`.
+4. Mantenga `canvasHighRiskCad` apagado si la alineacion F671-F675 no esta lista.
+5. Si la decision esta bloqueada, no hay falla de usuario: significa que el sistema esta evitando activar un owner profundo sin evidencia suficiente.
+6. Para avanzar a una prueba controlada se requieren alineacion lista, flag explicito, cero escritura de geometria y smoke antes/despues.
+
+### Logica de seguridad
+
+- El owner canonico sigue siendo `useCanvas`.
+- La fase exige rollback inmediato y no permite escritura geometrica.
+- El smoke queda detonado solo por flag, no por accidente visual.
+- Si F671-F675 reporta `missing-selection` o `mismatch`, F676-F680 bloquea el cambio.
+
+### Validacion tecnica
+
+- `npm run test:f671-f680:renderer-alignment-owner-smoke`
+- `npm run test:f671-f680:renderer-alignment-owner-smoke:values`
+- `npm run test:f671-f680:renderer-alignment-owner-smoke:e2e`
+
+## Addendum F671-F675 - Prediction Alignment
+
+F671-F675 compara lo que el renderer profundo cree que deberia seleccionarse contra lo que el flujo legacy realmente deja asentado despues del click. Esto cierra la brecha entre prediccion visual, aliases de entidades y seleccion real.
+
+### Como usarlo
+
+1. Abra el canvas y haga click sobre una entidad visible.
+2. Revise el panel **F671-F675 prediction alignment**.
+3. Lea **expected / settled** para comparar prediccion y seleccion real.
+4. Revise **diag**:
+   - `match`: coincide exactamente.
+   - `alias-match`: coincide por alias normalizado.
+   - `missing-selection`: hubo click/muestra, pero no seleccion asentada.
+   - `mismatch`: hay seleccion real diferente a la predicha.
+5. Si el diagnostico no es `match` o `alias-match`, la decision correcta es mantener preview.
+
+### Logica de seguridad
+
+- No selecciona entidades ni modifica geometria.
+- Normaliza aliases para evitar falsos negativos por prefijos de fase.
+- Sirve como requisito previo del smoke de owner F676-F680.
+- Registra gates de click/sample, seleccion presente, alineacion confiable y owner seguro.
+
+### Validacion tecnica
+
+- `npm run test:f671-f680:renderer-alignment-owner-smoke`
+- `npm run test:f671-f680:renderer-alignment-owner-smoke:values`
+- `npm run test:f671-f680:renderer-alignment-owner-smoke:e2e`
 
 ## Addendum F666-F670 - Selection Stabilizer
 

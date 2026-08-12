@@ -1,5 +1,21 @@
 # RadShield-MX - Fases recientes
 
+# F676-F680 (2026-08-10) - owner smoke gate
+
+- Agregado `src/lib/f676F680RendererOwnerSmoke.ts` con contrato `radshield-mx.canvas.renderer-owner-smoke.f676-f680.v1`.
+- F676 define plan de owner smoke bajo flag `canvasHighRiskCad`.
+- F677 confirma que la alineacion F671-F675 este lista, reversible y sin escritura geometrica.
+- F678-F680 agrega gates de alineacion lista, flag controlado, no geometry write, rollback y smoke antes/despues.
+- Decision actual: `owner-smoke-blocked` hasta que F671-F675 sea confiable.
+
+# F671-F675 (2026-08-10) - alineacion de prediccion y seleccion legacy
+
+- Agregado `src/lib/f671F675RendererPredictionAlignment.ts` con contrato `radshield-mx.canvas.renderer-prediction-alignment.f671-f675.v1`.
+- F671 normaliza IDs y aliases entre seleccion esperada y seleccion asentada.
+- F672 diagnostica `match`, `alias-match`, `missing-selection` o `mismatch`.
+- F673-F675 agrega gates de click/sample, seleccion presente, prediccion confiable y owner/geometria seguros.
+- Decision actual: mantener preview si no hay seleccion legacy asentada.
+
 # F666-F670 (2026-08-10) - estabilizador de seleccion post-click
 
 - Agregado `src/lib/f666F670RendererSelectionStabilizer.ts` con contrato `radshield-mx.canvas.renderer-selection-stabilizer.f666-f670.v1`.

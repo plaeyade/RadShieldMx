@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F670 - Manual de Versiones</title>
+  <title>RadShield-MX F680 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,37 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F670</span>
+    <span class="pill">Version documental: F680</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F676-F680 Owner Smoke Gate</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F676</td><td>Plan de owner smoke.</td><td>Define candidato <code>deep-renderer-v2</code> bajo flag.</td><td><code>canvasHighRiskCad</code>.</td></tr>
+        <tr><td>F677</td><td>Safety check.</td><td>Alineacion lista, reversible y sin escritura geometrica.</td><td>No geometry write.</td></tr>
+        <tr><td>F678</td><td>Gate de alineacion.</td><td>F671-F675 debe estar listo.</td><td>Match o alias-match.</td></tr>
+        <tr><td>F679</td><td>Rollback.</td><td>Garantiza retorno inmediato a <code>useCanvas</code>.</td><td>Rollback disponible.</td></tr>
+        <tr><td>F680</td><td>Smoke antes/despues.</td><td>Evita activar owner profundo sin E2E comparativo.</td><td>Smoke aprobado.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F676-F680 queda en <code>owner-smoke-blocked</code> si la seleccion legacy no esta alineada.</p>
+
+    <h2>0. F671-F675 Prediction Alignment</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F671</td><td>Aliases normalizados.</td><td>Evita falsos negativos por prefijos de fase.</td><td>ID comparable.</td></tr>
+        <tr><td>F672</td><td>Diagnostico.</td><td><code>match</code>, <code>alias-match</code>, <code>missing-selection</code> o <code>mismatch</code>.</td><td>Diagnostico visible.</td></tr>
+        <tr><td>F673</td><td>Click/sample.</td><td>Confirma click observado y muestra diferida.</td><td>Ambos OK.</td></tr>
+        <tr><td>F674</td><td>Seleccion presente.</td><td>Bloquea si no hay seleccion asentada.</td><td>Settled selection.</td></tr>
+        <tr><td>F675</td><td>Owner safety.</td><td>Sin owner profundo y sin mutacion geometrica.</td><td><code>useCanvas</code>.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F671-F675 queda en revision si hay <code>missing-selection</code>; solo habilita prep de owner smoke con coincidencia confiable.</p>
+
     <h2>0. F666-F670 Selection Stabilizer</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

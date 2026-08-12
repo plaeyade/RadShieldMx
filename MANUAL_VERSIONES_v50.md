@@ -1,5 +1,25 @@
 # RadShield-MX - Manual de Versiones
 
+# F676-F680 (2026-08-10) - Owner Smoke Gate
+
+- **F676:** define plan de owner smoke para `deep-renderer-v2` bajo flag `canvasHighRiskCad`.
+- **F677:** valida que F671-F675 este listo, reversible y sin escritura geometrica.
+- **F678:** gate de alineacion lista antes de cualquier cambio de owner.
+- **F679:** gate de flag explicito y rollback inmediato.
+- **F680:** gate de smoke antes/despues; si falta evidencia, conserva `useCanvas`.
+
+Decision: `owner-smoke-blocked` mientras la seleccion legacy no coincida con la prediccion. No activa renderer profundo ni escribe geometria.
+
+# F671-F675 (2026-08-10) - Prediction Alignment
+
+- **F671:** normaliza `expectedSelectionId` y `settledSelectionId` con aliases de fase/entidad.
+- **F672:** diagnostica `match`, `alias-match`, `missing-selection` o `mismatch`.
+- **F673:** gate de click observado y muestra diferida ejecutada.
+- **F674:** gate de seleccion presente y alineacion confiable.
+- **F675:** gate de owner seguro y geometria sin mutacion.
+
+Decision: `prediction-alignment-review` si hay muestra pero no seleccion asentada; `prediction-alignment-ready` solo con coincidencia exacta o alias confiable.
+
 # F666-F670 (2026-08-10) - Selection Stabilizer
 
 - **F666:** muestra diferida de seleccion despues de click legacy real.

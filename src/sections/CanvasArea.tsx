@@ -93,6 +93,8 @@ import { buildF651F655RendererActivationQa } from '@/lib/f651F655RendererActivat
 import { buildF656F660RendererLegacyClickProbe } from '@/lib/f656F660RendererLegacyClickProbe';
 import { buildF661F665RendererObservedClickBridge } from '@/lib/f661F665RendererObservedClickBridge';
 import { buildF666F670RendererSelectionStabilizer } from '@/lib/f666F670RendererSelectionStabilizer';
+import { buildF671F675RendererPredictionAlignment } from '@/lib/f671F675RendererPredictionAlignment';
+import { buildF676F680RendererOwnerSmoke } from '@/lib/f676F680RendererOwnerSmoke';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1432,6 +1434,16 @@ export default function CanvasArea({
       expectedSelectedId: f651ToF655RendererActivationQa.expectation.expectedSelectedId,
       expectedSelectedIds: f651ToF655RendererActivationQa.expectation.expectedSelectedIds,
       evidenceId: f666SelectionSample?.evidenceId,
+    },
+  );
+  const f671ToF675RendererPredictionAlignment = buildF671F675RendererPredictionAlignment(
+    f666ToF670RendererSelectionStabilizer,
+  );
+  const f676ToF680RendererOwnerSmoke = buildF676F680RendererOwnerSmoke(
+    f671ToF675RendererPredictionAlignment,
+    {
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+      beforeAfterSmokePassed: false,
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -2990,6 +3002,64 @@ export default function CanvasArea({
                     title={f666ToF670RendererSelectionStabilizer.rollback.join(' | ')}
                   >
                     {f666ToF670RendererSelectionStabilizer.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f671-f675-renderer-prediction-alignment"
+                  className="mt-2 rounded-lg border border-[#ddd6fe] bg-[#f5f3ff]/95 p-2"
+                  title="F671-F675: alinea prediccion del renderer con seleccion legacy real"
+                  aria-label="F671 a F675 alineacion de prediccion contra seleccion legacy"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#6d28d9]">F671-F675 prediction alignment</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Expected vs settled aliases</div>
+                    </div>
+                    <span data-testid="f671-f675-status" className="rounded border border-[#ddd6fe] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#6d28d9]">
+                      {f671ToF675RendererPredictionAlignment.status}
+                    </span>
+                  </div>
+                  <div data-testid="f671-f675-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f671ToF675RendererPredictionAlignment.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#6d28d9]">G {f671ToF675RendererPredictionAlignment.metrics.passCount}/{f671ToF675RendererPredictionAlignment.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">A {f671ToF675RendererPredictionAlignment.metrics.aliasCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">{f671ToF675RendererPredictionAlignment.diagnosis.alignment}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">Trust {f671ToF675RendererPredictionAlignment.diagnosis.canTrustPrediction ? 'SI' : 'NO'}</span>
+                  </div>
+                  <div data-testid="f671-f675-diagnosis" className="mt-1 rounded border border-[#ddd6fe] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#6d28d9]" title={f671ToF675RendererPredictionAlignment.diagnosis.reason}>
+                    {f671ToF675RendererPredictionAlignment.decision.recommendation} | {f671ToF675RendererPredictionAlignment.diagnosis.reason}
+                  </div>
+                  <div data-testid="f671-f675-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f671ToF675RendererPredictionAlignment.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f676-f680-renderer-owner-smoke"
+                  className="mt-2 rounded-lg border border-[#fecdd3] bg-[#fff1f2]/95 p-2"
+                  title="F676-F680: smoke controlado de owner profundo bajo flag; bloqueado si F671-F675 no esta listo"
+                  aria-label="F676 a F680 owner smoke controlado del renderer profundo"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#be123c]">F676-F680 owner smoke</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Flag + rollback + no geometry write</div>
+                    </div>
+                    <span data-testid="f676-f680-status" className="rounded border border-[#fecdd3] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#be123c]">
+                      {f676ToF680RendererOwnerSmoke.status}
+                    </span>
+                  </div>
+                  <div data-testid="f676-f680-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f676ToF680RendererOwnerSmoke.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#be123c]">G {f676ToF680RendererOwnerSmoke.metrics.passCount}/{f676ToF680RendererOwnerSmoke.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">{f676ToF680RendererOwnerSmoke.plan.currentOwner}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Write {f676ToF680RendererOwnerSmoke.safety.geometryWriteAllowed ? 'SI' : 'NO'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">RB {f676ToF680RendererOwnerSmoke.safety.reversible ? 'OK' : 'NO'}</span>
+                  </div>
+                  <div data-testid="f676-f680-decision" className="mt-1 rounded border border-[#fecdd3] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#be123c]" title={f676ToF680RendererOwnerSmoke.decision.reason}>
+                    {f676ToF680RendererOwnerSmoke.decision.recommendation} | {f676ToF680RendererOwnerSmoke.safety.evidence}
+                  </div>
+                  <div data-testid="f676-f680-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f676ToF680RendererOwnerSmoke.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

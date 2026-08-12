@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F670 - Manual de Usuario</title>
+  <title>RadShield-MX F680 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F670</span>
+      <span class="pill">Version de manual: F680</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,30 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F676-F680: Owner Smoke Gate</h2>
+    <p>F676-F680 prepara un smoke controlado del owner profundo, pero conserva <code>useCanvas</code> como propietario real hasta que la alineacion F671-F675 sea confiable.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Panel owner smoke</td><td>Revisar decision y gates.</td><td>Flag, alineacion, no geometry write y smoke antes/despues.</td><td>Conservar <code>useCanvas</code>.</td></tr>
+        <tr><td>Flag <code>canvasHighRiskCad</code></td><td>Solo para pruebas controladas.</td><td>Evita activacion accidental del renderer profundo.</td><td>Apagar flag.</td></tr>
+        <tr><td>Decision</td><td><code>blocked</code>, <code>keep-usecanvas</code> o <code>run-flagged-owner-smoke</code>.</td><td>Si el sistema esta listo para smoke o debe seguir en preview.</td><td>No cambia geometria.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F676-F680 queda bloqueado si F671-F675 reporta seleccion faltante o mismatch.</p>
+
+    <h2>0. Addendum F671-F675: Prediction Alignment</h2>
+    <p>F671-F675 compara la prediccion del renderer con la seleccion legacy asentada. Normaliza aliases para distinguir coincidencia real, coincidencia por alias, seleccion faltante y mismatch.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Resultado esperado</th></tr></thead>
+      <tbody>
+        <tr><td>Expected/settled</td><td>Comparar entidad predicha y entidad real.</td><td>Que el click y la seleccion apunten al mismo objeto.</td><td><code>match</code> o <code>alias-match</code>.</td></tr>
+        <tr><td>Diagnosis</td><td>Leer <code>match</code>, <code>alias-match</code>, <code>missing-selection</code> o <code>mismatch</code>.</td><td>Estado de confianza antes del owner smoke.</td><td>Mantener preview salvo coincidencia confiable.</td></tr>
+        <tr><td>Gates</td><td>Click/sample, seleccion presente, alineacion y owner.</td><td>Que no haya mutacion ni ownership prematuro.</td><td>Todos OK para avanzar.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Validacion:</strong> usar <code>npm run test:f671-f680:renderer-alignment-owner-smoke</code>, <code>:values</code> y <code>:e2e</code>.</p>
+
     <h2>0. Addendum F666-F670: Selection Stabilizer</h2>
     <p>F666-F670 toma una muestra diferida despues del click real para confirmar si la seleccion legacy se asento y coincide con la prediccion.</p>
     <table>
