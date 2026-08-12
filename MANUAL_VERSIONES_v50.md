@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F666-F670 (2026-08-10) - Selection Stabilizer
+
+- **F666:** muestra diferida de seleccion despues de click legacy real.
+- **F667:** comparacion expected vs settled.
+- **F668:** guard de estabilidad: click observado, seleccion estable, owner y geometria.
+- **F669:** gates de click observado, muestra diferida y seleccion estable.
+- **F670:** gates de prediccion coincidente, owner preservado y geometria intacta.
+
+Decision: `selection-stabilizer-preview` deja trazabilidad clara cuando el click existe pero la seleccion aun no coincide. No activa ownership profundo.
+
 # F661-F665 (2026-08-10) - Observed Click Bridge
 
 - **F661:** captura click real desde el wrapper legacy `handleF561MouseDown`.

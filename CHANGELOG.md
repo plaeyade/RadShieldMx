@@ -1,5 +1,15 @@
 # RadShield-MX - Fases recientes
 
+# F666-F670 (2026-08-10) - estabilizador de seleccion post-click
+
+- Agregado `src/lib/f666F670RendererSelectionStabilizer.ts` con contrato `radshield-mx.canvas.renderer-selection-stabilizer.f666-f670.v1`.
+- F666 toma una muestra diferida de seleccion despues del click legacy observado.
+- F667 compara seleccion esperada vs seleccion asentada.
+- F668 verifica click observado, seleccion estable, owner preservado y ausencia de mutacion geometrica.
+- F669-F670 agrega gates de click, muestra diferida, seleccion estable, prediccion coincidente, owner y geometria.
+- Canvas muestra panel F666-F670 y E2E valida que la muestra diferida se ejecute tras click real.
+- Decision actual: `selection-stabilizer-preview`; mantiene preview si no hay seleccion estabilizada/coincidente.
+
 # F661-F665 (2026-08-10) - bridge de click observado
 
 - Agregado `src/lib/f661F665RendererObservedClickBridge.ts` con contrato `radshield-mx.canvas.renderer-observed-click-bridge.f661-f665.v1`.

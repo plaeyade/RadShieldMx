@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F665 - Manual de Versiones</title>
+  <title>RadShield-MX F670 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F665</span>
+    <span class="pill">Version documental: F670</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F666-F670 Selection Stabilizer</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F666</td><td>Muestra diferida.</td><td>Lee seleccion post-click.</td><td>Sample ejecutado.</td></tr>
+        <tr><td>F667</td><td>Expected vs settled.</td><td>Compara prediccion contra seleccion real.</td><td>Coincidencia requerida.</td></tr>
+        <tr><td>F668</td><td>Stability guard.</td><td>Click, seleccion, owner y geometria.</td><td>Sin mutacion.</td></tr>
+        <tr><td>F669</td><td>Gates de estabilizacion.</td><td>Click, muestra y seleccion estable.</td><td>OK antes de owner smoke.</td></tr>
+        <tr><td>F670</td><td>Gates finales.</td><td>Prediccion, owner y geometria.</td><td>Preview si no coincide.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F666-F670 queda en <code>selection-stabilizer-preview</code>: no activa renderer profundo.</p>
+
     <h2>0. F661-F665 Observed Click Bridge</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

@@ -1,4 +1,31 @@
-# Manual de Usuario RadShield-MX - F665 Observed Click Bridge
+# Manual de Usuario RadShield-MX - F670 Selection Stabilizer
+
+## Addendum F666-F670 - Selection Stabilizer
+
+F666-F670 toma una muestra diferida de la seleccion despues de un click real. Esto separa tres cosas: el click observado, la seleccion asentada por `useCanvas` y la coincidencia contra la prediccion del renderer profundo.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. En el panel derecho ubique **F666-F670 selection stabilizer**.
+3. Haga click sobre el canvas.
+4. Revise **S**: debe cambiar de NO a SI cuando se tome la muestra diferida.
+5. Revise **expected / settled** para ver si la seleccion real coincide con la predicha.
+6. Si `Seleccion estable` o `Prediccion coincide` estan en NO, la decision correcta es `keep-preview`.
+7. Solo avance a owner smoke cuando la decision sea `eligible-for-owner-smoke`.
+
+### Logica de seguridad
+
+- No cambia seleccion ni geometria; solo lee el estado post-click.
+- Mantiene `useCanvas` como owner.
+- Bloquea si hay mutacion geometrica.
+- Documenta por que un click observado no basta si la seleccion no estabiliza.
+
+### Validacion tecnica
+
+- `npm run test:f666-f670:renderer-selection-stabilizer`
+- `npm run test:f666-f670:renderer-selection-stabilizer:values`
+- `npm run test:f666-f670:renderer-selection-stabilizer:e2e`
 
 ## Addendum F661-F665 - Observed Click Bridge
 

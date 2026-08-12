@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F665 - Manual de Usuario</title>
+  <title>RadShield-MX F670 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F665</span>
+      <span class="pill">Version de manual: F670</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,19 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F666-F670: Selection Stabilizer</h2>
+    <p>F666-F670 toma una muestra diferida despues del click real para confirmar si la seleccion legacy se asento y coincide con la prediccion.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Sample</td><td>Lectura post-click de seleccion.</td><td>Que useCanvas asento seleccion.</td><td>Repetir click E2E.</td></tr>
+        <tr><td>Expected/settled</td><td>Comparacion predicha vs real.</td><td>Coincidencia antes de owner smoke.</td><td>Volver a hit-test.</td></tr>
+        <tr><td>Owner</td><td><code>useCanvas</code></td><td>Eventos legacy preservados.</td><td>No activar renderer owner.</td></tr>
+        <tr><td>Decision</td><td><code>keep-preview</code> o <code>eligible-for-owner-smoke</code>.</td><td>Si puede probarse ownership controlado.</td><td>Mantener preview.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F666-F670 queda en <code>selection-stabilizer-preview</code> si click y seleccion no coinciden.</p>
+
     <h2>0. Addendum F661-F665: Observed Click Bridge</h2>
     <p>F661-F665 registra un click real del canvas despues del handler legacy. Sirve para validar evidencia real antes de mover ownership al renderer profundo.</p>
     <table>

@@ -92,6 +92,7 @@ import { buildF646F650RendererSelectionTransaction } from '@/lib/f646F650Rendere
 import { buildF651F655RendererActivationQa } from '@/lib/f651F655RendererActivationQa';
 import { buildF656F660RendererLegacyClickProbe } from '@/lib/f656F660RendererLegacyClickProbe';
 import { buildF661F665RendererObservedClickBridge } from '@/lib/f661F665RendererObservedClickBridge';
+import { buildF666F670RendererSelectionStabilizer } from '@/lib/f666F670RendererSelectionStabilizer';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -342,6 +343,11 @@ export default function CanvasArea({
     selectedIds: string[];
     evidenceId: string;
   } | null>(null);
+  const [f666SelectionSample, setF666SelectionSample] = useState<{
+    selectedId: string | null;
+    selectedIds: string[];
+    evidenceId: string;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const f540DragStartRef = useRef<{
     pointerId: number;
@@ -473,6 +479,24 @@ export default function CanvasArea({
     routeF561PointerEvent(event, 'pointerup');
     onMouseUp(event);
   };
+
+  useEffect(() => {
+    if (!f661ObservedClick) return undefined;
+    const timer = window.setTimeout(() => {
+      const sample = {
+        selectedId: canvasState.selectedId,
+        selectedIds: canvasState.selectedIds,
+        evidenceId: `f666-sample-${f661ObservedClick.evidenceId}`,
+      };
+      setF666SelectionSample(sample);
+      try {
+        window.localStorage.setItem('radshield_canvas_f666_selection_sample', JSON.stringify(sample));
+      } catch {
+        // Optional E2E aid only; runtime state remains authoritative.
+      }
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [canvasState.selectedId, canvasState.selectedIds, f661ObservedClick]);
 
   const hasResults = barrierResults.length > 0;
   const controlledZoneSummary = getControlledZoneCanvasSummary(floorPlan);
@@ -1397,6 +1421,17 @@ export default function CanvasArea({
       selectedIds: f661ObservedClick?.selectedIds ?? canvasState.selectedIds,
       evidenceId: f661ObservedClick?.evidenceId,
       deepRendererEventOwnership: isEnabled('canvasHighRiskCad'),
+    },
+  );
+  const f666ToF670RendererSelectionStabilizer = buildF666F670RendererSelectionStabilizer(
+    f661ToF665RendererObservedClickBridge,
+    {
+      sampled: Boolean(f666SelectionSample),
+      selectedId: f666SelectionSample?.selectedId ?? canvasState.selectedId,
+      selectedIds: f666SelectionSample?.selectedIds ?? canvasState.selectedIds,
+      expectedSelectedId: f651ToF655RendererActivationQa.expectation.expectedSelectedId,
+      expectedSelectedIds: f651ToF655RendererActivationQa.expectation.expectedSelectedIds,
+      evidenceId: f666SelectionSample?.evidenceId,
     },
   );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
@@ -2898,6 +2933,63 @@ export default function CanvasArea({
                     title={f661ToF665RendererObservedClickBridge.rollback.join(' | ')}
                   >
                     {f661ToF665RendererObservedClickBridge.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f666-f670-renderer-selection-stabilizer"
+                  className="mt-2 rounded-lg border border-[#fed7aa] bg-[#fff7ed]/95 p-2"
+                  title="F666-F670: muestra diferida para estabilizar seleccion post-click sin activar owner profundo"
+                  aria-label="F666 a F670 estabilizador de seleccion post-click"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#c2410c]">F666-F670 selection stabilizer</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Sample diferido + prediccion</div>
+                    </div>
+                    <span
+                      data-testid="f666-f670-status"
+                      className={`rounded border px-1.5 py-0.5 text-[8px] font-black ${
+                        f666ToF670RendererSelectionStabilizer.status === 'selection-stabilizer-ready'
+                          ? 'border-[#bbf7d0] bg-white text-[#047857]'
+                          : f666ToF670RendererSelectionStabilizer.status === 'selection-stabilizer-blocked'
+                            ? 'border-[#fecdd3] bg-[#fff1f2] text-[#b91c1c]'
+                            : 'border-[#fed7aa] bg-[#ffedd5] text-[#c2410c]'
+                      }`}
+                    >
+                      {f666ToF670RendererSelectionStabilizer.status}
+                    </span>
+                  </div>
+                  <div
+                    data-testid="f666-f670-metrics"
+                    className="mt-1 grid grid-cols-4 gap-1 text-[8px]"
+                    title={f666ToF670RendererSelectionStabilizer.metrics.cacheKey}
+                  >
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#c2410c]">G {f666ToF670RendererSelectionStabilizer.metrics.passCount}/{f666ToF670RendererSelectionStabilizer.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">S {f666ToF670RendererSelectionStabilizer.sample.sampled ? 'SI' : 'NO'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Sel {f666ToF670RendererSelectionStabilizer.metrics.settledCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">Own {f666ToF670RendererSelectionStabilizer.guard.ownerPreserved ? 'OK' : 'NO'}</span>
+                  </div>
+                  <div
+                    data-testid="f666-f670-sample"
+                    className="mt-1 truncate rounded border border-[#fed7aa] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#c2410c]"
+                    title={f666ToF670RendererSelectionStabilizer.sample.evidenceId}
+                  >
+                    expected: {f666ToF670RendererSelectionStabilizer.review.expectedSelectedId ?? 'none'} | settled: {f666ToF670RendererSelectionStabilizer.review.settledSelectedId ?? 'none'}
+                  </div>
+                  <div
+                    data-testid="f666-f670-decision"
+                    className="mt-1 truncate rounded border border-[#fed7aa] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#c2410c]"
+                    title={f666ToF670RendererSelectionStabilizer.decision.reason}
+                  >
+                    {f666ToF670RendererSelectionStabilizer.decision.recommendation} | {f666ToF670RendererSelectionStabilizer.review.evidence}
+                  </div>
+                  <div
+                    data-testid="f666-f670-gates"
+                    className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]"
+                    title={f666ToF670RendererSelectionStabilizer.rollback.join(' | ')}
+                  >
+                    {f666ToF670RendererSelectionStabilizer.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 
