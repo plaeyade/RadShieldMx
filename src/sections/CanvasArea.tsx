@@ -95,6 +95,7 @@ import { buildF661F665RendererObservedClickBridge } from '@/lib/f661F665Renderer
 import { buildF666F670RendererSelectionStabilizer } from '@/lib/f666F670RendererSelectionStabilizer';
 import { buildF671F675RendererPredictionAlignment } from '@/lib/f671F675RendererPredictionAlignment';
 import { buildF676F680RendererOwnerSmoke } from '@/lib/f676F680RendererOwnerSmoke';
+import { buildF681F685RendererTargetedLegacyClick } from '@/lib/f681F685RendererTargetedLegacyClick';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -1438,6 +1439,10 @@ export default function CanvasArea({
   );
   const f671ToF675RendererPredictionAlignment = buildF671F675RendererPredictionAlignment(
     f666ToF670RendererSelectionStabilizer,
+  );
+  const f681ToF685RendererTargetedLegacyClick = buildF681F685RendererTargetedLegacyClick(
+    f636ToF640RendererHitTestShadow,
+    f671ToF675RendererPredictionAlignment,
   );
   const f676ToF680RendererOwnerSmoke = buildF676F680RendererOwnerSmoke(
     f671ToF675RendererPredictionAlignment,
@@ -3031,6 +3036,37 @@ export default function CanvasArea({
                   </div>
                   <div data-testid="f671-f675-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
                     {f671ToF675RendererPredictionAlignment.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f681-f685-renderer-targeted-legacy-click"
+                  data-click-x={f681ToF685RendererTargetedLegacyClick.clickPoint.x ?? ''}
+                  data-click-y={f681ToF685RendererTargetedLegacyClick.clickPoint.y ?? ''}
+                  className="mt-2 rounded-lg border border-[#bfdbfe] bg-[#eff6ff]/95 p-2"
+                  title="F681-F685: propone click dirigido al centro del target predicho; useCanvas ejecuta la seleccion real"
+                  aria-label="F681 a F685 click legacy dirigido por target predicho"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#1d4ed8]">F681-F685 targeted click</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Centro del target predicho + handler legacy</div>
+                    </div>
+                    <span data-testid="f681-f685-status" className="rounded border border-[#bfdbfe] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#1d4ed8]">
+                      {f681ToF685RendererTargetedLegacyClick.status}
+                    </span>
+                  </div>
+                  <div data-testid="f681-f685-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f681ToF685RendererTargetedLegacyClick.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#1d4ed8]">G {f681ToF685RendererTargetedLegacyClick.metrics.passCount}/{f681ToF685RendererTargetedLegacyClick.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">T {f681ToF685RendererTargetedLegacyClick.metrics.targetCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">X {f681ToF685RendererTargetedLegacyClick.clickPoint.x ?? '-'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">Y {f681ToF685RendererTargetedLegacyClick.clickPoint.y ?? '-'}</span>
+                  </div>
+                  <div data-testid="f681-f685-decision" className="mt-1 rounded border border-[#bfdbfe] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#1d4ed8]" title={f681ToF685RendererTargetedLegacyClick.decision.reason}>
+                    {f681ToF685RendererTargetedLegacyClick.decision.recommendation} | {f681ToF685RendererTargetedLegacyClick.clickPoint.evidence}
+                  </div>
+                  <div data-testid="f681-f685-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f681ToF685RendererTargetedLegacyClick.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

@@ -1,5 +1,15 @@
 # RadShield-MX - Manual de Versiones
 
+# F681-F685 (2026-08-10) - Targeted Legacy Click
+
+- **F681:** resuelve el target esperado contra aliases del hit-test shadow.
+- **F682:** calcula centro clicable del target predicho.
+- **F683:** define expectativa post-click: `match-or-alias-match` o seleccion requerida.
+- **F684:** gates de target encontrado y punto clicable listo.
+- **F685:** gates de owner `useCanvas` preservado y sin escritura geometrica.
+
+Decision: `targeted-click-preview` permite repetir E2E sobre un punto real del objeto predicho. No selecciona por codigo ni activa renderer profundo.
+
 # F676-F680 (2026-08-10) - Owner Smoke Gate
 
 - **F676:** define plan de owner smoke para `deep-renderer-v2` bajo flag `canvasHighRiskCad`.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F680 - Manual de Versiones</title>
+  <title>RadShield-MX F685 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,24 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F680</span>
+    <span class="pill">Version documental: F685</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F681-F685 Targeted Legacy Click</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
+      <tbody>
+        <tr><td>F681</td><td>Target esperado.</td><td>Resuelve aliases contra hit-test shadow.</td><td>Target encontrado.</td></tr>
+        <tr><td>F682</td><td>Punto clicable.</td><td>Centro del target predicho para E2E.</td><td>X/Y finitos.</td></tr>
+        <tr><td>F683</td><td>Outcome.</td><td>Distingue click vacio vs seleccion fallida.</td><td>Expectativa post-click.</td></tr>
+        <tr><td>F684</td><td>Gates de target.</td><td>Target y punto listos.</td><td>OK antes de click.</td></tr>
+        <tr><td>F685</td><td>Gates de seguridad.</td><td>Owner useCanvas y sin escritura geometrica.</td><td>Preview reversible.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F681-F685 queda en <code>targeted-click-preview</code>; prueba seleccion real sin cambiar ownership.</p>
+
     <h2>0. F676-F680 Owner Smoke Gate</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>

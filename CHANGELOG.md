@@ -1,5 +1,14 @@
 # RadShield-MX - Fases recientes
 
+# F681-F685 (2026-08-10) - targeted legacy click
+
+- Agregado `src/lib/f681F685RendererTargetedLegacyClick.ts` con contrato `radshield-mx.canvas.renderer-targeted-legacy-click.f681-f685.v1`.
+- F681 resuelve el target legacy esperado desde el hit-test shadow F636-F640.
+- F682 expone un punto clicable seguro en el centro del target predicho.
+- F683 diferencia click vacio vs seleccion legacy fallida.
+- F684-F685 agrega gates de target encontrado, punto clicable, owner `useCanvas` preservado y cero escritura geometrica.
+- Canvas muestra panel F681-F685 y E2E ejecuta click real en `f100-main-floorplan-canvas`.
+
 # F676-F680 (2026-08-10) - owner smoke gate
 
 - Agregado `src/lib/f676F680RendererOwnerSmoke.ts` con contrato `radshield-mx.canvas.renderer-owner-smoke.f676-f680.v1`.

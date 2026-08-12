@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F680 - Manual de Usuario</title>
+  <title>RadShield-MX F685 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F680</span>
+      <span class="pill">Version de manual: F685</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,18 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F681-F685: Targeted Legacy Click</h2>
+    <p>F681-F685 agrega un click dirigido: calcula el centro del target predicho y permite que el handler legacy <code>useCanvas</code> ejecute la seleccion real.</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Uso</th><th>Que valida</th><th>Rollback</th></tr></thead>
+      <tbody>
+        <tr><td>Coordenadas X/Y</td><td>Click dirigido sobre el canvas.</td><td>Evita falsos negativos por click en area vacia.</td><td>No escribe estado.</td></tr>
+        <tr><td>Panel F681-F685</td><td>Revisar target, punto y gates.</td><td>Target encontrado, punto clicable, owner preservado.</td><td>Conservar <code>useCanvas</code>.</td></tr>
+        <tr><td>E2E</td><td><code>npm run test:f681-f685:renderer-targeted-legacy-click:e2e</code>.</td><td>Click real en <code>f100-main-floorplan-canvas</code>.</td><td>No activa renderer profundo.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> el click dirigido debe convertir un falso <code>missing-selection</code> en una prueba justa del flujo legacy.</p>
+
     <h2>0. Addendum F676-F680: Owner Smoke Gate</h2>
     <p>F676-F680 prepara un smoke controlado del owner profundo, pero conserva <code>useCanvas</code> como propietario real hasta que la alineacion F671-F675 sea confiable.</p>
     <table>

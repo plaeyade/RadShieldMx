@@ -1,4 +1,30 @@
-# Manual de Usuario RadShield-MX - F680 Alignment And Owner Smoke
+# Manual de Usuario RadShield-MX - F685 Targeted Legacy Click
+
+## Addendum F681-F685 - Targeted Legacy Click
+
+F681-F685 corrige una ambiguedad importante: un click observado puede no seleccionar nada porque el test hizo click en un area vacia, no porque el canvas este roto. Esta fase calcula un **click dirigido** al centro del target predicho por el renderer, pero deja que `useCanvas` ejecute la seleccion real.
+
+### Como usarlo
+
+1. Abra el canvas en modo guia.
+2. Localice **F681-F685 targeted click**.
+3. Revise las coordenadas **X/Y**: son el centro clicable recomendado del target predicho.
+4. Haga click sobre el canvas en esa posicion o ejecute la prueba E2E de F681-F685.
+5. Revise F671-F675: si aparece `match` o `alias-match`, la seleccion legacy ya coincide con la prediccion.
+6. Si sigue `missing-selection`, el problema esta en `findObjectAtScreen`, tolerancias o geometria legacy, no en el punto de prueba.
+
+### Logica de seguridad
+
+- No llama `setCanvasState`.
+- No cambia geometria, barreras, fuentes ni capas.
+- No activa el owner profundo.
+- Solo expone un punto de click para repetir la prueba de forma justa y reproducible.
+
+### Validacion tecnica
+
+- `npm run test:f681-f685:renderer-targeted-legacy-click`
+- `npm run test:f681-f685:renderer-targeted-legacy-click:values`
+- `npm run test:f681-f685:renderer-targeted-legacy-click:e2e`
 
 ## Addendum F676-F680 - Owner Smoke Gate
 
