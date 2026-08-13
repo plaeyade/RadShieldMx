@@ -78,6 +78,28 @@ const splitWallSample = [
   '0', 'EOF',
 ].join('\n');
 
+const unmappedLayerSample = [
+  '0', 'SECTION',
+  '2', 'TABLES',
+  '0', 'TABLE',
+  '2', 'LAYER',
+  '0', 'LAYER',
+  '2', 'A-900-RARO',
+  '62', '7',
+  '0', 'ENDTAB',
+  '0', 'ENDSEC',
+  '0', 'SECTION',
+  '2', 'ENTITIES',
+  '0', 'LINE',
+  '8', 'A-900-RARO',
+  '10', '0',
+  '20', '0',
+  '11', '4',
+  '21', '0',
+  '0', 'ENDSEC',
+  '0', 'EOF',
+].join('\n');
+
 describe('DXF real import hardening', () => {
   it('preserves repeated LWPOLYLINE vertices', () => {
     const parsed = parseDXF(sample);
@@ -109,5 +131,16 @@ describe('DXF real import hardening', () => {
     expect(simplified.summary.mappedBarriers).toBe(1);
     expect(simplified.floorPlan.barriers[0]).toMatchObject({ x1: 0, y1: 0, x2: 10, y2: 0 });
     expect(simplified.summary.warnings.join(' ')).toContain('Limpieza geometrica');
+  });
+
+  it('can import manually remapped layers as barriers', () => {
+    const unmapped = importDXFToFloorPlan(unmappedLayerSample, 'unknown-layer.dxf');
+    const remapped = importDXFToFloorPlan(unmappedLayerSample, 'unknown-layer.dxf', {
+      layerRoleOverrides: { 'A-900-RARO': 'barrier' },
+    });
+
+    expect(unmapped.summary.mappedBarriers).toBe(0);
+    expect(remapped.summary.mappedBarriers).toBe(1);
+    expect(remapped.floorPlan.barriers[0].name).toContain('A-900-RARO');
   });
 });

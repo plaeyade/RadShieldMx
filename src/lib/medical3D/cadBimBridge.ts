@@ -1,6 +1,6 @@
 import { extractBIMFromIFC, type BIMModel } from '@/lib/bimRAD';
 import { parseDXF, type DXFParsed, type DXFPoint } from '@/lib/dxfParser';
-import { inferDxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
+import { inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 import type { Barrier, FloorPlan } from '@/types/radshield';
 
 export type CadBimImportKind = 'dxf' | 'ifc' | 'step' | 'unknown';
@@ -22,6 +22,7 @@ export interface CadBimBridgeResult {
 export interface CadBimDxfImportOptions {
   barrierLayerNames?: string[];
   simplifyGeometry?: boolean;
+  layerRoleOverrides?: Record<string, F213DxfLayerRole>;
 }
 
 const DEFAULT_SCALE_M_PER_UNIT = 0.001;
@@ -176,9 +177,10 @@ function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions =
   let ignored = 0;
   let skippedNonBarrierSegments = 0;
   const selectedBarrierLayers = Array.isArray(options.barrierLayerNames) ? new Set(options.barrierLayerNames) : null;
+  const roleForLayer = (layerName: string) => options.layerRoleOverrides?.[layerName] || inferDxfLayerRole(layerName);
   const barrierLayerNames = new Set(
     Array.from(parsed.layers.values())
-      .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
+      .filter((layer) => roleForLayer(layer.name) === 'barrier')
       .filter((layer) => selectedBarrierLayers === null || selectedBarrierLayers.has(layer.name))
       .map((layer) => layer.name),
   );

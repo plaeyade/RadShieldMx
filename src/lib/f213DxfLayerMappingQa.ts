@@ -54,11 +54,11 @@ function canvasUse(role: F213DxfLayerRole): string {
   return 'Sin regla clara; revisar nombre de capa o remapear manualmente.';
 }
 
-export function buildF213DxfLayerMappingQa(parsed: DXFParsed | null): F213DxfLayerMappingQa {
+export function buildF213DxfLayerMappingQa(parsed: DXFParsed | null, roleOverrides: Partial<Record<string, F213DxfLayerRole>> = {}): F213DxfLayerMappingQa {
   const warnings: string[] = [];
   const rows: F213DxfLayerRow[] = parsed
     ? Array.from(parsed.layers.values()).map((layer) => {
-      const role = inferDxfLayerRole(layer.name);
+      const role = roleOverrides[layer.name] || inferDxfLayerRole(layer.name);
       const lineLikeCount = layer.entities.filter((entity) => entity.type === 'LINE' || entity.type === 'LWPOLYLINE').length;
       const textCount = layer.entities.filter((entity) => entity.type === 'TEXT' || entity.type === 'MTEXT').length;
       const confidence: F213DxfLayerRow['confidence'] =
