@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# Canvas funcional real (2026-08-12) - acciones visibles conectadas
+
+- Agregado `e2e/product-canvas-functional-smoke.spec.ts` y comando `npm run test:canvas-functional`.
+- El smoke cubre sidebar visible, toolbar CAD, canvas principal, comando de barrera, menu derecho, selector de fuente, export PNG y apertura de Evidence Pack.
+- `SourceSelector` deja de bloquear el canvas como modal de pantalla completa; ahora funciona como panel flotante no bloqueante con pass-through.
+- El menu contextual del canvas queda por encima de paneles flotantes para que sus acciones no sean interceptadas.
+- Build productivo y audit de estado de producto quedan verificados tras el cambio.
+
 # Product-state audit (2026-08-12) - cierre de inflacion de fases
 
 - Agregado `scripts/audit-current-product-state.mjs` y comando `npm run audit:product-state` para generar un informe repetible del estado real del producto.

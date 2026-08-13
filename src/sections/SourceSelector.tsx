@@ -109,13 +109,12 @@ export default function SourceSelector({ onSelect, onClose, selectedId }: Props)
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 ${minimized ? 'pointer-events-none bg-transparent' : 'bg-black/30'}`}
-      onClick={minimized ? undefined : onClose}
+      className="pointer-events-none fixed inset-0 z-50 flex items-start justify-end bg-transparent p-3"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label="Selector de fuente radiologica"
       data-testid="f376-source-selector-overlay"
-      data-f376-source-pass-through={minimized ? 'true' : 'false'}
+      data-f376-source-pass-through="true"
     >
       <div
         className={`pointer-events-auto bg-white rounded-xl shadow-2xl border border-slate-200 ${maximized ? 'w-[calc(100vw-32px)] h-[calc(100vh-32px)]' : minimized ? 'fixed bottom-4 right-4 w-[360px]' : 'w-[500px] max-h-[85vh]'} flex flex-col overflow-hidden`}

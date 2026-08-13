@@ -3872,7 +3872,7 @@ export default function CanvasArea({
             {contextMenu && (
               <div
                 data-testid="canvas-context-menu"
-                className="fixed z-50 w-56 overflow-hidden rounded-md border border-slate-200 bg-white text-[11px] text-slate-700 shadow-xl"
+                className="fixed z-[90] w-56 overflow-hidden rounded-md border border-slate-200 bg-white text-[11px] text-slate-700 shadow-xl"
                 style={{ left: contextMenu.x, top: contextMenu.y }}
                 onClick={(event) => event.stopPropagation()}
                 onContextMenu={(event) => event.preventDefault()}
