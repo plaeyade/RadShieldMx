@@ -25,6 +25,8 @@ const LAYER_COLORS: Record<number, string> = {
   9: 'bg-pink-500', 10: 'bg-teal-500',
 };
 
+const LARGE_DXF_BARRIER_WARNING = 1000;
+
 export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [parsed, setParsed] = useState<DXFParsed | null>(null);
   const [fileName, setFileName] = useState('');
@@ -120,6 +122,13 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     }
     try {
       const bridge = importDXFToFloorPlan(lastContent, fileName);
+      if (
+        bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
+        !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)
+      ) {
+        toast.info('Aplicacion del DXF cancelada para revisar capas primero.');
+        return;
+      }
       window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
       toast.success(`Plano DXF aplicado al canvas: ${bridge.summary.mappedBarriers} barreras`);
       onOpenChange(false);

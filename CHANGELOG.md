@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# DXF real ZUMAYA (2026-08-13) - polilineas y filtro conservador de barreras
+
+- Analizado `C:/Users/carlo/Desktop/ZUMAYA/plano.dxf`: DXF `AC1018`, 26.6 MB, 208 capas, 2303 LINE, 1309 LWPOLYLINE, 1282 INSERT.
+- Corregido parser DXF para preservar vertices repetidos de `LWPOLYLINE`; antes se podia perder geometria por sobrescritura de codigos 10/20.
+- `Aplicar al canvas` ahora mapea solo capas clasificadas como muro/barrera y conserva mobiliario, parque, cotas y referencias fuera del calculo.
+- Los DXF con mas de 1000 segmentos de barrera piden confirmacion antes de escribir geometria al floorplan.
+- Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
+
 # DWG local conversion probe (2026-08-13) - ruta local ODA/AutoCAD/LibreDWG
 
 - Agregado `scripts/dwg-local-conversion-probe.mjs` para validar fixture DWG real por firma/hash sin copiarlo al repo.

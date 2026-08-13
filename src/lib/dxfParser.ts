@@ -203,11 +203,13 @@ function parseEntitiesSection(lines: string[], startIdx: number, entities: DXFEn
 
 function parseEntity(lines: string[], startIdx: number, type: string): { entity: Partial<DXFEntity> | null; nextIndex: number } {
   const props: Record<number, any> = {};
+  const pairs: Array<{ code: number; value: string }> = [];
   let i = startIdx;
   while (i < lines.length - 1) {
     const code = parseInt(lines[i]);
     const val = lines[i + 1];
     if (code === 0) break;
+    pairs.push({ code, value: val });
     props[code] = val;
     i += 2;
   }
@@ -245,8 +247,8 @@ function parseEntity(lines: string[], startIdx: number, type: string): { entity:
       return {
         entity: {
           type: 'LWPOLYLINE', layer,
-          points: parsePolylinePoints(props),
-          closed: parseInt(props[70] || 0) === 1,
+          points: parsePolylinePoints(pairs),
+          closed: (parseInt(props[70] || 0) & 1) === 1,
         }, nextIndex: i,
       };
     case 'TEXT':
@@ -265,18 +267,26 @@ function parseEntity(lines: string[], startIdx: number, type: string): { entity:
   }
 }
 
-function parsePolylinePoints(props: Record<number, any>): DXFPoint[] {
+function parsePolylinePoints(pairs: Array<{ code: number; value: string }>): DXFPoint[] {
   const points: DXFPoint[] = [];
-  const count = parseInt(props[90] || 0);
-  // For LWPOLYLINE, points are interleaved 10/20
-  // We need to handle the raw parsing differently
-  // This is a simplified approach
-  const xCodes = Object.keys(props).filter(k => parseInt(k) >= 10 && parseInt(k) < 20).sort((a, b) => parseInt(a) - parseInt(b));
-  const yCodes = Object.keys(props).filter(k => parseInt(k) >= 20 && parseInt(k) < 30).sort((a, b) => parseInt(a) - parseInt(b));
-  const minLen = Math.min(xCodes.length, yCodes.length, count || Infinity);
-  for (let i = 0; i < minLen; i++) {
-    points.push({ x: parseFloat(props[parseInt(xCodes[i])] || 0), y: parseFloat(props[parseInt(yCodes[i])] || 0) });
+  let x: number | null = null;
+  let y: number | null = null;
+  for (const pair of pairs) {
+    if (pair.code === 10) {
+      if (x !== null && y !== null) points.push({ x, y });
+      x = parseFloat(pair.value);
+      y = null;
+    }
+    if (pair.code === 20) {
+      y = parseFloat(pair.value);
+      if (x !== null && Number.isFinite(x) && Number.isFinite(y)) {
+        points.push({ x, y });
+        x = null;
+        y = null;
+      }
+    }
   }
+  if (x !== null && y !== null && Number.isFinite(x) && Number.isFinite(y)) points.push({ x, y });
   return points;
 }
 

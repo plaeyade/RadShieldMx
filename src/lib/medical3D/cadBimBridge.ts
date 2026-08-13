@@ -1,5 +1,6 @@
 import { extractBIMFromIFC, type BIMModel } from '@/lib/bimRAD';
 import { parseDXF, type DXFParsed, type DXFPoint } from '@/lib/dxfParser';
+import { inferDxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 import type { Barrier, FloorPlan } from '@/types/radshield';
 
 export type CadBimImportKind = 'dxf' | 'ifc' | 'step' | 'unknown';
@@ -84,6 +85,12 @@ function collectDxfBarriers(parsed: DXFParsed) {
   const barriers: Barrier[] = [];
   const warnings: string[] = [];
   let ignored = 0;
+  let skippedNonBarrierSegments = 0;
+  const barrierLayerNames = new Set(
+    Array.from(parsed.layers.values())
+      .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
+      .map((layer) => layer.name),
+  );
 
   const addSegment = (layer: string, start: DXFPoint, end: DXFPoint) => {
     const dx = end.x - start.x;
@@ -97,6 +104,11 @@ function collectDxfBarriers(parsed: DXFParsed) {
   };
 
   for (const entity of parsed.entities) {
+    if (!barrierLayerNames.has(entity.layer)) {
+      if (entity.type === 'LINE') skippedNonBarrierSegments += 1;
+      if (entity.type === 'LWPOLYLINE') skippedNonBarrierSegments += Math.max(entity.points.length - 1, 0) + (entity.closed && entity.points.length > 2 ? 1 : 0);
+      continue;
+    }
     if (entity.type === 'LINE') addSegment(entity.layer, entity.start, entity.end);
     if (entity.type === 'LWPOLYLINE') {
       entity.points.forEach((point, index) => {
@@ -107,7 +119,8 @@ function collectDxfBarriers(parsed: DXFParsed) {
   }
 
   if (ignored > 0) warnings.push(`${ignored} segmentos DXF degenerados fueron ignorados.`);
-  if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE utilizables como barreras.');
+  if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
+  if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return { barriers, warnings };
 }
 
