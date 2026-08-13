@@ -46,6 +46,13 @@ const DIALOG_NAMES = new Set([
   'stGermainScatter','floorCeiling','onboardingTour','welcomeScreen',
   'updateCenter','analytics','emailNotifications','docs','materialLibrary',
   'materialProperty','neutronRemoval','nuclearMedicine','aapmTG108','ipem109','decayChains','therapyShielding','evidencePack',
+  'sourceSelector','mcResults','memoriaAI','historyPanel','helpPanel',
+  'isodosis','dose3D','heatMap','roomTemplates','layersPanel',
+  'floorPlanFeatures','transportDialog','nistXcom','onnxPredictor','revitIfcImport',
+  'geant4Mc','revitAddin','multiObjectiveOptimizer','materialComparison','batchReportExporter',
+  'spatialDoseMap','regulatoryReport','multiLayerShield','sourceLibrary','isosurface3d',
+  'pdfReport','sensitivityAnalysis','paretoOptimizer','parametric3d','designCompare',
+  'alaraWizard','nuclideLibrary500','darkMode','dxfExport','doseSweep','reportManager',
 ]);
 
 /** Check if a dialog name is registered */

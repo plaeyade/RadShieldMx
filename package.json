@@ -8,6 +8,7 @@
     "build": "vite build --configLoader runner",
     "lint": "eslint .",
     "preview": "vite preview",
+    "audit:product-state": "node scripts/audit-current-product-state.mjs",
     "start": "NODE_ENV=production node dist-backend/server/boot.js",
     "check": "node scripts/verify-quarantine.mjs && tsc -p tsconfig.app.json --pretty false && tsc -p tsconfig.server.json --pretty false && vite build --configLoader runner",
     "check:stable": "node scripts/verify-quarantine.mjs && tsc -p tsconfig.stable.json --pretty false && tsc -p tsconfig.server.json --pretty false && vite build --configLoader runner",

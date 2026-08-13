@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# Product-state audit (2026-08-12) - cierre de inflacion de fases
+
+- Agregado `scripts/audit-current-product-state.mjs` y comando `npm run audit:product-state` para generar un informe repetible del estado real del producto.
+- Corregida paridad de dialogos: `appStore` y `dialogRegistry` quedan alineados en 223/223 entradas.
+- Recalibrada la deteccion de dialogos para contar tambien superficies renderizadas directamente como Command Palette y Onboarding Tour.
+- Reconectadas acciones de Toolbar para Command Palette y Onboarding Tour; ya no dependen de dialogos Zustand inexistentes.
+- Decision operativa: continuar por objetivos verificables, empezando por `Canvas funcional real`, en lugar de seguir acumulando fases numericas sin cierre.
+
 # F691-F700 (2026-08-12) - controlled owner smoke + photoreal asset readiness
 
 - Agregado `src/lib/f691F695RendererControlledOwnerSmoke.ts` con contrato selection-only para probar el owner renderer sin escrituras de geometria.

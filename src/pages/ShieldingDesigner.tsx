@@ -550,6 +550,7 @@ export default function ShieldingDesigner() {
 
   // v128: Re-added useStates for active dialogs (pending Zustand migration)
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [onboardingTourKey, setOnboardingTourKey] = useState(0);
   const [showAirKermaOverlay, setShowAirKermaOverlay] = useState(false);
   const [showBarrierEditor, setShowBarrierEditor] = useState(false);
   const [showCertification, setShowCertification] = useState(false);
@@ -1947,8 +1948,15 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onToggleStickyNotes={() => setShowStickyNotesPanel(prev => !prev)}
           onUndo={undo}
           onRedo={redo}
-          onCommandPalette={() => useAppStore.getState().open('commandPalette')}
-          onOnboardingTour={() => useAppStore.getState().open('onboardingTour')}
+          onCommandPalette={() => setShowCommandPalette(true)}
+          onOnboardingTour={() => {
+            try {
+              window.localStorage.removeItem('radshield-tour-completed');
+            } catch {
+              // ignore storage failures; remount still attempts to start the tour
+            }
+            setOnboardingTourKey((key) => key + 1);
+          }}
           // v82: Update Center
           onUpdate={() => useAppStore.getState().open('updateCenter')}
           onFloorPlanFeatures={() => useAppStore.getState().open('floorPlanFeatures')}
@@ -2081,7 +2089,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         />
       )}
       <Suspense fallback={null}>
-        <OnboardingTour />
+        <OnboardingTour key={onboardingTourKey} />
       </Suspense>
       <div className="flex-1 flex overflow-hidden">
         {showWelcomeScreen ? (
