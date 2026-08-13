@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# DWG real seguro (2026-08-13) - fixture 0760030003b.dwg validado sin contaminar canvas
+
+- Usado `C:/Users/carlo/Downloads/0760030003b.dwg` como fixture real de frontera DWG.
+- El visor DXF/DWG ahora detecta DWG binario, valida firma `AC*`, muestra tamano y ruta segura DWG -> APS/ODA/AutoCAD -> DXF -> canvas.
+- El boton Aplicar al canvas queda bloqueado para DWG directo; solo DXF parseado puede escribir barreras reales.
+- Agregado `e2e/dwg-safe-import.spec.ts` y comando `npm run test:dwg-safe-import` para comprobar que DWG no modifica geometria hasta conversion verificable.
+
 # DXF import real al canvas (2026-08-13) - fixture, apply y conteo verificado
 
 - Agregado fixture `e2e/fixtures/sample-floorplan.dxf` con cuatro barreras mapeables desde capas CAD.

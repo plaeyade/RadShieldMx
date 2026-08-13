@@ -12,6 +12,7 @@
     "test:canvas-functional": "playwright test --project=chromium --grep \"Product canvas functional smoke\"",
     "test:file-menu": "playwright test --project=chromium --grep \"F404 Archivo menu\"",
     "test:dxf-import": "playwright test --project=chromium --grep \"DXF import to canvas\"",
+    "test:dwg-safe-import": "playwright test --project=chromium --grep \"DWG safe import boundary\"",
     "start": "NODE_ENV=production node dist-backend/server/boot.js",
     "check": "node scripts/verify-quarantine.mjs && tsc -p tsconfig.app.json --pretty false && tsc -p tsconfig.server.json --pretty false && vite build --configLoader runner",
     "check:stable": "node scripts/verify-quarantine.mjs && tsc -p tsconfig.stable.json --pretty false && tsc -p tsconfig.server.json --pretty false && vite build --configLoader runner",

@@ -28,6 +28,7 @@ const LAYER_COLORS: Record<number, string> = {
 export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [parsed, setParsed] = useState<DXFParsed | null>(null);
   const [fileName, setFileName] = useState('');
+  const [dwgNotice, setDwgNotice] = useState<{ fileName: string; sizeBytes: number; signatureValid: boolean } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [lineWidth, setLineWidth] = useState(1);
   const [showLabels, setShowLabels] = useState(true);
@@ -38,13 +39,19 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const f213LayerMapping = buildF213DxfLayerMappingQa(parsed);
 
   // Handle file upload
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // v14.5: DWG detection with conversion panel
     if (file.name.toLowerCase().endsWith('.dwg')) {
-      toast.error('Archivo DWG detectado. Seleccione "Convertir DWG" en el panel izquierdo para instrucciones.');
+      const signatureValid = isDWGFile(await file.arrayBuffer());
+      setParsed(null);
+      setImportSummary(null);
+      setLastContent('');
+      setFileName(file.name);
+      setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
+      toast.error('DWG detectado: convierta a DXF/SVG/IFC antes de aplicar al canvas.');
       return;
     }
 
@@ -58,6 +65,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         setImportSummary(bridge.summary);
         setLastContent(content);
         setFileName(file.name);
+        setDwgNotice(null);
         setZoom(1);
         toast.success(`DXF cargado: ${result.entities.length} entidades, ${bridge.summary.mappedBarriers} barreras detectadas`);
       } catch (err: any) {
@@ -213,8 +221,31 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded">
                   <FileUp className="w-16 h-16 mb-4 opacity-30" />
-                  <p className="text-sm font-medium">Importe un archivo DXF para visualizar</p>
+                  <p className="text-sm font-medium">{dwgNotice ? 'DWG detectado, conversion requerida' : 'Importe un archivo DXF para visualizar'}</p>
                   <p className="text-xs mt-2 opacity-60">Arrastre el archivo o use el botón Importar</p>
+                  {dwgNotice && (
+                    <div
+                      data-testid="dwg-conversion-notice"
+                      className="mt-4 w-full max-w-lg rounded border border-amber-400 bg-amber-50 p-3 text-left text-xs text-amber-900"
+                      title={convertDWGNote()}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-semibold truncate">{dwgNotice.fileName}</span>
+                        <Badge data-testid="dwg-signature-status" variant="outline" className="h-5 bg-white text-[10px]">
+                          Firma {dwgNotice.signatureValid ? 'DWG valida' : 'no confirmada'}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-[11px]">
+                        Tamano: {(dwgNotice.sizeBytes / 1024 / 1024).toFixed(2)} MB
+                      </div>
+                      <div data-testid="dwg-conversion-route" className="mt-2 leading-relaxed">
+                        Ruta segura: DWG -&gt; APS/ODA/AutoCAD -&gt; DXF con capas -&gt; mapeo de barreras -&gt; aplicar al canvas.
+                      </div>
+                      <div className="mt-2 text-[11px] text-amber-800">
+                        RadShield-MX no escribe geometria desde DWG binario directo; conserva estabilidad, escala y trazabilidad.
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-4 flex items-start gap-2 max-w-md text-xs opacity-60 bg-slate-800 p-3 rounded">
                     <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <p>Para archivos DWG: En AutoCAD, use "Guardar como" y seleccione formato DXF. RadShield-MX soporta DXF R12-R2018.</p>
