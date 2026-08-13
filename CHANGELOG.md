@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# DWG local conversion probe (2026-08-13) - ruta local ODA/AutoCAD/LibreDWG
+
+- Agregado `scripts/dwg-local-conversion-probe.mjs` para validar fixture DWG real por firma/hash sin copiarlo al repo.
+- El probe detecta ODA File Converter, AutoCAD Core Console y LibreDWG en PATH, pero solo ejecuta conversion si hay configuracion explicita.
+- Agregados comandos `npm run prepare:dwg-local-conversion` y `npm run test:dwg-local-conversion`.
+- El visor DXF/DWG documenta la ruta local: `DWG_CONVERTER_COMMAND` -> DXF -> Importar DXF -> Aplicar al canvas.
+
 # DWG real seguro (2026-08-13) - fixture 0760030003b.dwg validado sin contaminar canvas
 
 - Usado `C:/Users/carlo/Downloads/0760030003b.dwg` como fixture real de frontera DWG.

@@ -244,6 +244,9 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                       <div className="mt-2 text-[11px] text-amber-800">
                         RadShield-MX no escribe geometria desde DWG binario directo; conserva estabilidad, escala y trazabilidad.
                       </div>
+                      <div className="mt-1 text-[11px] text-amber-800">
+                        Conversion local: configure DWG_CONVERTER_COMMAND y ejecute npm run prepare:dwg-local-conversion.
+                      </div>
                     </div>
                   )}
                   <div className="mt-4 flex items-start gap-2 max-w-md text-xs opacity-60 bg-slate-800 p-3 rounded">
