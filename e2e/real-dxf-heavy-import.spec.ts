@@ -31,6 +31,12 @@ test.describe('Real DXF heavy import QA - real-dxf-heavy-import', () => {
     await expect(page.getByTestId('f213-dxf-layer-mapping-qa')).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId('f213-dxf-barrier-layer-count')).toContainText(/Muros [1-9]/, { timeout: 30_000 });
     await expect(page.getByText(/Barreras mapeadas al canvas: 2111/i)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId('dxf-visible-barrier-layer-summary')).toContainText(/Importables: [1-9]\d*\/[1-9]\d*/);
+
+    await page.getByRole('button', { name: 'Nada' }).click();
+    await expect(page.getByTestId('dxf-visible-barrier-layer-summary')).toContainText(/Importables: 0\/[1-9]\d*/);
+    await page.getByRole('button', { name: 'Muros' }).click();
+    await expect(page.getByTestId('dxf-visible-barrier-layer-summary')).toContainText(/Importables: [1-9]\d*\/[1-9]\d*/);
 
     let confirmMessage = '';
     page.once('dialog', async (dialog) => {

@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack } from 'lucide-react';
+import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack, Search, CheckSquare, Square } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
 import { importDXFToFloorPlan, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
 import { buildF213DxfLayerMappingQa, inferDxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
@@ -37,9 +37,18 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [importSummary, setImportSummary] = useState<CadBimImportSummary | null>(null);
   const [lastBridge, setLastBridge] = useState<CadBimBridgeResult | null>(null);
   const [lastContent, setLastContent] = useState('');
+  const [layerSearch, setLayerSearch] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const f213LayerMapping = buildF213DxfLayerMappingQa(parsed);
+  const normalizedLayerSearch = layerSearch.trim().toLowerCase();
+  const dxfLayers = parsed ? Array.from(parsed.layers.values()) : [];
+  const visibleBarrierLayers = dxfLayers.filter((layer) => layer.visible && inferDxfLayerRole(layer.name) === 'barrier');
+  const barrierLayers = dxfLayers.filter((layer) => inferDxfLayerRole(layer.name) === 'barrier');
+  const filteredLayers = dxfLayers.filter((layer) => {
+    if (!normalizedLayerSearch) return true;
+    return layer.name.toLowerCase().includes(normalizedLayerSearch) || inferDxfLayerRole(layer.name).includes(normalizedLayerSearch);
+  });
 
   // Handle file upload
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,6 +103,21 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     });
   }, []);
 
+  const setLayerVisibility = useCallback((shouldShow: (layer: DXFLayer) => boolean) => {
+    setParsed(prev => {
+      if (!prev) return prev;
+      const newLayers = new Map(prev.layers);
+      for (const layer of newLayers.values()) {
+        newLayers.set(layer.name, { ...layer, visible: shouldShow(layer) });
+      }
+      return { ...prev, layers: newLayers };
+    });
+  }, []);
+
+  const showOnlyBarrierLayers = () => setLayerVisibility(layer => inferDxfLayerRole(layer.name) === 'barrier');
+  const showAllLayers = () => setLayerVisibility(() => true);
+  const hideAllLayers = () => setLayerVisibility(() => false);
+
   // Render to canvas
   useEffect(() => {
     if (!parsed || !canvasRef.current) return;
@@ -125,16 +149,16 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       return;
     }
     try {
-      const visibleBarrierLayers = Array.from(parsed.layers.values())
+      const visibleBarrierLayerNames = Array.from(parsed.layers.values())
         .filter((layer) => layer.visible && inferDxfLayerRole(layer.name) === 'barrier')
         .map((layer) => layer.name);
-      const allBarrierLayers = Array.from(parsed.layers.values())
+      const allBarrierLayerNames = Array.from(parsed.layers.values())
         .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
         .map((layer) => layer.name);
       const bridge =
-        visibleBarrierLayers.length === allBarrierLayers.length
+        visibleBarrierLayerNames.length === allBarrierLayerNames.length
           ? lastBridge
-          : importDXFToFloorPlan(lastContent, fileName, { barrierLayerNames: visibleBarrierLayers });
+          : importDXFToFloorPlan(lastContent, fileName, { barrierLayerNames: visibleBarrierLayerNames });
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
         !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)
@@ -287,14 +311,41 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                   <Layers className="w-3 h-3" /> Capas
                 </div>
+                <div className="mt-2 rounded-md border bg-white px-2 py-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Search className="h-3 w-3 text-slate-400" />
+                    <input
+                      value={layerSearch}
+                      onChange={(event) => setLayerSearch(event.target.value)}
+                      placeholder="Buscar capa o rol..."
+                      className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-slate-400"
+                      title="Filtrar capas por nombre o rol: barrier, equipment, zone, dimension, reference, text"
+                    />
+                  </div>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-1">
+                  <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" onClick={showOnlyBarrierLayers} title="Mostrar solo capas clasificadas como muro/barrera para preparar el import al canvas">
+                    Muros
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" onClick={showAllLayers} title="Mostrar todas las capas del DXF en el preview">
+                    Todo
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" onClick={hideAllLayers} title="Ocultar todas las capas; util para activar manualmente solo las que se importaran">
+                    Nada
+                  </Button>
+                </div>
+                <div className="mt-2 rounded bg-white px-2 py-1 text-[10px] text-slate-600" data-testid="dxf-visible-barrier-layer-summary">
+                  Importables: {visibleBarrierLayers.length}/{barrierLayers.length} capas de muro visibles
+                </div>
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-0.5">
-                  {Array.from(parsed.layers.values()).map(layer => (
+                  {filteredLayers.map(layer => (
                     <div
                       key={layer.name}
                       className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${layer.visible ? 'bg-white hover:bg-slate-50' : 'bg-slate-50 hover:bg-slate-100'}`}
                       onClick={() => toggleLayer(layer.name)}
+                      title={`Capa ${layer.name}. Rol ${inferDxfLayerRole(layer.name)}. Click para ${layer.visible ? 'ocultar' : 'mostrar'} en preview/import.`}
                     >
                       {layer.visible ? (
                         <Eye className="w-3 h-3 text-slate-600" />
@@ -308,6 +359,11 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                       <Badge variant="outline" className="text-[9px] h-3.5 px-0.5 min-w-[18px] justify-center">{layer.entities.length}</Badge>
                     </div>
                   ))}
+                  {filteredLayers.length === 0 && (
+                    <div className="rounded bg-slate-50 px-2 py-3 text-center text-[10px] text-slate-500">
+                      Sin capas para ese filtro.
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
 
@@ -329,6 +385,14 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   <Badge data-testid="f213-dxf-equipment-layer-count" variant="outline" className="h-4 text-[9px]">Eq {f213LayerMapping.equipmentLayers}</Badge>
                   <Badge data-testid="f213-dxf-zone-layer-count" variant="outline" className="h-4 text-[9px]">Zonas {f213LayerMapping.zoneLayers}</Badge>
                   <Badge data-testid="f213-dxf-unmapped-layer-count" variant="outline" className="h-4 text-[9px]">Rev {f213LayerMapping.unmappedLayers}</Badge>
+                </div>
+                <div className="mb-1 flex gap-1">
+                  <Badge variant="outline" className="h-4 text-[9px]">
+                    <CheckSquare className="mr-1 h-2.5 w-2.5" /> Visibles {visibleBarrierLayers.length}
+                  </Badge>
+                  <Badge variant="outline" className="h-4 text-[9px]">
+                    <Square className="mr-1 h-2.5 w-2.5" /> Total {barrierLayers.length}
+                  </Badge>
                 </div>
                 <div className="mb-1 rounded bg-white px-1.5 py-1 text-[9px] leading-snug text-slate-600">
                   Oculte capas con el icono de ojo para excluirlas del import al canvas. Solo LINE/LWPOLYLINE en capas visibles de muro/barrera se convierten en barreras.
