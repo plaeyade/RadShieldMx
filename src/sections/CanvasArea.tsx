@@ -97,6 +97,7 @@ import { buildF671F675RendererPredictionAlignment } from '@/lib/f671F675Renderer
 import { buildF676F680RendererOwnerSmoke } from '@/lib/f676F680RendererOwnerSmoke';
 import { buildF681F685RendererTargetedLegacyClick } from '@/lib/f681F685RendererTargetedLegacyClick';
 import { buildF686F690RendererOwnerBeforeAfterSmoke } from '@/lib/f686F690RendererOwnerBeforeAfterSmoke';
+import { buildF691F695RendererControlledOwnerSmoke } from '@/lib/f691F695RendererControlledOwnerSmoke';
 import { buildF484F490NormativeQa } from '@/lib/f484F490NormativeQa';
 import { buildF491F498RegulatoryMaterialsDb } from '@/lib/f491F498RegulatoryMaterialsDb';
 import { buildF501F504HeavyAssetsDbPrep } from '@/lib/f501F504HeavyAssetsDbPrep';
@@ -104,6 +105,7 @@ import { buildMedicalScene, type MedicalRoomPreset } from '@/lib/medical3D/scene
 import { buildBabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
 import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebglExportedBuild';
 import { buildAdvancedPhotorealPackContract } from '@/lib/medical3D/advancedPhotorealPack';
+import { buildF696F700PhotorealAssetReadiness } from '@/lib/medical3D/f696F700PhotorealAssetReadiness';
 import { buildDefaultPbrMaterialDatabase, buildPbrMaterialDbUpdate } from '@/lib/medical3D/pbrMaterialDatabase';
 import { isEnabled } from '@/lib/featureFlags';
 import { buildF515CanvasEventHardening, routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
@@ -1462,6 +1464,13 @@ export default function CanvasArea({
       beforeAfterObserved: f686BeforeAfterObserved,
     },
   );
+  const f691ToF695RendererControlledOwnerSmoke = buildF691F695RendererControlledOwnerSmoke(
+    f686ToF690RendererOwnerBeforeAfterSmoke,
+    {
+      highRiskRendererEnabled: isEnabled('canvasHighRiskCad'),
+      eventControllerV2Enabled: isEnabled('canvasEventControllerV2'),
+    },
+  );
   const f556MedicalPresetByModality: Record<F525F529Modality, MedicalRoomPreset> = {
     TX: 'linac',
     NM: 'petct',
@@ -1495,6 +1504,10 @@ export default function CanvasArea({
     scene: f556MedicalScene,
     pbrMaterialDb: f556PbrMaterialDb,
     photorealEnabled: true,
+  });
+  const f696ToF700PhotorealAssetReadiness = buildF696F700PhotorealAssetReadiness(f556AdvancedPhotoreal, {
+    localManifestPresent: false,
+    heavyAssetsPresent: false,
   });
   const f556NormativeQa = buildF484F490NormativeQa();
   const f556ToF560PostBetaDeepStack = buildF556F560PostBetaDeepStack({
@@ -3136,6 +3149,64 @@ export default function CanvasArea({
                   </div>
                   <div data-testid="f686-f690-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
                     {f686ToF690RendererOwnerBeforeAfterSmoke.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f691-f695-renderer-controlled-owner-smoke"
+                  className="mt-2 rounded-lg border border-[#bae6fd] bg-[#eff6ff]/95 p-2"
+                  title="F691-F695: smoke minimo controlado, seleccion-only, doble bandera y rollback a useCanvas"
+                  aria-label="F691 a F695 smoke controlado del owner renderer"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#075985]">F691-F695 owner smoke</div>
+                      <div className="text-[8px] leading-tight text-[#64748b]">Seleccion-only + doble flag + no writes</div>
+                    </div>
+                    <span data-testid="f691-f695-status" className="rounded border border-[#bae6fd] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#075985]">
+                      {f691ToF695RendererControlledOwnerSmoke.status}
+                    </span>
+                  </div>
+                  <div data-testid="f691-f695-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f691ToF695RendererControlledOwnerSmoke.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#075985]">G {f691ToF695RendererControlledOwnerSmoke.metrics.passCount}/{f691ToF695RendererControlledOwnerSmoke.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">F686 {f691ToF695RendererControlledOwnerSmoke.preconditions.beforeAfterReady ? 'OK' : 'NO'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">V2 {f691ToF695RendererControlledOwnerSmoke.preconditions.eventControllerV2Enabled ? 'ON' : 'OFF'}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">W {f691ToF695RendererControlledOwnerSmoke.scope.allowedWrites.length}</span>
+                  </div>
+                  <div data-testid="f691-f695-decision" className="mt-1 rounded border border-[#bae6fd] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#075985]" title={f691ToF695RendererControlledOwnerSmoke.decision.reason}>
+                    {f691ToF695RendererControlledOwnerSmoke.decision.recommendation} | {f691ToF695RendererControlledOwnerSmoke.executionPlan.mode}
+                  </div>
+                  <div data-testid="f691-f695-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f691ToF695RendererControlledOwnerSmoke.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
+                  </div>
+                </div>
+
+                <div
+                  data-testid="f696-f700-photoreal-asset-readiness"
+                  className="mt-2 rounded-lg border border-[#fed7aa] bg-[#fff7ed]/95 p-2"
+                  title="F696-F700: rutas y manifest para fotorrealismo avanzado, con assets pesados lazy/gated"
+                  aria-label="F696 a F700 preparacion de assets fotorrealistas"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-wide text-[#9a3412]">F696-F700 photoreal assets</div>
+                      <div className="text-[8px] leading-tight text-[#78716c]">PBR + HDRI + decals + GLB + manifest</div>
+                    </div>
+                    <span data-testid="f696-f700-status" className="rounded border border-[#fed7aa] bg-white px-1.5 py-0.5 text-[8px] font-black text-[#9a3412]">
+                      {f696ToF700PhotorealAssetReadiness.status}
+                    </span>
+                  </div>
+                  <div data-testid="f696-f700-metrics" className="mt-1 grid grid-cols-4 gap-1 text-[8px]" title={f696ToF700PhotorealAssetReadiness.metrics.cacheKey}>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#9a3412]">G {f696ToF700PhotorealAssetReadiness.metrics.passCount}/{f696ToF700PhotorealAssetReadiness.metrics.gateCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#0369a1]">Heavy {f696ToF700PhotorealAssetReadiness.metrics.heavyAssetCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#047857]">Fallback {f696ToF700PhotorealAssetReadiness.metrics.proceduralFallbackCount}</span>
+                    <span className="rounded bg-white/85 px-1 py-0.5 text-center font-bold text-[#334155]">GLB</span>
+                  </div>
+                  <div data-testid="f696-f700-decision" className="mt-1 rounded border border-[#fed7aa] bg-white/85 px-1.5 py-1 text-[8px] font-bold text-[#9a3412]" title={f696ToF700PhotorealAssetReadiness.decision.reason}>
+                    {f696ToF700PhotorealAssetReadiness.decision.recommendation} | {f696ToF700PhotorealAssetReadiness.routes.manifest}
+                  </div>
+                  <div data-testid="f696-f700-gates" className="mt-1 truncate rounded border border-[#d8d6cd] bg-white/80 px-1.5 py-1 text-[8px] leading-tight text-[#4b5563]">
+                    {f696ToF700PhotorealAssetReadiness.gates.map((gate) => `${gate.label}:${gate.pass ? 'OK' : 'NO'}`).join(' | ')}
                   </div>
                 </div>
 

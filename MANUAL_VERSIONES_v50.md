@@ -1,5 +1,11 @@
 # RadShield-MX - Manual de Versiones
 
+# F691-F700 (2026-08-12) - Controlled Owner Smoke + Photoreal Asset Readiness
+
+- **F691-F695:** agrega contrato de smoke controlado selection-only para el renderer profundo. Requiere `canvasHighRiskCad` + `canvasEventControllerV2`, no permite escrituras de modelo y conserva rollback a `useCanvas`.
+- **F696-F700:** agrega contrato de readiness para fotorrealismo avanzado: texturas PBR, HDRI, decals, modelos GLB y manifest versionado bajo `public/medical3d/photoreal`.
+- **Decision:** publicar beta con fallback procedural y mantener assets pesados lazy/gated hasta contar con hash, licencia, captura QA y rollback visual.
+
 # F686-F690 (2026-08-10) - Before/After Owner Smoke
 
 - **F686:** baseline `useCanvas` con click dirigido y seleccion alineada.

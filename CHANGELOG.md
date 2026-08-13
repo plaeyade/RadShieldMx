@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# F691-F700 (2026-08-12) - controlled owner smoke + photoreal asset readiness
+
+- Agregado `src/lib/f691F695RendererControlledOwnerSmoke.ts` con contrato selection-only para probar el owner renderer sin escrituras de geometria.
+- Canvas expone panel `f691-f695-renderer-controlled-owner-smoke` con doble bandera, gates, decision y rollback a `useCanvas`.
+- Agregado `src/lib/medical3D/f696F700PhotorealAssetReadiness.ts` con rutas PBR/HDRI/decals/GLB/manifest y fallback procedural.
+- Canvas expone panel `f696-f700-photoreal-asset-readiness`; assets pesados permanecen lazy/gated hasta hash, licencia y QA visual.
+- Update Center y manuales HTML/Markdown suben cobertura documental a F700.
+
 # F686-F690 (2026-08-10) - before/after owner smoke
 
 - Agregado `src/lib/f686F690RendererOwnerBeforeAfterSmoke.ts` con contrato `radshield-mx.canvas.renderer-owner-before-after-smoke.f686-f690.v1`.

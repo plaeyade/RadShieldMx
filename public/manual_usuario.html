@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F690 - Manual de Usuario</title>
+  <title>RadShield-MX F700 - Manual de Usuario</title>
   <style>
     :root {
       --ink: #172033;
@@ -97,7 +97,7 @@
     <h1>RadShield-MX - Manual de Usuario</h1>
     <p>Guia operativa desde cero para usuarios basicos, intermedios y avanzados. Cubre el flujo real de diseno radiologico: plano, equipo, barreras, calculo, evidencia, memoria analitica y revision.</p>
     <div class="meta">
-      <span class="pill">Version de manual: F690</span>
+      <span class="pill">Version de manual: F700</span>
       <span class="pill">Fecha: 2026-08-10</span>
       <span class="pill">Estado: beta tecnica estable</span>
       <span class="pill">Uso clinico final: requiere revision FM/RSO</span>
@@ -105,6 +105,17 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum F691-F700: Owner Smoke Controlado + Fotorrealismo Asset-Ready</h2>
+    <p>F691-F695 prepara el primer smoke minimo del renderer profundo: solo selecciona un target observado, exige doble bandera (<code>canvasHighRiskCad</code> + <code>canvasEventControllerV2</code>) y bloquea toda escritura de barreras, fuentes, geometria, escala y materiales. Si hay mismatch, se apagan las banderas y <code>useCanvas</code> conserva el ownership estable.</p>
+    <p>F696-F700 deja el carril fotorrealista listo para crecer sin romper la beta: rutas para PBR, HDRI, decals, GLB de equipos y manifest con hash/licencia. Mientras no existan assets pesados reales, el recorrido 3D usa luces/texturas procedurales y advierte que lo visual no sustituye TVL, densidad, calculo ni cita normativa.</p>
+    <table>
+      <thead><tr><th>Bloque</th><th>Que activa</th><th>Que no activa</th><th>Evidencia</th></tr></thead>
+      <tbody>
+        <tr><td>F691-F695</td><td>Smoke selection-only del renderer owner bajo doble flag.</td><td>No transfiere escritura geometrica ni reemplaza calculo.</td><td>Panel canvas, gates, E2E y rollback.</td></tr>
+        <tr><td>F696-F700</td><td>Manifest y rutas para assets fotorrealistas.</td><td>No carga texturas pesadas si no hay hash/licencia.</td><td>Panel canvas, asset readiness, rutas lazy.</td></tr>
+      </tbody>
+    </table>
+
     <h2>0. Addendum F686-F690: Before/After Owner Smoke</h2>
     <p>F686-F690 ejecuta un smoke antes/despues: baseline con <code>useCanvas</code> y corrida flagged con <code>canvasHighRiskCad</code>, sin transferir ownership real.</p>
     <table>

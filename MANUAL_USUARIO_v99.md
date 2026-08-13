@@ -1,4 +1,20 @@
-# Manual de Usuario RadShield-MX - F690 Before/After Owner Smoke
+# Manual de Usuario RadShield-MX - F700 Owner Smoke + Fotorrealismo Asset-Ready
+
+## Addendum F691-F700 - Owner Smoke Controlado + Asset Readiness
+
+F691-F695 prepara un smoke minimo del renderer profundo, pero lo mantiene seguro: la unica accion permitida es seleccionar un target observado. La escritura de barreras, fuentes, geometria, escala y materiales sigue bloqueada y `useCanvas` conserva el ownership real.
+
+F696-F700 deja listo el carril fotorrealista: rutas para texturas PBR, HDRI, decals radiologicos/BIM, modelos GLB de equipos y manifest versionado. Mientras no existan assets pesados con hash/licencia, la beta usa fallback procedural.
+
+Uso operativo:
+
+1. Revise primero F686-F690 y confirme paridad observada.
+2. Active F691-F695 solo en staging con `canvasHighRiskCad` y `canvasEventControllerV2`.
+3. Verifique que el panel indique `run-selection-owner-smoke` antes de probar.
+4. Si hay mismatch o cambio de geometria, apague banderas y regrese a `useCanvas`.
+5. Para fotorrealismo, copie assets reales solo en `public/medical3d/photoreal` y actualice manifest con hash/licencia.
+
+Advertencia: F696-F700 es visual. No modifica TVL, densidad, costo, carga estructural, calculo ni evidencia normativa.
 
 ## Addendum F686-F690 - Before/After Owner Smoke
 

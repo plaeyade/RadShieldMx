@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RadShield-MX F690 - Manual de Versiones</title>
+  <title>RadShield-MX F700 - Manual de Versiones</title>
   <style>
     body { margin: 0; color: #172033; background: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
     header { padding: 28px 32px; border-bottom: 1px solid #d9e2ef; background: #f8fafc; }
@@ -26,11 +26,21 @@
   <header>
     <h1>RadShield-MX - Manual de Versiones</h1>
     <p>Control de cambios operativo para entender que se agrego, que botones afecta, como se conecta y que debe validar cada perfil de usuario.</p>
-    <span class="pill">Version documental: F690</span>
+    <span class="pill">Version documental: F700</span>
     <span class="pill">Fecha: 2026-08-10</span>
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. F691-F700 Owner Smoke Controlado + Asset Readiness</h2>
+    <table>
+      <thead><tr><th>Fase</th><th>Area</th><th>Cambio</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>F691-F695</td><td>Canvas renderer</td><td>Smoke minimo selection-only con doble bandera, sin escrituras de modelo y rollback a useCanvas.</td><td>Gated/seguro</td></tr>
+        <tr><td>F696-F700</td><td>Medical 3D</td><td>Readiness para assets PBR, HDRI, decals, modelos GLB y manifest versionado con fallback procedural.</td><td>Preview publicable</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> F691-F700 permite avanzar el renderer y fotorrealismo sin transferir ownership real ni cargar assets pesados sin hash/licencia.</p>
+
     <h2>0. F686-F690 Before/After Owner Smoke</h2>
     <table>
       <thead><tr><th>Fase</th><th>Cambio</th><th>Impacto</th><th>Gate</th></tr></thead>
