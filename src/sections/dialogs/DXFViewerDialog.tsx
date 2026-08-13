@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack, Search, CheckSquare, Square } from 'lucide-react';
+import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack, Search, CheckSquare, Square, Save, FolderOpen } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
 import { importDXFToFloorPlan, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
 import { buildF213DxfLayerMappingQa, inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
@@ -27,6 +27,7 @@ const LAYER_COLORS: Record<number, string> = {
 };
 
 const LARGE_DXF_BARRIER_WARNING = 1000;
+const DXF_LAYER_ROLE_PRESET_KEY = 'radshield_dxf_layer_role_presets_v1';
 const DXF_LAYER_ROLE_OPTIONS: Array<{ value: F213DxfLayerRole; label: string }> = [
   { value: 'barrier', label: 'Muro' },
   { value: 'equipment', label: 'Equipo' },
@@ -36,6 +37,39 @@ const DXF_LAYER_ROLE_OPTIONS: Array<{ value: F213DxfLayerRole; label: string }> 
   { value: 'text', label: 'Texto' },
   { value: 'unmapped', label: 'Ignorar' },
 ];
+
+interface DxfLayerRolePreset {
+  fileName: string;
+  roles: Record<string, F213DxfLayerRole>;
+  updatedAt: string;
+}
+
+function readDxfLayerRolePresets(): Record<string, DxfLayerRolePreset> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(DXF_LAYER_ROLE_PRESET_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDxfLayerRolePreset(fileName: string, roles: Record<string, F213DxfLayerRole>) {
+  if (typeof window === 'undefined') return;
+  const presets = readDxfLayerRolePresets();
+  presets[fileName] = {
+    fileName,
+    roles,
+    updatedAt: new Date().toISOString(),
+  };
+  window.localStorage.setItem(DXF_LAYER_ROLE_PRESET_KEY, JSON.stringify(presets));
+}
+
+function loadDxfLayerRolePreset(fileName: string) {
+  return readDxfLayerRolePresets()[fileName] || null;
+}
 
 export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [parsed, setParsed] = useState<DXFParsed | null>(null);
@@ -50,6 +84,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [layerSearch, setLayerSearch] = useState('');
   const [simplifyGeometry, setSimplifyGeometry] = useState(true);
   const [layerRoleOverrides, setLayerRoleOverrides] = useState<Record<string, F213DxfLayerRole>>({});
+  const [hasSavedLayerRolePreset, setHasSavedLayerRolePreset] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const f213LayerMapping = buildF213DxfLayerMappingQa(parsed, layerRoleOverrides);
@@ -80,6 +115,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       setLastBridge(null);
       setLastContent('');
       setLayerRoleOverrides({});
+      setHasSavedLayerRolePreset(false);
       setFileName(file.name);
       setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
       toast.error('DWG detectado: convierta a DXF/SVG/IFC antes de aplicar al canvas.');
@@ -96,11 +132,14 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         setImportSummary(bridge.summary);
         setLastBridge(bridge);
         setLastContent(content);
-        setLayerRoleOverrides({});
+        const savedPreset = loadDxfLayerRolePreset(file.name);
+        setLayerRoleOverrides(savedPreset?.roles || {});
+        setHasSavedLayerRolePreset(Boolean(savedPreset));
         setFileName(file.name);
         setDwgNotice(null);
         setZoom(1);
         toast.success(`DXF cargado: ${result.entities.length} entidades, ${bridge.summary.mappedBarriers} barreras detectadas`);
+        if (savedPreset) toast.info(`Preset de capas recuperado para ${file.name}`);
       } catch (err: any) {
         setLastBridge(null);
         toast.error('Error al parsear DXF: ' + err.message);
@@ -136,6 +175,29 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const showOnlyBarrierLayers = () => setLayerVisibility(layer => roleForLayer(layer.name) === 'barrier');
   const showAllLayers = () => setLayerVisibility(() => true);
   const hideAllLayers = () => setLayerVisibility(() => false);
+
+  const saveLayerRolePreset = () => {
+    if (!fileName || dxfLayers.length === 0) {
+      toast.error('Cargue primero un DXF para guardar roles.');
+      return;
+    }
+    const roles = Object.fromEntries(dxfLayers.map((layer) => [layer.name, roleForLayer(layer.name)])) as Record<string, F213DxfLayerRole>;
+    writeDxfLayerRolePreset(fileName, roles);
+    setHasSavedLayerRolePreset(true);
+    toast.success(`Preset de capas guardado para ${fileName}`);
+  };
+
+  const loadLayerRolePreset = () => {
+    if (!fileName) return;
+    const preset = loadDxfLayerRolePreset(fileName);
+    if (!preset) {
+      toast.error('No hay preset guardado para este DXF.');
+      return;
+    }
+    setLayerRoleOverrides(preset.roles);
+    setHasSavedLayerRolePreset(true);
+    toast.success(`Preset de capas cargado: ${Object.keys(preset.roles).length} capas`);
+  };
 
   // Render to canvas
   useEffect(() => {
@@ -353,6 +415,30 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   </Button>
                   <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" onClick={hideAllLayers} title="Ocultar todas las capas; util para activar manualmente solo las que se importaran">
                     Nada
+                  </Button>
+                </div>
+                <div className="mt-1 grid grid-cols-2 gap-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-1 text-[9px]"
+                    onClick={saveLayerRolePreset}
+                    disabled={!parsed}
+                    title="Guardar el mapeo actual de roles de capa para este nombre de archivo DXF"
+                  >
+                    <Save className="mr-1 h-3 w-3" /> Guardar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-1 text-[9px]"
+                    onClick={loadLayerRolePreset}
+                    disabled={!parsed || !hasSavedLayerRolePreset}
+                    title="Cargar el mapeo de capas previamente guardado para este DXF"
+                  >
+                    <FolderOpen className="mr-1 h-3 w-3" /> Cargar
                   </Button>
                 </div>
                 {Object.keys(layerRoleOverrides).length > 0 && (
