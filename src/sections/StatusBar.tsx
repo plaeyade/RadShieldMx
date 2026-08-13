@@ -59,7 +59,7 @@ export default function StatusBar({
         </span>
         <span className="flex items-center gap-1">
           <Shield className="w-2.5 h-2.5 text-[#f97316]" />
-          {t('status.barriers')}: <strong className="text-slate-700">{numBarriers}</strong>
+          {t('status.barriers')}: <strong data-testid="statusbar-barrier-count" className="text-slate-700">{numBarriers}</strong>
         </span>
         {numBarriersCalculated > 0 && (
           <span className="text-emerald-600 font-medium">({numBarriersCalculated} calculated)</span>

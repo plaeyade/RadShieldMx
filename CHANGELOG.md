@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# DXF import real al canvas (2026-08-13) - fixture, apply y conteo verificado
+
+- Agregado fixture `e2e/fixtures/sample-floorplan.dxf` con cuatro barreras mapeables desde capas CAD.
+- El visor DXF expone input estable `dxf-file-input` para pruebas reales de carga de archivo.
+- La barra de estado expone `statusbar-barrier-count` para comprobar que el floorplan aplicado actualiza el canvas principal.
+- Agregado `e2e/dxf-import-to-canvas.spec.ts` y comando `npm run test:dxf-import` para validar Archivo > Importar DXF > Aplicar al canvas.
+
 # Archivo funcional real (2026-08-13) - alineacion y submenus verificados
 
 - Reforzado `e2e/f404-file-menu-functional.spec.ts` para validar que Archivo use el menu primario y que el bloque legacy oculto no reaparezca.

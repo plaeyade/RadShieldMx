@@ -144,6 +144,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 accept=".dxf,.dwg"
                 onChange={handleFileUpload}
                 className="hidden"
+                data-testid="dxf-file-input"
               />
               <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs" title="Importar archivo DXF exportado desde AutoCAD/Revit/ODA para revisar capas y aplicar barreras al canvas">
                 <Upload className="w-3 h-3 mr-1" /> Importar DXF
