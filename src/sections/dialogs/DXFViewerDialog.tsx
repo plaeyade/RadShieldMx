@@ -38,6 +38,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [lastBridge, setLastBridge] = useState<CadBimBridgeResult | null>(null);
   const [lastContent, setLastContent] = useState('');
   const [layerSearch, setLayerSearch] = useState('');
+  const [simplifyGeometry, setSimplifyGeometry] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const f213LayerMapping = buildF213DxfLayerMappingQa(parsed);
@@ -160,9 +161,10 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
         .map((layer) => layer.name);
       const bridge =
-        visibleBarrierLayerNames.length === allBarrierLayerNames.length
-          ? lastBridge
-          : importDXFToFloorPlan(lastContent, fileName, { barrierLayerNames: visibleBarrierLayerNames });
+        importDXFToFloorPlan(lastContent, fileName, {
+          barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
+          simplifyGeometry,
+        });
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
         !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)
@@ -343,6 +345,20 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   <span className="mt-0.5 block text-[9px] text-slate-500">
                     Entidades lineales aprox.: {visibleBarrierLineLikeCount}
                   </span>
+                </div>
+                <div className="mt-2 flex items-start gap-2 rounded border border-blue-100 bg-blue-50 px-2 py-2">
+                  <Switch
+                    id="dxf-simplify-geometry"
+                    checked={simplifyGeometry}
+                    onCheckedChange={setSimplifyGeometry}
+                    data-testid="dxf-simplify-geometry"
+                  />
+                  <Label htmlFor="dxf-simplify-geometry" className="text-[10px] leading-snug text-blue-900">
+                    Limpiar geometria al aplicar
+                    <span className="block text-[9px] font-normal text-blue-700">
+                      Consolida segmentos duplicados o colineales de la misma capa antes de crear barreras.
+                    </span>
+                  </Label>
                 </div>
               </div>
               <ScrollArea className="flex-1">

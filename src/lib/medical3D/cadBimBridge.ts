@@ -21,6 +21,7 @@ export interface CadBimBridgeResult {
 
 export interface CadBimDxfImportOptions {
   barrierLayerNames?: string[];
+  simplifyGeometry?: boolean;
 }
 
 const DEFAULT_SCALE_M_PER_UNIT = 0.001;
@@ -85,8 +86,92 @@ function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, e
   };
 }
 
+interface DxfBarrierSegment {
+  layer: string;
+  start: DXFPoint;
+  end: DXFPoint;
+}
+
+function rounded(value: number, precision = 3) {
+  return Math.round(value * 10 ** precision) / 10 ** precision;
+}
+
+function pointKey(point: DXFPoint) {
+  return `${rounded(point.x)},${rounded(point.y)}`;
+}
+
+function segmentKey(segment: DxfBarrierSegment) {
+  const a = pointKey(segment.start);
+  const b = pointKey(segment.end);
+  return a < b ? `${segment.layer}:${a}:${b}` : `${segment.layer}:${b}:${a}`;
+}
+
+function simplifyDxfBarrierSegments(segments: DxfBarrierSegment[], tolerance = 0.001) {
+  const exact = new Map<string, DxfBarrierSegment>();
+  for (const segment of segments) exact.set(segmentKey(segment), segment);
+
+  const merged: DxfBarrierSegment[] = [];
+  const horizontal = new Map<string, Array<{ min: number; max: number; layer: string; y: number }>>();
+  const vertical = new Map<string, Array<{ min: number; max: number; layer: string; x: number }>>();
+
+  for (const segment of exact.values()) {
+    const dx = segment.end.x - segment.start.x;
+    const dy = segment.end.y - segment.start.y;
+    if (Math.abs(dy) <= tolerance) {
+      const y = rounded((segment.start.y + segment.end.y) / 2);
+      const key = `${segment.layer}:h:${y}`;
+      const list = horizontal.get(key) || [];
+      list.push({ min: Math.min(segment.start.x, segment.end.x), max: Math.max(segment.start.x, segment.end.x), layer: segment.layer, y });
+      horizontal.set(key, list);
+      continue;
+    }
+    if (Math.abs(dx) <= tolerance) {
+      const x = rounded((segment.start.x + segment.end.x) / 2);
+      const key = `${segment.layer}:v:${x}`;
+      const list = vertical.get(key) || [];
+      list.push({ min: Math.min(segment.start.y, segment.end.y), max: Math.max(segment.start.y, segment.end.y), layer: segment.layer, x });
+      vertical.set(key, list);
+      continue;
+    }
+    merged.push(segment);
+  }
+
+  for (const intervals of horizontal.values()) {
+    intervals.sort((a, b) => a.min - b.min);
+    let current = intervals[0];
+    for (const interval of intervals.slice(1)) {
+      if (interval.min <= current.max + tolerance) {
+        current.max = Math.max(current.max, interval.max);
+      } else {
+        merged.push({ layer: current.layer, start: { x: current.min, y: current.y }, end: { x: current.max, y: current.y } });
+        current = interval;
+      }
+    }
+    merged.push({ layer: current.layer, start: { x: current.min, y: current.y }, end: { x: current.max, y: current.y } });
+  }
+
+  for (const intervals of vertical.values()) {
+    intervals.sort((a, b) => a.min - b.min);
+    let current = intervals[0];
+    for (const interval of intervals.slice(1)) {
+      if (interval.min <= current.max + tolerance) {
+        current.max = Math.max(current.max, interval.max);
+      } else {
+        merged.push({ layer: current.layer, start: { x: current.x, y: current.min }, end: { x: current.x, y: current.max } });
+        current = interval;
+      }
+    }
+    merged.push({ layer: current.layer, start: { x: current.x, y: current.min }, end: { x: current.x, y: current.max } });
+  }
+
+  return {
+    segments: merged,
+    removed: segments.length - merged.length,
+  };
+}
+
 function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
-  const barriers: Barrier[] = [];
+  const barrierSegments: DxfBarrierSegment[] = [];
   const warnings: string[] = [];
   let ignored = 0;
   let skippedNonBarrierSegments = 0;
@@ -105,8 +190,7 @@ function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions =
       ignored += 1;
       return;
     }
-    const id = `dxf-barrier-${barriers.length + 1}`;
-    barriers.push(makeBarrier(id, `DXF ${barriers.length + 1} (${layer})`, layer, start, end));
+    barrierSegments.push({ layer, start, end });
   };
 
   for (const entity of parsed.entities) {
@@ -124,9 +208,19 @@ function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions =
     }
   }
 
+  const simplification = options.simplifyGeometry ? simplifyDxfBarrierSegments(barrierSegments) : { segments: barrierSegments, removed: 0 };
+  const barriers = simplification.segments.map((segment, index) => makeBarrier(
+    `dxf-barrier-${index + 1}`,
+    `DXF ${index + 1} (${segment.layer})`,
+    segment.layer,
+    segment.start,
+    segment.end,
+  ));
+
   if (ignored > 0) warnings.push(`${ignored} segmentos DXF degenerados fueron ignorados.`);
   if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
   if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
+  if (simplification.removed > 0) warnings.push(`Limpieza geometrica: ${simplification.removed} segmento(s) duplicados o colineales fueron consolidados antes de aplicar al canvas.`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return { barriers, warnings };
 }
