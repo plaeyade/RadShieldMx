@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
-import { importDXFToFloorPlan, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
+import { importDXFToFloorPlan, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
 import { buildF213DxfLayerMappingQa } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
@@ -35,6 +35,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [lineWidth, setLineWidth] = useState(1);
   const [showLabels, setShowLabels] = useState(true);
   const [importSummary, setImportSummary] = useState<CadBimImportSummary | null>(null);
+  const [lastBridge, setLastBridge] = useState<CadBimBridgeResult | null>(null);
   const [lastContent, setLastContent] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +51,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       const signatureValid = isDWGFile(await file.arrayBuffer());
       setParsed(null);
       setImportSummary(null);
+      setLastBridge(null);
       setLastContent('');
       setFileName(file.name);
       setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
@@ -65,12 +67,14 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         const bridge = importDXFToFloorPlan(content, file.name);
         setParsed(result);
         setImportSummary(bridge.summary);
+        setLastBridge(bridge);
         setLastContent(content);
         setFileName(file.name);
         setDwgNotice(null);
         setZoom(1);
         toast.success(`DXF cargado: ${result.entities.length} entidades, ${bridge.summary.mappedBarriers} barreras detectadas`);
       } catch (err: any) {
+        setLastBridge(null);
         toast.error('Error al parsear DXF: ' + err.message);
       }
     };
@@ -116,12 +120,12 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const zoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
   const zoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
   const applyToCanvas = () => {
-    if (!lastContent || !fileName) {
+    if (!lastContent || !fileName || !lastBridge) {
       toast.error('Importe primero un archivo DXF');
       return;
     }
     try {
-      const bridge = importDXFToFloorPlan(lastContent, fileName);
+      const bridge = lastBridge;
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
         !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)

@@ -6,7 +6,9 @@
 - Corregido parser DXF para preservar vertices repetidos de `LWPOLYLINE`; antes se podia perder geometria por sobrescritura de codigos 10/20.
 - `Aplicar al canvas` ahora mapea solo capas clasificadas como muro/barrera y conserva mobiliario, parque, cotas y referencias fuera del calculo.
 - Los DXF con mas de 1000 segmentos de barrera piden confirmacion antes de escribir geometria al floorplan.
+- El visor reutiliza el bridge DXF ya calculado al cargar el archivo; `Aplicar al canvas` ya no reparsea planos grandes.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
+- Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 
 # DWG local conversion probe (2026-08-13) - ruta local ODA/AutoCAD/LibreDWG
 
