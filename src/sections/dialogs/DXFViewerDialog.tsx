@@ -49,6 +49,10 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     if (!normalizedLayerSearch) return true;
     return layer.name.toLowerCase().includes(normalizedLayerSearch) || inferDxfLayerRole(layer.name).includes(normalizedLayerSearch);
   });
+  const visibleBarrierLineLikeCount = visibleBarrierLayers.reduce(
+    (count, layer) => count + layer.entities.filter((entity) => entity.type === 'LINE' || entity.type === 'LWPOLYLINE').length,
+    0,
+  );
 
   // Handle file upload
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -336,6 +340,9 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                 </div>
                 <div className="mt-2 rounded bg-white px-2 py-1 text-[10px] text-slate-600" data-testid="dxf-visible-barrier-layer-summary">
                   Importables: {visibleBarrierLayers.length}/{barrierLayers.length} capas de muro visibles
+                  <span className="mt-0.5 block text-[9px] text-slate-500">
+                    Entidades lineales aprox.: {visibleBarrierLineLikeCount}
+                  </span>
                 </div>
               </div>
               <ScrollArea className="flex-1">

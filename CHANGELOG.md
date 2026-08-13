@@ -9,6 +9,7 @@
 - El visor reutiliza el bridge DXF ya calculado al cargar el archivo; `Aplicar al canvas` ya no reparsea planos grandes.
 - El panel de capas ahora controla tambien la importacion: capas ocultas no se convierten en barreras del canvas.
 - Agregados buscador de capas y acciones rapidas `Muros`, `Todo`, `Nada` para preparar DXF grandes antes de aplicar al floorplan.
+- El panel de capas muestra entidades lineales aproximadas para estimar carga geometrica antes de importar.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
 - Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 
