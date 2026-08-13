@@ -10,6 +10,16 @@ async function openFileMenu(page: Page) {
   }
   await expect(menu).toBeVisible({ timeout: 5000 });
   await expect(page.getByTestId('f295-primary-file-menu')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId('f114-deduped-legacy-menu-zone')).toBeHidden();
+
+  const buttonBox = await page.getByTestId('f295-primary-file-dropdown').boundingBox();
+  const menuBox = await page.getByTestId('f295-primary-file-menu').boundingBox();
+  expect(buttonBox, 'Archivo primary button has a measurable box').toBeTruthy();
+  expect(menuBox, 'Archivo primary menu has a measurable box').toBeTruthy();
+  if (buttonBox && menuBox) {
+    expect(Math.abs(menuBox.x - buttonBox.x), 'Archivo menu must align with the primary trigger, not float to the right').toBeLessThan(32);
+    expect(menuBox.y, 'Archivo menu opens below the toolbar trigger').toBeGreaterThan(buttonBox.y + buttonBox.height - 2);
+  }
 }
 
 async function closeRadixDialog(page: Page, name: RegExp) {
@@ -24,6 +34,8 @@ test.describe('F404 Archivo menu functional QA - f404-file-menu-functional', () 
     await bootWorkspace(page);
 
     await expect(page.getByTestId('f100-main-floorplan-canvas')).toBeVisible();
+    await openFileMenu(page);
+    await page.keyboard.press('Escape');
 
     const radixChecks: Array<[string, RegExp]> = [
       ['f404-file-open-projects', /Administrador de Proyectos/i],

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# Archivo funcional real (2026-08-13) - alineacion y submenus verificados
+
+- Reforzado `e2e/f404-file-menu-functional.spec.ts` para validar que Archivo use el menu primario y que el bloque legacy oculto no reaparezca.
+- La prueba ahora mide la posicion del dropdown y falla si Archivo vuelve a abrir desfasado hacia la derecha.
+- Se validan superficies reales desde Archivo: proyectos, CSV batch, DXF, STEP/IGES, export CSV, reporte CNSNS, auditoria, logs, especificaciones, glosario y acerca de.
+- Agregado comando `npm run test:file-menu` para repetir esta validacion sin buscar el grep manualmente.
+
 # Canvas funcional real (2026-08-12) - acciones visibles conectadas
 
 - Agregado `e2e/product-canvas-functional-smoke.spec.ts` y comando `npm run test:canvas-functional`.
