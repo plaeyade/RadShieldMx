@@ -60,4 +60,10 @@ describe('DXF real import hardening', () => {
     expect(result.floorPlan.barriers.every((barrier) => barrier.name.includes('MUROS'))).toBe(true);
     expect(result.summary.warnings.join(' ')).toContain('capas no clasificadas');
   });
+
+  it('filters imported barriers by selected visible layers', () => {
+    const result = importDXFToFloorPlan(sample, 'real-sample.dxf', { barrierLayerNames: [] });
+    expect(result.summary.mappedBarriers).toBe(0);
+    expect(result.summary.warnings.join(' ')).toContain('No se detectaron LINE/LWPOLYLINE');
+  });
 });

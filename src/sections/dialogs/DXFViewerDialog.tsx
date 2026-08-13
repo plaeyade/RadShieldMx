@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
 import { importDXFToFloorPlan, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
-import { buildF213DxfLayerMappingQa } from '@/lib/f213DxfLayerMappingQa';
+import { buildF213DxfLayerMappingQa, inferDxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -120,12 +120,21 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const zoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
   const zoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
   const applyToCanvas = () => {
-    if (!lastContent || !fileName || !lastBridge) {
+    if (!lastContent || !fileName || !lastBridge || !parsed) {
       toast.error('Importe primero un archivo DXF');
       return;
     }
     try {
-      const bridge = lastBridge;
+      const visibleBarrierLayers = Array.from(parsed.layers.values())
+        .filter((layer) => layer.visible && inferDxfLayerRole(layer.name) === 'barrier')
+        .map((layer) => layer.name);
+      const allBarrierLayers = Array.from(parsed.layers.values())
+        .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
+        .map((layer) => layer.name);
+      const bridge =
+        visibleBarrierLayers.length === allBarrierLayers.length
+          ? lastBridge
+          : importDXFToFloorPlan(lastContent, fileName, { barrierLayerNames: visibleBarrierLayers });
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
         !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)
@@ -320,6 +329,9 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   <Badge data-testid="f213-dxf-equipment-layer-count" variant="outline" className="h-4 text-[9px]">Eq {f213LayerMapping.equipmentLayers}</Badge>
                   <Badge data-testid="f213-dxf-zone-layer-count" variant="outline" className="h-4 text-[9px]">Zonas {f213LayerMapping.zoneLayers}</Badge>
                   <Badge data-testid="f213-dxf-unmapped-layer-count" variant="outline" className="h-4 text-[9px]">Rev {f213LayerMapping.unmappedLayers}</Badge>
+                </div>
+                <div className="mb-1 rounded bg-white px-1.5 py-1 text-[9px] leading-snug text-slate-600">
+                  Oculte capas con el icono de ojo para excluirlas del import al canvas. Solo LINE/LWPOLYLINE en capas visibles de muro/barrera se convierten en barreras.
                 </div>
                 <div className="max-h-24 overflow-auto space-y-0.5">
                   {f213LayerMapping.rows.slice(0, 8).map((row) => (

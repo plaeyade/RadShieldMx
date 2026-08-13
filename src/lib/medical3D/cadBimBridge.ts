@@ -19,6 +19,10 @@ export interface CadBimBridgeResult {
   summary: CadBimImportSummary;
 }
 
+export interface CadBimDxfImportOptions {
+  barrierLayerNames?: string[];
+}
+
 const DEFAULT_SCALE_M_PER_UNIT = 0.001;
 
 function unitToMeters(unit: string) {
@@ -81,14 +85,16 @@ function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, e
   };
 }
 
-function collectDxfBarriers(parsed: DXFParsed) {
+function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
   const barriers: Barrier[] = [];
   const warnings: string[] = [];
   let ignored = 0;
   let skippedNonBarrierSegments = 0;
+  const selectedBarrierLayers = Array.isArray(options.barrierLayerNames) ? new Set(options.barrierLayerNames) : null;
   const barrierLayerNames = new Set(
     Array.from(parsed.layers.values())
       .filter((layer) => inferDxfLayerRole(layer.name) === 'barrier')
+      .filter((layer) => selectedBarrierLayers === null || selectedBarrierLayers.has(layer.name))
       .map((layer) => layer.name),
   );
 
@@ -120,13 +126,14 @@ function collectDxfBarriers(parsed: DXFParsed) {
 
   if (ignored > 0) warnings.push(`${ignored} segmentos DXF degenerados fueron ignorados.`);
   if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
+  if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return { barriers, warnings };
 }
 
-export function importDXFToFloorPlan(content: string, fileName = 'import.dxf'): CadBimBridgeResult {
+export function importDXFToFloorPlan(content: string, fileName = 'import.dxf', options: CadBimDxfImportOptions = {}): CadBimBridgeResult {
   const parsed = parseDXF(content);
-  const { barriers, warnings } = collectDxfBarriers(parsed);
+  const { barriers, warnings } = collectDxfBarriers(parsed, options);
   const scale = unitToMeters(parsed.unit);
   const width = Math.max(parsed.bounds.maxX - parsed.bounds.minX, 1);
   const height = Math.max(parsed.bounds.maxY - parsed.bounds.minY, 1);
