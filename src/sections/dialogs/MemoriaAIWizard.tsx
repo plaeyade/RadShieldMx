@@ -32,7 +32,7 @@ import {
   ClipboardCheck, RotateCcw, Send, Lightbulb, TrendingUp, Clock
 } from 'lucide-react';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
-import { buildAnalyticMemoryEvidenceSection, buildAnalyticMemorySnapshot } from '@/lib/analyticMemoryEvidence';
+import { buildAnalyticMemoryEvidenceSection, buildAnalyticMemorySnapshot, createFloorPlanEvidenceSources } from '@/lib/analyticMemoryEvidence';
 import { buildF102MemoryDesignPlan } from '@/lib/f102MemoriaDesignPlan';
 import { getF103MemoriaWorkflowAction } from '@/lib/f103MemoriaWorkflowActions';
 import { buildF117ModalityHandoff, readF117ActiveProfileId } from '@/lib/f117ModalityHandoff';
@@ -199,6 +199,10 @@ export default function MemoriaAIWizard({
   const eq = selectedEquipment ? EQUIPMENT_DB[selectedEquipment] : null;
   const memorySnapshot = useMemo(() => buildAnalyticMemorySnapshot(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const evidenceSection = useMemo(() => buildAnalyticMemoryEvidenceSection(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
+  const dxfEvidenceSource = useMemo(
+    () => createFloorPlanEvidenceSources(floorPlan, barrierResults, sampleLines).find((source) => source.id === 'ev-dxf-import-review'),
+    [floorPlan, barrierResults, sampleLines],
+  );
   const f125Gate = useMemo(() => buildF125CalculationEvidenceGate(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const memoriaAIPlan = useMemo(() => buildF91MemoriaAIPlan(), []);
   const f142MaterialEvidence = useMemo(() => buildF142MemoriaIaMaterialEvidence(), []);
@@ -324,7 +328,8 @@ export default function MemoriaAIWizard({
     const f367F370Section = `\n7.12 INTEGRACION F367-F370 / 3D, UNITY, MOTORES EXTERNOS Y BETA\n${f367F370ReleaseIntegrationText}\n`;
     const f409Section = `\n7.13 INTEGRACION F409 / SALIDAS REALES F405-F408\n${f409OutputIntegrationText}\n`;
     const f591Section = `\n7.14 MEJORAS GENERALES F591-F620 / FLUJO PRODUCTIVO\n${f591GeneralImprovementsText}\n`;
-    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}\n${improvementSection}`.trim();
+    const dxfEvidenceText = dxfEvidenceSource ? `\n7.15 REVISION CAD/DXF PARA MEMORIA IA\n   Fuente: ${dxfEvidenceSource.title}\n   Estado: ${dxfEvidenceSource.verificationStatus}\n   Hash/extracto: ${dxfEvidenceSource.excerptHash}\n   Trazabilidad: ${dxfEvidenceSource.excerpt}\n   Nota tecnica: ${dxfEvidenceSource.notes}\n` : '';
+    if (!eq) return evidenceSection ? `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO\n\n${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}${dxfEvidenceText}\n${evidenceSection}${improvementSection}` : `${f102Section}${f103Section}${f117Section}${f117F148BridgeSection}${f142Section}${f144Section}${f146Section}${f148Section}${f149Section}${f149bSection}${f149cSection}${f184Section}${f208Section}${f218Section}${f367F370Section}${f409Section}${f591Section}${dxfEvidenceText}\n${improvementSection}`.trim();
     return `MEMORIA ANALITICA DE BLINDAJE RADIOLOGICO
 
 1. DATOS DEL PROYECTO
@@ -393,10 +398,11 @@ ${f218Section}
 ${f367F370Section}
 ${f409Section}
 ${f591Section}
+${dxfEvidenceText}
 ${evidenceSection}
 ${improvementSection}
 `;
-  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, f409OutputIntegrationText, f591GeneralImprovementsText, evidenceSection, memoriaAIPlan]);
+  }, [eq, projectData, workloadData, barrierData, calcResults, f102DesignPlan, f103WorkflowActions, f117Handoff, f142MaterialEvidence, f144SourceGovernance, f146MaterialAppendixText, f148ActiveProfile, f148ProfileSelector.selectionPolicy, f149NormativeQaText, f149bFastradUtilityText, f149cMonteCarloGatewayText, f184ReleaseQualityText, f208CanvasReportingText, f218ReportHandoffText, f367F370ReleaseIntegrationText, f409OutputIntegrationText, f591GeneralImprovementsText, dxfEvidenceSource, evidenceSection, memoriaAIPlan]);
 
   // ─── Export handlers ───
   const exportPDF = useCallback(() => {
@@ -485,6 +491,21 @@ ${improvementSection}
             <div className="col-span-6 rounded border border-emerald-100 bg-emerald-50 px-2 py-1 text-emerald-800">
               Evidence Pack F76: {memorySnapshot.standards.join(', ') || 'sin fuentes'} | max {memorySnapshot.maxThickness.toFixed(1)} mm
             </div>
+            {dxfEvidenceSource && (
+              <div data-testid="memoria-dxf-evidence-source" className="col-span-6 rounded border border-blue-100 bg-blue-50 px-2 py-1 text-blue-900">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-semibold">Revision CAD/DXF para Memoria IA</div>
+                  <Badge className="h-4 bg-blue-100 text-blue-800 text-[9px]">CAD/DXF</Badge>
+                </div>
+                <div className="mt-1 grid grid-cols-3 gap-1">
+                  <div>Estado: {dxfEvidenceSource.verificationStatus}</div>
+                  <div className="truncate">Hash: {dxfEvidenceSource.excerptHash}</div>
+                  <div className="truncate">Doc: {dxfEvidenceSource.documentId}</div>
+                </div>
+                <div className="mt-1 truncate text-blue-800">{dxfEvidenceSource.excerpt}</div>
+                <div className="mt-0.5 truncate text-blue-700">{dxfEvidenceSource.notes}</div>
+              </div>
+            )}
             <div data-testid="f125-memoria-evidence-gate" className="col-span-6 rounded border border-amber-100 bg-amber-50 px-2 py-1 text-amber-900">
               <div className="flex items-center justify-between gap-2">
                 <div className="font-semibold">F125 contrato calculo-memoria-evidencia</div>

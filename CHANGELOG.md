@@ -22,6 +22,7 @@
 - Evidence Pack/Memoria IA ahora incorporan automaticamente una fuente `ev-dxf-import-review` con estado draft/reviewed segun la confirmacion DXF, hash de extracto y tags CAD/DXF.
 - El panel `Revision DXF` muestra la evidencia `ev-dxf-import-review`, su estado, hash de extracto y permite copiar un resumen trazable para revision documental.
 - Evidence Pack resalta la fuente CAD/DXF importada con tarjeta lateral, hash, estado de revision y marcador visual `CAD/DXF` dentro del listado editable de fuentes.
+- Memoria IA muestra la revision CAD/DXF como evidencia propia, exporta estado/hash/notas en el texto de memoria y queda cubierta por el smoke DXF.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
 - Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 

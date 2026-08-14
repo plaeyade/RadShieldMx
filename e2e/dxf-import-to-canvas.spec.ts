@@ -69,6 +69,10 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await page.getByTestId('statusbar-open-dxf-review').click();
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/reviewed/);
+    await page.getByTestId('dxf-review-memoria').click();
+    await expect(page.getByTestId('memoria-dxf-evidence-source')).toContainText(/reviewed/);
+    await expect(page.getByTestId('memoria-dxf-evidence-source')).toContainText(/CAD\/DXF/);
+    await page.keyboard.press('Escape');
     await page.getByTestId('dxf-review-evidence').click();
     await expect(page.getByTestId('evidence-pack-dxf-import-source')).toContainText(/reviewed/);
     await expect(page.getByTestId('evidence-pack-dxf-source-card')).toContainText(/CAD\/DXF/);
