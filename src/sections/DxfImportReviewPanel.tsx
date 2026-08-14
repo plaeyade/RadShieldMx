@@ -46,6 +46,27 @@ export default function DxfImportReviewPanel({
         : calculationStatus === 'error'
           ? 'Error de calculo'
           : 'Pendiente de calculo';
+  const workflowSteps = [
+    { id: 'load', label: 'Cargar', done: Boolean(metadata.importedAt), active: false },
+    { id: 'map', label: 'Mapear capas', done: (metadata.mappedBarriers ?? floorPlan.barriers.length) > 0, active: false },
+    { id: 'apply', label: 'Aplicar vista', done: floorPlan.barriers.length > 0, active: false },
+    { id: 'confirm', label: 'Confirmar', done: metadata.status === 'final', active: isPreliminary },
+    {
+      id: 'calculate',
+      label: 'Calcular',
+      done: calculationStatus === 'complete',
+      active: metadata.status === 'final' && calculationStatus !== 'complete',
+    },
+  ];
+  const nextAction = isPreliminary
+    ? 'Confirme geometria, escala y continuidad de barreras antes de calcular o generar memoria.'
+    : calculationStatus === 'blocked-no-source'
+      ? 'Agregue o confirme una fuente/equipo radiologico y vuelva a ejecutar Calcular.'
+      : calculationStatus === 'complete'
+        ? 'Abra Memoria IA o Evidence Pack para usar la evidencia CAD/DXF revisada.'
+        : calculationStatus === 'error'
+          ? 'Revise advertencias, escala y fuentes antes de repetir el calculo.'
+          : 'Ejecute Calcular para vincular barreras DXF con resultados preliminares.';
 
   const copyEvidenceSummary = async () => {
     if (!dxfEvidence) return;
@@ -101,6 +122,31 @@ export default function DxfImportReviewPanel({
           <Badge variant="outline">Modo {metadata.mode ?? 'DXF'}</Badge>
           <Badge variant="outline">{floorPlan.barriers.length} barreras</Badge>
           <Badge variant="outline">{floorPlan.sources.length} fuentes</Badge>
+        </div>
+        <div data-testid="dxf-review-workflow-steps" className="rounded border border-slate-200 bg-slate-50 p-2">
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Flujo CAD/DXF</div>
+          <div className="grid grid-cols-5 gap-1">
+            {workflowSteps.map((step, index) => (
+              <div key={step.id} className="min-w-0 text-center">
+                <div
+                  className={`mx-auto flex h-5 w-5 items-center justify-center rounded-full border text-[9px] font-bold ${
+                    step.done
+                      ? 'border-emerald-300 bg-emerald-100 text-emerald-700'
+                      : step.active
+                        ? 'border-amber-300 bg-amber-100 text-amber-800'
+                        : 'border-slate-200 bg-white text-slate-400'
+                  }`}
+                  title={step.label}
+                >
+                  {index + 1}
+                </div>
+                <div className="mt-1 truncate text-[9px] text-slate-500" title={step.label}>{step.label}</div>
+              </div>
+            ))}
+          </div>
+          <div data-testid="dxf-review-next-action" className="mt-2 rounded bg-white px-2 py-1 text-[10px] leading-snug text-slate-600">
+            <span className="font-semibold text-slate-700">Siguiente:</span> {nextAction}
+          </div>
         </div>
         <div
           data-testid="dxf-review-calculation-status"
@@ -188,7 +234,15 @@ export default function DxfImportReviewPanel({
               <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Confirmar
             </Button>
           )}
-          <Button size="sm" variant={isPreliminary ? 'outline' : 'default'} className="h-8 text-[11px]" onClick={onRunCalculations} data-testid="dxf-review-calculate">
+          <Button
+            size="sm"
+            variant={isPreliminary ? 'outline' : 'default'}
+            className="h-8 text-[11px]"
+            onClick={onRunCalculations}
+            disabled={isPreliminary}
+            title={isPreliminary ? 'Primero confirme la geometria DXF revisada.' : 'Ejecutar calculo preliminar con barreras DXF confirmadas.'}
+            data-testid="dxf-review-calculate"
+          >
             <Calculator className="mr-1 h-3.5 w-3.5" /> Calcular
           </Button>
           <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={onOpenMemoriaAI} data-testid="dxf-review-memoria">

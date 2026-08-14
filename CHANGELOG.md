@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# DXF workflow guided gate (2026-08-14) - pasos 3 y 4
+
+- El panel `Revision DXF` agrega stepper operativo: cargar DXF, mapear capas, aplicar vista ligera/completa, confirmar geometria y calcular.
+- La accion `Calcular` queda bloqueada mientras la geometria siga preliminar, evitando que una vista ligera llegue a Memoria IA sin revision visual.
+- La barra inferior ahora muestra estado de calculo DXF confirmado: `DXF sin fuente`, `DXF calculado`, `DXF calculando` o `DXF error`.
+- Manual de usuario, manual de versiones y Update Center documentan el flujo CAD/DXF real y la evidencia `ev-dxf-import-review`.
+
 # DXF real ZUMAYA (2026-08-13) - polilineas y filtro conservador de barreras
 
 - Analizado `C:/Users/carlo/Desktop/ZUMAYA/plano.dxf`: DXF `AC1018`, 26.6 MB, 208 capas, 2303 LINE, 1309 LWPOLYLINE, 1282 INSERT.

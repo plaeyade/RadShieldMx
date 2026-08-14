@@ -16,6 +16,7 @@ interface StatusBarProps {
   userName?: string | null;
   importStatus?: 'preliminary' | 'final';
   importMode?: string;
+  importCalculationStatus?: 'not-started' | 'blocked-no-source' | 'running' | 'complete' | 'error';
   onConfirmImport?: () => void;
   onOpenImportReview?: () => void;
 }
@@ -23,7 +24,7 @@ interface StatusBarProps {
 export default function StatusBar({
   projectName, lastSaved, isCalculating, calculationStatus,
   numSources, numBarriers, numBarriersCalculated, version, isDirty, userName,
-  importStatus, importMode, onConfirmImport, onOpenImportReview,
+  importStatus, importMode, importCalculationStatus, onConfirmImport, onOpenImportReview,
 }: StatusBarProps) {
   const { t } = useI18n();
 
@@ -34,6 +35,22 @@ export default function StatusBar({
     error: { label: 'Error', color: 'bg-red-400' },
   };
   const status = statusConfig[calculationStatus];
+  const importCalculationLabel = importCalculationStatus === 'complete'
+    ? 'DXF calculado'
+    : importCalculationStatus === 'running'
+      ? 'DXF calculando'
+      : importCalculationStatus === 'blocked-no-source'
+        ? 'DXF sin fuente'
+        : importCalculationStatus === 'error'
+          ? 'DXF error'
+          : null;
+  const importCalculationClass = importCalculationStatus === 'complete'
+    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+    : importCalculationStatus === 'blocked-no-source'
+      ? 'border-amber-300 bg-amber-50 text-amber-700'
+      : importCalculationStatus === 'error'
+        ? 'border-red-300 bg-red-50 text-red-700'
+        : 'border-slate-300 bg-slate-50 text-slate-600';
 
   return (
     <div className="h-6 bg-white border-t border-slate-200 text-slate-500 flex items-center px-3 text-[10px] gap-3 select-none shrink-0 z-50">
@@ -73,6 +90,15 @@ export default function StatusBar({
             title="Geometria DXF confirmada para calculo, memoria y evidencia."
           >
             DXF confirmado
+          </Badge>
+        )}
+        {importStatus === 'final' && importCalculationLabel && (
+          <Badge
+            variant="outline"
+            className={`h-3.5 px-1 text-[8px] ${importCalculationClass}`}
+            title="Estado del calculo preliminar asociado a la geometria DXF confirmada."
+          >
+            {importCalculationLabel}
           </Badge>
         )}
         {importStatus && onOpenImportReview && (

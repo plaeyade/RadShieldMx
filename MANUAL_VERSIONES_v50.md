@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# DXF Workflow Guided Gate (2026-08-14)
+
+- Panel `Revision DXF` con flujo visible: cargar, mapear capas, aplicar vista, confirmar geometria y calcular.
+- `Calcular` se bloquea mientras la geometria DXF siga preliminar.
+- La barra inferior muestra `DXF sin fuente`, `DXF calculado`, `DXF calculando` o `DXF error` cuando el plano ya esta confirmado.
+- Manuales y Update Center documentan la evidencia `ev-dxf-import-review` para Memoria IA, PDF y Evidence Pack.
+
 # F691-F700 (2026-08-12) - Controlled Owner Smoke + Photoreal Asset Readiness
 
 - **F691-F695:** agrega contrato de smoke controlado selection-only para el renderer profundo. Requiere `canvasHighRiskCad` + `canvasEventControllerV2`, no permite escrituras de modelo y conserva rollback a `useCanvas`.

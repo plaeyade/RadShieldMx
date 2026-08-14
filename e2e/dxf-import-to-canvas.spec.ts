@@ -61,6 +61,10 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
     await expect(page.getByText(/DXF preliminar/i)).toBeVisible();
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
+    await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Cargar/);
+    await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Confirmar/);
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Confirme geometria/i);
+    await expect(page.getByTestId('dxf-review-calculate')).toBeDisabled();
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/ev-dxf-import-review/);
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/draft/);
     await page.getByTestId('dxf-review-confirm').click();
@@ -70,6 +74,7 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/reviewed/);
     await expect(page.getByTestId('dxf-review-calculation-status')).toContainText(/Pendiente de fuente\/equipo/);
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/fuente\/equipo radiologico/i);
     await page.getByTestId('dxf-review-memoria').click();
     await expect(page.getByTestId('memoria-dxf-evidence-source')).toContainText(/reviewed/);
     await expect(page.getByTestId('memoria-dxf-evidence-source')).toContainText(/CAD\/DXF/);

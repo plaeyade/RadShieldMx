@@ -2351,6 +2351,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             userName={user?.name}
             importStatus={floorPlan.importMetadata?.status}
             importMode={floorPlan.importMetadata?.mode}
+            importCalculationStatus={floorPlan.importMetadata?.calculationStatus}
             onConfirmImport={handleConfirmDxfGeometry}
             onOpenImportReview={() => setShowDxfImportReview(true)}
           />

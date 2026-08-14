@@ -1,4 +1,19 @@
-# Manual de Usuario RadShield-MX - F700 Owner Smoke + Fotorrealismo Asset-Ready
+# Manual de Usuario RadShield-MX - DXF Guiado + F700 Owner Smoke
+
+## Addendum DXF Guiado - CAD, Canvas, Calculo, Memoria IA y Evidencia
+
+El flujo DXF operativo queda como ruta controlada:
+
+1. Abrir `Archivo > Importar DXF`.
+2. Cargar archivo DXF; si el origen es DWG, convertirlo antes mediante proveedor externo.
+3. Mapear capas como muros/barreras, equipos, zonas, cotas, referencias o revision.
+4. Aplicar vista ligera para planos grandes o vista completa para planos revisados.
+5. Revisar el panel `Revision DXF`: escala, barreras, fuentes, warnings y evidencia `ev-dxf-import-review`.
+6. Confirmar geometria solo despues de validar continuidad de barreras y escala.
+7. Agregar fuente/equipo si la barra inferior muestra `DXF sin fuente`.
+8. Ejecutar `Calcular` y abrir `Memoria IA` o `Evidence Pack`.
+
+Regla: una vista ligera es preliminar. No debe alimentar calculo final, PDF o memoria analitica sin confirmacion.
 
 ## Addendum F691-F700 - Owner Smoke Controlado + Asset Readiness
 

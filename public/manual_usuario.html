@@ -105,6 +105,27 @@
   </header>
   <main>
     <section>
+    <h2>0. Addendum DXF Guiado: del CAD a la Memoria IA</h2>
+    <p>El flujo operativo para planos CAD/DXF queda guiado dentro del canvas. El objetivo es que ninguna geometria importada llegue a calculo, Evidence Pack o Memoria IA sin revision de escala, capas y continuidad de barreras.</p>
+    <ol class="flow">
+      <li><strong>Cargar DXF.</strong> Abra <code>Archivo &gt; Importar DXF</code> y seleccione un archivo DXF. Si el archivo es DWG, conviertalo primero a DXF mediante proveedor externo o flujo CAD autorizado.</li>
+      <li><strong>Mapear capas.</strong> En el visor DXF clasifique capas como muros/barreras, equipos, zonas, cotas, referencias o revision. Use buscador y acciones rapidas cuando el plano tenga muchas capas.</li>
+      <li><strong>Aplicar vista ligera o completa.</strong> Use vista ligera para inspeccion inicial de planos grandes; use vista completa cuando la geometria y el rendimiento sean aceptables.</li>
+      <li><strong>Confirmar geometria.</strong> En el panel <strong>Revision DXF</strong> revise escala, barreras, fuentes, warnings y evidencia <code>ev-dxf-import-review</code>. Presione <strong>Confirmar</strong> solo despues de validar el plano visualmente.</li>
+      <li><strong>Calcular y documentar.</strong> Si falta fuente/equipo, la barra inferior mostrara <strong>DXF sin fuente</strong>. Al agregar fuente radiologica, ejecute <strong>Calcular</strong> y despues abra <strong>Memoria IA</strong> o <strong>Evidence Pack</strong>.</li>
+    </ol>
+    <table>
+      <thead><tr><th>Elemento</th><th>Que muestra</th><th>Accion correcta</th><th>Salida conectada</th></tr></thead>
+      <tbody>
+        <tr><td>Panel Revision DXF</td><td>Stepper: cargar, mapear, aplicar, confirmar y calcular.</td><td>Seguir la siguiente accion indicada.</td><td>Canvas, calculo, Memoria IA, Evidence Pack.</td></tr>
+        <tr><td>Barra inferior</td><td>DXF preliminar, DXF confirmado, DXF sin fuente o DXF calculado.</td><td>Abrir <strong>Revisar</strong> si hay duda o bloqueo.</td><td>Estado operativo permanente.</td></tr>
+        <tr><td><code>ev-dxf-import-review</code></td><td>Fuente trazable con estado draft/reviewed y hash de extracto.</td><td>Usarla como evidencia CAD/DXF, no como sustituto de revision FM/RSO.</td><td>Memoria IA, PDF y Evidence Pack.</td></tr>
+      </tbody>
+    </table>
+    <p class="warn"><strong>Regla de seguridad:</strong> una importacion ligera es preliminar. Debe confirmarse antes de calcular o generar memoria analitica con evidencia.</p>
+    </section>
+
+    <section>
     <h2>0. Addendum F691-F700: Owner Smoke Controlado + Fotorrealismo Asset-Ready</h2>
     <p>F691-F695 prepara el primer smoke minimo del renderer profundo: solo selecciona un target observado, exige doble bandera (<code>canvasHighRiskCad</code> + <code>canvasEventControllerV2</code>) y bloquea toda escritura de barreras, fuentes, geometria, escala y materiales. Si hay mismatch, se apagan las banderas y <code>useCanvas</code> conserva el ownership estable.</p>
     <p>F696-F700 deja el carril fotorrealista listo para crecer sin romper la beta: rutas para PBR, HDRI, decals, GLB de equipos y manifest con hash/licencia. Mientras no existan assets pesados reales, el recorrido 3D usa luces/texturas procedurales y advierte que lo visual no sustituye TVL, densidad, calculo ni cita normativa.</p>

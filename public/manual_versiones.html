@@ -31,6 +31,17 @@
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. DXF Workflow Guided Gate</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>
+      <tbody>
+        <tr><td>Canvas/DXF</td><td>Panel Revision DXF con stepper: cargar, mapear, aplicar, confirmar y calcular.</td><td>Evita que vistas ligeras o geometria preliminar lleguen a calculo/memoria sin revision.</td><td><code>test:dxf-import</code></td></tr>
+        <tr><td>Status Bar</td><td>Badge para DXF confirmado con estado de calculo: sin fuente, calculando, calculado o error.</td><td>El usuario sabe por que no avanza el calculo sin abrir dialogos.</td><td>Smoke DXF y barra inferior.</td></tr>
+        <tr><td>Documentacion</td><td>Manual usuario, versiones y Update Center explican <code>ev-dxf-import-review</code>.</td><td>Memoria IA y Evidence Pack quedan trazables desde CAD.</td><td>Revision documental.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> el flujo DXF queda listo para prueba real de usuario: importar, confirmar, agregar fuente, calcular y documentar.</p>
+
     <h2>0. F691-F700 Owner Smoke Controlado + Asset Readiness</h2>
     <table>
       <thead><tr><th>Fase</th><th>Area</th><th>Cambio</th><th>Estado</th></tr></thead>

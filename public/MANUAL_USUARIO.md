@@ -1,5 +1,18 @@
 # RadShield-MX v24 — Manual de Usuario
 
+## Addendum vigente: flujo DXF guiado
+
+1. Abra `Archivo > Importar DXF`.
+2. Cargue el DXF. Si el origen es DWG, conviertalo primero a DXF/SVG con un proveedor externo autorizado.
+3. Clasifique capas como barreras, equipos, zonas, cotas, referencias o revision.
+4. Aplique vista ligera para inspeccion inicial o vista completa para geometria revisada.
+5. En `Revision DXF`, revise escala, continuidad de muros, advertencias y la evidencia `ev-dxf-import-review`.
+6. Confirme geometria antes de calcular. La accion `Calcular` queda bloqueada mientras el DXF sea preliminar.
+7. Si la barra inferior muestra `DXF sin fuente`, agregue o confirme equipo/fuente radiologica.
+8. Ejecute calculo y genere `Memoria IA`, PDF o `Evidence Pack`.
+
+La evidencia `ev-dxf-import-review` conserva estado draft/reviewed, hash y notas para trazabilidad documental.
+
 ## Tabla de Contenidos
 1. [Introduccion](#1-introduccion)
 2. [Primeros Pasos](#2-primeros-pasos)
