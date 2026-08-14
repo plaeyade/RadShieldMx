@@ -66,6 +66,7 @@ import LazyDialog from '@/components/LazyDialog';
 import Toolbar from '@/sections/Toolbar';
 import Sidebar from '@/sections/Sidebar';
 import CanvasArea from '@/sections/CanvasArea';
+import DxfImportReviewPanel from '@/sections/DxfImportReviewPanel';
 import ResultsPanel from '@/sections/ResultsPanel';
 // v82: Canvas enhancements
 import { useCanvasLayers } from '@/hooks/useCanvasLayers';
@@ -685,6 +686,7 @@ export default function ShieldingDesigner() {
   const [showStickyNotesPanel, setShowStickyNotesPanel] = useState(false);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showRoomTemplates, setShowRoomTemplates] = useState(false);
+  const [showDxfImportReview, setShowDxfImportReview] = useState(false);
   const [draggedShape, setDraggedShape] = useState<ShapeItem | null>(null);
   // v80: Smart Rooms
 
@@ -1132,6 +1134,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       });
       setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
       setShowWelcomeScreen(false);
+      setShowDxfImportReview(true);
       toast.success(`${preliminary ? 'DXF preliminar' : 'DXF'} aplicado al canvas: ${mapped} barreras detectadas`);
       warnings.forEach((warning) => toast.warning(warning));
     };
@@ -2257,8 +2260,19 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             importStatus={floorPlan.importMetadata?.status}
             importMode={floorPlan.importMetadata?.mode}
             onConfirmImport={handleConfirmDxfGeometry}
+            onOpenImportReview={() => setShowDxfImportReview(true)}
           />
         </div>
+      )}
+      {!showWelcomeScreen && showDxfImportReview && floorPlan.importMetadata && (
+        <DxfImportReviewPanel
+          floorPlan={floorPlan}
+          onClose={() => setShowDxfImportReview(false)}
+          onConfirm={handleConfirmDxfGeometry}
+          onRunCalculations={runRadShieldCalculations}
+          onOpenMemoriaAI={() => useAppStore.getState().open('memoriaAI')}
+          onOpenEvidencePack={() => useAppStore.getState().open('evidencePack')}
+        />
       )}
       {/* Help panel floating button */}
       {!showWelcomeScreen && (

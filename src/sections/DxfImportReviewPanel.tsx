@@ -1,0 +1,118 @@
+import { AlertTriangle, Calculator, CheckCircle2, FileSearch, FileText, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import type { FloorPlan } from '@/types/radshield';
+
+interface DxfImportReviewPanelProps {
+  floorPlan: FloorPlan;
+  onClose: () => void;
+  onConfirm: () => void;
+  onRunCalculations: () => void;
+  onOpenMemoriaAI: () => void;
+  onOpenEvidencePack: () => void;
+}
+
+export default function DxfImportReviewPanel({
+  floorPlan,
+  onClose,
+  onConfirm,
+  onRunCalculations,
+  onOpenMemoriaAI,
+  onOpenEvidencePack,
+}: DxfImportReviewPanelProps) {
+  const metadata = floorPlan.importMetadata;
+  if (!metadata) return null;
+
+  const warnings = metadata.warnings ?? [];
+  const isPreliminary = metadata.status === 'preliminary';
+  const hasScale = Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0;
+  const readyForMemory = metadata.status === 'final' && floorPlan.barriers.length > 0 && hasScale;
+
+  return (
+    <section
+      data-testid="dxf-import-review-panel"
+      className="fixed bottom-9 right-4 z-[65] w-[340px] max-w-[calc(100vw-2rem)] rounded-md border border-slate-200 bg-white/98 shadow-xl"
+      aria-label="Revision de geometria DXF para memoria"
+    >
+      <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-3 py-2">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-wide text-slate-700">Revision DXF</div>
+          <div className="max-w-[260px] truncate text-[10px] text-slate-500" title={metadata.fileName}>
+            {metadata.fileName ?? floorPlan.name}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          title="Cerrar panel de revision DXF"
+          aria-label="Cerrar revision DXF"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="space-y-3 px-3 py-3 text-[11px] text-slate-600">
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant="outline" className={isPreliminary ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}>
+            {isPreliminary ? 'Preliminar' : 'Confirmado'}
+          </Badge>
+          <Badge variant="outline">Modo {metadata.mode ?? 'DXF'}</Badge>
+          <Badge variant="outline">{floorPlan.barriers.length} barreras</Badge>
+          <Badge variant="outline">{floorPlan.sources.length} fuentes</Badge>
+        </div>
+
+        <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
+          <dt className="text-slate-400">Escala</dt>
+          <dd className="text-right font-medium text-slate-700">{hasScale ? `${floorPlan.scale_m_per_pixel.toPrecision(4)} m/px` : 'pendiente'}</dd>
+          <dt className="text-slate-400">Barreras mapeadas</dt>
+          <dd className="text-right font-medium text-slate-700">{metadata.mappedBarriers ?? floorPlan.barriers.length}</dd>
+          <dt className="text-slate-400">Importado</dt>
+          <dd className="text-right font-medium text-slate-700">{metadata.importedAt ? new Date(metadata.importedAt).toLocaleTimeString('es-MX') : 'sin fecha'}</dd>
+          <dt className="text-slate-400">Confirmado</dt>
+          <dd className="text-right font-medium text-slate-700">{metadata.confirmedAt ? new Date(metadata.confirmedAt).toLocaleTimeString('es-MX') : 'pendiente'}</dd>
+        </dl>
+
+        <div className={readyForMemory ? 'rounded border border-emerald-200 bg-emerald-50 p-2 text-emerald-800' : 'rounded border border-amber-200 bg-amber-50 p-2 text-amber-800'}>
+          <div className="flex items-center gap-1 font-semibold">
+            {readyForMemory ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertTriangle className="h-3.5 w-3.5" />}
+            {readyForMemory ? 'Listo para calculo y memoria' : 'Requiere revision antes de memoria'}
+          </div>
+          <div className="mt-1 text-[10px] leading-snug">
+            {readyForMemory
+              ? 'La geometria fue confirmada; puede usarse como base trazable para calculo, Evidence Pack y Memoria IA.'
+              : 'Revise escala, capas y continuidad de muros antes de emitir resultados o anexos.'}
+          </div>
+        </div>
+
+        {warnings.length > 0 && (
+          <div className="rounded border border-slate-200 bg-slate-50 p-2">
+            <div className="mb-1 font-semibold text-slate-700">Advertencias</div>
+            <ul className="max-h-24 space-y-1 overflow-auto pr-1">
+              {warnings.slice(0, 6).map((warning, index) => (
+                <li key={`${warning}-${index}`} className="leading-snug text-slate-500">- {warning}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          {isPreliminary && (
+            <Button size="sm" className="h-8 text-[11px]" onClick={onConfirm} data-testid="dxf-review-confirm">
+              <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Confirmar
+            </Button>
+          )}
+          <Button size="sm" variant={isPreliminary ? 'outline' : 'default'} className="h-8 text-[11px]" onClick={onRunCalculations} data-testid="dxf-review-calculate">
+            <Calculator className="mr-1 h-3.5 w-3.5" /> Calcular
+          </Button>
+          <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={onOpenMemoriaAI} data-testid="dxf-review-memoria">
+            <FileText className="mr-1 h-3.5 w-3.5" /> Memoria IA
+          </Button>
+          <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={onOpenEvidencePack} data-testid="dxf-review-evidence">
+            <FileSearch className="mr-1 h-3.5 w-3.5" /> Evidencia
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}

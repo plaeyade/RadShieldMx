@@ -17,12 +17,13 @@ interface StatusBarProps {
   importStatus?: 'preliminary' | 'final';
   importMode?: string;
   onConfirmImport?: () => void;
+  onOpenImportReview?: () => void;
 }
 
 export default function StatusBar({
   projectName, lastSaved, isCalculating, calculationStatus,
   numSources, numBarriers, numBarriersCalculated, version, isDirty, userName,
-  importStatus, importMode, onConfirmImport,
+  importStatus, importMode, onConfirmImport, onOpenImportReview,
 }: StatusBarProps) {
   const { t } = useI18n();
 
@@ -73,6 +74,17 @@ export default function StatusBar({
           >
             DXF confirmado
           </Badge>
+        )}
+        {importStatus && onOpenImportReview && (
+          <button
+            type="button"
+            data-testid="statusbar-open-dxf-review"
+            onClick={onOpenImportReview}
+            className="h-4 rounded border border-slate-200 bg-slate-50 px-1.5 text-[8px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700"
+            title="Abrir revision DXF para escala, barreras, advertencias, calculo, Memoria IA y Evidence Pack."
+          >
+            Revisar
+          </button>
         )}
       </div>
 
