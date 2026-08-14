@@ -96,6 +96,7 @@ export default function EvidencePackDialog({
   const f409OutputIntegration = useMemo(() => buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const summary = useMemo(() => summarizeEvidencePack(pack), [pack]);
   const f126ReleaseEvidence = useMemo(() => buildF126ReleaseEvidenceHardening(pack.sources, pack.citationLedger), [pack.sources, pack.citationLedger]);
+  const dxfEvidenceSource = useMemo(() => pack.sources.find((source) => source.id === 'ev-dxf-import-review'), [pack.sources]);
 
   useEffect(() => {
     if (!open) return;
@@ -246,6 +247,19 @@ export default function EvidencePackDialog({
               <div>Deep dive: {summary.readyForDeepDive ? 'listo' : 'pendiente de referencias'}</div>
             </CardContent>
           </Card>
+
+          {dxfEvidenceSource && (
+            <Card data-testid="evidence-pack-dxf-import-source" className="border-blue-300 bg-blue-50">
+              <CardContent className="p-3 text-xs text-blue-950 space-y-1">
+                <div className="font-semibold">DXF importado</div>
+                <div>Estado: {dxfEvidenceSource.verificationStatus}</div>
+                <div>Confianza: {dxfEvidenceSource.confidence}</div>
+                <div>Hash: {dxfEvidenceSource.excerptHash}</div>
+                <div>Doc: {dxfEvidenceSource.documentId}</div>
+                <div className="text-[10px] leading-snug">{dxfEvidenceSource.notes}</div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card data-testid="f117-modality-handoff-evidence" className="border-cyan-200 bg-cyan-50">
             <CardContent className="p-3 text-xs text-cyan-900 space-y-1">
@@ -461,9 +475,17 @@ export default function EvidencePackDialog({
 
         <main className="min-w-0 overflow-auto p-5 bg-slate-50">
           <div className="max-w-5xl mx-auto space-y-3">
-            {pack.sources.map((source) => (
-              <Card key={source.id} className="bg-white">
+            {pack.sources.map((source) => {
+              const isDxfEvidence = source.id === 'ev-dxf-import-review';
+              return (
+              <Card key={source.id} className={isDxfEvidence ? 'border-blue-300 bg-blue-50/70' : 'bg-white'} data-testid={isDxfEvidence ? 'evidence-pack-dxf-source-card' : undefined}>
                 <CardContent className="p-4 space-y-3">
+                  {isDxfEvidence && (
+                    <div className="flex flex-wrap items-center gap-2 rounded border border-blue-200 bg-white px-2 py-1 text-[11px] text-blue-800">
+                      <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">CAD/DXF</Badge>
+                      <span>Fuente automatica de geometria importada para memoria y evidencia.</span>
+                    </div>
+                  )}
                   <div className="grid grid-cols-[minmax(0,1fr)_150px_120px_auto] gap-2">
                     <Input value={source.title} onChange={(event) => updateSource(source.id, { title: event.target.value })} placeholder="Titulo de la fuente" />
                     <select
@@ -515,7 +537,8 @@ export default function EvidencePackDialog({
                   <Textarea value={source.notes} onChange={(event) => updateSource(source.id, { notes: event.target.value })} placeholder="Notas de validacion, limitaciones o relacion con memoria analitica" />
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </main>
       </div>
