@@ -1139,6 +1139,23 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     return () => window.removeEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
   }, [resetFloorPlan, setCanvasState]);
 
+  const handleConfirmDxfGeometry = useCallback(() => {
+    if (floorPlan.importMetadata?.status !== 'preliminary') {
+      toast.info('No hay geometria DXF preliminar pendiente de confirmar.');
+      return;
+    }
+
+    setFloorPlan(prev => ({
+      ...prev,
+      importMetadata: {
+        ...prev.importMetadata,
+        status: 'final',
+        confirmedAt: new Date().toISOString(),
+      },
+    }));
+    toast.success('Geometria DXF confirmada para calculo, memoria y evidencia.');
+  }, [floorPlan.importMetadata?.status, setFloorPlan]);
+
   const computeCurrentHeatmap = useCallback(async () => {
     if (floorPlan.sources.length === 0) {
       setHeatmapData([]);
@@ -2226,7 +2243,21 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       </div>
       {!showWelcomeScreen && (
         <div className="status-bar">
-          <StatusBar projectName={floorPlan.name} lastSaved={lastSaved} isCalculating={calculationStatus==="running"} calculationStatus={calculationStatus} numSources={floorPlan.sources.length} numBarriers={floorPlan.barriers.length} numBarriersCalculated={floorPlan.barriers.filter(b=>b.requiredThickness_mm).length} version="RadShield-MX v127" isDirty={isDirty} userName={user?.name} importStatus={floorPlan.importMetadata?.status} importMode={floorPlan.importMetadata?.mode} />
+          <StatusBar
+            projectName={floorPlan.name}
+            lastSaved={lastSaved}
+            isCalculating={calculationStatus === "running"}
+            calculationStatus={calculationStatus}
+            numSources={floorPlan.sources.length}
+            numBarriers={floorPlan.barriers.length}
+            numBarriersCalculated={floorPlan.barriers.filter(b => b.requiredThickness_mm).length}
+            version="RadShield-MX v127"
+            isDirty={isDirty}
+            userName={user?.name}
+            importStatus={floorPlan.importMetadata?.status}
+            importMode={floorPlan.importMetadata?.mode}
+            onConfirmImport={handleConfirmDxfGeometry}
+          />
         </div>
       )}
       {/* Help panel floating button */}

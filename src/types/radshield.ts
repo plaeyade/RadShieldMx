@@ -499,6 +499,7 @@ export interface FloorPlan {
     status?: 'preliminary' | 'final';
     mappedBarriers?: number;
     importedAt?: string;
+    confirmedAt?: string;
     warnings?: string[];
   };
 }

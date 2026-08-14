@@ -16,12 +16,13 @@ interface StatusBarProps {
   userName?: string | null;
   importStatus?: 'preliminary' | 'final';
   importMode?: string;
+  onConfirmImport?: () => void;
 }
 
 export default function StatusBar({
   projectName, lastSaved, isCalculating, calculationStatus,
   numSources, numBarriers, numBarriersCalculated, version, isDirty, userName,
-  importStatus, importMode,
+  importStatus, importMode, onConfirmImport,
 }: StatusBarProps) {
   const { t } = useI18n();
 
@@ -43,12 +44,34 @@ export default function StatusBar({
           <Badge variant="outline" className="h-3.5 px-1 text-[8px] border-[#f97316] text-[#f97316]">{t('status.modified')}</Badge>
         )}
         {importStatus === 'preliminary' && (
+          <>
+            <Badge
+              variant="outline"
+              className="h-3.5 px-1 text-[8px] border-amber-400 bg-amber-50 text-amber-700"
+              title="Plano importado en modo preliminar; revise capas, escala y geometria antes de firmar memoria analitica."
+            >
+              DXF preliminar{importMode ? `/${importMode}` : ''}
+            </Badge>
+            {onConfirmImport && (
+              <button
+                type="button"
+                data-testid="statusbar-confirm-dxf-geometry"
+                onClick={onConfirmImport}
+                className="h-4 rounded border border-emerald-300 bg-emerald-50 px-1.5 text-[8px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                title="Confirmar que la geometria DXF revisada puede usarse para calculo, memoria y evidencia."
+              >
+                Confirmar DXF
+              </button>
+            )}
+          </>
+        )}
+        {importStatus === 'final' && importMode && (
           <Badge
             variant="outline"
-            className="h-3.5 px-1 text-[8px] border-amber-400 bg-amber-50 text-amber-700"
-            title="Plano importado en modo preliminar; revise capas, escala y geometria antes de firmar memoria analitica."
+            className="h-3.5 px-1 text-[8px] border-emerald-300 bg-emerald-50 text-emerald-700"
+            title="Geometria DXF confirmada para calculo, memoria y evidencia."
           >
-            DXF preliminar{importMode ? `/${importMode}` : ''}
+            DXF confirmado
           </Badge>
         )}
       </div>

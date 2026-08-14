@@ -60,5 +60,8 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByRole('textbox').first()).toHaveValue('CAD sample-floorplan.dxf');
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
     await expect(page.getByText(/DXF preliminar/i)).toBeVisible();
+    await page.getByTestId('statusbar-confirm-dxf-geometry').click();
+    await expect(page.getByText(/DXF confirmado/i)).toBeVisible();
+    await expect(page.getByText(/DXF preliminar/i)).toBeHidden();
   });
 });
