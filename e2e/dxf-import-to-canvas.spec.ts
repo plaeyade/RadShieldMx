@@ -61,10 +61,13 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
     await expect(page.getByText(/DXF preliminar/i)).toBeVisible();
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
+    await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/ev-dxf-import-review/);
+    await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/draft/);
     await page.getByTestId('dxf-review-confirm').click();
     await expect(page.getByText(/DXF confirmado/i)).toBeVisible();
     await expect(page.getByText(/DXF preliminar/i)).toBeHidden();
     await page.getByTestId('statusbar-open-dxf-review').click();
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
+    await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/reviewed/);
   });
 });

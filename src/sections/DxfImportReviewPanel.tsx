@@ -1,6 +1,9 @@
-import { AlertTriangle, Calculator, CheckCircle2, FileSearch, FileText, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { AlertTriangle, Calculator, CheckCircle2, ClipboardCopy, FileSearch, FileText, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { createFloorPlanEvidenceSources } from '@/lib/analyticMemoryEvidence';
 import type { FloorPlan } from '@/types/radshield';
 
 interface DxfImportReviewPanelProps {
@@ -21,12 +24,40 @@ export default function DxfImportReviewPanel({
   onOpenEvidencePack,
 }: DxfImportReviewPanelProps) {
   const metadata = floorPlan.importMetadata;
+  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
+  const dxfEvidence = useMemo(
+    () => createFloorPlanEvidenceSources(floorPlan).find((source) => source.id === 'ev-dxf-import-review'),
+    [floorPlan],
+  );
+
   if (!metadata) return null;
 
   const warnings = metadata.warnings ?? [];
   const isPreliminary = metadata.status === 'preliminary';
   const hasScale = Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0;
   const readyForMemory = metadata.status === 'final' && floorPlan.barriers.length > 0 && hasScale;
+
+  const copyEvidenceSummary = async () => {
+    if (!dxfEvidence) return;
+    const summary = [
+      `Evidence ID: ${dxfEvidence.id}`,
+      `Estado: ${dxfEvidence.verificationStatus}`,
+      `Hash: ${dxfEvidence.excerptHash}`,
+      `Titulo: ${dxfEvidence.title}`,
+      `Claim: ${dxfEvidence.claim}`,
+      `Extracto: ${dxfEvidence.excerpt}`,
+      `Notas: ${dxfEvidence.notes}`,
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopyState('copied');
+      toast.success('Resumen DXF copiado', { description: dxfEvidence.excerptHash });
+      window.setTimeout(() => setCopyState('idle'), 1600);
+    } catch {
+      toast.error('No se pudo copiar el resumen DXF');
+    }
+  };
 
   return (
     <section
@@ -84,6 +115,31 @@ export default function DxfImportReviewPanel({
               : 'Revise escala, capas y continuidad de muros antes de emitir resultados o anexos.'}
           </div>
         </div>
+
+        {dxfEvidence && (
+          <div className="rounded border border-blue-200 bg-blue-50 p-2 text-blue-900" data-testid="dxf-review-evidence-source">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="font-semibold">Evidencia trazable</div>
+                <div className="mt-1 text-[10px] leading-snug text-blue-800">
+                  {dxfEvidence.id} - {dxfEvidence.verificationStatus} - {dxfEvidence.excerptHash}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={copyEvidenceSummary}
+                className="rounded border border-blue-200 bg-white px-1.5 py-1 text-blue-700 hover:bg-blue-100"
+                title="Copiar resumen de evidencia DXF"
+                aria-label="Copiar resumen de evidencia DXF"
+                data-testid="dxf-review-copy-evidence"
+              >
+                <ClipboardCopy className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="mt-1 line-clamp-2 text-[10px] leading-snug text-blue-700">{dxfEvidence.notes}</div>
+            {copyState === 'copied' && <div className="mt-1 text-[10px] font-semibold text-emerald-700">Copiado al portapapeles</div>}
+          </div>
+        )}
 
         {warnings.length > 0 && (
           <div className="rounded border border-slate-200 bg-slate-50 p-2">

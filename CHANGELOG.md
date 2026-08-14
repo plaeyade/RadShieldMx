@@ -20,6 +20,7 @@
 - Agregada accion `Confirmar DXF` en la barra de estado; cambia la metadata a `final`, guarda `confirmedAt` y deja la geometria lista para calculo, memoria y evidencia tras revision visual.
 - Agregado panel `Revision DXF` como gate operativo entre importacion CAD y memoria: muestra escala, barreras, fuentes, warnings, confirmacion, calculo, Memoria IA y Evidence Pack.
 - Evidence Pack/Memoria IA ahora incorporan automaticamente una fuente `ev-dxf-import-review` con estado draft/reviewed segun la confirmacion DXF, hash de extracto y tags CAD/DXF.
+- El panel `Revision DXF` muestra la evidencia `ev-dxf-import-review`, su estado, hash de extracto y permite copiar un resumen trazable para revision documental.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
 - Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 
