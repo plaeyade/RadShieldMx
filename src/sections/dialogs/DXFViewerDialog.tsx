@@ -27,6 +27,7 @@ const LAYER_COLORS: Record<number, string> = {
 };
 
 const LARGE_DXF_BARRIER_WARNING = 1000;
+const LIGHT_DXF_BARRIER_LIMIT = 500;
 const DXF_LAYER_ROLE_PRESET_KEY = 'radshield_dxf_layer_role_presets_v1';
 const DXF_LAYER_ROLE_OPTIONS: Array<{ value: F213DxfLayerRole; label: string }> = [
   { value: 'barrier', label: 'Muro' },
@@ -83,6 +84,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [lastContent, setLastContent] = useState('');
   const [layerSearch, setLayerSearch] = useState('');
   const [simplifyGeometry, setSimplifyGeometry] = useState(true);
+  const [importMode, setImportMode] = useState<'light' | 'full'>('light');
   const [layerRoleOverrides, setLayerRoleOverrides] = useState<Record<string, F213DxfLayerRole>>({});
   const [hasSavedLayerRolePreset, setHasSavedLayerRolePreset] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -113,8 +115,9 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
       simplifyGeometry,
       layerRoleOverrides,
+      maxBarrierSegments: importMode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
     });
-  }, [parsed, simplifyGeometry, layerRoleOverrides]);
+  }, [parsed, simplifyGeometry, layerRoleOverrides, importMode]);
 
   // Handle file upload
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,6 +258,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
           barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
           simplifyGeometry,
           layerRoleOverrides,
+          maxBarrierSegments: importMode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
         });
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
@@ -264,7 +268,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         return;
       }
       window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
-      toast.success(`Plano DXF aplicado al canvas: ${bridge.summary.mappedBarriers} barreras`);
+      toast.success(`Plano DXF aplicado al canvas: ${bridge.summary.mappedBarriers} barreras (${importMode === 'light' ? 'modo ligero' : 'modo completo'})`);
       onOpenChange(false);
     } catch (err: any) {
       toast.error('No se pudo aplicar el DXF al canvas: ' + err.message);
@@ -473,6 +477,28 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                     Entidades lineales aprox.: {visibleBarrierLineLikeCount}
                   </span>
                 </div>
+                <div className="mt-2 rounded border border-slate-200 bg-white px-2 py-2">
+                  <Label className="mb-1 block text-[10px] font-semibold text-slate-600">
+                    Modo de importacion
+                  </Label>
+                  <Select value={importMode} onValueChange={(value) => setImportMode(value as 'light' | 'full')}>
+                    <SelectTrigger
+                      size="sm"
+                      className="h-7 text-[10px]"
+                      data-testid="dxf-import-mode-select"
+                      title="Modo ligero limita barreras para no saturar el canvas; completo aplica todo lo visible"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light" className="text-xs">Ligera - max {LIGHT_DXF_BARRIER_LIMIT} barreras</SelectItem>
+                      <SelectItem value="full" className="text-xs">Completa - todo lo visible</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="mt-1 text-[9px] leading-snug text-slate-500">
+                    Use Ligera para primera prueba del plano; cambie a Completa cuando las capas y roles ya esten revisados.
+                  </div>
+                </div>
                 <div className="mt-2 flex items-start gap-2 rounded border border-blue-100 bg-blue-50 px-2 py-2">
                   <Switch
                     id="dxf-simplify-geometry"
@@ -506,9 +532,16 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                       <span className="text-right font-medium">{importImpact.simplifiedBarrierSegments}</span>
                       <span className="text-emerald-700">Consolidados</span>
                       <span className="text-right font-medium">{importImpact.removedByCleanup}</span>
+                      <span className="text-emerald-700">Fuera por limite</span>
+                      <span className="text-right font-medium">{importImpact.cappedByLimit}</span>
                       <span className="text-emerald-700">Capas usadas</span>
                       <span className="text-right font-medium">{importImpact.selectedBarrierLayers}/{importImpact.barrierLayers}</span>
                     </div>
+                    {importImpact.importLimit !== null && (
+                      <div className="mt-1 border-t border-emerald-200 pt-1 text-[9px] text-emerald-800">
+                        Modo ligero activo: maximo {importImpact.importLimit} barreras para proteger rendimiento del canvas.
+                      </div>
+                    )}
                     {(importImpact.skippedNonBarrierSegments > 0 || importImpact.ignoredDegenerateSegments > 0) && (
                       <div className="mt-1 border-t border-emerald-200 pt-1 text-[9px] text-emerald-800">
                         Referencia omitida: {importImpact.skippedNonBarrierSegments}. Degenerados: {importImpact.ignoredDegenerateSegments}.

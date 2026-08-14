@@ -144,6 +144,22 @@ describe('DXF real import hardening', () => {
     expect(impact.estimatedBarriers).toBe(1);
   });
 
+  it('can cap DXF import in lightweight mode', () => {
+    const result = importDXFToFloorPlan(splitWallSample, 'split-wall.dxf', {
+      simplifyGeometry: false,
+      maxBarrierSegments: 2,
+    });
+    const impact = previewDXFImportImpact(parseDXF(splitWallSample), {
+      simplifyGeometry: false,
+      maxBarrierSegments: 2,
+    });
+
+    expect(result.summary.mappedBarriers).toBe(2);
+    expect(impact.estimatedBarriers).toBe(2);
+    expect(impact.cappedByLimit).toBe(1);
+    expect(result.summary.warnings.join(' ')).toContain('Importacion ligera');
+  });
+
   it('can import manually remapped layers as barriers', () => {
     const unmapped = importDXFToFloorPlan(unmappedLayerSample, 'unknown-layer.dxf');
     const remapped = importDXFToFloorPlan(unmappedLayerSample, 'unknown-layer.dxf', {

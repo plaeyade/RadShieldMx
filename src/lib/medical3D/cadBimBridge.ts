@@ -23,6 +23,7 @@ export interface CadBimDxfImportOptions {
   barrierLayerNames?: string[];
   simplifyGeometry?: boolean;
   layerRoleOverrides?: Record<string, F213DxfLayerRole>;
+  maxBarrierSegments?: number;
 }
 
 export interface CadBimDxfImportImpact {
@@ -32,6 +33,8 @@ export interface CadBimDxfImportImpact {
   rawBarrierSegments: number;
   simplifiedBarrierSegments: number;
   removedByCleanup: number;
+  cappedByLimit: number;
+  importLimit: number | null;
   skippedNonBarrierSegments: number;
   ignoredDegenerateSegments: number;
   estimatedBarriers: number;
@@ -224,7 +227,12 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
   }
 
   const simplification = options.simplifyGeometry ? simplifyDxfBarrierSegments(barrierSegments) : { segments: barrierSegments, removed: 0 };
-  const barriers = simplification.segments.map((segment, index) => makeBarrier(
+  const maxBarrierSegments = Number.isFinite(options.maxBarrierSegments) && Number(options.maxBarrierSegments) > 0
+    ? Math.floor(Number(options.maxBarrierSegments))
+    : null;
+  const limitedSegments = maxBarrierSegments === null ? simplification.segments : simplification.segments.slice(0, maxBarrierSegments);
+  const cappedByLimit = Math.max(simplification.segments.length - limitedSegments.length, 0);
+  const barriers = limitedSegments.map((segment, index) => makeBarrier(
     `dxf-barrier-${index + 1}`,
     `DXF ${index + 1} (${segment.layer})`,
     segment.layer,
@@ -236,6 +244,7 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
   if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
   if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
   if (simplification.removed > 0) warnings.push(`Limpieza geometrica: ${simplification.removed} segmento(s) duplicados o colineales fueron consolidados antes de aplicar al canvas.`);
+  if (cappedByLimit > 0) warnings.push(`Importacion ligera: ${cappedByLimit} segmento(s) quedaron fuera por limite de seguridad (${maxBarrierSegments}).`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return {
     barriers,
@@ -247,6 +256,8 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
       rawBarrierSegments: barrierSegments.length,
       simplifiedBarrierSegments: simplification.segments.length,
       removedByCleanup: simplification.removed,
+      cappedByLimit,
+      importLimit: maxBarrierSegments,
       skippedNonBarrierSegments,
       ignoredDegenerateSegments: ignored,
       estimatedBarriers: barriers.length,
