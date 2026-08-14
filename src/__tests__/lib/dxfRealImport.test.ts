@@ -100,6 +100,34 @@ const unmappedLayerSample = [
   '0', 'EOF',
 ].join('\n');
 
+const prioritizationSample = [
+  '0', 'SECTION',
+  '2', 'TABLES',
+  '0', 'TABLE',
+  '2', 'LAYER',
+  '0', 'LAYER',
+  '2', 'MUROS',
+  '62', '3',
+  '0', 'ENDTAB',
+  '0', 'ENDSEC',
+  '0', 'SECTION',
+  '2', 'ENTITIES',
+  '0', 'LINE',
+  '8', 'MUROS',
+  '10', '0',
+  '20', '0',
+  '11', '1',
+  '21', '0',
+  '0', 'LINE',
+  '8', 'MUROS',
+  '10', '0',
+  '20', '0',
+  '11', '20',
+  '21', '0',
+  '0', 'ENDSEC',
+  '0', 'EOF',
+].join('\n');
+
 describe('DXF real import hardening', () => {
   it('preserves repeated LWPOLYLINE vertices', () => {
     const parsed = parseDXF(sample);
@@ -158,6 +186,18 @@ describe('DXF real import hardening', () => {
     expect(impact.estimatedBarriers).toBe(2);
     expect(impact.cappedByLimit).toBe(1);
     expect(result.summary.warnings.join(' ')).toContain('Importacion ligera');
+  });
+
+  it('prioritizes representative long wall segments in lightweight mode', () => {
+    const result = importDXFToFloorPlan(prioritizationSample, 'prioritized.dxf', {
+      simplifyGeometry: false,
+      maxBarrierSegments: 1,
+      prioritizeRepresentativeSegments: true,
+    });
+
+    expect(result.summary.mappedBarriers).toBe(1);
+    expect(result.floorPlan.barriers[0]).toMatchObject({ x1: 0, y1: 0, x2: 20, y2: 0 });
+    expect(result.summary.warnings.join(' ')).toContain('Importacion ligera priorizada');
   });
 
   it('can import manually remapped layers as barriers', () => {

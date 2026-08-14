@@ -116,6 +116,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       simplifyGeometry,
       layerRoleOverrides,
       maxBarrierSegments: importMode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
+      prioritizeRepresentativeSegments: importMode === 'light',
     });
   }, [parsed, simplifyGeometry, layerRoleOverrides, importMode]);
 
@@ -259,6 +260,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
           simplifyGeometry,
           layerRoleOverrides,
           maxBarrierSegments: importMode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
+          prioritizeRepresentativeSegments: importMode === 'light',
         });
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
@@ -539,7 +541,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                     </div>
                     {importImpact.importLimit !== null && (
                       <div className="mt-1 border-t border-emerald-200 pt-1 text-[9px] text-emerald-800">
-                        Modo ligero activo: maximo {importImpact.importLimit} barreras para proteger rendimiento del canvas.
+                        Modo ligero activo: maximo {importImpact.importLimit} barreras priorizando capas de blindaje/muros y segmentos largos.
                       </div>
                     )}
                     {(importImpact.skippedNonBarrierSegments > 0 || importImpact.ignoredDegenerateSegments > 0) && (

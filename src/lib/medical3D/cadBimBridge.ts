@@ -24,6 +24,7 @@ export interface CadBimDxfImportOptions {
   simplifyGeometry?: boolean;
   layerRoleOverrides?: Record<string, F213DxfLayerRole>;
   maxBarrierSegments?: number;
+  prioritizeRepresentativeSegments?: boolean;
 }
 
 export interface CadBimDxfImportImpact {
@@ -35,6 +36,7 @@ export interface CadBimDxfImportImpact {
   removedByCleanup: number;
   cappedByLimit: number;
   importLimit: number | null;
+  prioritizedForLightImport: boolean;
   skippedNonBarrierSegments: number;
   ignoredDegenerateSegments: number;
   estimatedBarriers: number;
@@ -187,6 +189,28 @@ function simplifyDxfBarrierSegments(segments: DxfBarrierSegment[], tolerance = 0
   };
 }
 
+function segmentLength(segment: DxfBarrierSegment) {
+  const dx = segment.end.x - segment.start.x;
+  const dy = segment.end.y - segment.start.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function layerPriority(layerName: string) {
+  const layer = layerName.toLowerCase();
+  if (layer.includes('primary') || layer.includes('primaria') || layer.includes('blind') || layer.includes('shield')) return 0;
+  if (layer.includes('muro') || layer.includes('wall') || layer.includes('barrier') || layer.includes('barrera')) return 1;
+  if (layer.includes('concrete') || layer.includes('concreto') || layer.includes('struct') || layer.includes('estructura')) return 2;
+  return 3;
+}
+
+function prioritizeDxfSegmentsForLightImport(segments: DxfBarrierSegment[]) {
+  return [...segments].sort((a, b) => {
+    const priorityDelta = layerPriority(a.layer) - layerPriority(b.layer);
+    if (priorityDelta !== 0) return priorityDelta;
+    return segmentLength(b) - segmentLength(a);
+  });
+}
+
 function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
   const barrierSegments: DxfBarrierSegment[] = [];
   const warnings: string[] = [];
@@ -230,7 +254,9 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
   const maxBarrierSegments = Number.isFinite(options.maxBarrierSegments) && Number(options.maxBarrierSegments) > 0
     ? Math.floor(Number(options.maxBarrierSegments))
     : null;
-  const limitedSegments = maxBarrierSegments === null ? simplification.segments : simplification.segments.slice(0, maxBarrierSegments);
+  const prioritizedForLightImport = Boolean(maxBarrierSegments && options.prioritizeRepresentativeSegments !== false);
+  const candidateSegments = prioritizedForLightImport ? prioritizeDxfSegmentsForLightImport(simplification.segments) : simplification.segments;
+  const limitedSegments = maxBarrierSegments === null ? candidateSegments : candidateSegments.slice(0, maxBarrierSegments);
   const cappedByLimit = Math.max(simplification.segments.length - limitedSegments.length, 0);
   const barriers = limitedSegments.map((segment, index) => makeBarrier(
     `dxf-barrier-${index + 1}`,
@@ -244,7 +270,7 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
   if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
   if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
   if (simplification.removed > 0) warnings.push(`Limpieza geometrica: ${simplification.removed} segmento(s) duplicados o colineales fueron consolidados antes de aplicar al canvas.`);
-  if (cappedByLimit > 0) warnings.push(`Importacion ligera: ${cappedByLimit} segmento(s) quedaron fuera por limite de seguridad (${maxBarrierSegments}).`);
+  if (cappedByLimit > 0) warnings.push(`Importacion ligera priorizada: ${cappedByLimit} segmento(s) quedaron fuera por limite de seguridad (${maxBarrierSegments}).`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return {
     barriers,
@@ -258,6 +284,7 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
       removedByCleanup: simplification.removed,
       cappedByLimit,
       importLimit: maxBarrierSegments,
+      prioritizedForLightImport,
       skippedNonBarrierSegments,
       ignoredDegenerateSegments: ignored,
       estimatedBarriers: barriers.length,
