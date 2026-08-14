@@ -3,7 +3,7 @@
 // Soporta: LINE, CIRCLE, ARC, LWPOLYLINE, TEXT/MTEXT
 // Capas interactivas (mostrar/ocultar), zoom, pan
 // =============================================================================
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack, Search, CheckSquare, Square, Save, FolderOpen } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
-import { importDXFToFloorPlan, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
+import { importDXFToFloorPlan, previewDXFImportImpact, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
 import { buildF213DxfLayerMappingQa, inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
@@ -101,6 +101,20 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     (count, layer) => count + layer.entities.filter((entity) => entity.type === 'LINE' || entity.type === 'LWPOLYLINE').length,
     0,
   );
+  const importImpact = useMemo(() => {
+    if (!parsed) return null;
+    const visibleBarrierLayerNames = Array.from(parsed.layers.values())
+      .filter((layer) => layer.visible && roleForLayer(layer.name) === 'barrier')
+      .map((layer) => layer.name);
+    const allBarrierLayerNames = Array.from(parsed.layers.values())
+      .filter((layer) => roleForLayer(layer.name) === 'barrier')
+      .map((layer) => layer.name);
+    return previewDXFImportImpact(parsed, {
+      barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
+      simplifyGeometry,
+      layerRoleOverrides,
+    });
+  }, [parsed, simplifyGeometry, layerRoleOverrides]);
 
   // Handle file upload
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -473,6 +487,35 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                     </span>
                   </Label>
                 </div>
+                {importImpact && (
+                  <div
+                    data-testid="dxf-import-impact-preview"
+                    className="mt-2 rounded border border-emerald-100 bg-emerald-50 px-2 py-2 text-[10px] text-emerald-950"
+                    title="Vista previa conservadora del impacto antes de escribir barreras al canvas"
+                  >
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="font-semibold">Impacto al aplicar</span>
+                      <Badge variant="outline" className="h-4 bg-white text-[9px]">
+                        {importImpact.estimatedBarriers} barreras
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                      <span className="text-emerald-700">Segmentos crudos</span>
+                      <span className="text-right font-medium">{importImpact.rawBarrierSegments}</span>
+                      <span className="text-emerald-700">Tras limpieza</span>
+                      <span className="text-right font-medium">{importImpact.simplifiedBarrierSegments}</span>
+                      <span className="text-emerald-700">Consolidados</span>
+                      <span className="text-right font-medium">{importImpact.removedByCleanup}</span>
+                      <span className="text-emerald-700">Capas usadas</span>
+                      <span className="text-right font-medium">{importImpact.selectedBarrierLayers}/{importImpact.barrierLayers}</span>
+                    </div>
+                    {(importImpact.skippedNonBarrierSegments > 0 || importImpact.ignoredDegenerateSegments > 0) && (
+                      <div className="mt-1 border-t border-emerald-200 pt-1 text-[9px] text-emerald-800">
+                        Referencia omitida: {importImpact.skippedNonBarrierSegments}. Degenerados: {importImpact.ignoredDegenerateSegments}.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-0.5">

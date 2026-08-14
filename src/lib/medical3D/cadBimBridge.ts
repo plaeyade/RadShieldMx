@@ -25,6 +25,19 @@ export interface CadBimDxfImportOptions {
   layerRoleOverrides?: Record<string, F213DxfLayerRole>;
 }
 
+export interface CadBimDxfImportImpact {
+  sourceEntities: number;
+  barrierLayers: number;
+  selectedBarrierLayers: number;
+  rawBarrierSegments: number;
+  simplifiedBarrierSegments: number;
+  removedByCleanup: number;
+  skippedNonBarrierSegments: number;
+  ignoredDegenerateSegments: number;
+  estimatedBarriers: number;
+  warnings: string[];
+}
+
 const DEFAULT_SCALE_M_PER_UNIT = 0.001;
 
 function unitToMeters(unit: string) {
@@ -171,7 +184,7 @@ function simplifyDxfBarrierSegments(segments: DxfBarrierSegment[], tolerance = 0
   };
 }
 
-function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
+function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
   const barrierSegments: DxfBarrierSegment[] = [];
   const warnings: string[] = [];
   let ignored = 0;
@@ -224,7 +237,31 @@ function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions =
   if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
   if (simplification.removed > 0) warnings.push(`Limpieza geometrica: ${simplification.removed} segmento(s) duplicados o colineales fueron consolidados antes de aplicar al canvas.`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
+  return {
+    barriers,
+    warnings,
+    impact: {
+      sourceEntities: parsed.entities.length,
+      barrierLayers: Array.from(parsed.layers.values()).filter((layer) => roleForLayer(layer.name) === 'barrier').length,
+      selectedBarrierLayers: barrierLayerNames.size,
+      rawBarrierSegments: barrierSegments.length,
+      simplifiedBarrierSegments: simplification.segments.length,
+      removedByCleanup: simplification.removed,
+      skippedNonBarrierSegments,
+      ignoredDegenerateSegments: ignored,
+      estimatedBarriers: barriers.length,
+      warnings,
+    } satisfies CadBimDxfImportImpact,
+  };
+}
+
+function collectDxfBarriers(parsed: DXFParsed, options: CadBimDxfImportOptions = {}) {
+  const { barriers, warnings } = analyzeDxfBarrierSegments(parsed, options);
   return { barriers, warnings };
+}
+
+export function previewDXFImportImpact(parsed: DXFParsed, options: CadBimDxfImportOptions = {}): CadBimDxfImportImpact {
+  return analyzeDxfBarrierSegments(parsed, options).impact;
 }
 
 export function importDXFToFloorPlan(content: string, fileName = 'import.dxf', options: CadBimDxfImportOptions = {}): CadBimBridgeResult {

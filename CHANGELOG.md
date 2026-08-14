@@ -13,6 +13,7 @@
 - Agregada opcion `Limpiar geometria al aplicar`: consolida segmentos DXF duplicados o colineales por capa antes de crear barreras.
 - Agregado remapeo manual por capa (`Muro`, `Equipo`, `Zona`, `Cota`, `Ref`, `Texto`, `Ignorar`) para que planos con nomenclatura CAD irregular puedan importarse de forma controlada.
 - Los roles de capas DXF pueden guardarse/cargarse como preset local por nombre de archivo, reutilizando mapeos revisados en planos reales sin reconfigurar cada carga.
+- El visor DXF muestra una vista previa de impacto antes de aplicar: segmentos crudos, segmentos tras limpieza, consolidados, capas usadas y barreras estimadas.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
 - Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 

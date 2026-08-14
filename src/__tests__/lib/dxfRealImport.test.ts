@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseDXF } from '@/lib/dxfParser';
-import { importDXFToFloorPlan } from '@/lib/medical3D/cadBimBridge';
+import { importDXFToFloorPlan, previewDXFImportImpact } from '@/lib/medical3D/cadBimBridge';
 
 const sample = [
   '0', 'SECTION',
@@ -131,6 +131,17 @@ describe('DXF real import hardening', () => {
     expect(simplified.summary.mappedBarriers).toBe(1);
     expect(simplified.floorPlan.barriers[0]).toMatchObject({ x1: 0, y1: 0, x2: 10, y2: 0 });
     expect(simplified.summary.warnings.join(' ')).toContain('Limpieza geometrica');
+  });
+
+  it('previews DXF import impact before writing barriers to the canvas', () => {
+    const parsed = parseDXF(splitWallSample);
+    const impact = previewDXFImportImpact(parsed, { simplifyGeometry: true });
+
+    expect(impact.sourceEntities).toBe(3);
+    expect(impact.rawBarrierSegments).toBe(3);
+    expect(impact.simplifiedBarrierSegments).toBe(1);
+    expect(impact.removedByCleanup).toBe(2);
+    expect(impact.estimatedBarriers).toBe(1);
   });
 
   it('can import manually remapped layers as barriers', () => {
