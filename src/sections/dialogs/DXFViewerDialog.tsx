@@ -263,7 +263,13 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   };
 
   const dispatchBridgeToCanvas = (bridge: CadBimBridgeResult, mode: DxfImportMode, preliminary = false) => {
-    window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
+    window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', {
+      detail: {
+        ...bridge,
+        importMode: mode,
+        preliminary,
+      },
+    }));
     const label = mode === 'light' ? 'modo ligero' : 'modo completo';
     toast.success(`${preliminary ? 'Vista preliminar DXF aplicada' : 'Plano DXF aplicado'} al canvas: ${bridge.summary.mappedBarriers} barreras (${label})`);
     onOpenChange(false);

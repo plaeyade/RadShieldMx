@@ -1107,15 +1107,32 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
 
   useEffect(() => {
     const handleDxfImported = (event: Event) => {
-      const customEvent = event as CustomEvent<{ floorPlan?: FloorPlan; summary?: { mappedBarriers?: number; warnings?: string[]; fileName?: string } }>;
+      const customEvent = event as CustomEvent<{
+        floorPlan?: FloorPlan;
+        summary?: { mappedBarriers?: number; warnings?: string[]; fileName?: string };
+        importMode?: 'light' | 'full';
+        preliminary?: boolean;
+      }>;
       const nextPlan = customEvent.detail?.floorPlan;
       if (!nextPlan) return;
-      resetFloorPlan(nextPlan);
-      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
-      setShowWelcomeScreen(false);
       const mapped = customEvent.detail?.summary?.mappedBarriers ?? nextPlan.barriers.length;
       const warnings = customEvent.detail?.summary?.warnings ?? [];
-      toast.success(`DXF aplicado al canvas: ${mapped} barreras detectadas`);
+      const preliminary = Boolean(customEvent.detail?.preliminary);
+      resetFloorPlan({
+        ...nextPlan,
+        importMetadata: {
+          source: 'dxf',
+          fileName: customEvent.detail?.summary?.fileName ?? nextPlan.name,
+          mode: preliminary ? 'preview' : customEvent.detail?.importMode,
+          status: preliminary ? 'preliminary' : 'final',
+          mappedBarriers: mapped,
+          importedAt: new Date().toISOString(),
+          warnings,
+        },
+      });
+      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
+      setShowWelcomeScreen(false);
+      toast.success(`${preliminary ? 'DXF preliminar' : 'DXF'} aplicado al canvas: ${mapped} barreras detectadas`);
       warnings.forEach((warning) => toast.warning(warning));
     };
     window.addEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
@@ -2209,7 +2226,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       </div>
       {!showWelcomeScreen && (
         <div className="status-bar">
-          <StatusBar projectName={floorPlan.name} lastSaved={lastSaved} isCalculating={calculationStatus==="running"} calculationStatus={calculationStatus} numSources={floorPlan.sources.length} numBarriers={floorPlan.barriers.length} numBarriersCalculated={floorPlan.barriers.filter(b=>b.requiredThickness_mm).length} version="RadShield-MX v127" isDirty={isDirty} userName={user?.name} />
+          <StatusBar projectName={floorPlan.name} lastSaved={lastSaved} isCalculating={calculationStatus==="running"} calculationStatus={calculationStatus} numSources={floorPlan.sources.length} numBarriers={floorPlan.barriers.length} numBarriersCalculated={floorPlan.barriers.filter(b=>b.requiredThickness_mm).length} version="RadShield-MX v127" isDirty={isDirty} userName={user?.name} importStatus={floorPlan.importMetadata?.status} importMode={floorPlan.importMetadata?.mode} />
         </div>
       )}
       {/* Help panel floating button */}

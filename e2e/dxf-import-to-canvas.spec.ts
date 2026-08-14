@@ -59,5 +59,6 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeHidden({ timeout: 10_000 });
     await expect(page.getByRole('textbox').first()).toHaveValue('CAD sample-floorplan.dxf');
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
+    await expect(page.getByText(/DXF preliminar/i)).toBeVisible();
   });
 });

@@ -16,6 +16,7 @@
 - El visor DXF muestra una vista previa de impacto antes de aplicar: segmentos crudos, segmentos tras limpieza, consolidados, capas usadas y barreras estimadas.
 - Agregado modo de importacion `Ligera`/`Completa`: la ruta ligera limita la primera escritura al canvas para proteger rendimiento en DXF grandes y prioriza capas de blindaje/muros con segmentos largos.
 - Agregado boton `Probar ligera` para aplicar rapidamente una vista preliminar priorizada al canvas sin cambiar el modo de importacion completo.
+- El canvas conserva metadata de importacion DXF y muestra `DXF preliminar` en la barra de estado cuando la geometria viene de una prueba ligera.
 - Agregada prueba `src/__tests__/lib/dxfRealImport.test.ts` para polilineas cerradas y filtro conservador de capas.
 - Agregado smoke E2E `npm run test:real-dxf-import` para cargar `plano.dxf`, verificar 2111 barreras y cancelar el apply pesado.
 

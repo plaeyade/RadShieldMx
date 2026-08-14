@@ -492,4 +492,13 @@ export interface FloorPlan {
   occupiedRegions: OccupiedRegion[];
   regions?: OccupiedRegion[];
   criticalPoints?: CriticalPoint[];
+  importMetadata?: {
+    source?: 'dxf' | 'dwg' | 'ifc' | 'step' | 'manual' | 'unknown';
+    fileName?: string;
+    mode?: 'light' | 'full' | 'preview';
+    status?: 'preliminary' | 'final';
+    mappedBarriers?: number;
+    importedAt?: string;
+    warnings?: string[];
+  };
 }

@@ -14,11 +14,14 @@ interface StatusBarProps {
   version: string;
   isDirty: boolean;
   userName?: string | null;
+  importStatus?: 'preliminary' | 'final';
+  importMode?: string;
 }
 
 export default function StatusBar({
   projectName, lastSaved, isCalculating, calculationStatus,
   numSources, numBarriers, numBarriersCalculated, version, isDirty, userName,
+  importStatus, importMode,
 }: StatusBarProps) {
   const { t } = useI18n();
 
@@ -38,6 +41,15 @@ export default function StatusBar({
         <span className="font-semibold text-slate-700 truncate max-w-[200px]">{projectName || 'RadShield-MX'}</span>
         {isDirty && (
           <Badge variant="outline" className="h-3.5 px-1 text-[8px] border-[#f97316] text-[#f97316]">{t('status.modified')}</Badge>
+        )}
+        {importStatus === 'preliminary' && (
+          <Badge
+            variant="outline"
+            className="h-3.5 px-1 text-[8px] border-amber-400 bg-amber-50 text-amber-700"
+            title="Plano importado en modo preliminar; revise capas, escala y geometria antes de firmar memoria analitica."
+          >
+            DXF preliminar{importMode ? `/${importMode}` : ''}
+          </Badge>
         )}
       </div>
 
