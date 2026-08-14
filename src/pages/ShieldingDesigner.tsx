@@ -1129,6 +1129,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
           status: preliminary ? 'preliminary' : 'final',
           mappedBarriers: mapped,
           importedAt: new Date().toISOString(),
+          calculationStatus: 'not-started',
           warnings,
         },
       });
@@ -1142,22 +1143,113 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     return () => window.removeEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
   }, [resetFloorPlan, setCanvasState]);
 
+  const runConfirmedDxfPreliminaryCalculation = useCallback(async (plan: FloorPlan) => {
+    if (plan.barriers.length === 0) {
+      setFloorPlan(prev => ({
+        ...prev,
+        importMetadata: {
+          ...prev.importMetadata,
+          calculationStatus: 'error',
+          calculationMessage: 'No hay barreras DXF disponibles para calcular.',
+        },
+      }));
+      toast.error('DXF confirmado, pero no hay barreras para calcular.');
+      return;
+    }
+
+    if (plan.sources.length === 0) {
+      setFloorPlan(prev => ({
+        ...prev,
+        importMetadata: {
+          ...prev.importMetadata,
+          calculationStatus: 'blocked-no-source',
+          calculationMessage: 'Agregue o confirme una fuente/equipo para ejecutar el calculo preliminar DXF.',
+        },
+      }));
+      toast.warning('DXF confirmado. Falta fuente/equipo para calcular blindaje preliminar.');
+      return;
+    }
+
+    const toastId = toast.loading('Calculando DXF confirmado...', {
+      description: `${plan.barriers.length} barreras importadas x ${plan.sources.length} fuentes`,
+    });
+    setCalculationStatus('running');
+    setFloorPlan(prev => ({
+      ...prev,
+      importMetadata: {
+        ...prev.importMetadata,
+        calculationStatus: 'running',
+        calculationMessage: 'Calculo preliminar DXF en proceso.',
+      },
+    }));
+
+    try {
+      const engine = asyncEngineRef.current;
+      const { results, sampleLines } = await engine.calculate(
+        plan.barriers,
+        plan.sources,
+        plan.scale_m_per_pixel || 0.01,
+        (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }),
+      );
+      setBarrierResults(results as any);
+      setSampleLines(sampleLines as any);
+      setCalculationStatus('success');
+      setFloorPlan(prev => ({
+        ...prev,
+        importMetadata: {
+          ...prev.importMetadata,
+          calculationStatus: 'complete',
+          calculatedAt: new Date().toISOString(),
+          calculatedBarriers: results.length,
+          calculationMessage: `Calculo preliminar DXF completado para ${results.length} barreras.`,
+        },
+      }));
+      toast.dismiss(toastId);
+      toast.success('Calculo preliminar DXF completado', {
+        description: `${results.length} barreras conectadas a Memoria IA/Evidence Pack`,
+      });
+    } catch (err) {
+      setCalculationStatus('error');
+      setFloorPlan(prev => ({
+        ...prev,
+        importMetadata: {
+          ...prev.importMetadata,
+          calculationStatus: 'error',
+          calculationMessage: (err as Error).message,
+        },
+      }));
+      toast.dismiss(toastId);
+      toast.error('Error en calculo preliminar DXF: ' + (err as Error).message);
+      captureException(err as Error, {
+        context: 'DXF confirmed preliminary calculation',
+        barriers: plan.barriers.length,
+        sources: plan.sources.length,
+      });
+    }
+  }, [setFloorPlan]);
+
   const handleConfirmDxfGeometry = useCallback(() => {
     if (floorPlan.importMetadata?.status !== 'preliminary') {
       toast.info('No hay geometria DXF preliminar pendiente de confirmar.');
       return;
     }
 
-    setFloorPlan(prev => ({
-      ...prev,
+    const confirmedAt = new Date().toISOString();
+    const nextPlan: FloorPlan = {
+      ...floorPlan,
       importMetadata: {
-        ...prev.importMetadata,
+        ...floorPlan.importMetadata,
         status: 'final',
-        confirmedAt: new Date().toISOString(),
+        confirmedAt,
+        calculationStatus: 'not-started',
+        calculationMessage: 'DXF confirmado; calculo preliminar pendiente.',
       },
-    }));
+    };
+
+    setFloorPlan(nextPlan);
     toast.success('Geometria DXF confirmada para calculo, memoria y evidencia.');
-  }, [floorPlan.importMetadata?.status, setFloorPlan]);
+    void runConfirmedDxfPreliminaryCalculation(nextPlan);
+  }, [floorPlan, runConfirmedDxfPreliminaryCalculation, setFloorPlan]);
 
   const computeCurrentHeatmap = useCallback(async () => {
     if (floorPlan.sources.length === 0) {

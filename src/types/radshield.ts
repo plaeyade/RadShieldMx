@@ -500,6 +500,10 @@ export interface FloorPlan {
     mappedBarriers?: number;
     importedAt?: string;
     confirmedAt?: string;
+    calculationStatus?: 'not-started' | 'blocked-no-source' | 'running' | 'complete' | 'error';
+    calculatedAt?: string;
+    calculatedBarriers?: number;
+    calculationMessage?: string;
     warnings?: string[];
   };
 }

@@ -11,7 +11,7 @@
     "audit:product-state": "node scripts/audit-current-product-state.mjs",
     "test:canvas-functional": "playwright test --project=chromium --grep \"Product canvas functional smoke\"",
     "test:file-menu": "playwright test --project=chromium --grep \"F404 Archivo menu\"",
-    "test:dxf-import": "playwright test --project=chromium --grep \"DXF import to canvas\"",
+    "test:dxf-import": "node scripts/run-dxf-import-e2e.mjs",
     "test:dwg-safe-import": "playwright test --project=chromium --grep \"DWG safe import boundary\"",
     "test:real-dxf-import": "playwright test e2e/real-dxf-heavy-import.spec.ts --project=chromium",
     "prepare:dwg-local-conversion": "node scripts/dwg-local-conversion-probe.mjs",

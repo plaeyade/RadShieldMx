@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const useManagedWebServer = process.env.PLAYWRIGHT_NO_WEBSERVER !== '1';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -16,9 +18,11 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
   ],
-  webServer: {
-    command: 'node ./node_modules/vite/bin/vite.js preview --configLoader runner --host 127.0.0.1 --port 4174',
-    port: 4174,
-    reuseExistingServer: !process.env.CI,
-  },
+  ...(useManagedWebServer ? {
+    webServer: {
+      command: 'node ./node_modules/vite/bin/vite.js preview --configLoader runner --host 127.0.0.1 --port 4174',
+      port: 4174,
+      reuseExistingServer: !process.env.CI,
+    },
+  } : {}),
 });

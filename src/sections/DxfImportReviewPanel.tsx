@@ -36,6 +36,16 @@ export default function DxfImportReviewPanel({
   const isPreliminary = metadata.status === 'preliminary';
   const hasScale = Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0;
   const readyForMemory = metadata.status === 'final' && floorPlan.barriers.length > 0 && hasScale;
+  const calculationStatus = metadata.calculationStatus ?? 'not-started';
+  const calculationLabel = calculationStatus === 'complete'
+    ? `Calculado (${metadata.calculatedBarriers ?? floorPlan.barriers.length} barreras)`
+    : calculationStatus === 'running'
+      ? 'Calculando'
+      : calculationStatus === 'blocked-no-source'
+        ? 'Pendiente de fuente/equipo'
+        : calculationStatus === 'error'
+          ? 'Error de calculo'
+          : 'Pendiente de calculo';
 
   const copyEvidenceSummary = async () => {
     if (!dxfEvidence) return;
@@ -91,6 +101,26 @@ export default function DxfImportReviewPanel({
           <Badge variant="outline">Modo {metadata.mode ?? 'DXF'}</Badge>
           <Badge variant="outline">{floorPlan.barriers.length} barreras</Badge>
           <Badge variant="outline">{floorPlan.sources.length} fuentes</Badge>
+        </div>
+        <div
+          data-testid="dxf-review-calculation-status"
+          className={`rounded border p-2 ${
+            calculationStatus === 'complete'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : calculationStatus === 'blocked-no-source'
+                ? 'border-amber-200 bg-amber-50 text-amber-800'
+                : calculationStatus === 'error'
+                  ? 'border-red-200 bg-red-50 text-red-800'
+                  : 'border-slate-200 bg-slate-50 text-slate-700'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold">Calculo preliminar DXF</span>
+            <span>{calculationLabel}</span>
+          </div>
+          <div className="mt-1 text-[10px] leading-snug">
+            {metadata.calculationMessage ?? 'Confirme geometria y ejecute calculo cuando exista una fuente radiologica.'}
+          </div>
         </div>
 
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
