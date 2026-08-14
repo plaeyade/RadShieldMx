@@ -56,8 +56,35 @@ export function createFloorPlanEvidenceSources(
   const f125Gate = buildF125CalculationEvidenceGate(floorPlan, barrierResults, sampleLines);
   const f409OutputIntegration = buildF409OutputSurfaceIntegration(floorPlan, barrierResults, sampleLines);
   const generatedAt = new Date().toISOString();
+  const dxfImportEvidence = floorPlan.importMetadata
+    ? createEvidenceSource({
+      id: 'ev-dxf-import-review',
+      title: `Revision de importacion CAD/DXF: ${floorPlan.importMetadata.fileName ?? floorPlan.name}`,
+      url: `radshield://cad-import/${floorPlan.id}`,
+      sourceType: 'technicalReport',
+      capturedAt: generatedAt,
+      claim: 'La geometria importada desde CAD/DXF conserva metadata de origen, modo, estado de revision y conteo de barreras para trazabilidad de memoria analitica.',
+      excerpt: [
+        `Archivo: ${floorPlan.importMetadata.fileName ?? floorPlan.name}`,
+        `modo: ${floorPlan.importMetadata.mode ?? 'sin modo'}`,
+        `estado: ${floorPlan.importMetadata.status ?? 'sin estado'}`,
+        `barreras mapeadas: ${floorPlan.importMetadata.mappedBarriers ?? floorPlan.barriers.length}`,
+        `escala: ${floorPlan.scale_m_per_pixel} m/px`,
+        `warnings: ${(floorPlan.importMetadata.warnings ?? []).length}`,
+      ].join('; '),
+      notes: floorPlan.importMetadata.status === 'final'
+        ? 'El operador confirmo la geometria DXF para calculo/memoria. Aun debe verificarse contra planos firmados, colindancias y escala final.'
+        : 'La geometria DXF sigue preliminar. No debe usarse como base final de memoria hasta confirmar escala, capas, continuidad de blindaje y barreras.',
+      confidence: floorPlan.importMetadata.status === 'final' && snapshot.barriers > 0 ? 'high' : 'medium',
+      tags: ['DXF', 'CAD', 'floorplan', 'memoria', 'evidencia', floorPlan.importMetadata.status ?? 'preliminary'],
+      documentId: `dxf-import-${floorPlan.id}`,
+      sectionRef: 'Revision CAD/DXF y gate de geometria',
+      verificationStatus: floorPlan.importMetadata.status === 'final' ? 'reviewed' : 'draft',
+    })
+    : null;
 
   return [
+    ...(dxfImportEvidence ? [dxfImportEvidence] : []),
     createEvidenceSource({
       id: 'ev-f75-floorplan',
       title: `FloorPlan RadShield-MX: ${floorPlan.name}`,
