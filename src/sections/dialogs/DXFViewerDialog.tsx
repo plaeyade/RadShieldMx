@@ -19,6 +19,7 @@ import { importDXFToFloorPlan, previewDXFImportImpact, type CadBimBridgeResult, 
 import { buildF213DxfLayerMappingQa, inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
+type DxfImportMode = 'light' | 'full';
 
 const LAYER_COLORS: Record<number, string> = {
   1: 'bg-red-500', 2: 'bg-orange-500', 3: 'bg-yellow-500', 4: 'bg-green-500',
@@ -84,7 +85,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   const [lastContent, setLastContent] = useState('');
   const [layerSearch, setLayerSearch] = useState('');
   const [simplifyGeometry, setSimplifyGeometry] = useState(true);
-  const [importMode, setImportMode] = useState<'light' | 'full'>('light');
+  const [importMode, setImportMode] = useState<DxfImportMode>('light');
   const [layerRoleOverrides, setLayerRoleOverrides] = useState<Record<string, F213DxfLayerRole>>({});
   const [hasSavedLayerRolePreset, setHasSavedLayerRolePreset] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -242,26 +243,43 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
   // Zoom handlers
   const zoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
   const zoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
-  const applyToCanvas = () => {
+  const buildBridgeForCanvas = (mode: DxfImportMode) => {
     if (!lastContent || !fileName || !lastBridge || !parsed) {
-      toast.error('Importe primero un archivo DXF');
-      return;
+      throw new Error('Importe primero un archivo DXF');
     }
+    const visibleBarrierLayerNames = Array.from(parsed.layers.values())
+      .filter((layer) => layer.visible && roleForLayer(layer.name) === 'barrier')
+      .map((layer) => layer.name);
+    const allBarrierLayerNames = Array.from(parsed.layers.values())
+      .filter((layer) => roleForLayer(layer.name) === 'barrier')
+      .map((layer) => layer.name);
+    return importDXFToFloorPlan(lastContent, fileName, {
+      barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
+      simplifyGeometry,
+      layerRoleOverrides,
+      maxBarrierSegments: mode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
+      prioritizeRepresentativeSegments: mode === 'light',
+    });
+  };
+
+  const dispatchBridgeToCanvas = (bridge: CadBimBridgeResult, mode: DxfImportMode, preliminary = false) => {
+    window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
+    const label = mode === 'light' ? 'modo ligero' : 'modo completo';
+    toast.success(`${preliminary ? 'Vista preliminar DXF aplicada' : 'Plano DXF aplicado'} al canvas: ${bridge.summary.mappedBarriers} barreras (${label})`);
+    onOpenChange(false);
+  };
+
+  const applyLightPreviewToCanvas = () => {
     try {
-      const visibleBarrierLayerNames = Array.from(parsed.layers.values())
-        .filter((layer) => layer.visible && roleForLayer(layer.name) === 'barrier')
-        .map((layer) => layer.name);
-      const allBarrierLayerNames = Array.from(parsed.layers.values())
-        .filter((layer) => roleForLayer(layer.name) === 'barrier')
-        .map((layer) => layer.name);
-      const bridge =
-        importDXFToFloorPlan(lastContent, fileName, {
-          barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
-          simplifyGeometry,
-          layerRoleOverrides,
-          maxBarrierSegments: importMode === 'light' ? LIGHT_DXF_BARRIER_LIMIT : undefined,
-          prioritizeRepresentativeSegments: importMode === 'light',
-        });
+      dispatchBridgeToCanvas(buildBridgeForCanvas('light'), 'light', true);
+    } catch (err: any) {
+      toast.error('No se pudo aplicar la vista ligera: ' + err.message);
+    }
+  };
+
+  const applyToCanvas = () => {
+    try {
+      const bridge = buildBridgeForCanvas(importMode);
       if (
         bridge.summary.mappedBarriers > LARGE_DXF_BARRIER_WARNING &&
         !window.confirm(`El DXF contiene ${bridge.summary.mappedBarriers} segmentos de barrera. Aplicarlo puede crear un floorplan pesado. Desea continuar?`)
@@ -269,9 +287,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
         toast.info('Aplicacion del DXF cancelada para revisar capas primero.');
         return;
       }
-      window.dispatchEvent(new CustomEvent('radshield:dxf-imported-floorplan', { detail: bridge }));
-      toast.success(`Plano DXF aplicado al canvas: ${bridge.summary.mappedBarriers} barreras (${importMode === 'light' ? 'modo ligero' : 'modo completo'})`);
-      onOpenChange(false);
+      dispatchBridgeToCanvas(bridge, importMode);
     } catch (err: any) {
       toast.error('No se pudo aplicar el DXF al canvas: ' + err.message);
     }
@@ -305,6 +321,17 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
               />
               <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs" title="Importar archivo DXF exportado desde AutoCAD/Revit/ODA para revisar capas y aplicar barreras al canvas">
                 <Upload className="w-3 h-3 mr-1" /> Importar DXF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={applyLightPreviewToCanvas}
+                disabled={!parsed}
+                data-testid="dxf-apply-light-preview"
+                className="text-xs border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                title={`Aplicar rapidamente una vista preliminar de maximo ${LIGHT_DXF_BARRIER_LIMIT} barreras priorizadas para revisar el plano en el canvas`}
+              >
+                <SendToBack className="w-3 h-3 mr-1" /> Probar ligera
               </Button>
               <Button
                 variant="default"

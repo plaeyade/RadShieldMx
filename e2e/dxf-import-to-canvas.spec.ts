@@ -40,4 +40,24 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
     await expect(page.getByText(/DXF 1 \(WALL_PRIMARY_CONCRETE_300MM\)/i)).toBeVisible();
   });
+
+  test('Archivo > Importar DXF can apply a lightweight preview to the canvas', async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await bootWorkspace(page);
+
+    await openFileMenu(page);
+    await page.getByTestId('f404-file-import-dxf').click();
+    await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeVisible({ timeout: 10_000 });
+
+    const fixturePath = path.resolve('e2e/fixtures/sample-floorplan.dxf');
+    await page.getByTestId('dxf-file-input').setInputFiles(fixturePath);
+
+    await expect(page.getByTestId('dxf-import-impact-preview')).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId('dxf-apply-light-preview').click();
+
+    await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeHidden({ timeout: 10_000 });
+    await expect(page.getByRole('textbox').first()).toHaveValue('CAD sample-floorplan.dxf');
+    await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('4');
+  });
 });
