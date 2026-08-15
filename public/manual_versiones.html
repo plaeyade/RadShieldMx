@@ -31,6 +31,16 @@
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0.1 Beta Congelada Y DB Tecnica De Materiales</h2>
+    <table>
+      <thead><tr><th>Elemento</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline beta</td><td>Tag <code>beta-manual-accepted-20260815</code> y respaldos ZIP de codigo/dist.</td><td>Permite volver a la beta aceptada si una mejora futura falla.</td><td><code>git tag --list beta-manual-accepted-20260815</code></td></tr>
+        <tr><td>DB tecnica materiales</td><td>Registro tecnico con densidad, TVL/HVL, costo, masa kg/m2, carga kPa, evidencia y advertencias.</td><td>Permite comparar plomo, concreto, acero, TM-NIPOL, NELCO, VERITAS y borados por energia/modalidad.</td><td><code>vitest materialTechnicalRegistry</code></td></tr>
+        <tr><td>Pruebas</td><td>QA unitario para deduplicacion, TX/NM/DX/CY y TM-NIPOL.</td><td>Da base para pruebas reales sin requerir mas memorias analiticas por ahora.</td><td><code>src/__tests__/lib/materialTechnicalRegistry.test.ts</code></td></tr>
+      </tbody>
+    </table>
+
     <h2>0. DXF Real Con Fuentes Clinicas</h2>
     <table>
       <thead><tr><th>Elemento</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>

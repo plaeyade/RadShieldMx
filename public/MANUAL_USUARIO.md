@@ -1,5 +1,32 @@
 # RadShield-MX v24 — Manual de Usuario
 
+## Addendum vigente: beta congelada y materiales tecnicos
+
+Estado base: beta aceptada manualmente y congelada en `beta-manual-accepted-20260815`.
+
+### Como avanzar sin mas memorias
+
+La app puede seguir mejorando la base tecnica de materiales aunque no se carguen nuevas memorias analiticas. El flujo recomendado es:
+
+1. Abrir el canvas o importar DXF.
+2. Colocar equipo/fuente: LINAC, Gamma Knife, PET/NM, ciclotron o RX.
+3. Seleccionar material desde la toolbox de materiales.
+4. Comparar por energia: espesor TVL, masa kg/m2, costo aproximado, carga estructural kPa y advertencias.
+5. Enviar seleccion a Memoria IA/Evidence Pack solo cuando tenga fuente, pagina/hash o estado de revision suficiente.
+
+### Que valida la DB tecnica de materiales
+
+- Codigo unico de material.
+- Densidad en g/cm3 y kg/m3.
+- TVL/HVL por energia cuando existe.
+- Masa por metro cuadrado para cada TVL.
+- Costo por metro cuadrado usando costo por m3 o costo por kg.
+- Carga estructural equivalente en kPa.
+- Estado de evidencia: canonico, certificado por proveedor/laboratorio, derivado o pendiente de fuente.
+- Advertencias: TVL no versionado, material vendor sin aprobacion, neutron requiere revision especifica, datos faltantes.
+
+Los materiales comerciales como TM-NIPOL, NELCO o VERITAS pueden compararse para diseno preliminar, costo, peso y obra. Para memoria final deben conservar evidencia con fuente, pagina, hash documental, revision del fisico medico/RSO y aprobacion del proyecto.
+
 ## Addendum vigente: flujo DXF guiado
 
 1. Abra `Archivo > Importar DXF`.

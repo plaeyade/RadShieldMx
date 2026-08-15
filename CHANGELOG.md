@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# Beta congelada + DB tecnica de materiales (2026-08-15)
+
+- Congelada la beta aceptada manualmente en tag `beta-manual-accepted-20260815`.
+- Respaldos generados en `C:/Users/carlo/Documents/Codex/backups`: codigo fuente beta y `dist` beta.
+- Agregado registro tecnico `materialTechnicalRegistry`: consolida codigo, densidad, TVL/HVL, costo, masa kg/m2, carga kPa, estado de evidencia, fuentes y advertencias por material.
+- Agregado comparador por energia para TX/NM/DX/CY; permite revisar espesor, peso, costo y carga estructural antes de memoria analitica.
+- Agregadas pruebas unitarias para deduplicacion, TM-NIPOL, plomo/concreto/acero y filtros por modalidad.
+
 # DXF real ZUMAYA clinical source workflow (2026-08-14) - cinco pasos completos
 
 - El panel `Revision DXF` agrega accion `Fuentes` para colocar cuatro fuentes clinicas preliminares sobre el plano importado: LINAC Elekta Versa HD 15 MV, Gamma Knife Esprit Co-60, ciclotron IBA KIUBE 18 MeV y PET F-18 FDG.
