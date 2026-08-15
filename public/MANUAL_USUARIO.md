@@ -6,10 +6,11 @@
 2. Cargue el DXF. Si el origen es DWG, conviertalo primero a DXF/SVG con un proveedor externo autorizado.
 3. Clasifique capas como barreras, equipos, zonas, cotas, referencias o revision.
 4. Aplique vista ligera para inspeccion inicial o vista completa para geometria revisada.
-5. En `Revision DXF`, revise escala, continuidad de muros, advertencias y la evidencia `ev-dxf-import-review`.
-6. Confirme geometria antes de calcular. La accion `Calcular` queda bloqueada mientras el DXF sea preliminar.
-7. Si la barra inferior muestra `DXF sin fuente`, agregue o confirme equipo/fuente radiologica.
-8. Ejecute calculo y genere `Memoria IA`, PDF o `Evidence Pack`.
+5. En `Revision DXF`, use `Fuentes` cuando quiera colocar el set clinico preliminar: LINAC Elekta Versa HD 15 MV, Gamma Knife Esprit Co-60, ciclotron IBA KIUBE 18 MeV y PET F-18 FDG.
+6. Revise escala, continuidad de muros, advertencias, fuentes y la evidencia `ev-dxf-import-review`.
+7. Confirme geometria antes de calcular. La accion `Calcular` queda bloqueada mientras el DXF sea preliminar.
+8. Si la barra inferior muestra `DXF sin fuente`, agregue o confirme equipo/fuente radiologica.
+9. Ejecute `Calcular` desde `Revision DXF` para generar resultados preliminares trazables y abrir `Memoria IA` o `Evidence Pack`.
 
 La evidencia `ev-dxf-import-review` conserva estado draft/reviewed, hash y notas para trazabilidad documental.
 

@@ -128,7 +128,7 @@ export default function StatusBar({
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-1">
           <GitBranch className="w-2.5 h-2.5 text-[#f97316]" />
-          {t('status.sources')}: <strong className="text-slate-700">{numSources}</strong>
+          {t('status.sources')}: <strong data-testid="statusbar-source-count" className="text-slate-700">{numSources}</strong>
         </span>
         <span className="flex items-center gap-1">
           <Shield className="w-2.5 h-2.5 text-[#f97316]" />

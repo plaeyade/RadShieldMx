@@ -31,6 +31,17 @@
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. DXF Real Con Fuentes Clinicas</h2>
+    <table>
+      <thead><tr><th>Elemento</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>
+      <tbody>
+        <tr><td>Revision DXF</td><td>Accion <strong>Fuentes</strong> para colocar LINAC 15 MV, Gamma Knife, ciclotron 18 MeV y PET F-18.</td><td>El plano real puede avanzar de geometria a calculo preliminar sin crear fuentes manualmente.</td><td><code>npm run test:real-dxf-import</code></td></tr>
+        <tr><td>Stepper</td><td>Flujo de cinco pasos: cargar, mapear, fuentes, confirmar y calcular.</td><td>Ordena el uso real para memoria analitica y Evidence Pack.</td><td>Playwright sobre <code>plano.dxf</code>.</td></tr>
+        <tr><td>Memoria/Evidencia</td><td>El calculo DXF confirmado queda ligado a fuentes, resultados, hash y estado <code>reviewed</code>.</td><td>Prepara PDF/Evidence Pack sin ocultar que sigue siendo preliminar hasta revision profesional.</td><td>Memoria IA + Evidence Pack smoke.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> el flujo DXF queda apto para prueba real de usuario con fuentes clinicas preliminares y trazabilidad documental.</p>
+
     <h2>0. DXF Real ZUMAYA Validado</h2>
     <table>
       <thead><tr><th>Elemento</th><th>Resultado</th><th>Impacto</th><th>Comando</th></tr></thead>

@@ -48,8 +48,27 @@ test.describe('Real DXF heavy import QA - real-dxf-heavy-import', () => {
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('500');
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
     await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Calcular/);
-    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Confirme geometria/i);
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Coloque o confirme fuentes/i);
     await expect(page.getByTestId('dxf-review-calculate')).toBeDisabled();
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/ev-dxf-import-review/);
+
+    await page.getByTestId('dxf-review-place-clinical-sources').click();
+    await expect(page.getByTestId('statusbar-source-count')).toHaveText('4');
+    await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Fuentes/);
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Confirme geometria/i);
+
+    await page.getByTestId('dxf-review-confirm').click();
+    await expect(page.getByText(/DXF confirmado/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('dxf-review-calculation-status')).toContainText(/Calculado|Calculando/, { timeout: 10_000 });
+    await expect(page.getByTestId('dxf-review-calculation-status')).toContainText(/Calculado/, { timeout: 90_000 });
+
+    await page.getByTestId('dxf-review-memoria').click();
+    await expect(page.getByTestId('memoria-evidence-snapshot')).toContainText(/Fuentes/);
+    await expect(page.getByTestId('memoria-dxf-evidence-source')).toContainText(/reviewed|revis/i);
+    await page.keyboard.press('Escape');
+
+    await page.getByTestId('dxf-review-evidence').click();
+    await expect(page.getByTestId('evidence-pack-dxf-import-source')).toContainText(/reviewed|revis/i);
+    await expect(page.getByTestId('evidence-pack-calculation-snapshot')).toContainText(/Fuentes: 4/);
   });
 });

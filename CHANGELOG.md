@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# DXF real ZUMAYA clinical source workflow (2026-08-14) - cinco pasos completos
+
+- El panel `Revision DXF` agrega accion `Fuentes` para colocar cuatro fuentes clinicas preliminares sobre el plano importado: LINAC Elekta Versa HD 15 MV, Gamma Knife Esprit Co-60, ciclotron IBA KIUBE 18 MeV y PET F-18 FDG.
+- Las fuentes se ubican dentro de los limites reales de las barreras DXF, conservan modalidad, workload, uso, altura de isocentro, huella de equipo y variante de fabricante.
+- El stepper DXF queda como flujo operativo de cinco pasos: cargar, mapear, colocar fuentes, confirmar y calcular.
+- `Calcular` desde `Revision DXF` ejecuta el calculo preliminar DXF trazable y alimenta Memoria IA/Evidence Pack con el mismo estado del canvas.
+- `npm run test:real-dxf-import` ahora cubre el flujo real completo con `plano.dxf`: importacion ligera, cuatro fuentes, confirmacion, calculo, Memoria IA y Evidence Pack.
+
 # DXF real ZUMAYA validated gate (2026-08-14) - paso 5
 
 - `C:/Users/carlo/Desktop/ZUMAYA/plano.dxf` queda cubierto por `npm run test:real-dxf-import`.

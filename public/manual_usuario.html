@@ -111,13 +111,15 @@
       <li><strong>Cargar DXF.</strong> Abra <code>Archivo &gt; Importar DXF</code> y seleccione un archivo DXF. Si el archivo es DWG, conviertalo primero a DXF mediante proveedor externo o flujo CAD autorizado.</li>
       <li><strong>Mapear capas.</strong> En el visor DXF clasifique capas como muros/barreras, equipos, zonas, cotas, referencias o revision. Use buscador y acciones rapidas cuando el plano tenga muchas capas.</li>
       <li><strong>Aplicar vista ligera o completa.</strong> Use vista ligera para inspeccion inicial de planos grandes; use vista completa cuando la geometria y el rendimiento sean aceptables.</li>
-      <li><strong>Confirmar geometria.</strong> En el panel <strong>Revision DXF</strong> revise escala, barreras, fuentes, warnings y evidencia <code>ev-dxf-import-review</code>. Presione <strong>Confirmar</strong> solo despues de validar el plano visualmente.</li>
-      <li><strong>Calcular y documentar.</strong> Si falta fuente/equipo, la barra inferior mostrara <strong>DXF sin fuente</strong>. Al agregar fuente radiologica, ejecute <strong>Calcular</strong> y despues abra <strong>Memoria IA</strong> o <strong>Evidence Pack</strong>.</li>
+      <li><strong>Colocar fuentes clinicas.</strong> En el panel <strong>Revision DXF</strong> use <strong>Fuentes</strong> para sembrar el set preliminar: LINAC Elekta Versa HD 15 MV, Gamma Knife Esprit Co-60, ciclotron IBA KIUBE 18 MeV y PET F-18 FDG. Ajuste posiciones, cargas y proveedor antes de firma.</li>
+      <li><strong>Confirmar geometria.</strong> Revise escala, barreras, fuentes, warnings y evidencia <code>ev-dxf-import-review</code>. Presione <strong>Confirmar</strong> solo despues de validar el plano visualmente.</li>
+      <li><strong>Calcular y documentar.</strong> Si falta fuente/equipo, la barra inferior mostrara <strong>DXF sin fuente</strong>. Al agregar fuente radiologica, ejecute <strong>Calcular</strong> desde <strong>Revision DXF</strong> y despues abra <strong>Memoria IA</strong> o <strong>Evidence Pack</strong>.</li>
     </ol>
     <table>
       <thead><tr><th>Elemento</th><th>Que muestra</th><th>Accion correcta</th><th>Salida conectada</th></tr></thead>
       <tbody>
-        <tr><td>Panel Revision DXF</td><td>Stepper: cargar, mapear, aplicar, confirmar y calcular.</td><td>Seguir la siguiente accion indicada.</td><td>Canvas, calculo, Memoria IA, Evidence Pack.</td></tr>
+        <tr><td>Panel Revision DXF</td><td>Stepper: cargar, mapear, fuentes, confirmar y calcular.</td><td>Seguir la siguiente accion indicada.</td><td>Canvas, calculo, Memoria IA, Evidence Pack.</td></tr>
+        <tr><td>Fuentes DXF</td><td>Coloca LINAC 15 MV, Gamma Knife, ciclotron 18 MeV y PET F-18 con huella/workload preliminar.</td><td>Usar para prueba de memoria; ajustar con proveedor y datos finales.</td><td>Canvas, calculo, Memoria IA, Evidence Pack.</td></tr>
         <tr><td>Barra inferior</td><td>DXF preliminar, DXF confirmado, DXF sin fuente o DXF calculado.</td><td>Abrir <strong>Revisar</strong> si hay duda o bloqueo.</td><td>Estado operativo permanente.</td></tr>
         <tr><td><code>ev-dxf-import-review</code></td><td>Fuente trazable con estado draft/reviewed y hash de extracto.</td><td>Usarla como evidencia CAD/DXF, no como sustituto de revision FM/RSO.</td><td>Memoria IA, PDF y Evidence Pack.</td></tr>
       </tbody>

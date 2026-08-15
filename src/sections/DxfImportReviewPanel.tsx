@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Calculator, CheckCircle2, ClipboardCopy, FileSearch, FileText, X } from 'lucide-react';
+import { AlertTriangle, Calculator, CheckCircle2, ClipboardCopy, FileSearch, FileText, Radiation, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ interface DxfImportReviewPanelProps {
   floorPlan: FloorPlan;
   onClose: () => void;
   onConfirm: () => void;
+  onPlaceClinicalSources?: () => void;
   onRunCalculations: () => void;
   onOpenMemoriaAI: () => void;
   onOpenEvidencePack: () => void;
@@ -19,6 +20,7 @@ export default function DxfImportReviewPanel({
   floorPlan,
   onClose,
   onConfirm,
+  onPlaceClinicalSources,
   onRunCalculations,
   onOpenMemoriaAI,
   onOpenEvidencePack,
@@ -37,6 +39,7 @@ export default function DxfImportReviewPanel({
   const hasScale = Number.isFinite(floorPlan.scale_m_per_pixel) && floorPlan.scale_m_per_pixel > 0;
   const readyForMemory = metadata.status === 'final' && floorPlan.barriers.length > 0 && hasScale;
   const calculationStatus = metadata.calculationStatus ?? 'not-started';
+  const hasSources = floorPlan.sources.length > 0;
   const calculationLabel = calculationStatus === 'complete'
     ? `Calculado (${metadata.calculatedBarriers ?? floorPlan.barriers.length} barreras)`
     : calculationStatus === 'running'
@@ -49,8 +52,8 @@ export default function DxfImportReviewPanel({
   const workflowSteps = [
     { id: 'load', label: 'Cargar', done: Boolean(metadata.importedAt), active: false },
     { id: 'map', label: 'Mapear capas', done: (metadata.mappedBarriers ?? floorPlan.barriers.length) > 0, active: false },
-    { id: 'apply', label: 'Aplicar vista', done: floorPlan.barriers.length > 0, active: false },
-    { id: 'confirm', label: 'Confirmar', done: metadata.status === 'final', active: isPreliminary },
+    { id: 'sources', label: 'Fuentes', done: hasSources, active: !hasSources && floorPlan.barriers.length > 0 },
+    { id: 'confirm', label: 'Confirmar', done: metadata.status === 'final', active: isPreliminary && hasSources },
     {
       id: 'calculate',
       label: 'Calcular',
@@ -59,7 +62,9 @@ export default function DxfImportReviewPanel({
     },
   ];
   const nextAction = isPreliminary
-    ? 'Confirme geometria, escala y continuidad de barreras antes de calcular o generar memoria.'
+    ? hasSources
+      ? 'Confirme geometria, escala, fuentes y continuidad de barreras antes de calcular o generar memoria.'
+      : 'Coloque o confirme fuentes/equipos radiologicos antes de calcular o generar memoria.'
     : calculationStatus === 'blocked-no-source'
       ? 'Agregue o confirme una fuente/equipo radiologico y vuelva a ejecutar Calcular.'
       : calculationStatus === 'complete'
@@ -229,6 +234,18 @@ export default function DxfImportReviewPanel({
         )}
 
         <div className="grid grid-cols-2 gap-2">
+          {onPlaceClinicalSources && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-[11px]"
+              onClick={onPlaceClinicalSources}
+              title="Colocar LINAC, Gamma Knife, ciclotron y PET como fuentes preliminares trazables sobre el plano DXF."
+              data-testid="dxf-review-place-clinical-sources"
+            >
+              <Radiation className="mr-1 h-3.5 w-3.5" /> Fuentes
+            </Button>
+          )}
           {isPreliminary && (
             <Button size="sm" className="h-8 text-[11px]" onClick={onConfirm} data-testid="dxf-review-confirm">
               <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Confirmar

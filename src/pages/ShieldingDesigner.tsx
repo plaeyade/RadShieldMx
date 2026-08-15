@@ -1228,6 +1228,116 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
   }, [setFloorPlan]);
 
+  const handlePlaceDxfClinicalSources = useCallback(() => {
+    if (!floorPlan.importMetadata || floorPlan.barriers.length === 0) {
+      toast.error('Primero importe un DXF con barreras detectadas.');
+      return;
+    }
+
+    const xs = floorPlan.barriers.flatMap(barrier => [barrier.x1, barrier.x2]);
+    const ys = floorPlan.barriers.flatMap(barrier => [barrier.y1, barrier.y2]);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const width = Math.max(1, maxX - minX);
+    const height = Math.max(1, maxY - minY);
+    const point = (fx: number, fy: number) => ({
+      x: Math.round(minX + width * fx),
+      y: Math.round(minY + height * fy),
+    });
+    const byId = (id: string) => MODALITIES.find(modality => modality.id === id) ?? MODALITIES[0];
+    const cyclotron16 = byId('cyclotron-16mev');
+    const cyclotron18 = {
+      ...cyclotron16,
+      id: 'cyclotron-18mev',
+      name: 'Ciclotron IBA KIUBE - 18 MeV',
+      energyLabel: '18 MeV protones',
+      doseRateConstant: Math.max(cyclotron16.doseRateConstant ?? 1000, 1200),
+    };
+    const clinicalSources: RadiationSource[] = [
+      {
+        id: 'dxf-clinical-linac-versa-hd-15mv',
+        ...point(0.32, 0.36),
+        name: 'LINAC Elekta Versa HD 15 MV',
+        modality: byId('linac-15mv'),
+        workloadValue: 500,
+        workloadUnit: 'Gy/semana @ isocentro',
+        isocenterHeight_m: 1.3,
+        useFactor: 1,
+        workloadHoursPerWeek: 40,
+        rotationDeg: 0,
+        footprint_m: { width: 4.3, depth: 5.1 },
+        manufacturerVariant: 'Elekta Versa HD | carga maxima preliminar | NCRP 151',
+      },
+      {
+        id: 'dxf-clinical-gamma-knife-esprit',
+        ...point(0.68, 0.36),
+        name: 'Gamma Knife Esprit Co-60',
+        modality: byId('gamma-knife'),
+        workloadValue: 240,
+        workloadUnit: 'Gy/semana @ isocentro',
+        isocenterHeight_m: 1.5,
+        useFactor: 0.25,
+        workloadHoursPerWeek: 40,
+        rotationDeg: 0,
+        footprint_m: { width: 3.6, depth: 3.9 },
+        manufacturerVariant: 'Elekta Esprit | Co-60 | AAPM TG-56/NCRP',
+      },
+      {
+        id: 'dxf-clinical-cyclotron-kiube-18mev',
+        ...point(0.32, 0.68),
+        name: 'Ciclotron IBA KIUBE 18 MeV',
+        modality: cyclotron18,
+        workloadValue: 1200,
+        workloadUnit: 'uSv/h @ 1m preliminar',
+        isocenterHeight_m: 2,
+        useFactor: 1,
+        workloadHoursPerWeek: 40,
+        rotationDeg: 0,
+        footprint_m: { width: 7.2, depth: 6.2 },
+        manufacturerVariant: 'IBA KIUBE | terminos fuente preliminares | IAEA SRS-47',
+      },
+      {
+        id: 'dxf-clinical-pet-f18',
+        ...point(0.68, 0.68),
+        name: 'PET F-18 FDG / zona captacion',
+        modality: byId('pet-f18'),
+        workloadValue: 555,
+        workloadUnit: 'MBq promedio',
+        isocenterHeight_m: 1,
+        useFactor: 1,
+        workloadHoursPerWeek: 40,
+        nuclearActivity_GBq: 0.555,
+        rotationDeg: 0,
+        footprint_m: { width: 2.4, depth: 2.4 },
+        manufacturerVariant: 'F-18 FDG | TG-108 | fuente puntual preliminar',
+      },
+    ];
+    const clinicalIds = new Set(clinicalSources.map(source => source.id));
+
+    setFloorPlan(prev => ({
+      ...prev,
+      sources: [
+        ...prev.sources.filter(source => !clinicalIds.has(source.id)),
+        ...clinicalSources,
+      ],
+      importMetadata: {
+        ...prev.importMetadata,
+        calculationStatus: prev.importMetadata?.status === 'final' ? 'not-started' : prev.importMetadata?.calculationStatus ?? 'not-started',
+        calculationMessage: 'Fuentes clinicas preliminares colocadas; confirme geometria y ejecute calculo DXF.',
+        warnings: Array.from(new Set([
+          ...(prev.importMetadata?.warnings ?? []),
+          'Fuentes LINAC/Gamma Knife/ciclotron/PET colocadas con cargas maximas preliminares; ajustar con datos de proveedor y memoria final.',
+        ])),
+      },
+    }));
+    setCanvasState(prev => ({ ...prev, selectedId: clinicalSources[0].id, selectedIds: clinicalSources.map(source => source.id) }));
+    toast.success('Fuentes clinicas colocadas sobre el DXF', {
+      description: 'LINAC 15 MV, Gamma Knife, ciclotron 18 MeV y PET F-18 listos para calculo preliminar.',
+    });
+  }, [floorPlan, setCanvasState, setFloorPlan]);
+
   const handleConfirmDxfGeometry = useCallback(() => {
     if (floorPlan.importMetadata?.status !== 'preliminary') {
       toast.info('No hay geometria DXF preliminar pendiente de confirmar.');
@@ -2362,7 +2472,8 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           floorPlan={floorPlan}
           onClose={() => setShowDxfImportReview(false)}
           onConfirm={handleConfirmDxfGeometry}
-          onRunCalculations={runRadShieldCalculations}
+          onPlaceClinicalSources={handlePlaceDxfClinicalSources}
+          onRunCalculations={() => void runConfirmedDxfPreliminaryCalculation(floorPlan)}
           onOpenMemoriaAI={() => useAppStore.getState().open('memoriaAI')}
           onOpenEvidencePack={() => useAppStore.getState().open('evidencePack')}
         />
