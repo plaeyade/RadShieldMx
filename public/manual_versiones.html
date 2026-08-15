@@ -31,6 +31,17 @@
     <span class="pill">Beta tecnica estable</span>
   </header>
   <main>
+    <h2>0. DXF Real ZUMAYA Validado</h2>
+    <table>
+      <thead><tr><th>Elemento</th><th>Resultado</th><th>Impacto</th><th>Comando</th></tr></thead>
+      <tbody>
+        <tr><td><code>plano.dxf</code></td><td>DXF pesado de 26.6 MB cargado desde <code>C:/Users/carlo/Desktop/ZUMAYA/plano.dxf</code>.</td><td>Prueba real de usuario sobre archivo no sintetico.</td><td><code>npm run test:real-dxf-import</code></td></tr>
+        <tr><td>Visor DXF</td><td>Detecta 2111 barreras mapeadas y valida acciones <strong>Nada</strong>/<strong>Muros</strong>.</td><td>Permite revisar capas antes de escribir al canvas.</td><td>Playwright chromium.</td></tr>
+        <tr><td>Canvas</td><td>Aplica 500 barreras en modo ligero y abre <strong>Revision DXF</strong>.</td><td>Protege rendimiento y obliga confirmacion antes del calculo.</td><td>Gate ligero.</td></tr>
+      </tbody>
+    </table>
+    <p class="ok"><strong>Decision:</strong> el plano real puede entrar a beta como ruta ligera revisable; la importacion completa sigue reservada para geometria confirmada y equipo con capacidad suficiente.</p>
+
     <h2>0. DXF Workflow Guided Gate</h2>
     <table>
       <thead><tr><th>Area</th><th>Cambio</th><th>Impacto</th><th>Validacion</th></tr></thead>

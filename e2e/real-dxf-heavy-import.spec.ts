@@ -15,7 +15,7 @@ async function openFileMenu(page: Page) {
 }
 
 test.describe('Real DXF heavy import QA - real-dxf-heavy-import', () => {
-  test('loads the ZUMAYA DXF and protects the canvas from accidental heavy apply', async ({ page }) => {
+  test('loads the ZUMAYA DXF and routes it through the lightweight review gate', async ({ page }) => {
     test.skip(!fs.existsSync(realDxfPath), `Real DXF fixture not found: ${realDxfPath}`);
     test.setTimeout(180_000);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -40,15 +40,16 @@ test.describe('Real DXF heavy import QA - real-dxf-heavy-import', () => {
     await page.getByRole('button', { name: 'Muros' }).click();
     await expect(page.getByTestId('dxf-visible-barrier-layer-summary')).toContainText(/Importables: [1-9]\d*\/[1-9]\d*/);
 
-    let confirmMessage = '';
-    page.once('dialog', async (dialog) => {
-      confirmMessage = dialog.message();
-      await dialog.dismiss();
-    });
-    await page.getByTestId('dxf-apply-to-canvas').click({ force: true, timeout: 15_000 });
-    expect(confirmMessage).toContain('2111 segmentos de barrera');
-
-    await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeVisible();
+    await page.getByTestId('dxf-apply-light-preview').click({ force: true, timeout: 15_000 });
+    await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeHidden({ timeout: 30_000 });
     await expect(page.getByTestId('f100-main-floorplan-canvas')).toBeVisible();
+    await expect(page.getByRole('textbox').first()).toHaveValue('CAD plano.dxf');
+    await expect(page.getByText(/DXF preliminar/i)).toBeVisible();
+    await expect(page.getByTestId('statusbar-barrier-count')).toHaveText('500');
+    await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
+    await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Calcular/);
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Confirme geometria/i);
+    await expect(page.getByTestId('dxf-review-calculate')).toBeDisabled();
+    await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/ev-dxf-import-review/);
   });
 });

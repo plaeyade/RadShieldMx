@@ -1,5 +1,12 @@
 # RadShield-MX - Manual de Versiones
 
+# DXF Real ZUMAYA Validado (2026-08-14)
+
+- `npm run test:real-dxf-import` valida `C:/Users/carlo/Desktop/ZUMAYA/plano.dxf`.
+- El visor carga el DXF pesado, detecta 2111 barreras mapeadas y prueba filtros `Nada`/`Muros`.
+- El canvas recibe 500 barreras en modo ligero, mantiene `DXF preliminar`, bloquea `Calcular` y muestra `ev-dxf-import-review`.
+- La importacion completa queda como operacion revisada; la ruta beta recomendada es ligera -> Revision DXF -> Confirmar -> Fuente/equipo -> Calcular -> Memoria IA/Evidence.
+
 # DXF Workflow Guided Gate (2026-08-14)
 
 - Panel `Revision DXF` con flujo visible: cargar, mapear capas, aplicar vista, confirmar geometria y calcular.

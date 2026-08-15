@@ -13,7 +13,7 @@
     "test:file-menu": "playwright test --project=chromium --grep \"F404 Archivo menu\"",
     "test:dxf-import": "node scripts/run-dxf-import-e2e.mjs",
     "test:dwg-safe-import": "playwright test --project=chromium --grep \"DWG safe import boundary\"",
-    "test:real-dxf-import": "playwright test e2e/real-dxf-heavy-import.spec.ts --project=chromium",
+    "test:real-dxf-import": "node scripts/run-real-dxf-e2e.mjs",
     "prepare:dwg-local-conversion": "node scripts/dwg-local-conversion-probe.mjs",
     "test:dwg-local-conversion": "node scripts/check-dwg-local-conversion-probe-contracts.mjs",
     "start": "NODE_ENV=production node dist-backend/server/boot.js",

@@ -1,5 +1,12 @@
 # RadShield-MX - Fases recientes
 
+# DXF real ZUMAYA validated gate (2026-08-14) - paso 5
+
+- `C:/Users/carlo/Desktop/ZUMAYA/plano.dxf` queda cubierto por `npm run test:real-dxf-import`.
+- La prueba real valida carga de DXF pesado, conteo de 2111 barreras mapeadas en el visor, acciones `Nada`/`Muros` y ruta segura por vista ligera.
+- La aplicacion aplica 500 barreras al canvas en modo light, muestra `DXF preliminar`, bloquea `Calcular` hasta confirmacion y expone `ev-dxf-import-review`.
+- Agregado runner `scripts/run-real-dxf-e2e.mjs` para levantar preview, correr Playwright y cerrar el servidor sin dejar procesos colgados.
+
 # DXF workflow guided gate (2026-08-14) - pasos 3 y 4
 
 - El panel `Revision DXF` agrega stepper operativo: cargar DXF, mapear capas, aplicar vista ligera/completa, confirmar geometria y calcular.
