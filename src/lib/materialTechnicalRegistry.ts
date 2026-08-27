@@ -51,9 +51,36 @@ export interface MaterialEnergyComparison {
   warnings: string[];
 }
 
+export interface MaterialDecisionRow extends MaterialEnergyComparison {
+  area_m2: number;
+  totalMass_kg: number;
+  estimatedInstallDays: number;
+  structuralStatus: 'ok' | 'coordinate-structure' | 'structural-review';
+  evidenceReady: boolean;
+}
+
+export interface MaterialTechnicalClosure {
+  status: 'beta-materials-ready' | 'review-required';
+  totalMaterials: number;
+  canonicalMaterials: number;
+  vendorCertifiedMaterials: number;
+  duplicateCodes: number;
+  availableModalities: Record<MaterialModality, number>;
+  releaseGuards: string[];
+  recommendedNextData: string[];
+}
+
 const TX_KEYS = ['6MV', '10MV', '15MV', '18MV', 'Co60'];
 const NM_KEYS = ['511keV', '140keV', '364keV', 'Ir192'];
 const CY_KEYS = ['18MV', 'neutron'];
+const INSTALL_RATE_M2_DAY_BY_CATEGORY: Record<string, number> = {
+  Conventional: 8,
+  NELCO: 16,
+  VERITAS: 14,
+  'TM-NIPOL': 18,
+  'Special Nuclear': 12,
+  borated: 12,
+};
 
 function normalizeName(value: string): string {
   return value
@@ -195,20 +222,8 @@ export function compareMaterialsForEnergy(
     .map((record) => {
       const thickness = record.tvl_mm[energyKey] * requiredTvls;
       const mass = kgM2FromDensityThickness(record.density_g_cm3, thickness);
-      const cost = costPerM2FromMaterial(
-        {
-          name: record.name,
-          code: record.code,
-          density: record.density_g_cm3,
-          TVL_mm: record.tvl_mm,
-          cost_per_m3: record.cost_per_m3,
-          cost_per_kg: record.cost_per_kg,
-          category: record.category,
-          manufacturer: record.manufacturer,
-          certifiedLab: record.certifiedLab,
-        },
-        thickness,
-      );
+      const volumeM3PerM2 = thickness / 1000;
+      const cost = record.cost_per_m3 > 0 ? record.cost_per_m3 * volumeM3PerM2 : mass * record.cost_per_kg;
       return {
         code: record.code,
         name: record.name,
@@ -224,4 +239,65 @@ export function compareMaterialsForEnergy(
       };
     })
     .sort((a, b) => a.thickness_mm - b.thickness_mm || a.mass_kg_per_m2 - b.mass_kg_per_m2);
+}
+
+function materialInstallRate(category: string): number {
+  return INSTALL_RATE_M2_DAY_BY_CATEGORY[category] ?? 10;
+}
+
+function structuralStatus(kgM2: number): MaterialDecisionRow['structuralStatus'] {
+  if (kgM2 >= 750) return 'structural-review';
+  if (kgM2 >= 350) return 'coordinate-structure';
+  return 'ok';
+}
+
+export function buildMaterialDecisionRows(params: {
+  energyKey: string;
+  area_m2: number;
+  requiredTvls?: number;
+  records?: MaterialTechnicalRecord[];
+}): MaterialDecisionRow[] {
+  const area = Number.isFinite(params.area_m2) && params.area_m2 > 0 ? params.area_m2 : 1;
+  const requiredTvls = Number.isFinite(params.requiredTvls) && params.requiredTvls && params.requiredTvls > 0 ? params.requiredTvls : 1;
+  return compareMaterialsForEnergy(params.energyKey, requiredTvls, params.records).map((item) => ({
+    ...item,
+    area_m2: area,
+    totalMass_kg: item.mass_kg_per_m2 * area,
+    estimatedInstallDays: Math.max(0.5, area / materialInstallRate(item.category)),
+    structuralStatus: structuralStatus(item.mass_kg_per_m2),
+    evidenceReady: item.evidenceStatus === 'canonical' || item.evidenceStatus === 'vendor-certified',
+  }));
+}
+
+export function buildMaterialTechnicalClosure(records = buildMaterialTechnicalRegistry()): MaterialTechnicalClosure {
+  const validation = validateMaterialTechnicalRegistry(records);
+  const canonicalMaterials = records.filter((item) => item.evidenceStatus === 'canonical').length;
+  const vendorCertifiedMaterials = records.filter((item) => item.evidenceStatus === 'vendor-certified').length;
+  const modalityCounts: Record<MaterialModality, number> = {
+    DX: getMaterialsForModality('DX', records).length,
+    TX: getMaterialsForModality('TX', records).length,
+    NM: getMaterialsForModality('NM', records).length,
+    CY: getMaterialsForModality('CY', records).length,
+  };
+
+  return {
+    status: validation.errors.length === 0 && validation.duplicateCodes.length === 0 ? 'beta-materials-ready' : 'review-required',
+    totalMaterials: records.length,
+    canonicalMaterials,
+    vendorCertifiedMaterials,
+    duplicateCodes: validation.duplicateCodes.length,
+    availableModalities: modalityCounts,
+    releaseGuards: [
+      'Commercial/vendor materials require source, page, hash and project approval before final memoria analitica.',
+      'PBR/3D material appearance does not modify TVL, density or calculation constants.',
+      'Neutron and cyclotron shielding require dedicated high-energy review before clinical signoff.',
+      'Cost and installation time are planning estimates until vendor quote and construction schedule are attached.',
+    ],
+    recommendedNextData: [
+      'Vendor quotes for MXN/m3, MXN/kg or MXN/m2 by material.',
+      'Commercial thickness catalog for TM-NIPOL, NELCO, VeriShield, lead sheets, doors and windows.',
+      'Lab certificates with density, TVL/HVL, page/hash and validity date.',
+      'Structural allowable loads per slab/wall and door support detail.',
+    ],
+  };
 }

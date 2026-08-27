@@ -11,6 +11,10 @@ import { SHIELDING_MATERIALS } from '@/lib/xcomAttenuation';
 import { buildF123MaterialDecisionMatrix } from '@/lib/f123MaterialDecisionMatrix';
 import { buildF124MaterialToolboxSummary } from '@/lib/f124MaterialToolboxConsolidation';
 import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
+import {
+  buildMaterialDecisionRows,
+  buildMaterialTechnicalClosure,
+} from '@/lib/materialTechnicalRegistry';
 
 const COST: Record<string, number> = { PB: 2.5, CONCRETE: 0.15, STEEL: 1.2, GYPSUM: 0.4, POLYETHYLENE: 3.5, BPE: 8.0, TUNGSTEN: 45.0 };
 const INSTALL_RATE_M2_DAY: Record<string, number> = { PB: 18, CONCRETE: 8, STEEL: 12, GYPSUM: 35, POLYETHYLENE: 20, BPE: 16, TUNGSTEN: 10 };
@@ -27,6 +31,7 @@ export default function MaterialComparisonDialog() {
   const open = useAppStore(s => s.dialogs.materialComparison?.open ?? false);
   const close = () => useAppStore.getState().close('materialComparison');
   const [energy, setEnergy] = useState('1');
+  const [registryEnergy, setRegistryEnergy] = useState('15MV');
   const [area, setArea] = useState('10');
   const eN = parseFloat(energy) || 1;
   const aN = parseFloat(area) || 10;
@@ -34,6 +39,8 @@ export default function MaterialComparisonDialog() {
   const f124Toolbox = useMemo(() => buildF124MaterialToolboxSummary(), []);
   const f172aMethodology = useMemo(() => buildF172AResearchMethodology(), []);
   const f172aMaterials = f172aMethodology.sources.find(source => source.modality === 'Materials');
+  const materialClosure = useMemo(() => buildMaterialTechnicalClosure(), []);
+  const registryRows = useMemo(() => buildMaterialDecisionRows({ energyKey: registryEnergy, area_m2: aN, requiredTvls: 1 }), [registryEnergy, aN]);
 
   const data = useMemo(() => SHIELDING_MATERIALS.map(m => {
     const entry = m.data.find(d => d.energy_MeV >= eN) ?? m.data[m.data.length - 1];
@@ -78,9 +85,64 @@ export default function MaterialComparisonDialog() {
           <div className="flex-1"><label className="text-[10px] text-slate-500 font-medium mb-1 block">Energia</label>
             <Select value={energy} onValueChange={setEnergy}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent>{[0.05, 0.1, 0.5, 1, 2, 4, 6, 10].map(e => <SelectItem key={e} value={e.toString()} className="text-[11px]">{e} MeV</SelectItem>)}</SelectContent></Select>
           </div>
+          <div className="flex-1"><label className="text-[10px] text-slate-500 font-medium mb-1 block">DB tecnica</label>
+            <Select value={registryEnergy} onValueChange={setRegistryEnergy}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent>{['6MV','10MV','15MV','18MV','Co60','Ir192','511keV','140keV','364keV','neutron'].map(e => <SelectItem key={e} value={e} className="text-[11px]">{e}</SelectItem>)}</SelectContent></Select>
+          </div>
           <div className="flex-1"><label className="text-[10px] text-slate-500 font-medium mb-1 block">Area (m²)</label>
             <Select value={area} onValueChange={setArea}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent>{['5','10','15','20','30','50'].map(a => <SelectItem key={a} value={a} className="text-[11px]">{a} m²</SelectItem>)}</SelectContent></Select>
           </div>
+        </div>
+        <div data-testid="material-technical-registry-closure" className="mb-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900">DB tecnica de materiales cerrada para beta</h3>
+              <p className="text-[9px] text-slate-600">
+                {materialClosure.totalMaterials} materiales, {materialClosure.canonicalMaterials} canonicos, {materialClosure.vendorCertifiedMaterials} con certificado/proveedor y {materialClosure.duplicateCodes} codigos duplicados.
+              </p>
+            </div>
+            <Badge variant="outline" className="text-[9px] bg-white">{materialClosure.status}</Badge>
+          </div>
+          <div className="mt-2 grid grid-cols-4 gap-2">
+            {Object.entries(materialClosure.availableModalities).map(([key, count]) => (
+              <div key={key} className="rounded border border-slate-200 bg-white px-2 py-1">
+                <div className="text-[8px] font-semibold text-slate-500">{key}</div>
+                <div className="text-sm font-bold text-slate-900">{count}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 overflow-x-auto rounded border border-slate-200 bg-white">
+            <table className="w-full text-[8px]">
+              <thead className="bg-slate-100 text-slate-700">
+                <tr>
+                  <th className="text-left px-2 py-1">Material</th>
+                  <th className="text-right px-2 py-1">TVL</th>
+                  <th className="text-right px-2 py-1">kg/m2</th>
+                  <th className="text-right px-2 py-1">kg total</th>
+                  <th className="text-right px-2 py-1">kPa</th>
+                  <th className="text-right px-2 py-1">Costo/m2</th>
+                  <th className="text-right px-2 py-1">Dias</th>
+                  <th className="text-left px-2 py-1">Evidencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registryRows.slice(0, 10).map(row => (
+                  <tr key={row.code} data-testid="material-technical-registry-row" className="border-t border-slate-100">
+                    <td className="px-2 py-1 font-medium text-slate-900">{row.name}</td>
+                    <td className="text-right px-2 py-1 font-mono">{row.thickness_mm.toFixed(1)} mm</td>
+                    <td className="text-right px-2 py-1 font-mono">{row.mass_kg_per_m2.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{row.totalMass_kg.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{row.structuralLoad_kPa.toFixed(2)}</td>
+                    <td className="text-right px-2 py-1 font-mono">${row.cost_per_m2.toFixed(0)}</td>
+                    <td className="text-right px-2 py-1 font-mono">{row.estimatedInstallDays.toFixed(1)}</td>
+                    <td className="px-2 py-1">{row.evidenceReady ? row.evidenceStatus : 'revision requerida'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-[8px] text-slate-500">
+            Guardrail: costo/tiempo son estimados de planeacion. La memoria final requiere fuente, pagina, hash y aprobacion profesional del material.
+          </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[10px]">

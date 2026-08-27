@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildMaterialTechnicalRegistry,
+  buildMaterialDecisionRows,
+  buildMaterialTechnicalClosure,
   compareMaterialsForEnergy,
   getMaterialsForModality,
   validateMaterialTechnicalRegistry,
@@ -36,5 +38,17 @@ describe('material technical registry', () => {
     expect(getMaterialsForModality('NM').some((item) => item.tvl_mm['511keV'])).toBe(true);
     expect(getMaterialsForModality('CY').some((item) => /NIPOL|BPE|CONCRETE/i.test(item.code))).toBe(true);
     expect(getMaterialsForModality('DX').some((item) => item.sourceRefs.includes('NCRP147-Archer'))).toBe(true);
+  });
+
+  it('closes the beta material registry with planning rows and guardrails', () => {
+    const rows = buildMaterialDecisionRows({ energyKey: '15MV', area_m2: 20, requiredTvls: 1 });
+    const closure = buildMaterialTechnicalClosure();
+
+    expect(rows.length).toBeGreaterThan(5);
+    expect(rows.every((item) => item.totalMass_kg > 0)).toBe(true);
+    expect(rows.some((item) => item.structuralStatus === 'structural-review')).toBe(true);
+    expect(closure.status).toBe('beta-materials-ready');
+    expect(closure.availableModalities).toMatchObject({ DX: expect.any(Number), TX: expect.any(Number), NM: expect.any(Number), CY: expect.any(Number) });
+    expect(closure.releaseGuards.join(' ')).toContain('Commercial/vendor materials');
   });
 });

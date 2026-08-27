@@ -27,6 +27,12 @@ La app puede seguir mejorando la base tecnica de materiales aunque no se carguen
 
 Los materiales comerciales como TM-NIPOL, NELCO o VERITAS pueden compararse para diseno preliminar, costo, peso y obra. Para memoria final deben conservar evidencia con fuente, pagina, hash documental, revision del fisico medico/RSO y aprobacion del proyecto.
 
+### Cierre de materiales en la app
+
+El acceso rapido `Mat` abre la toolbox consolidada. La primera tabla corresponde a la DB tecnica canonica y sirve para comparar, por modalidad y energia, los materiales que ya estan listos para beta. Use `DB tecnica` para cambiar entre `6MV`, `15MV`, `Co60`, `511keV`, `Ir192`, `140keV`, `364keV` o `neutron`. La columna `Evidencia` indica si el material esta listo como referencia beta o si requiere revision documental adicional.
+
+La tabla XCOM que aparece debajo se conserva como apoyo de atenuacion por energia continua. Para decisiones finales prevalecen: calculo del motor, norma aplicable, fuente versionada, pagina/hash y revision profesional.
+
 ## Addendum vigente: flujo DXF guiado
 
 1. Abra `Archivo > Importar DXF`.

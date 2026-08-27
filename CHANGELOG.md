@@ -7,6 +7,7 @@
 - Agregado registro tecnico `materialTechnicalRegistry`: consolida codigo, densidad, TVL/HVL, costo, masa kg/m2, carga kPa, estado de evidencia, fuentes y advertencias por material.
 - Agregado comparador por energia para TX/NM/DX/CY; permite revisar espesor, peso, costo y carga estructural antes de memoria analitica.
 - Agregadas pruebas unitarias para deduplicacion, TM-NIPOL, plomo/concreto/acero y filtros por modalidad.
+- Cierre de materiales: `MaterialComparisonDialog` ahora muestra la DB tecnica canonica junto a la tabla XCOM, con conteo por modalidad, masa total por area, costo/m2, dias estimados, kPa y estado de evidencia.
 
 # DXF real ZUMAYA clinical source workflow (2026-08-14) - cinco pasos completos
 
