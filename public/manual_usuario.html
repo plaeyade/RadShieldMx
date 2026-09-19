@@ -682,6 +682,9 @@
       <h2>8. RAG, OCR Y Evidencia</h2>
       <p>Los documentos se indexan en chunks con pagina/hash cuando existe texto extraible. OCR en espanol mejora memorias escaneadas, pero cualquier valor critico debe pasar por revision antes de alimentar calculo.</p>
       <div class="note"><strong>Jerarquia documental.</strong> Norma primaria y manual de fabricante tienen prioridad. Memorias analiticas previas ayudan al estilo, checklist y deteccion de omisiones, pero no sustituyen NCRP, IAEA, AAPM, ICRP, CNSNS o datos aprobados.</div>
+      <h3>Addendum F506-F507: Trazabilidad Y Seed Regulatorio</h3>
+      <p>La promocion de materiales desde el catalogo tecnico hacia la DB regulatoria se realiza en dos controles separados. F506 revisa <code>document_chunks</code> para asociar cada fuente con pagina, hash y evidencia. F507 inserta exclusivamente valores <code>approved-reference</code> autorizados para calculo, dentro de una transaccion con rollback.</p>
+      <div class="note"><strong>Regla de seguridad.</strong> Una fuente sin pagina/hash verificable o un valor pendiente de revision no se usa en calculos clinicos ni se promociona. El seed se cancela si detecta datos existentes para evitar sobrescrituras; debe revisarse la cola de pendientes antes de repetirlo.</div>
     </section>
 
     <section id="3d">
