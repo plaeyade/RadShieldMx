@@ -687,6 +687,10 @@
       <div class="note"><strong>Regla de seguridad.</strong> Una fuente sin pagina/hash verificable o un valor pendiente de revision no se usa en calculos clinicos ni se promociona. El seed se cancela si detecta datos existentes para evitar sobrescrituras; debe revisarse la cola de pendientes antes de repetirlo.</div>
       <h3>Addendum F508-F509: QA Posterior Al Seed</h3>
       <p>Tras la lectura de la DB, RadShield-MX contrasta únicamente constantes aprobadas con seis casos representativos por modalidad: LINAC, Gamma Knife, PET, diagnóstico y ciclotrón. Una discrepancia, un dato sin fuente o una constante no aprobada se presenta como revisión; no se convierte automáticamente en un resultado clínico.</p>
+      <h3>Addendum F510: PET Y Diagnóstico</h3>
+      <p>El registro versionado incluye las constantes suplementarias de plomo para 511 keV y 120 kVp. Se mantienen como filas inmutables con fuente, página y hash; la promoción usa inserción solo de valores faltantes y vuelve a ejecutar el QA posterior al seed.</p>
+      <h3>Addendum F511-F514: Paquete Beta</h3>
+      <p>El paquete beta exige build estático, QA de materiales contra DB, manuales y Update Center sincronizados. Antes de publicar, confirme en la URL objetivo el menú Archivo, canvas, sidebar, acceso rápido, cálculo preliminar y export de evidencia. La beta no sustituye la revisión y firma del físico médico o RSO.</p>
     </section>
 
     <section id="3d">
