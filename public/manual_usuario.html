@@ -685,6 +685,8 @@
       <h3>Addendum F506-F507: Trazabilidad Y Seed Regulatorio</h3>
       <p>La promocion de materiales desde el catalogo tecnico hacia la DB regulatoria se realiza en dos controles separados. F506 revisa <code>document_chunks</code> para asociar cada fuente con pagina, hash y evidencia. F507 inserta exclusivamente valores <code>approved-reference</code> autorizados para calculo, dentro de una transaccion con rollback.</p>
       <div class="note"><strong>Regla de seguridad.</strong> Una fuente sin pagina/hash verificable o un valor pendiente de revision no se usa en calculos clinicos ni se promociona. El seed se cancela si detecta datos existentes para evitar sobrescrituras; debe revisarse la cola de pendientes antes de repetirlo.</div>
+      <h3>Addendum F508-F509: QA Posterior Al Seed</h3>
+      <p>Tras la lectura de la DB, RadShield-MX contrasta únicamente constantes aprobadas con seis casos representativos por modalidad: LINAC, Gamma Knife, PET, diagnóstico y ciclotrón. Una discrepancia, un dato sin fuente o una constante no aprobada se presenta como revisión; no se convierte automáticamente en un resultado clínico.</p>
     </section>
 
     <section id="3d">
