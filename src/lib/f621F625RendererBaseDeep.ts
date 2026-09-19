@@ -100,7 +100,7 @@ function buildCommands(runtime: F442ToF445RendererV2Runtime, viewport: F621Viewp
     const screenBounds = boundsForInstruction(instruction, viewport);
     return {
       id: `f621-command-${instruction.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`,
-      phase: 'F621',
+      phase: 'F621' as const,
       instructionId: instruction.id,
       primitive: instruction.primitive,
       layer: instruction.layer,

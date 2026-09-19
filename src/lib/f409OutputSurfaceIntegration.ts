@@ -52,7 +52,7 @@ function unique(values: string[]): string[] {
 function inferPreset(floorPlan?: FloorPlan): MedicalRoomPreset {
   const haystack = [
     floorPlan?.name,
-    ...(floorPlan?.sources ?? []).map((source) => `${source.name} ${source.type}`),
+    ...(floorPlan?.sources ?? []).map((source) => `${source.name} ${source.modality?.name ?? ''} ${source.modality?.category ?? ''}`),
   ].join(' ').toLowerCase();
 
   if (haystack.includes('gamma') || haystack.includes('lgk') || haystack.includes('knife')) return 'gammaKnife';

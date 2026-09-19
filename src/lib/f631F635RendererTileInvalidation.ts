@@ -98,7 +98,7 @@ export function buildF631F635RendererTileInvalidation(
   const coverage: F632LayerTileCoverage[] = deep.passGroups.map((group) => {
     const layerTiles = tiles.filter((tile) => tile.layers.includes(group.layer));
     return {
-      phase: 'F632',
+      phase: 'F632' as const,
       layer: group.layer,
       tileIds: layerTiles.map((tile) => tile.id),
       dirtyTileCount: layerTiles.length,

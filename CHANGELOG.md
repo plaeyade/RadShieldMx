@@ -1,5 +1,10 @@
 # RadShield-MX - Fases recientes
 
+# Cierre TypeScript post-materiales (2026-08-30)
+
+- Corregidos errores heredados que bloqueaban `tsc -p tsconfig.app.json`: sample lines del canvas, inferencia de modalidad en F409, decision QA F566, literales de renderer F621/F632 y campos reales en Medical 3D.
+- El cierre de materiales queda integrado con compilacion base limpia para avanzar a pruebas reales y build/deploy.
+
 # Beta congelada + DB tecnica de materiales (2026-08-15)
 
 - Congelada la beta aceptada manualmente en tag `beta-manual-accepted-20260815`.

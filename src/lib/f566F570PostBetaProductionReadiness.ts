@@ -70,7 +70,7 @@ export function buildF566F570PostBetaProductionReadiness(params: {
   const qaReady = eventController.qa.passedScenarioCount === eventController.qa.totalScenarioCount;
   const unityBlocked = postBeta.lanes.some((lane) => lane.id === 'unity' && lane.status === 'blocked');
   const technicalDbGated = postBeta.technicalDb.needsFullEndfXcomIcru;
-  const normativeQaReady = postBeta.normativeQa.releaseDecision !== 'block';
+  const normativeQaReady = postBeta.normativeQa.releaseDecision === 'allow-beta-preliminary-calculation';
 
   const tracks: F566F570Track[] = [
     {

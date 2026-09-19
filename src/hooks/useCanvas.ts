@@ -575,7 +575,31 @@ export function useCanvas(
       }
     }
 
-    drawCanvasSampleLinesLayer(ctx, sampleLines ?? [], {
+    drawCanvasSampleLinesLayer(ctx, (sampleLines ?? []).map((line) => ({
+      id: line.barrierId,
+      points: line.points.map((point) => ({
+        x: point.x,
+        y: point.y,
+        kerma: point.kermaRate,
+        thickness_mm: point.barrierThickness_mm,
+      })),
+      maxKermaPoint: line.maxKermaPoint
+        ? {
+            x: line.maxKermaPoint.x,
+            y: line.maxKermaPoint.y,
+            kerma: line.maxKermaPoint.kermaRate,
+            thickness_mm: line.maxKermaPoint.barrierThickness_mm,
+          }
+        : null,
+      maxThicknessPoint: line.maxThicknessPoint
+        ? {
+            x: line.maxThicknessPoint.x,
+            y: line.maxThicknessPoint.y,
+            kerma: line.maxThicknessPoint.kermaRate,
+            thickness_mm: line.maxThicknessPoint.barrierThickness_mm,
+          }
+        : null,
+    })), {
       scale: canvasState.scale,
       worldToScreen,
     }, {

@@ -725,7 +725,7 @@ function BeamGuides({ scene, visible }: { scene: MedicalScene; visible: boolean 
 
 function PhotorealDecals({ scene, visible }: { scene: MedicalScene; visible: boolean }) {
   if (!visible) return null;
-  const doorWall = scene.walls.find((wall) => wall.barrierType === 'door') || scene.walls[0];
+  const doorWall = scene.walls.find((wall) => wall.name.toLowerCase().includes('door') || wall.name.toLowerCase().includes('puerta')) || scene.walls[0];
   const primaryWall = scene.walls.find((wall) => wall.barrierType === 'primary') || scene.walls[0];
   const firstEquipment = scene.equipment[0];
   return (
@@ -1360,7 +1360,7 @@ function BabylonRuntimeSmokePreview({
               id: medicalZone.id,
               type: 'zone',
               label: medicalZone.name,
-              details: [`Tipo ${medicalZone.type}`, `Puntos ${medicalZone.points.length}`, 'Overlay de zona controlada'],
+              details: [`Zona ${medicalZone.controlled ? 'controlada' : 'no controlada'}`, `Puntos ${medicalZone.points.length}`, 'Overlay de zona controlada'],
             });
           });
         } else {
@@ -1381,7 +1381,7 @@ function BabylonRuntimeSmokePreview({
             type: 'equipment' as const,
             label: medicalEquipment.name,
             details: [
-              `Modalidad ${medicalEquipment.modality}`,
+              `Modalidad ${medicalEquipment.kind}`,
               `Footprint ${medicalEquipment.footprint_m[0]} x ${medicalEquipment.footprint_m[1]} m`,
               `Rotacion ${(medicalEquipment.rotationY * 180 / Math.PI).toFixed(0)} deg`,
             ],
