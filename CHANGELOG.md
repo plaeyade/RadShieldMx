@@ -2064,3 +2064,8 @@ Nuevo v62: updateCenter
 | APIs Web | 7 implementadas |
 | Idiomas | 2 (es/en) |
 | Commits desde v1 | ~500+ |
+# F511 Source Expansion Audit (2026-09-19)
+
+- Started the controlled PET/DX/cyclotron evidence expansion with live document-chunk inventory and primary-source review.
+- Recorded AAPM TG-108 broad-beam 511 keV transmission evidence separately from generic TVL claims; no new calculation constant was promoted.
+- Kept static beta deployment offline-safe with backend activation disabled.
