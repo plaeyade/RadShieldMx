@@ -14,7 +14,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Zap, Calculator, Download, Play, BookOpen, AlertTriangle, CheckCircle, ChevronRight } from 'lucide-react';
+import { Zap, Calculator, Play, BookOpen, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

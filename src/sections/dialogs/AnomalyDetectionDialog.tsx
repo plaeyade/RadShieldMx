@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { AlertTriangle, ShieldCheck, Eye, Play } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Eye } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

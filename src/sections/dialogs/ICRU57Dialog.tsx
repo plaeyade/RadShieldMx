@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Calculator,
@@ -13,11 +13,9 @@ import {
   Atom,
   Ruler,
   Search,
-  ChevronRight,
   Info,
   AlertTriangle,
   CheckCircle2,
-  FileDown,
   Zap,
   Activity,
 } from "lucide-react";

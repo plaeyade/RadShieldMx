@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAppStore } from '@/stores/appStore';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { buildAnalyticMemoryEvidenceSection, buildAnalyticMemorySnapshot } from '@/lib/analyticMemoryEvidence';
@@ -17,7 +16,7 @@ import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import type { FloorPlan } from '@/types/radshield';
-import { FileText, Download, BookOpen, Building2, User, Calendar, Shield } from 'lucide-react';
+import { FileText, Download, BookOpen } from 'lucide-react';
 
 const TEMPLATES = [
   { id: 'cnsns', name: 'CNSNS LA-007/01', desc: 'Formato oficial Comision Nacional' },

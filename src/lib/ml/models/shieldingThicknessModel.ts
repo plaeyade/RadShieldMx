@@ -6,7 +6,7 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
-import { generateTrainingDataset, normalizeFeatures, type ShieldingDataPoint, type FeatureNorms } from "../trainingData";
+import { generateTrainingDataset, normalizeFeatures, type FeatureNorms } from "../trainingData";
 
 // Singleton model instance
 let model: tf.LayersModel | null = null;

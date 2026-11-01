@@ -5,11 +5,11 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import '@/components/ui/scroll-area';
 import { X, BookOpen, Search, ExternalLink, FileText } from 'lucide-react';
-import { ALL_REFERENCES, searchRefs, getRefsByType, type BibEntry } from '@/lib/bibliography';
+import { ALL_REFERENCES, searchRefs, getRefsByType } from '@/lib/bibliography';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 

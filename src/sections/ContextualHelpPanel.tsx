@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { HelpCircle, X, ChevronRight, BookOpen, Video, Lightbulb, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';

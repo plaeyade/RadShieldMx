@@ -26,7 +26,7 @@ function genDF(sx: number, sy: number, sz: number, act: number): DP[] {
 }
 
 function proj(p: DP, rx: number, ry: number, sc: number, cx: number, cy: number) {
-  let x = p.x - 5, y = p.y - 4, z = p.z - 3;
+  const x = p.x - 5, y = p.y - 4, z = p.z - 3;
   const cx_ = Math.cos(rx), sx_ = Math.sin(rx), cy_ = Math.cos(ry), sy_ = Math.sin(ry);
   const y1 = y * cx_ - z * sx_, z1 = y * sx_ + z * cx_;
   const x2 = x * cy_ + z1 * sy_, z2 = -x * sy_ + z1 * cy_;

@@ -6,11 +6,11 @@
  * Reference: Iwamoto et al., J. Nucl. Sci. Technol. 59, 665-675 (2022)
  */
 import { useState } from 'react';
-import { X, Database, Search, Atom, Download, BarChart3, Radio } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { X, Database, Search, Atom, Radio } from 'lucide-react';
+import '@/components/ui/button';
+import '@/components/ui/input';
+import '@/components/ui/separator';
+import 'sonner';
 
 interface NuclideData {
   symbol: string;

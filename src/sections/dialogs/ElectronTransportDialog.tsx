@@ -24,9 +24,6 @@ import {
 import {
   ELECTRON_MATERIALS, runElectronTransport, runEnergySweep,
   calculateBremsstrahlungSpectrum,
-  collisionStoppingPower, radiativeStoppingPower, totalStoppingPower,
-  CSDArange_mm, projectedRange, detourFactor,
-  bremsstrahlungYield, multipleScatteringRMS,
   type ElectronSource, type ElectronTransportResult,
 } from '@/lib/electronEngine';
 

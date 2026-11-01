@@ -2,7 +2,7 @@
  * C.4 — Unit tests: useCanvas hook
  * Tests for canvas state, coordinate transforms, touch gestures
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useCanvas } from '@/hooks/useCanvas';
 import type { FloorPlan } from '@/types/radshield';

@@ -14,8 +14,7 @@ import {
   Clock, Grid3X3, Zap, Droplets, Shapes,
   Wand2, Plus, Trash2, Download, Lightbulb,
   ToggleLeft, ToggleRight, Ruler, ArrowRight,
-  Circle, Square, Hexagon, Type, Highlighter,
-  Play, Square as SquareIcon, Waves, PanelTop,
+  Circle, Hexagon, Type, Highlighter, Square as SquareIcon, Waves, PanelTop,
   BatteryCharging, Flame, CircleDot, X,
 } from "lucide-react";
 import {

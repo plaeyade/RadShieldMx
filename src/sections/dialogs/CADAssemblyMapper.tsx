@@ -3,17 +3,17 @@
  * Import CAD assemblies (STEP/IGES) and auto-map materials to parts by name
  * Modular functionality for rapid design iterations
  */
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import '@/components/ui/label';
+import '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Box, Upload, Layers, ArrowRight, CheckCircle, Download,
-  FileText, Database, Info, Plus, Trash2
+  FileText, Database, Info
 } from 'lucide-react';
 
 interface Props { open: boolean; onClose: () => void; }

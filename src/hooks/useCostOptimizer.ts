@@ -1,6 +1,6 @@
 // Batch 3: Cost Optimizer — find cheapest material combination meeting kerma goal
 import { MATERIALS } from '@/types/radshield';
-import type { Barrier } from '@/types/radshield';
+import '@/types/radshield';
 
 export interface CostOptimizedMaterial {
   materialCode: string;

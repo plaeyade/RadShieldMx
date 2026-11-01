@@ -3,8 +3,8 @@
  * Y-90, Lu-177, Ac-225, Pb-212, I-131, Ra-223
  */
 import { useState, useMemo } from 'react';
-import { X, Pill, AlertTriangle, CheckCircle, Download, Shield } from 'lucide-react';
-import { DEFAULT_THERAPY_TASKS, THERAPY_NUCLIDES, calculateTaskDose, getRoomSummary } from '@/lib/therapy/TherapeuticRadionuclideShielding';
+import { X, Pill, Download } from 'lucide-react';
+import { DEFAULT_THERAPY_TASKS, THERAPY_NUCLIDES, getRoomSummary } from '@/lib/therapy/TherapeuticRadionuclideShielding';
 import type { TherapyRoomTask } from '@/lib/therapy/TherapeuticRadionuclideShielding';
 
 export default function TherapyShieldingDialog({ onClose }: { onClose: () => void }) {

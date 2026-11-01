@@ -3,7 +3,7 @@
  * useUndoRedo, useIndexedDB, useBroadcastChannel, useCalculationCache, useHighContrast
  * useWorkerCalculation, useWebGPU, useFileSystemAccess, useCanvasZoom, useTouchGestures
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 // ─── useUndoRedo ───
 describe('useUndoRedo', () => {

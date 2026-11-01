@@ -17,7 +17,7 @@ export const reportRouter = createRouter({
     }))
     .query(async ({ ctx, input }) => {
       const db = getDb();
-      let query = db.select().from(reports)
+      const query = db.select().from(reports)
         .where(eq(reports.userId, ctx.user.unionId))
         .orderBy(desc(reports.createdAt))
         .limit(input.limit)

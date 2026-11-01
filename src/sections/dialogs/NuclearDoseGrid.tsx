@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useI18n } from '@/hooks/useI18n';
 import {
-  Grid3X3, Download, RefreshCw, Activity, Map, BarChart3,
+  Grid3X3, Download, Activity, Map, BarChart3,
   CheckCircle, AlertTriangle, Info
 } from 'lucide-react';
 

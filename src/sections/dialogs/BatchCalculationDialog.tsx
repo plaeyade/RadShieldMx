@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Layers, Play, RotateCcw, CheckCircle2, Clock, Calculator } from 'lucide-react';
+import { Layers, Play, RotateCcw, CheckCircle2, Clock } from 'lucide-react';
 
 interface BatchBarrier {
   id: string;

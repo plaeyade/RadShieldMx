@@ -17,7 +17,7 @@ import { useWorkerCalculation } from '@/hooks/useWorkerCalculation';
 import { useHighContrast } from '@/hooks/useHighContrast';
 import { useWebGPUHeatmap } from '@/hooks/useWebGPUHeatmap';
 import { useCanvasKeyboardNav } from '@/hooks/useCanvasKeyboardNav';
-import { inverseArcher, tvlThickness } from '@/lib/shieldingMath';
+import '@/lib/shieldingMath';
 import {
   applyShieldingPresetToFloorPlan,
   buildAuditSnapshotMetadata,
@@ -30,7 +30,7 @@ import {
 } from '@/lib/canvasF85Workflow';
 import { suggestOccupancyProfile, NCRP_DESIGN_GOALS, formatOccupancy } from '@/lib/ncrpOccupancy';
 // v50: Motor optimizado con spatial hashing + async WebWorker
-import { ShieldingEngine } from '@/lib/shieldingEngine';
+import '@/lib/shieldingEngine';
 import { AsyncShieldingEngine } from '@/lib/engine/AsyncShieldingEngine';
 import { CanvasRenderer } from '@/lib/canvas/CanvasRenderer';
 import { createProfiler } from '@/lib/performance/Profiler';
@@ -51,7 +51,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useWebShare } from '@/hooks/useWebShare';
-import { useOpenCV, type WallDetection } from '@/hooks/useOpenCV';
+import { useOpenCV } from '@/hooks/useOpenCV';
 import { captureException } from '@/lib/sentry';
 import { buildKimiOAuthUrl } from '@/lib/authConfig';
 import { trpc } from '@/providers/trpc';
@@ -1590,7 +1590,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   useEffect(() => {
     const saved = loadCurrent();
     if (saved && saved.sources.length > 0) { resetFloorPlan(saved); toast.info('Proyecto restaurado de la sesion anterior'); }
-  }, []); // eslint-disable-line
+  }, []);  
 
   // v85: Show SourceSelector when 'source' tool is active
   useEffect(() => {

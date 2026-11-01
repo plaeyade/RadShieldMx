@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Upload, Scan, Layers, Activity, FileText } from 'lucide-react';
+import { X, Upload, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 

@@ -15,9 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-  Box, Layers, Download, Upload, FileText, Crosshair, Microscope,
-  RotateCcw, Play, Info, CheckCircle, ChevronRight, Triangle,
-  Circle, Square, Hexagon, Zap
+  Box, Download, FileText,
+  RotateCcw, Play, Info, CheckCircle, Triangle
 } from 'lucide-react';
 
 // ─── Reconstruction algorithms ───

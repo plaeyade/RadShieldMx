@@ -15,20 +15,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
+import '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
+import '@/components/ui/scroll-area';
+import '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  Box, Layers, Merge, Activity, Atom, Zap, RotateCcw,
-  Eye, Download, Info, Shield, Radio,
+  Box, Merge, Atom, Zap, RotateCcw, Shield
 } from 'lucide-react';
 import {
   PARTICLE_TYPES, RADIOLOGICAL_ZONES,
   generateDetectorMesh, mergeMappings, computeMeshStats,
-  getZoneForDoseRate,
   type ParticleType, type DetectorMesh, type MergedMapping,
 } from '@/lib/doseMappingEngine';
 

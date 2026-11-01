@@ -11,7 +11,6 @@ import {
   analyzeSource,
   analyzeModule,
   exportAnalysisJSON,
-  type AnalysisResult,
 } from '../performance/AlgorithmAnalyzer';
 
 describe('AlgorithmAnalyzer', () => {

@@ -11,20 +11,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  Atom, Calculator, ArrowRight, Shield, Zap,
+  Atom, Calculator, Shield, Zap,
   TrendingDown, AlertTriangle, Info, Download, Table,
 } from 'lucide-react';
 import {
   NEUTRON_REMOVAL_DATA, calculateNeutronTransmission, calculateNeutronShieldingThickness,
-  type NeutronRemovalData,
 } from '@/lib/phyXData';
 
 interface Props {

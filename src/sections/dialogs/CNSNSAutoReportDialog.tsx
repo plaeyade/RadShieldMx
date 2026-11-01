@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, Download, FileCheck, Clock, Building2, User, CalendarDays, ShieldCheck } from 'lucide-react';
+import { FileText, Download, FileCheck, Clock } from 'lucide-react';
 
 interface ReportSection {
   id: string;

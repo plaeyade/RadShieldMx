@@ -7,10 +7,10 @@
  * Reference: Poole et al., "A CAD interface for GEANT4", NIM A 618, 2010
  */
 import { useState, useRef } from 'react';
-import { X, Box, Upload, FileText, Download, Check, Layers, Triangle, AlertTriangle } from 'lucide-react';
+import { X, Box, Upload, Download, Layers, Triangle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { toast } from 'sonner';
 
 interface MeshStats {

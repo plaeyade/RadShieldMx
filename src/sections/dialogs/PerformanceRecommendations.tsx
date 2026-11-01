@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Cpu, Zap, Monitor, Timer, BarChart3, HardDrive, Globe, AlertTriangle, CheckCircle, Info
+  Cpu, Zap, Monitor, Timer, HardDrive, Globe, AlertTriangle, CheckCircle, Info
 } from 'lucide-react';
 
 interface Props {

@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  Truck, Shield, Package, AlertTriangle, FileCheck,
+  Truck, Package, AlertTriangle, FileCheck,
   Radiation, Scale, BookOpen, Info,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";

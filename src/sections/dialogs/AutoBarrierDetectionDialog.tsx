@@ -15,8 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  ScanLine, Upload, Loader2, Trash2, Eye, EyeOff, Shield,
-  DoorOpen, Square, Ruler, FileImage, Layers, CheckCircle2,
+  ScanLine, Upload, Loader2, Trash2, Eye, EyeOff, Shield, Square, Ruler, FileImage, Layers, CheckCircle2,
 } from "lucide-react";
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

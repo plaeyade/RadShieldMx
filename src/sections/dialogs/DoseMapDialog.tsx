@@ -5,7 +5,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -15,17 +15,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import {
-  Palette, Play, Download, Eye, BarChart3, Layers, Zap,
+  Palette, Play, Layers,
   Radio, Shield, Settings, RotateCcw, Map, Activity
 } from 'lucide-react';
 import {
   calculateDoseGrid, renderDoseHeatmap, generateDose3DMesh,
-  calculateDoseStats, TVL_PRIMARY_CONCRETE_MM, TVL_SECONDARY_CONCRETE_MM,
+  calculateDoseStats, TVL_PRIMARY_CONCRETE_MM,
   type DoseGridConfig, type DoseGridResult, type ColorMap,
 } from '@/lib/doseMapEngine';
 

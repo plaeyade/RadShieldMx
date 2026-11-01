@@ -5,15 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  Search, Server, Database, Link, FileImage, Activity, Wifi, WifiOff,
-  Download, Eye, Folders, Globe, Shield, RefreshCw, Settings, Plug,
-  Monitor, HardDrive, CheckCircle, AlertTriangle, Clock
+  Search, Server, Link, FileImage, Wifi, WifiOff,
+  Download, Eye, Folders, Globe, Shield, RefreshCw, Plug, HardDrive, CheckCircle, AlertTriangle
 } from 'lucide-react';
 
 // PACS Vendor configurations

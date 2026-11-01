@@ -4,12 +4,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Activity, Clock, TrendingDown, Atom, Play, Download } from 'lucide-react';
-import { solveBateman, generateTimePoints, searchNuclides, NUCLIDE_LIBRARY, GAMMA_CONSTANTS } from '@/lib/batemanSolver';
+import { Activity, Play, Download } from 'lucide-react';
+import { solveBateman, generateTimePoints, searchNuclides, NUCLIDE_LIBRARY } from '@/lib/batemanSolver';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

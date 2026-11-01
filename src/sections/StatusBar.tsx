@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Save, Clock, Activity, Shield, GitBranch, User } from 'lucide-react';
+import { Save, Clock, Shield, GitBranch, User } from 'lucide-react';
 import { useI18n } from '@/hooks/useI18n';
 
 interface StatusBarProps {

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { FileBarChart, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, Hash, Zap } from 'lucide-react';
+import { FileBarChart, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface LogEntry {
   id: string;

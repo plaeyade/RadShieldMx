@@ -1,1 +1,5 @@
-export default function Stub(props: any) { return null; }
+import { createUnavailableFeatureDialog } from '@/components/UnavailableFeatureDialog';
+
+const VRARBunkerPreview = createUnavailableFeatureDialog('Vista previa VR/AR del búnker');
+
+export default VRARBunkerPreview;

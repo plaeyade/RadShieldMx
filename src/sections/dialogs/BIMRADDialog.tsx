@@ -11,17 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
+import '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
   Box, Upload, Activity, Shield, ArrowRight, Play,
-  CheckCircle, Circle, AlertTriangle, TrendingDown, Layers,
-  Radio, Eye, Download, RotateCcw, FileBarChart, Info,
+  CheckCircle, Circle, TrendingDown, Download, RotateCcw
 } from 'lucide-react';
 import {
   extractBIMFromIFC, inverseSourceStrength, computeBIMDoseDistribution,

@@ -1,13 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { GitCompareArrows, Globe, Shield, BarChart3, ArrowRight, AlertTriangle } from 'lucide-react';
-import { REGULATIONS, compareDoseLimits, type Regulation } from '@/lib/internationalRegulations';
+import { GitCompareArrows, Shield, BarChart3, ArrowRight } from 'lucide-react';
+import { REGULATIONS } from '@/lib/internationalRegulations';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

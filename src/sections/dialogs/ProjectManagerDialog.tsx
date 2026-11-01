@@ -10,10 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import {
   FolderOpen, Trash2, Download, Upload, Cloud, HardDrive,
-  Search, Plus, FileJson, Save, RefreshCw,
+  Search, FileJson, Save, RefreshCw,
 } from 'lucide-react';
 
 interface LocalProject {

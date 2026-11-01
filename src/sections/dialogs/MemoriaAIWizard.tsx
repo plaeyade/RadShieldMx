@@ -17,19 +17,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  BookOpen, Bot, User, ChevronRight, ChevronLeft, Download, Sparkles,
-  CheckCircle, AlertTriangle, FileText, Calculator, Shield, Zap, Star,
-  ClipboardCheck, RotateCcw, Send, Lightbulb, TrendingUp, Clock
+  Bot, User, ChevronRight, ChevronLeft, Download, Sparkles,
+  CheckCircle, AlertTriangle, FileText, Calculator, Shield, Zap, RotateCcw, Send, Clock
 } from 'lucide-react';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
 import { buildAnalyticMemoryEvidenceSection, buildAnalyticMemorySnapshot, createFloorPlanEvidenceSources } from '@/lib/analyticMemoryEvidence';

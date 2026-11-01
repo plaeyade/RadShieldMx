@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Server, Search, Link, Download, Eye, Database, Wifi, WifiOff, RefreshCw, FileImage, User, Calendar, Activity } from 'lucide-react';
+import { Server, Search, Link, Download, Eye, Database, Wifi, WifiOff, RefreshCw, FileImage, Calendar, Activity } from 'lucide-react';
 import { getDefaultOrthancUrl, isOrthancConfigured } from '@/lib/pacsConfig';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

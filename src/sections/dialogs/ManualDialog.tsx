@@ -3,7 +3,7 @@
 // Todas las funcionalidades v1–v58 documentadas extensamente
 // =============================================================================
 import { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Search, ChevronRight } from 'lucide-react';

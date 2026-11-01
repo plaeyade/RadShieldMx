@@ -12,7 +12,7 @@
  * Después: Clases separadas con responsabilidad única
  */
 import type { FloorPlan, Barrier, RadiationSource, OccupiedRegion } from '@/types/radshield';
-import type { CanvasSampleLine, CanvasSamplePoint } from '@/hooks/useCanvas';
+import type { CanvasSampleLine } from '@/hooks/useCanvas';
 import { getEquipmentVisualProfile, type EquipmentIconKind } from '@/lib/equipmentVisuals';
 import { getEquipmentIconProfile } from '@/lib/f98UnifiedIconography';
 

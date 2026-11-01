@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, AlertTriangle, Shield, Eye, Stethoscope, Users, Skull, FileText, BookOpen, CheckCircle, Circle, Activity, ClipboardList, Save, FileDown } from 'lucide-react';
+import { X, AlertTriangle, Shield, Eye, Stethoscope, Users, Skull, BookOpen, CheckCircle, Circle, Activity, Save, FileDown } from 'lucide-react';
 import { getAllSpecialCases } from '@/lib/specialCases';
 import { INTEGRITY_CHECKS, BACKUP_ITEMS, PDF_COMPONENTS } from '@/lib/systemIntegrity';
 import { toast } from 'sonner';

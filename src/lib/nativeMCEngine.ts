@@ -562,7 +562,7 @@ export function runNativeMC(
       }
       
       let pos: [number, number, number] = [...src.position] as [number, number, number];
-      let weight = 1.0;
+      const weight = 1.0;
       let alive = true;
       let numScatters = 0;
       

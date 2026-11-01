@@ -9,9 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  Cpu, Atom, Box, Layers, Zap, Globe, Database, Crosshair,
-  ChevronRight, ChevronLeft, X, FileText, Download, Play,
-  Pause, RotateCcw, Code, Terminal, Settings, Eye, Activity
+  Cpu, Box, Layers, Database,
+  ChevronRight, ChevronLeft, X, FileText, Play, Code, Eye, Activity
 } from 'lucide-react';
 import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 

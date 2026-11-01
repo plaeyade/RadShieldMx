@@ -7,24 +7,23 @@ import { useState, useMemo } from 'react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
+import '@/components/ui/select';
+import 'sonner';
 import {
-  Factory, Shield, Radio, Timer, AlertTriangle, Info,
-  FlaskConical, Ruler, Eye, BarChart3,
+  Factory, Shield, Radio, AlertTriangle,
+  FlaskConical
 } from 'lucide-react';
 import {
   INDUSTRIAL_SOURCES, INDUSTRIAL_CONTROL_ZONES, NDT_TECHNIQUES,
-  calculateControlDistance, calculateIndustrialShielding, calculateSafeOperatingTime,
-  type IndustrialSource, type ControlZone,
+  calculateControlDistance, calculateSafeOperatingTime
 } from '@/lib/industrialRadiation';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

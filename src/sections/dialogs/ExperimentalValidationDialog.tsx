@@ -1,14 +1,14 @@
 // ExperimentalValidationDialog.tsx — Cross-validation with measured data
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from 'sonner';
-import { FlaskConical, Database, TrendingDown, Upload } from 'lucide-react';
+import 'sonner';
+import { FlaskConical, Database } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

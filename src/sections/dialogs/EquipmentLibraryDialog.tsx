@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Brain, FlaskConical, Crosshair, Atom, ExternalLink, BookOpen, Database } from 'lucide-react';
+import { Activity, Brain, FlaskConical, Crosshair, Atom, ExternalLink, Database } from 'lucide-react';
 
 interface EquipmentLibraryDialogProps {
   open: boolean;

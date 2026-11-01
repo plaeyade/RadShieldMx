@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { Clock, TrendingDown, CalendarDays } from 'lucide-react';
 
 interface ExposureEntry {

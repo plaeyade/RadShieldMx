@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/command';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
-  Play, Calculator, BookOpen, Layers, BarChart3, FileText, ShieldCheck, Pencil,
-  Scan, Cpu, Atom, FileImage, FolderOpen, Wand2, Settings, Database,
-  ClipboardCheck, GitBranch, TrendingDown, Cloud, Zap, Construction,
+  Play, Calculator, BookOpen, Layers, BarChart3, FileText, Pencil,
+  Scan, Cpu, Atom, FolderOpen, Wand2, Settings,
+  ClipboardCheck, GitBranch, Cloud, Zap, Construction,
   ArrowUpDown, Wind, CalendarDays, Table, Library, Brain, Hexagon,
-  FlaskConical, Crosshair, Ruler, FileCheck, Box, Gauge, DollarSign,
-  Upload, Download, FileDown, AlertTriangle, Sun, Moon, Undo, Redo,
+  FlaskConical, Ruler, FileCheck, Box,
+  Upload, Download, FileDown, Sun,
   Globe, Activity, Keyboard, Search, FileBarChart, HelpCircle, Map,
-  Flame, Grid3x3, ChevronRight
+  Flame, Grid3x3
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 

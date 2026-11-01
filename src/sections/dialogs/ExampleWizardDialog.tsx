@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Wand2, ChevronRight, ChevronLeft, CheckCircle2, Zap, CircleDot, Layers, BookOpen, Calculator, FileText } from 'lucide-react';
+import { Wand2, ChevronRight, ChevronLeft, CheckCircle2, Zap, CircleDot, Layers, BookOpen } from 'lucide-react';
 
 interface WizardStep {
   title: string;

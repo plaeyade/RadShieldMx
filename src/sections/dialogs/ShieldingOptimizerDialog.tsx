@@ -13,11 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { TrendingDown, Play, Download, CheckCircle, AlertTriangle, Star, BarChart3, Layers, DollarSign, Weight, ArrowRight } from 'lucide-react';
+import { TrendingDown, Play, Download, CheckCircle, AlertTriangle, Star, BarChart3, Layers, DollarSign, Weight } from 'lucide-react';
 import {
   runShieldingOptimization, OPTIMIZATION_MATERIALS,
   type OptimizerConfig, type OptimizationBarrier, type OptimizationResult, type ObjectiveFunction,

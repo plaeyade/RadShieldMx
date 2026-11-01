@@ -4,14 +4,13 @@
  * Groups: NCRP, Analysis, Tools, Import/Export
  */
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
 import {
   Atom, Database, Brain, Building2, Code,
   TrendingDown, GitCompareArrows, FileDown,
   Crosshair, FileText, ShieldPlus, ShieldAlert,
-  Wind, Truck, ScanEye, Move, ChevronRight, ChevronLeft,
-  Zap, BarChart3, FileBarChart, MousePointer2, Ruler, Layers,
+  Wind, Truck, ScanEye, ChevronRight, ChevronLeft, MousePointer2, Ruler, Layers,
   Magnet, PenTool, Box, MapPin, Glasses
 } from 'lucide-react';
 

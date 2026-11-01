@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useI18n } from '@/hooks/useI18n';
 import {
-  Cpu, Play, Download, Box, Layers, Activity, Info,
+  Cpu, Play, Download, Box, Layers, Activity,
   Settings, RotateCcw, FileOutput, Gauge
 } from 'lucide-react';
 import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';

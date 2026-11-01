@@ -20,8 +20,8 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import {
-  Atom, Play, Download, Copy, CheckCircle, Radio,
-  Settings, Zap, Eye, FileCode, FlaskConical, RotateCcw,
+  Atom, Play, Download, Copy, Radio,
+  Settings, Zap, Eye, FileCode, RotateCcw,
 } from 'lucide-react';
 import { RADIONUCLIDES } from '@/lib/nuclearMedicine';
 

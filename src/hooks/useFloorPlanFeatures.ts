@@ -2,7 +2,7 @@
 // 1. AI Timeline Generator, 2. Easy Floor Planning, 3. Electrical Plans
 // 4. Plumbing Drawings, 5. Advanced Diagramming
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. AI TIMELINE GENERATOR — Auto-generate construction timelines from floor plan

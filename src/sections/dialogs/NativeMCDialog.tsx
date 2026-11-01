@@ -6,20 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  Cpu, Play, Pause, RotateCcw, Download, Activity, Zap, Shield,
-  Box, AlertTriangle, CheckCircle, BarChart3, FileText, Atom, Layers
+  Cpu, Play, Pause, RotateCcw, Download, Activity, Zap,
+  Box, AlertTriangle, CheckCircle, BarChart3, Atom, Layers
 } from 'lucide-react';
 import {
   runNativeMC, parseSTEPFile, detectOverlaps,
   type MCSource, type MCDetector, type MCVolumeScoring, type MCConfig,
   type MCResult, type Triangle, type MeshRegion, type BRepModel,
-  MATERIAL_XS, getHstar10,
+  MATERIAL_XS,
 } from '@/lib/nativeMCEngine';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

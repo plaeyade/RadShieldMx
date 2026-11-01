@@ -14,17 +14,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  FlaskConical, Calculator, Table, TrendingUp, Atom,
-  Shield, Zap, ArrowRight, Download, Copy,
+  Calculator, Table, Atom, Zap, Download, Copy,
 } from 'lucide-react';
 import {
-  COMPOUNDS, ELEMENTS, ENERGY_GRID_KEV,
+  COMPOUNDS, ELEMENTS,
   calculateCompoundMAC, calculateHVL, calculateTVL, calculateMFP,
   calculateZeff, calculateNeff, calculateEABF,
   type CompoundData,

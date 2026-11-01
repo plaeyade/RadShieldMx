@@ -8,11 +8,11 @@
  * - ICRP 144: Radiological Protection from Occupational Exposure
  */
 import { useState } from 'react';
-import { X, Atom, Calculator, Download, Clock, Radiation, Shield } from 'lucide-react';
+import { X, Atom, Calculator, Clock, Radiation, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { toast } from 'sonner';
 
 interface ActivationResult {

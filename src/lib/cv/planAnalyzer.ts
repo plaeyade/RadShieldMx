@@ -333,7 +333,7 @@ function computeOtsuThreshold(data: Uint8ClampedArray): number {
   const histogram = new Uint32Array(256);
   for (let i = 0; i < data.length; i++) histogram[data[i]]++;
 
-  let total = data.length;
+  const total = data.length;
   let sum = 0;
   for (let i = 0; i < 256; i++) sum += i * histogram[i];
 
