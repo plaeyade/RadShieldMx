@@ -28,7 +28,10 @@ describe('material technical registry', () => {
     expect(lead?.thickness_mm).toBe(70);
     expect(nipol350?.thickness_mm).toBe(301);
     expect(nipol500?.thickness_mm).toBe(210);
-    expect(nipol500!.mass_kg_per_m2).toBeGreaterThan(nipol350!.mass_kg_per_m2);
+    // A 15 MV la atenuación de fotones escala con el espesor másico (ρ·x): el material más denso
+    // es más delgado pero pesa prácticamente lo mismo por m² (301 mm × 3,5 ≈ 210 mm × 5,0).
+    expect(Math.abs(nipol500!.mass_kg_per_m2 - nipol350!.mass_kg_per_m2) / nipol350!.mass_kg_per_m2).toBeLessThan(0.02);
+    expect(nipol500!.thickness_mm).toBeLessThan(nipol350!.thickness_mm);
     expect(nipol500!.structuralLoad_kPa).toBeGreaterThan(0);
     expect(comparison.every((item) => Number.isFinite(item.cost_per_m2))).toBe(true);
   });

@@ -1,6 +1,7 @@
 import type { Barrier, FloorPlan, OccupiedRegion, RadiationSource } from '@/types/radshield';
 import type { F426SurfaceRole, F426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
 import type { F436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
+import { getModalityEnergy_MeV } from '@/lib/shieldingMath';
 
 export type F439GeometryEntityType = 'barrier' | 'source' | 'region' | 'penetration' | 'overlay';
 
@@ -162,7 +163,7 @@ function sourceEntity(source: RadiationSource, scaleMPerPixel: number): F439Norm
     evidenceIds: ['F426', source.modality.standard || 'standard-pending'],
     warnings: [
       source.workloadValue > 0 ? '' : 'Workload no definido.',
-      source.modality.category === 'therapy' && (source.modality.energy_MeV ?? 0) > 10 ? 'Energia alta: revisar neutrones/puerta/laberinto.' : '',
+      source.modality.category === 'therapy' && getModalityEnergy_MeV(source) > 10 ? 'Energia alta: revisar neutrones/puerta/laberinto.' : '',
     ].filter(Boolean),
   };
 }
