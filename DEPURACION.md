@@ -53,3 +53,33 @@ Pendiente para la etapa 3:
 - implementar o retirar del menú las 16 funciones anunciadas (decisión de producto);
 - bajar los 243 `no-unused-vars` restantes (variables locales, no imports);
 - tipar los 335 `any` de cálculo (`src/lib`) antes que los de UI.
+
+# Evidencia de GAMMA y funciones pendientes (2026-11-01)
+
+**Biblioteca de referencias (antes Stub) → consumidor de `gamma/evidencia@1`.**
+- Carga el JSON que entrega GAMMA-AI y verifica cada cita: SHA-256 del texto citado e identidad
+  de la fuente (`source_` + hash del documento).
+- Las citas alteradas se marcan y no se pueden copiar.
+- Las verificadas se copian a la memoria con su identificador.
+- La evidencia que se declare validada o apta para firma se rechaza.
+- Pruebas: 5, con una fixture generada por el propio GAMMA-AI.
+
+**Propuesta para las 15 funciones de menú que siguen sin implementar** (decisión de producto):
+
+| Función | Propuesta | Motivo |
+| --- | --- | --- |
+| Calculadora de blindaje | Retirar del menú | Duplica la calculadora de barrera y el asistente de equipos, que sí calculan |
+| Barrera rápida | Retirar del menú | Igual que la anterior |
+| Verificación de blindaje | Implementar | Recalcular la dosis tras el blindaje propuesto en puntos de control; base para firma |
+| Análisis de incertidumbre | Implementar | El MC de Cyclotron-SIM ya da error estadístico; propagar ±σ de W, U, T y TVL |
+| Calculadora de skyshine | Implementar | NCRP 151 §4 (fotones) y McGinley (neutrones); necesaria para techos de baja ocupación |
+| Ventilación del búnker | Implementar (ciclotrón) | Activación de aire (Ar-41, N-13) en la bóveda KIUBE; dato de Cyclotron-SIM |
+| Dosimetría de terapia con radionúclidos | Retirar | Fuera del alcance de blindaje estructural |
+| Ajuste estacional de carga | Retirar | Sin base normativa; la carga se declara anual o semanal |
+| Manual de Shleien | Retirar | Lo cubre la biblioteca de referencias con evidencia de GAMMA |
+| Gestor de proyectos (mosaico) | Retirar | Ya existe el gestor de proyectos principal |
+| Campo de solución 3D | Retirar | Lo cubre el visor 3D existente |
+| Motor de temas | Retirar | Basta el modo oscuro existente |
+| Historial deshacer/rehacer | Implementar (UI) | El historial ya existe en el estado; sólo falta el panel |
+| Vista previa VR/AR | Retirar | Fuera de alcance |
+| Tablero de validación | Implementar | Reunir las validaciones NCRP y numéricas que hoy están dispersas |
