@@ -1,0 +1,70 @@
+{
+ "contrato": "gamma/ingesta@1",
+ "productor": {
+  "repo": "radshieldmx",
+  "commit": "bf4cae45933c"
+ },
+ "generado_utc": "2026-11-01T18:51:36+00:00",
+ "documentos": [
+  {
+   "id_local": "data/pdf/ncrp_151",
+   "ruta": "data/pdf/ncrp_151.pdf",
+   "sha256": "3a110fa12aeee43063fb6704bd225b7622b35dbecaaaa9ea60c585a84c6b670c",
+   "bytes": 933540,
+   "mime": "application/pdf",
+   "titulo": "NCRP Report 151: Structural Shielding Design for Megavoltage X- and Gamma-Ray Facilities",
+   "dominio": "radioproteccion/normas",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "NCRP",
+   "licencia": "ejemplar del propietario; uso interno",
+   "jurisdiccion": "US",
+   "idioma": "en"
+  },
+  {
+   "id_local": "data/pdf/nom_008_ener",
+   "ruta": "data/pdf/nom_008_ener.pdf",
+   "sha256": "ba6467d1777d00b82eb7e1faeb4a4c1879d48739ae4a3cb6d850d7b4feb1d442",
+   "bytes": 731257,
+   "mime": "application/pdf",
+   "titulo": "NOM-008-ENER: eficiencia energética en edificaciones",
+   "dominio": "edificacion/normas",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "SENER",
+   "licencia": "ejemplar del propietario; uso interno",
+   "jurisdiccion": "MX",
+   "idioma": "es"
+  },
+  {
+   "id_local": "data/pdf/room_shield_design",
+   "ruta": "data/pdf/room_shield_design.pdf",
+   "sha256": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
+   "bytes": 7435438,
+   "mime": "application/pdf",
+   "titulo": "Room shielding design (referencia)",
+   "dominio": "radioproteccion/blindajes",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "referencia técnica",
+   "licencia": "ejemplar del propietario; uso interno",
+   "jurisdiccion": "INT",
+   "idioma": "en"
+  },
+  {
+   "id_local": "data/pdf/tg108_pet_shielding",
+   "ruta": "data/pdf/tg108_pet_shielding.pdf",
+   "sha256": "e049e205ca840cc158fc65a112388db7c040e39b7f8e3bdea391f047c708b3c1",
+   "bytes": 641275,
+   "mime": "application/pdf",
+   "titulo": "AAPM TG-108: PET and PET/CT Shielding Requirements",
+   "dominio": "radioproteccion/normas",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "AAPM",
+   "licencia": "ejemplar del propietario; uso interno",
+   "jurisdiccion": "US",
+   "idioma": "en"
+  }
+ ]
+}
