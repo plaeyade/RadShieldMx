@@ -260,3 +260,6 @@ Cada uno generó la evidencia de cierre de una fase (F1xx–F6xx). Se conservan 
 | `f78-fullstack-db-readiness.mjs` | `prepare:f78:db-fullstack` |
 
 - `manifiesto_gamma.py`: genera `gamma-ingesta.json` (contrato `gamma/ingesta@1`) con las normas de `data/pdf/` para que GAMMA-AI las indexe y RadShieldMx consuma la evidencia citada.
+
+- `gamma-consultas-memoria.json`: consultas por sección de la memoria CNSNS. GAMMA genera con ellas el paquete `src/data/gamma-evidencia-memoria.json`:
+  `gamma ecosistema paquete scripts/gamma-consultas-memoria.json --salida-paquete src/data/gamma-evidencia-memoria.json --experimental-en-revision --manifiesto gamma-ingesta.json`
