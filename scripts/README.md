@@ -258,3 +258,5 @@ Cada uno generó la evidencia de cierre de una fase (F1xx–F6xx). Se conservan 
 | `f511-f514-beta-closure.mjs` | `prepare:f511-f514:beta-closure` |
 | `f515-f520-post-beta-plan.mjs` | `prepare:f515-f520:post-beta-plan` |
 | `f78-fullstack-db-readiness.mjs` | `prepare:f78:db-fullstack` |
+
+- `manifiesto_gamma.py`: genera `gamma-ingesta.json` (contrato `gamma/ingesta@1`) con las normas de `data/pdf/` para que GAMMA-AI las indexe y RadShieldMx consuma la evidencia citada.
