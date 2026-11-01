@@ -166,20 +166,39 @@ interface AppState {
   setActiveCategory: (c: string | null) => void;
 }
 
+/**
+ * Diálogos de menú que duplicaban a otro ya implementado (etapa 3, 2026-11-01): abrir la clave
+ * antigua abre el diálogo real. Los menús, atajos y accesos rápidos existentes siguen funcionando.
+ */
+export const DIALOGOS_REDIRIGIDOS: Readonly<Record<string, string>> = {
+  shieldingCalculator: 'barrierCalculator',
+  quickBarrier: 'barrierCalculator',
+  shleien: 'referenceLibrary',
+  solutionField3D: 'viewer3d',
+  uncertainty: 'gumUncertainty',
+  validationDashboard: 'ncrpValidation',
+};
+
+export const resolverDialogo = (name: string): string => DIALOGOS_REDIRIGIDOS[name] ?? name;
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Dialogs
   dialogs: Object.fromEntries(DIALOG_NAMES.map((n) => [n, false])) as Record<string, any>,
   dialogHistory: [],
-  open: (name) => set((s) => ({
+  open: (alias) => set((s) => {
+    const name = resolverDialogo(alias);
+    return {
     dialogs: { ...s.dialogs, [name]: true },
     dialogHistory: s.dialogHistory.includes(name) ? s.dialogHistory : [...s.dialogHistory, name],
-  })),
+    };
+  }),
   close: (name) => set((s) => ({
     dialogs: { ...s.dialogs, [name]: false },
     dialogHistory: s.dialogHistory.filter((n) => n !== name),
   })),
   closeAll: () => set({ dialogs: Object.fromEntries(DIALOG_NAMES.map((n) => [n, false])) as Record<string, any>, dialogHistory: [] }),
-  openExclusive: (name) => set((s) => {
+  openExclusive: (alias) => set((s) => {
+    const name = resolverDialogo(alias);
     const allClosed = Object.fromEntries(DIALOG_NAMES.map((n) => [n, false])) as Record<string, any>;
     allClosed[name] = true;
     return { dialogs: allClosed, dialogHistory: [...s.dialogHistory.filter((n) => n !== name), name] };

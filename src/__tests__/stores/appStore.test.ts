@@ -2,6 +2,7 @@
  * C.4 — Unit tests: Zustand appStore
  * Tests for dialog management, canvas state, calculation state
  */
+import { resolverDialogo } from '@/stores/appStore';
 import { describe, it, expect } from 'vitest';
 import { useAppStore } from '@/stores/appStore';
 
@@ -168,8 +169,10 @@ describe('appStore — Dialog operations on migrated dialogs', () => {
       'bimConnector', 'cloudSync', 'validationDashboard', 'externalConnector',
       'aiAssistant', 'manual',
     ];
-    for (const name of migratedDialogs) {
-      useAppStore.getState().open(name as any);
+    for (const alias of migratedDialogs) {
+      // Las claves de diálogos duplicados (etapa 3) abren el diálogo real.
+      const name = resolverDialogo(alias);
+      useAppStore.getState().open(alias as any);
       expect(useAppStore.getState().dialogs[name]).toBe(true);
       useAppStore.getState().close(name as any);
       expect(useAppStore.getState().dialogs[name]).toBe(false);

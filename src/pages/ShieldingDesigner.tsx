@@ -134,10 +134,8 @@ const DecayChainsDialog = lazy(() => import('@/sections/dialogs/DecayChainsDialo
 const CompareScenariosDialog = lazy(() => import('@/sections/dialogs/CompareScenariosDialog'));
 const TornadoSensitivityDialog = lazy(() => import('@/sections/dialogs/TornadoSensitivityDialog'));
 const NCRPValidationDialog = lazy(() => import('@/sections/dialogs/NCRPValidationDialog'));
-const ThemeEngineDialog = lazy(() => import('@/sections/dialogs/ThemeEngineDialog'));
 const BIMConnectorDialog = lazy(() => import('@/sections/dialogs/BIMConnectorDialog'));
 const CloudSyncDialog = lazy(() => import('@/sections/dialogs/CloudSyncDialog'));
-const ValidationDashboardDialog = lazy(() => import('@/sections/dialogs/ValidationDashboardDialog'));
 const ExternalConnectorDialog = lazy(() => import('@/sections/dialogs/ExternalConnectorDialog'));
 const BIMRADDialog = lazy(() => import('@/sections/dialogs/BIMRADDialog'));
 const CollaborationHub = lazy(() => import('@/sections/dialogs/CollaborationHub'));
@@ -152,7 +150,6 @@ const AutoBarrierDetectionDialog = lazy(() => import('@/sections/dialogs/AutoBar
 const PredictiveMaterialDialog = lazy(() => import('@/sections/dialogs/PredictiveMaterialDialog'));
 const AnomalyDetectionDialog = lazy(() => import('@/sections/dialogs/AnomalyDetectionDialog'));
 const AutoFillEquipmentDialog = lazy(() => import('@/sections/dialogs/AutoFillEquipmentDialog'));
-const VRARBunkerPreview = lazy(() => import('@/sections/dialogs/VRARBunkerPreview'));
 const VideoTutorialGenerator = lazy(() => import('@/sections/dialogs/VideoTutorialGenerator'));
 const AnimatedDoseMapsDialog = lazy(() => import('@/sections/dialogs/AnimatedDoseMapsDialog'));
 const PointCloudImportDialog = lazy(() => import('@/sections/dialogs/PointCloudImportDialog'));
@@ -188,7 +185,6 @@ const CategoryToolsDialog = lazy(() => import('@/sections/dialogs/CategoryToolsD
 const EmergencyProceduresDialog = lazy(() => import('@/sections/dialogs/EmergencyProceduresDialog'));
 const AuditTrailDialog = lazy(() => import('@/sections/dialogs/AuditTrailDialog'));
 const EPAGuidanceDialog = lazy(() => import('@/sections/dialogs/EPAGuidanceDialog'));
-const ShleienHandbookDialog = lazy(() => import('@/sections/dialogs/ShleienHandbookDialog'));
 const GammaKnifeDialog = lazy(() => import('@/sections/dialogs/GammaKnifeDialog'));
 const BraquiterapiaCo60Dialog = lazy(() => import('@/sections/dialogs/BraquiterapiaCo60Dialog'));
 const VersaHD15MVDialog = lazy(() => import('@/sections/dialogs/VersaHD15MVDialog'));
@@ -254,7 +250,6 @@ const ExportDialog = lazy(() => import('@/sections/dialogs/ExportDialog'));
 const MCDialog = lazy(() => import('@/sections/dialogs/MCDialog'));
 const ProjectManagerDialog = lazy(() => import('@/sections/dialogs/ProjectManagerDialog'));
 const Viewer3DDialog = lazy(() => import('@/sections/dialogs/Viewer3DDialog'));
-const QuickBarrierDialog = lazy(() => import('@/sections/dialogs/QuickBarrierDialog'));
 const EquipmentDBDialog = lazy(() => import('@/sections/dialogs/EquipmentDBDialog'));
 const MCCloudDialog = lazy(() => import('@/sections/dialogs/MCCloudDialog'));
 const MCConfigDialog = lazy(() => import('@/sections/dialogs/MCConfigDialog'));
@@ -267,14 +262,11 @@ const CNSNSChecklistDialog = lazy(() => import('@/sections/dialogs/CNSNSChecklis
 const BatchImportDialog = lazy(() => import('@/sections/dialogs/BatchImportDialog'));
 const CostOptimizerDialog = lazy(() => import('@/sections/dialogs/CostOptimizerDialog'));
 const NeutronDialog = lazy(() => import('@/sections/dialogs/NeutronDialog'));
-const SeasonalDialog = lazy(() => import('@/sections/dialogs/SeasonalDialog'));
-const UncertaintyDialog = lazy(() => import('@/sections/dialogs/UncertaintyDialog'));
 const VentilationDialog = lazy(() => import('@/sections/dialogs/VentilationDialog'));
 const DICOMDialog = lazy(() => import('@/sections/dialogs/DICOMDialog'));
 const TechSpecsDialog = lazy(() => import('@/sections/dialogs/TechSpecsDialog'));
 const CNSNSDashboardDialog = lazy(() => import('@/sections/dialogs/CNSNSDashboardDialog'));
 // v13.4+v13.5: Shielding Calculator + DXF Viewer
-const ShieldingCalculatorDialog = lazy(() => import('@/sections/dialogs/ShieldingCalculatorDialog'));
 // v14.3: Gap analysis - Excel hojas faltantes
 const CBCTIGRTDialog = lazy(() => import('@/sections/dialogs/CBCTIGRTDialog'));
 const MaintenanceLogDialog = lazy(() => import('@/sections/dialogs/MaintenanceLogDialog'));
@@ -286,7 +278,6 @@ const SpecialCasesDialog = lazy(() => import('@/sections/dialogs/SpecialCasesDia
 // v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points
 const BarrierEditorDialog = lazy(() => import('@/sections/dialogs/BarrierEditor'));
 const AirKermaOverlayDialog = lazy(() => import('@/sections/dialogs/AirKermaOverlay'));
-const MosaicProjectManagerDialog = lazy(() => import('@/sections/dialogs/ProjectManager'));
 const ControlPointsDialog = lazy(() => import('@/sections/dialogs/ControlPointsDialog'));
 // v39: PHITS, CADMesh, JENDL-5
 const PHITSInputGeneratorDialog = lazy(() => import('@/sections/dialogs/PHITSInputGenerator'));
@@ -305,7 +296,6 @@ const DVHAnalyzerDialog = lazy(() => import('@/sections/dialogs/DVHAnalyzer'));
 // v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification
 const FLUKAInputGeneratorDialog = lazy(() => import('@/sections/dialogs/FLUKAInputGenerator'));
 const PENELOPEInputGeneratorDialog = lazy(() => import('@/sections/dialogs/PENELOPEInputGenerator'));
-const RadionuclideTherapyDosimetryDialog = lazy(() => import('@/sections/dialogs/RadionuclideTherapyDosimetry'));
 const ShieldingVerificationDialog = lazy(() => import('@/sections/dialogs/ShieldingVerification'));
 // v42: McGinley integration — Laminated barriers + Controlled areas
 const LaminatedBarrierCalculatorDialog = lazy(() => import('@/sections/dialogs/LaminatedBarrierCalculator'));
@@ -319,9 +309,7 @@ const Attila4MCVarianceReductionDialog = lazy(() => import('@/sections/dialogs/A
 // v44: Attila4MC GUI features — MCNP Deck, CAD Mapper, 3D Solution Fields
 const MCNPGUIDeckGeneratorDialog = lazy(() => import('@/sections/dialogs/MCNPGUIDeckGenerator'));
 const CADAssemblyMapperDialog = lazy(() => import('@/sections/dialogs/CADAssemblyMapper'));
-const SolutionField3DDialog = lazy(() => import('@/sections/dialogs/SolutionField3D'));
 // v46: Recommendations A-E — Skyshine, Annual Dose, Cross-Validation, Oblique, Spectra, Adaptive, Self-Shielding, Transmission, Neutron Maze
-const SkyshineCalculatorDialog = lazy(() => import('@/sections/dialogs/SkyshineCalculator'));
 const AnnualDoseReportDialog = lazy(() => import('@/sections/dialogs/AnnualDoseReport'));
 const CrossValidationDialog = lazy(() => import('@/sections/dialogs/CrossValidationDialog'));
 const ObliqueIncidenceDialog = lazy(() => import('@/sections/dialogs/ObliqueIncidenceDialog'));
@@ -562,11 +550,8 @@ export default function ShieldingDesigner() {
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [showIsodosis, setShowIsodosis] = useState(false);
   const [showLaminatedBarrier, setShowLaminatedBarrier] = useState(false);
-  const [showMosaicProjectManager, setShowMosaicProjectManager] = useState(false);
   const [showPerformanceRecommendations, setShowPerformanceRecommendations] = useState(false);
-  const [showSkyshine, setShowSkyshine] = useState(false);
   const [showSourceSelector, setShowSourceSelector] = useState(false);
-  const [showTherapyDosimetry, setShowTherapyDosimetry] = useState(false);
 
   // [ZUSTAND] themeEngine, bimConnector, cloudSync, validationDashboard
   // const [showThemeEngine, setShowThemeEngine] = useState(false);
@@ -1075,7 +1060,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       // v38: Mosaic Atomics tools
       case 'barrier-editor': setShowBarrierEditor(true); break;
       case 'air-kerma': setShowAirKermaOverlay(true); break;
-      case 'project-manager': setShowMosaicProjectManager(true); break;
+      case 'project-manager': useAppStore.getState().open('projects'); break;
       case 'control-points': setShowControlPoints(true); break;
       // v39: PHITS, CADMesh, JENDL-5
       case 'phits-generator': setShowPHITSGenerator(true); break;
@@ -2083,7 +2068,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     onCBCTIGRT: () => useAppStore.getState().open('cbctIgrt'),
     onVentilation: () => useAppStore.getState().open('ventilation'),
     onUncertainty: () => useAppStore.getState().open('uncertainty'),
-    onSeasonal: () => useAppStore.getState().open('seasonal'),
     onMC: () => useAppStore.getState().open('mc'),
     onMCCloud: () => useAppStore.getState().open('mcConfig'),
     onMonteCarloSim: () => useAppStore.getState().open('monteCarloSim'),
@@ -2202,9 +2186,9 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           // v80: Smart Rooms
           onToggleRoomTemplates={() => setShowRoomTemplates(prev => !prev)}
           onMaterialProperty={()=>useAppStore.getState().open('materialProperty')} onLeadFreeMaterials={()=>useAppStore.getState().open('materialComparison')} onNeutronRemoval={()=>useAppStore.getState().open('neutronRemoval')}
-          onNuclearMedicine={()=>useAppStore.getState().open('nuclearMedicine')} onGMPCertification={()=>useAppStore.getState().open('certification')} onAAPMTG108PET={()=>useAppStore.getState().open('aapmTG108')} onIPEM109={()=>useAppStore.getState().open('ipem109')} onChiltonSkyshine={()=>useAppStore.getState().open('skyshine')} onTherapyShielding={()=>useAppStore.getState().open('therapyShielding')} onDecayChains={()=>useAppStore.getState().open('decayChains')} onAbout={()=>useAppStore.getState().open('about')} onGlossary={()=>useAppStore.getState().open('glossary')} onThemeEngine={()=>useAppStore.getState().open('themeEngine')} onBIMConnector={()=>useAppStore.getState().open('bimConnector')} onCloudSync={()=>useAppStore.getState().open('cloudSync')} onValidationDashboard={()=>useAppStore.getState().open('validationDashboard')} onExternalConnector={()=>useAppStore.getState().open('externalConnector')}
+          onNuclearMedicine={()=>useAppStore.getState().open('nuclearMedicine')} onGMPCertification={()=>useAppStore.getState().open('certification')} onAAPMTG108PET={()=>useAppStore.getState().open('aapmTG108')} onIPEM109={()=>useAppStore.getState().open('ipem109')} onChiltonSkyshine={()=>useAppStore.getState().open('skyshine')} onTherapyShielding={()=>useAppStore.getState().open('therapyShielding')} onDecayChains={()=>useAppStore.getState().open('decayChains')} onAbout={()=>useAppStore.getState().open('about')} onGlossary={()=>useAppStore.getState().open('glossary')} onBIMConnector={()=>useAppStore.getState().open('bimConnector')} onCloudSync={()=>useAppStore.getState().open('cloudSync')} onValidationDashboard={()=>useAppStore.getState().open('validationDashboard')} onExternalConnector={()=>useAppStore.getState().open('externalConnector')}
           onBIMRAD={()=>useAppStore.getState().open('bimRAD')} onCollaboration={()=>useAppStore.getState().open('collaborationHub')} onCollaborationHub={()=>useAppStore.getState().open('collaborationHub')} onGATE={()=>useAppStore.getState().open('gateSimulation')} onGATEPET={()=>useAppStore.getState().open('gateSimulation')} onExternalSoftware={()=>useAppStore.getState().open('externalConnector')}
-          onMonteCarlo={()=>useAppStore.getState().open('monteCarloIntegration')} onGUMUncertainty={()=>useAppStore.getState().open('gumUncertainty')} onExperimental={()=>useAppStore.getState().open('experimentalValidation')} onDICOMRT={()=>useAppStore.getState().open('dicomRT')} onAIShielding={() => useAppStore.getState().open('aiAssistant')} onAutoBarrier={()=>useAppStore.getState().open('autoBarrier')} onPredictiveMaterial={()=>useAppStore.getState().open('predictiveMaterial')} onPredictiveOptimizer={()=>useAppStore.getState().open('predictiveMaterial')} onAnomalyDetection={()=>useAppStore.getState().open('anomalyDetection')} onAutoFillEquipment={()=>useAppStore.getState().open('autoFillEquipment')} onAutoFillEquipo={()=>useAppStore.getState().open('autoFillEquipment')} onVRAR={()=>useAppStore.getState().open('vrarPreview')} onVideoTutorial={()=>useAppStore.getState().open('videoTutorial')} onAnimatedDose={()=>useAppStore.getState().open('animatedDose')} onAnimatedDoseMaps={()=>useAppStore.getState().open('animatedDose')} onPointCloud={()=>useAppStore.getState().open('pointCloud')} onIndustrial={()=>useAppStore.getState().open('industrial')} onIndustrialRadiation={()=>useAppStore.getState().open('industrial')}
+          onMonteCarlo={()=>useAppStore.getState().open('monteCarloIntegration')} onGUMUncertainty={()=>useAppStore.getState().open('gumUncertainty')} onExperimental={()=>useAppStore.getState().open('experimentalValidation')} onDICOMRT={()=>useAppStore.getState().open('dicomRT')} onAIShielding={() => useAppStore.getState().open('aiAssistant')} onAutoBarrier={()=>useAppStore.getState().open('autoBarrier')} onPredictiveMaterial={()=>useAppStore.getState().open('predictiveMaterial')} onPredictiveOptimizer={()=>useAppStore.getState().open('predictiveMaterial')} onAnomalyDetection={()=>useAppStore.getState().open('anomalyDetection')} onAutoFillEquipment={()=>useAppStore.getState().open('autoFillEquipment')} onAutoFillEquipo={()=>useAppStore.getState().open('autoFillEquipment')} onVideoTutorial={()=>useAppStore.getState().open('videoTutorial')} onAnimatedDose={()=>useAppStore.getState().open('animatedDose')} onAnimatedDoseMaps={()=>useAppStore.getState().open('animatedDose')} onPointCloud={()=>useAppStore.getState().open('pointCloud')} onIndustrial={()=>useAppStore.getState().open('industrial')} onIndustrialRadiation={()=>useAppStore.getState().open('industrial')}
           onMultiSource={()=>useAppStore.getState().open('multiSource')} onPACS={()=>useAppStore.getState().open('pacs')}
           onInternationalRegulations={()=>useAppStore.getState().open('internationalRegulations')} onRegulatoryComparison={()=>useAppStore.getState().open('regulatoryComparison')} onComplianceCertification={()=>useAppStore.getState().open('complianceCertification')} onRegulatoryAlerts={()=>useAppStore.getState().open('regulatoryAlerts')} onPythonIntegration={()=>useAppStore.getState().open('pythonIntegration')} onPythonTools={()=>useAppStore.getState().open('pythonIntegration')}
           onNativeMC={()=>useAppStore.getState().open('nativeMC')}
@@ -2220,7 +2204,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onEmergency={() => useAppStore.getState().open('emergencyProcedures')}
           onBarrierEditor={() => setShowBarrierEditor(true)}
           onAirKermaOverlay={() => setShowAirKermaOverlay(true)}
-          onMosaicProjectManager={() => setShowMosaicProjectManager(true)}
+          onMosaicProjectManager={() => useAppStore.getState().open('projects')}
           onControlPoints={() => setShowControlPoints(true)}
           onPHITSGenerator={() => setShowPHITSGenerator(true)}
           onDCHAINCalc={() => setShowDCHAINCalc(true)}
@@ -2237,7 +2221,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           // v41b
           onFLUKA={() => setShowFLUKA(true)}
           onPENELOPE={() => setShowPENELOPE(true)}
-          onTherapyDosimetry={() => setShowTherapyDosimetry(true)}
           onShieldingVerification={() => useAppStore.getState().open('shieldingVerification')}
           // v42: McGinley
           onLaminatedBarrier={() => setShowLaminatedBarrier(true)}
@@ -2254,7 +2237,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           // v45: WASM + Sensitivity Analysis
 
           // v46: Recommendations A-E
-          onSkyshine={() => setShowSkyshine(true)}
+          onSkyshine={() => useAppStore.getState().open('skyshine')}
           onAnnualDose={() => useAppStore.getState().open('annualDose')}
           onCrossValidation={() => useAppStore.getState().open('crossValidation')}
           onObliqueIncidence={() => useAppStore.getState().open('obliqueIncidence')}
@@ -2560,7 +2543,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="keyboardShortcuts" component={KeyboardShortcutsDialog} />
         <LazyDialog name="viewer3d" component={Viewer3DDialog} floorPlan={floorPlan} />
         <LazyDialog name="maze" component={MazeCalculatorDialog} />
-        <LazyDialog name="quickBarrier" component={QuickBarrierDialog} />
         <LazyDialog name="equipmentDB" component={EquipmentDBDialog} />
         <LazyDialog name="mcConfig" component={MCConfigDialog} floorPlan={floorPlan} onLaunchMC={(jobId: number, format: string) => { setMcJobConfig({ jobId, format, particles: 1000000, jobName: `MC_${floorPlan.name}` }); useAppStore.getState().close('mcConfig'); useAppStore.getState().open('mcCloud'); }} />
         {mcJobConfig && <LazyDialog name="mcCloud" component={MCCloudDialog} projectId={floorPlan.id} format={mcJobConfig.format} particles={mcJobConfig.particles} jobName={mcJobConfig.jobName} />}
@@ -2572,15 +2554,12 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="batchImport" component={BatchImportDialog} floorPlan={floorPlan} onImport={setFloorPlan} />
         <LazyDialog name="costOptimizer" component={CostOptimizerDialog} />
         <LazyDialog name="neutron" component={NeutronDialog} />
-        <LazyDialog name="seasonal" component={SeasonalDialog} baseWorkload={floorPlan.sources.reduce((s,src)=>s+src.workloadValue,0)} />
-        <LazyDialog name="uncertainty" component={UncertaintyDialog} />
         <LazyDialog name="ventilation" component={VentilationDialog} />
         <LazyDialog name="dicom" component={DICOMDialog} />
         <LazyDialog name="techSpecs" component={TechSpecsDialog} floorPlanName={floorPlan.name} />
         <LazyDialog name="cnsnsDashboard" component={CNSNSDashboardDialog} floorPlan={floorPlan} />
         <LazyDialog name="auditTrail" component={AuditTrailDialog} projectId={floorPlan.id} />
         <LazyDialog name="epaGuidance" component={EPAGuidanceDialog} />
-        <LazyDialog name="shleien" component={ShleienHandbookDialog} />
         <LazyDialog name="gammaKnife" component={GammaKnifeDialog} />
         <LazyDialog name="braquiCo60" component={BraquiterapiaCo60Dialog} />
         <LazyDialog name="versaHD" component={VersaHD15MVDialog} />
@@ -2589,7 +2568,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="equipmentLibrary" component={EquipmentLibraryDialog} onOpenVersaHD={() => useAppStore.getState().open('versaHD')} onOpenGammaKnife={() => useAppStore.getState().open('gammaKnife')} onOpenBraquiCo60={() => useAppStore.getState().open('braquiCo60')} />
         <LazyDialog name="referenceLibrary" component={ReferenceLibraryDialog} onOpenEPA={() => useAppStore.getState().open('epaGuidance')} onOpenShleien={() => useAppStore.getState().open('shleien')} onOpenICRU57={() => useAppStore.getState().open('icru57')} onOpenICRU96={() => useAppStore.getState().open('icru96')} />
         <LazyDialog name="ncrp151Tables" component={NCRP151TablesDialog} />
-        <LazyDialog name="shieldingCalculator" component={ShieldingCalculatorDialog} />
         <LazyDialog name="dxfViewer" component={DXFViewerDialog} />
         <LazyDialog name="mcResults" component={MCResultsDialog} resultJson={lastMCResult} />
                 <LazyDialog
@@ -2687,10 +2665,8 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             <SplashScreen onClose={() => setShowSplash(false)} />
           </Suspense>
         )}
-        <LazyDialog name="themeEngine" component={ThemeEngineDialog} />
         <LazyDialog name="bimConnector" component={BIMConnectorDialog} />
         <LazyDialog name="cloudSync" component={CloudSyncDialog} />
-        <LazyDialog name="validationDashboard" component={ValidationDashboardDialog} />
         <LazyDialog name="externalConnector" component={ExternalConnectorDialog} />
         {/* v20: BIMRAD + Collaboration + GATE PET/SPECT */}
         <LazyDialog name="bimRAD" component={BIMRADDialog} />
@@ -2706,7 +2682,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="predictiveMaterial" component={PredictiveMaterialDialog} />
         <LazyDialog name="anomalyDetection" component={AnomalyDetectionDialog} />
         <LazyDialog name="autoFillEquipment" component={AutoFillEquipmentDialog} />
-        <LazyDialog name="vrarPreview" component={VRARBunkerPreview} />
         <LazyDialog name="videoTutorial" component={VideoTutorialGenerator} />
         <LazyDialog name="animatedDose" component={AnimatedDoseMapsDialog} />
         <LazyDialog name="pointCloud" component={PointCloudImportDialog} />
@@ -2771,9 +2746,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             material: r.material,
           }))} onClose={() => setShowAirKermaOverlay(false)} onExportPDF={() => toast.success('Air kerma report exported')} />
         )}
-        {showMosaicProjectManager && (
-          <MosaicProjectManagerDialog onClose={() => setShowMosaicProjectManager(false)} onOpenProject={(id) => { handleLoadProject(id); setShowMosaicProjectManager(false); }} />
-        )}
         {showControlPoints && (
           <ControlPointsDialog controlPoints={controlPoints} onUpdate={setControlPoints} onClose={() => setShowControlPoints(false)} floorPlanWidth={floorPlan.width_pixels} floorPlanHeight={floorPlan.height_pixels} />
         )}
@@ -2818,12 +2790,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             <PENELOPEInputGeneratorDialog open={showPENELOPE} onClose={() => setShowPENELOPE(false)} />
           </Suspense>
         )}
-        {showTherapyDosimetry && (
-          <Suspense fallback={<DialogFallback />}>
-            <RadionuclideTherapyDosimetryDialog open={showTherapyDosimetry} onClose={() => setShowTherapyDosimetry(false)} />
-          </Suspense>
-        )}
-                <LazyDialog name="shieldingVerification" component={ShieldingVerificationDialog} />
+                <LazyDialog name="shieldingVerification" component={ShieldingVerificationDialog} floorPlan={floorPlan} />
         {showLaminatedBarrier && (
           <Suspense fallback={<DialogFallback />}>
             <LaminatedBarrierCalculatorDialog open={showLaminatedBarrier} onClose={() => setShowLaminatedBarrier(false)} />
@@ -2852,13 +2819,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             <CADAssemblyMapperDialog open={showCADMapper} onClose={() => setShowCADMapper(false)} />
           </Suspense>
         )}
-                <LazyDialog name="solutionField3D" component={SolutionField3DDialog} />
         {/* v46: Recommendations A-E — Engine improvements */}
-        {showSkyshine && (
-          <Suspense fallback={<DialogFallback />}>
-            <SkyshineCalculatorDialog open={showSkyshine} onClose={() => setShowSkyshine(false)} />
-          </Suspense>
-        )}
                 <LazyDialog name="annualDose" component={AnnualDoseReportDialog} />
                 <LazyDialog name="crossValidation" component={CrossValidationDialog} />
                 <LazyDialog name="obliqueIncidence" component={ObliqueIncidenceDialog} />

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createUnavailableFeatureDialog } from '@/components/UnavailableFeatureDialog';
-import VentilationDialog from '@/sections/dialogs/VentilationDialog';
+import { readdirSync, readFileSync } from 'node:fs';
 
 describe('funciones de menú sin implementación', () => {
   it('avisan explícitamente en lugar de no hacer nada', () => {
@@ -17,7 +17,9 @@ describe('funciones de menú sin implementación', () => {
     expect(renderToStaticMarkup(<Dialogo open={false} history={[]} />)).toBe('');
   });
 
-  it('los antiguos stubs usan el aviso', () => {
-    expect(renderToStaticMarkup(<VentilationDialog open />)).toContain('Ventilación del búnker');
+  it('ningún diálogo del menú es un Stub que devuelve null', () => {
+    const dir = 'src/sections/dialogs';
+    const stubs = readdirSync(dir).filter((f) => /export default function Stub\(/.test(readFileSync(`${dir}/${f}`, 'utf8')));
+    expect(stubs).toEqual([]);
   });
 });
