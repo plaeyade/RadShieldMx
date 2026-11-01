@@ -5,6 +5,7 @@ import { buildAnalyticMemoryEvidenceSection } from '@/lib/analyticMemoryEvidence
 import { buildF125CalculationEvidenceGate } from '@/lib/f125CalculationEvidenceGate';
 import type { FloorPlan, Barrier } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
+import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 
 export function generatePDFReport(
   floorPlan: FloorPlan,
@@ -157,5 +158,6 @@ export function generatePDFReport(
   doc.setTextColor(128, 128, 128);
   doc.text(`Generado por RadShield-MX v1.2 | ${meta.date}`, pageW / 2, pageH - 10, { align: 'center' });
 
+  stampNotForSignature(doc);
   return doc.output('blob');
 }

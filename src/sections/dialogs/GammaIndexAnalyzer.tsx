@@ -16,6 +16,7 @@ import {
   Activity, BarChart3, Grid3X3, CheckCircle, XCircle,
   Download, RefreshCw, Info, ArrowRight
 } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface DosePoint {
   x: number; // depth (mm) for PDD, or lateral position (mm) for profiles
@@ -399,6 +400,7 @@ export default function GammaIndexAnalyzer({ open, onClose }: GammaIndexAnalyzer
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <SyntheticResultBanner />
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Activity className="w-5 h-5 text-[#f97316]" />

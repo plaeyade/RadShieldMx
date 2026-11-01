@@ -13,6 +13,7 @@ import {
   ChevronRight, ChevronLeft, X, FileText, Download, Play,
   Pause, RotateCcw, Code, Terminal, Settings, Eye, Activity
 } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -322,6 +323,7 @@ export default function MonteCarloSimulationWizard({ open, onOpenChange }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      <SyntheticResultBanner />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-900 text-white">
         <div className="flex items-center gap-2">

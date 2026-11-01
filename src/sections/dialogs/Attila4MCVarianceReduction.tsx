@@ -17,6 +17,7 @@ import {
   Layers, Zap, Download, Info, Target, Shield, Box,
   CheckCircle, ArrowRight
 } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onClose: () => void; }
 
@@ -148,6 +149,7 @@ c Target distance: ${targetDist_cm} cm
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <SyntheticResultBanner />
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Zap className="w-5 h-5 text-[#f97316]" />

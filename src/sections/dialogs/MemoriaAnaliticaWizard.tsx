@@ -25,6 +25,7 @@ import {
   C1_IMRT_FACTORS, TVL_PRIMARIA_CM, eq430_BeltlineWidth,
   eq438_TADR, checkTADR, MEXICO_DOSE_LIMITS,
 } from '@/lib/uaqProtocol';
+import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -257,6 +258,7 @@ function WizardContent({ onOpenChange }: { onOpenChange: (open: boolean) => void
     doc.text(`Generado por RadShield-MX v14.2 | ${new Date().toLocaleString('es-MX')}`, margin, y);
     doc.text(`Página ${doc.getNumberOfPages()}`, pageW - margin - 20, y);
 
+    stampNotForSignature(doc);
     doc.save(`Memoria_Blindaje_${memoria.nombreInstalacion || 'RadShield'}_${memoria.fecha}.pdf`);
     toast.success('Memoria analítica PDF exportada');
   }, [memoria, material, C1, W_L, calcularBarrera]);

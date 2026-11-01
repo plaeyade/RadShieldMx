@@ -4,6 +4,7 @@ import Login from '@/pages/Login';
 import NotFound from '@/pages/NotFound';
 import { useWebVitals } from '@/hooks/useWebVitals';
 import { SentryErrorBoundary, captureException } from '@/lib/sentry';
+import { NotForSignatureNotice } from '@/components/SyntheticResultBanner';
 
 function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <NotForSignatureNotice />
     </SentryErrorBoundary>
   );
 }

@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Shield, X, ChevronRight, BookOpen, Sparkles, Users, Globe } from 'lucide-react';
-import { IAEALogo, NCRPLogo, CNSNSLogo, AAPMLogo, ICRPLogo, ICRULogo } from '@/components/logos/InstitutionalLogos';
 
 interface Props {
   onClose: () => void;
 }
 
 const LOGOS = [
-  { Logo: IAEALogo, name: 'OIEA / IAEA', subtitle: 'International Atomic Energy Agency', url: 'https://www.iaea.org' },
-  { Logo: NCRPLogo, name: 'NCRP', subtitle: 'National Council on Radiation Protection', url: 'https://ncrponline.org' },
-  { Logo: CNSNSLogo, name: 'CNSNS', subtitle: 'Comision Nacional de Seguridad Nuclear y Salvaguardias', url: 'https://www.gob.mx/cnsns' },
-  { Logo: AAPMLogo, name: 'AAPM', subtitle: 'American Association of Physicists in Medicine', url: 'https://www.aapm.org' },
-  { Logo: ICRPLogo, name: 'ICRP', subtitle: 'International Commission on Radiological Protection', url: 'https://www.icrp.org' },
-  { Logo: ICRULogo, name: 'ICRU', subtitle: 'International Commission on Radiation Units', url: 'https://icru.org' },
+  { name: 'OIEA / IAEA', subtitle: 'International Atomic Energy Agency', url: 'https://www.iaea.org' },
+  { name: 'NCRP', subtitle: 'National Council on Radiation Protection', url: 'https://ncrponline.org' },
+  { name: 'CNSNS', subtitle: 'Comision Nacional de Seguridad Nuclear y Salvaguardias', url: 'https://www.gob.mx/cnsns' },
+  { name: 'AAPM', subtitle: 'American Association of Physicists in Medicine', url: 'https://www.aapm.org' },
+  { name: 'ICRP', subtitle: 'International Commission on Radiological Protection', url: 'https://www.icrp.org' },
+  { name: 'ICRU', subtitle: 'International Commission on Radiation Units', url: 'https://icru.org' },
 ];
 
 const FEATURES = [
@@ -66,10 +65,10 @@ export default function SplashScreen({ onClose }: Props) {
         {showLogos && (
           <div className="w-full mb-8">
             <p className="text-[10px] text-slate-500 uppercase tracking-widest text-center mb-4">
-              Respaldado por instituciones internacionales
+              Normas de referencia (sin aval de estas instituciones)
             </p>
             <div className="flex justify-center items-center gap-4 flex-wrap">
-              {LOGOS.map(({ Logo, name, subtitle, url }) => (
+              {LOGOS.map(({ name, subtitle, url }) => (
                 <a
                   key={name}
                   href={url}
@@ -78,7 +77,6 @@ export default function SplashScreen({ onClose }: Props) {
                   className="group flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20"
                   title={subtitle}
                 >
-                  <Logo className="w-12 h-12 group-hover:scale-110 transition-transform" />
                   <span className="text-[9px] text-slate-400 group-hover:text-white transition-colors font-medium">{name}</span>
                 </a>
               ))}

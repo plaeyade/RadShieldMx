@@ -17,6 +17,7 @@ import {
   Cpu, Play, Download, Box, Layers, Activity, Info,
   Settings, RotateCcw, FileOutput, Gauge
 } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 // ICRP Reference Phantoms (simplified voxel data)
 interface Phantom {
@@ -359,6 +360,7 @@ export default function MonteCarloEngine({ open, onClose }: MonteCarloEngineProp
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <SyntheticResultBanner />
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Cpu className="w-5 h-5 text-[#f97316]" />

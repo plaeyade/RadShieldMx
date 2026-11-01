@@ -68,6 +68,21 @@ export function getCalculationInputWarnings(input: Record<string, unknown>): Cal
   return warnings;
 }
 
+/**
+ * Energía nominal de fotones en MV/MeV. El catálogo de modalidades declara la energía de los LINAC
+ * sólo en la etiqueta («18 MV X-rays») o en el id («linac-18mv»), no en `energy_MeV`; sin este
+ * respaldo el aviso de neutrones/laberinto/puerta (>10 MV) nunca se activaba.
+ */
+export function getModalityEnergy_MeV(source?: RadiationSource): number {
+  const modality = source?.modality;
+  if (!modality) return 0;
+  if (isFinitePositive(modality.energy_MeV)) return modality.energy_MeV;
+  const label = modality.energyLabel?.match(/(\d+(?:\.\d+)?)\s*(?:MV|MeV)\b/i);
+  if (label?.[1]) return Number(label[1]);
+  const id = modality.id.match(/(\d+(?:\.\d+)?)\s*mv/i);
+  return id?.[1] ? Number(id[1]) : 0;
+}
+
 export function getShieldingEnergyKey(source?: RadiationSource): string {
   if (!source) return 'unknown';
   const modality = source.modality;
@@ -111,7 +126,7 @@ export function getShieldingCitationIds(source?: RadiationSource): string[] {
   if (category === 'therapy') ids.add('NCRP-151');
   if (category === 'nuclear') ids.add('AAPM-TG-108');
   if (category === 'cyclotron') ids.add('IAEA-SRS-47');
-  if ((source?.modality.energy_MeV || 0) > 10) ids.add('NCRP-151-neutrons');
+  if (getModalityEnergy_MeV(source) > 10) ids.add('NCRP-151-neutrons');
   if (!ids.size) ids.add('RadShield-method-note');
   return [...ids];
 }
@@ -149,7 +164,7 @@ export function getCalculationAuditWarnings(params: {
   if (params.barrier.useFactor < 0 || params.barrier.useFactor > 1 || !Number.isFinite(params.barrier.useFactor)) {
     warnings.push({ field: 'useFactor', severity: 'warning', message: 'Use factor U is outside the expected 0..1 range.' });
   }
-  if (primarySource && (primarySource.modality.energy_MeV || 0) > 10) {
+  if (getModalityEnergy_MeV(primarySource) > 10) {
     warnings.push({ field: 'energy_MeV', severity: 'warning', message: 'Energy >10 MV: neutron shielding and maze/door checks are required.' });
   }
   if (primarySource && !primarySource.modality.standard) {
@@ -200,7 +215,7 @@ export function buildCalculationTrace(params: {
     `Sampling spacing ${SAMPLING_SPACING_M} m along barrier.`,
     'Final clinical acceptance requires qualified expert review and measurement survey.',
   ];
-  if ((primarySource?.modality.energy_MeV || 0) > 10) assumptions.push('High-energy photon mode requires neutron and maze/door evaluation.');
+  if (getModalityEnergy_MeV(primarySource) > 10) assumptions.push('High-energy photon mode requires neutron and maze/door evaluation.');
   const finiteThicknesses = Object.values(params.requiredThickness_mm).filter((value) => Number.isFinite(value) && value >= 0);
 
   return {
