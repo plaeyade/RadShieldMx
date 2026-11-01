@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import '@/components/ui/badge';
 import { toast } from 'sonner';
 import { AlertTriangle, Phone, ShieldAlert, ChevronRight, CheckCircle2, Siren, Radio, Zap, Droplets, AlertOctagon, UserX, Stethoscope, FileText, Eye, Hand, HeartPulse, Ban, MapPin, Footprints, Shield, Activity } from 'lucide-react';
 

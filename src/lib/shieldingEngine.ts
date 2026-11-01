@@ -18,8 +18,7 @@ import {
   buildConservativeCalculationComparison,
   getCalculationAuditWarnings,
   getShieldingEnergyKey,
-  inverseArcher,
-  tvlThickness,
+  inverseArcher
 } from './shieldingMath';
 
 // ─── Spatial Hash Grid ───

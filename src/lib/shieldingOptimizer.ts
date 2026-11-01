@@ -15,7 +15,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { getMaterialCost, calculateBarrierCost } from './costDatabase';
+import './costDatabase';
 
 export interface OptimizationBarrier {
   id: string;
@@ -283,7 +283,7 @@ export function runShieldingOptimization(config: OptimizerConfig): OptimizationR
   }
 
   const convergence: number[][] = [];
-  let bestSolution: Solution | null = null;
+  const bestSolution: Solution | null = null;
   const allSolutions: Solution[] = [];
 
   for (let gen = 0; gen < generations; gen++) {

@@ -1,1 +1,5 @@
-export default function Stub(props: any) { return null; }
+import { createUnavailableFeatureDialog } from '@/components/UnavailableFeatureDialog';
+
+const ReferenceLibraryDialog = createUnavailableFeatureDialog('Biblioteca de referencias');
+
+export default ReferenceLibraryDialog;

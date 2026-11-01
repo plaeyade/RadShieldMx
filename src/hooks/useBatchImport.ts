@@ -1,6 +1,6 @@
 // Batch 3: Batch import CSV/Excel into floor plan
 import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
-import { MODALITIES, MATERIALS } from '@/types/radshield';
+import { MODALITIES } from '@/types/radshield';
 
 export interface CSVRow {
   name: string;

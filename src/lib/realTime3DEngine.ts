@@ -16,7 +16,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
+import type { FloorPlan } from '@/types/radshield';
 
 export type ExportFormat = 'gltf' | 'glb' | 'fbx' | 'usda' | 'obj' | 'enscape' | 'rhino' | 'forge' | 'sketchup';
 

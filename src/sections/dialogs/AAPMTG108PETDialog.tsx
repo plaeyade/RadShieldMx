@@ -5,7 +5,7 @@
  * Referencia: AAPM TG 108, Med Phys 33(1):1-16, 2006
  */
 import { useState, useMemo } from 'react';
-import { X, Calculator, Activity, Table, FileDown, Beaker } from 'lucide-react';
+import { X, Activity, Table, FileDown } from 'lucide-react';
 import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 
 interface PETProcedure { name: string; patientsPerWeek: number; avgAdminActivity_MBQ: number; avgScanTime_min: number; ctScans: number; }

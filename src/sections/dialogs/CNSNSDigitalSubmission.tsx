@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, FileText, Send, CheckCircle2, AlertTriangle, Shield, Download } from 'lucide-react';
+import { X, Send, CheckCircle2, AlertTriangle, Shield, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 

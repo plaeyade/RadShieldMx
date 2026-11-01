@@ -17,7 +17,7 @@ import {
 } from '@/lib/mcginleyData';
 import { MATERIALS } from '@/types/radshield';
 import {
-  Layers, Plus, Trash2, Download, Info, Calculator
+  Layers, Plus, Trash2, Download, Info
 } from 'lucide-react';
 
 const ENERGY_KEYS = ['1.25', '6', '10', '15', '18', '24'];

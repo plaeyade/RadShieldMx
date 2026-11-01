@@ -3,10 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Box, ChevronRight, ChevronLeft, CheckCircle2, Zap, Wand2, Loader2 } from 'lucide-react';
+import { Box, ChevronRight, ChevronLeft, Wand2, Loader2 } from 'lucide-react';
 
 interface BunkerTemplate {
   id: string;

@@ -14,8 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  FileText, Download, Copy, CheckCircle, Layers, Target, Box,
-  Atom, Zap, Shield, Info, ArrowRight
+  FileText, Download, Copy, CheckCircle, Target, Box, Zap, Shield, Info
 } from 'lucide-react';
 
 interface Props { open: boolean; onClose: () => void; }

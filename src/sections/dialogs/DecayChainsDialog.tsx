@@ -3,7 +3,7 @@
  * Mo-99/Tc-99m, Ge-68/Ga-68, Sr-82/Rb-82, W-188/Re-188
  */
 import { useState, useMemo } from 'react';
-import { X, Clock, Activity, Download, Beaker } from 'lucide-react';
+import { X, Clock, Activity, Download } from 'lucide-react';
 import { DECAY_CHAINS, eluateActivity, timeToMaxDaughter } from '@/lib/decay/DecayChains';
 
 export default function DecayChainsDialog({ onClose }: { onClose: () => void }) {

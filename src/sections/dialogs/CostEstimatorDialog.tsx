@@ -4,10 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { DollarSign, TrendingUp, Download, Calculator, AlertTriangle } from 'lucide-react';
+import { DollarSign, TrendingUp, Download, Calculator } from 'lucide-react';
 import { MATERIALS } from '@/types/radshield';
 
 interface MaterialCost {

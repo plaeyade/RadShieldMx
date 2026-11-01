@@ -16,9 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  Brain, Play, ThumbsUp, ThumbsDown, AlertTriangle,
-  CheckCircle2, Loader2, TrendingUp, Shield, Zap,
-  BarChart3, Info, ChevronDown, ChevronUp,
+  Brain, ThumbsUp, ThumbsDown, AlertTriangle, Loader2, TrendingUp, Zap, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 interface Props {

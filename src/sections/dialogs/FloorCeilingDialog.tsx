@@ -1,6 +1,6 @@
 // Fase 9: Blindaje de suelo y techo — NCRP 151 §5.2.3
 import { useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
+import 'sonner';
 import { ArrowUpDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { calculateFloorCeiling, type FloorCeilingConfig } from '@/hooks/useFloorCeilingCalc';
 

@@ -28,7 +28,7 @@ function adaptiveSample(
   gradientThreshold: number
 ): { positions: number[]; totalPoints: number; densityInfo: string } {
   const base = Array.from({ length: numBasePoints }, (_, i) => i / (numBasePoints - 1));
-  let extra: number[] = [];
+  const extra: number[] = [];
   sourcePositions.forEach(sp => {
     const localDensity = Math.max(20, Math.floor(numBasePoints * gradientThreshold));
     const local = Array.from({ length: localDensity }, (_, i) => {

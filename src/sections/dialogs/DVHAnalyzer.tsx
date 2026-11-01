@@ -13,8 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useI18n } from '@/hooks/useI18n';
 import {
-  BarChart3, Download, Activity, Info, TrendingUp, Target,
-  GitCompareArrows, Layers
+  BarChart3, Download, Activity, TrendingUp, Target
 } from 'lucide-react';
 import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 

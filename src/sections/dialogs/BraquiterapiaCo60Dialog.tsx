@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Atom, Shield, Activity, FileText, Download, Calculator, CheckCircle } from 'lucide-react';
+import { Atom, Shield, FileText, Download, Calculator, CheckCircle } from 'lucide-react';
 
 interface Props {
   open: boolean;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,9 @@ import {
   BookOpen,
   FlaskConical,
   Shield,
-  Ruler,
-  ChevronRight,
-  Info,
   AlertTriangle,
   CheckCircle2,
   FileDown,
-  Zap,
   Activity,
   Crosshair,
 } from "lucide-react";

@@ -44,9 +44,9 @@ export function parseIsodosisFile(content: string, filename: string): CTIsodosis
   if (lines.length < 3) return null;
 
   // Try to detect format
-  let points: CTIsodosisPoint[] = [];
+  const points: CTIsodosisPoint[] = [];
   let manufacturer = 'Unknown';
-  let model = 'Unknown';
+  const model = 'Unknown';
   let kVp = 120;
   let filter = 'Body';
 

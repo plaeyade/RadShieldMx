@@ -1,1 +1,5 @@
-export default function Stub(props: any) { return null; }
+import { createUnavailableFeatureDialog } from '@/components/UnavailableFeatureDialog';
+
+const ShieldingVerification = createUnavailableFeatureDialog('Verificación de blindaje');
+
+export default ShieldingVerification;

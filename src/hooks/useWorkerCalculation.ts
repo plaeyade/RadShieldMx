@@ -4,7 +4,7 @@
  * Speedup: 2-8x en CPUs multi-core. Fallback a main thread si Worker no disponible.
  */
 import { useRef, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
+import 'sonner';
 import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
 
 interface WorkerResult {

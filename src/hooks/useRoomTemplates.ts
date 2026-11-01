@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { FloorPlan } from '@/types/floorPlan';
+import '@/types/floorPlan';
 
 export interface RoomTemplate {
   id: string;

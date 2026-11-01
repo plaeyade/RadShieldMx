@@ -6,7 +6,7 @@
  * Focus indicators visible via CSS outline
  */
 import { useCallback, useEffect, useRef } from 'react';
-import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
+import type { FloorPlan } from '@/types/radshield';
 
 interface KeyboardNavState {
   offsetX: number;

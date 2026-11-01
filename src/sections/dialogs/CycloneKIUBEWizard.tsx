@@ -11,15 +11,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
   CYCLOONE_KIUBE_MODELS, CYCLOONE_KIUBE_DOSE_RATES, CYCLOONE_KIUBE_SHIELDING,
-  CYCLOONE_KIUBE_NEUTRON, CYCLOONE_KIUBE_VAULT, CYCLOONE_KIUBE_RADIONUCLIDES,
-  calculateCycloneConcreteThickness, getNeutronTVLConcrete_KIUBE,
-  calculateNeutronFluence_KIUBE, calculateDecommissioningLayer_KIUBE,
-  type CycloneKIUBEModel
+  CYCLOONE_KIUBE_NEUTRON, CYCLOONE_KIUBE_VAULT, CYCLOONE_KIUBE_RADIONUCLIDES, getNeutronTVLConcrete_KIUBE,
+  calculateNeutronFluence_KIUBE, calculateDecommissioningLayer_KIUBE
 } from '@/lib/cycloneKIUBEData';
 import {
-  Cpu, Atom, Shield, Ruler, Zap, FlaskConical, X, Download,
-  ChevronRight, ChevronLeft, FileText, Activity, BookOpen,
-  Box, Layers, Radio, Crosshair, Eye
+  Cpu, Atom, Shield, Ruler, Zap, X, Download,
+  ChevronRight, ChevronLeft, FileText, Activity,
+  Box, Eye
 } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

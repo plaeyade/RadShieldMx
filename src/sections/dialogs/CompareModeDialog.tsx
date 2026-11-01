@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import '@/components/ui/separator';
+import '@/components/ui/button';
+import '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GitCompare, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { GitCompare, ArrowRight } from 'lucide-react';
 
 interface CompareScenario {
   id: string;

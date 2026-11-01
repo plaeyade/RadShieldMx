@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Database, ExternalLink } from 'lucide-react';
+import { Search, Database } from 'lucide-react';
 import { COMMERCIAL_EQUIPMENT } from '@/types/equipmentDB';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; onSelect?: (equipmentId: string) => void; }

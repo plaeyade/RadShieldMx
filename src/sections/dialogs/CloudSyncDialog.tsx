@@ -8,22 +8,20 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
+import '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  Cloud, CloudOff, Upload, Download, RefreshCw, User,
-  Server, CheckCircle, AlertTriangle, Link2, LogOut,
-  Globe, Shield, FileJson,
+  Cloud, CloudOff, Download, RefreshCw, User, CheckCircle, AlertTriangle, LogOut,
+  Globe, Shield
 } from 'lucide-react';
 import {
   apiHealthCheck, apiLogin, apiRegister, apiListProjects,
   apiGetCurrentUser, apiSyncAll, apiGetSyncStatus,
-  exportProjectJSON, importProjectJSON,
   type CloudUser, type CloudProject, type SyncStatus,
 } from '@/lib/cloudSync';
 

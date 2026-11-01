@@ -10,10 +10,9 @@ import {
   tvlTransmission,
   tvlThickness,
   calculateUnshieldedKerma,
-  generateSamplePoints,
   roundThickness,
 } from './shieldingMath';
-import { MATERIALS, type Barrier, type RadiationSource, type Modality } from '@/types/radshield';
+import { MATERIALS, type RadiationSource, type Modality } from '@/types/radshield';
 
 // ─── Fixtures ───
 const concrete = MATERIALS.find(m => m.code === 'CONCRETE235')!;

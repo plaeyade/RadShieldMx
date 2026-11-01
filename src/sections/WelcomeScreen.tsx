@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  Shield, Play, FolderOpen, Upload, BookOpen, GraduationCap, X,
-  Sparkles, Activity, Radio, Atom, Zap, Calculator, FileText,
-  Stethoscope, Microscope, Beaker, Layers, Box, Globe, Settings,
-  ArrowRight, Crown, MousePointer, Grid3X3, Palette, CheckCircle2,
-  MapPin, Users, BarChart3, PenTool, Ruler, FileBarChart,
-  ScanLine, Brain, Crosshair, Workflow, ChevronRight, Radiation,
-  Building2, HardHat, TriangleAlert
+  Shield, Play, FolderOpen, Upload, BookOpen, X, Activity, Radio, Atom, Zap, Calculator, FileText,
+  Stethoscope, Box,
+  ArrowRight, CheckCircle2,
+  MapPin, BarChart3, PenTool, Ruler, FileBarChart,
+  ScanLine, Brain, Radiation,
+  Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/hooks/useI18n';

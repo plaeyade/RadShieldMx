@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
 
 const GLOSSARY = [

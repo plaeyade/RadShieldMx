@@ -4,7 +4,7 @@
  * Ref: Card, Mackinlay & Shneiderman (1999) — Readings in Information Visualization
  */
 import { useRef, useEffect, useCallback } from 'react';
-import type { FloorPlan, Barrier, RadiationSource } from '@/types/radshield';
+import type { FloorPlan } from '@/types/radshield';
 
 interface Props {
   floorPlan: FloorPlan;

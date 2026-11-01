@@ -4,11 +4,10 @@
  */
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/stores/appStore';
 import { useCanvasStore } from '@/stores/canvasStore';
-import { Crosshair, Zap, Palette } from 'lucide-react';
+import { Crosshair, Palette } from 'lucide-react';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
 
 function computeDoseGrid(sources: any[], barriers: any[], w: number, h: number, scale: number) {

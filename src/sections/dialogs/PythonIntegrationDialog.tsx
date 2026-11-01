@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
-import { Code, Play, Terminal, Cpu, Globe, AlertTriangle, Zap, BookOpen } from 'lucide-react';
+import { Code, Play, Cpu, Globe, Zap, BookOpen } from 'lucide-react';
 import { getPyodideIndexUrl, getPyodideModuleUrl } from '@/lib/pyodideConfig';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

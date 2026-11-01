@@ -14,8 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import {
-  Layers, Zap, Download, Info, Target, Shield, Box,
-  CheckCircle, ArrowRight
+  Zap, Download, Info, Target, Box
 } from 'lucide-react';
 import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 

@@ -33,3 +33,23 @@ Todo lo retirado se recupera con `git show archivo/pre-depuracion-2026-10-31:<ru
 - 219 diálogos en `src/sections/dialogs`: varios son variantes del mismo flujo.
 - ESLint en CI.
 - 7 PDF/DXF marcados como LFS que no son punteros (`git lfs migrate import` cuando se active LFS).
+
+# Etapa 2 (2026-11-01)
+
+| Cambio | Antes | Después |
+| --- | --- | --- |
+| Diálogos `Stub` que devolvían `null` con entrada en menús | 16 (12 con hasta 6 accesos cada uno): el clic no hacía nada | Aviso explícito «función no disponible; no se ha calculado nada» (`UnavailableFeatureDialog`) y 3 pruebas |
+| Imports sin uso | ~600 | 0 (codemod ts-morph + `unused-imports --fix`, sin reordenar) |
+| Problemas de ESLint | 1.399 | 371 errores + 366 avisos de `any` |
+| ESLint en CI | no | `npm run lint:ci`: el trinquete falla si un archivo suma errores (`.eslint-baseline.json`) |
+| Índice de scripts | — | `scripts/README.md`: 206 scripts en 6 grupos, con su comando npm |
+
+`any` pasa a aviso: es deuda visible que se reduce por módulo. Variables con prefijo `_` se
+consideran intencionalmente no usadas.
+
+Validado: `tsc` de app y servidor, Vitest 340/340, `vite build`, `build-backend`, trinquete ESLint.
+
+Pendiente para la etapa 3:
+- implementar o retirar del menú las 16 funciones anunciadas (decisión de producto);
+- bajar los 243 `no-unused-vars` restantes (variables locales, no imports);
+- tipar los 335 `any` de cálculo (`src/lib`) antes que los de UI.

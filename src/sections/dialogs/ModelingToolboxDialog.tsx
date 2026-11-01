@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-  Box, Layers, Ruler, Calculator, Wand2, ChevronRight, Zap, Shield,
-  Atom, Database, GitBranch, Copy, Play, RotateCcw
+  Box, Layers, Ruler, Calculator, Zap, Shield,
+  Atom, GitBranch, Copy, Play, RotateCcw
 } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

@@ -7,18 +7,18 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import '@/components/ui/input';
+import '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  Cpu, ExternalLink, FileCode, Download, Upload, Link2,
-  CheckCircle, AlertTriangle, Info, Play, Settings,
+  Cpu, ExternalLink, Download, Link2,
+  CheckCircle, Info, Settings,
 } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

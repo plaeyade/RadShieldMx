@@ -15,7 +15,7 @@ import {
   Activity, Cpu, MemoryStick, Timer, Flame, Gauge,
   AlertTriangle, CheckCircle, XCircle, TrendingUp,
   BarChart3, Search, Zap, Code2, Shield, Play, Square,
-  Download, RefreshCw, Settings, ChevronDown, Filter,
+  Download, RefreshCw, Settings, Filter,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +23,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 

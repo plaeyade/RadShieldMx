@@ -14,7 +14,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -24,12 +23,11 @@ import { toast } from 'sonner';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
-  Box, Download, ExternalLink, Play, Eye, FileBox, Layers,
-  Zap, Cpu, Globe, Monitor, Smartphone, CheckCircle, ChevronRight,
-  Settings, RotateCcw, Radio, Construction, Shield
+  Box, Download, ExternalLink, Eye, FileBox, Layers, Globe, CheckCircle,
+  Settings, RotateCcw
 } from 'lucide-react';
 import {
-  exportBunker3D, exportGLB, exportOBJ, exportUSD, generateBunkerMesh,
+  exportBunker3D, generateBunkerMesh,
   CONNECTORS, BARRIER_MATERIAL_COLORS,
   type ExportFormat, type ExportOptions,
 } from '@/lib/realTime3DEngine';

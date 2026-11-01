@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { toast } from 'sonner';
+import 'sonner';
 
 export interface SmartBarrierResult {
   recommended_thickness_mm: number;

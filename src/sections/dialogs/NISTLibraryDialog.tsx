@@ -3,11 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { Database, Search, Atom, Layers, DollarSign, FileText, Shield } from 'lucide-react';
-import { NIST_MATERIALS, TVL_DATA, getTVL, searchNISTMaterials, type NISTMaterial } from '@/lib/nistMaterialLibrary';
+import { Database, Search, Shield } from 'lucide-react';
+import { NIST_MATERIALS, TVL_DATA, searchNISTMaterials, type NISTMaterial } from '@/lib/nistMaterialLibrary';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

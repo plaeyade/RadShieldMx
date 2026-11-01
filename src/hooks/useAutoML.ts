@@ -5,13 +5,11 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   trainModel,
   predictThickness,
-  loadModel,
-  isModelLoaded,
-  getTrainingStatus,
+  loadModel
 } from "@/lib/ml/models/shieldingThicknessModel";
 import { detectAnomaly } from "@/lib/ml/models/anomalyDetector";
 import { trpc } from "@/providers/trpc";

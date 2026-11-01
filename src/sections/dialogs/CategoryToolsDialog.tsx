@@ -8,16 +8,16 @@
 
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import 'sonner';
 import {
-  Stethoscope, Zap, Activity, Radio, Microscope, ShieldCheck,
-  ChevronRight, Calculator, BookOpen, ExternalLink, FileText,
-  Radiation, Brain, Scan, ScanLine, Sparkles, FlaskConical, Hexagon,
-  AlertTriangle, Info, Play, Box, Atom, Server, Crosshair
+  Stethoscope, Zap, Activity, Radio, Microscope,
+  ChevronRight, BookOpen, FileText,
+  Radiation, Scan, ScanLine, Sparkles, FlaskConical, Hexagon,
+  AlertTriangle, Info, Box, Atom, Server, Crosshair
 } from 'lucide-react';
 
 type Category = 'diagnostic' | 'therapy' | 'nuclear' | 'cyclotron';

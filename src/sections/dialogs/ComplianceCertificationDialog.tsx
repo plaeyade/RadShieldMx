@@ -7,14 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
-  ClipboardCheck, CheckCircle, XCircle, AlertTriangle, Shield, FileText,
-  Award, Download, TrendingUp, Calendar, Clock, User, Building
+  ClipboardCheck, CheckCircle, AlertTriangle, Shield, FileText,
+  Award, Download, TrendingUp, Calendar, Clock, Building
 } from 'lucide-react';
-import { COMPLIANCE_CHECKLISTS, type ComplianceChecklist } from '@/lib/internationalRegulations';
+import { COMPLIANCE_CHECKLISTS } from '@/lib/internationalRegulations';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 

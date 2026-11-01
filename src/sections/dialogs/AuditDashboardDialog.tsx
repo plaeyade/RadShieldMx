@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Clock, GitCommit, User, Calculator, FileText, ShieldCheck, AlertTriangle, Settings, TrendingUp } from 'lucide-react';
+import { Clock, GitCommit, User, Calculator, FileText, ShieldCheck, Settings, TrendingUp } from 'lucide-react';
 
 interface AuditEntry {
   id: string;

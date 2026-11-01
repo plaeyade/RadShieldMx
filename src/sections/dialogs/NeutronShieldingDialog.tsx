@@ -4,12 +4,11 @@
  */
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/stores/appStore';
-import { Atom, Zap, Info } from 'lucide-react';
+import { Atom, Info } from 'lucide-react';
 
 const NEUTRON_MATERIALS = [
   { code: 'CONCRETE', name: 'Concreto estandar', tvl_cm: 45, density: 2.35, use: 'Blindaje primario MV' },

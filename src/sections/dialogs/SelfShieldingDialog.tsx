@@ -9,7 +9,7 @@
  * Archer et al. (1994): "The use factor accounts for primary beam direction
  * but patient attenuation of scatter is often neglected."
  */
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

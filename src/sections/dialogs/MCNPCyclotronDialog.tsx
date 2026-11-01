@@ -15,8 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-  Atom, Download, FileText, Zap, Shield, Microscope,
-  Info, Play, Copy, Check, AlertTriangle, Database
+  Atom, Download, FileText, Zap, Shield,
+  Info, Copy, Check, AlertTriangle, Database
 } from 'lucide-react';
 
 // ─── Cyclotron models with NCRP 151 data ───

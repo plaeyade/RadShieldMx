@@ -14,24 +14,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  Atom, Shield, Activity, FlaskConical, Clock, TrendingDown,
-  Calculator, AlertTriangle, CheckCircle, Info, Download, CloudUpload,
+  Atom, Shield, Activity, FlaskConical, Clock, TrendingDown, AlertTriangle, CheckCircle, Info, Download, CloudUpload,
 } from 'lucide-react';
 import { BACKEND_ENABLED, trpc } from '@/providers/trpc';
 import { useAuth } from '@/hooks/useAuth';
 import {
   RADIONUCLIDES, NM_ROOM_CONFIGS,
   calculateWeeklyKerma, calculateNMBarrierThickness,
-  decayedActivity, decayInStorageTime, estimateMIRDDose,
+  decayedActivity, estimateMIRDDose,
   canReleasePatient, bremsstrahlungShielding,
-  type Radionuclide, type RoomShieldingConfig,
 } from '@/lib/nuclearMedicine';
 import {
   buildIdacDoseReadinessPack,

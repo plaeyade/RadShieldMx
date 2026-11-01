@@ -5,19 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   COMMERCIAL_EQUIPMENT, getEquipmentsByCategory, getAllCategories, getAllManufacturers,
   type CommercialEquipment
 } from '@/types/equipmentDB';
-import { MATERIALS_DB, getTVL } from '@/lib/materialDatabase';
+import { MATERIALS_DB } from '@/lib/materialDatabase';
 import {
   Wand2, ChevronRight, ChevronLeft, Download, Calculator, Ruler,
-  Shield, FileText, BookOpen, Atom, Microscope, Zap, Crosshair,
-  Activity, Brain, FlaskConical, Scan, X, DollarSign
+  Shield, FileText, Crosshair,
+  Activity, X, DollarSign
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════

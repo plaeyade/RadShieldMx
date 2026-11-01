@@ -1,19 +1,18 @@
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import {
-  Globe, Search, BookOpen, Shield, MapPin, Calendar, FileText,
-  CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp, Filter
+  Globe, Search, Shield, MapPin, Calendar, ChevronDown, ChevronUp
 } from 'lucide-react';
 import {
-  REGULATIONS, REGULATORY_REGIONS, searchRegulations,
+  REGULATIONS, searchRegulations,
   type Regulation
 } from '@/lib/internationalRegulations';
 

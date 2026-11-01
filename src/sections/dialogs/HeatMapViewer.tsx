@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Flame, Download, BarChart3, Info } from 'lucide-react';
+import { Flame, Download, BarChart3 } from 'lucide-react';
 
 interface HeatMapViewerProps {
   open: boolean;

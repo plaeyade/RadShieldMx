@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { X, Radiation, Zap, Brain, Atom, Scan, Microscope, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check, Maximize2, Minimize2, Move } from 'lucide-react';
+import { X, Radiation, Zap, Brain, Atom, Scan, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check, Maximize2, Minimize2, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export interface SourceItem {

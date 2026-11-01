@@ -12,12 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-  Server, Plus, Pencil, Trash2, Search, Download, Upload,
-  Zap, Microscope, Crosshair, Shield, Save, X, Copy,
-  ChevronDown, Filter, Star, FileText, RotateCcw
+  Server, Trash2, Search, Download, Upload, Crosshair, Shield, Copy, Filter, Star, RotateCcw
 } from 'lucide-react';
 
 // ─── Equipment Model ───

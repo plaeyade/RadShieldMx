@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
 import { buildAnalyticMemoryEvidenceSection } from '@/lib/analyticMemoryEvidence';
 import { buildF125CalculationEvidenceGate } from '@/lib/f125CalculationEvidenceGate';
-import type { FloorPlan, Barrier } from '@/types/radshield';
+import type { FloorPlan } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
 import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 

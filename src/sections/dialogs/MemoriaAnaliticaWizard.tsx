@@ -15,15 +15,13 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import FullscreenShell from '@/components/FullscreenShell';
 import {
-  FileText, ChevronRight, ChevronLeft, Building2, Atom, Shield,
-  Ruler, Users, Calculator, CheckCircle, Download, BookOpen, AlertTriangle, FileDown
+  FileText, ChevronRight, ChevronLeft, Building2, Atom, Shield, Users, Calculator, Download, BookOpen, FileDown
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import { MATERIALS_DB, getMaterialById, type ShieldingMaterial } from '@/lib/materialDatabase';
+import { MATERIALS_DB, getMaterialById } from '@/lib/materialDatabase';
 import {
   calculateLINACPrimaryBarrier, calculateLINACSecondaryBarrier,
-  C1_IMRT_FACTORS, TVL_PRIMARIA_CM, eq430_BeltlineWidth,
-  eq438_TADR, checkTADR, MEXICO_DOSE_LIMITS,
+  C1_IMRT_FACTORS
 } from '@/lib/uaqProtocol';
 import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 

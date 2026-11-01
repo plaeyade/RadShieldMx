@@ -16,11 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
   Bot, Play, Shield, AlertTriangle, CheckCircle2, Loader2,
-  FileText, ChevronDown, ChevronUp, Zap, BarChart3,
+  FileText, Zap,
 } from "lucide-react";
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

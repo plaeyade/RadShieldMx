@@ -2,12 +2,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import '@/components/ui/input';
+import '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Cloud, Play, Download, CheckCircle, Clock, Server, Cpu, AlertTriangle, FileJson, FileCode, Layers } from 'lucide-react';
+import { Cloud, Play, CheckCircle, Clock, Cpu, AlertTriangle, FileJson, FileCode, Layers } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { useAuth } from '@/hooks/useAuth';
 import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';

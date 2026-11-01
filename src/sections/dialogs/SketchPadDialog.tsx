@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Pencil, Eraser, Download, RotateCcw, Square, Circle, Minus, Grip, Grid3x3, Save } from 'lucide-react';
+import { Pencil, Eraser, Download, RotateCcw, Square, Circle, Minus, Grid3x3 } from 'lucide-react';
 
 type Tool = 'pencil' | 'eraser' | 'line' | 'rect' | 'circle' | 'select';
 type ElementType = 'line' | 'rect' | 'circle' | 'freehand' | 'text';

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ShieldCheck, CheckCircle, XCircle, FileDown, Play } from 'lucide-react';
+import { CheckCircle, XCircle, FileDown, Play } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
 import { runValidation, summarize, toCSV, CASES } from '@/lib/validation/NCRPValidationSuite';
 import type { ValResult, SuiteSummary } from '@/lib/validation/NCRPValidationSuite';

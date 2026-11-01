@@ -5,7 +5,7 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-import type { AgentStep, AgentRunResult, AgentTool } from "./types";
+import type { AgentStep, AgentRunResult } from "./types";
 import { getTool } from "./tools";
 
 export class AgentRuntime {

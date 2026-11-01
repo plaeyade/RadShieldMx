@@ -2,7 +2,7 @@
 // CollaborationHub.tsx — Real-time Collaboration for Shielding Projects
 // Multi-user editing with operational transforms, presence, comments
 // =============================================================================
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -15,9 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import {
-  Users, Send, Circle, Share2, UserPlus, MessageSquare,
-  Eye, Pencil, MousePointer, Activity, Clock, CheckCircle2,
-  Radio, Lock, Unlock,
+  Users, Send, Circle, Share2, MessageSquare,
+  Eye, Pencil, Activity, Clock, CheckCircle2,
+  Radio, Unlock,
 } from 'lucide-react';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }

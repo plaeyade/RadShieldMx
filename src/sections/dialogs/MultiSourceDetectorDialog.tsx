@@ -12,11 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import {
   Cpu, Plus, Trash2, Play, Download, FileText, Activity, Zap,
-  Shield, Crosshair, Radio, Box, Layers, GitBranch, BarChart3,
-  Save, Copy, ExternalLink
+  Shield, Crosshair, Radio, Layers, GitBranch, BarChart3, Copy, ExternalLink
 } from 'lucide-react';
 import {
-  type MultiSourceJob, type MCSource, type MCDetector, type BiasingConfig,
+  type MultiSourceJob, type MCSource, type MCDetector,
   type ShieldingObject, PREDEFINED_SOURCES,
   runMultiSourceMultiDetector, generateGeant4MultiSourceMacro,
   generateFLUKAMultiSourceInput, generateGDMLSnippet,

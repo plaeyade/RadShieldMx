@@ -1,9 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Box, Circle, Cylinder, Square, Triangle, Hexagon, Star, Pentagon, Octagon, Layers } from 'lucide-react';
+import '@/components/ui/separator';
+import { Box, Circle, Cylinder, Square, Triangle, Hexagon, Star, Layers } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface GeometryOption {

@@ -35,6 +35,9 @@ jobs:
       - name: Deployable stability check
         run: npm run check
 
+      - name: ESLint (trinquete contra .eslint-baseline.json)
+        run: npm run lint:ci
+
   test:
     name: Vitest Tests
     runs-on: ubuntu-latest

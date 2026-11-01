@@ -1,1 +1,5 @@
-export default function Stub(props: any) { return null; }
+import { createUnavailableFeatureDialog } from '@/components/UnavailableFeatureDialog';
+
+const ShleienHandbookDialog = createUnavailableFeatureDialog('Manual de Shleien');
+
+export default ShleienHandbookDialog;

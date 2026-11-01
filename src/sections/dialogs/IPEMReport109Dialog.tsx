@@ -3,8 +3,8 @@
  * IPEM Report 109 (2014) — SPECT and SPECT/CT room shielding.
  */
 import { useState, useMemo } from 'react';
-import { X, Activity, Table, Download, Shield } from 'lucide-react';
-import { DEFAULT_SPECT_PROCEDURES, SPECT_RADIONUCLIDES, calculateSPECTShielding } from '@/lib/spect/IPEMReport109';
+import { X, Activity, Table, Download } from 'lucide-react';
+import { DEFAULT_SPECT_PROCEDURES, calculateSPECTShielding } from '@/lib/spect/IPEMReport109';
 import type { SPECTProcedure } from '@/lib/spect/IPEMReport109';
 
 export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }) {

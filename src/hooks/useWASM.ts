@@ -4,7 +4,7 @@
  * Módulo custom 547 bytes con: inverse_archer, tvl_thickness, dose_from_source, gamma_index
  * Fallback a JS puro si WASM no disponible
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 export interface WASMInterface {

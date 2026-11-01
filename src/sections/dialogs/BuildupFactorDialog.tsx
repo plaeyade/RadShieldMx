@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Layers, Info } from 'lucide-react';
+import '@/components/ui/separator';
+import { Layers } from 'lucide-react';
 
 interface BuildupEntry {
   material: string;

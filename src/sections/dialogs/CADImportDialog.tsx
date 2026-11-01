@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Upload, FileImage, FileText, Box, AlertTriangle, CheckCircle2, ChevronRight, Layers, ExternalLink } from 'lucide-react';
+import { Upload, Box, AlertTriangle, CheckCircle2, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface CADImportDialogProps {
   open: boolean;
