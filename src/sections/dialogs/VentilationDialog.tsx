@@ -1,7 +1,8 @@
 /** Ventilación de la bóveda: activación de Ar-41 en el aire y tiempo de espera antes de entrar. */
 import { useMemo, useState } from 'react';
 import DialogShell from '@/components/DialogShell';
-import { AR41, calcularVentilacionAr41, type EntradaVentilacion } from '@/lib/ventilacionBunker';
+import { AR41, calcularVentilacionAr41, flujoParaCorriente, leerFlujoAire, type EntradaVentilacion, type FlujoAireCyclotronSim } from '@/lib/ventilacionBunker';
+import kiube from '@/data/flujo_aire_kiube.json';
 
 const CAMPOS: Array<[keyof EntradaVentilacion, string]> = [
   ['volumenSala_m3', 'Volumen de la sala (m³)'],
@@ -15,6 +16,23 @@ const fmt = (v: number) => (Math.abs(v) >= 1e4 || (v !== 0 && Math.abs(v) < 1e-2
 
 export default function VentilationDialog({ open = true, onClose }: { open?: boolean; onClose?: () => void }) {
   const [e, setE] = useState<EntradaVentilacion>({ volumenSala_m3: 120, renovaciones_h: 10, flujoTermico_n_cm2_s: 1e5, horasIrradiacion: 2, esperaAntesDeEntrar_min: 10 });
+  const [mc, setMc] = useState<FlujoAireCyclotronSim | null>(null);
+  const [corriente, setCorriente] = useState(300);
+  const [errorMc, setErrorMc] = useState<string | null>(null);
+  const aplicarMc = (f: FlujoAireCyclotronSim, conservador: boolean) => {
+    setMc(f);
+    setErrorMc(null);
+    setE((x) => ({ ...x, flujoTermico_n_cm2_s: Math.round(flujoParaCorriente(f, corriente, conservador)) }));
+  };
+  const importar = async (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const f = ev.target.files?.[0];
+    if (!f) return;
+    try {
+      aplicarMc(leerFlujoAire(JSON.parse(await f.text())), false);
+    } catch (err) {
+      setErrorMc((err as Error).message);
+    }
+  };
   const r = useMemo(() => {
     try {
       return { ok: calcularVentilacionAr41(e) } as const;
@@ -33,7 +51,21 @@ export default function VentilationDialog({ open = true, onClose }: { open?: boo
               <input type="number" className="w-full rounded border p-1" value={e[k] ?? 0} onChange={(ev) => setE({ ...e, [k]: Number(ev.target.value) })} />
             </label>
           ))}
-          <p className="text-xs text-slate-500">El flujo térmico medio del aire sale de la malla MC de la bóveda (Cyclotron-SIM) o de una medición. Es el dato que más pesa en el resultado.</p>
+          <div className="space-y-1 rounded border border-sky-200 bg-sky-50 p-2 text-xs" data-testid="ventilation-mc">
+            <p className="font-medium">Flujo desde el MC de Cyclotron-SIM</p>
+            <label className="block">
+              Corriente total (µA)
+              <input type="number" className="ml-2 w-20 rounded border p-0.5" value={corriente} onChange={(ev) => setCorriente(Number(ev.target.value))} />
+            </label>
+            <div className="flex flex-wrap gap-1">
+              <button type="button" className="rounded border bg-white px-2" onClick={() => aplicarMc(leerFlujoAire(kiube), false)}>KIUBE 300 · media</button>
+              <button type="button" className="rounded border bg-white px-2" onClick={() => aplicarMc(leerFlujoAire(kiube), true)}>KIUBE 300 · p95</button>
+              <input type="file" accept=".json" onChange={importar} aria-label="Importar flujo_aire@1" />
+            </div>
+            {mc ? <p>{mc.maquina}: {mc.lotes} lotes MC, escalado a {corriente} µA.</p> : null}
+            {errorMc ? <p className="text-red-700">{errorMc}</p> : null}
+          </div>
+          <p className="text-xs text-slate-500">El flujo térmico medio del aire es el dato que más pesa en el resultado. Sale de la malla MC de la bóveda (Cyclotron-SIM) o de una medición.</p>
         </div>
         <div className="space-y-1">
           {'error' in r ? (

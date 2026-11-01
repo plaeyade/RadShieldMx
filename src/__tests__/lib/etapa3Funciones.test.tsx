@@ -87,3 +87,15 @@ describe('redirecciones y historial', () => {
     expect(html).toContain('posición 1');
   });
 });
+
+describe('flujo del aire desde Cyclotron-SIM', () => {
+  it('lee el contrato KIUBE y escala por corriente', async () => {
+    const { leerFlujoAire, flujoParaCorriente } = await import('@/lib/ventilacionBunker');
+    const kiube = (await import('@/data/flujo_aire_kiube.json')).default;
+    const f = leerFlujoAire(kiube);
+    expect(f.corriente_uA).toBe(300);
+    expect(flujoParaCorriente(f, 150)).toBeCloseTo(f.phi_termico_aire_n_cm2_s.media / 2, 3);
+    expect(flujoParaCorriente(f, 300, true)).toBe(f.phi_termico_aire_n_cm2_s.p95);
+    expect(() => leerFlujoAire({ contrato: 'otro' })).toThrow();
+  });
+});
