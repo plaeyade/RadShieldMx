@@ -4,6 +4,8 @@ import { buildAnalyticMemoryEvidenceSection } from '@/lib/analyticMemoryEvidence
 import type { FloorPlan } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
 import { extractControlledZoneReportContext } from '@/lib/controlledZoneReportAdapter';
+import { seccionEvidenciaMemoria, verificarPaqueteGamma, type PaqueteVerificado } from '@/lib/gammaCliente';
+import paqueteEvidenciaMemoria from '@/data/gamma-evidencia-memoria.json';
 
 export interface CNSNSReportData {
   floorPlan: FloorPlan;
@@ -16,6 +18,8 @@ export interface CNSNSReportData {
   canvasImageDataUrl?: string; // base64 PNG of canvas
   barrierResults?: CanvasBarrierResult[];
   sampleLines?: CanvasSampleLine[];
+  /** Evidencia de GAMMA ya verificada; si falta, se usa el paquete versionado del repo. */
+  evidenciaGamma?: PaqueteVerificado;
 }
 
 function textBlockToParagraphs(text: string): Paragraph[] {
@@ -386,6 +390,26 @@ export async function generateCNSNSReport(data: CNSNSReportData): Promise<Blob> 
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• DeLorenzo et al. (2016). RadShield: Semiautomated shielding design using a floor plan driven GUI. JACMP 17(3):167-182.', size: 22 })] })
   ];
 
+  // 6.1 Evidencia documental citada (GAMMA-AI): página y fragmento verificables por SHA-256
+  const evidenciaGamma = data.evidenciaGamma ?? (await verificarPaqueteGamma(paqueteEvidenciaMemoria));
+  const gammaParagraphs = [
+    new Paragraph({
+      spacing: { before: 300, after: 120 },
+      children: [new TextRun({ text: '6.1 EVIDENCIA DOCUMENTAL CITADA (GAMMA-AI)', bold: true, size: 24, color: '2E5C8A' })],
+    }),
+    new Paragraph({
+      spacing: { after: 120 },
+      children: [new TextRun({
+        text: 'Fragmentos de las fuentes recuperados por GAMMA-AI con documento, página y SHA-256 del texto citado. Respaldo documental experimental: no sustituye la revisión ni la firma del responsable.',
+        size: 18, italics: true, color: '4A5568',
+      })],
+    }),
+    ...seccionEvidenciaMemoria(evidenciaGamma).map((linea) => new Paragraph({
+      spacing: { after: 60 },
+      children: [new TextRun({ text: linea, size: linea.startsWith('Sección') ? 20 : 17, bold: linea.startsWith('Sección') })],
+    })),
+  ];
+
   const analyticEvidenceParagraphs = [
     new Paragraph({
       spacing: { before: 400, after: 200 },
@@ -483,6 +507,7 @@ export async function generateCNSNSReport(data: CNSNSReportData): Promise<Blob> 
         ...matCompParagraphs,
         ...methodologyParagraphs,
         ...normativeParagraphs,
+        ...gammaParagraphs,
         ...analyticEvidenceParagraphs,
         ...canvasImageParagraphs,
         ...signatureParagraphs
