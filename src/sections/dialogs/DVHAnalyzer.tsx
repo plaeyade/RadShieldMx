@@ -16,6 +16,7 @@ import {
   BarChart3, Download, Activity, Info, TrendingUp, Target,
   GitCompareArrows, Layers
 } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface DVHData {
   structureName: string;
@@ -363,6 +364,7 @@ export default function DVHAnalyzer({ open, onClose }: DVHAnalyzerProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <SyntheticResultBanner />
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <BarChart3 className="w-5 h-5 text-[#f97316]" />

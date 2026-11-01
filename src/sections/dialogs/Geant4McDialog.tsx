@@ -12,6 +12,7 @@ import { useAppStore } from '@/stores/appStore';
 import { Atom, Play, CheckCircle, AlertTriangle, Activity, Timer, Database } from 'lucide-react';
 import { SHIELDING_MATERIALS, calculateTransmission } from '@/lib/xcomAttenuation';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface McResult {
   mcDose_mSv_per_wk: number; mcTransmission: number;
@@ -25,7 +26,7 @@ function runMonteCarlo(energy_MeV: number, activity_GBq: number, distance_m: num
   const W = activity_GBq * 1000;
   const mcTransmission = calculateTransmission(materialCode, energy_MeV, thickness_mm) ?? Math.exp(-0.05 * (thickness_mm / 10));
   const statUncertainty = 5 / Math.sqrt(nHistories / 1e4);
-  const mcDose = P * (P * distance_m * distance_m / (W * 0.25 * 0.2) / mcTransmission) * (1 + (Math.random() - 0.5) * statUncertainty / 100);
+  const mcDose = P * (P * distance_m * distance_m / (W * 0.25 * 0.2) / mcTransmission) /* etapa 0: sin ruido aleatorio — valor analítico, no MC */;
   const percentDiff = Math.abs((mcDose - P) / P) * 100;
   const mat = SHIELDING_MATERIALS.find(m => m.code === materialCode);
   return {
@@ -59,6 +60,7 @@ export default function Geant4McDialog() {
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
       <DialogContent className="max-w-lg">
+        <SyntheticResultBanner />
         <DialogHeader><DialogTitle className="flex items-center gap-2 text-sm"><Atom className="w-4 h-4 text-green-500" /> Geant4 Monte Carlo (v103)<Badge variant="outline" className="text-[9px]">Gold Standard</Badge></DialogTitle></DialogHeader>
         <div className="text-[10px] text-slate-500 bg-green-50 rounded-md p-2 mb-3 flex items-start gap-2"><Activity className="w-3 h-3 text-green-400 mt-0.5 shrink-0" />Validacion MC vs NCRP. Tolerancia: 5% (NCRP 151 Sec. B.1)</div>
         <div className="grid grid-cols-2 gap-3 mb-3">

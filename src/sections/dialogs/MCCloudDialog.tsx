@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Cloud, Play, Download, CheckCircle, Clock, Server, Cpu, AlertTriangle, FileJson, FileCode, Layers } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { useAuth } from '@/hooks/useAuth';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; projectId: string; format: string; particles: number; jobName: string; }
 
@@ -159,6 +160,7 @@ Para simulacion REAL:
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <SyntheticResultBanner />
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Cloud className="w-5 h-5 text-blue-500" />

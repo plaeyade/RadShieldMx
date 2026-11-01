@@ -59,7 +59,7 @@ export default function Login() {
 
             <div className="pt-3 border-t text-center space-y-2">
               <p className="text-[10px] text-slate-400 uppercase tracking-wider">
-                Respaldado por
+                Normas de referencia
               </p>
               <div className="flex justify-center gap-3 text-slate-300">
                 <Radio className="w-4 h-4" aria-label="NCRP" />
