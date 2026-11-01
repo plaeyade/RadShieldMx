@@ -1,0 +1,26 @@
+{
+ "contrato": "gamma/evidencia@1",
+ "consulta": "tasa de dosis KIUBE doble haz",
+ "perfil": "GUIDELINES",
+ "generado_utc": "2026-11-01T12:00:00Z",
+ "estado": "experimental_sin_validacion_clinica",
+ "no_apto_para_firma": true,
+ "citas": [
+  {
+   "source_id": "source_b899b5034fa514181b99425e1f9cc523",
+   "sha256_documento": "b899b5034fa514181b99425e1f9cc523406226f99e02681f7b900c9c6e461ffd",
+   "pagina": 27,
+   "fragmento_sha256": "fc3d48d62d546b14847b21c92c5d214ec458f799b06fc688c342747ee7fc33b6",
+   "texto": "Dual beam 2 x 150 uA: dose rate at 1 m in front of the target 1.8E8 uSv/h (table 8).",
+   "puntaje": 0.91
+  },
+  {
+   "source_id": "source_b899b5034fa514181b99425e1f9cc523",
+   "sha256_documento": "b899b5034fa514181b99425e1f9cc523406226f99e02681f7b900c9c6e461ffd",
+   "pagina": 28,
+   "fragmento_sha256": "fff29cf3f38f0788120cd2f2ee50d513af49b477995d312693a4559380a2726f",
+   "texto": "Contact dose rate behind 200 cm of concrete (2.35 g/cm3): 5.43 uSv/h (table 9).",
+   "puntaje": 0.88
+  }
+ ]
+}
