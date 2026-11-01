@@ -69,10 +69,10 @@ interface ToolbarProps {
   onCalculate: () => void; onShieldingCalculator: () => void; onCompareScenarios: () => void; onTornadoSensitivity: () => void;
   onEquipmentShieldingWizard: () => void; onQuick: () => void; onMazeCalculator: () => void;
   onFloorCeiling: () => void; onShieldingOptimizer: () => void; onCostOptimizer: () => void;
-  onCostEstimator: () => void; onUncertainty: () => void; onSeasonal: () => void; onGUMUncertainty: () => void;
+  onCostEstimator: () => void; onUncertainty: () => void; onGUMUncertainty: () => void;
   onUAQ: () => void; onMemoriaAI: () => void;
   on3D: () => void; on3DModels: () => void; onMedicalFloorPlan3D: () => void; onPointCloud: () => void;
-  onVRAR: () => void; onAutoBarrier: () => void;
+  onAutoBarrier: () => void;
   onRealTime3D: () => void; onBIMRAD: () => void;
   onLayoutBunker: () => void; onBIMConnector: () => void;
   onShapesReconstruction: () => void;
@@ -95,7 +95,7 @@ interface ToolbarProps {
   onReferenceLibrary?: () => void;
   onAIShielding: () => void; onPredictiveOptimizer: () => void; onAutoFillEquipo: () => void;
   onVideoTutorial: () => void; onCloudSync: () => void; onCollaborationHub: () => void;
-  onThemeEngine: () => void; onAbout: () => void; onGlossary: () => void; onExternalSoftware: () => void;
+  onAbout: () => void; onGlossary: () => void; onExternalSoftware: () => void;
   onIndustrialRadiation: () => void; onPythonTools: () => void;
   onAnimatedDoseMaps: () => void; onVentilation: () => void;
   onEquipmentLibrary: () => void; onEquipmentManager: () => void;
@@ -142,7 +142,6 @@ interface ToolbarProps {
   // v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification
   onFLUKA?: () => void;
   onPENELOPE?: () => void;
-  onTherapyDosimetry?: () => void;
   onShieldingVerification?: () => void;
   // v42: McGinley
   onLaminatedBarrier?: () => void;
@@ -235,8 +234,8 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     onTechSpecs, onAuditTrail, onLogFileAnalysis,
     onCalculate, onShieldingCalculator, onCompareScenarios, onTornadoSensitivity, onEquipmentShieldingWizard, onQuick, onMazeCalculator,
     onFloorCeiling, onShieldingOptimizer, onCostOptimizer, onCostEstimator,
-    onUncertainty, onSeasonal, onGUMUncertainty, onUAQ, onMemoriaAI,
-    on3D, on3DModels, onMedicalFloorPlan3D, onPointCloud, onVRAR, onAutoBarrier,
+    onUncertainty, onGUMUncertainty, onUAQ, onMemoriaAI,
+    on3D, on3DModels, onMedicalFloorPlan3D, onPointCloud, onAutoBarrier,
     onRealTime3D, onBIMRAD, onLayoutBunker, onBIMConnector, onShapesReconstruction,
     onMonteCarlo, onMonteCarloSim, onMC, onMCCloud, onMultiSource,
     onNativeMC, onNeutronShielding, onElectronTransport, onVoxelPhantom,
@@ -250,7 +249,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     onEvidencePack,
     onReferenceLibrary,
     onAIShielding, onPredictiveOptimizer, onAutoFillEquipo, onVideoTutorial,
-    onCloudSync, onCollaborationHub, onThemeEngine, onExternalSoftware,
+    onCloudSync, onCollaborationHub, onExternalSoftware,
     onIndustrialRadiation, onPythonTools, onAnimatedDoseMaps, onVentilation,
     onEquipmentLibrary, onEquipmentManager,
     onPACSReal, onElectronApplicator,
@@ -270,7 +269,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     // v41
     onGammaIndex, onNuclearDoseGrid, onMonteCarloEngine, onDVHAnalyzer,
     // v41b
-    onFLUKA, onPENELOPE, onTherapyDosimetry, onShieldingVerification,
+    onFLUKA, onPENELOPE, onShieldingVerification,
     // v42
     onLaminatedBarrier,
     onPerformanceRecommendations,
@@ -771,14 +770,11 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                 <>
                   <SectionLabel label="F107 blindaje migrado (fallback)" color="text-emerald-500" />
                   <SmartItem icon={Play} iconColor={c.calc} label={`${t('calc.calculate')} (fallback F107)`} onClick={onCalculate} shortcut="F5" desc="Run calculation for all barriers" />
-                  <SmartItem icon={Calculator} iconColor={c.calc} label={`${t('calc.uaq')} (fallback F107)`} onClick={onShieldingCalculator} desc="14 tabs per equipment" />
                   <SmartItem icon={Wand2} iconColor={c.calc} label="Equipment Wizard (fallback F107)" onClick={onEquipmentShieldingWizard} />
-                  <SmartItem icon={Zap} iconColor={c.calc} label={`${t('calc.quick')} (fallback F107)`} onClick={onQuick} shortcut="Ctrl+B" />
                   <SmartItem icon={ArrowUpDown} iconColor={c.calc} label={`${t('calc.floorCeiling')} (fallback F107)`} onClick={onFloorCeiling} />
                   <SmartItem icon={TrendingDown} iconColor={c.calc} label="Optimize Materials (fallback F107)" onClick={onCostOptimizer} desc="Cost/benefit optimization" />
                   <SmartItem icon={DollarSign} iconColor={c.calc} label={t('calc.costs')} onClick={onCostEstimator} />
                   <SmartItem icon={BarChart3} iconColor={c.calc} label="Uncertainty (fallback F108)" onClick={onUncertainty} />
-                  <SmartItem icon={CalendarDays} iconColor={c.calc} label={t('calc.seasonal')} onClick={onSeasonal} />
                   <SmartItem icon={BarChart3} iconColor={c.calc} label="GUM Uncertainty (fallback F108)" onClick={onGUMUncertainty} desc="JCGM 100 propagation" />
                   <SectionLabel label="Analysis Tools (v50)" color="text-emerald-500" />
                   <SmartItem icon={GitCompareArrows} iconColor="bg-violet-600" label="Compare Scenarios" onClick={onCompareScenarios} desc="Side-by-side with delta highlights" />
@@ -861,7 +857,6 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <SmartItem icon={Cloud} iconColor="bg-sky-500" label="Chilton Skyshine (fallback F107)" onClick={onChiltonSkyshine} desc="Roof scatter MV" />
                   <SectionLabel label="Radiofarmacia" color="text-rose-500" />
                   <SmartItem icon={FileCheck} iconColor="bg-emerald-600" label="GMP Certification — Cyclotron" onClick={onGMPCertification} desc="IAEA/WHO, EMA — 59 requisitos" />
-                  <SmartItem icon={Pill} iconColor="bg-rose-600" label="Therapy Dosimetry" onClick={onTherapyDosimetry} desc="MIRD/OLINDA — Lu-177, I-131" />
                   <SmartItem icon={Clock} iconColor="bg-amber-600" label="Generator Decay Chains" onClick={onDecayChains} desc="Mo-99/Tc-99m, Ge-68/Ga-68" />
                   <SmartItem icon={Atom} iconColor={c.nucmed} label={t('nucMed.bateman')} onClick={onBatemanDecay} />
                   <SmartItem icon={Grid3X3} iconColor="bg-rose-600" label="Nuclear Dose Grid" onClick={onNuclearDoseGrid} desc="PET/SPECT dose maps" />
@@ -908,7 +903,6 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <SectionLabel label={t('tools.integration')} color="text-[#f97316]" />
                   <SmartItem icon={Cloud} iconColor={c.tool} label={t('tools.cloudSync')} onClick={onCloudSync} />
                   <SmartItem icon={Users} iconColor={c.tool} label={t('tools.collaboration')} onClick={onCollaborationHub} />
-                  <SmartItem icon={Palette} iconColor={c.tool} label={t('tools.themeEngine')} onClick={onThemeEngine} />
                   <SmartItem icon={Globe} iconColor={c.tool} label={t('tools.external')} onClick={onExternalSoftware} />
                   <SectionLabel label={t('tools.others')} color="text-[#f97316]" />
                   <SmartItem icon={Factory} iconColor={c.tool} label={t('tools.industrial')} onClick={onIndustrialRadiation} />

@@ -83,3 +83,28 @@ Pendiente para la etapa 3:
 | Historial deshacer/rehacer | Implementar (UI) | El historial ya existe en el estado; sólo falta el panel |
 | Vista previa VR/AR | Retirar | Fuera de alcance |
 | Tablero de validación | Implementar | Reunir las validaciones NCRP y numéricas que hoy están dispersas |
+
+
+# Etapa 3: funciones de menú resueltas (2026-11-01)
+
+No queda ningún Stub. Las 16 funciones anunciadas que no hacían nada quedaron así:
+
+| Función | Resultado |
+| --- | --- |
+| Verificación de blindaje | **Implementada**: espesor instalado frente al requerido por barrera, margen, dosis estimada con TVL y estado (`lib/verificacionBlindaje.ts`) |
+| Ventilación del búnker | **Implementada**: Ar-41 en el aire (NCRP 144) con saturación, concentración al entrar, espera hasta quedar bajo el DAC y emisión por chimenea, comparadas con 10 CFR 20 Ap. B (`lib/ventilacionBunker.ts`) |
+| Historial de deshacer/rehacer | **Implementado**: lista de acciones, salto a cualquiera, deshacer y rehacer |
+| Calculadora de skyshine | Abre la calculadora Chilton existente (`ChiltonSkyshineDialog`) |
+| Análisis de incertidumbre | Abre el análisis GUM existente |
+| Tablero de validación | Abre la validación NCRP existente |
+| Calculadora de blindaje, Barrera rápida, UAQ | Abren la calculadora de barrera existente |
+| Manual de Shleien | Abre la biblioteca de referencias (evidencia de GAMMA) |
+| Campo de solución 3D | Abre el visor 3D existente |
+| Gestor de proyectos (mosaico) | Abre el gestor de proyectos principal |
+| Ajuste estacional, Motor de temas, VR/AR, Dosimetría de terapia | **Retiradas** del menú |
+
+Las redirecciones viven en `DIALOGOS_REDIRIGIDOS` (`stores/appStore.ts`). Los atajos, accesos
+rápidos y menús existentes siguen funcionando. Se quitaron 2 entradas duplicadas «(fallback F107)».
+
+Validado: `tsc` OK, Vitest 353/353 (+11 pruebas nuevas), `vite build` OK y trinquete de ESLint sin
+errores nuevos.
