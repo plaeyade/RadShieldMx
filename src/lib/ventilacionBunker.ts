@@ -80,3 +80,27 @@ export function calcularVentilacionAr41(e: EntradaVentilacion): ResultadoVentila
     advertencias,
   };
 }
+
+/** Contrato `cyclotron-sim/flujo_aire@1`: flujo térmico medio del aire de la bóveda según el MC. */
+export interface FlujoAireCyclotronSim {
+  contrato: 'cyclotron-sim/flujo_aire@1';
+  maquina: string;
+  corriente_uA: number;
+  lotes: number;
+  phi_termico_aire_n_cm2_s: { media: number; mediana: number; p95: number; max: number };
+  fuente?: string;
+}
+
+export function leerFlujoAire(datos: unknown): FlujoAireCyclotronSim {
+  const d = datos as Partial<FlujoAireCyclotronSim> | null;
+  if (!d || d.contrato !== 'cyclotron-sim/flujo_aire@1') throw new Error('No es un contrato cyclotron-sim/flujo_aire@1');
+  const p = d.phi_termico_aire_n_cm2_s;
+  if (!p || !(p.media > 0) || !(p.p95 >= p.media) || !(Number(d.corriente_uA) > 0)) throw new Error('Flujo del contrato inválido');
+  return d as FlujoAireCyclotronSim;
+}
+
+/** El flujo escala linealmente con la corriente total del haz (mismo blanco y energía). */
+export function flujoParaCorriente(f: FlujoAireCyclotronSim, corriente_uA: number, conservador = false): number {
+  const base = conservador ? f.phi_termico_aire_n_cm2_s.p95 : f.phi_termico_aire_n_cm2_s.media;
+  return (base * corriente_uA) / f.corriente_uA;
+}
