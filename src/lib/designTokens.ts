@@ -1,3 +1,0 @@
-export const tokens={colors:{primary:{DEFAULT:'#f97316',hover:'#ea580c',light:'#fff7ed'},secondary:{DEFAULT:'#0d9488',hover:'#0f766e'},success:{DEFAULT:'#22c55e',hover:'#16a34a'},danger:{DEFAULT:'#ef4444',hover:'#dc2626'},info:{DEFAULT:'#3b82f6',hover:'#2563eb'},slate:{50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a'}},spacing:{xs:'2px',sm:'4px',md:'8px',lg:'12px',xl:'16px','2xl':'24px'},radius:{sm:'4px',md:'8px',lg:'12px',full:'9999px'},animation:{fast:'150ms',normal:'250ms',slow:'400ms'}};
-export function color(n:keyof typeof tokens.colors,sh='DEFAULT'){const c=tokens.colors[n] as any;return c[sh]||c.DEFAULT}
-export default tokens;
