@@ -1,10 +1,12 @@
 [
- {"id": "tvl_concreto", "seccion": "5.2", "consulta": "tenth-value layer TVL concrete primary barrier megavoltage", "k": 3},
- {"id": "factor_uso", "seccion": "5.2", "consulta": "use factor U fraction of primary-beam workload directed toward barrier", "k": 2},
- {"id": "ocupacion", "seccion": "5.2", "consulta": "occupancy factor T uncontrolled area", "k": 2},
- {"id": "objetivo_diseno", "seccion": "5.2", "consulta": "shielding design goal controlled area mSv per week", "k": 2},
+ {"id": "tvl_concreto", "seccion": "5.2", "consulta": "tenth-value layer TVL concrete primary barrier megavoltage TVL hormigón barrera primaria megavoltaje", "k": 3},
+ {"id": "factor_uso", "seccion": "5.2", "consulta": "use factor U fraction of primary-beam workload directed toward barrier factor de uso U fracción de la carga de trabajo del haz primario hacia la barrera", "k": 3},
+ {"id": "ocupacion", "seccion": "5.2", "consulta": "occupancy factor T uncontrolled area factor de ocupación T área no controlada", "k": 3},
+ {"id": "objetivo_diseno", "seccion": "5.2", "consulta": "shielding design goal controlled area mSv per week objetivo de diseño área controlada mSv por semana", "k": 3},
  {"id": "pet_constante", "seccion": "5.3", "consulta": "PET 511 keV dose rate constant patient", "k": 2},
  {"id": "pet_autoatenuacion", "seccion": "5.3", "consulta": "patient self-attenuation uptake time PET shielding", "k": 2},
  {"id": "ciclotron_dosis", "seccion": "5.3", "consulta": "cyclotron vault dose rate neutron gamma dual beam shielding", "k": 3},
- {"id": "tabique_densidad", "seccion": "5.5", "consulta": "densidad tabique blindaje ficha tecnica", "k": 3}
+ {"id": "tabique_densidad", "seccion": "5.5", "consulta": "densidad tabique blindaje ficha tecnica", "k": 3},
+ {"id": "ncrp151_tvl", "seccion": "5.2", "consulta": "TVL1 TVLe hormigón haz primario fuga energía MV tabla", "k": 2},
+ {"id": "ncrp151_ocupacion", "seccion": "5.2", "consulta": "factores de ocupación sugeridos oficinas pasillos salas de espera", "k": 2}
 ]

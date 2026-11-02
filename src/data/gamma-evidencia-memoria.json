@@ -1,6 +1,6 @@
 {
  "contrato": "gamma/paquete_evidencia@1",
- "generado_utc": "2026-11-01T19:12:06+00:00",
+ "generado_utc": "2026-11-02T07:08:53+00:00",
  "incluye_en_revision": true,
  "consultas": [
   {
@@ -8,9 +8,9 @@
    "seccion": "5.2",
    "evidencia": {
     "contrato": "gamma/evidencia@1",
-    "consulta": "tenth-value layer TVL concrete primary barrier megavoltage",
+    "consulta": "tenth-value layer TVL concrete primary barrier megavoltage TVL hormigón barrera primaria megavoltaje",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:05+00:00",
+    "generado_utc": "2026-11-02T07:08:49+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -46,9 +46,9 @@
    "seccion": "5.2",
    "evidencia": {
     "contrato": "gamma/evidencia@1",
-    "consulta": "use factor U fraction of primary-beam workload directed toward barrier",
+    "consulta": "use factor U fraction of primary-beam workload directed toward barrier factor de uso U fracción de la carga de trabajo del haz primario hacia la barrera",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:05+00:00",
+    "generado_utc": "2026-11-02T07:08:49+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -67,6 +67,14 @@
       "fragmento_sha256": "adb957d1de295ddf357ba4ab28103821b254611b4089d6d4bf91852655c36d34",
       "texto": "U= use factor or fraction of the workload that the primary beam is directed at the barrier in",
       "puntaje": 0.016129
+     },
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 36,
+      "fragmento_sha256": "efe2993309aa7669f54ca6f1a73e632b2eb8fe028bc17f37580e0dde4be5600b",
+      "texto": "U = factor de utilización o fracción de la carga de trabajo",
+      "puntaje": 0.015873
      }
     ]
    }
@@ -76,9 +84,9 @@
    "seccion": "5.2",
    "evidencia": {
     "contrato": "gamma/evidencia@1",
-    "consulta": "occupancy factor T uncontrolled area",
+    "consulta": "occupancy factor T uncontrolled area factor de ocupación T área no controlada",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:05+00:00",
+    "generado_utc": "2026-11-02T07:08:50+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -97,6 +105,14 @@
       "fragmento_sha256": "c30723e2b5ecf584e6cbaf6461ea9118958a1bcbc4e8d92c55b50fa916f53542",
       "texto": "Occupancy Factor, T",
       "puntaje": 0.016129
+     },
+     {
+      "source_id": "source_1414ded940d68843942281895404a675",
+      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
+      "pagina": 71,
+      "fragmento_sha256": "412ac0dc9c867d2435cc8d8133e0b3e804e21874f45442f557a41b7ac879d716",
+      "texto": "T=occupancy factor",
+      "puntaje": 0.015873
      }
     ]
    }
@@ -106,9 +122,9 @@
    "seccion": "5.2",
    "evidencia": {
     "contrato": "gamma/evidencia@1",
-    "consulta": "shielding design goal controlled area mSv per week",
+    "consulta": "shielding design goal controlled area mSv per week objetivo de diseño área controlada mSv por semana",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:06+00:00",
+    "generado_utc": "2026-11-02T07:08:50+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -121,12 +137,20 @@
       "puntaje": 0.016393
      },
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 49,
-      "fragmento_sha256": "7199d9b34427642a07c9363795942ae6a5f76ba60545945aaa6ecbd66dfb5dd0",
-      "texto": "Shielding design goal (P) (in dose equivalent):",
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 16,
+      "fragmento_sha256": "4ea570139fa73798c25ed49ff4619773430d0ab30882ffcbbdd1cbc722183a31",
+      "texto": "Recomendación para las zonas controladas: Objetivo de diseño del blindaje (P) (en equivalente de dosis): 0,1 mSv semana-1 (5 mSv año-1)",
       "puntaje": 0.016129
+     },
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 151,
+      "fragmento_sha256": "d23e6ac4678203915153873b3dd3e5a66279a84d9dc79cf2ff096fcfaf43b279",
+      "texto": "Para la zona de control del tratamiento (una zona controlada), el objetivo de diseño del blindaje P es de 5 mSv y-1, o 0,1 mSv semana-1 (0,1 × 10-3 Sv semana-1; 100 μ￿￿ semana-1). Otros valores de datos de entrada para la Ecuación 2.1 son:",
+      "puntaje": 0.015625
      }
     ]
    }
@@ -138,7 +162,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "PET 511 keV dose rate constant patient",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:06+00:00",
+    "generado_utc": "2026-11-02T07:08:51+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -168,7 +192,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "patient self-attenuation uptake time PET shielding",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:06+00:00",
+    "generado_utc": "2026-11-02T07:08:51+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -198,7 +222,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "cyclotron vault dose rate neutron gamma dual beam shielding",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:06+00:00",
+    "generado_utc": "2026-11-02T07:08:52+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -236,7 +260,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "densidad tabique blindaje ficha tecnica",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-01T19:12:06+00:00",
+    "generado_utc": "2026-11-02T07:08:52+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -266,12 +290,72 @@
      }
     ]
    }
+  },
+  {
+   "id": "ncrp151_tvl",
+   "seccion": "5.2",
+   "evidencia": {
+    "contrato": "gamma/evidencia@1",
+    "consulta": "TVL1 TVLe hormigón haz primario fuga energía MV tabla",
+    "perfil": "ECOSISTEMA-BM25-EN-REVISION",
+    "generado_utc": "2026-11-02T07:08:52+00:00",
+    "estado": "experimental_sin_validacion_clinica",
+    "no_apto_para_firma": true,
+    "citas": [
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 198,
+      "fragmento_sha256": "64ae96fe9e9f2be872d48e942fef0b1fc7dd0ed94c4a91ffd3c941a7beff7dfe",
+      "texto": "Energía final (MV)b TVL1 (cm) TVLe (cm)",
+      "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 144,
+      "fragmento_sha256": "10c51e0a32ab6b9a40bd6614117e20fa77ba61f7d2df970a56ce75503d92dc9f",
+      "texto": "(TVLe ) (Tabla B.7) TVLL (radiación de fuga de 6 MV) = 34 cm (TVL1 ) y 29 cm",
+      "puntaje": 0.016129
+     }
+    ]
+   }
+  },
+  {
+   "id": "ncrp151_ocupacion",
+   "seccion": "5.2",
+   "evidencia": {
+    "contrato": "gamma/evidencia@1",
+    "consulta": "factores de ocupación sugeridos oficinas pasillos salas de espera",
+    "perfil": "ECOSISTEMA-BM25-EN-REVISION",
+    "generado_utc": "2026-11-02T07:08:53+00:00",
+    "estado": "experimental_sin_validacion_clinica",
+    "no_apto_para_firma": true,
+    "citas": [
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 191,
+      "fragmento_sha256": "b3203361a2b137eb7364cb229cf2cf958c8dfc246a7e874d0163d8aa3ebffa6b",
+      "texto": "Zonas de ocupación plena (zonas ocupadas a tiempo completo por una persona), por ejemplo, oficinas administrativas o de oficina; zonas de planificación de tratamientos, salas de control de tratamientos, puestos de enfermería, zonas de recepcionistas, salas de espera atendidas, espacios ocupados en edificios cercanos.",
+      "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
+      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+      "pagina": 280,
+      "fragmento_sha256": "c9a9775381a2be3b16d1e54105b14dfc9740bd2aeeea9ca83aa2d0e9b20d956b",
+      "texto": "Factores de ocupación 4, 7, 10-11,",
+      "puntaje": 0.015625
+     }
+    ]
+   }
   }
  ],
  "fuentes": {
   "source_108d330ab33949c4abc14179d4343758": {
-   "titulo": "Tabique TD-350 CONTUPLEX",
-   "emisor": "fabricante de tabiques",
+   "titulo": "Tabique_TD-350_CONTUPLEX",
+   "emisor": "",
    "sha256": "108d330ab33949c4abc14179d4343758a9cc93e2520e5e691e988bc2e6fd56f0"
   },
   "source_1414ded940d68843942281895404a675": {
@@ -280,18 +364,23 @@
    "sha256": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed"
   },
   "source_4e1f0075615d96b8ab6a521b48448c1c": {
-   "titulo": "Tabique TD-500 CONTUPLEX",
-   "emisor": "fabricante de tabiques",
+   "titulo": "Tabique_TD-500_CONTUPLEX",
+   "emisor": "",
    "sha256": "4e1f0075615d96b8ab6a521b48448c1c122937ee941dfe134f33de4b03881cfb"
   },
+  "source_8ff45677d5ea3c5611cd16204fbd1725": {
+   "titulo": "NCRP Report 151: Structural Shielding Design for Megavoltage X- and Gamma-Ray Facilities",
+   "emisor": "NCRP",
+   "sha256": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2"
+  },
   "source_bc37632c883458327121646a027bd2af": {
-   "titulo": "Tabique TD-250 CONTUPLEX 1",
-   "emisor": "fabricante de tabiques",
+   "titulo": "Tabique_TD-250_CONTUPLEX_1",
+   "emisor": "",
    "sha256": "bc37632c883458327121646a027bd2afa0d9c9eeb0bdf441d478074a4e578e84"
   },
   "source_d1b26ebf916cd9da39ca66e9b2bf3117": {
-   "titulo": "IBA CYC y RF 4ta Propuesta",
-   "emisor": "IBA",
+   "titulo": "IBA_CYC_y_RF_4ta_Propuesta",
+   "emisor": "",
    "sha256": "d1b26ebf916cd9da39ca66e9b2bf31175a3851ac14c5b8d146fc19955606a3cc"
   },
   "source_e049e205ca840cc158fc65a112388db7": {
