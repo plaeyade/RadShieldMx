@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RadShield-MX</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="RadShield-MX: diseño, cálculo y memoria de blindajes radiológicos para instalaciones médicas.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sitio institucional de laboratorio — cabecera fija, héroe con mapa de dosis vivo, secciones en franja con contenedor de 1080px */
+:root{
+  --bg:#f6f7f5; --paper:#ffffff; --ink:#14201d; --muted:#56655f; --line:#d8dfdb;
+  --deep:#0f3b36; --accent:#1f7a6c; --accent-soft:#e3f1ee; --signal:#c8611a; --signal-soft:#fbeadf;
+  --f-display:"Fraunces", Georgia, serif; --f-body:"IBM Plex Sans", system-ui, sans-serif; --f-mono:"IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1513; --paper:#132019; --ink:#e4ece9; --muted:#9db0a9; --line:#26362f;
+  --deep:#0a2925; --accent:#5cc2b0; --accent-soft:#16332d; --signal:#f0904d; --signal-soft:#3a2416; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1513; --paper:#132019; --ink:#e4ece9; --muted:#9db0a9; --line:#26362f;
+  --deep:#0a2925; --accent:#5cc2b0; --accent-soft:#16332d; --signal:#f0904d; --signal-soft:#3a2416; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;margin:0}
+a{color:var(--accent)}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h2{font-size:clamp(26px,3.4vw,34px);font-weight:650}
+h3{font-size:19px;font-weight:650}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+p{margin:.4em 0}
+.muted{color:var(--muted)}
+
+/* cabecera */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--paper);border-bottom:1px solid var(--line)}
+header.top .in{display:flex;align-items:center;gap:20px;min-height:64px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600;letter-spacing:.01em}
+.logo svg{width:30px;height:30px}
+.logo small{display:block;font-weight:400;font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+nav.menu{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+nav.menu a{color:var(--ink);text-decoration:none;font-size:14px;padding:8px 10px;border-radius:6px}
+nav.menu a:hover,nav.menu a:focus-visible{background:var(--accent-soft);outline:none}
+.menu-btn{display:none;margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:6px 12px;font:inherit}
+@media (max-width:860px){
+  .menu-btn{display:block}
+  nav.menu{display:none;position:absolute;left:0;right:0;top:100%;background:var(--paper);border-bottom:1px solid var(--line);flex-direction:column;padding:8px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+  nav.menu.open{display:flex}
+}
+
+/* héroe */
+.hero{background:var(--deep);color:#eaf4f1;position:relative;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.hero .in{position:relative;padding-block:72px 64px;display:grid;gap:22px}
+.hero h1{font-size:clamp(32px,5.4vw,56px);font-weight:650;max-width:16ch;color:#f4fbf9}
+.hero p.lede{max-width:56ch;font-size:18px;color:#cfe3de}
+.slides{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.slides button{background:transparent;border:1px solid rgba(234,244,241,.4);color:#eaf4f1;border-radius:999px;padding:7px 14px;font:inherit;font-size:13.5px;cursor:pointer}
+.slides button[aria-pressed="true"]{background:#eaf4f1;color:#0f3b36;border-color:#eaf4f1}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.cta a{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px}
+.cta .primary{background:var(--signal);color:#fff}
+.cta .ghost{border:1px solid rgba(234,244,241,.55);color:#eaf4f1}
+.legend{font-family:var(--f-mono);font-size:11.5px;color:#a9c8c1;display:flex;gap:14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:22px;height:8px;border-radius:2px;vertical-align:middle;margin-right:6px}
+
+/* índice */
+.toc{background:var(--paper);border-bottom:1px solid var(--line)}
+.toc .in{display:flex;gap:6px 18px;flex-wrap:wrap;padding-block:14px;font-size:14px}
+.toc span{color:var(--muted)}
+.toc a{text-decoration:none}
+
+section.blk{padding-block:64px}
+section.alt{background:var(--paper);border-block:1px solid var(--line)}
+.head{display:grid;gap:8px;max-width:68ch;margin-bottom:28px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.pillar{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px;display:grid;gap:10px;align-content:start;min-width:0}
+section.alt .pillar{background:var(--bg)}
+.pillar .k{font-family:var(--f-mono);font-size:12px;color:var(--signal)}
+.pillar ul{margin:0;padding-left:1.1em;color:var(--muted);font-size:14.5px}
+.split{display:grid;gap:32px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ok{color:var(--accent);font-weight:600}
+.xr{background:var(--deep);border-radius:12px;padding:22px;color:#dcebe7;display:grid;gap:12px}
+.xr canvas{width:100%;aspect-ratio:4/3;max-width:100%;border-radius:8px;background:#0a2420;display:block}
+.xr p{font-size:14px;color:#b9d3cd;margin:0}
+.aud{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.aud a{display:grid;gap:6px;padding:22px;border-radius:10px;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line)}
+.aud a:hover,.aud a:focus-visible{border-color:var(--accent);outline:none}
+.aud b{font-family:var(--f-display);font-size:20px}
+.aud span{color:var(--muted);font-size:14.5px}
+.news{display:grid;gap:0;border-top:1px solid var(--line)}
+.news div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;padding:16px 0;border-bottom:1px solid var(--line)}
+.news time{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+@media (max-width:560px){.news div{grid-template-columns:1fr;gap:4px}}
+.basics{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.basics div{border-left:3px solid var(--accent);padding:4px 0 4px 14px}
+.basics b{display:block;font-size:15px}
+.basics span{color:var(--muted);font-size:14px}
+footer{background:var(--deep);color:#c6dbd5;padding-block:44px;font-size:14px}
+footer .in{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+footer b{color:#f0f8f6;font-family:var(--f-display);font-size:17px}
+footer p{margin:.25em 0}
+footer .copy{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;color:#93b1a9;font-size:12.5px}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top band">
+  <div class="in">
+    <a class="logo" href="#inicio" aria-label="RadShield-MX, inicio">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.6 12 15 6.9-1.4 12-7.5 12-15V7z" fill="var(--accent)"/><circle cx="16" cy="15" r="3" fill="var(--paper)"/><path d="M16 15 11 7.5a8.7 8.7 0 0 1 10 0zM16 15l8.6 1.8a8.7 8.7 0 0 1-5 7.7zM16 15l-3.6 9.5a8.7 8.7 0 0 1-5-7.7z" fill="var(--paper)" opacity=".85"/></svg>
+      <span>RadShield-MX<small>Blindaje radiológico en medicina</small></span>
+    </a>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav class="menu" id="menu" aria-label="Principal">
+      <a href="#capacidades">Capacidades</a>
+      <a href="#validacion">Normas y validación</a>
+      <a href="#visualizacion">Visualización y XR</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#colaboracion">Colaboración</a>
+      <a href="#fundamentos">Fundamentos</a>
+      <a href="#novedades">Novedades</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero band" aria-label="Presentación">
+    <canvas id="campo" aria-hidden="true"></canvas>
+    <div class="in">
+      <div class="eyebrow" style="color:#8fd3c4">Protección radiológica · ingeniería de blindajes</div>
+      <h1 id="lema">Blindajes calculados con la norma original</h1>
+      <p class="lede" id="sublema">Del plano arquitectónico a la memoria para la CNSNS: cada barrera con su método, sus tablas y su cita verificable.</p>
+      <div class="slides" role="group" aria-label="Mensajes">
+        <button type="button" aria-pressed="true" data-i="0">Cálculo normativo</button>
+        <button type="button" aria-pressed="false" data-i="1">Ver lo invisible</button>
+        <button type="button" aria-pressed="false" data-i="2">Del plano a la memoria</button>
+      </div>
+      <div class="cta">
+        <a class="primary" href="#colaboracion">Solicitar un proyecto</a>
+        <a class="ghost" href="#validacion">Ver la validación</a>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i style="background:#f0904d"></i>tasa alta</span><span><i style="background:#5cc2b0"></i>tasa baja</span><span>búnker de ciclotrón, vista en planta (ilustrativo)</span>
+      </div>
+    </div>
+  </section>
+
+  <nav class="toc band" aria-label="En esta página">
+    <div class="in"><span>En esta página:</span>
+      <a href="#acerca">Acerca de</a><a href="#capacidades">Capacidades</a><a href="#validacion">Validación</a><a href="#visualizacion">Visualización y XR</a><a href="#proyectos">Proyectos</a><a href="#novedades">Novedades</a>
+    </div>
+  </nav>
+
+  <section class="blk band" id="acerca">
+    <div class="in split">
+      <div class="head" style="margin:0">
+        <div class="eyebrow">Acerca de</div>
+        <h2>Ingeniería de blindajes para hospitales que van a operar radiación</h2>
+        <p>RadShield-MX nace de la práctica de consultoría en seguridad radiológica: diseñar el blindaje de un edificio completo, de rayos X a ciclotrón, y sostenerlo ante el regulador.</p>
+        <p class="muted">Reúne en un mismo plano todas las modalidades del edificio, calcula cada barrera con las ecuaciones y tablas de los informes originales y produce la memoria analítica con la evidencia citada. El diseño final lo revisa y firma el físico médico responsable.</p>
+      </div>
+      <div class="aud">
+        <a href="#colaboracion"><b>Hospitales y arquitectura</b><span>Cálculo y memoria de blindaje para su proyecto, desde el plano DWG.</span></a>
+        <a href="#colaboracion"><b>Físicos médicos y colaboradores</b><span>Validación con casos reales, levantamientos y desarrollo conjunto.</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band alt" id="capacidades">
+    <div class="in">
+      <div class="head"><div class="eyebrow">Líneas de trabajo</div><h2>Cuatro capacidades, un mismo plano</h2></div>
+      <div class="grid">
+        <div class="pillar"><span class="k">NCRP 147 · NCRP 151 · TG-108</span><h3>Cálculo normativo</h3><ul><li>Diagnóstico por distribución de carga TG9</li><li>Teleterapia: primaria, fuga con IMRT, dispersión</li><li>PET y medicina nuclear a 511 keV</li></ul></div>
+        <div class="pillar"><span class="k">Geant4 · IBA SRG</span><h3>Ciclotrones y Monte Carlo</h3><ul><li>Búnker del ciclotrón por Monte Carlo propio</li><li>Validado contra la guía del fabricante</li><li>Activación del aire y ventilación (Ar-41)</li></ul></div>
+        <div class="pillar"><span class="k">3D · WebXR</span><h3>Visualización</h3><ul><li>Mapas de dosis en planta y en 3D</li><li>Recorrido del recinto en el navegador</li><li>Base para realidad virtual y aumentada</li></ul></div>
+        <div class="pillar"><span class="k">CNSNS</span><h3>Documentación regulatoria</h3><ul><li>Memoria analítica con evidencia citada</li><li>Espesor instalado frente al requerido</li><li>Masa, costo y carga estructural por material</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="validacion">
+    <div class="in">
+      <div class="head"><div class="eyebrow">Normas y validación</div><h2>Reproduce los ejemplos resueltos de los informes</h2><p class="muted">Cada versión del motor se prueba contra los casos publicados. Si un resultado deja de coincidir, la versión no se publica.</p></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Caso</th><th>Informe</th><th>Valor publicado</th><th>RadShield-MX</th></tr></thead>
+          <tbody>
+            <tr><td>Muro primario de unidad de tórax, 300 pacientes/semana a 3 m</td><td>NCRP 147 §5.2</td><td class="n">2.2 mm Pb</td><td class="n ok">2.2 mm</td></tr>
+            <tr><td>Transmisión de 1.66 mm Pb, sala de rayos X (bucky de tórax)</td><td>NCRP 147 Ap. A</td><td class="n">9.3 × 10⁻⁴</td><td class="n ok">9.3 × 10⁻⁴</td></tr>
+            <tr><td>Barrera primaria 18 MV, punto a 7.2 m</td><td>NCRP 151 §7.1.1</td><td class="n">149.6 cm</td><td class="n ok">149.6 cm</td></tr>
+            <tr><td>Dispersión del paciente 18 + 6 MV a 30°</td><td>NCRP 151 §7.1.5</td><td class="n">55.6 cm</td><td class="n ok">55.6 cm</td></tr>
+            <tr><td>Fuga 18 + 6 MV</td><td>NCRP 151 §7.1.5</td><td class="n">48 cm</td><td class="n ok">48 cm</td></tr>
+            <tr><td>Carga de fuga con 80 % IMRT, C<sub>I</sub> = 5</td><td>NCRP 151 §7.1.4</td><td class="n">945 Gy/semana</td><td class="n ok">945 Gy/semana</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band alt" id="visualizacion">
+    <div class="in split">
+      <div class="head" style="margin:0">
+        <div class="eyebrow">Visualización y XR</div>
+        <h2>Hacer visible la radiación</h2>
+        <p>La dosis no se ve; el error de diseño tampoco, hasta que se mide. Los mapas de tasa de dosis en planta y en tres dimensiones muestran dónde se concentra la radiación detrás de cada barrera.</p>
+        <p class="muted">El visor 3D y la compilación WebGL son la base para recorrer el recinto en el navegador y, después, con visor de realidad virtual o con realidad aumentada en la obra.</p>
+      </div>
+      <div class="xr">
+        <canvas id="corte" aria-label="Corte ilustrativo: la tasa de dosis cae a través de un muro de concreto"></canvas>
+        <p>Corte ilustrativo: la tasa de dosis decae década por década a través del muro (escala logarítmica).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="proyectos">
+    <div class="in split">
+      <div class="head" style="margin:0">
+        <div class="eyebrow">Proyectos</div>
+        <h2>Centro Internacional de Neuro-Oncología Zumaya</h2>
+        <p>Villahermosa, Tabasco. Ciclotrón IBA KIUBE de doble haz, acelerador lineal de 15 MV, Gamma Knife, braquiterapia HDR, PET-CT, medicina nuclear y CT simulador en un mismo edificio.</p>
+        <p class="muted">El búnker del ciclotrón se dimensiona con Monte Carlo propio, calibrado contra la guía del fabricante, y tabiques de alta densidad certificados.</p>
+      </div>
+      <div class="tbl">
+        <table style="min-width:0">
+          <thead><tr><th>Cara del búnker</th><th>Espesor interino</th></tr></thead>
+          <tbody>
+            <tr><td>Este</td><td class="n">2.08 m</td></tr>
+            <tr><td>Oeste</td><td class="n">1.95 m</td></tr>
+            <tr><td>Sur</td><td class="n">1.82 m</td></tr>
+            <tr><td>Techo</td><td class="n">1.95 m</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band alt" id="colaboracion">
+    <div class="in">
+      <div class="head"><div class="eyebrow">Colaboración</div><h2>Trabajemos el blindaje de su instalación</h2><p class="muted">Para hospitales, despachos de arquitectura e ingeniería, y físicos médicos que quieran validar o desarrollar con nosotros. La información de cada proyecto se trata como confidencial.</p></div>
+      <div class="grid">
+        <div class="pillar"><h3>Cálculo y memoria</h3><p class="muted">Recibimos el plano DWG y la carga de trabajo; entregamos espesores por barrera y la memoria analítica para revisión y firma del físico médico.</p></div>
+        <div class="pillar"><h3>Revisión de diseños</h3><p class="muted">Contrastamos un blindaje existente contra NCRP 147/151 y TG-108 y señalamos las barreras que no cumplen.</p></div>
+        <div class="pillar"><h3>Desarrollo conjunto</h3><p class="muted">Simuladores de linac, PET/CT y braquiterapia sobre la misma infraestructura Monte Carlo.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="fundamentos">
+    <div class="in">
+      <div class="head"><div class="eyebrow">Fundamentos</div><h2>Los términos con los que se diseña un blindaje</h2></div>
+      <div class="basics">
+        <div><b>Objetivo de diseño (P)</b><span>0.1 mSv/semana en áreas controladas y 0.02 en no controladas.</span></div>
+        <div><b>Factor de ocupación (T)</b><span>Fracción del tiempo que una persona ocupa el área protegida.</span></div>
+        <div><b>Factor de uso (U)</b><span>Fracción de la carga dirigida hacia una barrera primaria.</span></div>
+        <div><b>Capa decimorreductora (TVL)</b><span>Espesor que reduce la tasa de dosis a la décima parte.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band alt" id="novedades">
+    <div class="in">
+      <div class="head"><div class="eyebrow">Novedades</div><h2>Avances recientes</h2></div>
+      <div class="news">
+        <div><time datetime="2026-11-02">02 nov 2026</time><span>El motor del plano calcula cada barrera con NCRP 147 (diagnóstico) y NCRP 151 (teleterapia), y reproduce sus ejemplos resueltos.</span></div>
+        <div><time datetime="2026-11-02">02 nov 2026</time><span>NCRP 147 y NCRP 151 originales indexados en GAMMA-AI y citados en la memoria analítica.</span></div>
+        <div><time datetime="2026-11-01">01 nov 2026</time><span>Revisión física completa del motor de cálculo: corrección de unidades de Archer, κ de TC y criterio de alta de paciente.</span></div>
+        <div><time datetime="2026-11-01">01 nov 2026</time><span>La biblioteca de referencias consulta a GAMMA-AI en vivo con citas verificables.</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="band">
+  <div class="in">
+    <div><b>RadShield-MX</b><p>Diseño, cálculo y memoria de blindajes radiológicos para instalaciones médicas.</p></div>
+    <div><b>Ecosistema GAMMA</b><p>GAMMA-AI · Cyclotron-SIM · Radiopharma OS · Zumaya-AI</p></div>
+    <div><b>Aviso</b><p>Herramienta de ingeniería. La firma y la responsabilidad regulatoria son del físico médico responsable.</p></div>
+    <div class="copy">© 2026 RadShield-MX. Uso privado; información de proyectos confidencial.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var btn=document.getElementById('menu-btn'), menu=document.getElementById('menu');
+  btn.addEventListener('click',function(){var o=menu.classList.toggle('open');btn.setAttribute('aria-expanded',o?'true':'false');});
+  menu.addEventListener('click',function(e){if(e.target.tagName==='A'){menu.classList.remove('open');btn.setAttribute('aria-expanded','false');}});
+
+  var lemas=[
+    ['Blindajes calculados con la norma original','Del plano arquitectónico a la memoria para la CNSNS: cada barrera con su método, sus tablas y su cita verificable.'],
+    ['Hacer visible la radiación invisible','Mapas de tasa de dosis en planta y en 3D para ver dónde se concentra la radiación detrás de cada barrera.'],
+    ['Del plano a la memoria analítica','Importe el plano DWG, coloque fuentes y barreras, y obtenga espesores y memoria con evidencia citada.']];
+  var bs=[].slice.call(document.querySelectorAll('.slides button'));
+  function mostrar(i){document.getElementById('lema').textContent=lemas[i][0];document.getElementById('sublema').textContent=lemas[i][1];bs.forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false');});}
+  bs.forEach(function(b){b.addEventListener('click',function(){mostrar(+b.dataset.i);});});
+
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Mapa de dosis ilustrativo: fuente puntual con atenuación exponencial en los muros de un búnker.
+  var cv=document.getElementById('campo'), ctx=cv.getContext('2d');
+  function colorDe(v){ // v en [0,1]: 0 bajo (verde azulado) → 1 alto (naranja)
+    var a=[92,194,176], b=[240,144,77]; return 'rgba('+(a[0]+(b[0]-a[0])*v|0)+','+(a[1]+(b[1]-a[1])*v|0)+','+(a[2]+(b[2]-a[2])*v|0)+','+(0.08+0.55*v)+')';
+  }
+  function dibujarCampo(t){
+    var w=cv.clientWidth,h=cv.clientHeight; if(!w||!h)return;
+    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+    ctx.clearRect(0,0,w,h);
+    var cx=w*0.74, cy=h*0.52, R=Math.min(w,h)*0.26, muro=Math.min(w,h)*0.07, paso=Math.max(10,Math.round(w/90));
+    for(var y=0;y<h;y+=paso){for(var x=0;x<w;x+=paso){
+      var dx=x-cx, dy=y-cy, r=Math.sqrt(dx*dx+dy*dy)+8;
+      var dentro=Math.max(Math.abs(dx),Math.abs(dy));
+      var espesor=Math.max(0,Math.min(muro,dentro-R));
+      var logd=-2*Math.log10(r/40)-6*(espesor/muro)-(dentro>R+muro?0.5:0);
+      var pulso=reduce?0:0.15*Math.sin(t/900-r/60);
+      var v=Math.max(0,Math.min(1,(logd+6)/6+pulso));
+      ctx.fillStyle=colorDe(v); ctx.fillRect(x,y,paso-1,paso-1);
+    }}
+    ctx.strokeStyle='rgba(234,244,241,.55)'; ctx.lineWidth=1.2;
+    ctx.strokeRect(cx-R,cy-R,2*R,2*R); ctx.strokeRect(cx-R-muro,cy-R-muro,2*(R+muro),2*(R+muro));
+    ctx.fillStyle='#f4fbf9'; ctx.beginPath(); ctx.arc(cx,cy,4,0,7); ctx.fill();
+  }
+  // Corte: log10 de la tasa relativa a través de un muro de 3 TVL.
+  var cc=document.getElementById('corte'), c2=cc.getContext('2d');
+  function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+  function dibujarCorte(){
+    var w=cc.clientWidth,h=cc.clientHeight; if(!w||!h)return;
+    cc.width=w;cc.height=h;
+    var m={l:46,r:14,t:16,b:30}, W=w-m.l-m.r, H=h-m.t-m.b;
+    var x0=m.l+W*0.35, x1=m.l+W*0.65;
+    c2.fillStyle='rgba(234,244,241,.08)'; c2.fillRect(x0,m.t,x1-x0,H);
+    c2.fillStyle='#b9d3cd'; c2.font='11px "IBM Plex Mono", monospace';
+    c2.fillText('concreto (3 TVL)',x0+6,m.t+14);
+    for(var d=0;d>=-4;d--){var y=m.t+H*(-d/4); c2.strokeStyle='rgba(234,244,241,.12)'; c2.beginPath(); c2.moveTo(m.l,y); c2.lineTo(m.l+W,y); c2.stroke(); c2.fillText('10'+(d===0?'⁰':d===-1?'⁻¹':d===-2?'⁻²':d===-3?'⁻³':'⁻⁴'),6,y+4);}
+    c2.strokeStyle='#f0904d'; c2.lineWidth=2.4; c2.beginPath();
+    for(var i=0;i<=W;i++){
+      var x=m.l+i, f=i/W, l;
+      if(x<x0) l=-0.3*f/0.35; else if(x<=x1) l=-0.3-3*(x-x0)/(x1-x0); else l=-3.3-0.4*(x-x1)/(m.l+W-x1);
+      var y=m.t+H*(-l/4); if(i===0)c2.moveTo(x,y); else c2.lineTo(x,y);
+    }
+    c2.stroke(); c2.fillStyle='#dcebe7'; c2.fillText('distancia →',m.l+W-80,h-8);
+  }
+  function bucle(t){dibujarCampo(t); if(!reduce) requestAnimationFrame(bucle);}
+  requestAnimationFrame(bucle); dibujarCorte();
+  window.addEventListener('resize',function(){dibujarCorte(); if(reduce) dibujarCampo(0);});
+})();
+</script>
+</body>
+</html>
