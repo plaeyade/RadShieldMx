@@ -1,16 +1,19 @@
 /**
  * Biblioteca de referencias: evidencia citada por GAMMA-AI (`gamma/evidencia@1`).
  *
- * Carga el JSON que entrega GAMMA, verifica cada cita (SHA-256 del texto, identidad de la fuente)
- * y permite copiarla a la memoria con su identificador verificable. Sustituye al antiguo Stub.
+ * Dos caminos, la misma verificación (SHA-256 del texto, identidad de la fuente):
+ * - En vivo: consulta `GET /v1/ecosistema/evidencia` del servicio de GAMMA (`VITE_GAMMA_URL`).
+ * - Archivo: el JSON que entrega GAMMA.
+ * Cada cita verificada se puede copiar a la memoria con su identificador verificable.
  */
-import { useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import DialogShell from '@/components/DialogShell';
 import {
   formatearCitaParaMemoria,
   verificarEvidenciaGamma,
   type ResultadoEvidencia,
 } from '@/lib/gammaEvidence';
+import { consultarGamma, urlGamma } from '@/lib/gammaCliente';
 
 interface ReferenceLibraryDialogProps {
   open?: boolean;
@@ -19,6 +22,9 @@ interface ReferenceLibraryDialogProps {
   onOpenShleien?: () => void;
   onOpenICRU57?: () => void;
   onOpenICRU96?: () => void;
+  /** Para pruebas: URL y fetch del servicio de GAMMA. */
+  gammaUrl?: string;
+  fetchFn?: typeof fetch;
 }
 
 export default function ReferenceLibraryDialog({
@@ -28,10 +34,16 @@ export default function ReferenceLibraryDialog({
   onOpenShleien,
   onOpenICRU57,
   onOpenICRU96,
+  gammaUrl,
+  fetchFn,
 }: ReferenceLibraryDialogProps) {
   const [archivo, setArchivo] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoEvidencia | null>(null);
   const [copiada, setCopiada] = useState<number | null>(null);
+  const [consulta, setConsulta] = useState('');
+  const [enRevision, setEnRevision] = useState(false);
+  const [consultando, setConsultando] = useState(false);
+  const servicio = gammaUrl ?? urlGamma();
 
   if (!open) return null;
 
@@ -45,6 +57,17 @@ export default function ReferenceLibraryDialog({
     } catch {
       setResultado({ valida: false, errores: ['El archivo no es JSON válido.'], citas: [] });
     }
+  };
+
+  const buscar = async (e: FormEvent) => {
+    e.preventDefault();
+    const q = consulta.trim();
+    if (!q || consultando) return;
+    setConsultando(true);
+    setCopiada(null);
+    setArchivo(`GAMMA en vivo`);
+    setResultado(await consultarGamma(q, { url: servicio ?? '', k: 5, revision: enRevision, fetchFn }));
+    setConsultando(false);
   };
 
   const copiar = async (i: number) => {
@@ -75,6 +98,32 @@ export default function ReferenceLibraryDialog({
           La evidencia de GAMMA es experimental y no apta para firma. Cada cita se verifica contra su
           hash; una cita alterada se marca y no se puede copiar.
         </p>
+        <form onSubmit={buscar} className="space-y-1" data-testid="gamma-live-form">
+          <span className="font-medium">Consultar GAMMA en vivo</span>
+          <div className="flex gap-2">
+            <input
+              type="search"
+              aria-label="Consulta a GAMMA"
+              value={consulta}
+              onChange={(e) => setConsulta(e.target.value)}
+              placeholder="p. ej. factor de uso NCRP 151"
+              className="flex-1 rounded border px-2 py-1"
+              disabled={!servicio}
+            />
+            <button type="submit" disabled={!servicio || consultando || !consulta.trim()} className="rounded border px-3 py-1 disabled:opacity-40">
+              {consultando ? 'Consultando…' : 'Consultar'}
+            </button>
+          </div>
+          <label className="flex items-center gap-1 text-xs text-slate-600">
+            <input type="checkbox" checked={enRevision} onChange={(e) => setEnRevision(e.target.checked)} />
+            Incluir documentos en revisión (se declara en la evidencia)
+          </label>
+          {!servicio && (
+            <p className="text-xs text-slate-500" data-testid="gamma-live-off">
+              Servicio de GAMMA no configurado (VITE_GAMMA_URL). Use el archivo de evidencia.
+            </p>
+          )}
+        </form>
         <label className="block">
           <span className="font-medium">Archivo de evidencia de GAMMA (.json)</span>
           <input type="file" accept="application/json,.json" onChange={cargar} className="mt-1 block" data-testid="gamma-evidence-input" />
