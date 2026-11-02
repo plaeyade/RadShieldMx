@@ -25,7 +25,6 @@ import { MATERIALS, type Barrier, type RadiationSource, type Modality } from '@/
 const concrete = MATERIALS.find(m => m.code === 'CONCRETE235')!;
 const lead = MATERIALS.find(m => m.code === 'PB')!;
 const steel = MATERIALS.find(m => m.code === 'STEEL')!;
-const gypsum = MATERIALS.find(m => m.code === 'GYPSUM')!;
 
 const mockMaterialNoArcher: typeof concrete = {
   ...concrete,

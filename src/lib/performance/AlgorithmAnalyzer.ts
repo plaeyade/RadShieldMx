@@ -115,7 +115,7 @@ export const detectQuadraticPatterns = (
   if (/\.\.\.\w+/.test(sourceCode) && maxDepth > 0) {
     const spreadLines = lines.map((l, i) => ({ line: l, num: i + 1 }))
       .filter(({ line }) => /\.\.\.\w+/.test(line) && (line.includes('for') || line.includes('while') || depth > 0));
-    for (const { line, num } of spreadLines) {
+    for (const { num } of spreadLines) {
       reports.push({
         name: `${funcName}:L${num}`,
         severity: 'medium',

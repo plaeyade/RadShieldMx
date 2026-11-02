@@ -12,7 +12,7 @@ export class ShieldingDesignAgent {
   private runtime = new AgentRuntime();
 
   async design(input: ShieldingDesignInput): Promise<ShieldingDesignOutput> {
-    const { modality, energy, workload, roomDimensions, distances, materials, occupancy, useFactor, specialConsiderations } = input;
+    const { energy } = input;
 
     // Build execution plan based on modality
     const plan = this.buildPlan(input);
@@ -99,7 +99,7 @@ export class ShieldingDesignAgent {
     });
 
     // Step 6: Cost estimation
-    for (const [name, distance] of Object.entries(distances).slice(0, 2)) {
+    for (let i = 0; i < Math.min(2, Object.keys(distances).length); i++) {
       plan.push({
         agent: "ShieldingDesignAgent",
         action: "estimateCost",

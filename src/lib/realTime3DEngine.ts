@@ -72,12 +72,6 @@ function makeBox(
     // back
     cx-hx,cy-hy,cz-hz,  cx+hx,cy-hy,cz-hz,  cx+hx,cy+hy,cz-hz,  cx-hx,cy+hy,cz-hz,
   ];
-  const n = [
-    // front
-    0,0,1, 0,0,1, 0,0,1, 0,0,1,
-    // back
-    0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,
-  ];
   // Expand to 24 vertices (4 per face, 6 faces)
   const v24: number[] = [];
   const n24: number[] = [];
@@ -229,7 +223,7 @@ export function generateBunkerMesh(
    ═══════════════════════════════════════════════════════════ */
 
 /** Export to glTF 2.0 (JSON + external bin) or glB */
-export function exportGLTF(mesh: MeshData, opts: ExportOptions): { json: string; bin: ArrayBuffer; mimeType: string } {
+export function exportGLTF(mesh: MeshData, _opts: ExportOptions): { json: string; bin: ArrayBuffer; mimeType: string } {
   const { vertices, normals, colors, indices } = mesh;
   const numVerts = vertices.length / 3;
 
@@ -324,8 +318,8 @@ export function exportGLB(mesh: MeshData, opts: ExportOptions): ArrayBuffer {
 }
 
 /** Export to OBJ format */
-export function exportOBJ(mesh: MeshData, opts: ExportOptions): string {
-  const { vertices, normals, colors, indices } = mesh;
+export function exportOBJ(mesh: MeshData, _opts: ExportOptions): string {
+  const { vertices, normals, indices } = mesh;
   let obj = '# RadShield-MX v29 — Bunker geometry\n';
   obj += '# Vertices: ' + (vertices.length / 3) + ', Faces: ' + (indices.length / 3) + '\n';
   obj += 'o Bunker\n';
@@ -345,7 +339,7 @@ export function exportOBJ(mesh: MeshData, opts: ExportOptions): string {
 }
 
 /** Export to USDA (Pixar USD ASCII) */
-export function exportUSD(mesh: MeshData, opts: ExportOptions): string {
+export function exportUSD(mesh: MeshData, _opts: ExportOptions): string {
   const { vertices, indices, colors } = mesh;
   let usd = '#usda 1.0\n';
   usd += '(\n    doc = "RadShield-MX v29 — Bunker geometry"\n';
@@ -522,7 +516,6 @@ export function exportBunker3D(
     }
     case 'gltf':
     default: {
-      const { json, bin } = exportGLTF(mesh, opts);
       // Return GLB for simplicity
       const glb = exportGLB(mesh, opts);
       return { data: new Blob([glb], { type: 'model/gltf-binary' }), filename: 'bunker_radshield.glb', mimeType: 'model/gltf-binary' };
@@ -531,7 +524,7 @@ export function exportBunker3D(
 }
 
 /** Export to FBX ASCII format */
-function exportFBX(mesh: MeshData, opts: ExportOptions): string {
+function exportFBX(mesh: MeshData, _opts: ExportOptions): string {
   const { vertices, normals, indices } = mesh;
   let fbx = '; FBX 7.7.0 project file\n';
   fbx += '; Exported from RadShield-MX v29 Real-Time 3D Engine\n';
@@ -553,7 +546,6 @@ function exportFBX(mesh: MeshData, opts: ExportOptions): string {
   fbx += '}\n';
 
   // Geometry
-  const numVerts = vertices.length / 3;
   fbx += 'Geometry: 100000, "Geometry::Bunker", "Mesh" {\n';
   fbx += '  Vertices: *' + vertices.length + ' {\n    a: ';
   for (let i = 0; i < vertices.length; i++) {

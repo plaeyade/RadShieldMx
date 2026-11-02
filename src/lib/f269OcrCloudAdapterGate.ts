@@ -44,7 +44,7 @@ export const F269_DEFAULT_PENDING_DOCUMENTS: F269OcrPendingDocument[] = [
   },
 ];
 
-export function buildF269OcrCloudAdapterGate(configuredSecrets: Record<string, boolean> = {}): F269OcrCloudAdapterGate {
+export function buildF269OcrCloudAdapterGate(_configuredSecrets: Record<string, boolean> = {}): F269OcrCloudAdapterGate {
   const googleSecrets = [
     'GOOGLE_APPLICATION_CREDENTIALS',
     'GOOGLE_DOCUMENTAI_PROJECT_ID',

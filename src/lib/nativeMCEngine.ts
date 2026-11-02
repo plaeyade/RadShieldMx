@@ -16,9 +16,6 @@
 
 // ============ PHYSICS CONSTANTS ============
 const ELECTRON_REST_MASS = 0.5110034; // MeV
-const AVOGADRO = 6.02214076e23;
-const ELECTRON_RADIUS = 2.8179403227e-13; // cm
-const CLASSICAL_ELEC_CROSS = 6.6524587158e-25; // cm² (Thomson)
 
 // ============ CROSS-SECTION DATA (NIST XCOM approximation) ============
 // Simplified cross-sections for common shielding materials
@@ -413,21 +410,12 @@ function getMaterialProperties(material: string, energy_MeV: number): {
   };
 }
 
-// Klein-Nishina formula for Compton scattering
-function kleinNishina(E: number, cosTheta: number): number {
-  const alpha = E / ELECTRON_REST_MASS;
-  const alpha_prime = alpha / (1 + alpha * (1 - cosTheta));
-  const ratio = alpha_prime / alpha;
-  return 0.5 * ratio * ratio * (ratio + 1 / ratio - 1 + cosTheta * cosTheta);
-}
-
 // Compton scattering: sample scattering angle and compute new energy
 function comptonScatter(rng: MersenneTwister, E: number): { cosTheta: number; E_prime: number } {
   const alpha = E / ELECTRON_REST_MASS;
   let cosTheta: number;
-  let E_prime: number;
   // Rejection sampling using Kahn's method
-  do {
+  for (;;) {
     const r1 = rng.random();
     const r2 = rng.random();
     if (r1 <= (2 * alpha + 1) / (2 * alpha + 9)) {
@@ -443,9 +431,9 @@ function comptonScatter(rng: MersenneTwister, E: number): { cosTheta: number; E_
         break;
       }
     }
-  } while (true);
-  
-  E_prime = E / (1 + alpha * (1 - cosTheta));
+  }
+
+  const E_prime = E / (1 + alpha * (1 - cosTheta));
   return { cosTheta, E_prime };
 }
 
@@ -685,7 +673,7 @@ export function runNativeMC(
           // Pair production
           ppEvents++;
           totalInteractions++;
-          const { E_electron, E_positron } = pairProduction(rng, energy);
+          pairProduction(rng, energy); // conserva la secuencia del RNG
           // Simplified: deposit energy locally, kill photon
           alive = false;
         } else {
@@ -778,7 +766,7 @@ export interface BRepModel {
   }>;
 }
 
-export async function parseSTEPFile(fileContent: ArrayBuffer): Promise<BRepModel> {
+export async function parseSTEPFile(_fileContent: ArrayBuffer): Promise<BRepModel> {
   // In a full implementation, this would use OpenCascade.js
   // For now, we simulate the parsing with a placeholder
   // TODO: Integrate opencascade.js for real STEP parsing

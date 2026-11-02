@@ -122,7 +122,6 @@ export function generateDetectorMesh(
   const nz = Math.ceil(roomDimensions.z / res_m);
   const voxels: DetectorVoxel[] = [];
 
-  const particle = PARTICLE_TYPES.find(p => p.type === particleType)!;
   const gammaConst = getGammaConstant(particleType);
 
   for (let i = 0; i < nx; i++) {

@@ -302,7 +302,6 @@ export function projectedRange(
  * From empirical fits in ICRU-37/90.
  */
 export function detourFactor(E_MeV: number, mat: ElectronMaterial): number {
-  const tau = E_MeV / 0.511;
   const z = mat.Z_eff;
   // Lynch-Dahl parameterization
   const chi_cc = 0.157 * z * (z + 1) * mat.density_g_cm3 / (mat.A_eff * E_MeV * (E_MeV + 2 * 0.511));
@@ -384,13 +383,11 @@ export function bremsstrahlungDifferential(
   const r_e = 2.818e-13; // classical electron radius (cm)
   const k = k_MeV;
   const E0 = E_MeV + 0.511; // total energy
-  const p0 = Math.sqrt(E0 * E0 - 0.511 * 0.511);
   const E1 = E0 - k;
   if (E1 <= 0.511) return 0;
   const p1 = Math.sqrt(E1 * E1 - 0.511 * 0.511);
   if (p1 <= 0) return 0;
   // Koch-Motz formula (screened, no Coulomb correction)
-  const v = k / E0;
   const delta = Math.max(0, 100 * k / (E0 * E1)); // Elwert correction (approx)
   const phi_1 = 4 * (1 + (E1 / E0) * (E1 / E0) - (2 / 3) * (E1 / E0));
   const phi_2 = (16 / 3) * (E1 / E0);
@@ -408,7 +405,7 @@ export function bremsstrahlungDifferential(
 export function totalBremsstrahlungEnergy(
   E_MeV: number,
   mat: ElectronMaterial,
-  numPoints: number = 50
+  _numPoints: number = 50
 ): number {
   if (E_MeV <= 0) return 0;
   const y = bremsstrahlungYield(E_MeV, mat);
@@ -478,7 +475,6 @@ export function calculateTTB(
 
   // Forward-peaked angular distribution (approximate)
   // θ₁/₂ ≈ 0.511 / E₀ (MeV) in radians
-  const theta_half_rad = 0.511 / E0;
   // Fraction of energy within θ₁/₂ cone
   const forwardFraction = 0.7; // ~70% of Bremsstrahlung within forward cone
 

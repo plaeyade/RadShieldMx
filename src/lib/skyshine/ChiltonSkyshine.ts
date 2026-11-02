@@ -38,8 +38,7 @@ const MU_VALUES = [0.0087, 0.0062, 0.0048, 0.0045, 0.0042] as const;
 
 // Linear interpolation helper
 const lerp = (keys: readonly number[], vals: readonly number[], e: number): number => {
-  const cached = tvlCache.get(e); // reuse tvlCache key pattern
-  // Actually we use separate caches - simplified: binary search lerp
+  // Interpolación lineal por tramos.
   if (e <= keys[0]) return vals[0];
   if (e >= keys[keys.length - 1]) return vals[vals.length - 1];
   for (let i = 0; i < keys.length - 1; i++) {

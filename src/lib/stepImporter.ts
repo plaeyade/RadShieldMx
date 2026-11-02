@@ -579,10 +579,9 @@ export async function exportSTEPFile(
     const writer = new oc.STEPControl_Writer();
 
     // Transfer each solid to the writer
-    for (const solid of solids) {
-      // This would require creating actual B-Rep shapes from our mesh data
-      // For now, return null (export requires full B-Rep reconstruction)
-    }
+    // Transferir cada sólido requiere reconstruir B-Rep a partir de la malla; aún no se
+    // implementa (`solids` se conserva para cuando exista).
+    void solids;
 
     const outputPath = `/tmp/${fileName}`;
     writer.Write(outputPath);

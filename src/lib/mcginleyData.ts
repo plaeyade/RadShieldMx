@@ -120,7 +120,7 @@ export function calculateCaptureGammaDose(
   neutronDose_mSv: number,
   mazeLength_m: number,
   wallThickness_cm: number,
-  concreteDensity_g_cm3: number
+  _concreteDensity_g_cm3: number
 ): number {
   // Simplified: capture gamma attenuated through maze walls
   const tvlCaptureGamma_cm = 21; // TVL for 2.2 MeV capture gamma in concrete

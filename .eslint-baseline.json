@@ -1,5 +1,5 @@
 {
- "total": 371,
+ "total": 305,
  "errores": {
   "api/ai-router.ts::@typescript-eslint/no-unused-vars": 1,
   "api/project-router.ts::@typescript-eslint/no-unused-vars": 1,
@@ -28,31 +28,6 @@
   "src/hooks/useWebGPU.ts::@typescript-eslint/no-unused-vars": 1,
   "src/hooks/useWebGPUHeatmap.ts::@typescript-eslint/no-unused-vars": 1,
   "src/hooks/useWebWorker.ts::react-hooks/set-state-in-effect": 1,
-  "src/hooks/useWorkerCalculation.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/hooks/useWorkerCalculation.ts::react-hooks/refs": 2,
-  "src/lib/agents/ShieldingDesignAgent.ts::@typescript-eslint/no-unused-vars": 10,
-  "src/lib/canvas/CanvasRenderer.ts::@typescript-eslint/no-unused-vars": 2,
-  "src/lib/cycloneKIUBEData.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/doseMappingEngine.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/electronEngine.ts::@typescript-eslint/no-unused-vars": 5,
-  "src/lib/f269OcrCloudAdapterGate.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/f416ToF420BimCanvasSequence.ts::@typescript-eslint/no-unused-vars": 3,
-  "src/lib/mcginleyData.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/monteCarloEngine.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/multiSourceDetector.ts::@typescript-eslint/no-unused-vars": 5,
-  "src/lib/multiSourceDetector.ts::no-case-declarations": 3,
-  "src/lib/nativeMCEngine.ts::@typescript-eslint/no-unused-vars": 7,
-  "src/lib/nativeMCEngine.ts::no-constant-condition": 1,
-  "src/lib/nativeMCEngine.ts::prefer-const": 1,
-  "src/lib/nuclearMedicine.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/performance/AlgorithmAnalyzer.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/performance/CPUMemoryProfiler.ts::@typescript-eslint/no-unused-vars": 2,
-  "src/lib/realTime3DEngine.ts::@typescript-eslint/no-unused-vars": 9,
-  "src/lib/shieldingMath.test.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/shieldingOptimizer.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/skyshine/ChiltonSkyshine.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/stepImporter.ts::@typescript-eslint/no-unused-vars": 1,
-  "src/lib/validationEngine.ts::@typescript-eslint/no-unused-vars": 1,
   "src/pages/ShieldingDesigner.tsx::@typescript-eslint/no-unused-vars": 30,
   "src/providers/trpc.tsx::react-refresh/only-export-components": 4,
   "src/sections/CanvasArea.tsx::@typescript-eslint/no-unused-vars": 2,
@@ -147,8 +122,6 @@
   "src/sections/dialogs/SpatialDoseMapDialog.tsx::react-hooks/set-state-in-render": 2,
   "src/sections/dialogs/SpecialCasesDialog.tsx::@typescript-eslint/no-unused-vars": 1,
   "src/sections/dialogs/TransmissionCurveDialog.tsx::@typescript-eslint/no-unused-vars": 1,
-  "src/sections/dialogs/UncertaintyQuantificationDialog.tsx::@typescript-eslint/no-unused-vars": 1,
-  "src/workers/shieldingWorker.ts::@typescript-eslint/ban-ts-comment": 2,
-  "src/workers/shieldingWorker.ts::@typescript-eslint/no-unused-vars": 1
+  "src/sections/dialogs/UncertaintyQuantificationDialog.tsx::@typescript-eslint/no-unused-vars": 1
  }
 }

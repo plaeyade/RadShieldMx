@@ -79,9 +79,7 @@ function calculateInWorker(
 
         // Simplified TVL-based calculation
         const leadTvl = 16.6;
-        const concTvl = 370;
         const thicknessLeadMm = kerma > 0 ? -leadTvl * Math.log10(B) : 0;
-        const thicknessConcreteMm = kerma > 0 ? -concTvl * Math.log10(B) : 0;
 
         const pt = { x: px, y: py, kermaRate: kerma, barrierThickness_mm: thicknessLeadMm, material: barrier.materialCode || 'CONCRETE235' };
         points.push(pt);
@@ -214,5 +212,8 @@ export function useWorkerCalculation() {
     });
   }, []);
 
-  return { calculate, isAvailable: !!workerRef.current };
+  // Función (no valor) para no leer el ref durante el render.
+  const isAvailable = useCallback(() => workerRef.current !== null, []);
+
+  return { calculate, isAvailable };
 }
