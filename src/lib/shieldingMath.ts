@@ -545,16 +545,33 @@ export function calculateUnshieldedKerma(
 // ───────────────────────────────────────────────────────────────
 // Sampling points along barrier (perpendicular offset)
 // ───────────────────────────────────────────────────────────────
-export function generateSamplePoints(barrier: Barrier, scale_m_per_pixel: number): { x: number; y: number }[] {
+/**
+ * Puntos a 0.3 m de la barrera (NCRP 147/151), del lado OPUESTO a las fuentes: el área protegida.
+ * Antes la normal era fija y podía caer del lado de la fuente. Si se conoce el espesor de la barrera
+ * (`thickness_mm`), el desplazamiento se mide desde su cara exterior.
+ */
+export function generateSamplePoints(
+  barrier: Barrier,
+  scale_m_per_pixel: number,
+  sources: { x: number; y: number }[] = [],
+): { x: number; y: number }[] {
   const dx = barrier.x2 - barrier.x1;
   const dy = barrier.y2 - barrier.y1;
   const length = Math.sqrt(dx * dx + dy * dy);
   const length_m = length * scale_m_per_pixel;
   if (length_m < 0.1) return [];
 
-  const nx = -dy / length;
-  const ny = dx / length;
-  const offset_pixels = SAMPLING_DISTANCE_M / scale_m_per_pixel;
+  let nx = -dy / length;
+  let ny = dx / length;
+  if (sources.length) {
+    const mx = (barrier.x1 + barrier.x2) / 2;
+    const my = (barrier.y1 + barrier.y2) / 2;
+    const cx = sources.reduce((a, s) => a + s.x, 0) / sources.length;
+    const cy = sources.reduce((a, s) => a + s.y, 0) / sources.length;
+    if ((cx - mx) * nx + (cy - my) * ny > 0) { nx = -nx; ny = -ny; }
+  }
+  const espesor_m = Number.isFinite(barrier.thickness_mm) && (barrier.thickness_mm ?? 0) > 0 ? (barrier.thickness_mm as number) / 1000 : 0;
+  const offset_pixels = (SAMPLING_DISTANCE_M + espesor_m) / scale_m_per_pixel;
   const numPoints = Math.max(2, Math.ceil(length_m / SAMPLING_SPACING_M) + 1);
 
   const points: { x: number; y: number }[] = [];

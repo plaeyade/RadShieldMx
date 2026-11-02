@@ -368,6 +368,9 @@ export interface RadiationSource {
   ctScansPerPatient?: number;   // number of scan series per patient
   // Nuclear specific (Fase 2)
   nuclearActivity_GBq?: number; // for PET/SPECT/radioiodine
+  // NCRP 151 Ec. 3.6: fracción de la carga con IMRT y factor C_I (por omisión 0.5 y 5)
+  imrtFraction?: number;
+  imrtFactor?: number;
 }
 
 export interface Barrier {
@@ -378,6 +381,8 @@ export interface Barrier {
   barrierType: 'primary' | 'secondary' | 'leakage' | 'scatter' | 'nuclear';
   useFactor: number; // U
   occupancyFactor: number; // T
+  // NCRP 151: ángulo de dispersión del paciente para barreras secundarias (por omisión 30°, conservador)
+  scatterAngle_deg?: number;
   designGoal_mSv_per_wk: number; // P
   materialCode: string; // selected material code
   points?: SamplePoint[];

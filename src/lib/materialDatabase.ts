@@ -4,6 +4,20 @@
 //          materiales NCRP 151, AAPM, ICRU, y normativa mexicana
 // =============================================================================
 
+import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
+
+// Fuente única para los materiales de referencia de NCRP 151: Tabla B.2 (primaria, TVL₁) y
+// Tabla B.7 (fuga en concreto, TVL₁). Para acero y plomo la secundaria usa la primaria (conservador).
+const ENERGIAS = { '6MV': '6', '10MV': '10', '15MV': '15', '18MV': '18', '25MV': '25', Co60: 'Co60' } as const;
+function tvlNCRP(mat: 'concrete' | 'steel' | 'lead', tipo: 'primary' | 'secondary'): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(ENERGIAS).map(([k, e]) => [
+      k,
+      tipo === 'secondary' && mat === 'concrete' ? TABLA_B_7[e].tvl1_cm : TABLA_B_2[mat][e].tvl1_cm,
+    ]),
+  );
+}
+
 export interface ShieldingMaterial {
   id: string;
   name: string;
@@ -37,8 +51,8 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     name: 'Concreto normal',
     category: 'concrete',
     density_g_cm3: 2.35,
-    TVL_primary_cm: { '6MV': 37.0, '10MV': 37.0, '15MV': 41.0, '18MV': 45.0, '25MV': 50.0, 'Co60': 21.8 },
-    TVL_secondary_cm: { '6MV': 31.0, '10MV': 31.0, '15MV': 35.0, '18MV': 39.0, '25MV': 44.0, 'Co60': 18.0 },
+    TVL_primary_cm: tvlNCRP('concrete', 'primary'),
+    TVL_secondary_cm: tvlNCRP('concrete', 'secondary'),
     TVL_neutron_cm: { TVL1: 31, TVLe: 21 },
     compressive_strength_MPa: 25,
     normativa: ['NCRP 151', 'IAEA SRS 47', 'NOM-008-NUCL-2018'],
@@ -103,8 +117,8 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     name: 'Acero estructural',
     category: 'steel',
     density_g_cm3: 7.87,
-    TVL_primary_cm: { '6MV': 8.5, '10MV': 9.0, '15MV': 10.0, '18MV': 11.0, '25MV': 12.5, 'Co60': 5.5 },
-    TVL_secondary_cm: { '6MV': 7.0, '10MV': 7.5, '15MV': 8.5, '18MV': 9.5, '25MV': 11.0, 'Co60': 4.5 },
+    TVL_primary_cm: tvlNCRP('steel', 'primary'),
+    TVL_secondary_cm: tvlNCRP('steel', 'secondary'),
     normativa: ['NCRP 151', 'IAEA SRS 47'],
     notes: 'Acero estructural A36/A992. Usado en placas, vigas, puertas blindadas.',
     isNCRP151: true,
@@ -114,11 +128,11 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     name: 'Plomo colado',
     category: 'lead',
     density_g_cm3: 11.34,
-    TVL_primary_cm: { '6MV': 5.5, '10MV': 6.0, '15MV': 7.0, '18MV': 8.0, '25MV': 9.5, 'Co60': 1.13 },
-    TVL_secondary_cm: { '6MV': 4.5, '10MV': 5.0, '15MV': 6.0, '18MV': 6.8, '25MV': 8.0, 'Co60': 0.9 },
+    TVL_primary_cm: tvlNCRP('lead', 'primary'),
+    TVL_secondary_cm: tvlNCRP('lead', 'secondary'),
     thickness_mm_std: [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25],
     normativa: ['NCRP 151', 'IAEA SRS 47'],
-    notes: 'Plomo puro ASTM B749. Para puertas, ventanas, juntas. HVL(6MV)=1.6 mm.',
+    notes: 'Plomo puro ASTM B749. Para puertas, ventanas, juntas. TVL₁ 5.7 cm a 4–30 MV (NCRP 151 Tabla B.2).',
     isNCRP151: true,
   },
   {
@@ -126,8 +140,8 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     name: 'Lámina de plomo',
     category: 'lead',
     density_g_cm3: 11.34,
-    TVL_primary_cm: { '6MV': 5.5, '10MV': 6.0, '15MV': 7.0, '18MV': 8.0, '25MV': 9.5, 'Co60': 1.13 },
-    TVL_secondary_cm: { '6MV': 4.5, '10MV': 5.0, '15MV': 6.0, '18MV': 6.8, '25MV': 8.0, 'Co60': 0.9 },
+    TVL_primary_cm: tvlNCRP('lead', 'primary'),
+    TVL_secondary_cm: tvlNCRP('lead', 'secondary'),
     thickness_mm_std: [0.5, 1.0, 1.5, 2.0, 3.0],
     normativa: ['NCRP 147', 'NCRP 151'],
     notes: 'Lámina de plomo para blindaje de Rayos X diagnóstico y dental.',

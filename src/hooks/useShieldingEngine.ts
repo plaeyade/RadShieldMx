@@ -20,6 +20,7 @@ import {
   getShieldingEnergyKey,
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
+import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
 
 export function useShieldingEngine() {
 
@@ -31,7 +32,7 @@ export function useShieldingEngine() {
   ): Barrier[] => {
     if (!sources.length) return barriers;
     return barriers.map(b => {
-      const points = generateSamplePoints(b, scale_m_per_pixel);
+      const points = generateSamplePoints(b, scale_m_per_pixel, sources);
       if (!points.length) return b;
 
       let maxKerma = 0;
@@ -70,6 +71,13 @@ export function useShieldingEngine() {
         }
         if (thickness > 0) requiredThickness[mat.code] = thickness;
       }
+      // NCRP 147 (diagnóstico) y NCRP 151 (teleterapia MV) sustituyen al punto-kernel cuando aplican.
+      const normativo = esCiclotron ? null : calcularBarreraNormativa(b, sources, points, scale_m_per_pixel, MATERIALS);
+      if (normativo) {
+        for (const k of Object.keys(requiredThickness)) delete requiredThickness[k];
+        Object.assign(requiredThickness, normativo.espesores_mm);
+        maxKerma = normativo.kermaMax_mSv_semana;
+      }
 
       const calculationTrace = buildCalculationTrace({
         barrier: b,
@@ -79,6 +87,11 @@ export function useShieldingEngine() {
         requiredThickness_mm: requiredThickness,
         samplePointCount: points.length,
       });
+      if (normativo) {
+        calculationTrace.formulaId = normativo.metodo === 'NCRP147' ? 'NCRP147_TABLES_4.5_4.7_B1_C1' : 'NCRP151_PRIMARY_LEAKAGE_SCATTER';
+        calculationTrace.standard = normativo.metodo;
+        calculationTrace.assumptions = [...calculationTrace.assumptions, ...normativo.notas];
+      }
       const calculationWarnings = getCalculationAuditWarnings({
         barrier: b,
         sources,

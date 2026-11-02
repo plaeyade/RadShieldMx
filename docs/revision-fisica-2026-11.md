@@ -61,3 +61,19 @@ Con los informes íntegros en inglés (indexados en GAMMA) se verificaron los da
 Confirmado contra el original: κ de TC (9×10⁻⁵ y 1.2 × 3×10⁻⁴ cm⁻¹, NCRP 147 pp. 107–109), cuyo arreglo entró en F2.
 
 Pendiente: hay otras tablas de materiales (`materialDatabase.ts`, `f510DiagnosticPetTvlPromotion.ts`) con valores propios; deben converger en una sola fuente con cita.
+
+## Tercera ronda — motor normativo en el lienzo (02-11-2026)
+
+- **P1 resuelto (teleterapia):** `src/lib/ncrp151.ts` + `normativeBarrierEngine.ts`. Primaria con TVL₁/TVLₑ;
+  secundaria con fuga (carga IMRT, por omisión 50 % con C_I = 5) y dispersión del paciente por ángulo
+  (por omisión 30°, conservador; `scatterAngle_deg` por barrera), combinadas con la regla de dos fuentes.
+  Las pruebas reproducen NCRP 151 §7.1.1 (149.6 cm), §7.1.5 (55.6, 48 y 66.4 cm) y §7.1.4 (IMRT).
+- **P3/P4 resueltos (diagnóstico):** el lienzo usa NCRP 147 por distribución TG9 (primaria Tabla 4.5/B.1,
+  secundaria Tabla 4.7/C.1, columna de 135° por conservadurismo), resolviendo Σ Kᵢ·Bᵢ(x) = P/T con varias
+  fuentes. Fluoroscopía y mastografía, sólo secundaria. Reproduce NCRP 147 §5.2 (2.2 mm Pb) en el lienzo.
+- **P6 resuelto (muestreo):** puntos del lado opuesto a las fuentes y desde la cara exterior cuando se
+  conoce el espesor.
+- **Materiales:** `materialDatabase.ts` toma concreto, acero y plomo de las tablas de NCRP 151; la
+  promoción F510 de plomo a 511 keV pasa a 16.6 mm.
+- Siguen en el motor anterior: TC (κ), medicina nuclear, braquiterapia, Gamma Knife y ciclotrón (módulo
+  propio). Pendiente: laberinto y puerta ≥ 10 MV, fotoneutrones.

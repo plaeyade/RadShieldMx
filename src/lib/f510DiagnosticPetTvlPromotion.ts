@@ -48,7 +48,8 @@ export function buildF510DiagnosticPetTvlPromotion(): F510DiagnosticPetTvlPromot
         materialId: 'lead-cast',
         valueKind: 'tvl-primary',
         energyKey: '511keV',
-        value: 11.8,
+        // TG-108/NCRP: 16.6 mm (el 11.8 previo subestimaba; revisión física 2026-11, F10).
+        value: 16.6,
         unit: 'mm',
         sourceId: 'src-norm-lead-cast',
         reviewState: 'approved-reference',
