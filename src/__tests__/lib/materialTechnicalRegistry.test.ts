@@ -25,7 +25,7 @@ describe('material technical registry', () => {
     const nipol350 = comparison.find((item) => item.code === 'NIPOL350');
     const nipol500 = comparison.find((item) => item.code === 'NIPOL500');
 
-    expect(lead?.thickness_mm).toBe(70);
+    expect(lead?.thickness_mm).toBe(57); // NCRP 151 Tabla B.2: TVL₁ del plomo 5.7 cm a 4–30 MV
     expect(nipol350?.thickness_mm).toBe(301);
     expect(nipol500?.thickness_mm).toBe(210);
     // A 15 MV la atenuación de fotones escala con el espesor másico (ρ·x): el material más denso

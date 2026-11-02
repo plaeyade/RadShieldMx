@@ -46,3 +46,18 @@ La Tabla 9 de IBA (concreto 2350 kg/m³) da 0.40 μSv/h tras 230 cm para el KIUB
 interinos del búnker (este 2.08 m, oeste 1.95 m, sur 1.82 m, techo 1.95 m) provienen del Monte Carlo
 de Cyclotron-SIM con su propio término fuente, materiales y geometría; no son comparables uno a uno
 con la Tabla 9 y se fijarán con el MC F90 completo.
+
+## Segunda ronda — con NCRP 147 y NCRP 151 originales (02-11-2026)
+
+Con los informes íntegros en inglés (indexados en GAMMA) se verificaron los datos del motor:
+
+| # | Severidad | Hallazgo | Corrección |
+|---|---|---|---|
+| F10 | **Alta** (sub-diseño) | TVL del plomo para Co-60 = 11.3 mm; NCRP 151 Tabla B.2 da **4.0 cm** (3.5× bajo). Plomo a 511 keV 11.8 mm vs 16.6 mm. | Valores de NCRP 151 B.2 y TG-108. |
+| F11 | Media (sub-diseño 7–10 %) | Concreto: TVL a 10 MV = 370 mm y a 15 MV = 410 mm; NCRP 151 B.2: TVL₁ 41 y 44 cm. Acero: 85–110 mm y Co-60 55 mm vs 10–11 cm y 7.0 cm. Acero a 511 keV 42 mm vs 6.5 cm (TG-108). | Valores de las tablas. |
+| F12 | Alta (sub-diseño) | Plomo para Ir-192, Tc-99m e I-131: 3.0, 0.3 y 2.0 mm (valores de HVL o menores). | Provisionales de manual (16, 1.0 y 11 mm) hasta verificarlos con fuente en GAMMA. |
+| F13 | **Alta** | Las «distribuciones de carga» diagnósticas del catálogo no son las de NCRP 147 (TG9): p. ej. «Tórax PA» K¹ = 0.17 mGy/paciente vs Chest Room **1.2** (Tabla 4.5, 7× bajo). | Nuevo módulo `src/lib/ncrp147.ts` con las Tablas 4.5, 4.6, 4.7, B.1 y C.1 transcritas, barreras primaria y secundaria, y pruebas que reproducen el ejemplo §5.2 (2.2 mm Pb) y la transmisión del Apéndice A (9.3×10⁻⁴ en 1.66 mm). **Pendiente: conectar el motor del lienzo a este módulo** (siguiente PR). |
+
+Confirmado contra el original: κ de TC (9×10⁻⁵ y 1.2 × 3×10⁻⁴ cm⁻¹, NCRP 147 pp. 107–109), cuyo arreglo entró en F2.
+
+Pendiente: hay otras tablas de materiales (`materialDatabase.ts`, `f510DiagnosticPetTvlPromotion.ts`) con valores propios; deben converger en una sola fuente con cita.
