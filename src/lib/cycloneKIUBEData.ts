@@ -159,45 +159,83 @@ export const CYCLOONE_KIUBE_RADIONUCLIDES: CycloneKIUBERadionuclide[] = [
 // CALCULATION FUNCTIONS
 // ─────────────────────────────────────────────────────────
 
-/** Calculate required concrete thickness for a given dose rate limit */
+export interface CycloneConcreteThicknessResult {
+  thickness_cm: number;
+  interpolationUsed: boolean;
+  /** El objetivo cae fuera del rango 200–230 cm de la Tabla 9: valor extrapolado (log-lineal). */
+  extrapolated: boolean;
+  /** Factor angular aplicado (tasa interna en la dirección / tasa a 0°); 1 a 0°. */
+  directionFactor: number;
+  /** Modelo de la Tabla 8 que se usó, o null si no se reconoció (se devuelve el máximo de la tabla). */
+  model: string | null;
+  notes: string[];
+}
+
+/**
+ * Espesor de concreto (2350 kg/m³) para una tasa de dosis objetivo fuera del búnker KIUBE.
+ *
+ * Base: IBA Cyclone KIUBE Site Requirement Guide (MID 55672 Rev G), Tabla 9 (tasa tras 200, 220 y
+ * 230 cm) interpolada log-linealmente, es decir, con atenuación exponencial entre puntos.
+ *
+ * Dirección: la Tabla 9 se toma como la dirección más desfavorable (0°, frente al blanco). Para
+ * 90° y 180° el término fuente se escala con la razón de la Tabla 8 (tasa interna a 1 m en esa
+ * dirección / tasa a 0°). Es una aproximación: a 90° y 180° el espectro es más blando y la
+ * atenuación real es igual o mayor, así que el resultado sigue siendo conservador respecto a
+ * esa hipótesis. Es un tamizaje de ingeniería; el diseño final se valida con Monte Carlo
+ * (Cyclotron-SIM) y la revisión de un físico médico calificado.
+ */
 export function calculateCycloneConcreteThickness(
   model: string,
   targetDoseRate_uSv_h: number,
-  // La tabla de espesores no distingue dirección: el parámetro se conserva por compatibilidad.
-  _direction: '0deg' | '90deg' | '180deg'
-): { thickness_cm: number; interpolationUsed: boolean } {
-  const doseData = CYCLOONE_KIUBE_DOSE_RATES.find(d => d.model === model);
-  if (!doseData) return { thickness_cm: 220, interpolationUsed: false };
-
-  // Find bracketing thickness values
+  direction: '0deg' | '90deg' | '180deg' = '0deg'
+): CycloneConcreteThicknessResult {
+  const notes: string[] = [];
+  const normalizado = model.replace(/^\s*cyclone\s+/i, '').trim().toUpperCase();
+  const doseData = CYCLOONE_KIUBE_DOSE_RATES.find(d => d.model.toUpperCase() === normalizado);
   const shieldingData = CYCLOONE_KIUBE_SHIELDING;
-  let lower = shieldingData[0];
-  let upper = shieldingData[shieldingData.length - 1];
-
-  const doseKey = model === 'KIUBE 100' ? 'doseRate_KIUBE100_uSv_h' :
-                  model === 'KIUBE 150' ? 'doseRate_KIUBE150_uSv_h' :
-                  model === 'KIUBE 180' ? 'doseRate_KIUBE180_uSv_h' :
-                  'doseRate_KIUBE300_uSv_h';
-
-  for (let i = 0; i < shieldingData.length; i++) {
-    const d = shieldingData[i] as any;
-    if (d[doseKey] <= targetDoseRate_uSv_h) {
-      lower = shieldingData[Math.max(0, i - 1)];
-      upper = d;
-      break;
-    }
+  if (!(targetDoseRate_uSv_h > 0) || !Number.isFinite(targetDoseRate_uSv_h)) {
+    throw new RangeError('targetDoseRate_uSv_h debe ser positivo y finito');
+  }
+  if (!doseData) {
+    notes.push(`Modelo «${model}» no reconocido: se usa el espesor máximo de la Tabla 9 sin interpolar.`);
+    const max = shieldingData[shieldingData.length - 1].concreteThickness_cm;
+    return { thickness_cm: max, interpolationUsed: false, extrapolated: false, directionFactor: 1, model: null, notes };
   }
 
-  // Log-linear interpolation for shielding
-  const lowerDose = (lower as any)[doseKey];
-  const upperDose = (upper as any)[doseKey];
-  
-  if (upperDose === lowerDose) return { thickness_cm: upper.concreteThickness_cm, interpolationUsed: false };
+  const directionFactor =
+    direction === '90deg' ? doseData.at90deg_uSv_h / doseData.at0deg_uSv_h
+    : direction === '180deg' ? doseData.at180deg_uSv_h / doseData.at0deg_uSv_h
+    : 1;
+  // Objetivo equivalente a 0°: la tabla describe la fuente a 0°.
+  const objetivo = targetDoseRate_uSv_h / directionFactor;
 
-  const logRatio = Math.log(targetDoseRate_uSv_h / lowerDose) / Math.log(upperDose / lowerDose);
-  const thickness = lower.concreteThickness_cm + logRatio * (upper.concreteThickness_cm - lower.concreteThickness_cm);
-  
-  return { thickness_cm: Math.ceil(thickness), interpolationUsed: true };
+  const key = `doseRate_${doseData.model.replace(' ', '')}_uSv_h` as keyof CycloneKIUBEShielding;
+  const puntos = shieldingData.map(d => ({ x: d.concreteThickness_cm, D: d[key] as number }));
+
+  // Tramo que contiene el objetivo; fuera del rango se extrapola con el tramo extremo.
+  let i = puntos.findIndex(p => p.D <= objetivo);
+  let extrapolated = false;
+  if (i === -1) { i = puntos.length - 1; extrapolated = true; }
+  else if (i === 0) {
+    if (puntos[0].D === objetivo) {
+      return { thickness_cm: puntos[0].x, interpolationUsed: false, extrapolated: false, directionFactor, model: doseData.model, notes };
+    }
+    i = 1; extrapolated = true;
+  }
+  const a = puntos[i - 1], b = puntos[i];
+  const frac = Math.log(objetivo / a.D) / Math.log(b.D / a.D);
+  const thickness = a.x + frac * (b.x - a.x);
+  if (extrapolated) notes.push('Objetivo fuera del rango 200–230 cm de la Tabla 9: valor extrapolado, confirmar con Monte Carlo.');
+  if (direction !== '0deg') notes.push(`Dirección ${direction}: término fuente escalado ×${directionFactor.toFixed(3)} (Tabla 8).`);
+
+  return {
+    thickness_cm: Math.ceil(thickness),
+    interpolationUsed: true,
+    extrapolated,
+    directionFactor,
+    model: doseData.model,
+    notes,
+  };
 }
 
 /** Calculate neutron TVL for concrete (empirical from IBA data) */

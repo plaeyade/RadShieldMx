@@ -144,7 +144,9 @@ describe('inverseArcher() — NCRP 147 §4.1', () => {
 
   it('TVL: thickness where B=0.1', () => {
     const tvlThick = inverseArcher(0.1, concrete);
-    expect(tvlThick).toBeGreaterThan(100);
+    // α, β en mm⁻¹ (NCRP 147): TVL de concreto a energía diagnóstica ~5 cm
+    expect(tvlThick).toBeGreaterThan(30);
+    expect(tvlThick).toBeLessThan(100);
     // TVL/HVL ratio from Archer params for concrete (~3.7 for this parametrization)
     const hvlThick = inverseArcher(0.5, concrete);
     expect(tvlThick / hvlThick).toBeCloseTo(3.7, 0.5);
@@ -271,13 +273,12 @@ describe('calculateCTKerma() — NCRP 147 §5.6', () => {
     expect(k1).toBeGreaterThan(k2);
   });
 
-  it('very close to source → high kerma (clamped at 1e6 within 10 cm)', () => {
-    // Source at (100,100) with 1m height. At scale 0.01, same x,y → dz=1m, d_cm=100cm
-    // Clamp triggers at d_cm < 10cm. Use very small scale to make pixel distance matter
-    const k = calculateCTKerma(source, 100, 100, 0.001); // 1mm per pixel
-    // dx=0, dy=0, dz=1.0 → d_cm=100 → still not clamped
-    // Instead verify it returns a high value (not clamped but large)
-    expect(k).toBeGreaterThan(1000);
+  it('at 1 m the kerma is κ·DLP per patient (NCRP 147 §5.6), not the DLP itself', () => {
+    // dx=dy=0, dz=1 m → d = 1 m
+    const k = calculateCTKerma(source, 100, 100, 0.001);
+    const dlp = source.ctDLP_mGy_cm || source.modality.doseRateConstant || 0;
+    const kappa = source.modality.id === 'ct-head' ? 9e-5 : 1.2 * 3e-4;
+    expect(k).toBeCloseTo(kappa * dlp * (source.ctScansPerPatient || 1) * source.workloadValue, 9);
   });
 
   it('kerma is positive', () => {
@@ -466,13 +467,13 @@ describe('Constants — NCRP 147', () => {
 // REFERENCE VALUE TESTS — Validated against NCRP 147 Tables
 // ═══════════════════════════════════════════════════════════════════
 describe('Reference Values — NCRP 147 Table 4.2', () => {
-  it('Concrete 235 kg/m³: HVL/TVL from fitted Archer params (~144mm / ~534mm)', () => {
+  it('Concrete 235 kg/m³: HVL/TVL from fitted Archer params (~14 mm / ~53 mm)', () => {
     const hvl = inverseArcher(0.5, concrete);
     const tvl = inverseArcher(0.1, concrete);
-    // Our fitted alpha=0.0383, beta=0.0141, gamma=1.099 for concrete
-    // give these reference values (broad-beam, fitted range)
-    expect(hvl).toBeCloseTo(144, 0);
-    expect(tvl).toBeCloseTo(534, 0);
+    // α=0.0383 mm⁻¹, β=0.0141 mm⁻¹, γ=1.099 (unidades NCRP 147). Antes la prueba fijaba 144/534 mm,
+    // que salían de tratar α y β como cm⁻¹ (10× de más). Revisión física 2026-11.
+    expect(hvl).toBeCloseTo(14.4, 1);
+    expect(tvl).toBeCloseTo(53.4, 1);
   });
 
   it('Lead at 120 kVp: HVL ~0.3mm, very thin for diagnostic', () => {

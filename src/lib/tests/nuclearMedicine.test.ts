@@ -115,12 +115,19 @@ describe('Patient Release Criteria (NRC Reg Guide 8.39)', () => {
   it('F-18 patient at 0.37 GBq CAN be released', () => {
     const result = canReleasePatient(0.37, 'F-18');
     expect(result.canRelease).toBe(true);
-    expect(result.limit_mSv_at_1m).toBe(5.0);
+    // Tasa a 1 m que corresponde al umbral de actividad (RG 8.39), no 5 mSv/h
+    expect(result.limit_mSv_at_1m).toBeCloseTo(0.143 * 3.0, 6);
   });
 
   it('F-18 patient at 3.7 GBq CANNOT be released', () => {
     const result = canReleasePatient(3.7, 'F-18');
     expect(result.canRelease).toBe(false);
+  });
+
+  it('I-131: el límite de tasa es ~0.07 mSv/h (1.22 GBq), no 5 mSv/h', () => {
+    const r = canReleasePatient(1.2, 'I-131');
+    expect(r.limit_mSv_at_1m).toBeCloseTo(0.059 * 1.22, 6);
+    expect(r.canRelease).toBe(true);
   });
 
   it('I-131 therapy patient at 1.85 GBq CANNOT be released', () => {

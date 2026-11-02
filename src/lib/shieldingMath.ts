@@ -9,7 +9,7 @@ import {
   type ShieldingMaterial,
   WORKLOAD_DISTRIBUTIONS
 } from '@/types/radshield';
-import { type CTIsodosisProfile, getCTIsodosisFactor, DEFAULT_CT_ISODOSIS } from '@/types/ctIsodosis';
+import { type CTIsodosisProfile, getCTIsodosisFactor } from '@/types/ctIsodosis';
 import { normalizeCalculationUnits, type NormalizedCalculationUnits } from './unitNormalization';
 
 export const SAMPLING_DISTANCE_M = 0.3;
@@ -167,6 +167,13 @@ export function getCalculationAuditWarnings(params: {
   if (getModalityEnergy_MeV(primarySource) > 10) {
     warnings.push({ field: 'energy_MeV', severity: 'warning', message: 'Energy >10 MV: neutron shielding and maze/door checks are required.' });
   }
+  if (primarySource?.modality.category === 'cyclotron') {
+    warnings.push({
+      field: 'cyclotron',
+      severity: 'error',
+      message: 'Cyclotron vaults are dominated by fast neutrons: the generic point-kernel engine is not valid. Use the cyclotron module (IBA SRG data / Monte Carlo).',
+    });
+  }
   if (primarySource && !primarySource.modality.standard) {
     warnings.push({ field: 'standard', severity: 'warning', message: 'Source modality has no explicit standard; inferred standard was used.' });
   }
@@ -298,6 +305,8 @@ export function buildConservativeCalculationComparison(params: {
 // ───────────────────────────────────────────────────────────────
 // NCRP 147 — Archer Equation (Diagnostic X-ray)
 // B(x) = [(1+β/α)·exp(αγx/cosθ) − β/α]^(−1/γ)
+// α y β en mm⁻¹ y x en mm, como en las tablas de NCRP 147 (Apéndice A). Antes se pasaba x en cm,
+// lo que daba ~10× más espesor (1 mm Pb transmitía 48 % en vez de ~2 %). Revisión física 2026-11.
 // ───────────────────────────────────────────────────────────────
 export function archerTransmission(
   thickness_mm: number,
@@ -310,9 +319,8 @@ export function archerTransmission(
     if (hvl <= 0) return 1;
     return clampTransmission(Math.exp(-0.693 * (thickness_mm / hvl) / Math.max(0.01, Math.cos(theta_rad))));
   }
-  const x_cm = thickness_mm / 10;
   const cos_theta = Math.max(0.01, Math.cos(theta_rad));
-  const exponent = (material.archerAlpha * material.archerGamma * x_cm) / cos_theta;
+  const exponent = (material.archerAlpha * material.archerGamma * thickness_mm) / cos_theta;
   const inner = (1 + material.archerBeta / material.archerAlpha) * Math.exp(exponent) - material.archerBeta / material.archerAlpha;
   if (inner <= 0) return 0;
   return clampTransmission(Math.pow(inner, -1 / material.archerGamma));
@@ -409,8 +417,23 @@ export function exponentialThickness(
 
 // ───────────────────────────────────────────────────────────────
 // NCRP 147 §5.6 — CT-DLP Method
-// K(θ,d) = DLP × f(θ) × (100cm/d)^1.5
+// K_sec(1 m) = κ · DLP   con κ = 9×10⁻⁵ cm⁻¹ (cabeza) y 1.2 × 3×10⁻⁴ cm⁻¹ (cuerpo)
+// K(d) = K_sec(1 m) · (1 m / d)² · g(θ)
+// g(θ) ≤ 1 es la reducción angular de un perfil de isodosis del fabricante, normalizada a su
+// máximo; sin perfil g = 1 (isotrópico, conservador como NCRP 147). Antes se multiplicaba el DLP
+// directamente por f(θ) sin κ (~800–3000× de sobreestimación) y se usaba d^1.5. Revisión 2026-11.
 // ───────────────────────────────────────────────────────────────
+export const CT_KAPPA_HEAD_PER_CM = 9e-5;
+export const CT_KAPPA_BODY_PER_CM = 1.2 * 3e-4;
+
+function ctAngularReduction(profile: CTIsodosisProfile | undefined, angle_deg: number): number {
+  if (!profile?.fittedParams?.length) return 1;
+  let max = 0;
+  for (let a = 0; a < 360; a += 5) max = Math.max(max, getCTIsodosisFactor(profile, a));
+  if (!(max > 0)) return 1;
+  return Math.min(1, getCTIsodosisFactor(profile, angle_deg) / max);
+}
+
 export function calculateCTKerma(
   source: RadiationSource,
   pointX: number,
@@ -421,21 +444,17 @@ export function calculateCTKerma(
   const dx = (pointX - source.x) * scale_m_per_pixel;
   const dy = (pointY - source.y) * scale_m_per_pixel;
   const dz = source.isocenterHeight_m;
-  const d_cm = Math.sqrt(dx * dx + dy * dy + dz * dz) * 100;
-  if (d_cm < 10) return 1e6;
+  const d_m = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (d_m < 0.1) return 1e6;
 
-  const angle_rad = Math.atan2(dy, dx);
-  const angle_deg = ((angle_rad * 180 / Math.PI) + 360) % 360;
-
-  const dlp = source.ctDLP_mGy_cm || source.modality.doseRateConstant;
+  const angle_deg = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+  const dlp = source.ctDLP_mGy_cm || source.modality.doseRateConstant || 0;
   const scansPerPatient = source.ctScansPerPatient || 1;
   const patientsPerWeek = source.workloadValue;
+  const kappa = source.modality.id === 'ct-head' ? CT_KAPPA_HEAD_PER_CM : CT_KAPPA_BODY_PER_CM;
+  const g = ctAngularReduction(isodosisProfile, angle_deg);
 
-  const profile = isodosisProfile || DEFAULT_CT_ISODOSIS;
-  const fTheta = getCTIsodosisFactor(profile, angle_deg);
-
-  const distanceFactor = Math.pow(100 / d_cm, 1.5);
-  return dlp * fTheta * distanceFactor * patientsPerWeek * scansPerPatient;
+  return (kappa * dlp * scansPerPatient * patientsPerWeek * g) / (d_m * d_m); // mGy/semana
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -454,8 +473,11 @@ export function calculateNuclearKerma(
   const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (d < 0.1) return 1e6;
 
-  const gamma = source.modality.doseRateConstant; // μSv·m²/GBq·h
-  const activity_GBq = source.nuclearActivity_GBq || source.workloadValue;
+  // Γ en μSv·m²/(MBq·h) (TG-108: F-18 0.143). Γ[μSv·m²/(MBq·h)] × A[GBq] da mSv·m²/h, así que el
+  // resultado queda en mSv/semana. `workloadValue` está en MBq (RadiationSource): se pasa a GBq; antes
+  // se tomaba como GBq (×1000). Sin atenuación del paciente ni decaimiento (TG-108): conservador.
+  const gamma = source.modality.doseRateConstant ?? 0;
+  const activity_GBq = source.nuclearActivity_GBq ?? source.workloadValue / 1000;
   const hoursPerWeek = source.workloadHoursPerWeek || 40;
 
   return (gamma * activity_GBq * hoursPerWeek) / (d * d);
@@ -505,10 +527,12 @@ export function calculateUnshieldedKerma(
       return dosePerFraction_Gy * fractionsPerWeek * source.useFactor / (d * d) * 1000; // mSv/week
     }
     if (mod.id === 'hdr-192ir' || mod.id === 'ldr-cs137') {
-      const gamma = mod.doseRateConstant;
+      // Γδ en μGy·m²/(MBq·h) (Ir-192 0.111; Cs-137 0.0779); actividad en Ci; resultado mGy/semana.
+      // Antes Γ = 10 «Gy·cm²/h» con un factor /100 sin unidades: Cs-137 quedaba ~2.4× bajo.
+      const gamma = mod.doseRateConstant ?? 0;
       const hoursPerWeek = source.workloadHoursPerWeek || 40;
-      const activity_Ci = source.workloadValue;
-      return (gamma * activity_Ci * 37 * hoursPerWeek) / (d * d * 100);
+      const activity_MBq = source.workloadValue * 3.7e4;
+      return (gamma * activity_MBq * hoursPerWeek) / (d * d) / 1000;
     }
     const fractionsPerWeek = source.workloadValue;
     const dosePerFraction_Gy = 2.0;
