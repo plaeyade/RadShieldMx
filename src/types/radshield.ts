@@ -104,7 +104,8 @@ export const MATERIALS: ShieldingMaterial[] = [
     code: "CONCRETE235",
     density: 2.35,
     archerAlpha: 0.0383, archerBeta: 0.0141, archerGamma: 1.099,
-    TVL_mm: { "6MV": 370, "10MV": 370, "15MV": 410, "18MV": 450, "Co60": 218, "Ir192": 110, "511keV": 170, "140keV": 45, "364keV": 140 },
+    // TVL₁ de NCRP 151 Tabla B.2 (p. 161) para MV y Co-60; 511 keV de TG-108 (TVL 17.6 cm). Resto: provisional.
+    TVL_mm: { "6MV": 370, "10MV": 410, "15MV": 440, "18MV": 450, "Co60": 210, "Ir192": 110, "511keV": 176, "140keV": 45, "364keV": 140 },
     cost_per_m3: 180, cost_per_kg: 0.08,
     color: "#9CA3AF",
     category: "Convencional"
@@ -132,7 +133,10 @@ export const MATERIALS: ShieldingMaterial[] = [
     code: "PB",
     density: 11.34,
     archerAlpha: 2.246, archerBeta: 6.31, archerGamma: 0.629,
-    TVL_mm: { "6MV": 55, "10MV": 60, "15MV": 70, "18MV": 80, "Co60": 11.3, "Ir192": 3.0, "511keV": 11.8, "140keV": 0.3, "364keV": 2.0 },
+    // NCRP 151 Tabla B.2: 5.7 cm para 4–30 MV y 4.0 cm para Co-60 (antes 11.3 mm: 3.5× bajo). 511 keV: NCRP/TG-108
+    // 16.6 mm (antes 11.8). Ir-192, Tc-99m e I-131: valores de manual (Delacroix 2002), PROVISIONALES —
+    // los anteriores (3.0, 0.3, 2.0 mm) eran HVL o menos; verificar con fuente en GAMMA.
+    TVL_mm: { "6MV": 57, "10MV": 57, "15MV": 57, "18MV": 57, "Co60": 40, "Ir192": 16, "511keV": 16.6, "140keV": 1.0, "364keV": 11 },
     cost_per_m3: 8500, cost_per_kg: 0.75,
     color: "#374151",
     category: "Convencional"
@@ -141,7 +145,8 @@ export const MATERIALS: ShieldingMaterial[] = [
     name: "Acero (placas estructurales)",
     code: "STEEL",
     density: 7.87,
-    TVL_mm: { "6MV": 85, "10MV": 90, "15MV": 100, "18MV": 110, "Co60": 55, "Ir192": 28, "511keV": 42 },
+    // NCRP 151 Tabla B.2 (acero 7.87 g/cm³): 10 cm a 6 MV, 11 cm ≥10 MV, 7.0 cm Co-60; 511 keV: TG-108 (6.5 cm).
+    TVL_mm: { "6MV": 100, "10MV": 110, "15MV": 110, "18MV": 110, "Co60": 70, "Ir192": 28, "511keV": 65 },
     cost_per_m3: 3200, cost_per_kg: 0.41,
     color: "#1F2937",
     category: "Convencional"

@@ -12,14 +12,14 @@
    "sha256": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
    "bytes": 5666065,
    "mime": "application/pdf",
-   "titulo": "NCRP Report 151: Structural Shielding Design for Megavoltage X- and Gamma-Ray Facilities",
+   "titulo": "NCRP Report 151: Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities (traducción al español)",
    "dominio": "radioproteccion/normas",
    "gobernanza": "restricted",
    "tipo": "document",
    "emisor": "NCRP",
    "licencia": "ejemplar con licencia de un solo usuario; uso interno; el PDF no se versiona",
    "jurisdiccion": "US",
-   "idioma": "en"
+   "idioma": "es"
   },
   {
    "id_local": "data/pdf/nom_008_ener",
@@ -63,6 +63,36 @@
    "tipo": "document",
    "emisor": "AAPM",
    "licencia": "ejemplar del propietario; uso interno",
+   "jurisdiccion": "US",
+   "idioma": "en"
+  },
+  {
+   "id_local": "data/pdf/ncrp_151_en",
+   "ruta": "data/pdf/ncrp_151_en.pdf",
+   "sha256": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+   "bytes": 2976451,
+   "mime": "application/pdf",
+   "titulo": "NCRP Report 151: Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities (2005)",
+   "dominio": "radioproteccion/normas",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "NCRP",
+   "licencia": "ejemplar con licencia de un solo usuario; uso interno; el PDF no se versiona",
+   "jurisdiccion": "US",
+   "idioma": "en"
+  },
+  {
+   "id_local": "data/pdf/ncrp_147",
+   "ruta": "data/pdf/ncrp_147.pdf",
+   "sha256": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+   "bytes": 6851386,
+   "mime": "application/pdf",
+   "titulo": "NCRP Report 147: Structural Shielding Design for Medical X-Ray Imaging Facilities (2004)",
+   "dominio": "radioproteccion/normas",
+   "gobernanza": "restricted",
+   "tipo": "document",
+   "emisor": "NCRP",
+   "licencia": "ejemplar con licencia de un solo usuario; uso interno; el PDF no se versiona",
    "jurisdiccion": "US",
    "idioma": "en"
   }

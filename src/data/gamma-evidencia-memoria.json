@@ -1,6 +1,6 @@
 {
  "contrato": "gamma/paquete_evidencia@1",
- "generado_utc": "2026-11-02T07:08:53+00:00",
+ "generado_utc": "2026-11-02T07:45:42+00:00",
  "incluye_en_revision": true,
  "consultas": [
   {
@@ -10,7 +10,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "tenth-value layer TVL concrete primary barrier megavoltage TVL hormigón barrera primaria megavoltaje",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:49+00:00",
+    "generado_utc": "2026-11-02T07:45:35+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -23,19 +23,19 @@
       "puntaje": 0.016393
      },
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 70,
-      "fragmento_sha256": "7f1613e467b5e2fc331919ed90d9b006fb4fe4fa8e639d5eff4826b715cc46a7",
-      "texto": "Lead 5.7 5.7 Table B.2 – Primary barrier TVLs for concrete, steel and lead",
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 256,
+      "fragmento_sha256": "521bac35dd8a3e91bc6a9c36b9e04e6bf60239717817b4a112dfd15301873ee5",
+      "texto": "Tenth-value distance (TVD) 41–45 Tenth-value layer (TVL) 8, 23, 30,",
       "puntaje": 0.016129
      },
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 72,
-      "fragmento_sha256": "1e75b3b1a661722fb5d7b9d7e9034b7f6b8274f2155ffc36f48c212f8052f85e",
-      "texto": "Primary Barrier Width and Length",
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 253,
+      "fragmento_sha256": "b19d0459d3ef923c4053cce5fcbe1c5152268e79056b388fe107de1a288a5c1b",
+      "texto": "angle) 166 scatter fraction 32 tenth-value layer (lead) 165 tenth-value layer (ordinary",
       "puntaje": 0.015873
      }
     ]
@@ -48,7 +48,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "use factor U fraction of primary-beam workload directed toward barrier factor de uso U fracción de la carga de trabajo del haz primario hacia la barrera",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:49+00:00",
+    "generado_utc": "2026-11-02T07:45:35+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -86,7 +86,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "occupancy factor T uncontrolled area factor de ocupación T área no controlada",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:50+00:00",
+    "generado_utc": "2026-11-02T07:45:36+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -124,17 +124,25 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "shielding design goal controlled area mSv per week objetivo de diseño área controlada mSv por semana",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:50+00:00",
+    "generado_utc": "2026-11-02T07:45:37+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 71,
-      "fragmento_sha256": "28781a1e53013da286d117059578afcfe73174d119e7733bda1cabffedeb4e9f",
-      "texto": "P = shielding design goal (Sv/week)",
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 17,
+      "fragmento_sha256": "344fb6b8182178805bddd25f609e2816c7146332402831b031a0c826cf2d9afb",
+      "texto": "Recommendation for Controlled Areas: Shielding design goal (P) (in dose equivalent): 0.1 mSv week–1",
       "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 131,
+      "fragmento_sha256": "2c235a174249d5a9bfe69e43693d221a326f782d34c8767cd867c75995e1f6bb",
+      "texto": "For the treatment control area (a controlled area), the shielding design goal P is 5 mSv y–1, or 0.1 mSv week–1 (0.1 × 10–3 Sv week–1; 100 µSv week–1). Other input data values for Equation 2.1 are:",
+      "puntaje": 0.016129
      },
      {
       "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
@@ -142,15 +150,7 @@
       "pagina": 16,
       "fragmento_sha256": "4ea570139fa73798c25ed49ff4619773430d0ab30882ffcbbdd1cbc722183a31",
       "texto": "Recomendación para las zonas controladas: Objetivo de diseño del blindaje (P) (en equivalente de dosis): 0,1 mSv semana-1 (5 mSv año-1)",
-      "puntaje": 0.016129
-     },
-     {
-      "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
-      "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
-      "pagina": 151,
-      "fragmento_sha256": "d23e6ac4678203915153873b3dd3e5a66279a84d9dc79cf2ff096fcfaf43b279",
-      "texto": "Para la zona de control del tratamiento (una zona controlada), el objetivo de diseño del blindaje P es de 5 mSv y-1, o 0,1 mSv semana-1 (0,1 × 10-3 Sv semana-1; 100 μ￿￿ semana-1). Otros valores de datos de entrada para la Ecuación 2.1 son:",
-      "puntaje": 0.015625
+      "puntaje": 0.015873
      }
     ]
    }
@@ -162,7 +162,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "PET 511 keV dose rate constant patient",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:51+00:00",
+    "generado_utc": "2026-11-02T07:45:37+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -192,7 +192,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "patient self-attenuation uptake time PET shielding",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:51+00:00",
+    "generado_utc": "2026-11-02T07:45:38+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -208,8 +208,8 @@
       "source_id": "source_e049e205ca840cc158fc65a112388db7",
       "sha256_documento": "e049e205ca840cc158fc65a112388db7c040e39b7f8e3bdea391f047c708b3c1",
       "pagina": 8,
-      "fragmento_sha256": "39b2671f843b77dbb73e64f05bd446ac1948b67b78f57a404eddc698d3dd9dfc",
-      "texto": "Uptake room Shielding \u0001mm Pb\u0002",
+      "fragmento_sha256": "761687d9bf60f5dd5a86b977e5350c443386b2be2532414d4d54c087f2d1c1a4",
+      "texto": "How much shielding is required for an uncontrolled room above a PET uptake room? Patients are administered",
       "puntaje": 0.016129
      }
     ]
@@ -222,7 +222,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "cyclotron vault dose rate neutron gamma dual beam shielding",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:52+00:00",
+    "generado_utc": "2026-11-02T07:45:39+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -235,19 +235,19 @@
       "puntaje": 0.016393
      },
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 97,
-      "fragmento_sha256": "993bc513668fa9547e2ae339d3cf986f4c9db99704f5c8c422333adf9d03deb8",
-      "texto": "Maze Neutron Unshielded Dose Rate",
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 59,
+      "fragmento_sha256": "9d9a486de7a2515d51e7f67903f89f1dcda8a24bd18d04d6e41f21a40e90a5c9",
+      "texto": "TABLE 2.1—Dose-equivalent rate due to neutron capture gamma rays and neutrons at the outside maze entrance per unit absorbed-dose rate",
       "puntaje": 0.016129
      },
      {
-      "source_id": "source_1414ded940d68843942281895404a675",
-      "sha256_documento": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed",
-      "pagina": 96,
-      "fragmento_sha256": "6ea9857bfc6801c896f246250d77ac1c28a30006cf405747132a6c3bfca2e5ed",
-      "texto": "Maze Capture Gamma Unshielded Dose Rate",
+      "source_id": "source_2a578b0af069a47658367bde153bf504",
+      "sha256_documento": "2a578b0af069a47658367bde153bf504289d07564f03fab81224b3c8a503fd71",
+      "pagina": 18,
+      "fragmento_sha256": "0b4e1dc86dd04561601b655c1829e9b51473d76a6e164ab588d2fd41419bc103",
+      "texto": "Table 8: Dose rate at 1m from the Cyclotron (inside the vault)",
       "puntaje": 0.015873
      }
     ]
@@ -260,7 +260,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "densidad tabique blindaje ficha tecnica",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:52+00:00",
+    "generado_utc": "2026-11-02T07:45:39+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -298,22 +298,22 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "TVL1 TVLe hormigón haz primario fuga energía MV tabla",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:52+00:00",
+    "generado_utc": "2026-11-02T07:45:40+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
      {
       "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
       "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
-      "pagina": 198,
-      "fragmento_sha256": "64ae96fe9e9f2be872d48e942fef0b1fc7dd0ed94c4a91ffd3c941a7beff7dfe",
-      "texto": "Energía final (MV)b TVL1 (cm) TVLe (cm)",
+      "pagina": 144,
+      "fragmento_sha256": "10c51e0a32ab6b9a40bd6614117e20fa77ba61f7d2df970a56ce75503d92dc9f",
+      "texto": "(TVLe ) (Tabla B.7) TVLL (radiación de fuga de 6 MV) = 34 cm (TVL1 ) y 29 cm",
       "puntaje": 0.016393
      },
      {
       "source_id": "source_8ff45677d5ea3c5611cd16204fbd1725",
       "sha256_documento": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
-      "pagina": 144,
+      "pagina": 156,
       "fragmento_sha256": "10c51e0a32ab6b9a40bd6614117e20fa77ba61f7d2df970a56ce75503d92dc9f",
       "texto": "(TVLe ) (Tabla B.7) TVLL (radiación de fuga de 6 MV) = 34 cm (TVL1 ) y 29 cm",
       "puntaje": 0.016129
@@ -328,7 +328,7 @@
     "contrato": "gamma/evidencia@1",
     "consulta": "factores de ocupación sugeridos oficinas pasillos salas de espera",
     "perfil": "ECOSISTEMA-BM25-EN-REVISION",
-    "generado_utc": "2026-11-02T07:08:53+00:00",
+    "generado_utc": "2026-11-02T07:45:40+00:00",
     "estado": "experimental_sin_validacion_clinica",
     "no_apto_para_firma": true,
     "citas": [
@@ -350,6 +350,96 @@
      }
     ]
    }
+  },
+  {
+   "id": "ncrp147_kerma_primario",
+   "seccion": "5.1",
+   "evidencia": {
+    "contrato": "gamma/evidencia@1",
+    "consulta": "unshielded primary air kerma per patient workload distribution Table 4.5",
+    "perfil": "ECOSISTEMA-BM25-EN-REVISION",
+    "generado_utc": "2026-11-02T07:45:41+00:00",
+    "estado": "experimental_sin_validacion_clinica",
+    "no_apto_para_firma": true,
+    "citas": [
+     {
+      "source_id": "source_b45e41b5b716c03b0e1ff070f00f959c",
+      "sha256_documento": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+      "pagina": 54,
+      "fragmento_sha256": "518b5d5d702828b6c0ee9b661b02808e58f19f82a807c9a464cc6e05aa28b79e",
+      "texto": "TABLE 4.5—Unshielded primary air kerma per patient [ (in mGy patient–1)] for the indicated workload [Wnorm (mA min patient–1)] and workload distribution, normalized to primary beam distance dP = 1 m.",
+      "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_b45e41b5b716c03b0e1ff070f00f959c",
+      "sha256_documento": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+      "pagina": 169,
+      "fragmento_sha256": "6ddbf35df520c7768d8732944bb24f97bc6809370b51c33d58586e5a4c153f92",
+      "texto": "unshielded secondary air kerma per patient at 1 m calcu- lated for a workload distribution of total workload per patient Wnorm air kerma at 1 m per unit workload due to primary beam",
+      "puntaje": 0.016129
+     }
+    ]
+   }
+  },
+  {
+   "id": "ncrp147_archer",
+   "seccion": "5.1",
+   "evidencia": {
+    "contrato": "gamma/evidencia@1",
+    "consulta": "fitting parameters transmission broad primary x-ray beams Archer alpha beta gamma",
+    "perfil": "ECOSISTEMA-BM25-EN-REVISION",
+    "generado_utc": "2026-11-02T07:45:42+00:00",
+    "estado": "experimental_sin_validacion_clinica",
+    "no_apto_para_firma": true,
+    "citas": [
+     {
+      "source_id": "source_b45e41b5b716c03b0e1ff070f00f959c",
+      "sha256_documento": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+      "pagina": 144,
+      "fragmento_sha256": "7ba67d3ca2e5e503b049b149000592577b6f87e183466581af2c3ba0b8d543aa",
+      "texto": "TABLE B.1—Fitting parameters for transmission of broad primary x-ray beams to Equation A.2 (thickness x is input in",
+      "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_b45e41b5b716c03b0e1ff070f00f959c",
+      "sha256_documento": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+      "pagina": 168,
+      "fragmento_sha256": "263116c045fa4616d9ffb7ac054ae3769605453ce9780784d646a7742ac32db3",
+      "texto": "α, β, γ fitting parameters in the mathematical model for trans- mission of broad x-ray beams through shielding materials (Archer et al., 1983) κ scatter fraction per centimeter, used in computed tomog- raphy",
+      "puntaje": 0.016129
+     }
+    ]
+   }
+  },
+  {
+   "id": "ncrp147_tc",
+   "seccion": "5.1",
+   "evidencia": {
+    "contrato": "gamma/evidencia@1",
+    "consulta": "CT scatter fraction kappa DLP secondary air kerma",
+    "perfil": "ECOSISTEMA-BM25-EN-REVISION",
+    "generado_utc": "2026-11-02T07:45:42+00:00",
+    "estado": "experimental_sin_validacion_clinica",
+    "no_apto_para_firma": true,
+    "citas": [
+     {
+      "source_id": "source_b45e41b5b716c03b0e1ff070f00f959c",
+      "sha256_documento": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc",
+      "pagina": 195,
+      "fragmento_sha256": "1f25266c949e8e13be4ddbf35745500705641d177e7fa2349e5d7ad6520b6989",
+      "texto": "42–43 unshielded secondary air kerma",
+      "puntaje": 0.016393
+     },
+     {
+      "source_id": "source_c540e5e39608bb3ef0ec07354a066ad0",
+      "sha256_documento": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc",
+      "pagina": 174,
+      "fragmento_sha256": "24bb235f338b17a6616d5b5e35a6c7a7903555ca2fb3bb3f360fda7c421dddd4",
+      "texto": "Scatter Fraction (a)",
+      "puntaje": 0.015873
+     }
+    ]
+   }
   }
  ],
  "fuentes": {
@@ -363,20 +453,35 @@
    "emisor": "referencia técnica",
    "sha256": "1414ded940d68843942281895404a675f083426320fc67931e48984f09d7d1ed"
   },
+  "source_2a578b0af069a47658367bde153bf504": {
+   "titulo": "861876572-MID-55672-F-Cyclone-KIUBE-Site-Requirement-Guide",
+   "emisor": "",
+   "sha256": "2a578b0af069a47658367bde153bf504289d07564f03fab81224b3c8a503fd71"
+  },
   "source_4e1f0075615d96b8ab6a521b48448c1c": {
    "titulo": "Tabique_TD-500_CONTUPLEX",
    "emisor": "",
    "sha256": "4e1f0075615d96b8ab6a521b48448c1c122937ee941dfe134f33de4b03881cfb"
   },
   "source_8ff45677d5ea3c5611cd16204fbd1725": {
-   "titulo": "NCRP Report 151: Structural Shielding Design for Megavoltage X- and Gamma-Ray Facilities",
+   "titulo": "NCRP Report 151: Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities (traducción al español)",
    "emisor": "NCRP",
    "sha256": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2"
+  },
+  "source_b45e41b5b716c03b0e1ff070f00f959c": {
+   "titulo": "NCRP Report 147: Structural Shielding Design for Medical X-Ray Imaging Facilities (2004)",
+   "emisor": "NCRP",
+   "sha256": "b45e41b5b716c03b0e1ff070f00f959ce25e12ea3b0fa67792efd13894bd31dc"
   },
   "source_bc37632c883458327121646a027bd2af": {
    "titulo": "Tabique_TD-250_CONTUPLEX_1",
    "emisor": "",
    "sha256": "bc37632c883458327121646a027bd2afa0d9c9eeb0bdf441d478074a4e578e84"
+  },
+  "source_c540e5e39608bb3ef0ec07354a066ad0": {
+   "titulo": "NCRP Report 151: Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities (2005)",
+   "emisor": "NCRP",
+   "sha256": "c540e5e39608bb3ef0ec07354a066ad02a3a29339ea472924fd9839ec4f878fc"
   },
   "source_d1b26ebf916cd9da39ca66e9b2bf3117": {
    "titulo": "IBA_CYC_y_RF_4ta_Propuesta",

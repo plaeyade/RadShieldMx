@@ -50,3 +50,5 @@ test-results/
 
 # Normas con licencia de un solo usuario: se indexan en GAMMA localmente, no se versionan
 data/pdf/ncrp_151.pdf
+data/pdf/ncrp_151_en.pdf
+data/pdf/ncrp_147.pdf
