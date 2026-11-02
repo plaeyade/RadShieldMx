@@ -9,15 +9,15 @@
   {
    "id_local": "data/pdf/ncrp_151",
    "ruta": "data/pdf/ncrp_151.pdf",
-   "sha256": "3a110fa12aeee43063fb6704bd225b7622b35dbecaaaa9ea60c585a84c6b670c",
-   "bytes": 933540,
+   "sha256": "8ff45677d5ea3c5611cd16204fbd17252caed102c99122b89ab620744d7e8ca2",
+   "bytes": 5666065,
    "mime": "application/pdf",
    "titulo": "NCRP Report 151: Structural Shielding Design for Megavoltage X- and Gamma-Ray Facilities",
    "dominio": "radioproteccion/normas",
    "gobernanza": "restricted",
    "tipo": "document",
    "emisor": "NCRP",
-   "licencia": "ejemplar del propietario; uso interno",
+   "licencia": "ejemplar con licencia de un solo usuario; uso interno; el PDF no se versiona",
    "jurisdiccion": "US",
    "idioma": "en"
   },
