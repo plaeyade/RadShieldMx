@@ -29,7 +29,7 @@ const lead: ShieldingMaterial = {
   archerAlpha: 2.246,
   archerBeta: 6.31,
   archerGamma: 0.629,
-  TVL_mm: { '6MV': 55, '10MV': 60, '15MV': 70, '18MV': 80, Co60: 11.3, '511keV': 11.8, '140keV': 0.3 },
+  TVL_mm: { '6MV': 57, '10MV': 57, '15MV': 57, '18MV': 57, Co60: 40, '511keV': 16.6, '140keV': 1.0 },
   cost_per_m3: 8500,
   cost_per_kg: 0.75,
   color: '#374151',

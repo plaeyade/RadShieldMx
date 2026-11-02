@@ -18,7 +18,7 @@ const candidates = [
     materialId: 'lead-cast',
     valueKind: 'tvl-primary',
     energyKey: '511keV',
-    value: 11.8,
+    value: 16.6, // TG-108/NCRP (antes 11.8; revisión física 2026-11)
     unit: 'mm',
     sourceId: 'src-norm-lead-cast',
     reviewState: 'approved-reference',
