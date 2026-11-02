@@ -11,7 +11,7 @@ import { Cloud, Upload, ArrowRight } from 'lucide-react';
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 export default function PointCloudImportDialog({ open, onOpenChange }: Props) {
-  const [fileName, setFileName] = useState('');
+  const [, setFileName] = useState('');
   const [loaded, setLoaded] = useState(false);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

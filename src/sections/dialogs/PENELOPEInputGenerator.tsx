@@ -126,8 +126,8 @@ export default function PENELOPEInputGenerator({ open, onClose }: PENELOPEInputG
   const [eabsPhoton, setEabsPhoton] = useState(0.0001);
   const [c1, setC1] = useState(0.1);
   const [c2, setC2] = useState(0.1);
-  const [wcc, setWcc] = useState(0.001);
-  const [wcr, setWcr] = useState(0.0001);
+  const [wcc] = useState(0.001);
+  const [wcr] = useState(0.0001);
   const [activeTab, setActiveTab] = useState('setup');
   const [copied, setCopied] = useState(false);
 

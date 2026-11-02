@@ -45,7 +45,6 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<PACSStudy | null>(null);
-  const [dicomPreviewUrl, setDicomPreviewUrl] = useState('');
 
   const handleConnect = useCallback(async () => {
     setIsLoading(true);

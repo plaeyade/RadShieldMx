@@ -21,7 +21,7 @@ const actionConfig: Record<string, { label: string; icon: any; color: string }> 
 };
 
 export default function AuditTrailDialog({ open, onOpenChange, projectId }: Props) {
-  const [limit, setLimit] = useState(50);
+  const [limit] = useState(50);
   const { data: auditEntries, isLoading } = trpc.audit.list.useQuery(
     { projectId, limit },
     { enabled: open && !!projectId }

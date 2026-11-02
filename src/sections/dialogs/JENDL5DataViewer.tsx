@@ -112,7 +112,7 @@ const JENDL5_NUCLIDES: NuclideData[] = [
 ];
 
 // Label import needed
-function Label(props: any) { return <label {...props} className={`text-sm font-medium ${props.className || ''}`} />; }
+function _Label(props: any) { return <label {...props} className={`text-sm font-medium ${props.className || ''}`} />; }
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 

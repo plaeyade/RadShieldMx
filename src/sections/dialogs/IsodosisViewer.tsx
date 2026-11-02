@@ -96,7 +96,6 @@ export default function IsodosisViewer({ open, onOpenChange }: IsodosisViewerPro
     if (showContours) {
       ctx.lineWidth = 1;
       contourLevels.forEach(level => {
-        const [r, g, b] = jetColor(level);
         ctx.strokeStyle = `rgba(255,255,255,0.6)`;
         ctx.beginPath();
         data.forEach((d, i) => {

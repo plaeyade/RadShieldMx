@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useI18n } from '@/hooks/useI18n';
 import {
   Activity, BarChart3, Grid3X3, CheckCircle, XCircle,
   Download, RefreshCw, Info, ArrowRight
@@ -369,7 +368,6 @@ interface GammaIndexAnalyzerProps {
 }
 
 export default function GammaIndexAnalyzer({ open, onClose }: GammaIndexAnalyzerProps) {
-  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('pdd');
   const [dtaMm, setDtaMm] = useState(3);
   const [ddPct, setDdPct] = useState(3);

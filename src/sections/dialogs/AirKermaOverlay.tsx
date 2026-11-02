@@ -49,7 +49,6 @@ export default function AirKermaOverlay({ distributions, onClose, onExportPDF }:
 
     const xs = dist.points.map(p => p.x);
     const ks = dist.points.map(p => p.kerma);
-    const sks = dist.points.map(p => p.shieldedKerma);
     const xMin = Math.min(...xs), xMax = Math.max(...xs);
     const kMax = Math.max(...ks) * 1.1;
 

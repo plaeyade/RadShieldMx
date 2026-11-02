@@ -436,7 +436,7 @@ export default function MultiSourceDetectorDialog({ open, onOpenChange }: Props)
                     <Card><CardContent className="pt-4 text-center"><p className="text-[10px] text-muted-foreground">Sim Time</p><p className="text-2xl font-bold">{results.length > 0 ? results[0].simulationTime_s : 0}s</p></CardContent></Card>
                   </div>
                   <div className="space-y-2">
-                    {results.map((res, i) => (
+                    {results.map((res) => (
                       <Card key={res.detectorId} className={`border-l-4 ${res.convergenceStatus === 'converged' ? 'border-l-emerald-500' : res.convergenceStatus === 'acceptable' ? 'border-l-amber-500' : 'border-l-red-500'}`}>
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">

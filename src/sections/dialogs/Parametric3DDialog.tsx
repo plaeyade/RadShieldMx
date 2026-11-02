@@ -153,7 +153,7 @@ export default function Parametric3DDialog() {
 
           <div className="border border-slate-700 rounded-lg overflow-hidden" style={{ cursor: drag ? 'grabbing' : 'grab' }}>
             <canvas ref={cv} width={700} height={400} className="w-full block"
-              onMouseDown={e => { setDrag(true); }} onMouseMove={e => { if (!drag) return; setRy(p => p + e.movementX * 0.01); setRx(p => Math.max(-1, Math.min(1, p + e.movementY * 0.01))); }} onMouseUp={() => setDrag(false)} onMouseLeave={() => setDrag(false)} />
+              onMouseDown={_e => { setDrag(true); }} onMouseMove={e => { if (!drag) return; setRy(p => p + e.movementX * 0.01); setRx(p => Math.max(-1, Math.min(1, p + e.movementY * 0.01))); }} onMouseUp={() => setDrag(false)} onMouseLeave={() => setDrag(false)} />
           </div>
           <div className="flex gap-1 flex-wrap">
             {prims.map((p, i) => (

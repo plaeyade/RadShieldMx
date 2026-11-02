@@ -26,7 +26,7 @@ export default function ExperimentalValidationDialog({ open, onOpenChange }: Pro
   const [measuredTVL, setMeasuredTVL] = useState('36.5');
   const [measuredUnc, setMeasuredUnc] = useState('2.0');
   const [refTVL, setRefTVL] = useState('37.0');
-  const [selectedData, setSelectedData] = useState<typeof EXPERIMENTAL_DATA[0] | null>(null);
+  const [, setSelectedData] = useState<typeof EXPERIMENTAL_DATA[0] | null>(null);
 
   const diff = parseFloat(measuredTVL) - parseFloat(refTVL);
   const enRatio = parseFloat(measuredUnc) > 0 ? Math.abs(diff) / parseFloat(measuredUnc) : 0;

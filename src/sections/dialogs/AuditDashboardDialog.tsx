@@ -99,7 +99,7 @@ export default function AuditDashboardDialog({ open, onOpenChange }: AuditDashbo
         <ScrollArea className="px-6 pb-6 max-h-[50vh]">
           <div className="relative">
             <div className="absolute left-[18px] top-0 bottom-0 w-px bg-slate-200" />
-            {filtered.map((entry, i) => {
+            {filtered.map((entry) => {
               const cfg = TYPE_CONFIG[entry.type];
               const Icon = cfg.icon;
               return (

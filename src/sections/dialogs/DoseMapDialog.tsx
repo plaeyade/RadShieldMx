@@ -51,8 +51,8 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
   const [result, setResult] = useState<DoseGridResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [stats, setStats] = useState<ReturnType<typeof calculateDoseStats> | null>(null);
-  const [showSources, setShowSources] = useState(true);
-  const [showBarriers, setShowBarriers] = useState(true);
+  const [showSources] = useState(true);
+  const [showBarriers] = useState(true);
 
   // ─── Calculate dose map ───
   const handleCalculate = useCallback(() => {
@@ -220,7 +220,7 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     ctx: CanvasRenderingContext2D, w: number, h: number,
     res: DoseGridResult, cmap: ColorMap
   ) {
-    const lh = 12; const lw = 120; const ly = h - 80;
+    const _lh = 12; const lw = 120; const ly = h - 80;
     const lx = w - lw - 10;
 
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
@@ -231,7 +231,6 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
 
     for (let i = 0; i < 20; i++) {
       const t = i / 19;
-      const val = res.minDose + t * (res.maxDose - res.minDose);
       const [r, g, b] = (() => {
         const colors = {
           jet: [[0,0,0.5],[0,0,1],[0,0.5,1],[0,1,1],[0.5,1,0.5],[1,1,0],[1,0.5,0],[1,0,0],[0.5,0,0]],

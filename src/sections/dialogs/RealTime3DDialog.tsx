@@ -53,7 +53,6 @@ export default function RealTime3DDialog({ open, onOpenChange, floorPlan }: Prop
   const [ceilingHeight, setCeilingHeight] = useState('3.0');
   const [isPreviewReady, setIsPreviewReady] = useState(false);
   const [selectedConnector, setSelectedConnector] = useState<string>('unreal');
-  const [showWireframe, setShowWireframe] = useState(false);
 
   // ─── 3D Preview ───
   const init3D = useCallback(() => {

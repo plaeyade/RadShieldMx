@@ -19,7 +19,6 @@ export default function BatemanDecayDialog({ open, onOpenChange }: Props) {
   const [activityUnit, setActivityUnit] = useState<'MBq' | 'GBq' | 'TBq'>('MBq');
   const [numHalfLives, setNumHalfLives] = useState(10);
   const [results, setResults] = useState<ReturnType<typeof solveBateman>>([]);
-  const [searchedNuclides, setSearchedNuclides] = useState(Object.values(NUCLIDE_LIBRARY));
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 

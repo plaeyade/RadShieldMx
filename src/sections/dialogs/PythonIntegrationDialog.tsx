@@ -27,7 +27,7 @@ def calculate_barrier_thickness(
     design_goal_mSv_week=0.02,
     tvl_cm=37.0  # TVL for concrete @ 6 MV
 ):
-    \"\"\"Calculate required barrier thickness (cm) per NCRP 151.\"\"\"
+    """Calculate required barrier thickness (cm) per NCRP 151."""
     B = (design_goal_mSv_week * distance_m**2) / (workload_cGy_week * use_factor * occupancy_factor)
     n = -math.log10(B) if B > 0 else 10
     thickness = n * tvl_cm
@@ -59,7 +59,7 @@ for key, value in result.items():
     code: `# Point Kernel Dose Calculation
 def point_kernel_dose(activity_Bq, gamma_constant, distance_m, 
                        shield_thickness_cm=0, tvl_cm=None):
-    \"\"\"Calculate air kerma rate from a point source.\"\"\"
+    """Calculate air kerma rate from a point source."""
     import math
     # Unshielded dose rate
     kerma_rate = gamma_constant * activity_Bq / (distance_m ** 2)
@@ -90,11 +90,11 @@ print(f"Dose rate: {dose * 1000:.4f} mSv/h")
 
 # Radioactive Decay Calculations
 def decay_activity(A0, half_life, time):
-    \"\"\"Calculate remaining activity after time.\"\"\"
+    """Calculate remaining activity after time."""
     return A0 * (0.5 ** (time / half_life))
 
 def time_to_reach_activity(A0, half_life, target_A):
-    \"\"\"Calculate time to reach target activity.\"\"\"
+    """Calculate time to reach target activity."""
     return half_life * math.log2(A0 / target_A)
 
 # F-18 PET radionuclide
@@ -125,9 +125,9 @@ def generate_mcnp_input(
     shield_thickness_cm=100,
     detector_distance_m=3.0
 ):
-    \"\"\"Generate MCNP6 input for shielding calculation.\"\"\"
+    """Generate MCNP6 input for shielding calculation."""
     
-    mcnp = f\"\"\"MCNP6 Shielding Calculation
+    mcnp = f"""MCNP6 Shielding Calculation
 C Cell cards
 1 1 -2.35 -10 20              $ Concrete shield
 2 2 -0.0012 -20 30            $ Air gap  
@@ -158,7 +158,7 @@ E4 0.001 0.01 0.1 1.0 10.0 LOG
 
 C Cutoffs
 CUT:N J 0.001                          $ 1 keV cutoff
-"\"\"\"
+""""
     return mcnp
 
 # Generate for a typical LINAC vault
@@ -194,7 +194,7 @@ TVL_TABLE = {
 }
 
 def get_tvl(material, energy):
-    \"\"\"Get TVL value for a material and energy combination.\"\"\"
+    """Get TVL value for a material and energy combination."""
     if material not in TVL_TABLE:
         return None
     if energy not in TVL_TABLE[material]:
@@ -205,7 +205,7 @@ def get_tvl(material, energy):
     return TVL_TABLE[material][energy]
 
 def calculate_shielding_from_tvl(n_tvl, material, energy):
-    \"\"\"Calculate thickness given number of TVLs.\"\"\"
+    """Calculate thickness given number of TVLs."""
     tvl = get_tvl(material, energy)
     if tvl is None:
         return None

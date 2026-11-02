@@ -91,7 +91,6 @@ export default function CADAssemblyMapper({ open, onClose }: Props) {
   const [activeTab, setActiveTab] = useState('import');
   const [parts, setParts] = useState<CADPart[]>([]);
   const [assemblyName, setAssemblyName] = useState('');
-  const [selectedCode, setSelectedCode] = useState('M002');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mappedCount, setMappedCount] = useState(0);
 
@@ -239,7 +238,6 @@ export default function CADAssemblyMapper({ open, onClose }: Props) {
                 </thead>
                 <tbody>
                   {parts.map(p => {
-                    const mat = MATERIAL_LIBRARY[p.material];
                     return (
                       <tr key={p.id} className={`border-b border-slate-100 ${p.mapped ? '' : 'bg-amber-50/30'}`}>
                         <td className="py-1 px-2">

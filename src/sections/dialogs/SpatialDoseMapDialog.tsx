@@ -13,7 +13,6 @@ import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
 function computeDoseGrid(sources: any[], barriers: any[], w: number, h: number, scale: number) {
   const nx = 80, ny = 60;
   const grid: number[][] = Array(ny).fill(0).map(() => Array(nx).fill(0));
-  const P = NCRP_DESIGN_GOALS.uncontrolled;
   
   for (let iy = 0; iy < ny; iy++) {
     for (let ix = 0; ix < nx; ix++) {
@@ -71,7 +70,7 @@ export default function SpatialDoseMapDialog() {
   const close = () => useAppStore.getState().close('spatialDoseMap');
   const floorPlan = useCanvasStore(s => s.floorPlan);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [computed, setComputed] = useState(false);
+  const [, setComputed] = useState(false);
   const [maxDose, setMaxDose] = useState(0);
 
   const grid = useMemo(() => {

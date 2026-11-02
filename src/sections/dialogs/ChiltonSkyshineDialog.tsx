@@ -12,7 +12,7 @@ export default function ChiltonSkyshineDialog({ onClose }: { onClose: () => void
   const [barrierH, setBarrierH] = useState(3.0);
   const [roofThick, setRoofThick] = useState(300);
   const [beamAngle, setBeamAngle] = useState(0);
-  const [distances, setDistances] = useState(DEFAULT_DISTANCES.join(', '));
+  const [distances] = useState(DEFAULT_DISTANCES.join(', '));
 
   const result = useMemo(() => {
     const d = distances.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n) && n > 0);

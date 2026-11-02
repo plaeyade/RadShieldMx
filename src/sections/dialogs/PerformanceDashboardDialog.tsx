@@ -400,7 +400,7 @@ export default function PerformanceDashboardDialog({ open, onClose }: { open: bo
                   <CardContent>
                     <ResponsiveContainer width="100%" height={200}>
                       <PieChart>
-                        <Pie data={benchmarks.filter(b => b.calls > 1)} cx="50%" cy="50%" outerRadius={80} dataKey="calls" nameKey="name" label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}>
+                        <Pie data={benchmarks.filter(b => b.calls > 1)} cx="50%" cy="50%" outerRadius={80} dataKey="calls" nameKey="name" label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
                           {benchmarks.filter(b => b.calls > 1).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                         </Pie>
                         <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }} />

@@ -35,7 +35,7 @@ function generateFWCADISWeightWindows(
   sourceStrength: number,
   adjointFlux: number[],
   forwardFlux: number[],
-  meshCells: number
+  _meshCells: number
 ): number[] {
   // FW-CADIS weight window lower bounds
   // w_l = φ⁺ / (max(φ⁺) × R_target)
@@ -81,7 +81,7 @@ export default function Attila4MCVarianceReduction({ open, onClose }: Props) {
   const [materialTVL_cm, setMaterialTVL_cm] = useState(37);
   const [meshCells, setMeshCells] = useState(1000);
   const [useFWCADIS, setUseFWCADIS] = useState(true);
-  const [histories, setHistories] = useState(5e7);
+  const [histories] = useState(5e7);
 
   // Sample material regions (like Attila4MC)
   const [regions, setRegions] = useState<MaterialRegion[]>([
@@ -131,7 +131,7 @@ c Target distance: ${targetDist_cm} cm
       inp += `WWN${i + 1}:${sourceType === 'photon' ? 'p' : 'n'} ${w.toExponential(4)}\n`;
     });
     // IMP card (cell importances)
-    regions.forEach((r, i) => {
+    regions.forEach((r) => {
       inp += `IMP:${sourceType === 'photon' ? 'p' : 'n'} ${r.importance}  $ ${r.name}\n`;
     });
     inp += 'C End of variance reduction cards\n';

@@ -25,7 +25,6 @@ function runMonteCarlo(energy_MeV: number, activity_GBq: number, distance_m: num
   const P = NCRP_DESIGN_GOALS.uncontrolled;
   const W = activity_GBq * 1000;
   const mcTransmission = calculateTransmission(materialCode, energy_MeV, thickness_mm) ?? Math.exp(-0.05 * (thickness_mm / 10));
-  const statUncertainty = 5 / Math.sqrt(nHistories / 1e4);
   const mcDose = P * (P * distance_m * distance_m / (W * 0.25 * 0.2) / mcTransmission) /* etapa 0: sin ruido aleatorio — valor analítico, no MC */;
   const percentDiff = Math.abs((mcDose - P) / P) * 100;
   const mat = SHIELDING_MATERIALS.find(m => m.code === materialCode);

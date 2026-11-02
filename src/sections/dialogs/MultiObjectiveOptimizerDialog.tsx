@@ -1,7 +1,7 @@
 /**
  * v105: Multi-Objective Shielding Optimizer
  */
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,17 +34,16 @@ export default function MultiObjectiveOptimizerDialog() {
   const [energy, setEnergy] = useState('6');
   const [activity, setActivity] = useState('100');
   const [dist, setDist] = useState('3');
-  const [occ, setOcc] = useState('0.2');
-  const [useF, setUseF] = useState('0.25');
+  const [occ] = useState('0.2');
+  const [useF] = useState('0.25');
   const [cw, setCw] = useState('0.5');
   const [ww, setWw] = useState('0.3');
   const [sw, setSw] = useState('0.2');
-  const [mats, setMats] = useState(['CONCRETE', 'PB', 'STEEL']);
+  const [mats] = useState(['CONCRETE', 'PB', 'STEEL']);
   const [run, setRun] = useState(false);
   const [res, setRes] = useState<any[] | null>(null);
 
   const go = () => { setRun(true); setTimeout(() => { setRes(optimize(parseFloat(energy)||6, parseFloat(activity)||100, parseFloat(dist)||3, parseFloat(occ)||0.2, parseFloat(useF)||0.25, mats, parseFloat(cw)||0.5, parseFloat(ww)||0.3, parseFloat(sw)||0.2)); setRun(false); }, 600); };
-  const matOpts = useMemo(() => SHIELDING_MATERIALS.map(m => ({ code: m.code, name: m.nameEs })), []);
   if (!open) return null;
 
   return (

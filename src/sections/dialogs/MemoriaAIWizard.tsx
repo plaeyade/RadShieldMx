@@ -181,7 +181,7 @@ export default function MemoriaAIWizard({
   });
   const [selectedEquipment, setSelectedEquipment] = useState('');
   const [selectedMemoryProfile, setSelectedMemoryProfile] = useState<F148MemoryProfileKey>(() => getF148ProfileForF117(readF117ActiveProfileId()));
-  const [equipmentNotes, setEquipmentNotes] = useState('');
+  const [, setEquipmentNotes] = useState('');
   const [workloadData, setWorkloadData] = useState({
     patientsPerWeek: '', fractionsPerPatient: '', dosePerFraction: '',
     beamsPerFraction: '', tadsPerWeek: '', workloadHours: '',
@@ -436,7 +436,6 @@ ${improvementSection}
     toast.success('Memoria exportada como TXT');
   }, [generatedText, projectData]);
 
-  const CurrentStepIcon = STEPS[step]?.icon || FileText;
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (

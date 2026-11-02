@@ -13,7 +13,7 @@ import { computeUncertaintyBudget, type UncertaintyBudget } from '@/lib/gumUncer
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 export default function UncertaintyQuantificationDialog({ open, onOpenChange }: Props) {
-  const [thickness, setThickness] = useState('100');
+  const [thickness] = useState('100');
   const [activity, setActivity] = useState('500');
   const [uAct, setUAct] = useState('25');
   const [distance, setDistance] = useState('4.0');
