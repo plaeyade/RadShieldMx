@@ -283,7 +283,6 @@ export function runShieldingOptimization(config: OptimizerConfig): OptimizationR
   }
 
   const convergence: number[][] = [];
-  const bestSolution: Solution | null = null;
   const allSolutions: Solution[] = [];
 
   for (let gen = 0; gen < generations; gen++) {

@@ -29,10 +29,6 @@ export interface AllocationRecord {
   readonly type: string;
 }
 
-// ─── Memory API detection ───
-const hasMemoryAPI = (): boolean =>
-  typeof performance !== 'undefined' && 'memory' in performance;
-
 const getMemory = (): MemorySnapshot => {
   const mem = (performance as any).memory;
   if (!mem) {
@@ -81,7 +77,6 @@ export const detectMemoryLeak = (windowMinutes = 5): LeakReport => {
   const sumXX = recent.reduce((s, _, i) => s + i * i, 0);
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const intercept = (sumY - slope * sumX) / n;
 
   // Convert slope (MB per snapshot) to MB per minute
   // Assume snapshots every ~5 seconds

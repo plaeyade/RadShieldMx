@@ -163,14 +163,11 @@ export const CYCLOONE_KIUBE_RADIONUCLIDES: CycloneKIUBERadionuclide[] = [
 export function calculateCycloneConcreteThickness(
   model: string,
   targetDoseRate_uSv_h: number,
-  direction: '0deg' | '90deg' | '180deg'
+  // La tabla de espesores no distingue dirección: el parámetro se conserva por compatibilidad.
+  _direction: '0deg' | '90deg' | '180deg'
 ): { thickness_cm: number; interpolationUsed: boolean } {
   const doseData = CYCLOONE_KIUBE_DOSE_RATES.find(d => d.model === model);
   if (!doseData) return { thickness_cm: 220, interpolationUsed: false };
-
-  const initialDose = direction === '0deg' ? doseData.at0deg_uSv_h :
-                      direction === '90deg' ? doseData.at90deg_uSv_h :
-                      doseData.at180deg_uSv_h;
 
   // Find bracketing thickness values
   const shieldingData = CYCLOONE_KIUBE_SHIELDING;

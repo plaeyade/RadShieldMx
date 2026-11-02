@@ -45,7 +45,7 @@ export function generateGeant4Macro(config: MCConfig): string {
 /gun/direction 0 0 1
 # Geometry: ${config.geometry} shield
 /detector/setMaterial ${matName}
-${config.thicknesses_cm.map((t, i) => `/detector/setThickness ${t} cm\n/run/reinitializeGeometry\n/run/beamOn ${config.numParticles}`).join('\n')}
+${config.thicknesses_cm.map((t) => `/detector/setThickness ${t} cm\n/run/reinitializeGeometry\n/run/beamOn ${config.numParticles}`).join('\n')}
 # Tallies: ${config.tallies.join(', ')}
 /analysis/writeFile
 exit

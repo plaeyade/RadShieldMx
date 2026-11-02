@@ -173,7 +173,6 @@ class StaticLayer extends CanvasLayer {
     this.lastSourceCount = fp.sources.length;
     this.lastSelectedId = state.selectedId;
 
-    const { ctx } = this;
 
     // Regions
     for (const region of fp.occupiedRegions) {
@@ -487,7 +486,6 @@ class DynamicLayer extends CanvasLayer {
   }
 
   render(state: RenderState): void {
-    const { ctx } = this;
     const sl = state.sampleLines;
 
     // Heatmap

@@ -5,13 +5,6 @@
  */
 
 // Re-implementamos las funciones matemáticas aquí (workers no pueden importar módulos)
-// @ts-ignore — used by downstream consumers
-function archerTransmission(xMm: number, alpha: number, beta: number, gamma: number): number {
-  const xCm = xMm / 10;
-  if (xCm <= 0) return 1.0;
-  return Math.pow(1.0 + (beta / alpha) * Math.exp(alpha * gamma * xCm), -1.0 / gamma);
-}
-
 function inverseArcher(B: number, alpha: number, beta: number, gamma: number): number {
   if (B >= 1.0) return 0;
   if (B <= 0) return 999;
@@ -20,7 +13,6 @@ function inverseArcher(B: number, alpha: number, beta: number, gamma: number): n
   return (Math.log(inner) / alpha) * 10; // mm
 }
 
-// @ts-ignore — used by downstream consumers
 function tvlThickness(K: number, P: number, tvlMm: number): number {
   if (K <= 0 || P <= 0 || tvlMm <= 0) return 0;
   const B = P / K;

@@ -81,9 +81,6 @@ export function buildF416ToF420BimCanvasSequence(args: {
   const visibleWidth_m = hasScale ? floorPlan.width_pixels * floorPlan.scale_m_per_pixel : 0;
   const visibleHeight_m = hasScale ? floorPlan.height_pixels * floorPlan.scale_m_per_pixel : 0;
   const barrierCount = floorPlan.barriers.length;
-  const sourceCount = floorPlan.sources.length;
-  const zoneCount = (floorPlan.regions?.length ?? 0) + floorPlan.occupiedRegions.length;
-  const pointCount = floorPlan.criticalPoints?.length ?? 0;
   const calculatedBarrierCount = floorPlan.barriers.filter((barrier) => Boolean(barrier.requiredThickness_mm ?? barrier.thickness_mm)).length;
   const estimatedShieldedFootprint_m = hasScale ? Math.max(visibleWidth_m, 12) * Math.max(visibleHeight_m, 12) : 0;
   const visibleFootprint_m = hasScale ? visibleWidth_m * visibleHeight_m : 0;

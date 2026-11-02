@@ -288,7 +288,7 @@ export interface MIRDDose {
 export function estimateMIRDDose(
   nuclide: string,
   administeredActivity_MBQ: number,
-  procedureType: 'PET' | 'SPECT' | 'Therapy',
+  _procedureType: 'PET' | 'SPECT' | 'Therapy',
 ): MIRDDose[] {
   const A = administeredActivity_MBQ;
   switch (nuclide) {

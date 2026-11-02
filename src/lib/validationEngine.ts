@@ -85,7 +85,6 @@ export function validateBarrierThickness(
 export function validateOccupancyFactor(T: number): { valid: boolean; message: string } {
   const values = Object.values(NCRP151_OCCUPANCY);
   const min = Math.min(...values);
-  const max = Math.max(...values);
   if (T < 0 || T > 1) return { valid: false, message: `Occupancy factor ${T} outside [0,1] range` };
   if (T < min / 2) return { valid: true, message: `Warning: T=${T} unusually low (NCRP min: ${min})` };
   return { valid: true, message: `Occupancy factor T=${T} valid` };

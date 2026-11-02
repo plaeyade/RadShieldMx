@@ -174,11 +174,6 @@ const CONVERSION_COEFFICIENTS: Record<string, Record<string, number>> = {
 };
 
 // === Mass energy absorption coefficients (cm²/g) ===
-const MASS_ENERGY_ABSORPTION: Record<string, number> = {
-  'tissue': 0.031, 'air': 0.027, 'silicon': 0.048,
-  'water': 0.031, 'concrete': 0.030, 'lead': 0.12, 'steel': 0.041,
-};
-
 /**
  * Compute point-kernel dose from a single source to a detector position.
  * Uses the inverse square law + exponential attenuation + buildup factor.
@@ -242,7 +237,6 @@ function pointKernelDose(
         shield.material === 'steel' ?
         (source.energy_MeV < 1 ? 3.0 : source.energy_MeV < 2 ? 5.0 : 8.0) :
         15.0; // default concrete-like
-      const nHVL = shield.thickness_cm / tvl_cm * Math.log(10); // convert TVL to HVL
       transmission *= Math.pow(0.1, shield.thickness_cm / tvl_cm);
       // Berger buildup factor approximation
       const mu_cm = Math.log(10) / tvl_cm;
@@ -262,7 +256,6 @@ function pointKernelDose(
   const doseEquiv_Sv_per_h = attenuatedKerma * convCoeff;
 
   // Absorbed dose in specific material
-  const muen_cm2_g = MASS_ENERGY_ABSORPTION['tissue'] || 0.031;
   const absorbedDose_Gy_per_h = attenuatedKerma; // approximately equal to kerma for photons
 
   return {
@@ -301,18 +294,21 @@ export function runMultiSourceMultiDetector(
             // Importance = 1/d² for closer detectors
             weightFactor = pk.distance_m < 1.0 ? 2.0 : 1.0;
             break;
-          case 'weight_windows':
+          case 'weight_windows': {
             const [wMin, wMax] = job.biasing.weightWindowBounds || [0.1, 10];
             weightFactor = Math.min(wMax, Math.max(wMin, 1.0 / (pk.distance_m * pk.distance_m)));
             break;
-          case 'Russian_roulette':
+          }
+          case 'Russian_roulette': {
             const rrThresh = job.biasing.RussianRouletteThreshold || 0.01;
             weightFactor = pk.kerma_Gy_per_h < rrThresh ? 0.0 : 1.0;
             break;
-          case 'splitting':
+          }
+          case 'splitting': {
             const splitFactor = job.biasing.splittingFactor || 4;
             weightFactor = pk.distance_m < 2.0 ? splitFactor : 1.0;
             break;
+          }
           case 'force_collision':
             if (job.biasing.forceCollisionTarget === detector.id) {
               weightFactor = 3.0; // force interactions near target detector
@@ -386,7 +382,7 @@ export function generateGeant4MultiSourceMacro(job: MultiSourceJob): string {
 
   // Define sources
   macro += `# --- Sources ---\n`;
-  job.sources.forEach((src, i) => {
+  job.sources.forEach((src) => {
     macro += `/gps/source/add ${src.activity_Bq}\n`;
     macro += `/gps/particle gamma\n`;
     if (src.sourceType === 'isotropic') {
@@ -754,7 +750,7 @@ reg.setWorld(world_lv.name)
 
 # --- Sources ---
 sources_data = [
-${job.sources.map((s, i) => `    {"name": "${s.name}", "pos": (${s.position.x*1000}, ${s.position.y*1000}, ${s.position.z*1000}), "energy": ${s.energy_MeV}}`).join(',\n')}
+${job.sources.map((s) => `    {"name": "${s.name}", "pos": (${s.position.x*1000}, ${s.position.y*1000}, ${s.position.z*1000}), "energy": ${s.energy_MeV}}`).join(',\n')}
 ]
 
 for i, src in enumerate(sources_data):
@@ -767,7 +763,7 @@ for i, src in enumerate(sources_data):
 
 # --- Detectors ---
 detectors_data = [
-${job.detectors.map((d, i) => `    {"name": "${d.name}", "pos": (${d.position.x*1000}, ${d.position.y*1000}, ${d.position.z*1000})}`).join(',\n')}
+${job.detectors.map((d) => `    {"name": "${d.name}", "pos": (${d.position.x*1000}, ${d.position.y*1000}, ${d.position.z*1000})}`).join(',\n')}
 ]
 
 for i, det in enumerate(detectors_data):
