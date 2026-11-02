@@ -5,12 +5,17 @@
  */
 
 // Re-implementamos las funciones matemáticas aquí (workers no pueden importar módulos)
+/**
+ * Inversa cerrada de Archer (NCRP 147, ec. 4.4): α y β en mm⁻¹, resultado en mm.
+ * x = ln[(B^−γ + β/α) / (1 + β/α)] / (α·γ)
+ */
 function inverseArcher(B: number, alpha: number, beta: number, gamma: number): number {
   if (B >= 1.0) return 0;
   if (B <= 0) return 999;
-  const inner = ((Math.pow(B, -gamma) - 1) * alpha) / beta;
-  if (inner <= 0) return 999;
-  return (Math.log(inner) / alpha) * 10; // mm
+  const r = beta / alpha;
+  const arg = (Math.pow(B, -gamma) + r) / (1 + r);
+  if (arg <= 1) return 0;
+  return Math.log(arg) / (alpha * gamma);
 }
 
 function tvlThickness(K: number, P: number, tvlMm: number): number {

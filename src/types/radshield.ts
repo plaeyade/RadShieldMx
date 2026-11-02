@@ -49,8 +49,8 @@ export const MODALITIES: Modality[] = [
   { id: 'linac-15mv', name: 'LINAC - 15 MV', description: 'LINAC - 15 MV', category: 'therapy', standard: 'NCRP151', doseRateConstant: 2.0, unit: 'Gy/fracción isocentro', energyLabel: '15 MV X-rays', isocenterHeightDefault_m: 1.3 },
   { id: 'linac-18mv', name: 'LINAC - 18 MV', description: 'LINAC - 18 MV', category: 'therapy', standard: 'NCRP151', doseRateConstant: 2.0, unit: 'Gy/fracción isocentro', energyLabel: '18 MV X-rays', isocenterHeightDefault_m: 1.3 },
   { id: 'gamma-knife', name: 'Gamma Knife (Co-60)', description: 'Gamma Knife (Co-60)', category: 'therapy', standard: 'AAPMTG56', doseRateConstant: 1.5, unit: 'Gy/fracción isocentro', energyLabel: '1.25 MeV γ (Co-60)', isocenterHeightDefault_m: 1.5 },
-  { id: 'hdr-192ir', name: 'Braquiterapia HDR - Ir-192', description: 'Braquiterapia HDR - Ir-192', category: 'therapy', standard: 'NCRP151', doseRateConstant: 10.0, unit: 'Gy·cm²/h (Γ)', energyLabel: '0.38 MeV γ (Ir-192)', isocenterHeightDefault_m: 1.0 },
-  { id: 'ldr-cs137', name: 'Braquiterapia LDR - Cs-137', description: 'Braquiterapia LDR - Cs-137', category: 'therapy', standard: 'NCRP151', doseRateConstant: 3.3, unit: 'Gy·cm²/h (Γ)', energyLabel: '0.66 MeV γ (Cs-137)', isocenterHeightDefault_m: 1.0 },
+  { id: 'hdr-192ir', name: 'Braquiterapia HDR - Ir-192', description: 'Braquiterapia HDR - Ir-192', category: 'therapy', standard: 'NCRP151', doseRateConstant: 0.111, unit: 'μGy·m²/MBq·h (Γδ kerma en aire)', energyLabel: '0.38 MeV γ (Ir-192)', isocenterHeightDefault_m: 1.0 },
+  { id: 'ldr-cs137', name: 'Braquiterapia LDR - Cs-137', description: 'Braquiterapia LDR - Cs-137', category: 'therapy', standard: 'NCRP151', doseRateConstant: 0.0779, unit: 'μGy·m²/MBq·h (Γδ kerma en aire)', energyLabel: '0.66 MeV γ (Cs-137)', isocenterHeightDefault_m: 1.0 },
 
   // --- NUCLEAR MEDICINE (TG 108 / NCRP 147 adapted) ---
   { id: 'pet-f18', name: 'PET-CT - F-18 FDG', description: 'PET-CT - F-18 FDG', category: 'nuclear', standard: 'TG108', doseRateConstant: 0.143, unit: 'μSv·m²/MBq·h (Γ)', energyLabel: '511 keV γ (F-18)', isocenterHeightDefault_m: 1.0 },
@@ -74,7 +74,7 @@ export interface ShieldingMaterial {
   code: string;
   density: number; // g/cm3
   density_kg_m3?: number; // legacy SI alias
-  // Archer params for NCRP 147 (diagnostic X-ray)
+  // Archer params for NCRP 147 (diagnostic X-ray): α y β en mm⁻¹, γ adimensional
   archerAlpha?: number;
   archerBeta?: number;
   archerGamma?: number;

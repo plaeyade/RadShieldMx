@@ -231,3 +231,39 @@ describe('shieldingMath — Edge Cases & Robustness', () => {
     expect(B).toBeLessThan(1e-10); // But extremely small
   });
 });
+
+// ─── Revisión física 2026-11: valores contra las referencias ───
+import { calculateCTKerma, calculateUnshieldedKerma, CT_KAPPA_BODY_PER_CM } from '@/lib/shieldingMath';
+import { MATERIALS, MODALITIES, type RadiationSource } from '@/types/radshield';
+
+const fuente = (id: string, extra: Partial<RadiationSource> = {}): RadiationSource => ({
+  id: 's', x: 0, y: 0, name: id, modality: MODALITIES.find((m) => m.id === id)!,
+  workloadValue: 1, workloadUnit: '', isocenterHeight_m: 0, useFactor: 1, ...extra,
+});
+
+describe('revisión física 2026-11', () => {
+  it('Archer usa α, β en mm⁻¹ (NCRP 147): 1 mm Pb transmite pocos %, no ~50 %', () => {
+    const pb = MATERIALS.find((m) => m.code === 'PB')!;
+    const B = archerTransmission(1, pb);
+    expect(B).toBeLessThan(0.05);
+    expect(B).toBeGreaterThan(1e-4);
+    expect(inverseArcher(B, pb)).toBeCloseTo(1, 3);
+  });
+
+  it('CT: K(1 m) = κ·DLP (NCRP 147 §5.6), cuerpo 1.2 × 3e-4 cm⁻¹', () => {
+    // 1 paciente/semana, DLP 350 mGy·cm, punto a 1 m (escala 1 m/px)
+    const k = calculateCTKerma(fuente('ct-body', { ctDLP_mGy_cm: 350 }), 1, 0, 1);
+    expect(k).toBeCloseTo(CT_KAPPA_BODY_PER_CM * 350, 9);
+    expect(k).toBeCloseTo(0.126, 6);
+  });
+
+  it('HDR Ir-192: 10 Ci, 1 h, 1 m → 41 mGy (Γδ 0.111 μGy·m²/MBq·h)', () => {
+    const k = calculateUnshieldedKerma(fuente('hdr-192ir', { workloadValue: 10, workloadHoursPerWeek: 1 }), 1, 0, 1);
+    expect(k).toBeCloseTo(41.07, 1);
+  });
+
+  it('PET F-18: 555 MBq, 1 h, 1 m → 0.079 mSv (Γ 0.143 μSv·m²/MBq·h)', () => {
+    const k = calculateUnshieldedKerma(fuente('pet-f18', { workloadValue: 555, workloadHoursPerWeek: 1 }), 1, 0, 1);
+    expect(k).toBeCloseTo(0.143 * 555 / 1000, 6);
+  });
+});

@@ -52,15 +52,21 @@ export function useShieldingEngine() {
       const energy_MeV = sources[0]?.modality.energy_MeV || 6;
       const energyKey = getShieldingEnergyKey(sources[0]) || String(Math.round(energy_MeV));
 
-      for (const mat of MATERIALS) {
+      // Ciclotrón: el motor genérico (Γ·A/d² con TVL gamma) subestima ~100× la fuente de neutrones y
+      // usa TVL de fotones: no se publica espesor; el aviso de auditoría remite al módulo de ciclotrón/MC.
+      const esCiclotron = sources[0]?.modality.category === 'cyclotron';
+      // NCRP 147/151: B = P / (K·T). T fuera de (0, 1] → T = 1 (conservador; la auditoría lo marca).
+      const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 && b.occupancyFactor <= 1 ? b.occupancyFactor : 1;
+      const metaEfectiva = b.designGoal_mSv_per_wk / T;
+      for (const mat of esCiclotron ? [] : MATERIALS) {
         let thickness = 0;
         if (sources[0]?.modality.category === 'diagnostic') {
-          const B = Math.max(1e-10, b.designGoal_mSv_per_wk / (maxKerma || 1));
+          const B = Math.max(1e-10, metaEfectiva / (maxKerma || 1));
           thickness = inverseArcher(B, mat);
         } else if (sources[0]?.modality.category === 'therapy') {
-          thickness = tvlThickness(maxKerma, b.designGoal_mSv_per_wk, mat, energyKey);
+          thickness = tvlThickness(maxKerma, metaEfectiva, mat, energyKey);
         } else {
-          thickness = exponentialThickness(maxKerma, b.designGoal_mSv_per_wk, mat, energyKey);
+          thickness = exponentialThickness(maxKerma, metaEfectiva, mat, energyKey);
         }
         if (thickness > 0) requiredThickness[mat.code] = thickness;
       }
@@ -100,7 +106,7 @@ export function useShieldingEngine() {
       const calculationComparison = buildConservativeCalculationComparison({
         baseThickness_mm: selectedThickness,
         maxKerma_mSv_per_wk: maxKerma,
-        designGoal_mSv_per_wk: b.designGoal_mSv_per_wk,
+        designGoal_mSv_per_wk: metaEfectiva,
         material: selectedMaterial,
         energyKey,
       });

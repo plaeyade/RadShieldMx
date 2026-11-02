@@ -17,12 +17,14 @@ export interface WASMInterface {
 
 // JS fallback implementations (pure JS, no WASM)
 const jsFallback: WASMInterface = {
+  // Inversa cerrada de Archer (NCRP 147): α y β en mm⁻¹, resultado en mm.
   inverseArcher: (B: number, alpha: number, beta: number, gamma: number): number => {
     if (B >= 1.0) return 0;
     if (B <= 0) return 999;
-    const inner = ((Math.pow(B, -gamma) - 1) * alpha) / beta;
-    if (inner <= 0) return 999;
-    return (Math.log(inner) / alpha) * 10;
+    const r = beta / alpha;
+    const arg = (Math.pow(B, -gamma) + r) / (1 + r);
+    if (arg <= 1) return 0;
+    return Math.log(arg) / (alpha * gamma);
   },
   tvlThickness: (K: number, P: number, tvl: number): number => {
     if (K <= 0 || P <= 0 || tvl <= 0) return 0;

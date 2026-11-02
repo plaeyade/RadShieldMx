@@ -410,31 +410,31 @@ function getMaterialProperties(material: string, energy_MeV: number): {
   };
 }
 
-// Compton scattering: sample scattering angle and compute new energy
-function comptonScatter(rng: MersenneTwister, E: number): { cosTheta: number; E_prime: number } {
+// Compton scattering: muestreo de Klein-Nishina por el método de Kahn (Everett y Cashwell, como en
+// MCNP), con x = k/k′ y tres números aleatorios independientes. La versión anterior reutilizaba r1
+// para elegir la rama y para aceptar, lo que sesgaba la distribución angular. Revisión 2026-11.
+export function comptonScatter(rng: { random(): number }, E: number): { cosTheta: number; E_prime: number } {
   const alpha = E / ELECTRON_REST_MASS;
-  let cosTheta: number;
-  // Rejection sampling using Kahn's method
+  const umbral = (2 * alpha + 1) / (2 * alpha + 9);
   for (;;) {
     const r1 = rng.random();
     const r2 = rng.random();
-    if (r1 <= (2 * alpha + 1) / (2 * alpha + 9)) {
-      const cosTheta1 = 1 - 2 * r2 / (2 * alpha + 1);
-      if (r1 <= 2 * (alpha + 1) * (1 - cosTheta1) / ((2 * alpha + 1) * (1 + cosTheta1 * cosTheta1))) {
-        cosTheta = cosTheta1;
-        break;
-      }
+    const r3 = rng.random();
+    let x: number;
+    let aceptar: boolean;
+    if (r1 <= umbral) {
+      x = 1 + 2 * alpha * r2;
+      aceptar = r3 <= 4 * (1 / x - 1 / (x * x));
     } else {
-      cosTheta = (2 * alpha + 1 - (2 * alpha + 9) * r2 / 2) / (2 * alpha + 1);
-      const ratio = 1 / (1 + alpha * (1 - cosTheta));
-      if (r1 <= (alpha + 1) * ratio * ratio * (1 + cosTheta * cosTheta)) {
-        break;
-      }
+      x = (1 + 2 * alpha) / (1 + 2 * alpha * r2);
+      const mu = 1 - (x - 1) / alpha;
+      aceptar = r3 <= 0.5 * (mu * mu + 1 / x);
+    }
+    if (aceptar) {
+      const cosTheta = 1 - (x - 1) / alpha;
+      return { cosTheta, E_prime: E / x };
     }
   }
-
-  const E_prime = E / (1 + alpha * (1 - cosTheta));
-  return { cosTheta, E_prime };
 }
 
 // Rayleigh scattering (coherent): sample scattering angle

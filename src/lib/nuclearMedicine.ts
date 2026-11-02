@@ -353,25 +353,28 @@ export function canReleasePatient(
   const threshold = nrcThresholds_GBq[nuclide] ?? Infinity; // Unknown nuclides = conservative (don't release)
   const belowActivityThreshold = remainingActivity_GBq <= threshold;
 
-  // Secondary: dose rate at 1m must be <= 5 mSv/h
+  // Secundario: tasa a 1 m ≤ la que corresponde al umbral de actividad (RG 8.39 Tabla 1; para I-131
+  // 1.22 GBq ≈ 0.07 mSv/h). Antes se comparaba con 5 mSv/h, que es el límite de DOSA total al público
+  // (5 mSv), no una tasa: era ~70× permisivo. Revisión física 2026-11.
   const doseAt1m_mSv_h = nuclideData.gammaConstant_mSv_m2_GBq_h * remainingActivity_GBq;
-  const belowDoseLimit = doseAt1m_mSv_h <= 5.0;
+  const limitRate_mSv_h = Number.isFinite(threshold) ? nuclideData.gammaConstant_mSv_m2_GBq_h * threshold : 0;
+  const belowDoseLimit = doseAt1m_mSv_h <= limitRate_mSv_h + 1e-12;
 
   // Patient can be released only if BOTH criteria are met
   const canRelease = belowActivityThreshold && belowDoseLimit;
 
   let reason: string;
   if (!belowActivityThreshold && !belowDoseLimit) {
-    reason = `Activity ${remainingActivity_GBq.toFixed(2)} GBq > threshold ${threshold} GBq AND dose at 1m = ${doseAt1m_mSv_h.toFixed(2)} mSv/h > 5.0 mSv/h. Must keep hospitalized.`;
+    reason = `Activity ${remainingActivity_GBq.toFixed(2)} GBq > threshold ${threshold} GBq AND dose at 1m = ${doseAt1m_mSv_h.toFixed(2)} mSv/h > ${limitRate_mSv_h.toFixed(3)} mSv/h. Must keep hospitalized.`;
   } else if (!belowActivityThreshold) {
     reason = `Activity ${remainingActivity_GBq.toFixed(2)} GBq > NRC threshold ${threshold} GBq (RG 8.39 Table 2). Must keep hospitalized.`;
   } else if (!belowDoseLimit) {
-    reason = `Dose at 1m = ${doseAt1m_mSv_h.toFixed(2)} mSv/h > 5.0 mSv/h. Must keep hospitalized.`;
+    reason = `Dose at 1m = ${doseAt1m_mSv_h.toFixed(3)} mSv/h > ${limitRate_mSv_h.toFixed(3)} mSv/h. Must keep hospitalized.`;
   } else {
-    reason = `Activity ${remainingActivity_GBq.toFixed(2)} GBq <= ${threshold} GBq AND dose at 1m = ${doseAt1m_mSv_h.toFixed(2)} mSv/h <= 5.0 mSv/h. Patient can be released.`;
+    reason = `Activity ${remainingActivity_GBq.toFixed(2)} GBq <= ${threshold} GBq AND dose at 1m = ${doseAt1m_mSv_h.toFixed(2)} mSv/h <= ${limitRate_mSv_h.toFixed(3)} mSv/h. Patient can be released.`;
   }
 
-  return { canRelease, reason, limit_mSv_at_1m: 5.0 };
+  return { canRelease, reason, limit_mSv_at_1m: limitRate_mSv_h };
 }
 
 /** Bremsstrahlung shielding for beta emitters (Y-90) */
