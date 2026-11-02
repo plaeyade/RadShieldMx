@@ -1,12 +1,24 @@
+<!-- encabezado-gamma -->
+<div align="center">
+
 # RadShield-MX
+
+**Diseño, cálculo y memoria de blindajes radiológicos para instalaciones médicas**
+
+[![ci.yml](https://github.com/plaeyade/RadShieldMx/actions/workflows/ci.yml/badge.svg)](https://github.com/plaeyade/RadShieldMx/actions/workflows/ci.yml) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![React](https://img.shields.io/badge/React-19-61DAFB) ![normas](https://img.shields.io/badge/normas-NCRP%20147%20%C2%B7%20151%20%C2%B7%20TG--108%20%C2%B7%20SRS--47-informational) ![licencia](https://img.shields.io/badge/licencia-propietaria-lightgrey)
+
+[Objetivos](#objetivos) · [Funciones principales](#funciones-principales) · [Arquitectura y versiones](#arquitectura-y-versiones) · [Contenedores](#contenedores) · [Uso](#uso) · [Ecosistema GAMMA](#ecosistema-gamma)
+
+</div>
+
+> [!IMPORTANT]
+> Repositorio privado, de uso interno. Los cálculos y memorias que produce son herramientas de ingeniería: la firma y la responsabilidad regulatoria (CNSNS) son del físico médico responsable.
+<!-- /encabezado-gamma -->
 
 Diseño, cálculo y documentación de blindajes radiológicos para instalaciones médicas: radioterapia
 (LINAC, Gamma Knife, HDR), medicina nuclear y PET/CT, ciclotrones, rayos X diagnósticos y
 mastografía. Corresponde a la fase **B.18 (RadShield & Radiation Protection)** del plan canónico de
 GAMMA.
-
-> Repositorio privado, de uso interno. Los cálculos y memorias que produce son herramientas de
-> ingeniería: la firma y la responsabilidad regulatoria (CNSNS) son del físico médico responsable.
 
 ## Objetivos
 
@@ -128,3 +140,33 @@ en verde.
 - `DB_RECONSTRUCTION_RUNBOOK.md`, `F81_DOCKER_DESKTOP_DB_RUNBOOK.md`: operación de la base.
 - `TECH_DEBT_QUARANTINE.md`: deuda técnica en cuarentena.
 - `docs/auditorias/`, `docs/planes/`, `docs/runbooks/`: documentos anteriores, sin cambios.
+
+## Ecosistema GAMMA
+
+Cinco repositorios privados unidos por contratos JSON versionados, no por imports. Este repositorio
+está resaltado.
+
+```mermaid
+flowchart LR
+  G["GAMMA-AI<br/><sub>motor científico · núcleo clínico</sub>"]
+  R["RadShieldMx<br/><sub>blindajes y memoria CNSNS</sub>"]
+  P["Radiopharma OS<br/><sub>producción · QC · liberación</sub>"]
+  C["Cyclotron-SIM<br/><sub>gemelo físico · Monte Carlo</sub>"]
+  Z["Zumaya-AI<br/><sub>instalación · búnker · estructura</sub>"]
+  G -- "gamma/evidencia@1" --> R
+  G -- "gamma/evidencia@1" --> P
+  C -- "termino_fuente@1" --> P
+  C -- "flujo_aire@1" --> R
+  Z -- "presupuesto_operativo@1" --> P
+  Z -- "planos · materiales" --> C
+  R & P & C & Z -. "gamma/ingesta@1" .-> G
+  classDef actual fill:#1f6feb,stroke:#0b3d91,color:#fff,stroke-width:2px
+  class R actual
+```
+
+## Confidencialidad y licencia
+
+Software propietario de uso individual del titular; no es de código abierto ni se distribuye.
+Los documentos fuente son propiedad del titular, que tiene los derechos de uso. Ningún dato de
+pacientes reales entra a este repositorio: los datos clínicos permanecen anonimizados y fuera de
+GitHub. Las salidas técnicas no sustituyen la revisión ni la firma del profesional responsable.
