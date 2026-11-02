@@ -8,7 +8,7 @@
  * when available. If not, the values in Table 4.1 may be used."
  * Importancia: Diferencias de 10-15% en HVL son comunes entre lotes de plomo.
  */
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,7 +40,6 @@ export default function TransmissionCurveDialog({ open, onClose }: Props) {
   const [batchNumber, setBatchNumber] = useState('');
   const [testDate, setTestDate] = useState('');
 
-  const allPoints = useMemo(() => [...NOMINAL_PB_6MV, ...measuredPoints], [measuredPoints]);
 
   const parseCSV = useCallback((text: string) => {
     const lines = text.trim().split('\n');

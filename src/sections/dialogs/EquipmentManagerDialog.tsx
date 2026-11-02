@@ -77,7 +77,6 @@ export default function EquipmentManagerDialog({ open, onOpenChange }: Equipment
   const [catFilter, setCatFilter] = useState('All');
   const [mfgFilter, setMfgFilter] = useState('All');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('list');
 
   // Persist

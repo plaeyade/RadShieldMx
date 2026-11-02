@@ -16,7 +16,6 @@ function genDF(sx: number, sy: number, sz: number, act: number): DP[] {
     for (let y = 0; y < 8; y += 0.2) {
       for (let z = 0; z < 6; z += 0.2) {
         const d2 = (x - sx) ** 2 + (y - sy) ** 2 + (z - sz) ** 2;
-        const d = Math.sqrt(d2) || 0.1;
         const dose = (act * g) / d2;
         if (dose > 0.001) pts.push({ x, y, z, dose });
       }

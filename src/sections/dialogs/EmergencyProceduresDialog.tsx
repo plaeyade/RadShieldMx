@@ -75,7 +75,7 @@ export default function EmergencyProceduresDialog({ open, onOpenChange }: { open
               <span className="text-[10px] text-slate-500 ml-auto">{filt.length} escenarios</span>
             </div>
             <div className="space-y-1.5">
-              {filt.map((sc:any, idx:number) => {
+              {filt.map((sc:any) => {
                 const sv = (SEV as any)[sc.sev];
                 const gIdx = SCENARIOS.findIndex((x:any) => x.id === sc.id);
                 return (

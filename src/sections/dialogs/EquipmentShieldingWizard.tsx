@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
-  COMMERCIAL_EQUIPMENT, getEquipmentsByCategory, getAllCategories, getAllManufacturers,
+  COMMERCIAL_EQUIPMENT, getEquipmentsByCategory, getAllCategories, 
   type CommercialEquipment
 } from '@/types/equipmentDB';
 import { MATERIALS_DB } from '@/lib/materialDatabase';
@@ -64,7 +64,7 @@ const TECHNIQUE_C1: Record<string, { label: string; C1: number; description: str
 };
 
 // Use factors per barrier direction (NCRP 151)
-const USE_FACTORS = {
+const _USE_FACTORS = {
   floor: 0.25, ceiling: 0.25, wall_gantry: 0.25, wall_lateral: 0.25,
   wall_primary: 0.25, maze: 0.05, door: 0.05,
 };
@@ -214,7 +214,6 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
 
   const categories = getAllCategories();
   const equipments = state.category ? getEquipmentsByCategory(state.category as any) : [];
-  const manufacturers = getAllManufacturers();
 
   const handleEquipmentSelect = (eqId: string) => {
     const eq = COMMERCIAL_EQUIPMENT.find(e => e.id === eqId) || null;
@@ -299,7 +298,7 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
 
       {/* Step indicator */}
       <div className="flex items-center gap-1 px-4 py-2 bg-slate-50 border-b">
-        {STEPS.map((s, i) => {
+        {STEPS.map((s) => {
           const Icon = s.icon;
           const isActive = state.step === s.num;
           const isDone = state.step > s.num;

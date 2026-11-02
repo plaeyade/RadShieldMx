@@ -86,7 +86,7 @@ const SEVERITY_CONFIG = {
 export default function RegulatoryAlertsDialog({ open, onOpenChange }: Props) {
   const [alerts, setAlerts] = useState(MOCK_ALERTS);
   const [filterCategory, setFilterCategory] = useState('');
-  const [filterSeverity, setFilterSeverity] = useState('');
+  const [filterSeverity] = useState('');
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
 
   const filtered = useMemo(() => alerts.filter(a => {

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import '@/components/ui/separator';
 import { Layers } from 'lucide-react';
 
-interface BuildupEntry {
+interface _BuildupEntry {
   material: string;
   energy_MeV: number;
   mfp: number; // mean free paths

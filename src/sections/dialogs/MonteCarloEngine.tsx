@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { useI18n } from '@/hooks/useI18n';
 import {
   Cpu, Play, Download, Box, Layers, Activity,
   Settings, RotateCcw, FileOutput, Gauge
@@ -152,7 +151,6 @@ function generateDoseDistribution(
 
   // Half-value layer (HVL) approximation
   const hvl_mmAl = 2.5 + kVp * 0.02 + filter_mmAl * 0.3;
-  const meanEnergy_keV = kVp * 0.35;
 
   // Output (mGy/mAs at 1m) approximation
   const output_mGy_mAs_1m = kVp * kVp * 1.5e-5 * Math.exp(-filter_mmAl * 0.12);
@@ -289,7 +287,6 @@ interface MonteCarloEngineProps {
 }
 
 export default function MonteCarloEngine({ open, onClose }: MonteCarloEngineProps) {
-  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('setup');
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);

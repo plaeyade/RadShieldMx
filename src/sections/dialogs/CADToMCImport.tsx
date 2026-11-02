@@ -28,7 +28,7 @@ interface Props {
   onImport?: (meshData: any) => void;
 }
 
-export default function CADToMCImport({ open, onOpenChange, onImport }: Props) {
+export default function CADToMCImport({ open, onOpenChange, onImport: _onImport }: Props) {
   const [meshStats, setMeshStats] = useState<MeshStats | null>(null);
   const [mcCode, setMcCode] = useState<'phits' | 'geant4' | 'mcnp'>('phits');
   const [outputText, setOutputText] = useState('');

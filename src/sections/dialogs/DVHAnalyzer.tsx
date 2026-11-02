@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useI18n } from '@/hooks/useI18n';
 import {
   BarChart3, Download, Activity, TrendingUp, Target
 } from 'lucide-react';
@@ -185,7 +184,6 @@ function DVHCanvas({ dvhs, showDifferential }: { dvhs: DVHData[]; showDifferenti
         ctx.lineWidth = 1.5;
         ctx.beginPath();
 
-        const binWidth = dvh.doses_Gy[1] - dvh.doses_Gy[0];
         for (let i = 0; i < dvh.doses_Gy.length - 1; i++) {
           const dv = Math.abs(dvh.volumes_pct[i + 1] - dvh.volumes_pct[i]);
           const x = toX(dvh.doses_Gy[i]);
@@ -293,10 +291,8 @@ interface DVHAnalyzerProps {
 }
 
 export default function DVHAnalyzer({ open, onClose }: DVHAnalyzerProps) {
-  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('cumulative');
   const [prescribedDose, setPrescribedDose] = useState(60);
-  const [showDifferential, setShowDifferential] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('prostate-imrt');
 
   const plans: Record<string, { structures: Array<{ name: string; isTarget: boolean; volume_cc: number; color: string }> }> = {

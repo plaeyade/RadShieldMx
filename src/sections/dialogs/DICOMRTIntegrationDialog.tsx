@@ -25,7 +25,7 @@ const DICOM_TAGS = [
   { tag: '3006,0050', name: 'Contour Image Sequence', vr: 'SQ', use: 'Link to CT slices' },
 ];
 
-const ROI_MAPPING = [
+const _ROI_MAPPING = [
   { pattern: 'ROOM|BUNKER|VAULT', type: 'shielding_zone', action: 'Extract as bunker space' },
   { pattern: 'WALL|BARRIER|SHIELD', type: 'primary_barrier', action: 'Calculate shielding thickness' },
   { pattern: 'MAZE|ENTRANCE|DOOR', type: 'leakage_path', action: 'Leakage & scatter calc' },
@@ -36,7 +36,7 @@ const ROI_MAPPING = [
 ];
 
 export default function DICOMRTIntegrationDialog({ open, onOpenChange }: Props) {
-  const [file, setFile] = useState<File | null>(null);
+  const [, setFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState(false);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

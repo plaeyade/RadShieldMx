@@ -38,7 +38,6 @@ function BibliographyContent({ onOpenChange }: { onOpenChange: (open: boolean) =
   }, [search, filterType]);
 
   const types = [...new Set(ALL_REFERENCES.map(r => r.type))];
-  const userRefs = ALL_REFERENCES.filter(r => r.id.startsWith('REF00') && parseInt(r.id.slice(3)) <= 14);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }}>

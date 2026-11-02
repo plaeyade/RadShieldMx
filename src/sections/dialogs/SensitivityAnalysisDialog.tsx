@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAppStore } from '@/stores/appStore';
 import { BarChart3, ArrowUpDown, BookOpen } from 'lucide-react';
 
-interface TornadoBar { param: string; base: number; low: number; high: number; deltaLow: number; deltaHigh: number; color: string; }
+interface _TornadoBar { param: string; base: number; low: number; high: number; deltaLow: number; deltaHigh: number; color: string; }
 
 const PARAMS = [
   { key: 'W', name: 'Carga trabajo (W)', unit: 'mA-min/sem', base: 500, pct: 20 },

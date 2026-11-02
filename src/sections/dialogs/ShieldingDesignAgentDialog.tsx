@@ -37,8 +37,6 @@ export default function ShieldingDesignAgentDialog({ open, onOpenChange }: Props
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [validation, setValidation] = useState<any[]>([]);
-  const [showSteps, setShowSteps] = useState(false);
-  const [steps, setSteps] = useState<any[]>([]);
 
   const handleRun = async () => {
     setIsRunning(true);

@@ -56,7 +56,7 @@ interface ActivityEvent {
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
 
 export default function CollaborationHub({ open, onOpenChange }: Props) {
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([
+  const [collaborators] = useState<Collaborator[]>([
     { id: 'u1', name: 'Dr. Garcia', initials: 'DG', color: COLORS[0], status: 'active', role: 'admin', lastSeen: 'now' },
     { id: 'u2', name: 'Ing. Martinez', initials: 'IM', color: COLORS[1], status: 'active', role: 'editor', lastSeen: 'now' },
     { id: 'u3', name: 'Fis. Lopez', initials: 'FL', color: COLORS[2], status: 'idle', role: 'editor', lastSeen: '2m ago' },
@@ -68,13 +68,13 @@ export default function CollaborationHub({ open, onOpenChange }: Props) {
     { id: 'c3', authorId: 'u3', authorName: 'Fis. Lopez', authorInitials: 'FL', text: 'El factor de ocupacion para el pasillo debe ser 0.2 no 0.25.', timestamp: '2026-06-01 09:15', resolved: true, elementRef: 'Occupancy_Corridor', replies: [] },
   ]);
   const [newComment, setNewComment] = useState('');
-  const [activityLog, setActivityLog] = useState<ActivityEvent[]>([
+  const [activityLog] = useState<ActivityEvent[]>([
     { id: 'a1', user: 'Dr. Garcia', action: 'modified', target: 'Barrier_Primary thickness: 120→140 cm', timestamp: '10:30' },
     { id: 'a2', user: 'Ing. Martinez', action: 'added', target: 'Secondary barrier for maze', timestamp: '10:28' },
     { id: 'a3', user: 'Fis. Lopez', action: 'commented', target: 'Occupancy factor corridor', timestamp: '09:15' },
     { id: 'a4', user: 'Dr. Garcia', action: 'shared', target: 'Project with Dr. Chen (viewer)', timestamp: '09:00' },
   ]);
-  const [isConnected, setIsConnected] = useState(true);
+  const [isConnected] = useState(true);
   const [shareEmail, setShareEmail] = useState('');
   const [shareRole, setShareRole] = useState<'editor' | 'viewer'>('viewer');
 

@@ -38,7 +38,7 @@ export default function ShieldingOptimizerDialog({ open, onOpenChange }: Props) 
   const [generations, setGenerations] = useState('50');
   const [popSize, setPopSize] = useState('40');
   const [energy, setEnergy] = useState('6');
-  const [barriers, setBarriers] = useState<OptimizationBarrier[]>(DEFAULT_BARRIERS);
+  const [barriers] = useState<OptimizationBarrier[]>(DEFAULT_BARRIERS);
   const [activeTab, setActiveTab] = useState('setup');
 
   const handleOptimize = useCallback(() => {
@@ -131,7 +131,7 @@ export default function ShieldingOptimizerDialog({ open, onOpenChange }: Props) 
 
                     <div className="text-[11px] font-semibold text-slate-700 mt-2">Barreras ({barriers.length})</div>
                     <div className="space-y-1.5">
-                      {barriers.map((b, i) => (
+                      {barriers.map((b) => (
                         <div key={b.id} className="bg-slate-50 rounded p-2 border text-[10px] space-y-1">
                           <div className="flex justify-between"><strong>{b.name}</strong><span>{b.area_m2} m2, d={b.distance_to_source_m}m</span></div>
                           <div className="flex gap-2 text-slate-500">

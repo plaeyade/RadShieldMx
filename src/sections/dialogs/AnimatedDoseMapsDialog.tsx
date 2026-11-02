@@ -23,7 +23,7 @@ function jet(v: number): string {
 export default function AnimatedDoseMapsDialog({ open, onOpenChange }: Props) {
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
-  const [speed, setSpeed] = useState(1);
+  const [speed] = useState(1);
   const animRef = useRef<number | null>(null);
 
   useEffect(() => {

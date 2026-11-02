@@ -42,7 +42,7 @@ export default function SketchPadDialog({ open, onOpenChange }: SketchPadDialogP
   const [color, setColor] = useState('#334155');
   const [lineWidth, setLineWidth] = useState(2);
   const [showGrid, setShowGrid] = useState(true);
-  const [scale, setScale] = useState(1);
+  const [scale] = useState(1);
   const isDrawing = useRef(false);
 
   const COLORS = ['#334155', '#dc2626', '#2563eb', '#16a34a', '#d97706', '#9333ea', '#000000'];

@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { useI18n } from '@/hooks/useI18n';
 import {
   Grid3X3, Download, Activity, Map, BarChart3,
   CheckCircle, AlertTriangle, Info
@@ -245,14 +244,13 @@ interface NuclearDoseGridProps {
 }
 
 export default function NuclearDoseGrid({ open, onClose }: NuclearDoseGridProps) {
-  const { t } = useI18n();
   const [nuclide, setNuclide] = useState('F-18');
   const [activity_GBq, setActivity] = useState(5);
   const [useTime_h, setUseTime] = useState(2);
   const [gridSize, setGridSize] = useState(30);
   const [showIsodoses, setShowIsodoses] = useState(true);
   const [activeTab, setActiveTab] = useState('grid');
-  const [barriers, setBarriers] = useState<ShieldingBarrier[]>([
+  const [barriers] = useState<ShieldingBarrier[]>([
     { name: 'Lead shield', material: 'Pb', thickness_mm: 3, position_x: 1.5, tvls: 3 },
   ]);
 

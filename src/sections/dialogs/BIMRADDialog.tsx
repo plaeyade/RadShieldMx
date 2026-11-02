@@ -58,7 +58,7 @@ export default function BIMRADDialog({ open, onOpenChange }: Props) {
         setModel(parsed);
         setWorkflowProgress(30);
         toast.success(`IFC parsed: ${parsed.spaces.length} spaces, ${parsed.elements.length} elements`);
-      } catch (err) {
+      } catch {
         toast.error('Failed to parse IFC');
       }
     };

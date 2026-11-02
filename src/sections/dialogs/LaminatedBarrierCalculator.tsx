@@ -173,7 +173,6 @@ export default function LaminatedBarrierCalculator({ open, onClose }: LaminatedB
             </TableHeader>
             <TableBody>
               {layers.map((layer, i) => {
-                const mat = MATERIALS.find(m => m.code === layer.material);
                 const b = Math.pow(10, -layer.thickness_mm / (layer.tvl_mm || 1));
                 const n = layer.thickness_mm / (layer.tvl_mm || 1);
                 return (

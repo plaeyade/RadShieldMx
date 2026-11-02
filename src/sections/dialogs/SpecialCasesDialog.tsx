@@ -47,7 +47,7 @@ function CasesContent({ onOpenChange }: { onOpenChange: (open: boolean) => void 
   const criticalPassed = integrityChecks.filter(c => c.critical && c.status === 'pass').length;
   const totalCritical = integrityChecks.filter(c => c.critical).length;
 
-  const COL: Record<string, string> = {
+  const _COL: Record<string, string> = {
     espera: 'bg-blue-50', morgue: 'bg-slate-100', oftalmo: 'bg-cyan-50', arp: 'bg-red-50',
     implantes: 'bg-emerald-50', cuarto: 'bg-amber-50', anexos: 'bg-violet-50',
     integridad: 'bg-green-50', backup: 'bg-gray-50', pdf: 'bg-indigo-50',

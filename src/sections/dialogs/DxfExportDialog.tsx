@@ -24,7 +24,7 @@ const SCALES = [
 function generateDXF(floorPlan: any, scale: number): string {
   let dxf = '0\nSECTION\n2\nHEADER\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n';
   // Barriers as lines
-  floorPlan?.barriers?.forEach((b: any, i: number) => {
+  floorPlan?.barriers?.forEach((b: any) => {
     if (b.points && b.points.length >= 2) {
       for (let j = 0; j < b.points.length - 1; j++) {
         const x1 = (b.points[j].x * scale).toFixed(2);
@@ -51,8 +51,6 @@ export default function DxfExportDialog() {
   const close = () => useAppStore.getState().close('dxfExport');
   const [format, setFormat] = useState('dxf');
   const [scaleId, setScaleId] = useState('1:100');
-  const [includeLabels, setIncludeLabels] = useState(true);
-  const [includeGrid, setIncludeGrid] = useState(false);
   const fmt = FORMATS.find(f => f.id === format);
   const sc = SCALES.find(s => s.id === scaleId)?.value || 100;
 

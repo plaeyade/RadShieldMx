@@ -79,7 +79,7 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
 
   const handleCalculate = useCallback(() => {
     try {
-      const SSD = parseFloat(ssd) || 100; // cm
+      const _SSD = parseFloat(ssd) || 100; // cm
       const d_rate = parseFloat(doseRate_MU_min) || 600;
       const t_time = parseFloat(treatmentTime_min) || 2.5;
       const dist_m = parseFloat(distanceToBarrier_m) || 2.0;

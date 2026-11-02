@@ -10,7 +10,6 @@ export default function DecayChainsDialog({ onClose }: { onClose: () => void }) 
   const [chainIdx, setChainIdx] = useState(0);
   const [parentActivity, setParentActivity] = useState(37); // GBq
   const [hours, setHours] = useState(24);
-  const [showGenerator, setShowGenerator] = useState(true);
 
   const chain = DECAY_CHAINS[chainIdx];
   const eluate = useMemo(() => eluateActivity(chain.name, parentActivity, hours), [chain.name, parentActivity, hours]);

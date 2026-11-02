@@ -42,7 +42,7 @@ export default function MultiEnergySpectraDialog({ open, onClose }: Props) {
   const [selectedKey, setSelectedKey] = useState('RAD_120');
   const [workload, setWorkload] = useState(150);
   const [distance, setDistance] = useState(4.5);
-  const [designGoal, setDesignGoal] = useState(0.02);
+  const [designGoal] = useState(0.02);
 
   const data = TASMIP_DATA[selectedKey];
 
@@ -57,7 +57,7 @@ export default function MultiEnergySpectraDialog({ open, onClose }: Props) {
 
   const exportCSV = () => {
     let csv = 'kVp,HVL1_mmAl,HVL2_mmAl,TVL_mmPb,TVL_mmConcrete,MeanEnergy_keV\n';
-    Object.entries(TASMIP_DATA).forEach(([k, v]) => {
+    Object.entries(TASMIP_DATA).forEach(([_k, v]) => {
       csv += `${v.kVp},${v.hvl1_mmAl},${v.hvl2_mmAl},${v.tvl_mmPb},${v.tvl_mmConcrete},${v.meanEnergy_keV}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });

@@ -76,7 +76,6 @@ interface Props {
 export default function RadioactiveTransportDialog({ open, onOpenChange }: Props) {
   const [activeTab, setActiveTab] = useState("categories");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [search, setSearch] = useState("");
 
   const toggleCheck = (id: string) => setChecked(p => ({ ...p, [id]: !p[id] }));
   const completed = Object.values(checked).filter(Boolean).length;

@@ -104,7 +104,6 @@ function reconstructSurface(contours: ContourSlice[]): ReconstructedMesh {
 
   // Close top and bottom
   const firstSlice = contours[0];
-  const lastSlice = contours[contours.length - 1];
   if (firstSlice.points.length >= 3) {
     const cx = firstSlice.points.reduce((s, p) => s + p[0], 0) / firstSlice.points.length;
     const cy = firstSlice.points.reduce((s, p) => s + p[1], 0) / firstSlice.points.length;

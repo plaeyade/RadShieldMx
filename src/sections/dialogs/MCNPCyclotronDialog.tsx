@@ -113,7 +113,6 @@ export default function MCNPCyclotronDialog({ open, onOpenChange }: MCNPCyclotro
     const mat = shieldMaterial;
 
     // Neutron source strength (n/s)
-    const Q_n = cyc.neutronYield_n_per_uC * (cyc.current_uA * 1e-6) * (1e6 / 1.602e-19);
     // Simplified: neutron yield per microamp = n/(uC) * uA * C/(uC conversion)
     const Q_n_simplified = cyc.neutronYield_n_per_uC * cyc.current_uA * 1e-6 * 1e6; // n/s (simplified for display)
 

@@ -172,7 +172,7 @@ export default function AutoBarrierDetectionDialog({ open, onOpenChange }: Props
                       <Layers className="h-3.5 w-3.5" /> Detected Barriers
                     </h4>
                     <div className="max-h-48 overflow-y-auto space-y-1">
-                      {barriers.slice(0, 30).map((b, i) => (
+                      {barriers.slice(0, 30).map((b) => (
                         <div key={b.id} className="flex items-center justify-between p-1.5 rounded bg-slate-50 text-[10px]">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className={`text-[7px] h-3 px-1 ${b.isHorizontal ? "bg-emerald-50" : "bg-blue-50"}`}>

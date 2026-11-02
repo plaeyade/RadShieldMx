@@ -45,7 +45,7 @@ export default function GATESimulationDialog({ open, onOpenChange }: Props) {
   const [addRandoms, setAddRandoms] = useState(true);
   const [addNoise, setAddNoise] = useState(false);
   const [macroCode, setMacroCode] = useState('');
-  const [showMacro, setShowMacro] = useState(false);
+  const [, setShowMacro] = useState(false);
 
   const nuclide = useMemo(() => RADIONUCLIDES.find(r => r.symbol === selectedNuclide), [selectedNuclide]);
 

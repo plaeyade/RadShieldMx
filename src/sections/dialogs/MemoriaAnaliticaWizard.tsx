@@ -69,7 +69,7 @@ export default function MemoriaAnaliticaWizard({ open, onOpenChange }: Props) {
   );
 }
 
-function WizardContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
+function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: boolean) => void }) {
   const [step, setStep] = useState(0);
   const [memoria, setMemoria] = useState<Record<string, any>>({
     // Step 0: Info general
@@ -107,8 +107,6 @@ function WizardContent({ onOpenChange }: { onOpenChange: (open: boolean) => void
     if (!area || !material) return null;
     const energy = parseInt(memoria.energia_MV);
     const P = 0.02; // mSv/sem (público por defecto)
-    const key = `${energy}MV`;
-    const TVL = material.TVL_primary_cm[key] || 37;
     
     if (area.barrera === 'primaria') {
       return calculateLINACPrimaryBarrier({
@@ -261,8 +259,6 @@ function WizardContent({ onOpenChange }: { onOpenChange: (open: boolean) => void
     toast.success('Memoria analítica PDF exportada');
   }, [memoria, material, C1, W_L, calcularBarrera]);
 
-  const currentStep = STEPS[step];
-  const StepIcon = currentStep.icon;
 
   return (
     <>

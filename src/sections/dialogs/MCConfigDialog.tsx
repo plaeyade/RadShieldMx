@@ -60,7 +60,6 @@ export default function MCConfigDialog({ open, onOpenChange, floorPlan, onLaunch
     });
   }, [floorPlan, format, particles, jobName, createJob, onLaunchMC, onOpenChange]);
 
-  const selected = FORMATS.find(f => f.value === format)!;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

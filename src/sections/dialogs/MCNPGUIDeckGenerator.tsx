@@ -20,7 +20,7 @@ import {
 interface Props { open: boolean; onClose: () => void; }
 
 // Process-based MCNP card generators
-function generateCells(geometry: string, materials: Array<{ id: number; name: string; density: number }>): string {
+function generateCells(_geometry: string, _materials: Array<{ id: number; name: string; density: number }>): string {
   let cards = 'c ============================================================\n';
   cards += 'c CELLS (Region definitions with material assignments)\n';
   cards += 'c ============================================================\n';
@@ -72,7 +72,6 @@ function generateSurfaces(roomWidth: number, roomLength: number, roomHeight: num
 
   const hw = roomWidth / 2;
   const hl = roomLength / 2;
-  const hh = roomHeight / 2;
   const wt = wallThickness;
 
   // Room boundaries (inner)

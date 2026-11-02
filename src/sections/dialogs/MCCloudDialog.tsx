@@ -14,7 +14,7 @@ import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; projectId: string; format: string; particles: number; jobName: string; }
 
-type SimStatus = 'idle' | 'queued' | 'running' | 'completed' | 'failed';
+type _SimStatus = 'idle' | 'queued' | 'running' | 'completed' | 'failed';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
   pending: { label: 'Pendiente', color: 'bg-gray-100 text-gray-700', icon: Clock },
