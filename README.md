@@ -7,139 +7,125 @@
 
 [![ci.yml](https://github.com/plaeyade/RadShieldMx/actions/workflows/ci.yml/badge.svg)](https://github.com/plaeyade/RadShieldMx/actions/workflows/ci.yml) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![React](https://img.shields.io/badge/React-19-61DAFB) ![normas](https://img.shields.io/badge/normas-NCRP%20147%20%C2%B7%20151%20%C2%B7%20TG--108%20%C2%B7%20SRS--47-informational) ![licencia](https://img.shields.io/badge/licencia-propietaria-lightgrey)
 
-[Objetivos](#objetivos) · [Funciones principales](#funciones-principales) · [Arquitectura y versiones](#arquitectura-y-versiones) · [Contenedores](#contenedores) · [Uso](#uso) · [Ecosistema GAMMA](#ecosistema-gamma)
+[Qué aporta](#qué-aporta) · [Capacidades](#capacidades) · [Sustento científico](#sustento-científico) · [Diferencias con otros programas](#diferencias-con-otros-programas) · [Integración con el ecosistema](#integración-con-el-ecosistema) · [Ecosistema GAMMA](#ecosistema-gamma)
 
 </div>
 
 > [!IMPORTANT]
-> Repositorio privado, de uso interno. Los cálculos y memorias que produce son herramientas de ingeniería: la firma y la responsabilidad regulatoria (CNSNS) son del físico médico responsable.
+> Repositorio privado, de uso individual del titular. Los cálculos y memorias que produce son herramientas de ingeniería: la firma y la responsabilidad regulatoria (CNSNS) son del físico médico responsable.
 <!-- /encabezado-gamma -->
 
-Diseño, cálculo y documentación de blindajes radiológicos para instalaciones médicas: radioterapia
-(LINAC, Gamma Knife, HDR), medicina nuclear y PET/CT, ciclotrones, rayos X diagnósticos y
-mastografía. Corresponde a la fase **B.18 (RadShield & Radiation Protection)** del plan canónico de
-GAMMA.
+RadShield-MX diseña, calcula y documenta blindajes radiológicos de instalaciones médicas: rayos X
+diagnósticos, tomografía, mastografía, fluoroscopía, medicina nuclear y PET/CT, teleterapia de
+megavoltaje, braquiterapia HDR y ciclotrones. Del plano arquitectónico sale un modelo, del modelo el
+cálculo por barrera, y del cálculo la memoria analítica para la CNSNS con cada número citado.
 
-## Objetivos
+## Qué aporta
 
-1. **Plano → modelo → cálculo → memoria**, de forma trazable:
-   - importar el plano (DXF/DWG/PDF) y verificar sus dimensiones;
-   - colocar fuentes y barreras;
-   - calcular espesores con NCRP 147/151, AAPM TG-108 e IAEA SRS-47;
-   - generar la memoria CNSNS (.docx) y el reporte PDF.
-2. **Cada número con su fuente.** Las referencias documentales salen de GAMMA-AI, el motor
-   científico del ecosistema, con documento, página y fragmento verificables por SHA-256.
-3. **Datos físicos de la instalación real.** El flujo térmico en el aire de la bóveda del KIUBE
-   proviene de la simulación Monte Carlo de Cyclotron-SIM (contrato `cyclotron-sim/flujo_aire@1`).
+- **Cálculo normativo, no aproximado.** Las barreras se calculan con las ecuaciones y tablas de los
+  informes originales (NCRP 147, NCRP 151, AAPM TG-108) y las pruebas reproducen los ejemplos
+  resueltos de esos informes.
+- **Trazabilidad completa.** Cada barrera guarda su método, supuestos, tablas usadas y avisos. La
+  memoria cita documento, página y fragmento verificados por SHA-256 desde GAMMA-AI.
+- **Instalación real, no genérica.** El búnker del ciclotrón usa el término fuente y el flujo de
+  neutrones del Monte Carlo de Cyclotron-SIM, calibrado contra la guía del fabricante.
+- **Del plano a la obra.** Espesor, masa por m², carga estructural y costo por material, para
+  decidir entre concreto, plomo, acero o tabiques de alta densidad.
 
-## Funciones principales
+## Capacidades
 
 | Área | Qué hace |
 |---|---|
-| Canvas 2D | Barreras, fuentes, regiones, medición, ajuste a la cuadrícula, importación DXF con mapeo de capas, exportación PNG |
-| Visor 3D | Three.js / React-Three-Fiber, con adaptador Babylon.js; huellas de equipos y exportación OBJ/JSON |
-| Cálculo | Espesor por barrera y material (TVL/HVL, XCOM), kerma en puntos de control, cielo (skyshine) por Chilton, incertidumbre GUM |
-| Verificación | Espesor instalado frente al requerido, barrera por barrera (`src/lib/verificacionBlindaje.ts`) |
-| Ventilación | Ar-41 en la bóveda: concentración, DAC, tiempo de espera y emisión por la chimenea, con el flujo del MC (`src/lib/ventilacionBunker.ts`) |
-| Materiales | Registro técnico (densidad, TVL, masa, costo, carga estructural) y fichas de tabiques (Contuplex, Nipol) |
-| Documentos | Memoria CNSNS con la sección **6.1 Evidencia documental citada (GAMMA-AI)**, reporte PDF y Evidence Pack |
+| Plano | Importación DXF/DWG/PDF con mapeo de capas y verificación de escala; lienzo CAD 2D con barreras, fuentes, regiones y puntos de control |
+| Diagnóstico (NCRP 147) | Barreras primarias y secundarias por distribución de carga TG9 (Tablas 4.5, 4.7, B.1, C.1); varias fuentes a la vez; TC por método DLP con κ (§5.6) |
+| Teleterapia (NCRP 151) | Primaria con TVL₁/TVLₑ, fuga con carga IMRT, dispersión del paciente por ángulo, regla de las dos fuentes (Tablas B.2, B.4, B.5a, B.7) |
+| Medicina nuclear y PET (TG-108) | Kerma por constante Γ, TVL a 511 keV, criterios de alta de paciente (NRC RG 8.39) |
+| Ciclotrón | Tabla 8/9 de la guía IBA KIUBE por dirección; término fuente y flujo térmico del Monte Carlo; ventilación del Ar-41 |
+| Materiales | Registro único con densidad, TVL citados, masa, costo y carga estructural; tabiques comerciales (Contuplex, Nipol) |
+| Verificación | Espesor instalado frente al requerido, barrera por barrera; comparación conservadora (−20 % del objetivo) |
+| Visualización | Mapa de dosis 2D, visor 3D (Three.js y Babylon.js) y compilación Unity WebGL; base para recorridos en realidad virtual |
+| Documentos | Memoria CNSNS (.docx) con evidencia citada, reporte PDF y paquete de evidencia |
 
-## Arquitectura y versiones
+## Sustento científico
 
-| Componente | Tecnología | Versión |
+| Fuente | Qué se toma |
+|---|---|
+| NCRP Report No. 147 (2004) | Kerma sin blindaje por paciente, ajustes de Archer primarios y secundarios, preblindaje, κ de TC |
+| NCRP Report No. 151 (2005) | TVL de concreto, acero y plomo; fuga; fracciones y TVL de dispersión; IMRT; regla de dos fuentes |
+| AAPM TG-108 (2006) | Constantes Γ, TVL y transmisión de banda ancha a 511 keV |
+| NRC RG 8.39 | Umbrales de actividad para el alta del paciente |
+| IAEA SRS-47 | Marco para ciclotrones y aceleradores |
+| IBA Cyclone KIUBE SRG (MID 55672 Rev G) | Tasas internas por dirección y tasas tras 200–230 cm de concreto |
+
+Las tablas están transcritas en `src/lib/ncrp147.ts` y `src/lib/ncrp151.ts`, con informe y página
+en cada constante. La revisión física y sus hallazgos están en `docs/revision-fisica-2026-11.md`.
+
+**Validación contra los informes**
+
+| Caso | Informe | RadShield |
 |---|---|---|
-| Aplicación | `radshield-mx` | **86.0.0** (`package.json`) |
-| Escritorio | Tauri (`src-tauri`) | 13.4.0 |
-| Frontend | React · TypeScript · Vite · Zustand · Tailwind | 19.2 · 5.9 · 7.2 · 5.0 · 3.4 |
-| API opcional | Hono + tRPC + Drizzle (`api/`) | 4.8 · 11.8 · 0.45 |
-| Base de datos opcional | MySQL | 8.0 |
-| Pruebas | Vitest · Playwright | 4.0 · 1.60 |
-| Node | CI: 20 · contenedores: 24 (Alpine) | |
+| Unidad de tórax, muro primario, 300 pacientes/semana a 3 m | 2.2 mm Pb (NCRP 147 §5.2) | 2.2 mm |
+| Transmisión de 1.66 mm Pb, Rad Room (chest bucky) | 9.3 × 10⁻⁴ (NCRP 147 Ap. A) | 9.3 × 10⁻⁴ |
+| Primaria 18 MV, punto C a 7.2 m | 149.6 cm concreto (NCRP 151 §7.1.1) | 149.6 cm |
+| Dispersión 18 + 6 MV a 30°, punto A | 55.6 cm (NCRP 151 §7.1.5) | 55.6 cm |
+| Fuga 18 + 6 MV, punto A | 48 cm (NCRP 151 §7.1.5) | 48 cm |
 
-Sin `DATABASE_URL`, la aplicación funciona completa en modo local u offline; `/api/health/db`
-responde 503. La base sólo se necesita para la persistencia en el servidor.
+## Diferencias con otros programas
+
+Herramientas como pyrateShield, ShieldCalc o BunkerDesign calculan una modalidad o un recinto.
+RadShield-MX reúne en un mismo plano todas las modalidades de un edificio, conecta el ciclotrón con
+un Monte Carlo propio y produce la memoria con su evidencia citada en el formato de la CNSNS.
+
+## Integración con el ecosistema
+
+| Con | Contrato | Para qué |
+|---|---|---|
+| GAMMA-AI | `gamma/evidencia@1`, `gamma/paquete_evidencia@1` | Citas de la memoria y biblioteca de referencias en vivo |
+| GAMMA-AI | `gamma/ingesta@1` (`gamma-ingesta.json`) | Registro de las normas que se indexan |
+| Cyclotron-SIM | `cyclotron-sim/flujo_aire@1` | Flujo de neutrones en el aire de la bóveda (Ar-41) |
+| Zumaya-AI | planos y presupuesto operativo | Geometría y carga del edificio real |
+
+## Arquitectura
+
+| Componente | Tecnología |
+|---|---|
+| Aplicación web y escritorio | React 19 · TypeScript 5.9 · Vite 7 · Zustand · Tailwind · Tauri 13 |
+| API opcional | Hono · tRPC · Drizzle · MySQL 8 (la aplicación funciona completa sin servidor) |
+| Pruebas | Vitest · Playwright · ESLint con trinquete |
+| Contenedores | `docker-compose.yml`: frontend (nginx), API y base de datos |
 
 ```
-src/            aplicación (sections/, components/, hooks/, lib/, stores/, data/, types/)
-api/            backend Hono + tRPC (routers por dominio)
-db/             esquema y migraciones Drizzle
-src-tauri/      empaquetado de escritorio
-data/pdf/       normas fuente (NCRP 151, TG-108, NOM-008-ENER, Room Shield Design) → GAMMA
-scripts/        utilidades (ver scripts/README.md)
-e2e/            pruebas Playwright
-docs/           auditorías, planes, runbooks y manuales anteriores
-```
-
-## Contenedores
-
-`docker-compose.yml` levanta la pila local completa:
-
-| Servicio | Imagen / Dockerfile | Puerto | Función |
-|---|---|---|---|
-| `frontend` | `Dockerfile.frontend` (node:24-alpine → nginx) | 8080 | Build estático offline-first |
-| `api` | `Dockerfile.api` (node:24-alpine) | 3000 | Hono + tRPC; depende de `db` |
-| `db` | `mysql:8.0` | 3306 | Persistencia; volumen `mysql-data` |
-
-`docker-compose.db.yml` levanta sólo la base de pruebas (`radshield_mx_test`). El `Dockerfile` de
-la raíz es el build de producción en una sola imagen.
-
-```bash
-docker compose up -d --build                         # pila completa
-docker compose -f docker-compose.db.yml up -d        # sólo la base de pruebas
+src/lib/        motores de cálculo (ncrp147, ncrp151, normativeBarrierEngine, cyclone, nuclear…)
+src/sections/   lienzo, paneles y diálogos
+src/data/       paquete de evidencia de GAMMA y datos del MC
+api/, db/       backend y esquema opcionales
+data/pdf/       normas de libre uso (las de licencia individual quedan fuera de git)
+docs/           revisión física, manuales y runbooks
 ```
 
 ## Uso
 
 ```bash
 npm ci
-npm run dev            # desarrollo (Vite)
-npm run build          # build de producción
-npm test               # Vitest
-npm run lint:ci        # ESLint con trinquete (.eslint-baseline.json: no se aceptan errores nuevos)
-npx tsc --noEmit       # tipos
-npm run tauri:dev      # escritorio
+npm run dev          # desarrollo
+npm test             # pruebas
+npm run lint:ci      # ESLint sin errores nuevos
+npm run build        # producción
+docker compose up -d --build   # pila completa
 ```
 
-Base de datos (opcional):
+## Colaboraciones
 
-```bash
-export DATABASE_URL="mysql://radshield:radshield@127.0.0.1:3306/radshield_mx_test"
-npm run db:migrate && npm run db:seed && npm run db:validate:live
-```
+Abierto a colaboradores invitados: físicos médicos (validación con casos reales y levantamientos),
+ingenieros estructurales (cargas y detalles constructivos) y desarrolladores con experiencia en CAD,
+BIM o WebXR. Las contribuciones entran por pull request con revisión y CI en verde.
 
-Los scripts `prepare:fNNN` y `test:fNNN` de `package.json` son verificaciones de fases anteriores.
-Siguen funcionando, pero no forman parte del flujo diario.
+## Hoja de ruta
 
-## Integración con el ecosistema
-
-| Con | Contrato | Dónde |
-|---|---|---|
-| **GAMMA-AI** (evidencia) | `gamma/evidencia@1`, `gamma/paquete_evidencia@1` | `src/lib/gammaEvidence.ts`, `src/lib/gammaCliente.ts` |
-| **GAMMA-AI** (ingesta de normas) | `gamma/ingesta@1` | `scripts/manifiesto_gamma.py` → `gamma-ingesta.json` |
-| **Cyclotron-SIM** (MC) | `cyclotron-sim/flujo_aire@1` | `src/data/flujo_aire_kiube.json`, `ventilacionBunker.ts` |
-
-- **Consulta en vivo:** `VITE_GAMMA_URL=http://127.0.0.1:8765`, con GAMMA corriendo
-  `gamma ecosistema servir --origen http://localhost:5173`.
-- **Sin servicio:** se usa el paquete versionado `src/data/gamma-evidencia-memoria.json`, que se
-  regenera con `scripts/gamma-consultas-memoria.json`.
-
-Toda cita se verifica contra su SHA-256, y la memoria declara que la evidencia es experimental y
-no apta para firma.
-
-## Calidad
-
-La CI (`.github/workflows/ci.yml`) corre en cada PR: TypeScript, ESLint con trinquete, Vitest,
-build de producción, Playwright E2E y despliegue estático. Ningún cambio entra a `main` sin la CI
-en verde.
-
-## Documentación
-
-- `CHANGELOG.md`: historial de fases.
-- `MANUAL_USUARIO_v99.md`, `MANUAL_VERSIONES_v50.md`, `CONTROL_DE_CAMBIOS_v99.md`: manuales
-  vigentes; las pruebas los referencian.
-- `DB_RECONSTRUCTION_RUNBOOK.md`, `F81_DOCKER_DESKTOP_DB_RUNBOOK.md`: operación de la base.
-- `TECH_DEBT_QUARANTINE.md`: deuda técnica en cuarentena.
-- `docs/auditorias/`, `docs/planes/`, `docs/runbooks/`: documentos anteriores, sin cambios.
+1. Beta con el equipo de física médica, con el protocolo de prueba sobre planos reales.
+2. Laberinto y puerta para ≥ 10 MV (NCRP 151 §2.4–2.5) y fotoneutrones.
+3. Importación BIM (IFC) y exportación de cargas al cálculo estructural.
+4. Recorrido en realidad virtual (WebXR) con el mapa de dosis 3D.
 
 ## Ecosistema GAMMA
 
