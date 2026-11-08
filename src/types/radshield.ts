@@ -368,6 +368,8 @@ export interface RadiationSource {
   ctScansPerPatient?: number;   // number of scan series per patient
   // Nuclear specific (Fase 2)
   nuclearActivity_GBq?: number; // for PET/SPECT/radioiodine
+  // AAPM TG-108 por paciente (PET): si existe, sustituye a «actividad × horas» (sin decaimiento ni paciente)
+  tg108?: { A0_MBq: number; pacientesSemana: number; tU_h: number; tI_h: number; sala: 'captacion' | 'imagen' };
   // NCRP 151 Ec. 3.6: fracción de la carga con IMRT y factor C_I (por omisión 0.5 y 5)
   imrtFraction?: number;
   imrtFactor?: number;
