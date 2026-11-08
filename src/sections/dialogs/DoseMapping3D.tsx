@@ -2,6 +2,9 @@
 // DoseMapping3D.tsx — Advanced 3D Dose Mapping with Virtual Detector Mesh
 // Particle types: photons, electrons, positrons, neutrons
 // Legal radiological zoning, merge mappings
+// Fase 5 (docs/plan-motores-calculo.md): por omisión mapea el PLANO DEL LIENZO (fuentes, barreras y escala
+// reales) con `meshDoseMapping3D` (visoresDosis → doseFieldEngine); la sala sintética de la Fase 3 queda como
+// opción. Tasa media = kerma semanal / 40 h. Sigue inactivo tras `VISOR_DOSE_MAPPING_3D` hasta que se autorice.
 // =============================================================================
 import { Suspense, useMemo, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
@@ -29,6 +32,8 @@ import {
   generateDetectorMesh, mergeMappings, computeMeshStats,
   type ParticleType, type DetectorMesh, type MergedMapping,
 } from '@/lib/doseMappingEngine';
+import { meshDoseMapping3D, HORAS_OPERACION_SEMANA } from '@/lib/visoresDosis';
+import { useCanvasStore } from '@/stores/canvasStore';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -131,6 +136,8 @@ function Scene({ mesh, showZones }: { mesh: DetectorMesh | MergedMapping; showZo
 }
 
 export default function DoseMapping3D({ open, onOpenChange }: Props) {
+  const floorPlan = useCanvasStore((st) => st.floorPlan);
+  const [origen, setOrigen] = useState<'plano' | 'sintetica'>('plano');
   const [particleType, setParticleType] = useState<ParticleType>('photon');
   const [activity_GBq, setActivity_GBq] = useState('3.7');
   const [roomX, setRoomX] = useState('6');
@@ -145,6 +152,14 @@ export default function DoseMapping3D({ open, onOpenChange }: Props) {
   const [activeTab, setActiveTab] = useState('single');
 
   const computeMesh = useCallback(() => {
+    if (origen === 'plano') {
+      const mesh = meshDoseMapping3D(floorPlan);
+      if (!mesh.voxels.length) { toast.error(mesh.nota ?? 'El plano no tiene fuentes: agrega una fuente en el lienzo.'); return null; }
+      setMeshes(prev => [...prev, mesh]);
+      setMerged(null);
+      toast.success(`Malla del plano: ${mesh.voxels.length} vóxeles (motor de campo)`);
+      return mesh;
+    }
     const mesh = generateDetectorMesh(
       particleType,
       { x: parseFloat(roomX) / 2, y: 1.5, z: parseFloat(roomZ) / 2 },
@@ -154,11 +169,12 @@ export default function DoseMapping3D({ open, onOpenChange }: Props) {
       parseFloat(shieldCm) || 0,
       shieldMat,
     );
+    if (mesh.nota) { toast.error(mesh.nota); return null; }
     setMeshes(prev => [...prev, mesh]);
     setMerged(null);
     toast.success(`Mesh computed: ${mesh.voxels.length} voxels for ${particleType}s`);
     return mesh;
-  }, [particleType, activity_GBq, roomX, roomY, roomZ, resolution, shieldCm, shieldMat]);
+  }, [origen, floorPlan, particleType, activity_GBq, roomX, roomY, roomZ, resolution, shieldCm, shieldMat]);
 
   const handleMerge = useCallback(() => {
     if (meshes.length < 2) { toast.error('Need at least 2 meshes to merge'); return; }
@@ -213,7 +229,22 @@ export default function DoseMapping3D({ open, onOpenChange }: Props) {
           </TabsList>
 
           <TabsContent value="single" className="space-y-3 mt-2">
-            <div className="grid grid-cols-5 gap-2">
+            <div className="flex items-center gap-2 text-xs">
+              <Label className="text-xs">Origen</Label>
+              <Select value={origen} onValueChange={(v) => setOrigen(v as 'plano' | 'sintetica')}>
+                <SelectTrigger className="h-8 text-xs w-56" data-testid="dose3d-origen"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="plano">Plano del lienzo (motor de campo)</SelectItem>
+                  <SelectItem value="sintetica">Sala sintética (fuente 511 keV)</SelectItem>
+                </SelectContent>
+              </Select>
+              {origen === 'plano' && (
+                <span className="text-muted-foreground" data-testid="dose3d-plano-info">
+                  {floorPlan.sources.length} fuente(s), {floorPlan.barriers.length} barrera(s); tasa media = kerma semanal / {HORAS_OPERACION_SEMANA} h
+                </span>
+              )}
+            </div>
+            {origen === 'sintetica' && <div className="grid grid-cols-5 gap-2">
               <div>
                 <Label className="text-xs">Particle</Label>
                 <Select value={particleType} onValueChange={(v) => setParticleType(v as ParticleType)}>
@@ -261,7 +292,7 @@ export default function DoseMapping3D({ open, onOpenChange }: Props) {
                   </Select>
                 </div>
               </div>
-            </div>
+            </div>}
             <div className="flex gap-2">
               <Button size="sm" onClick={computeMesh} className="flex-1"><Zap className="h-3.5 w-3.5 mr-1" />Compute Mesh</Button>
               <Button size="sm" variant="outline" onClick={() => { setShowZones(!showZones); }}>
@@ -290,7 +321,7 @@ export default function DoseMapping3D({ open, onOpenChange }: Props) {
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p?.color }} />
                       #{i + 1} {p?.symbol} — {m.voxels.length} voxels
                     </span>
-                    <span className="text-muted-foreground">{m.shieldThickness_cm > 0 ? `${m.shieldThickness_cm}cm ${m.shieldMaterial}` : 'No shield'}</span>
+                    <span className="text-muted-foreground">{m.shieldMaterial === 'plano' ? 'Plano del lienzo' : m.shieldThickness_cm > 0 ? `${m.shieldThickness_cm}cm ${m.shieldMaterial}` : 'No shield'}</span>
                   </div>
                 );
               })}

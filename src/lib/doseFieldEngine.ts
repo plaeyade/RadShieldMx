@@ -28,6 +28,10 @@
  * opuesto a las fuentes, la misma convención de `generateSamplePoints`. El recorrido es la cuerda real del
  * rayo dentro de la banda (t / cos θ si la cruza entera; menos si el punto está dentro del muro o el rayo
  * corta una esquina). En barreras laminadas la cuerda se reparte en proporción al espesor de cada capa.
+ * Uniones en esquina (Fase 5, `unionesDeBarreras`): si dos barreras comparten un extremo (±1 cm), cada banda
+ * se corta por la línea de inglete (miter) que va del vértice interior a la intersección de las caras
+ * exteriores, como un muro continuo: en una esquina exterior se cubre el hueco t₁ × t₂ que antes quedaba
+ * sin blindaje y en una esquina entrante se elimina el solape (sin doble crédito).
  *
  * Incidencia oblicua:
  * - Primaria y fuga NCRP 151: espesor oblicuo, con la corrección del §2.2 (p. 24: θ > 45°, ≈ 1 HVL en alta
@@ -48,7 +52,6 @@ import {
   clampTransmission,
   codigoCatalogo,
   getShieldingEnergyKey,
-  heatmapGridPoints,
   tvlTransmission,
 } from '@/lib/shieldingMath';
 import { PREBLINDAJE_MM, TABLA_B_1, TABLA_C_1, transmisionArcher, transmisionTC, type Archer, type MaterialNCRP147 } from '@/lib/ncrp147';
@@ -164,6 +167,8 @@ export interface PuntoMallaDosis {
   /** Kerma con barreras (mGy ≈ mSv por semana). */
   kerma: number;
   kermaSinBlindaje: number;
+  /** Lado de la celda (px del plano); el punto es su centro. */
+  paso_px?: number;
 }
 
 const EPS = 1e-9;
@@ -235,11 +240,21 @@ export function normalProtegida(
  * Cuerda del segmento A→B dentro de la banda de la barrera (0 ≤ u ≤ L a lo largo, 0 ≤ v ≤ espesor hacia
  * la normal protegida), en las unidades del lienzo. Recorte paramétrico de Liang–Barsky. null si no entra.
  */
+/**
+ * Semiplano que sustituye el corte recto de un extremo de la banda: se conserva n·(X − P) ≥ 0.
+ * P es el vértice interior de la esquina y la recta pasa por la intersección de las caras exteriores.
+ */
+export interface CorteInglete { px: number; py: number; nx: number; ny: number }
+
+/** Cortes de inglete de una barrera en su extremo 1 (x1, y1) y 2 (x2, y2); sin unión, corte recto. */
+export interface UnionesBarrera { inicio?: CorteInglete; fin?: CorteInglete }
+
 export function cuerdaEnBarrera(
   ax: number, ay: number, bx: number, by: number,
   barrier: Pick<Barrier, 'x1' | 'y1' | 'x2' | 'y2'>,
   espesor_px: number,
   normal: { nx: number; ny: number },
+  uniones: UnionesBarrera = {},
 ): { t0: number; t1: number; cuerda: number; profundidad: number } | null {
   const sx = barrier.x2 - barrier.x1, sy = barrier.y2 - barrier.y1;
   const L = Math.hypot(sx, sy);
@@ -256,9 +271,92 @@ export function cuerdaEnBarrera(
     if (p < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; }
     return true;
   };
-  if (!recorta(-du, u0) || !recorta(du, L - u0) || !recorta(-dv, v0) || !recorta(dv, espesor_px - v0)) return null;
+  // Extremo: corte recto (u ≥ 0 / u ≤ L) o semiplano de inglete n·(X − P) ≥ 0 ⇒ −(n·r)·τ ≤ n·(A − P).
+  const extremo = (c: CorteInglete | undefined, recto: () => boolean): boolean =>
+    c ? recorta(-(c.nx * rx + c.ny * ry), c.nx * (ax - c.px) + c.ny * (ay - c.py)) : recto();
+  if (!extremo(uniones.inicio, () => recorta(-du, u0)) || !extremo(uniones.fin, () => recorta(du, L - u0))
+    || !recorta(-dv, v0) || !recorta(dv, espesor_px - v0)) return null;
   if (t1 - t0 <= EPS) return null;
   return { t0, t1, cuerda: (t1 - t0) * Math.hypot(rx, ry), profundidad: (t1 - t0) * Math.abs(dv) };
+}
+
+/** Tolerancia para considerar que dos barreras comparten un extremo (m). */
+export const TOLERANCIA_UNION_M = 0.01;
+/** Inglete máximo: si la cara exterior se corta a más de este múltiplo del espesor mayor, no se une. */
+export const LIMITE_INGLETE = 4;
+
+/**
+ * Uniones en esquina de las barreras del plano (inglete). Para cada extremo compartido por exactamente
+ * dos barreras con espesor, y con las dos bandas del mismo lado de la esquina (las dos hacia fuera o las dos
+ * hacia dentro del ángulo), devuelve el semiplano de corte de cada banda. Se omiten: extremos con 3 o más
+ * barreras, uniones en T (un extremo a media barrera), muros colineales y ángulos con inglete > `LIMITE_INGLETE`·t
+ * (corte recto, como antes). Índices paralelos a `barriers`.
+ */
+export function unionesDeBarreras(
+  barriers: Barrier[],
+  scale_m_per_pixel: number,
+  centro: { x: number; y: number },
+): UnionesBarrera[] {
+  const out: UnionesBarrera[] = barriers.map(() => ({}));
+  if (!(scale_m_per_pixel > 0) || barriers.length < 2) return out;
+  const tol = TOLERANCIA_UNION_M / scale_m_per_pixel;
+  const esp = barriers.map((b) => capasDeBarrera(b).reduce((a, c) => a + c.thickness_mm, 0) / 1000 / scale_m_per_pixel);
+  const extremos: Array<{ i: number; fin: boolean; x: number; y: number }> = [];
+  barriers.forEach((b, i) => {
+    if (!(esp[i] > 0) || !(Math.hypot(b.x2 - b.x1, b.y2 - b.y1) > EPS)) return;
+    extremos.push({ i, fin: false, x: b.x1, y: b.y1 }, { i, fin: true, x: b.x2, y: b.y2 });
+  });
+  for (const e of extremos) {
+    if ((e.fin ? out[e.i].fin : out[e.i].inicio)) continue;
+    const pares = extremos.filter((o) => o.i !== e.i && Math.hypot(o.x - e.x, o.y - e.y) <= tol);
+    if (pares.length !== 1) continue;
+    const o = pares[0];
+    if (extremos.filter((q) => q.i === e.i && Math.hypot(q.x - e.x, q.y - e.y) <= tol).length !== 1) continue;
+    const ingletes = inglete(barriers[e.i], e.fin, esp[e.i], barriers[o.i], o.fin, esp[o.i], centro);
+    if (!ingletes) continue;
+    if (e.fin) out[e.i].fin = ingletes[0]; else out[e.i].inicio = ingletes[0];
+    if (o.fin) out[o.i].fin = ingletes[1]; else out[o.i].inicio = ingletes[1];
+  }
+  return out;
+}
+
+/** Cortes de inglete de la esquina entre A (extremo `finA`) y B (extremo `finB`). null si no procede. */
+function inglete(
+  a: Barrier, finA: boolean, tA: number, b: Barrier, finB: boolean, tB: number, centro: { x: number; y: number },
+): [CorteInglete, CorteInglete] | null {
+  // Vértice interior: punto medio de los dos extremos (coinciden dentro de la tolerancia).
+  const pA = finA ? { x: a.x2, y: a.y2 } : { x: a.x1, y: a.y1 };
+  const pB = finB ? { x: b.x2, y: b.y2 } : { x: b.x1, y: b.y1 };
+  const P = { x: (pA.x + pB.x) / 2, y: (pA.y + pB.y) / 2 };
+  // Dirección desde el vértice hacia el resto de cada muro.
+  const dir = (w: Barrier, fin: boolean) => {
+    const dx = fin ? w.x1 - w.x2 : w.x2 - w.x1, dy = fin ? w.y1 - w.y2 : w.y2 - w.y1;
+    const L = Math.hypot(dx, dy);
+    return { x: dx / L, y: dy / L };
+  };
+  const dA = dir(a, finA), dB = dir(b, finB);
+  const cruz = dA.x * dB.y - dA.y * dB.x;
+  if (Math.abs(cruz) < 1e-6) return null; // colineales (o retroceso): corte recto
+  const nA = normalProtegida(a, centro), nB = normalProtegida(b, centro);
+  // ¿Banda hacia dentro del ángulo (hacia el otro muro)? Las dos igual: esquina exterior o entrante.
+  const dentroA = nA.nx * dB.x + nA.ny * dB.y > 0, dentroB = nB.nx * dA.x + nB.ny * dA.y > 0;
+  if (dentroA !== dentroB) return null;
+  // Q = P + tA·nA + s·dA = P + tB·nB + w·dB (intersección de las caras exteriores).
+  const cx = tB * nB.nx - tA * nA.nx, cy = tB * nB.ny - tA * nA.ny;
+  const sA = (cx * dB.y - cy * dB.x) / cruz;
+  const Q = { x: P.x + tA * nA.nx + sA * dA.x, y: P.y + tA * nA.ny + sA * dA.y };
+  const mx = Q.x - P.x, my = Q.y - P.y;
+  const largo = Math.hypot(mx, my);
+  if (!(largo > EPS) || largo > LIMITE_INGLETE * Math.max(tA, tB)) return null;
+  // Normal de la recta PQ; cada banda conserva el lado donde está su propio muro.
+  const k = { x: -my / largo, y: mx / largo };
+  const lado = (d: { x: number; y: number }) => (k.x * d.x + k.y * d.y >= 0 ? 1 : -1);
+  const sgA = lado(dA), sgB = lado(dB);
+  if (sgA === sgB) return null; // los dos muros del mismo lado del inglete: geometría no válida
+  return [
+    { px: P.x, py: P.y, nx: sgA * k.x, ny: sgA * k.y },
+    { px: P.x, py: P.y, nx: sgB * k.x, ny: sgB * k.y },
+  ];
 }
 
 /** ¿Está el punto en la franja que barre el haz primario? null si la fuente no trae `ejeGantry_deg`. */
@@ -322,17 +420,42 @@ interface CruceGeometrico {
   profundidad_mm: number;
 }
 
+/** Las uniones dependen sólo de barreras, escala y centroide: se reutilizan en toda una malla. */
+const CACHE_UNIONES = new WeakMap<Barrier[], { firma: number; scale: number; cx: number; cy: number; uniones: UnionesBarrera[] }>();
+
+/** Firma numérica barata de la geometría (por si el arreglo se modifica en su lugar). */
+function firmaBarreras(barriers: Barrier[]): number {
+  let h = barriers.length;
+  barriers.forEach((b, i) => {
+    const t = capasDeBarrera(b).reduce((a, c) => a + c.thickness_mm, 0);
+    h += (i + 1) * (b.x1 * 1.1 + b.y1 * 1.3 + b.x2 * 1.7 + b.y2 * 1.9 + t * 2.3);
+  });
+  return h;
+}
+
+function unionesCacheadas(barriers: Barrier[], scale: number, centro: { x: number; y: number }): UnionesBarrera[] {
+  if (barriers.length < 2) return barriers.map(() => ({}));
+  const firma = firmaBarreras(barriers);
+  const c = CACHE_UNIONES.get(barriers);
+  if (c && c.firma === firma && c.scale === scale && c.cx === centro.x && c.cy === centro.y) return c.uniones;
+  const uniones = unionesDeBarreras(barriers, scale, centro);
+  CACHE_UNIONES.set(barriers, { firma, scale, cx: centro.x, cy: centro.y, uniones });
+  return uniones;
+}
+
 function crucesGeometricos(
   source: RadiationSource, x: number, y: number, barriers: Barrier[], scale: number, centro: { x: number; y: number },
 ): { tocadas: Barrier[]; atenuantes: CruceGeometrico[] } {
   const tocadas: Barrier[] = [];
   const atenuantes: CruceGeometrico[] = [];
   const lr = Math.hypot(x - source.x, y - source.y);
-  for (const barrier of barriers) {
+  const uniones = unionesCacheadas(barriers, scale, centro);
+  for (let ib = 0; ib < barriers.length; ib++) {
+    const barrier = barriers[ib];
     const capas = capasDeBarrera(barrier);
     const espesor_mm = capas.reduce((a, c) => a + c.thickness_mm, 0);
     const cuerda = espesor_mm > 0 && scale > 0
-      ? cuerdaEnBarrera(source.x, source.y, x, y, barrier, espesor_mm / 1000 / scale, normalProtegida(barrier, centro))
+      ? cuerdaEnBarrera(source.x, source.y, x, y, barrier, espesor_mm / 1000 / scale, normalProtegida(barrier, centro), uniones[ib])
       : null;
     const linea = cruceSegmentoBarrera(source.x, source.y, x, y, barrier);
     if (!cuerda && !linea) continue;
@@ -601,17 +724,72 @@ export function kermaComponente(d: DosisEnPunto, componente: ComponenteCampo, so
     .reduce((a, c) => a + c.kerma_mSv_semana, 0);
 }
 
-/** Malla de dosis del heat map (misma malla que `calculateHeatmapGrid`), atenuada por barreras. */
+// ───────────────────────────────────────────────────────────────
+// Heat map del lienzo (Fase 5): dominio en metros reales.
+// Antes (`heatmapGridPoints`) se muestreaban ±200 px alrededor de cada fuente: 4 m en un plano a 0.02 m/px
+// pero 0.2 m en un DXF en mm, que no llegaba a los muros. Ahora el dominio es la unión de
+//   · el plano: fuentes y barreras + `MARGEN_DOMINIO_HEATMAP_M` (1 m) en metros, y
+//   · alrededor de cada fuente, el radio R en el que su kerma SIN blindaje cae bajo
+//     `UMBRAL_DOMINIO_HEATMAP_mSv_semana` (0.002 mSv/semana = P/10 de zona no controlada, NCRP 147/151),
+//     R = √(K(1 m)/umbral) por el inverso del cuadrado, acotado a [1 m, `RADIO_MAX_DOMINIO_HEATMAP_M` = 10 m].
+// El paso es el mayor de `gridSize` (px) y lado mayor / `MAX_CELDAS_LADO_HEATMAP`, así que el número de
+// puntos no depende de la escala del plano. Los valores son `dosisEnPunto` en el centro de cada celda.
+// ───────────────────────────────────────────────────────────────
+
+export const UMBRAL_DOMINIO_HEATMAP_mSv_semana = 0.002;
+export const RADIO_MAX_DOMINIO_HEATMAP_M = 10;
+export const MARGEN_DOMINIO_HEATMAP_M = 1;
+export const MAX_CELDAS_LADO_HEATMAP = 80;
+
+/** Radio (m) en el que el kerma sin blindaje de la fuente cae bajo el umbral del dominio, acotado. */
+export function radioDominioFuente(
+  source: RadiationSource, scale_m_per_pixel: number, opciones: OpcionesCampoDosis = {},
+): number {
+  if (!(scale_m_per_pixel > 0)) return MARGEN_DOMINIO_HEATMAP_M;
+  const k1 = contribucionFuente(source, source.x + 1 / scale_m_per_pixel, source.y, scale_m_per_pixel, { ...opciones, barriers: [] })
+    .kermaSinBlindaje_mSv_semana;
+  const r = Number.isFinite(k1) && k1 > 0 ? Math.sqrt(k1 / UMBRAL_DOMINIO_HEATMAP_mSv_semana) : MARGEN_DOMINIO_HEATMAP_M;
+  return Math.min(RADIO_MAX_DOMINIO_HEATMAP_M, Math.max(MARGEN_DOMINIO_HEATMAP_M, r));
+}
+
+/** Rectángulo (px) del heat map del lienzo: plano + margen ∪ radio de umbral de cada fuente (en metros). */
+export function dominioHeatmap(
+  sources: RadiationSource[], scale_m_per_pixel: number, opciones: OpcionesCampoDosis = {},
+): RectanguloPlano | null {
+  if (!sources.length || !(scale_m_per_pixel > 0)) return null;
+  const plano = limitesDelPlano({ sources, barriers: opciones.barriers ?? [], scale_m_per_pixel }, MARGEN_DOMINIO_HEATMAP_M)!;
+  let x0 = plano.x0, y0 = plano.y0, x1 = plano.x0 + plano.ancho, y1 = plano.y0 + plano.alto;
+  for (const s of sources) {
+    const r = radioDominioFuente(s, scale_m_per_pixel, opciones) / scale_m_per_pixel;
+    x0 = Math.min(x0, s.x - r); y0 = Math.min(y0, s.y - r);
+    x1 = Math.max(x1, s.x + r); y1 = Math.max(y1, s.y + r);
+  }
+  return { x0, y0, ancho: x1 - x0, alto: y1 - y0 };
+}
+
+/**
+ * Malla de dosis del heat map del lienzo, atenuada por barreras, sobre `dominioHeatmap` (metros reales).
+ * `gridSize` es el paso mínimo en px; el paso real crece para no pasar de `MAX_CELDAS_LADO_HEATMAP` celdas por lado.
+ */
 export function calcularMallaDosis(
   sources: RadiationSource[],
   scale_m_per_pixel: number,
   gridSize: number = 50,
   opciones: OpcionesCampoDosis = {},
 ): PuntoMallaDosis[] {
-  return heatmapGridPoints(sources, gridSize).map(({ x, y }) => {
-    const d = dosisEnPunto(sources, x, y, scale_m_per_pixel, opciones);
-    return { x, y, kerma: d.kerma_mSv_semana, kermaSinBlindaje: d.kermaSinBlindaje_mSv_semana };
-  });
+  const rect = dominioHeatmap(sources, scale_m_per_pixel, opciones);
+  if (!rect || !(gridSize > 0)) return [];
+  const paso = Math.max(gridSize, Math.max(rect.ancho, rect.alto) / MAX_CELDAS_LADO_HEATMAP);
+  const malla = calcularMallaRegular(sources, scale_m_per_pixel, rect, Math.max(1, Math.ceil(rect.ancho / paso - 1e-9)), opciones);
+  const puntos: PuntoMallaDosis[] = [];
+  for (let iy = 0; iy < malla.ny; iy++) {
+    for (let ix = 0; ix < malla.nx; ix++) {
+      const { x, y } = centroCelda(malla, ix, iy);
+      const k = iy * malla.nx + ix;
+      puntos.push({ x, y, kerma: malla.valores[k], kermaSinBlindaje: malla.sinBlindaje[k], paso_px: malla.paso_px });
+    }
+  }
+  return puntos;
 }
 
 // ───────────────────────────────────────────────────────────────

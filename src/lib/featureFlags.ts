@@ -102,9 +102,39 @@ export function esVisorEnRevision(id: string): boolean {
   return IDS_VISORES_EN_REVISION.includes(id.toLowerCase());
 }
 
-/** ¿Se puede abrir/montar este visor? Siempre true para lo que no está en revisión. */
-export function visorDisponible(id: string, habilitados: boolean = VISORES_EN_REVISION): boolean {
-  return habilitados || !esVisorEnRevision(id);
+// ───────────────────────────────────────────────────────────────
+// Fase 5: una bandera por visor. Los cuatro ya están conectados a `doseFieldEngine` (vía
+// `src/lib/visoresDosis.ts`) y tienen prueba visor ↔ motor, pero siguen INACTIVOS hasta que el
+// responsable los autorice: todas en `false` por omisión, sólo se encienden con su variable VITE_*.
+// ───────────────────────────────────────────────────────────────
+
+/** Heat Map Avanzado (`HeatMapViewer`), id `heatmap`. */
+export const VISOR_HEATMAP_AVANZADO: boolean = import.meta.env.VITE_VISOR_HEATMAP_AVANZADO === 'true';
+/** Curvas Isodosis (`IsodosisViewer`), id `isodosis`. */
+export const VISOR_ISODOSIS: boolean = import.meta.env.VITE_VISOR_ISODOSIS === 'true';
+/** Isosuperficie 3D (`Isosurface3DDialog`), id `isosurface3d`. */
+export const VISOR_ISOSUPERFICIE_3D: boolean = import.meta.env.VITE_VISOR_ISOSUPERFICIE_3D === 'true';
+/** 3D Dose Mapping (`DoseMapping3D`), id `dose3d`. */
+export const VISOR_DOSE_MAPPING_3D: boolean = import.meta.env.VITE_VISOR_DOSE_MAPPING_3D === 'true';
+
+/** Bandera propia de cada visor en revisión (id en minúsculas). */
+export const BANDERAS_VISOR: Readonly<Record<string, boolean>> = {
+  heatmap: VISOR_HEATMAP_AVANZADO,
+  isodosis: VISOR_ISODOSIS,
+  isosurface3d: VISOR_ISOSUPERFICIE_3D,
+  dose3d: VISOR_DOSE_MAPPING_3D,
+};
+
+/**
+ * ¿Se puede abrir/montar este visor? Siempre true para lo que no está en revisión; un visor en revisión
+ * se habilita con `VISORES_EN_REVISION` (todos) o con su bandera propia (`BANDERAS_VISOR`).
+ */
+export function visorDisponible(
+  id: string,
+  habilitados: boolean = VISORES_EN_REVISION,
+  banderas: Readonly<Record<string, boolean>> = BANDERAS_VISOR,
+): boolean {
+  return habilitados || !esVisorEnRevision(id) || banderas[id.toLowerCase()] === true;
 }
 
 /** Quita de una lista de menú las entradas de visores en revisión (mientras la bandera esté apagada). */
@@ -112,6 +142,7 @@ export function filtrarVisoresEnRevision<T>(
   items: readonly T[],
   idDe: (item: T) => string,
   habilitados: boolean = VISORES_EN_REVISION,
+  banderas: Readonly<Record<string, boolean>> = BANDERAS_VISOR,
 ): T[] {
-  return items.filter((item) => visorDisponible(idDe(item), habilitados));
+  return items.filter((item) => visorDisponible(idDe(item), habilitados, banderas));
 }

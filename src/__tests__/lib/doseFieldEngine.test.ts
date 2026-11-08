@@ -48,17 +48,20 @@ describe('doseFieldEngine — sin barreras', () => {
     expect(k1 / k2).toBeCloseTo(4, 10);
   });
 
-  it('la malla es idéntica a calculateHeatmapGrid para modalidades de K₀ único', () => {
+  it('la malla del heat map da calculateUnshieldedKerma en cada punto para modalidades de K₀ único', () => {
+    // Fase 5: el dominio ya no es ±200 px (`heatmapGridPoints`) sino metros reales; el valor por punto no cambia.
     const fuentes = [fuente('ct-body', { x: 100, y: 120 }), fuente('pet-f18', { x: 300, y: 80, nuclearActivity_GBq: 0.5 })];
     const motor = calcularMallaDosis(fuentes, 0.01, 40);
-    const previa = calculateHeatmapGrid(fuentes, 0.01, 40);
-    expect(motor.length).toBe(previa.length);
-    motor.forEach((p, i) => {
-      expect(p.x).toBe(previa[i].x);
-      expect(p.y).toBe(previa[i].y);
-      expect(p.kerma).toBe(previa[i].kerma);
-      expect(p.kermaSinBlindaje).toBe(previa[i].kerma);
+    expect(motor.length).toBeGreaterThan(100);
+    expect(motor.length).toBeLessThanOrEqual(80 * 80);
+    motor.forEach((p) => {
+      const ref = fuentes.reduce((a, s) => a + calculateUnshieldedKerma(s, p.x, p.y, 0.01), 0);
+      expect(Math.abs(p.kerma - ref)).toBeLessThanOrEqual(1e-6 * ref);
+      expect(p.kermaSinBlindaje).toBe(p.kerma);
     });
+    // calculateHeatmapGrid (@deprecated) conserva su malla ±200 px; sus valores coinciden con el motor.
+    const previa = calculateHeatmapGrid(fuentes, 0.01, 40);
+    expect(previa.length).toBeGreaterThan(0);
   });
 });
 
@@ -143,7 +146,8 @@ describe('doseFieldEngine — barreras', () => {
     const s = fuente('linac-6mv', { x: 100, y: 100 });
     const b = barrera({ x1: 200, y1: -500, x2: 200, y2: 500, thickness_mm: 1000 });
     const malla = calcularMallaDosis([s], 0.01, 40, { barriers: [b] });
-    const detras = malla.filter((p) => p.x > 200);
+    // Fase 5: el dominio llega más allá de los extremos del muro (y = ±500 px); se mira frente a él.
+    const detras = malla.filter((p) => p.x > 200 && Math.abs(p.y - 100) < 300);
     const delante = malla.filter((p) => p.x < 200);
     expect(detras.length).toBeGreaterThan(0);
     expect(detras.every((p) => p.kerma < p.kermaSinBlindaje)).toBe(true);
