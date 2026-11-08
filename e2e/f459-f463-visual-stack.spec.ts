@@ -5,6 +5,11 @@ import { bootWorkspace } from './helpers';
 
 const outputDir = path.resolve('outputs', 'f459_f463_visual_stack');
 
+
+// Fase 1 motor de dosis: la vista previa Babylon está detrás de VISOR_3D_BABYLON (apagada por omisión).
+// Esta prueba sólo aplica a un build con VITE_VISOR_3D_BABYLON=true; ejecutarla con E2E_VISOR_3D_BABYLON=1.
+const VISOR_3D_BABYLON = process.env.E2E_VISOR_3D_BABYLON === '1';
+
 test('F459-F463 visual stack shows Unity bridge, PBR DB, Babylon visuals and WASD mode', async ({ page }) => {
   test.setTimeout(120_000);
   await mkdir(outputDir, { recursive: true });
@@ -20,8 +25,11 @@ test('F459-F463 visual stack shows Unity bridge, PBR DB, Babylon visuals and WAS
 
   await expect(page.getByTestId('f459-f463-visual-stack')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('f459-f460-unity-bridge-summary')).toBeVisible();
-  await expect(page.getByTestId('f455-babylon-runtime-smoke')).toBeVisible();
-  await expect(page.getByTestId('f455-babylon-runtime-status')).toContainText(/ready|loading/, { timeout: 30_000 });
+  const babylonCard = page.getByTestId(VISOR_3D_BABYLON ? 'f455-babylon-runtime-smoke' : 'babylon-visor-en-revision');
+  await expect(babylonCard).toBeVisible();
+  if (VISOR_3D_BABYLON) {
+    await expect(page.getByTestId('f455-babylon-runtime-status')).toContainText(/ready|loading/, { timeout: 30_000 });
+  }
   await expect(page.getByTestId('f461-photoreal-advanced-profile')).toBeVisible();
   await expect(page.getByTestId('f462-pbr-material-gallery')).toBeVisible();
   await expect(page.getByTestId('f463-wasd-visual-guide')).toBeVisible();
@@ -35,7 +43,7 @@ test('F459-F463 visual stack shows Unity bridge, PBR DB, Babylon visuals and WAS
   const babylonScreenshot = path.join(outputDir, '03_babylon_visual_card.png');
   await page.screenshot({ path: visualStackScreenshot, fullPage: false });
   await page.getByTestId('f462-pbr-material-gallery').screenshot({ path: materialsScreenshot });
-  await page.getByTestId('f455-babylon-runtime-smoke').screenshot({ path: babylonScreenshot });
+  await babylonCard.screenshot({ path: babylonScreenshot });
   await writeFile(
     path.join(outputDir, 'f459_f463_visual_stack_e2e.json'),
     `${JSON.stringify({

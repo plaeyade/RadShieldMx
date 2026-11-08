@@ -32,7 +32,6 @@ import { suggestOccupancyProfile, NCRP_DESIGN_GOALS, formatOccupancy } from '@/l
 // v50: Motor optimizado con spatial hashing + async WebWorker
 import '@/lib/shieldingEngine';
 import { AsyncShieldingEngine } from '@/lib/engine/AsyncShieldingEngine';
-import { CanvasRenderer } from '@/lib/canvas/CanvasRenderer';
 import { createProfiler } from '@/lib/performance/Profiler';
 // Fase 1.1: ErrorBoundary para cada dialog
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -96,9 +95,12 @@ import LogFileAnalysisDialog from '@/sections/dialogs/LogFileAnalysisDialog';
 import CommandPalette, { DEFAULT_COMMANDS } from '@/sections/dialogs/CommandPalette';
 import UndoRedoHistoryPanel from '@/sections/dialogs/UndoRedoHistoryPanel';
 import ContextualHelpPanel from '@/sections/ContextualHelpPanel';
-import IsodosisViewer from '@/sections/dialogs/IsodosisViewer';
-import DoseMapping3D from '@/sections/dialogs/DoseMapping3D';
-import HeatMapViewer from '@/sections/dialogs/HeatMapViewer';
+import { HEATMAP_GPU, visorDisponible } from '@/lib/featureFlags';
+// Visores en revisión (Fase 1 del motor de dosis): carga diferida y sólo se montan con
+// VISORES_EN_REVISION activa; DoseMapping3D arrastraba @react-three/* al chunk de entrada.
+const IsodosisViewer = lazy(() => import('@/sections/dialogs/IsodosisViewer'));
+const DoseMapping3D = lazy(() => import('@/sections/dialogs/DoseMapping3D'));
+const HeatMapViewer = lazy(() => import('@/sections/dialogs/HeatMapViewer'));
 // ─── ALL Dialogs lazy-loaded for performance ───
 const CompareModeDialog = lazy(() => import('@/sections/dialogs/CompareModeDialog'));
 const BatchCalculationDialog = lazy(() => import('@/sections/dialogs/BatchCalculationDialog'));
@@ -832,7 +834,6 @@ export default function ShieldingDesigner() {
   // v50: Async engine + profiler (instanciados una sola vez)
   const asyncEngineRef = useRef(new AsyncShieldingEngine());
   const profilerRef = useRef(createProfiler());
-  const rendererRef = useRef<CanvasRenderer | null>(null);
   const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([
     { id: 'cp-1', name: 'Control Desk', x: 150, y: 150, designGoal_mSv_per_wk: 0.02, occupancyFactor: 1.0, notes: 'Main control room' },
     { id: 'cp-2', name: 'Patient Waiting', x: 500, y: 100, designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.2, notes: 'Public area' },
@@ -1353,15 +1354,17 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
     const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
     let hm: { x: number; y: number; kerma: number }[] | null = null;
-    if (webgpuHeatmap.available) {
+    // HEATMAP_GPU apagada: el shader WebGPU (W·U/d² en px) no está portado al motor de campo y
+    // no atenúa por barreras; se usa siempre el motor de CPU (doseFieldEngine).
+    if (HEATMAP_GPU && webgpuHeatmap.available) {
       hm = await webgpuHeatmap.computeHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40);
     }
     if (!hm) {
-      hm = calculateHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40, ctProfile);
+      hm = calculateHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40, ctProfile, floorPlan.barriers);
     }
     setHeatmapData(hm);
     return hm;
-  }, [calculateHeatmap, floorPlan.scale_m_per_pixel, floorPlan.sources, isodosisProfiles, selectedIsodosisId, webgpuHeatmap]);
+  }, [calculateHeatmap, floorPlan.barriers, floorPlan.scale_m_per_pixel, floorPlan.sources, isodosisProfiles, selectedIsodosisId, webgpuHeatmap]);
 
   const handleToggleHeatmap = useCallback(async (enabled: boolean) => {
     setHeatmapEnabled(enabled);
@@ -2527,7 +2530,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         {/* v114-116: Multi-Layer Shield / Source Library / 3D Isosurface */}
         <LazyDialog name="multiLayerShield" component={MultiLayerShieldDialog} />
         <LazyDialog name="sourceLibrary" component={SourceLibraryDialog} />
-        <LazyDialog name="isosurface3d" component={Isosurface3DDialog} />
+        {visorDisponible('isosurface3d') && <LazyDialog name="isosurface3d" component={Isosurface3DDialog} />}
         {/* v117-120: PDF Report / Pareto / Parametric 3D */}
         <LazyDialog name="pdfReport" component={PdfReportDialog} floorPlan={floorPlan} />
         <LazyDialog name="paretoOptimizer" component={ParetoOptimizerDialog} />
@@ -2619,9 +2622,12 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         {/* v15: Undo/Redo History */}
         <UndoRedoHistoryPanel open={showHistoryPanel} onOpenChange={setShowHistoryPanel} history={actionHistory} currentIndex={historyIndex} onJumpTo={(idx) => setHistoryIndex(idx)} onUndo={undo} onRedo={redo} canUndo={canUndo} canRedo={canRedo} />
         {/* v15: Visualization dialogs */}
-        <IsodosisViewer open={showIsodosis} onOpenChange={setShowIsodosis} />
-        <DoseMapping3D open={showDose3D} onOpenChange={setShowDose3D} />
-        <HeatMapViewer open={showHeatMap} onOpenChange={setShowHeatMap} />
+        {/* Visores en revisión: inactivos mientras VISORES_EN_REVISION esté apagada (código conservado). */}
+        <Suspense fallback={null}>
+          {visorDisponible('isodosis') && showIsodosis && <IsodosisViewer open={showIsodosis} onOpenChange={setShowIsodosis} />}
+          {visorDisponible('dose3D') && showDose3D && <DoseMapping3D open={showDose3D} onOpenChange={setShowDose3D} />}
+          {visorDisponible('heatMap') && showHeatMap && <HeatMapViewer open={showHeatMap} onOpenChange={setShowHeatMap} />}
+        </Suspense>
         {/* v15: Contextual Help Panel (rendered inline, not in Suspense) */}
         <LazyDialog name="helpPanel" component={ContextualHelpPanel} activeContext={helpContext} />
         {/* v15.2: Category C dialogs (conditional mount) */}

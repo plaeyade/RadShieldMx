@@ -20,6 +20,7 @@ import {
   Flame, Grid3x3
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { filtrarVisoresEnRevision } from '@/lib/featureFlags';
 
 interface CommandAction {
   id: string;
@@ -36,7 +37,11 @@ interface CommandPaletteProps {
   actions: CommandAction[];
 }
 
-export const DEFAULT_COMMANDS = (handlers: Record<string, () => void>): CommandAction[] => [
+/**
+ * Comandos de la paleta. Los visores en revisión (isodosis, dose3d, heatmap) se filtran con
+ * `filtrarVisoresEnRevision` mientras `VISORES_EN_REVISION` esté apagada (Fase 1 del motor de dosis).
+ */
+export const DEFAULT_COMMANDS = (handlers: Record<string, () => void>): CommandAction[] => filtrarVisoresEnRevision<CommandAction>([
   // Calculo
   { id: 'calc', name: 'Calcular Blindaje', icon: Play, shortcut: 'F5', group: 'Calculo', action: handlers.onCalculate },
   { id: 'shield', name: 'Calculadora Blindaje Avanzado', icon: Calculator, group: 'Calculo', action: handlers.onShieldingCalculator },
@@ -104,7 +109,7 @@ export const DEFAULT_COMMANDS = (handlers: Record<string, () => void>): CommandA
   { id: 'dark', name: 'Toggle Dark Mode', icon: Sun, group: 'Utilidades', action: handlers.onDarkModeToggle },
   { id: 'lang', name: 'Cambiar Idioma ES/EN', icon: Globe, group: 'Utilidades', action: handlers.onLangToggle },
   { id: 'help', name: 'Ayuda / Tutorial', icon: HelpCircle, group: 'Utilidades', action: handlers.onTutorial },
-];
+], (c) => c.id);
 
 export default function CommandPalette({ open, onOpenChange, actions }: CommandPaletteProps) {
   const [recentCommands, setRecentCommands] = useState<string[]>(() => {

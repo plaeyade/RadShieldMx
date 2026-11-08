@@ -45,6 +45,7 @@ import {
 import { buildF459F463VisualStack } from '@/lib/medical3D/f459F463VisualStack';
 import { buildF464F468VisualBetaContract } from '@/lib/medical3D/f464F468VisualBeta';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
+import { NOTA_VISOR_EN_REVISION, VISOR_3D_BABYLON } from '@/lib/featureFlags';
 
 interface Props {
   open: boolean;
@@ -1203,6 +1204,10 @@ function BabylonRuntimeSmokePreview({
 
     setSmokeStatus('loading', 'Cargando @babylonjs/core/loaders/materials...');
     setMetrics({ firstFrameMs: null, fps: null, meshes: 0 });
+
+    // Con VISOR_3D_BABYLON apagada el componente no se monta; la guarda además deja la rama
+    // muerta para que el build no emita los chunks de @babylonjs/* (Fase 6: consolidar en r3f).
+    if (!VISOR_3D_BABYLON) return () => { disposed = true; };
 
     void (async () => {
       try {
@@ -2510,12 +2515,21 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 <div>{renderStrategy.role}</div>
                 <div className="mt-1 text-amber-700">{renderStrategy.activationGate}</div>
               </div>
-              <BabylonRuntimeSmokePreview
-                scene={scene}
-                enabled={open && hasGeometry}
-                onStatusChange={setBabylonSmokeStatus}
-                deepContract={babylonDeepContract}
-              />
+              {VISOR_3D_BABYLON ? (
+                <BabylonRuntimeSmokePreview
+                  scene={scene}
+                  enabled={open && hasGeometry}
+                  onStatusChange={setBabylonSmokeStatus}
+                  deepContract={babylonDeepContract}
+                />
+              ) : (
+                <div
+                  className="rounded border border-amber-200 bg-amber-50 p-2 text-[10px] text-amber-900"
+                  data-testid="babylon-visor-en-revision"
+                >
+                  Vista previa Babylon — {NOTA_VISOR_EN_REVISION}. El visor 3D activo es Three/R3F.
+                </div>
+              )}
               <div
                 data-testid="f520-f524-deep-renderer-babylon-3d"
                 className="rounded border border-cyan-100 bg-white p-2 text-[10px] leading-relaxed text-slate-650"

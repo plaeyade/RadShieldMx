@@ -29,6 +29,7 @@ import type { CriticalPoint, FloorPlan, Barrier } from '@/types/radshield';
 import { applyShieldingPresetToBarrier, SHIELDING_PRESETS } from '@/lib/canvasF85Workflow';
 import { CANVAS_TOOL_ICON_PROFILES, getCanvasToolIconProfile } from '@/lib/f98UnifiedIconography';
 import { toast } from 'sonner';
+import { filtrarVisoresEnRevision } from '@/lib/featureFlags';
 import TG108PatientModelCard from './TG108PatientModelCard';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
@@ -124,7 +125,7 @@ const NCRP_TOOLS = [
 /* ═══════════════════════════════════════════
    ANALYSIS TOOLS — v113
    ═══════════════════════════════════════════ */
-const ANALYSIS_TOOLS = [
+const ANALYSIS_TOOLS = filtrarVisoresEnRevision([
   { icon: Database,         label: 'NIST', dialog: 'nistXcom',                title: 'NIST XCOM Coef. Atenuacion',      color: '#059669', bg: '#ecfdf5' },
   { icon: Brain,            label: 'ML',   dialog: 'onnxPredictor',           title: 'ML Predictor ONNX espesor',       color: '#7c3aed', bg: '#f5f3ff' },
   { icon: TrendingDown,     label: 'Opt',  dialog: 'multiObjectiveOptimizer', title: 'Optimizador Multi-Objetivo',      color: '#0d9488', bg: '#f0fdfa' },
@@ -137,7 +138,7 @@ const ANALYSIS_TOOLS = [
   { icon: TrendingDown,     label: 'Pare', dialog: 'paretoOptimizer',         title: 'NSGA-III Pareto Optimizer — Multi-objetivo', color: '#7c3aed', bg: '#f5f3ff' },
   { icon: Atom,             label: 'Nuc',  dialog: 'nuclideLibrary500',       title: 'Nuclide Library — 40+ radionucleidos',       color: '#7c3aed', bg: '#f5f3ff' },
   { icon: Play,             label: 'Swp',  dialog: 'doseSweep',               title: 'Animated Dose Sweep — 360deg rotation',      color: '#e11d48', bg: '#fff1f2' },
-];
+], (t) => t.dialog);
 
 /* ═══════════════════════════════════════════
    UTILITY TOOLS — v113

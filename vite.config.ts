@@ -19,7 +19,8 @@ export default defineConfig({
     reportCompressedSize: false,
     sourcemap: false,
     target: 'esnext',
-    chunkSizeWarningLimit: 5000,
+    // Fase 1 motor de dosis: 5000 ocultaba un chunk de entrada de 3.9 MB; ver docs/plan-motores-calculo.md (Fase 6).
+    chunkSizeWarningLimit: 1500,
     minify: 'esbuild',
   },
 });
