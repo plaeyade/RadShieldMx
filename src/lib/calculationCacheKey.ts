@@ -49,6 +49,16 @@ export function buildCalculationCachePayload(fp: FloorPlan) {
       nuclearActivity_GBq: stableRound(source.nuclearActivity_GBq ?? 0, 6),
       ctDLP_mGy_cm: stableRound(source.ctDLP_mGy_cm ?? 0, 4),
       ctScansPerPatient: stableRound(source.ctScansPerPatient ?? 0, 4),
+      // Modelo por paciente (TG-108 en PET, «estilo TG-108» en SPECT/I-131): cambia la dosis.
+      tg108: source.tg108
+        ? {
+            A0_MBq: stableRound(source.tg108.A0_MBq, 4),
+            pacientesSemana: stableRound(source.tg108.pacientesSemana, 4),
+            tU_h: stableRound(source.tg108.tU_h, 4),
+            tI_h: stableRound(source.tg108.tI_h, 4),
+            sala: source.tg108.sala,
+          }
+        : null,
     })),
     criticalPoints: fp.criticalPoints?.map((point) => ({
       id: point.id,
