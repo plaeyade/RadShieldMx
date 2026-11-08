@@ -11,6 +11,7 @@
  * Cuando hay margen y una TVL conocida, estima la dosis tras la barrera con P·10^(−margen/TVL).
  */
 import type { Barrier, FloorPlan } from '@/types/radshield';
+import { codigoCatalogo } from '@/lib/shieldingMath';
 
 export type EstadoVerificacion = 'CUMPLE' | 'NO_CUMPLE' | 'SIN_CALCULO' | 'SIN_ESPESOR' | 'REVISAR_MATERIAL';
 
@@ -31,7 +32,7 @@ export function espesorRequerido(b: Barrier): number | null {
   const r = b.requiredThickness_mm;
   if (typeof r === 'number') return Number.isFinite(r) ? r : null;
   if (r && typeof r === 'object') {
-    const v = r[b.materialCode];
+    const v = r[b.materialCode] ?? r[codigoCatalogo(b.materialCode)];
     return typeof v === 'number' && Number.isFinite(v) ? v : null;
   }
   return null;

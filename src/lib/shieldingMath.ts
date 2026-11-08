@@ -669,3 +669,24 @@ export function calculateHeatmapGrid(
     return { x, y, kerma: totalKerma };
   });
 }
+
+// ───────────────────────────────────────────────────────────────
+// Códigos de material del lienzo → catálogo
+// ───────────────────────────────────────────────────────────────
+/**
+ * Códigos de material del importador CAD/BIM (`cadBimBridge`: «concreto», «plomo»…) → código del catálogo
+ * `MATERIALS`. Sin esta equivalencia los muros de un DXF importado no atenuaban (material desconocido, B = 1)
+ * y el reporte no encontraba el espesor requerido del material seleccionado (Fase 4).
+ */
+export const ALIAS_MATERIAL_CATALOGO: Record<string, string> = {
+  concreto: 'CONCRETE235',
+  concreto_baritado: 'CONCRETEBARITE',
+  plomo: 'PB',
+  acero: 'STEEL',
+  vidrio_plomo: 'LEADGLASS',
+};
+
+/** Código del catálogo para un código de material del lienzo (sin cambios si ya es del catálogo). */
+export function codigoCatalogo(code: string): string {
+  return ALIAS_MATERIAL_CATALOGO[code] ?? code;
+}

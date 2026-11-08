@@ -4,7 +4,10 @@
  * Datos transcritos del informe (indexado en GAMMA, SHA-256 b45e41b5…):
  * - Tabla 4.5 (p. 43): kerma primario sin blindaje por paciente a 1 m, K¹_P, y W_norm.
  * - Tabla 4.7 (pp. 46–47): kerma secundario sin blindaje por paciente a 1 m, K¹_sec
- *   (fuga + dispersión lateral a 90°, y fuga + dispersión hacia adelante/atrás a 135°).
+ *   (fuga + dispersión lateral a 90°, y fuga + dispersión hacia adelante/atrás a 135°), y sus
+ *   columnas por separado (fuga, dispersión a 90° y a 135°) para los ejemplos con d_L ≠ d_S (§5.3.3, §5.4).
+ * - Tabla 4.7 nota f y §5.5 (p. 92): mastografía, 3.6×10⁻² mGy/paciente a 1 m del ISOCENTRO.
+ * - Figuras A.2 y A.3 (pp. 123–124): ajustes de Archer de la radiación secundaria de TC (120 y 140 kVp).
  * - Tabla B.1 (p. 133): ajustes de Archer para transmisión PRIMARIA (α, β en mm⁻¹).
  * - Tabla C.1 (p. 147): ajustes de Archer para transmisión SECUNDARIA (α, β en mm⁻¹).
  * - Ec. 4.3/4.8: K_P(0) = K¹_P·U·N/d_P²; B = P·d²/(T·U·N·K¹); x = ln[(B^−γ+β/α)/(1+β/α)]/(αγ).
@@ -49,18 +52,48 @@ export const TABLA_4_5: Partial<Record<DistribucionNCRP147, { K1P_mGy: number; W
   chest_room: { K1P_mGy: 1.2, Wnorm: 0.22 },
 };
 
-/** Tabla 4.7: K¹_sec (mGy/paciente a 1 m). `lateral` = fuga + 90°; `frontal` = fuga + 135°. */
-export const TABLA_4_7: Record<DistribucionNCRP147, { Wnorm: number; lateral: number; frontal: number }> = {
-  rad_room_all: { Wnorm: 2.5, lateral: 3.4e-2, frontal: 4.9e-2 },
-  rad_room_chest_bucky: { Wnorm: 0.6, lateral: 5.3e-3, frontal: 7.3e-3 },
-  rad_room_floor_other: { Wnorm: 1.9, lateral: 2.3e-2, frontal: 3.3e-2 },
-  fluoro_tube_rf: { Wnorm: 13, lateral: 3.2e-1, frontal: 4.6e-1 },
-  rad_tube_rf: { Wnorm: 1.5, lateral: 2.9e-2, frontal: 4.0e-2 },
-  chest_room: { Wnorm: 0.22, lateral: 2.7e-3, frontal: 3.6e-3 },
-  mammography_room: { Wnorm: 6.7, lateral: 1.1e-2, frontal: 4.9e-2 },
-  cardiac_angiography: { Wnorm: 160, lateral: 2.7, frontal: 3.8 },
-  peripheral_angiography: { Wnorm: 64, lateral: 6.6e-1, frontal: 9.5e-1 },
+/**
+ * Tabla 4.7: K¹_sec (mGy/paciente a 1 m del tubo y del paciente). `lateral` = fuga + 90°; `frontal` = fuga + 135°.
+ * `fuga`, `dispersion90` y `dispersion135` son las columnas por separado (para d_L ≠ d_S).
+ */
+export const TABLA_4_7: Record<DistribucionNCRP147, {
+  Wnorm: number; lateral: number; frontal: number; fuga: number; dispersion90: number; dispersion135: number;
+}> = {
+  rad_room_all: { Wnorm: 2.5, lateral: 3.4e-2, frontal: 4.9e-2, fuga: 5.3e-4, dispersion90: 3.4e-2, dispersion135: 4.8e-2 },
+  rad_room_chest_bucky: { Wnorm: 0.6, lateral: 5.3e-3, frontal: 7.3e-3, fuga: 3.9e-4, dispersion90: 4.9e-3, dispersion135: 6.9e-3 },
+  rad_room_floor_other: { Wnorm: 1.9, lateral: 2.3e-2, frontal: 3.3e-2, fuga: 1.4e-4, dispersion90: 2.3e-2, dispersion135: 3.3e-2 },
+  fluoro_tube_rf: { Wnorm: 13, lateral: 3.2e-1, frontal: 4.6e-1, fuga: 1.2e-2, dispersion90: 3.1e-1, dispersion135: 4.4e-1 },
+  rad_tube_rf: { Wnorm: 1.5, lateral: 2.9e-2, frontal: 4.0e-2, fuga: 9.4e-4, dispersion90: 2.8e-2, dispersion135: 3.9e-2 },
+  chest_room: { Wnorm: 0.22, lateral: 2.7e-3, frontal: 3.6e-3, fuga: 3.8e-4, dispersion90: 2.3e-3, dispersion135: 3.2e-3 },
+  mammography_room: { Wnorm: 6.7, lateral: 1.1e-2, frontal: 4.9e-2, fuga: 1.1e-5, dispersion90: 1.1e-2, dispersion135: 4.9e-2 },
+  cardiac_angiography: { Wnorm: 160, lateral: 2.7, frontal: 3.8, fuga: 8.8e-2, dispersion90: 2.6, dispersion135: 3.7 },
+  peripheral_angiography: { Wnorm: 64, lateral: 6.6e-1, frontal: 9.5e-1, fuga: 3.4e-3, dispersion90: 6.6e-1, dispersion135: 9.5e-1 },
 };
+
+/**
+ * Tabla 4.7 nota f y §5.5 (p. 92): para mastografía, 3.6×10⁻² mGy/paciente es un máximo conservador de K¹_sec
+ * para TODAS las barreras, medido a 1 m del ISOCENTRO del equipo (cuatro proyecciones). Las entradas de la
+ * Tabla 4.7 se evaluaron a 1 m del tubo y del paciente; en el lienzo la fuente es el isocentro.
+ */
+export const K1_SEC_MASTOGRAFIA_ISOCENTRO_mGy = 3.6e-2;
+
+/**
+ * Figuras A.2 (plomo) y A.3 (concreto), pp. 123–124: ajustes de Archer (Ec. A.2) de la transmisión de la
+ * radiación secundaria de TC (datos de Simpkin, 1991). No hay ajuste de TC para yeso u otros materiales.
+ */
+export const AJUSTES_TC: Record<120 | 140, Record<'lead' | 'concrete', Archer>> = {
+  120: { lead: a(2.246, 5.73, 0.547), concrete: a(0.0383, 0.0142, 0.658) },
+  140: { lead: a(2.009, 3.99, 0.342), concrete: a(0.0336, 0.0122, 0.519) },
+};
+
+/**
+ * Transmisión de la secundaria de TC (Figs. A.2/A.3). Sin kVp definido se toma la mayor de las dos curvas
+ * (Apéndice A, p. 117: suponer la del potencial más alto es conservador; aquí, la mayor transmisión).
+ */
+export function transmisionTC(x_mm: number, material: 'lead' | 'concrete', kvp?: 120 | 140): number {
+  if (kvp) return transmisionArcher(x_mm, AJUSTES_TC[kvp][material]);
+  return Math.max(transmisionArcher(x_mm, AJUSTES_TC[120][material]), transmisionArcher(x_mm, AJUSTES_TC[140][material]));
+}
 
 /** Tabla B.1: transmisión primaria. */
 export const TABLA_B_1: Record<DistribucionNCRP147, Ajustes> = {

@@ -1,6 +1,6 @@
 # Plan de motores de cálculo — campo de dosis unificado
 
-Estado: Fases 1 (PR #26) y 2 (PR #27) fusionadas; Fase 3 en revisión (rama `motor-dosis-fase3`). Herramienta de diseño preliminar; todo resultado
+Estado: Fases 1 (PR #26), 2 (PR #27) y 3 (PR #28) fusionadas; Fase 4 en revisión (rama `fase4`). Herramienta de diseño preliminar; todo resultado
 requiere revisión de un experto calificado / OSR antes de uso clínico o regulatorio.
 
 ## Diagnóstico de partida
@@ -191,6 +191,69 @@ importado de punta a punta (geometría → barreras → campo → reporte).
 
 Salida / pruebas: cada ejemplo reproduce el valor publicado dentro de la tolerancia documentada; el caso
 DWG real queda como prueba E2E en CI.
+
+### Estado de la Fase 4 (rama `fase4`)
+
+Entrada cumplida: Fase 3 fusionada (PR #28). Fuentes: NCRP 147 (Sección 5, pp. 69–101; Tabla 4.7, pp. 46–47;
+Figs. A.2/A.3, pp. 123–124) y NCRP 151 (§7.1, pp. 105–148; Tablas B.8a/B.8b, pp. 168–169), versiones con licencia
+locales (`data/pdf/`, fuera de git); en las pruebas sólo se transcriben los números necesarios.
+
+Suite (`src/__tests__/validacion/`, 43 pruebas + 3 `it.todo` documentados):
+- `ncrp147Capitulo5.test.ts` — vía `calcularBarreraNormativa` y `dosisEnPunto`: §5.1 angiografía cardiaca (K = 5.9,
+  1.3 mm Pb), §5.2 tórax primaria (40 mGy/semana, 2.2 mm; neto 1.4 mm con preblindaje) y secundaria (0.18, 0.42 mm),
+  §5.3.1 piso (39 → 107 mm concreto, 35 mm netos; 0.47 → 33 mm), §5.3.2 techo (0.84 → 44 mm), §5.3.4 cuarto oscuro
+  (1.1 → 0.53 mm), §5.3.6 control (1.3 → 0.27 mm), §5.5 mastografía (1.2 → 9.8 mm de yeso), §5.6.1 TC método DLP
+  (5.2 → 1.5 mm Pb). Con `ncrp147` (distribuciones sin modalidad en el catálogo o con d_L ≠ d_S): §5.3.3 (46 → 1.3 mm,
+  0.45 netos; 1.1 → 0.35 mm), §5.3.5 (7.5 y 0.72; K_tot(0.8 mm) = 0.014), §5.4.1 (1 + 0.29 = 1.3 → 62 mm),
+  §5.4.2 (18.6 y 7; 0.017 a 72 mm; 69 mm), §5.6 CTDI (0.12/0.38 → 3.1 → 1.3 mm).
+  Tolerancias: kerma ±4 % (redondeo a 2 cifras), espesor ±5 % (lectura de figuras / Ec. 4.10 a 2 cifras), campo con
+  el espesor publicado ±10 % de P/T.
+- `ncrp151Capitulo7.test.ts` — primarias §7.1.1 (149.6 cm; 6 MV 1 µSv), §7.1.3 (dispersión a 10°: 0.51 µSv), §7.1.4
+  (fuga 2.2×10⁻³ µSv), §7.1.7 (188.6 cm; 2.7 µSv), §7.1.14 (163 cm); secundarias §7.1.5 (66.4 cm; 2.8/4.6/0.8/0.8 →
+  9 µSv; IMRT 73 cm → 10 µSv), §7.1.8 (94.7 cm → 47 µSv; IMRT 102.4 cm → 48.5 µSv), §7.1.9 (87 cm; IMRT 101.2 cm →
+  12.8 µSv), §7.1.15 (19 µSv tras 73 cm; IMRT 20.5 µSv tras 80.1 cm y 91 cm → 9.3 µSv); laberinto §7.1.10
+  (H_S 2.2, H_LS 1.7, H_ps 34.9, H_LT 0.6 → H_Tot 100 µSv; IMRT 113), §7.1.11 (φ_A 7.88×10⁹, h_φ 1.45×10⁻⁷,
+  65.3/170 µSv), §7.1.12 (Kersey 1.7×10⁻⁶ → 765/1 989 µSv; Wu–McGinley 0.8×10⁻⁶), §7.1.13 (puerta 54 mm BPE + 7 mm
+  Pb; IMRT 72 + 32 mm), §7.1.17 (fuga 80.2/69 → 91 cm, 67 µSv). Tolerancias: espesor ±1.5 % (y ≥ publicado − 0.5 cm),
+  dosis por componente ±5 %, totales ±3 %.
+- `dxfPuntaAPunta.test.ts` — `e2e/fixtures/sample-floorplan.dxf` (el de la prueba Playwright) por las funciones de la
+  app: `importDXFToFloorPlan` → `useShieldingEngine().calculateAllBarriers` (NCRP 147) → `dosisEnPunto` y
+  `mallaDoseMap` → `verificarPlano` (4 × CUMPLE; un muro adelgazado da NO_CUMPLE y campo > P). Corre en el job de
+  Vitest de CI (el job Playwright sigue con `continue-on-error`).
+
+Correcciones al motor (con cita):
+- **Regla de dos fuentes en secundaria NCRP 151** (`combinarPorTipo`): por tipo (dispersión entre energías, fuga entre
+  energías) y después entre tipos, como §7.1.5 (pp. 114–115) y §7.1.8 (p. 123). Antes una sola pasada sobre las
+  cuatro componentes daba 56.9 cm en §7.1.5 (publicado 66.4) y 85.7 cm en §7.1.8 (94.7). Se mantiene la suma directa.
+- **TVL de dispersión a θ < 15°**: max(B.5a a 15°, TVL₁ primario de B.2), como §7.1.3 (p. 110: 45 cm a ~10° con
+  18 MV). Antes 44 cm (no conservador; 0.42 frente a 0.51 µSv).
+- **α₁ del laberinto** (Ec. 2.10/2.11): Tabla B.8b (45°) como §7.1.10.2–3 (pp. 130–131); antes B.8a (hasta 17 %
+  menos, no conservador). Nueva `dsecFuga_m` (d_LS = 7.9 m en H_LS frente a d_sec = 7.3 m en H_ps); antes una sola
+  distancia sobrestimaba H_LS un 15 %.
+- **TC**: transmisión de la secundaria de TC de las Figs. A.2/A.3 (120 y 140 kVp; sin kVp fijo, la mayor) en el campo
+  y en el normativo (`tomografia`: κ·DLP con el perfil de isodosis si lo hay). Antes Archer genérico del material.
+- **Mastografía**: K¹_sec = 3.6×10⁻² mGy/paciente a 1 m del isocentro (Tabla 4.7 nota f; §5.5, p. 92). Antes la
+  columna de 135° de la Tabla 4.7 (4.9×10⁻², medida desde tubo y paciente).
+- **NCRP 147 secundaria**: columna de 90° de la Tabla 4.7 si la barrera tiene 60° ≤ `scatterAngle_deg` ≤ 120°; si
+  no, 135° (por omisión, como antes). Tabla 4.7 completa (fuga, 90°, 135° por separado). Ids `angio-cardiac` y
+  `angio-peripheral` en `DISTRIBUCION_POR_MODALIDAD` (el catálogo aún no los expone).
+- **DXF**: los códigos del importador CAD («concreto», «plomo»…) se resuelven al catálogo (`codigoCatalogo`) en el
+  campo, en `calculateAllBarriers` y en la verificación: antes los muros importados no atenuaban (B = 1) y el reporte
+  quedaba «SIN_CALCULO». El espesor declarado en la capa con unidad («…_300MM») pasa a `thickness_mm` (instalado);
+  el espesor ya no se lee del nombre «DXF n (…)», que daba «n mm».
+
+No reproducidos / pendientes (`it.todo`, sin ajustar la prueba):
+- §7.1.9 sin IMRT: el informe da 8.8 µSv (18 MV) detrás de 87 cm; la Ec. 2.8 con la Tabla B.7 da 9.8 µSv (el caso con
+  IMRT, misma fórmula, sí coincide). Total ≤ P en ambos casos.
+- §7.1.15: el informe aplica la regla de dos fuentes sólo al par mayor (73 cm); la regla por tipo da 83.5 cm
+  (conservador). La dosis detrás de 73 cm sí se reproduce.
+- §5.5 puerta de madera (41 mm): sin madera en el catálogo ni ajuste de madera transcrito de la Tabla C.1.
+- No cubiertos: §7.1.2/§7.1.6/§7.1.16 (TADR en cualquier hora: el motor no calcula R_h), §7.1.17 neutrones directos
+  (Fig. A.2 de NCRP 151, lectura gráfica), §7.2 (CyberKnife, sin modalidad), §5.7 (densitometría).
+- Limitaciones del campo halladas con el DXF: el heat map del lienzo (`calculateHeatmap`) sólo muestrea ±200 px
+  alrededor de las fuentes (±0.2 m en un DXF en mm); la banda de cada muro no cubre el cuadrado t × t de la esquina
+  exterior (el campo ahí sobrestima: conservador). Laberinto/puerta siguen fuera del campo.
+- `VISORES_EN_REVISION` y `HEATMAP_GPU` siguen en `false`.
 
 ## Fase 5 — Reactivar visores uno por uno
 
