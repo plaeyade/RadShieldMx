@@ -29,6 +29,7 @@ import type { CriticalPoint, FloorPlan, Barrier } from '@/types/radshield';
 import { applyShieldingPresetToBarrier, SHIELDING_PRESETS } from '@/lib/canvasF85Workflow';
 import { CANVAS_TOOL_ICON_PROFILES, getCanvasToolIconProfile } from '@/lib/f98UnifiedIconography';
 import { toast } from 'sonner';
+import TG108PatientModelCard from './TG108PatientModelCard';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -219,7 +220,7 @@ interface SidebarProps {
 export default function Sidebar({
   floorPlan, setFloorPlan, activeTool, setActiveTool,
   selectedSource, selectedBarrier, selectedCriticalPoint, updateSelected, deleteSelected, resetView, onImageUpload,
-  onRunCalculations, onUAQ, onMemoriaAI, onMazeCalculator, onDXFViewer,
+  onRunCalculations, onUAQ, onMemoriaAI, onMazeCalculator: _onMazeCalculator, onDXFViewer,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
@@ -277,7 +278,7 @@ export default function Sidebar({
           <Sparkles className="w-4 h-4 text-white" />
         </div>
         <Separator className="my-2" />
-        {DRAWING_TOOLS.slice(0, 5).map(({ id, icon: Icon, label, color, bg, desc }) => (
+        {DRAWING_TOOLS.slice(0, 5).map(({ id, icon: Icon, label, color, desc }) => (
           <Button key={id} variant={activeTool === id ? 'default' : 'ghost'} size="icon" className="h-8 w-8 mb-1"
             onClick={() => setActiveTool(id)} title={desc} aria-label={`${label}: ${desc}`}>
             <Icon className="w-4 h-4" style={{ color: activeTool === id ? '#fff' : color }} />
@@ -586,6 +587,10 @@ export default function Sidebar({
               <Input value={selectedSource.manufacturerVariant ?? 'generic'} onChange={e => updateSelected({ manufacturerVariant: e.target.value })} className="h-8 text-xs" />
             </CardContent>
           </Card>
+        )}
+
+        {selectedSource && (
+          <TG108PatientModelCard source={selectedSource} onChange={tg108 => updateSelected({ tg108 })} />
         )}
 
         {selectedBarrier && (

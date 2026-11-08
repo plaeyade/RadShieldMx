@@ -1,7 +1,12 @@
 // Funciones puras de cálculo de blindaje — extraídas de useShieldingEngine para testabilidad
 // Todas las fórmulas referenciadas contra NCRP 147, 151, AAPM TG 108
 
-import { dosisSemanalTG108, type NuclidoPET } from '@/lib/tg108';
+import {
+  dosisSemanalPorPaciente,
+  dosisSemanalTG108,
+  NUCLIDO_NO_PET_POR_MODALIDAD,
+  NUCLIDO_PET_POR_MODALIDAD,
+} from '@/lib/tg108';
 import {
   type Barrier,
   type CalculationComparison,
@@ -13,7 +18,6 @@ import {
 import { type CTIsodosisProfile, getCTIsodosisFactor } from '@/types/ctIsodosis';
 import { normalizeCalculationUnits, type NormalizedCalculationUnits } from './unitNormalization';
 
-const NUCLIDO_POR_MODALIDAD: Record<string, NuclidoPET> = { 'pet-f18': 'F18', 'pet-gallium': 'Ga68' };
 
 export const SAMPLING_DISTANCE_M = 0.3;
 export const SAMPLING_SPACING_M = 0.2;
@@ -479,10 +483,17 @@ export function calculateNuclearKerma(
   // Γ en μSv·m²/(MBq·h) (TG-108: F-18 0.143). Γ[μSv·m²/(MBq·h)] × A[GBq] da mSv·m²/h, así que el
   // resultado queda en mSv/semana. `workloadValue` está en MBq (RadiationSource): se pasa a GBq; antes
   // se tomaba como GBq (×1000). Sin atenuación del paciente ni decaimiento (TG-108): conservador.
-  const pet = NUCLIDO_POR_MODALIDAD[source.modality.id];
+  const pet = NUCLIDO_PET_POR_MODALIDAD[source.modality.id];
   if (source.tg108 && pet) {
     // TG-108 Ec. 2–3 / 9–10: decaimiento y absorción del paciente; μSv/semana → mSv/semana.
-    return dosisSemanalTG108({ nuclido: pet, d_m: d, ...source.tg108 }) / 1000;
+    return dosisSemanalTG108({ ...source.tg108, nuclido: pet, d_m: d }) / 1000;
+  }
+  const noPet = NUCLIDO_NO_PET_POR_MODALIDAD[source.modality.id];
+  if (source.tg108 && noPet) {
+    // Extensión «estilo TG-108» (no es TG-108, que sólo cubre PET): Γ de la modalidad sin
+    // atenuación del paciente y sin vaciado, con decaimiento Rₜ/F_U. Ver tg108.ts.
+    const gammaModalidad = source.modality.doseRateConstant ?? 0;
+    return dosisSemanalPorPaciente({ ...source.tg108, nuclido: noPet, gamma: gammaModalidad, d_m: d }) / 1000;
   }
 
   const gamma = source.modality.doseRateConstant ?? 0;
