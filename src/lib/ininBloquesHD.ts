@@ -3,7 +3,7 @@
  * 21-11-2024): TVL y HVL medidos con Co-60 (Picker C9) y con 6 y 18 MV (Varian Clinac iX) para bloques de
  * 13 × 13 × 26 cm de densidad nominal 3.5, 4.0 y 5.0 g/cm³.
  *
- * Política de diseño: la medición queda como evidencia, pero NO se usa como TVL de diseño mientras no pase
+ * Política de diseño: densidad = masa específica seca medida (IMCYC) cuando existe. La medición queda como evidencia, pero NO se usa como TVL de diseño mientras no pase
  * la validación de `docs/validacion-bloques-hd.md`. El TVL de diseño es el de concreto de NCRP 151 (Tabla B.2,
  * TVL₁ y TVLₑ) escalado por masa a la densidad nominal — conservador para mezclas con hierro en MV.
  */
@@ -35,6 +35,38 @@ export const COMPOSICION_XRF: Record<DensidadMedida, Record<string, number>> = {
   4.0: { Fe: 65.5, Ca: 18.7, Si: 7.4, Al: 3.3, S: 2.2, Mg: 1.1, Mn: 0.8 },
   5.0: { Fe: 62.96, Ca: 22.82, Si: 8.16, Al: 2.29, S: 1.07, Mn: 0.95, Mg: 0.68, K: 0.35 },
 };
+
+/**
+ * Masa específica por NMX-C-263-ONNCCE (IMCYC, OT-521, informe 152, 26-05-2022; tres tabiques por densidad):
+ * seca (la que cuenta para blindaje de un muro seco), aparente (sólido sin poros) y vacíos permeables.
+ */
+export const IMCYC_OT521: Record<DensidadMedida, { seca: number[]; aparente: number[]; vacios_pct: number[] }> = {
+  3.5: { seca: [3.32, 3.32, 3.31], aparente: [3.78, 3.82, 3.78], vacios_pct: [12.3, 13.1, 12.4] },
+  4.0: { seca: [3.66, 3.69, 3.7], aparente: [4.66, 4.7, 4.61], vacios_pct: [21.5, 21.5, 19.7] },
+  5.0: { seca: [3.96, 4.02, 3.98], aparente: [5.05, 5.16, 5.12], vacios_pct: [21.6, 22.1, 22.2] },
+};
+
+const media = (x: number[]) => x.reduce((a, b) => a + b, 0) / x.length;
+
+/** Densidad seca medida (media IMCYC) para una densidad nominal medida; null si no hay ensayo. */
+export function densidadSecaIMCYC(nominal: number): number | null {
+  const r = IMCYC_OT521[nominal as DensidadMedida];
+  return r ? +media(r.seca).toFixed(2) : null;
+}
+
+/**
+ * TD-550 (ficha CONTUPLEX): 23.6 kg por pieza de 13 × 13 × 25.4 cm → 5.50 g/cm³ por masa/volumen nominal.
+ * La misma ficha dice también «densidad nominal 5,00» y «aparente típica 2,7»: queda provisional hasta pesar un lote.
+ */
+export const TD550_DENSIDAD_POR_PESO = +(23600 / (13 * 13 * 25.4)).toFixed(2);
+
+/** Densidad de diseño: la seca medida si existe; si no, la nominal (con advertencia). */
+export function densidadDiseno(nominal: number): { rho: number; fuente: string } {
+  const seca = densidadSecaIMCYC(nominal);
+  if (seca !== null) return { rho: seca, fuente: 'IMCYC OT-521 (2022), masa específica seca' };
+  if (nominal === 5.5) return { rho: TD550_DENSIDAD_POR_PESO, fuente: 'Ficha TD-550: peso/volumen nominal; pesar un lote' };
+  return { rho: nominal, fuente: 'Nominal del fabricante, sin ensayo' };
+}
 
 /** Incertidumbre expandida (k = 2) informada para μ', TVL y HVL (§4.4.3). */
 export const U_EXPANDIDA_TVL = 0.25;
@@ -75,6 +107,11 @@ export function revisarCertificado(): Hallazgo[] {
         }
       }
     }
+  }
+  for (const d of [3.5, 4.0, 5.0] as DensidadMedida[]) {
+    const seca = densidadSecaIMCYC(d)!;
+    const ap = +media(IMCYC_OT521[d].aparente).toFixed(2);
+    h.push({ nivel: 'bloquea', texto: `Nominal ${d} g/cm³: IMCYC midió ${seca} g/cm³ en seco (${ap} sin poros). La densidad «radiológica» del ININ (${DENSIDAD_RADIOLOGICA[d]}) supera incluso la del sólido sin poros.` });
   }
   if (DENSIDAD_RADIOLOGICA[5.0] < DENSIDAD_RADIOLOGICA[4.0]) {
     h.push({ nivel: 'bloquea', texto: 'Densidad radiológica de los bloques nominales 5.0 (5.80) menor que la de los 4.0 (5.97): falta la densidad gravimétrica (masa/volumen) de cada bloque.' });

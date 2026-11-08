@@ -5,6 +5,7 @@
 // =============================================================================
 
 import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
+import { densidadDiseno } from '@/lib/ininBloquesHD';
 
 // Fuente única para los materiales de referencia de NCRP 151: Tabla B.2 (primaria, TVL₁) y
 // Tabla B.7 (fuga en concreto, TVL₁). Para acero y plomo la secundaria usa la primaria (conservador).
@@ -185,7 +186,9 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     ['tm-nipoll-n40', 4.0, 'TM NIPOL HD 4.0'],
     ['tm-nipoll-n50', 5.0, 'TM NIPOL HD 5.0'],
     ['tm-nipol-hd55', 5.5, 'TM NIPOL HD 5.5 (recomendado linac; sin medición)'],
-  ] as const).map(([id, rho, name]): ShieldingMaterial => ({
+  ] as const).map(([id, nominal, name]): ShieldingMaterial => {
+    const { rho, fuente } = densidadDiseno(nominal);
+    return {
     id,
     name,
     category: 'composite',
@@ -195,11 +198,9 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     thickness_mm_std: [130, 260],
     manufacturer: 'TM NIPOL (México)',
     normativa: ['NCRP 151', 'ININ CE.CB.LSCD-589/TD/2024'],
-    notes:
-      rho === 5.5
-        ? 'Bloque 13×13×26 cm. Sin medición a 5.5 g/cm³: TVL por masa desde concreto NCRP 151. Validación pendiente (docs/validacion-bloques-hd.md).'
-        : 'Bloque 13×13×26 cm. TVL de diseño por masa desde concreto NCRP 151; los TVL medidos por ININ son menores y no se adoptan hasta validar geometría y densidad.',
-  })),
+    notes: `Bloque 13×13×26 cm, nominal ${nominal} g/cm³; densidad de diseño ${rho} (${fuente}). TVL por masa desde concreto NCRP 151; los TVL del ININ no se adoptan hasta validar (docs/validacion-bloques-hd.md).`,
+    };
+  }),
   {
     id: 'v-250',
     name: 'Bloques V-250 (concreto barita)',

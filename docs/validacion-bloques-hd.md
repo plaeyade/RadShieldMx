@@ -31,25 +31,49 @@ Incertidumbre expandida informada para TVL: ±25 % (k = 2).
 5. **Sin O ni H en la composición (XRF).** A ≥ 10 MV el hidrógeno del muro decide el blindaje de
    neutrones; sin él no se puede evaluar el muro ni la puerta.
 6. **No hay medición a 5.5 g/cm³**, la densidad recomendada para linac.
+7. **La densidad real es menor que la nominal** (IMCYC, sección siguiente).
+
+## Densidad real: IMCYC (OT-521, 2022)
+
+Masa específica por NMX-C-263-ONNCCE sobre tres tabiques de cada densidad (lote EYMSA):
+
+| Nominal | Seca (g/cm³) | Sin poros, «aparente» (g/cm³) | Vacíos permeables |
+|---|---|---|---|
+| 3.5 | 3.31–3.32 | 3.78–3.82 | 12–13 % |
+| 4.0 | 3.66–3.70 | 4.61–4.70 | 20–22 % |
+| 5.0 | 3.96–4.02 | 5.05–5.16 | 22 % |
+
+Un muro seco blinda con la densidad **seca**. La nominal «5.0» es en realidad ≈ 4.0 g/cm³. Las densidades
+«radiológicas» del ININ (4.80, 5.97 y 5.80) superan incluso la del sólido sin poros, lo que confirma que
+sus TVL son demasiado bajos.
+
+La ficha CONTUPLEX TD-550 (mismo fabricante) se contradice:
+- dice ρ = 5.50 g/cm³ en un lugar, «densidad nominal 5,00» en otro y «aparente típica 2,7» en un tercero;
+- da para 18 MV un TVL de 13.6 cm y también de 20.4 cm.
+
+Su peso por pieza (23.6 kg en 13 × 13 × 25.4 cm) corresponde a 5.50 g/cm³: se usa de forma provisional
+hasta pesar un lote. Para el TD-250 del ciclotrón, la ficha da 10.7 kg por pieza, que corresponde a
+2.49 g/cm³ y es coherente con lo usado en el MC F90. Pesar piezas del lote en obra cierra la duda en
+ambos casos.
 
 ## Regla de diseño vigente en RadShield
 
-TVL₁ y TVLₑ del concreto de NCRP 151 (Tabla B.2; fuga con Tabla B.7) escalados por masa: `TVL × 2.35/ρ`.
-Es conservador para mezclas con hierro: a 18 MV el acero es ≈ 15 % mejor por masa que el concreto.
+TVL₁ y TVLₑ del concreto de NCRP 151 (Tabla B.2; fuga con Tabla B.7) escalados por masa con la densidad de
+diseño (seca medida si existe): `TVL × 2.35/ρ`. Es conservador para mezclas con hierro: a 18 MV el acero
+es ≈ 15 % mejor por masa que el concreto.
 
-| ρ (g/cm³) | 6 MV TVL₁ / TVLₑ | 18 MV TVL₁ / TVLₑ | Co-60 |
-|---|---|---|---|
-| 3.5 | 24.8 / 22.2 | 30.2 / 28.9 | 14.1 |
-| 4.0 | 21.7 / 19.4 | 26.4 / 25.3 | 12.3 |
-| 5.0 | 17.4 / 15.5 | 21.2 / 20.2 | 9.9 |
-| **5.5** | **15.8 / 14.1** | **19.2 / 18.4** | **9.0** |
+| Nominal | ρ de diseño | 6 MV TVL₁ / TVLₑ (cm) | 18 MV TVL₁ / TVLₑ (cm) | Co-60 (cm) |
+|---|---|---|---|---|
+| 3.5 | 3.32 (IMCYC seca) | 26.2 / 23.4 | 31.9 / 30.5 | 14.9 |
+| 4.0 | 3.68 (IMCYC seca) | 23.6 / 21.1 | 28.7 / 27.4 | 13.4 |
+| 5.0 | 3.99 (IMCYC seca) | 21.8 / 19.5 | 26.5 / 25.3 | 12.4 |
+| 5.5 (TD-550) | 5.50 (peso de ficha, provisional) | 15.8 / 14.1 | 19.2 / 18.4 | 9.0 |
 
-Diferencia con el certificado a 5.0 g/cm³ y 18 MV: 20.2 cm frente a 15.2 cm, es decir +33 % de espesor.
-Con la cota del acero el TVLₑ sería 17.3 cm. Lo que se ganaría al validar es como mucho ≈ 15 %, no 33 %.
+Diferencia con el certificado para el bloque nominal 5.0 a 18 MV: 25.3 cm frente a 15.2 cm de TVLₑ.
 
 ## Protocolo de validación pendiente (5.5 g/cm³ para linac)
 
-1. **Densidad gravimétrica** de al menos 10 bloques por lote (masa / volumen medido), con su dispersión.
+1. **Densidad gravimétrica** de al menos 10 bloques por lote (masa / volumen medido) y NMX-C-263 sobre 3 piezas; es el paso más barato y el que más cambia el resultado.
 2. **Composición completa**, incluidos O y H (análisis químico o PGNAA); el contenido de H en % en masa
    se necesita para neutrones a ≥ 10 MV.
 3. **Transmisión en haz amplio** a 6 y 18 MV:

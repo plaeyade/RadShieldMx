@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { revisarCertificado, tvlCotaAcero, tvlDisenoHD, TVL_INFORMADO } from '@/lib/ininBloquesHD';
+import { densidadDiseno, revisarCertificado, tvlCotaAcero, tvlDisenoHD, TVL_INFORMADO } from '@/lib/ininBloquesHD';
 import { MATERIALS_DB } from '@/lib/materialDatabase';
 
 describe('Bloques HD TM NIPOL (ININ LSCD-589/TD/2024)', () => {
@@ -22,9 +22,15 @@ describe('Bloques HD TM NIPOL (ININ LSCD-589/TD/2024)', () => {
     expect(h.some((x) => x.texto.includes('5.80') && x.texto.includes('5.97'))).toBe(true);
   });
 
+  it('densidad de diseño = masa específica seca IMCYC', () => {
+    expect(densidadDiseno(5.0).rho).toBe(3.99);
+    expect(densidadDiseno(5.5).rho).toBe(5.5);
+    expect(revisarCertificado().some((x) => x.texto.includes('IMCYC midió 3.99'))).toBe(true);
+  });
+
   it('el catálogo incluye 3.5, 4.0, 5.0 y 5.5 con TVL por masa', () => {
     const hd = MATERIALS_DB.filter((m) => m.manufacturer === 'TM NIPOL (México)');
-    expect(hd.map((m) => m.density_g_cm3)).toEqual([3.5, 4.0, 5.0, 5.5]);
+    expect(hd.map((m) => m.density_g_cm3)).toEqual([3.32, 3.68, 3.99, 5.5]);
     expect(hd[3].TVL_primary_cm['18MV']).toBe(19.2);
   });
 });
