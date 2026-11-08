@@ -6,6 +6,8 @@ import {
   cruceSegmentoBarrera,
   dosisEnPunto,
   kermaEnPunto,
+  type ComponenteCampo,
+  type DosisEnPunto,
 } from '@/lib/doseFieldEngine';
 import { calculateHeatmapGrid, calculateUnshieldedKerma, tvlTransmission } from '@/lib/shieldingMath';
 import { TABLA_B_2, TABLA_B_7, espesorTVL, transmisionTVL } from '@/lib/ncrp151';
@@ -21,11 +23,22 @@ const barrera = (extra: Partial<Barrier> = {}): Barrier => ({
   useFactor: 1, occupancyFactor: 1, designGoal_mSv_per_wk: 0.1, materialCode: 'CONCRETE235', ...extra,
 });
 const material = (code: string) => MATERIALS.find((m) => m.code === code)!;
+/** Componente de la primera fuente (Fase 2: el campo se separa por componentes). */
+const comp = (d: DosisEnPunto, c: ComponenteCampo) => d.porFuente[0].componentes.find((x) => x.componente === c)!;
 
 describe('doseFieldEngine — sin barreras', () => {
-  it('coincide con calculateUnshieldedKerma (shieldingMath) en un punto', () => {
-    const s = fuente('linac-6mv');
+  it('coincide con calculateUnshieldedKerma (shieldingMath) en un punto (K₀ único: TC, medicina nuclear)', () => {
+    const s = fuente('ct-body');
     expect(kermaEnPunto([s], 4, 1, 1)).toBe(calculateUnshieldedKerma(s, 4, 1, 1));
+  });
+
+  it('LINAC: la primaria coincide con calculateUnshieldedKerma y el total suma fuga y dispersión', () => {
+    const s = fuente('linac-6mv');
+    const d = dosisEnPunto([s], 4, 1, 1);
+    expect(comp(d, 'primaria').kerma_mSv_semana).toBeCloseTo(calculateUnshieldedKerma(s, 4, 1, 1), 9);
+    const suma = d.porFuente[0].componentes.reduce((a, c) => a + c.kerma_mSv_semana, 0);
+    expect(d.porFuente[0].componentes.map((c) => c.componente)).toEqual(['primaria', 'fuga', 'dispersion']);
+    expect(d.kerma_mSv_semana).toBeCloseTo(suma, 12);
   });
 
   it('cumple el inverso del cuadrado', () => {
@@ -35,8 +48,8 @@ describe('doseFieldEngine — sin barreras', () => {
     expect(k1 / k2).toBeCloseTo(4, 10);
   });
 
-  it('la malla es idéntica a calculateHeatmapGrid', () => {
-    const fuentes = [fuente('linac-6mv', { x: 100, y: 120 }), fuente('rad-chest', { x: 300, y: 80 })];
+  it('la malla es idéntica a calculateHeatmapGrid para modalidades de K₀ único', () => {
+    const fuentes = [fuente('ct-body', { x: 100, y: 120 }), fuente('pet-f18', { x: 300, y: 80, nuclearActivity_GBq: 0.5 })];
     const motor = calcularMallaDosis(fuentes, 0.01, 40);
     const previa = calculateHeatmapGrid(fuentes, 0.01, 40);
     expect(motor.length).toBe(previa.length);
@@ -55,8 +68,9 @@ describe('doseFieldEngine — barreras', () => {
     const t_mm = espesorTVL(1e-3, TABLA_B_2.concrete['18']) * 10;
     const b = barrera({ thickness_mm: t_mm });
     const d = dosisEnPunto([s], 6, 0, 1, { barriers: [b] });
-    expect(d.porFuente[0].transmision).toBeCloseTo(1e-3, 12);
-    expect(d.kerma_mSv_semana).toBeCloseTo(d.kermaSinBlindaje_mSv_semana * 1e-3, 12);
+    const p = comp(d, 'primaria');
+    expect(p.transmision).toBeCloseTo(1e-3, 12);
+    expect(p.kerma_mSv_semana).toBeCloseTo(p.kermaSinBlindaje_mSv_semana * 1e-3, 12);
     expect(d.porFuente[0].cruces[0].capas[0].metodo).toBe('NCRP151_TVL1_TVLe');
   });
 
@@ -66,11 +80,12 @@ describe('doseFieldEngine — barreras', () => {
     expect(transmisionTVL(espesorTVL(1e-4, tvl), tvl)).toBeCloseTo(1e-4, 14);
   });
 
-  it('barrera secundaria de concreto con LINAC usa TVL de fuga (Tabla B.7)', () => {
+  it('barrera secundaria de concreto con LINAC: fuga con TVL de la Tabla B.7 y sin primaria detrás', () => {
     const s = fuente('linac-6mv');
     const t_mm = 600;
     const d = dosisEnPunto([s], 6, 0, 1, { barriers: [barrera({ barrierType: 'secondary', thickness_mm: t_mm })] });
-    expect(d.porFuente[0].transmision).toBeCloseTo(transmisionTVL(t_mm / 10, TABLA_B_7['6']), 14);
+    expect(comp(d, 'fuga').transmision).toBeCloseTo(transmisionTVL(t_mm / 10, TABLA_B_7['6']), 14);
+    expect(comp(d, 'primaria')).toBeUndefined();
   });
 
   it('el punto del lado de la fuente no se atenúa', () => {
@@ -88,12 +103,12 @@ describe('doseFieldEngine — barreras', () => {
     const cruce = d.porFuente[0].cruces[0];
     expect(cruce.cosTheta).toBeCloseTo(Math.SQRT1_2, 12);
     expect(cruce.capas[0].recorrido_mm).toBeCloseTo(t_mm * Math.SQRT2, 9);
-    expect(d.porFuente[0].transmision).toBeCloseTo(transmisionTVL((t_mm * Math.SQRT2) / 10, TABLA_B_2.concrete['6']), 14);
+    expect(comp(d, 'primaria').transmision).toBeCloseTo(transmisionTVL((t_mm * Math.SQRT2) / 10, TABLA_B_2.concrete['6']), 12);
   });
 
-  it(`el crédito por oblicuidad se limita a θ = ${ANGULO_MAX_OBLICUIDAD_DEG}°`, () => {
-    const s = fuente('linac-6mv');
-    const d = dosisEnPunto([s], 6, 60, 1, { barriers: [barrera({ y1: -100, y2: 100, thickness_mm: 300 })] });
+  it(`fuera de NCRP 151 el crédito por oblicuidad se limita a θ = ${ANGULO_MAX_OBLICUIDAD_DEG}°`, () => {
+    const s = fuente('rad-chest');
+    const d = dosisEnPunto([s], 6, 60, 1, { barriers: [barrera({ barrierType: 'secondary', materialCode: 'PB', y1: -100, y2: 100, thickness_mm: 1 })] });
     const cruce = d.porFuente[0].cruces[0];
     expect(cruce.cosTheta).toBeLessThan(0.5);
     expect(cruce.factorOblicuidad).toBeCloseTo(1 / Math.cos((ANGULO_MAX_OBLICUIDAD_DEG * Math.PI) / 180), 12);
@@ -102,14 +117,15 @@ describe('doseFieldEngine — barreras', () => {
   it('diagnóstico tabulado: Archer NCRP 147 Tabla C.1 en plomo', () => {
     const s = fuente('rad-chest');
     const d = dosisEnPunto([s], 6, 0, 1, { barriers: [barrera({ barrierType: 'secondary', materialCode: 'PB', thickness_mm: 1 })] });
-    expect(d.porFuente[0].transmision).toBeCloseTo(transmisionArcher(1, TABLA_C_1.chest_room.lead), 14);
+    expect(comp(d, 'secundaria147').transmision).toBeCloseTo(transmisionArcher(1, TABLA_C_1.chest_room.lead), 12);
+    expect(comp(d, 'primaria147')).toBeUndefined();
     expect(d.porFuente[0].cruces[0].capas[0].metodo).toBe('NCRP147_ARCHER');
   });
 
   it('medicina nuclear: TVL del material', () => {
     const s = fuente('pet-f18', { nuclearActivity_GBq: 0.5 });
     const d = dosisEnPunto([s], 6, 0, 1, { barriers: [barrera({ barrierType: 'nuclear', materialCode: 'PB', thickness_mm: 10 })] });
-    expect(d.porFuente[0].transmision).toBeCloseTo(tvlTransmission(10, material('PB'), '511keV'), 14);
+    expect(d.porFuente[0].transmision).toBeCloseTo(tvlTransmission(10, material('PB'), '511keV'), 12);
   });
 
   it('dos barreras cruzadas multiplican su transmisión; capas laminadas también', () => {
@@ -120,7 +136,7 @@ describe('doseFieldEngine — barreras', () => {
     const B1 = transmisionTVL(37, TABLA_B_2.concrete['6']);
     const B2 = transmisionTVL(20, TABLA_B_2.concrete['6']) * transmisionTVL(5.7, TABLA_B_2.lead['6']);
     expect(d.porFuente[0].cruces).toHaveLength(2);
-    expect(d.porFuente[0].transmision).toBeCloseTo(B1 * B2, 14);
+    expect(comp(d, 'primaria').transmision).toBeCloseTo(B1 * B2, 12);
   });
 
   it('la malla del heat map ahora atenúa detrás de la barrera', () => {

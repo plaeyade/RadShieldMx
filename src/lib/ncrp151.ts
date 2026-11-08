@@ -7,7 +7,8 @@
  * - Tabla B.5a (p. 164): TVL en concreto de la radiación dispersada por el paciente según ángulo.
  * - Tabla B.7 (p. 167): TVL₁/TVLₑ de la radiación de fuga en concreto.
  * Ecuaciones 2.1 (primaria), 2.3 (espesor con TVL₁ y TVLₑ), 2.7 (dispersión del paciente),
- * 2.8 (fuga, fracción 10⁻³), 3.6 (carga de fuga con IMRT) y la regla de las dos fuentes (§1.4.3).
+ * 2.8 (fuga, fracción 10⁻³), 3.6 (carga de fuga con IMRT), la regla de las dos fuentes (§1.4.3) y la
+ * corrección de incidencia oblicua (§2.4).
  */
 
 export type EnergiaMV = 4 | 6 | 10 | 15 | 18 | 20 | 25 | 30 | 'Co60';
@@ -127,18 +128,108 @@ export interface Contexto {
   material?: MaterialNCRP151;
 }
 
+// ───────────────────────────────────────────────────────────────
+// Kerma sin blindaje por componente (Sv/semana ≈ Gy/semana). Fuente única: las funciones de espesor
+// de abajo (B = P / (T·K)) y el motor de campo (`doseFieldEngine`, K·B) usan estas mismas expresiones.
+// ───────────────────────────────────────────────────────────────
+
+/** Ec. 2.1 sin blindaje: primaria W·U/d² (d: blanco → punto, m). */
+export function kermaPrimaria(f: FuenteTeleterapia, U: number, d_m: number): number {
+  return (f.W_Gy_semana * U) / (d_m * d_m);
+}
+
+/** Ec. 2.8 sin blindaje: fuga 10⁻³·W_L/d_L² (W_L con IMRT, Ec. 3.6; sin U). */
+export function kermaFuga(f: FuenteTeleterapia, dL_m: number): number {
+  return (1e-3 * cargaFuga(f)) / (dL_m * dL_m);
+}
+
+export interface GeometriaDispersion { U: number; dsec_m: number; dsca_m?: number; theta_deg: number; campo_cm2?: number }
+
+/** Ec. 2.7 sin blindaje: dispersión del paciente a(θ)·W·U·(F/400)/(d_sca²·d_sec²); F = 1600 cm², d_sca = 1 m por omisión. */
+export function kermaDispersion(f: FuenteTeleterapia, g: GeometriaDispersion): number {
+  const a = fraccionDispersion(f.energia, g.theta_deg);
+  const F = g.campo_cm2 ?? 1600;
+  const dsca = g.dsca_m ?? 1;
+  return (a * f.W_Gy_semana * g.U * (F / 400)) / (dsca * dsca * g.dsec_m * g.dsec_m);
+}
+
+// TVL por componente y material (cm).
+
+/** Primaria: Tabla B.2. */
+export function tvlPrimaria(e: EnergiaMV, mat: MaterialNCRP151): TvlPar {
+  return TABLA_B_2[mat][clave(e)];
+}
+
+/** Fuga: Tabla B.7 en concreto; en acero/plomo los TVL primarios de B.2 (conservador). */
+export function tvlFuga(e: EnergiaMV, mat: MaterialNCRP151): TvlPar {
+  return mat === 'concrete' ? TABLA_B_7[clave(e)] : TABLA_B_2[mat][clave(e)];
+}
+
+/** Dispersión del paciente: un solo TVL (B.5a en concreto; TVL₁ de B.2 en acero/plomo, conservador). */
+export function tvlDispersion(e: EnergiaMV, mat: MaterialNCRP151, theta_deg: number): number {
+  return mat === 'concrete' ? tvlDispersionConcreto(e, theta_deg) : TABLA_B_2[mat][clave(e)].tvl1_cm;
+}
+
+/** Transmisión con un solo TVL: B = 10^(−t/TVL) (inversa de n·TVL, como en `dispersion`). */
+export function transmisionUnTVL(t_cm: number, tvl_cm: number): number {
+  return t_cm > 0 ? Math.pow(10, -t_cm / tvl_cm) : 1;
+}
+
+// ───────────────────────────────────────────────────────────────
+// Incidencia oblicua (NCRP 151 §2.4; Kirn et al. 1954; Biggs 1996, datos de 0° a 70°)
+// ───────────────────────────────────────────────────────────────
+
+/** Por encima de este ángulo la aproximación de espesor oblicuo t/cos θ sobrestima la atenuación. */
+export const OBLICUIDAD_UMBRAL_DEG = 45;
+/** Límite de los datos de oblicuidad (Biggs: 0°–70°): no se acredita recorrido adicional más allá. */
+export const OBLICUIDAD_MAX_DATOS_DEG = 70;
+/** Umbral de transmisión de la regla de NCRP 151 §2.4. */
+export const OBLICUIDAD_B_UMBRAL = 1e-3;
+
+/**
+ * Corrección de NCRP 151 §2.4 a la transmisión calculada con el espesor oblicuo t/cos θ: para θ > 45° y
+ * B < 10⁻³ el espesor oblicuo sobrestima la atenuación (los fotones dispersados en la barrera salen por
+ * un camino más corto); se descuenta ≈ 1 HVL para rayos X de MV y ≈ 2 HVL para Co-60 (baja energía),
+ * es decir B × 2 o B × 4, sin superar la transmisión a incidencia normal.
+ */
+export function correccionOblicuidad(
+  B_oblicua: number, B_normal: number, theta_deg: number, e: EnergiaMV,
+): { transmision: number; hvlDescontados: number } {
+  if (!(theta_deg > OBLICUIDAD_UMBRAL_DEG + 1e-9) || !(B_oblicua < OBLICUIDAD_B_UMBRAL)) {
+    return { transmision: B_oblicua, hvlDescontados: 0 };
+  }
+  const k = e === 'Co60' ? 2 : 1;
+  return { transmision: Math.min(B_normal, B_oblicua * Math.pow(2, k)), hvlDescontados: k };
+}
+
+export interface TerminoDirecto { K_Sv_semana: number; transmision: (t_cm: number) => number }
+
+/**
+ * Espesor t (cm) con Σ Kᵢ·Bᵢ(t)·T = P, por bisección: la suma directa de las componentes que usa el motor
+ * de campo. Complementa la regla de las dos fuentes (§1.4.3), que con más de dos componentes (p. ej. fuga
+ * y dispersión de un equipo de doble energía) puede quedar hasta ~10 % por encima de P.
+ */
+export function espesorSumaDirecta(terminos: TerminoDirecto[], P_Sv_semana: number, T: number): number {
+  const meta = P_Sv_semana / T;
+  const f = (t: number) => terminos.reduce((a, x) => a + x.K_Sv_semana * x.transmision(t), 0);
+  if (f(0) <= meta) return 0;
+  let lo = 0, hi = 50;
+  while (f(hi) > meta && hi < 1e5) hi *= 2;
+  for (let i = 0; i < 100; i++) { const mid = (lo + hi) / 2; if (f(mid) > meta) lo = mid; else hi = mid; }
+  return hi;
+}
+
 /** Barrera primaria (Ec. 2.1 + 2.3). d: blanco → punto protegido (m). */
 export function primaria(f: FuenteTeleterapia, c: Contexto & { U: number; d_m: number }): Componente {
-  const B = (c.P_Sv_semana * c.d_m * c.d_m) / (f.W_Gy_semana * c.U * c.T);
-  const tvl = TABLA_B_2[c.material ?? 'concrete'][clave(f.energia)];
+  const B = c.P_Sv_semana / (kermaPrimaria(f, c.U, c.d_m) * c.T);
+  const tvl = tvlPrimaria(f.energia, c.material ?? 'concrete');
   return { espesor_cm: espesorTVL(B, tvl), tvl_cm: tvl.tvle_cm, nombre: `primaria ${f.energia} MV` };
 }
 
 /** Fuga (Ec. 2.8). En acero/plomo se usan los TVL primarios de B.2 (conservador). */
 export function fuga(f: FuenteTeleterapia, c: Contexto & { dL_m: number }): Componente {
-  const B = (c.P_Sv_semana * c.dL_m * c.dL_m) / (1e-3 * cargaFuga(f) * c.T);
-  const mat = c.material ?? 'concrete';
-  const tvl = mat === 'concrete' ? TABLA_B_7[clave(f.energia)] : TABLA_B_2[mat][clave(f.energia)];
+  const B = c.P_Sv_semana / (kermaFuga(f, c.dL_m) * c.T);
+  const tvl = tvlFuga(f.energia, c.material ?? 'concrete');
   return { espesor_cm: espesorTVL(B, tvl), tvl_cm: tvl.tvl1_cm, nombre: `fuga ${f.energia} MV` };
 }
 
@@ -148,15 +239,10 @@ export function fuga(f: FuenteTeleterapia, c: Contexto & { dL_m: number }): Comp
  */
 export function dispersion(
   f: FuenteTeleterapia,
-  c: Contexto & { U: number; dsec_m: number; dsca_m?: number; theta_deg: number; campo_cm2?: number },
+  c: Contexto & GeometriaDispersion,
 ): Componente {
-  const a = fraccionDispersion(f.energia, c.theta_deg);
-  const F = c.campo_cm2 ?? 1600;
-  const dsca = c.dsca_m ?? 1;
-  const B = (c.P_Sv_semana * dsca * dsca * c.dsec_m * c.dsec_m * 400) / (a * f.W_Gy_semana * c.U * c.T * F);
-  const mat = c.material ?? 'concrete';
-  const tvlC = tvlDispersionConcreto(f.energia, c.theta_deg);
-  const tvl = mat === 'concrete' ? tvlC : TABLA_B_2[mat][clave(f.energia)].tvl1_cm;
+  const B = c.P_Sv_semana / (kermaDispersion(f, c) * c.T);
+  const tvl = tvlDispersion(f.energia, c.material ?? 'concrete', c.theta_deg);
   const n = B >= 1 ? 0 : Math.log10(1 / B);
   return { espesor_cm: n * tvl, tvl_cm: tvl, nombre: `dispersión ${f.energia} MV a ${c.theta_deg}°` };
 }

@@ -1,6 +1,6 @@
 # Plan de motores de cálculo — campo de dosis unificado
 
-Estado: Fase 1 en curso (rama `motor-dosis-fase1`). Herramienta de diseño preliminar; todo resultado
+Estado: Fase 1 fusionada (PR #26); Fase 2 en revisión (rama `motor-dosis-fase2`). Herramienta de diseño preliminar; todo resultado
 requiere revisión de un experto calificado / OSR antes de uso clínico o regulatorio.
 
 ## Diagnóstico de partida
@@ -30,7 +30,7 @@ localStorage para que una preferencia guardada no reabra visores con dosis no f�
 | `DEPURACION_RENDER` | `VITE_DEPURACION_RENDER` | No se dibujan los HUD F442–F445/F621–F640 sobre el plano (el `<canvas>` overlay sigue montado). Los paneles DOM F621–F695 ya sólo aparecen en modo «guiado» (opt-in) y los usan pruebas E2E: se conservan |
 | `VISOR_3D_BABYLON` | `VITE_VISOR_3D_BABYLON` | Inspección 3D no monta la vista previa Babylon; muestra «En revisión: se reactivará con el motor de dosis unificado» |
 
-## Fase 1 — Motor de campo único y desactivación controlada (este PR)
+## Fase 1 — Motor de campo único y desactivación controlada (PR #26, fusionada)
 
 Entrada: diagnóstico anterior aceptado; `shieldingMath`, `ncrp147`, `ncrp151`, `normativeBarrierEngine` con pruebas en verde.
 
@@ -74,6 +74,53 @@ Trabajo:
 
 Salida / pruebas: el kerma del motor en los puntos de muestreo detrás de la barrera calculada es ≤ P/T
 (tolerancia de redondeo) para los casos de `normativeBarrierEngine.test.ts`; regresión de Fase 1 en verde.
+
+### Estado de la Fase 2 (rama `motor-dosis-fase2`)
+
+Hecho:
+- **Componentes** (`doseFieldEngine.ts`, `contribucionFuente` → `componentes`):
+  - Teleterapia NCRP 151 (`linac-*` y `tele-co60*`; Gamma Knife sigue fuera, es autoblindado): `primaria`
+    W·U/d² (Ec. 2.1, B.2 TVL₁/TVLₑ), `fuga` 10⁻³·W_L/d² (Ec. 2.8; W_L con IMRT vía `cargaFuga`, Ec. 3.6;
+    B.7 en concreto, B.2 en acero/plomo) y `dispersion` a(θ)·W·U·(F/400)/d² (Ec. 2.7, B.4; un TVL de B.5a).
+    W = fracciones × Gy/fracción (`fuenteTeleterapiaDe`, el mismo que el motor normativo; antes el campo
+    usaba 2 Gy fijos). Las expresiones de K₀ (`kermaPrimaria`, `kermaFuga`, `kermaDispersion`) y de TVL
+    (`tvlPrimaria`, `tvlFuga`, `tvlDispersion`) están en `ncrp151.ts` y las usan tanto el espesor
+    (B = P/(T·K)) como el campo (K·B).
+  - Dónde llega la primaria: con `RadiationSource.ejeGantry_deg` (nuevo, opcional), en la franja que barre
+    el haz (semidiagonal del campo 40×40 cm: 0.283·(d + SAD)); sin orientación, en los rayos que cruzan una
+    barrera primaria o ninguna (interior de la sala). U y θ salen de la barrera cruzada (`useFactor`,
+    `scatterAngle_deg`, 30° por omisión) o de la fuente.
+  - Diagnóstico TG9: `primaria147` (Tabla 4.5, Archer B.1) y `secundaria147` (Tabla 4.7 a 135°, C.1) con
+    `terminoNCRP147`, compartido con el motor normativo; preblindaje de la Tabla 4.6 opcional
+    (`preblindaje`, sin acreditar por omisión, como el normativo).
+  - TC, medicina nuclear (TG-108 por paciente), braquiterapia y resto: K₀ único de `calculateUnshieldedKerma`.
+  - En el campo las componentes se suman; la regla de las dos fuentes es sólo de diseño.
+- **Oblicuidad** (NCRP 151 §2.4): primaria y fuga con espesor oblicuo; para θ > 45° y B < 10⁻³ se descuenta
+  1 HVL (MV) o 2 HVL (Co-60) (`correccionOblicuidad`), sin superar la transmisión normal y sin crédito más
+  allá de 70° (datos de Kirn/Biggs). Dispersión del paciente: espesor normal, sin crédito (el informe no da
+  un criterio único). Diagnóstico y resto: tope de 60° de la Fase 1.
+- **Espesor geométrico**: la barrera es una banda de espesor t desde la línea (cara interior) hacia el lado
+  opuesto a las fuentes (convención de `generateSamplePoints`); el recorrido es la cuerda real del rayo
+  (`cuerdaEnBarrera`): t/cos θ al cruzarla, parcial dentro del muro, recortada en los extremos.
+- **Una sola fuente de verdad**: `calculateAllBarriers` toma el kerma sin blindaje de los puntos de muestreo de
+  `dosisEnPunto`; `normativeBarrierEngine` usa las mismas funciones de K₀/TVL y, además de la regla de NCRP 151,
+  resuelve la suma directa Σ K·B = P/T (`espesorSumaDirecta`) y toma el mayor espesor: con fuga + dispersión
+  de un equipo de doble energía (4 componentes) la regla de dos fuentes dejaba el campo ~1 % sobre P/T.
+
+Pruebas (`src/__tests__/lib/doseFieldEngineFase2.test.ts`): componentes contra NCRP 151 §7.1.1 (149.6 cm →
+B = 3.69×10⁻⁴, primaria = P/T), §7.1.5 (dispersión 46.1/30.7 cm, fuga 37.3/25 cm, total 66.4 cm ≤ P/T) y
+§7.1.4 (W_L = 945 Gy/semana); consistencia campo ↔ normativo en los puntos de muestreo (primaria = P/T,
+total ≤ P/T + 1 %; secundaria 6+18 MV con IMRT en concreto/plomo/acero ≤ P/T; NCRP 147 §5.2 = P/T y K₀ igual
+al normativo; fluoroscopía con dos fuentes ≤ P/T, = P/T sin crédito de oblicuidad); oblicuidad §2.4;
+cuerda geométrica; presencia de la primaria con y sin `ejeGantry_deg`; preblindaje. Las pruebas de la Fase 1
+que suponían un K₀ único para LINAC/diagnóstico TG9 ahora comprueban la componente correspondiente.
+
+Pendiente (no se inventan datos):
+- Barita/hierro con TVL propios: NCRP 151 Tabla B.2 sólo tabula concreto, acero y plomo; los TVL de
+  `CONCRETEBARITE`/`CONCRETEIRON` del catálogo no tienen fuente. Siguen por equivalencia másica.
+- Interfaz para capturar `ejeGantry_deg` en el panel de la fuente.
+- Laberinto/puerta y fotoneutrones en el campo (sólo existen en `ncrp151Laberinto.ts`).
+- `HEATMAP_GPU` y `VISORES_EN_REVISION` siguen en `false`.
 
 ## Fase 3 — Reconectar DoseMapDialog, SpatialDoseMap y modo dosis de Medical 3D
 
