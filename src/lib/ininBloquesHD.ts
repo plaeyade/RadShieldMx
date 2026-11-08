@@ -56,7 +56,7 @@ export function densidadSecaIMCYC(nominal: number): number | null {
 
 /**
  * TD-550 (ficha CONTUPLEX): 23.6 kg por pieza de 13 × 13 × 25.4 cm → 5.50 g/cm³ por masa/volumen nominal.
- * La misma ficha dice también «densidad nominal 5,00» y «aparente típica 2,7»: queda provisional hasta pesar un lote.
+ * La misma ficha dice también «densidad nominal 5,00» y «aparente típica 2,7»; el pesaje del lote (08-11-2026) confirmó 5.50.
  */
 export const TD550_DENSIDAD_POR_PESO = +(23600 / (13 * 13 * 25.4)).toFixed(2);
 
@@ -64,7 +64,7 @@ export const TD550_DENSIDAD_POR_PESO = +(23600 / (13 * 13 * 25.4)).toFixed(2);
 export function densidadDiseno(nominal: number): { rho: number; fuente: string } {
   const seca = densidadSecaIMCYC(nominal);
   if (seca !== null) return { rho: seca, fuente: 'IMCYC OT-521 (2022), masa específica seca' };
-  if (nominal === 5.5) return { rho: TD550_DENSIDAD_POR_PESO, fuente: 'Ficha TD-550: peso/volumen nominal; pesar un lote' };
+  if (nominal === 5.5) return { rho: TD550_DENSIDAD_POR_PESO, fuente: 'TD-550: pesaje del lote confirmado por el propietario (08-11-2026), 23.6 kg por pieza' };
   return { rho: nominal, fuente: 'Nominal del fabricante, sin ensayo' };
 }
 

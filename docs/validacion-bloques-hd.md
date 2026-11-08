@@ -52,10 +52,9 @@ La ficha CONTUPLEX TD-550 (mismo fabricante) se contradice:
 - dice ρ = 5.50 g/cm³ en un lugar, «densidad nominal 5,00» en otro y «aparente típica 2,7» en un tercero;
 - da para 18 MV un TVL de 13.6 cm y también de 20.4 cm.
 
-Su peso por pieza (23.6 kg en 13 × 13 × 25.4 cm) corresponde a 5.50 g/cm³: se usa de forma provisional
-hasta pesar un lote. Para el TD-250 del ciclotrón, la ficha da 10.7 kg por pieza, que corresponde a
-2.49 g/cm³ y es coherente con lo usado en el MC F90. Pesar piezas del lote en obra cierra la duda en
-ambos casos.
+Su peso por pieza (23.6 kg en 13 × 13 × 25.4 cm) corresponde a 5.50 g/cm³, y el **pesaje del lote lo confirmó
+(08-11-2026)**. Para el TD-250 del ciclotrón, la ficha da 10.7 kg por pieza, que corresponde a
+2.49 g/cm³; el pesaje del lote también lo confirmó, así que los espesores del MC F90 quedan firmes.
 
 ## Regla de diseño vigente en RadShield
 
@@ -69,7 +68,7 @@ conservador a toda energía; sólo concreto no lo sería en Co-60 ni en el TVL�
 | 3.5 | 3.32 (IMCYC seca) | 26.2 / 23.7 | 31.9 / 30.5 | 16.6 |
 | 4.0 | 3.68 (IMCYC seca) | 23.6 / 21.4 | 28.7 / 27.4 | 15.0 |
 | 5.0 | 3.99 (IMCYC seca) | 21.8 / 19.7 | 26.5 / 25.3 | 13.8 |
-| 5.5 (TD-550) | 5.50 (peso de ficha, provisional) | 15.8 / 14.3 | 19.2 / 18.4 | 10.0 |
+| 5.5 (TD-550) | 5.50 (pesaje del lote, confirmado) | 15.8 / 14.3 | 19.2 / 18.4 | 10.0 |
 
 Diferencia con el certificado para el bloque nominal 5.0 a 18 MV: 25.3 cm frente a 15.2 cm de TVLₑ. La
 mayor parte (≈ 25 %) viene de la densidad real; el resto, de la geometría del ensayo.
