@@ -1,9 +1,23 @@
 // =============================================================================
 // doseMappingEngine.ts — 3D Dose Mapping Engine with Virtual Detector Mesh
-// Supports: photons, electrons, positrons, neutrons
-// Legal zoning: controlled, supervised, free
-// Based on: NCRP 151, ICRP 103, IAEA SSG-46
+// Legal zoning: controlled, supervised, free (ICRP 103, IAEA SSG-46)
+//
+// Fase 3 (docs/plan-motores-calculo.md): la tasa de dosis de cada vóxel sale de `dosisEnPunto`
+// (doseFieldEngine); aquí no queda física propia. Errores corregidos al delegar:
+//   · Γ ×1000: 0.143 se usaba como µSv·m²/(GBq·h); es µSv·m²/(MBq·h) (TG-108) = 143 µSv·m²/(GBq·h).
+//     Ahora la modalidad `pet-f18` del catálogo y `calculateNuclearKerma`.
+//   · TVL de 511 keV: 37 cm de concreto y 0.5 cm de plomo (erróneos) → catálogo `MATERIALS` (TG-108:
+//     concreto 17.6 cm, plomo 1.66 cm, acero 6.5 cm; barita del catálogo).
+//   · Mezcla cm/m: el blindaje se colocaba a `shieldThickness_cm` METROS de la fuente. Ahora es un muro
+//     perpendicular a x a `shieldDistance_m` (m) de la fuente, de espesor `shieldThickness_cm` (cm → mm).
+//   · Neutrones (Σ_R ~10× bajos, Γ «0.5» sin fuente) y electrones (alcance fijo de 0.5 m) quedan
+//     FUERA DE ALCANCE: devuelven una malla vacía con `nota`. Neutrones de LINAC: `ncrp151Laberinto.ts`.
+// Positrones: se mapean los fotones de aniquilación de 511 keV (F-18), igual que `photon`.
+// Geometría: el motor es de planta (x, z); la altura entra como distancia vertical fuente–vóxel
+// (`isocenterHeight_m`), y la oblicuidad vertical no se acredita (conservador).
 // =============================================================================
+import { MATERIALS, MODALITIES, type Barrier, type RadiationSource } from '@/types/radshield';
+import { dosisEnPunto } from '@/lib/doseFieldEngine';
 
 export type ParticleType = 'photon' | 'electron' | 'positron' | 'neutron';
 
@@ -91,6 +105,7 @@ export interface DetectorVoxel {
   particleType: ParticleType;
   zone: string;
   cumulativeDose_uSv: number;
+  /** No calculado (NaN): el motor da kerma, no fluencia. */
   flux_cm2_s: number;
 }
 
@@ -103,10 +118,79 @@ export interface DetectorMesh {
   sourceActivity_GBq: number;
   shieldThickness_cm: number;
   shieldMaterial: string;
+  /** Distancia fuente → cara interior del muro (m), a lo largo de +x. */
+  shieldDistance_m: number;
   computedAt: string;
+  /** Presente cuando la partícula está fuera del alcance del motor (malla vacía). */
+  nota?: string;
 }
 
-/** Generate virtual detector mesh for a given particle type and source */
+/** Escala del plano sintético (1 px = 1 cm). Cualquier escala da el mismo resultado físico. */
+export const ESCALA_MAPEO_M_POR_PX = 0.01;
+
+/** Material del selector → código del catálogo `MATERIALS`. */
+export const MATERIAL_MAPEO: Record<string, string> = {
+  concrete: 'CONCRETE235', lead: 'PB', steel: 'STEEL', barite: 'CONCRETEBARITE',
+};
+
+export const NOTA_FUERA_DE_ALCANCE: Partial<Record<ParticleType, string>> = {
+  electron: 'Electrones (β⁻): fuera del alcance del motor de campo; no se mapean.',
+  neutron: 'Neutrones: fuera del alcance del motor de campo (fotoneutrones de LINAC en ncrp151Laberinto).',
+};
+
+const MODALIDAD_511 = MODALITIES.find((m) => m.id === 'pet-f18');
+
+/** Fuente sintética (F-18, 511 keV) a la altura `dy_m` del plano del vóxel. Tasa: 1 h/semana ⇒ mSv/h. */
+export function fuenteMapeo(sourcePos: { x: number; z: number }, activity_GBq: number, dy_m: number): RadiationSource {
+  if (!MODALIDAD_511) throw new Error('Modalidad pet-f18 ausente del catálogo');
+  return {
+    id: 'mapeo-3d',
+    name: 'Fuente puntual 511 keV',
+    x: sourcePos.x / ESCALA_MAPEO_M_POR_PX,
+    y: sourcePos.z / ESCALA_MAPEO_M_POR_PX,
+    modality: MODALIDAD_511,
+    workloadValue: activity_GBq * 1000,
+    workloadUnit: 'MBq',
+    nuclearActivity_GBq: activity_GBq,
+    workloadHoursPerWeek: 1,
+    isocenterHeight_m: Math.abs(dy_m),
+    useFactor: 1,
+  };
+}
+
+/** Muro del mapeo: perpendicular a x, a `distancia_m` de la fuente, largo de sobra en z. */
+export function muroMapeo(
+  sourcePos: { x: number; z: number }, distancia_m: number, espesor_cm: number, material: string,
+): Barrier | null {
+  const codigo = MATERIAL_MAPEO[material];
+  if (!codigo || !(espesor_cm > 0)) return null;
+  const x = (sourcePos.x + distancia_m) / ESCALA_MAPEO_M_POR_PX;
+  return {
+    id: 'muro-mapeo', name: 'Blindaje', x1: x, y1: -1e5, x2: x, y2: 1e5,
+    barrierType: 'nuclear', useFactor: 1, occupancyFactor: 1, designGoal_mSv_per_wk: 0.02,
+    materialCode: codigo, thickness_mm: espesor_cm * 10,
+  };
+}
+
+/**
+ * Tasa de dosis (µSv/h) en un punto (m) delegando en `dosisEnPunto`: la fuente se sintetiza con 1 h/semana,
+ * así que el kerma semanal del motor (mSv) es la tasa en mSv/h.
+ */
+export function tasaDosisMapeo_uSv_h(
+  punto: { x: number; y: number; z: number },
+  sourcePos: { x: number; y: number; z: number },
+  activity_GBq: number,
+  barrera: Barrier | null,
+): number {
+  const fuente = fuenteMapeo(sourcePos, activity_GBq, punto.y - sourcePos.y);
+  const d = dosisEnPunto([fuente], punto.x / ESCALA_MAPEO_M_POR_PX, punto.z / ESCALA_MAPEO_M_POR_PX, ESCALA_MAPEO_M_POR_PX, {
+    barriers: barrera ? [barrera] : [],
+    materials: MATERIALS,
+  });
+  return d.kerma_mSv_semana * 1000;
+}
+
+/** Generate virtual detector mesh for a given particle type and source (vía doseFieldEngine). */
 export function generateDetectorMesh(
   particleType: ParticleType,
   sourcePos: { x: number; y: number; z: number },
@@ -115,14 +199,22 @@ export function generateDetectorMesh(
   resolution_cm: number = 25, // 25cm default
   shieldThickness_cm: number = 0,
   shieldMaterial: string = 'none',
+  shieldDistance_m: number = 1,
 ): DetectorMesh {
+  const base = {
+    resolution_cm, dimensions: roomDimensions, particleType, sourcePosition: sourcePos,
+    sourceActivity_GBq: activity_GBq, shieldThickness_cm, shieldMaterial, shieldDistance_m,
+    computedAt: new Date().toISOString(),
+  };
+  const nota = NOTA_FUERA_DE_ALCANCE[particleType];
+  if (nota) return { ...base, voxels: [], nota };
+
   const res_m = resolution_cm / 100;
   const nx = Math.ceil(roomDimensions.x / res_m);
   const ny = Math.ceil(roomDimensions.y / res_m);
   const nz = Math.ceil(roomDimensions.z / res_m);
   const voxels: DetectorVoxel[] = [];
-
-  const gammaConst = getGammaConstant(particleType);
+  const barrera = muroMapeo(sourcePos, shieldDistance_m, shieldThickness_cm, shieldMaterial);
 
   for (let i = 0; i < nx; i++) {
     for (let j = 0; j < ny; j++) {
@@ -135,36 +227,7 @@ export function generateDetectorMesh(
         const d = Math.sqrt((x - sourcePos.x) ** 2 + (y - sourcePos.y) ** 2 + (z - sourcePos.z) ** 2);
         if (d < 0.3) continue;
 
-        // Dose rate calculation
-        let doseRate_uSv_h = 0;
-        if (particleType === 'photon') {
-          doseRate_uSv_h = (gammaConst * activity_GBq) / (d * d);
-          // Apply shielding attenuation (broad-beam)
-          if (shieldThickness_cm > 0 && isBehindShield(x, y, z, sourcePos, shieldThickness_cm)) {
-            const tvl = getTVLForMaterial(shieldMaterial, particleType);
-            if (tvl > 0) {
-              const nTVL = shieldThickness_cm / tvl;
-              const B = Math.pow(10, -nTVL);
-              doseRate_uSv_h *= B;
-            }
-          }
-        } else if (particleType === 'electron') {
-          // CSDA range-limited (electrons don't travel far)
-          const maxRange_m = 0.5; // ~50cm max range for MeV electrons in air
-          doseRate_uSv_h = d < maxRange_m ? (gammaConst * activity_GBq * 0.01) / (d * d) : 0;
-        } else if (particleType === 'positron') {
-          // 511 keV annihilation photons after positron range
-          const maxRange_m = 0.004; // ~4mm range
-          doseRate_uSv_h = d > maxRange_m ? (gammaConst * activity_GBq) / (d * d) : 0;
-        } else if (particleType === 'neutron') {
-          // Neutron dose with removal cross section
-          const sigmaR = getNeutronRemovalCoeff(shieldMaterial);
-          doseRate_uSv_h = (gammaConst * activity_GBq * 100) / (d * d); // higher for neutrons
-          if (shieldThickness_cm > 0 && sigmaR > 0) {
-            doseRate_uSv_h *= Math.exp(-sigmaR * shieldThickness_cm);
-          }
-        }
-
+        const doseRate_uSv_h = tasaDosisMapeo_uSv_h({ x, y, z }, sourcePos, activity_GBq, barrera);
         const zone = getZoneForDoseRate(doseRate_uSv_h);
         voxels.push({
           x, y, z,
@@ -172,57 +235,13 @@ export function generateDetectorMesh(
           particleType,
           zone: zone.id,
           cumulativeDose_uSv: doseRate_uSv_h * 40, // 40h/week
-          flux_cm2_s: doseRate_uSv_h / 3600 * 1000, // approximate
+          flux_cm2_s: Number.NaN, // no se calcula (antes era una conversión sin fundamento)
         });
       }
     }
   }
 
-  return {
-    resolution_cm,
-    dimensions: roomDimensions,
-    voxels,
-    particleType,
-    sourcePosition: sourcePos,
-    sourceActivity_GBq: activity_GBq,
-    shieldThickness_cm,
-    shieldMaterial,
-    computedAt: new Date().toISOString(),
-  };
-}
-
-function getGammaConstant(particle: ParticleType): number {
-  switch (particle) {
-    case 'photon': return 0.143;    // F-18 reference (mSv.m2/GBq.h)
-    case 'electron': return 0.001;   // Beta
-    case 'positron': return 0.143;   // 511 keV annihilation
-    case 'neutron': return 0.50;     // Approximate for fast neutrons
-  }
-}
-
-function getTVLForMaterial(material: string, particle: ParticleType): number {
-  if (particle !== 'photon') return 0;
-  const tvlMap: Record<string, number> = {
-    concrete: 37.0, lead: 0.5, steel: 10.0, barite: 28.0,
-  };
-  return tvlMap[material] || 0;
-}
-
-function getNeutronRemovalCoeff(material: string): number {
-  const coeffs: Record<string, number> = {
-    concrete: 0.00947, polyethylene: 0.0608, steel: 0.00405, lead: 0.00352,
-  };
-  return coeffs[material] || 0;
-}
-
-function isBehindShield(
-  x: number, y: number, z: number,
-  sourcePos: { x: number; y: number; z: number },
-  wallDistance: number,
-): boolean {
-  // Simple check: if detector is farther from source than wall
-  const wallX = sourcePos.x + wallDistance;
-  return x > wallX;
+  return { ...base, voxels };
 }
 
 // ── Merge multiple mappings ──
@@ -278,6 +297,13 @@ export function mergeMappings(mappings: DetectorMesh[]): MergedMapping {
 // ── Statistics ──
 export function computeMeshStats(mesh: DetectorMesh) {
   const doses = mesh.voxels.map(v => v.doseRate_uSv_h);
+  if (!doses.length) {
+    return {
+      voxelCount: 0, maxDose_uSv_h: 0, minDose_uSv_h: 0, avgDose_uSv_h: 0, medianDose_uSv_h: 0,
+      zoneDistribution: {} as Record<string, number>,
+      volume_m3: mesh.dimensions.x * mesh.dimensions.y * mesh.dimensions.z, resolution: mesh.resolution_cm,
+    };
+  }
   const zones: Record<string, number> = {};
   for (const v of mesh.voxels) {
     zones[v.zone] = (zones[v.zone] || 0) + 1;

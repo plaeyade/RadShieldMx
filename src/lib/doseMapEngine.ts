@@ -1,38 +1,14 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════
- *  RadShield-MX v31 — Dose Map Visualization Engine
- * ═══════════════════════════════════════════════════════════════════════════
- *  2D/3D volumetric dose heatmap with isodose contour lines.
+ * Presentación de mallas de dosis (DoseMapDialog): mapas de color, isodosis por marching squares,
+ * superficie 3D y estadísticas.
  *
- *  Physics models:
- *    • Inverse square law        — primary radiation
- *    • Exponential attenuation   — barrier transmission
- *    • Scatter buildup           — BSF from NCRP 151 tables
- *    • Neutron dose component    — for energies > 10 MV
- *    • TVL-based transmission    — primary and secondary barriers
- *
- *  Grid: Cartesian 2D mesh with configurable resolution
- *  Visualization: Color heatmap + isodose contour lines
- *  Integration: Canvas 2D overlay + Three.js 3D mesh
- * ═══════════════════════════════════════════════════════════════════════════
+ * Fase 3 (docs/plan-motores-calculo.md): este módulo ya NO calcula dosis. Se retiraron las tablas de
+ * TVL propias (`TVL_PRIMARY_CONCRETE_MM`, …), `calculatePointDose` y `calculateDoseGrid` (W·U/d² con una
+ * sola TVL por barrera, sin fuga ni dispersión, T aplicado al mapa y 1000 mSv fijos junto a la fuente).
+ * Los valores salen de `calcularMallaRegular` (`doseFieldEngine`) y aquí sólo se convierten con
+ * `resultadoDesdeMalla`. Unidades: kerma en mSv/semana, celdas en m.
  */
-
-// ─── TVL data from NCRP 151 (mm concrete) ─────────────────────────
-export const TVL_PRIMARY_CONCRETE_MM: Record<string, number> = {
-  '4MV': 350, '6MV': 369, '10MV': 410, '15MV': 440, '18MV': 457, '25MV': 480,
-  'Co60': 218, 'Ir192': 61, 'Cs137': 71, 'I131': 22,
-};
-
-export const TVL_SECONDARY_CONCRETE_MM: Record<string, number> = {
-  '4MV': 293, '6MV': 293, '10MV': 330, '15MV': 360, '18MV': 380, '25MV': 410,
-  'Co60': 183, 'Ir192': 50, 'Cs137': 58, 'I131': 18,
-};
-
-// HVL in mm lead
-export const HVL_LEAD_MM: Record<string, number> = {
-  '4MV': 14.7, '6MV': 16.6, '10MV': 19.5, '15MV': 22.0, '18MV': 23.0, '25MV': 25.0,
-  'Co60': 11.0, 'Ir192': 3.3, 'Cs137': 6.5, 'I131': 3.0,
-};
+import type { MallaRegularDosis } from '@/lib/doseFieldEngine';
 
 // ─── Color maps ────────────────────────────────────────────────────
 export type ColorMap = 'jet' | 'viridis' | 'plasma' | 'inferno' | 'hot' | 'cool';
@@ -78,36 +54,7 @@ export function getColor(value: number, minVal: number, maxVal: number, cmap: Co
   return lerpColor(colors[i0], colors[i1], f);
 }
 
-// ─── Point source dose calculation ─────────────────────────────────
-export interface DoseSource {
-  x: number; // grid coordinate
-  y: number;
-  energyLabel: string; // e.g. '6MV', 'Co60'
-  workload_Gy_week: number;
-  useFactor: number; // U
-  isPrimary: boolean; // if true, uses primary TVL; else secondary
-}
-
-export interface DoseBarrier {
-  x1: number; y1: number;
-  x2: number; y2: number;
-  thickness_mm: number;
-  material: string;
-  tvl_mm: number; // effective TVL for this energy
-}
-
-export interface DoseGridConfig {
-  width: number;   // grid cells in X
-  height: number;  // grid cells in Y
-  cellSize_m: number; // physical size per cell (meters)
-  sources: DoseSource[];
-  barriers: DoseBarrier[];
-  occupancyFactor: number; // T
-  designDose_mSv_week: number; // P
-  colorMap: ColorMap;
-  contourLevels: number[]; // in mSv/week, e.g. [0.02, 0.1, 0.5, 1.0, 2.0]
-}
-
+// ─── Resultado de malla ─────────────────────────────────────────────
 export interface DoseGridResult {
   grid: Float32Array; // width * height values in mSv/week
   width: number;
@@ -126,95 +73,52 @@ export interface ContourLine {
   color: string;
 }
 
-// ─── Core dose calculation ─────────────────────────────────────────
-
 /**
- * Calculate dose at a single point from all sources, considering
- * inverse square law and barrier attenuation.
+ * Resultado de presentación a partir de una malla del motor de campo. `grid` conserva los valores del
+ * motor (mSv/semana) en el mismo orden (iy·nx + ix); las isodosis se extraen sobre esos valores.
  */
-export function calculatePointDose(
-  px: number, py: number,
-  sources: DoseSource[],
-  barriers: DoseBarrier[],
-  occupancyFactor: number
-): number {
-  let totalDose = 0;
-
-  for (const src of sources) {
-    const dx = px - src.x;
-    const dy = py - src.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 0.1) { totalDose += 1000; continue; } // very close to source
-
-    // Inverse square law: dose ∝ 1/d²
-    // W (Gy/week) × 1000 (mSv/Gy) × U / d²
-    let dose = (src.workload_Gy_week * 1000 * src.useFactor) / (dist * dist);
-
-    // Barrier attenuation: check if ray from source to point crosses any barrier
-    for (const bar of barriers) {
-      if (lineSegmentIntersects(src.x, src.y, px, py, bar.x1, bar.y1, bar.x2, bar.y2)) {
-        // Exponential attenuation: I = I₀ × 10^(-thickness/TVL)
-        const nTvl = bar.thickness_mm / bar.tvl_mm;
-        const transmission = Math.pow(10, -nTvl);
-        dose *= transmission;
-      }
-    }
-
-    totalDose += dose;
+export function resultadoDesdeMalla(malla: MallaRegularDosis, contourLevels: number[], calculationTime_ms = 0): DoseGridResult {
+  let minDose = Infinity, maxDose = 0;
+  for (const v of malla.valores) {
+    if (!Number.isFinite(v)) continue;
+    if (v < minDose) minDose = v;
+    if (v > maxDose) maxDose = v;
   }
-
-  return totalDose * occupancyFactor;
+  if (!Number.isFinite(minDose)) minDose = 0;
+  return {
+    grid: malla.valores,
+    width: malla.nx,
+    height: malla.ny,
+    cellSize_m: malla.paso_m,
+    minDose,
+    maxDose,
+    contourLines: extractContours(malla.valores, malla.nx, malla.ny, contourLevels),
+    calculationTime_ms,
+  };
 }
 
 /**
- * Check if line segment AB intersects line segment CD.
+ * Copia de presentación en escala log₁₀ (color y altura 3D): el campo cae como 1/d² y varía muchos
+ * órdenes de magnitud. Las isodosis se conservan del resultado lineal. `piso` evita log(0).
  */
-function lineSegmentIntersects(
-  ax: number, ay: number, bx: number, by: number,
-  cx: number, cy: number, dx: number, dy: number
-): boolean {
-  const denom = (ax - bx) * (cy - dy) - (ay - by) * (cx - dx);
-  if (Math.abs(denom) < 1e-10) return false; // parallel
-
-  const t = ((ax - cx) * (cy - dy) - (ay - cy) * (cx - dx)) / denom;
-  const u = ((ax - cx) * (ay - by) - (ay - cy) * (ax - bx)) / denom;
-
-  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
-}
-
-/**
- * Calculate full dose grid.
- */
-export function calculateDoseGrid(config: DoseGridConfig): DoseGridResult {
-  const t0 = performance.now();
-  const { width, height, cellSize_m, sources, barriers, occupancyFactor } = config;
-  const grid = new Float32Array(width * height);
-  let minDose = Infinity;
-  let maxDose = 0;
-
-  for (let gy = 0; gy < height; gy++) {
-    for (let gx = 0; gx < width; gx++) {
-      const px = gx * cellSize_m;
-      const py = gy * cellSize_m;
-      const dose = calculatePointDose(px, py, sources, barriers, occupancyFactor);
-      grid[gy * width + gx] = dose;
-      if (dose < minDose) minDose = dose;
-      if (dose > maxDose) maxDose = dose;
-    }
+export function resultadoLogaritmico(res: DoseGridResult, piso = 1e-6): DoseGridResult {
+  const tope = res.maxDose > 0 ? res.maxDose : piso;
+  const grid = new Float32Array(res.grid.length);
+  let minDose = Infinity, maxDose = -Infinity;
+  for (let i = 0; i < res.grid.length; i++) {
+    const v = res.grid[i];
+    const w = Math.log10(Math.min(Math.max(Number.isFinite(v) ? v : tope, piso), tope));
+    grid[i] = w;
+    if (w < minDose) minDose = w;
+    if (w > maxDose) maxDose = w;
   }
-
-  // Extract contour lines
-  const contourLines = extractContours(grid, width, height, config.contourLevels);
-
-  const dt = performance.now() - t0;
-
-  return { grid, width, height, cellSize_m, minDose, maxDose, contourLines, calculationTime_ms: dt };
+  return { ...res, grid, minDose, maxDose };
 }
 
 /**
  * Marching squares contour extraction.
  */
-function extractContours(
+export function extractContours(
   grid: Float32Array, w: number, h: number, levels: number[]
 ): ContourLine[] {
   const lines: ContourLine[] = [];
@@ -408,7 +312,7 @@ export function generateDose3DMesh(
       const [r, g, b] = getColor(val, minDose, maxDose, cmap);
 
       vertices[idx * 3] = x * cellSize_m;
-      vertices[idx * 3 + 1] = val * heightScale; // height = dose × scale
+      vertices[idx * 3 + 1] = (val - minDose) * heightScale; // altura ∝ (valor − mínimo)
       vertices[idx * 3 + 2] = y * cellSize_m;
 
       colors[idx * 3] = r;

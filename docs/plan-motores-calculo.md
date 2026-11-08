@@ -1,6 +1,6 @@
 # Plan de motores de cálculo — campo de dosis unificado
 
-Estado: Fase 1 fusionada (PR #26); Fase 2 en revisión (rama `motor-dosis-fase2`). Herramienta de diseño preliminar; todo resultado
+Estado: Fases 1 (PR #26) y 2 (PR #27) fusionadas; Fase 3 en revisión (rama `motor-dosis-fase3`). Herramienta de diseño preliminar; todo resultado
 requiere revisión de un experto calificado / OSR antes de uso clínico o regulatorio.
 
 ## Diagnóstico de partida
@@ -75,7 +75,7 @@ Trabajo:
 Salida / pruebas: el kerma del motor en los puntos de muestreo detrás de la barrera calculada es ≤ P/T
 (tolerancia de redondeo) para los casos de `normativeBarrierEngine.test.ts`; regresión de Fase 1 en verde.
 
-### Estado de la Fase 2 (rama `motor-dosis-fase2`)
+### Estado de la Fase 2 (PR #27, fusionada)
 
 Hecho:
 - **Componentes** (`doseFieldEngine.ts`, `contribucionFuente` → `componentes`):
@@ -95,9 +95,11 @@ Hecho:
     (`preblindaje`, sin acreditar por omisión, como el normativo).
   - TC, medicina nuclear (TG-108 por paciente), braquiterapia y resto: K₀ único de `calculateUnshieldedKerma`.
   - En el campo las componentes se suman; la regla de las dos fuentes es sólo de diseño.
-- **Oblicuidad** (NCRP 151 §2.4): primaria y fuga con espesor oblicuo; para θ > 45° y B < 10⁻³ se descuenta
-  1 HVL (MV) o 2 HVL (Co-60) (`correccionOblicuidad`), sin superar la transmisión normal y sin crédito más
-  allá de 70° (datos de Kirn/Biggs). Dispersión del paciente: espesor normal, sin crédito (el informe no da
+- **Oblicuidad** (NCRP 151 §2.2, p. 24: para θ > 45°, ≈ 2 HVL en baja energía y ≈ 1 HVL en alta energía,
+  concreto): primaria y fuga con espesor oblicuo; para θ > 45° y B < 10⁻³ se descuenta 1 HVL (MV) o 2 HVL
+  (Co-60) (`correccionOblicuidad`), sin superar la transmisión normal y sin crédito más allá de 70°. El umbral
+  B < 10⁻³ y el tope de 70° son criterios conservadores del motor (en la Fase 3 se corrigió la cita, que
+  remitía a Biggs/AAPM en lugar de NCRP 151 §2.2). Dispersión del paciente: espesor normal, sin crédito (el informe no da
   un criterio único). Diagnóstico y resto: tope de 60° de la Fase 1.
 - **Espesor geométrico**: la barrera es una banda de espesor t desde la línea (cara interior) hacia el lado
   opuesto a las fuentes (convención de `generateSamplePoints`); el recorrido es la cuerda real del rayo
@@ -112,7 +114,7 @@ B = 3.69×10⁻⁴, primaria = P/T), §7.1.5 (dispersión 46.1/30.7 cm, fuga 37.
 §7.1.4 (W_L = 945 Gy/semana); consistencia campo ↔ normativo en los puntos de muestreo (primaria = P/T,
 total ≤ P/T + 1 %; secundaria 6+18 MV con IMRT en concreto/plomo/acero ≤ P/T; NCRP 147 §5.2 = P/T y K₀ igual
 al normativo; fluoroscopía con dos fuentes ≤ P/T, = P/T sin crédito de oblicuidad); oblicuidad §2.4;
-cuerda geométrica; presencia de la primaria con y sin `ejeGantry_deg`; preblindaje. Las pruebas de la Fase 1
+(cita corregida a §2.2, p. 24, en la Fase 3); cuerda geométrica; presencia de la primaria con y sin `ejeGantry_deg`; preblindaje. Las pruebas de la Fase 1
 que suponían un K₀ único para LINAC/diagnóstico TG9 ahora comprueban la componente correspondiente.
 
 Pendiente (no se inventan datos):
@@ -132,6 +134,52 @@ o aislando Γ ×1000, TVL F-18, Σ_R y cm/m) y unificar unidades (mSv/semana, m)
 
 Salida / pruebas: prueba por visor que compara su malla con el motor en ≥ 10 puntos (diferencia < 1 %);
 prueba de unidades (m vs. px) con dos escalas.
+
+### Estado de la Fase 3 (rama `motor-dosis-fase3`)
+
+Entrada cumplida: Fase 2 fusionada (PR #27).
+
+Hecho:
+- **API de mallas** en `doseFieldEngine.ts`: `calcularMallaRegular` (celdas cuadradas sobre un rectángulo en px,
+  valor = `dosisEnPunto` en el centro de cada celda, `paso_px` y `paso_m`), `centroCelda`, `limitesDelPlano`,
+  `kermaFiltrado` / `componentesPresentes` / `COMPONENTES_CAMPO` / `ETIQUETA_COMPONENTE` (componentes
+  seleccionables). `src/lib/visoresDosis.ts` (`mallaDoseMap`, `mallaSpatialDoseMap`) es lo único que llaman
+  los diálogos; selector común `SelectorComponentesDosis`.
+- **DoseMapDialog**: fuentes, barreras reales y escala del plano (`canvasStore`) en lugar de una sala 8×8 m con
+  tres barreras sintéticas y una sola TVL; componentes seleccionables; kerma en mSv/semana sin T (antes
+  multiplicaba por T) y P/T como isodosis; color y altura 3D en log₁₀. `doseMapEngine.ts` queda sólo de
+  presentación (mapas de color, isodosis, malla 3D, estadísticas, `resultadoDesdeMalla`): se retiraron
+  `TVL_PRIMARY_CONCRETE_MM`, `TVL_SECONDARY_CONCRETE_MM`, `HVL_LEAD_MM`, `calculatePointDose` y `calculateDoseGrid`.
+- **SpatialDoseMapDialog**: `mallaSpatialDoseMap` (80 columnas sobre el plano, misma escala en x e y) en lugar
+  de Γ = 0.5 fijo, μ inventados, 23.5 cm de concreto en toda barrera y «µSv» mal rotulado.
+- **Medical 3D, modo dosis**: `buildMedicalScene(plano, preset, { dosis: { componentes } })` genera
+  `dosePoints` como malla del motor (24 columnas sobre la escena; m = px × escala) con `kerma_mSv_semana` y
+  nivel (> 0.1 controlada, > 0.02 supervisada); antes eran tres anillos fijos por equipo. Sin la opción no se
+  calcula (el lienzo construye la escena en cada render) y `dosePoints` queda vacío.
+- **doseMappingEngine** (usado sólo por DoseMapping3D, que sigue en revisión): la tasa de cada vóxel sale de
+  `dosisEnPunto` con una fuente sintética `pet-f18`. Corregidos: Γ ×1000 (0.143 µSv·m²/(MBq·h), no por GBq),
+  TVL de 511 keV (37 cm de concreto y 0.5 cm de plomo → catálogo TG-108: 17.6 cm, 1.66 cm, acero 6.5 cm), y
+  cm/m (el muro estaba a `shieldThickness_cm` metros; ahora a `shieldDistance_m` m con espesor en cm → mm).
+  Neutrones (Σ_R ~10× bajos) y electrones quedan fuera de alcance (malla vacía con `nota`); positrones = 511 keV.
+- Cita de oblicuidad de la Fase 2 corregida a NCRP 151 §2.2, p. 24 (`ncrp151.ts`, `doseFieldEngine.ts`,
+  pruebas, `docs/revision-fisica-2026-11.md`).
+- Banderas sin cambios: `VISORES_EN_REVISION = false` (Heat Map Avanzado, Isodosis, Isosuperficie 3D,
+  3D Dose Mapping siguen inactivos hasta la Fase 5) y `HEATMAP_GPU = false`.
+
+Salida cumplida (`src/__tests__/lib/doseFieldEngineFase3.test.ts`, 15 pruebas):
+- DoseMapDialog, SpatialDoseMapDialog y Medical 3D: ≥ 10 puntos por visor, diferencia con `dosisEnPunto`
+  < 1 % (en la práctica, redondeo Float32), con todas las componentes y con selecciones (sólo fuga, NCRP 147,
+  fuga + dispersión); se comprueba que las barreras reales atenúan.
+- Unidades: el mismo plano a 0.01 y 0.02 m/px da la misma malla (nx, ny, paso en m) y el mismo kerma; la escena
+  3D da las mismas celdas en metros.
+- doseMappingEngine: 1 GBq de F-18 a 2 m = 143/4 µSv/h; 1.66 cm de plomo y 17.6 cm de concreto = 1 TVL; el
+  muro a `shieldDistance_m`; vóxeles = motor; neutrones/electrones fuera de alcance.
+- `tsc -p tsconfig.app.json`, `vitest run` (63 archivos, 478 pruebas), ESLint de los archivos tocados sin
+  errores nuevos (quedan los previos de DoseMapDialog/MedicalFloorPlan3DDialog) y `vite build` en verde;
+  Playwright en CI.
+
+Pendiente: Interfaz para `ejeGantry_deg`; laberinto/puerta y fotoneutrones en el campo; DoseMapping3D sigue
+con su sala sintética (se reconectará al plano en la Fase 5, junto con su reactivación).
 
 ## Fase 4 — Suite de validación normativa
 

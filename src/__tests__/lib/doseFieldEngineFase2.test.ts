@@ -2,7 +2,7 @@
  * Fase 2 del motor de campo (docs/plan-motores-calculo.md): componentes primaria/fuga/dispersión de
  * NCRP 151 frente a los ejemplos resueltos del §7.1 (mismos datos que ncrp151.test.ts y
  * normativeBarrierEngine.test.ts), consistencia campo ↔ motor normativo en los puntos de muestreo,
- * oblicuidad (§2.4), espesor geométrico, presencia de la primaria y preblindaje NCRP 147.
+ * oblicuidad (§2.2, p. 24), espesor geométrico, presencia de la primaria y preblindaje NCRP 147.
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -158,7 +158,7 @@ describe('Fase 2 — consistencia campo ↔ normativeBarrierEngine en los puntos
   });
 });
 
-describe('Fase 2 — oblicuidad (NCRP 151 §2.4)', () => {
+describe('Fase 2 — oblicuidad (NCRP 151 §2.2, p. 24)', () => {
   const muro = (t_mm: number) => barrera({ x1: 3, x2: 3, y1: -500, y2: 500, thickness_mm: t_mm });
   const y60 = 6 * Math.tan((60 * Math.PI) / 180); // punto (6, y60): rayo a 60° de la normal del muro x = 3
 
@@ -186,7 +186,7 @@ describe('Fase 2 — oblicuidad (NCRP 151 §2.4)', () => {
     expect(c.transmision).toBeCloseTo(Math.min(Bnor, Bobl * 4), 14);
   });
 
-  it(`sin crédito adicional más allá de ${OBLICUIDAD_MAX_DATOS_DEG}° (límite de los datos)`, () => {
+  it(`sin crédito adicional más allá de ${OBLICUIDAD_MAX_DATOS_DEG}° (tope del motor)`, () => {
     const t = 500;
     const ang = (80 * Math.PI) / 180;
     const d = dosisEnPunto([linac18()], 6, 3 * Math.tan(ang) * 2, 1, { barriers: [muro(t)] });
