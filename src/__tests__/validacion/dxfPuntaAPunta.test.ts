@@ -107,13 +107,27 @@ describe('DXF real (e2e/fixtures/sample-floorplan.dxf) de punta a punta', () => 
     expect(fuera.every((i) => malla.valores[i] < malla.sinBlindaje[i])).toBe(true);
     expect(frente.length).toBeGreaterThan(0);
     expect(Math.max(...frente.map((i) => malla.valores[i]))).toBeLessThanOrEqual(0.02);
-    // Limitación conocida (conservadora): la banda de cada muro va de su línea hacia afuera y no cubre el cuadrado
-    // t × t de la esquina exterior; los rayos diagonales cruzan sólo una cuerda parcial y el campo ahí sobrestima.
-    // Se documenta en docs/plan-motores-calculo.md (Fase 4, pendiente).
-    // Limitación conocida (no se cambia aquí): el heat map del lienzo (`calculateHeatmap`) muestrea ±200 px alrededor
-    // de las fuentes; en un DXF en mm eso es ±0.2 m y no llega a los muros.
+    // Fase 5 — esquinas: las bandas de muros que comparten extremo se unen en inglete, así que también en la
+    // diagonal de las esquinas exteriores (antes un hueco t × t sin blindaje: hasta ~0.7 mGy/semana) el campo es
+    // ≤ P/T más allá de 0.6 m de la cara exterior.
+    expect(Math.max(...fuera.map((i) => malla.valores[i]))).toBeLessThanOrEqual(0.02);
+
+    // Fase 5 — dominio del heat map del lienzo en metros: antes ±200 px alrededor de la fuente (±0.2 m en este DXF
+    // en mm, sin llegar a los muros); ahora cubre la sala y más allá de los muros, con el valor del motor en cada punto.
     const heat = result.current.calculateHeatmap(plano.sources, escala, 50, undefined, calculadas);
-    expect(Math.max(...heat.map((q) => Math.abs(q.x - s.x)))).toBeLessThanOrEqual(200);
+    const xs = heat.map((q) => q.x), ys = heat.map((q) => q.y);
+    expect(Math.min(...xs)).toBeLessThan(-300);
+    expect(Math.max(...xs)).toBeGreaterThan(8300);
+    expect(Math.min(...ys)).toBeLessThan(-300);
+    expect(Math.max(...ys)).toBeGreaterThan(6300);
+    expect(heat.length).toBeLessThanOrEqual(80 * 80);
+    for (const q of heat.filter((_, i) => i % 97 === 0)) {
+      const ref = dosisEnPunto(plano.sources, q.x, q.y, escala, { barriers: calculadas, materials: MATERIALS }).kerma_mSv_semana;
+      expect(Math.abs(q.kerma - ref)).toBeLessThanOrEqual(1e-6 * ref + 1e-30);
+    }
+    const heatFuera = heat.filter((q) => q.x < -600 || q.x > 8600 || q.y < -600 || q.y > 6600);
+    expect(heatFuera.length).toBeGreaterThan(0);
+    expect(heatFuera.every((q) => q.kerma < q.kermaSinBlindaje && q.kerma <= 0.02)).toBe(true);
 
     // Reporte: verificación instalado (capas del DXF) vs. requerido (motor) — todas las barreras cumplen.
     const rep = verificarPlano(planoCalculado);

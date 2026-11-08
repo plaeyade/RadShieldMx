@@ -7,6 +7,8 @@ export interface CanvasHeatmapPoint {
   x: number;
   y: number;
   kerma: number;
+  /** Lado de la celda del motor (px del plano). Sin él, círculos de 8 px como antes. */
+  paso_px?: number;
 }
 
 export interface CanvasSamplePointLike {
@@ -65,7 +67,9 @@ export function drawCanvasHeatmapLayer(
     const [r, g, b] = doseColor(normalized);
     ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.25)`;
     ctx.beginPath();
-    ctx.arc(sp.x, sp.y, 8 * projection.scale, 0, Math.PI * 2);
+    // Fase 5: el radio sigue a la celda del motor (el dominio ahora está en metros, no ±200 px).
+    const radio_px = point.paso_px && point.paso_px > 0 ? 0.6 * point.paso_px : 8;
+    ctx.arc(sp.x, sp.y, radio_px * projection.scale, 0, Math.PI * 2);
     ctx.fill();
   }
 

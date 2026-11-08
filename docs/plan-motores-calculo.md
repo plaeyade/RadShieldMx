@@ -1,6 +1,6 @@
 # Plan de motores de cálculo — campo de dosis unificado
 
-Estado: Fases 1 (PR #26), 2 (PR #27) y 3 (PR #28) fusionadas; Fase 4 en revisión (rama `fase4`). Herramienta de diseño preliminar; todo resultado
+Estado: Fases 1 (PR #26), 2 (PR #27), 3 (PR #28) y 4 (PR #29) fusionadas; Fase 5 en revisión (rama `fase5`). Herramienta de diseño preliminar; todo resultado
 requiere revisión de un experto calificado / OSR antes de uso clínico o regulatorio.
 
 ## Diagnóstico de partida
@@ -29,6 +29,13 @@ localStorage para que una preferencia guardada no reabra visores con dosis no f�
 | `HEATMAP_GPU` | `VITE_HEATMAP_GPU` | Heat map siempre en CPU con `doseFieldEngine` |
 | `DEPURACION_RENDER` | `VITE_DEPURACION_RENDER` | No se dibujan los HUD F442–F445/F621–F640 sobre el plano (el `<canvas>` overlay sigue montado). Los paneles DOM F621–F695 ya sólo aparecen en modo «guiado» (opt-in) y los usan pruebas E2E: se conservan |
 | `VISOR_3D_BABYLON` | `VITE_VISOR_3D_BABYLON` | Inspección 3D no monta la vista previa Babylon; muestra «En revisión: se reactivará con el motor de dosis unificado» |
+| `VISOR_HEATMAP_AVANZADO` | `VITE_VISOR_HEATMAP_AVANZADO` | Fase 5: Heat Map Avanzado (ya conectado al motor) sigue inactivo |
+| `VISOR_ISODOSIS` | `VITE_VISOR_ISODOSIS` | Fase 5: Curvas Isodosis (ya conectado) sigue inactivo |
+| `VISOR_ISOSUPERFICIE_3D` | `VITE_VISOR_ISOSUPERFICIE_3D` | Fase 5: Isosuperficie 3D (ya conectado) sigue inactivo |
+| `VISOR_DOSE_MAPPING_3D` | `VITE_VISOR_DOSE_MAPPING_3D` | Fase 5: 3D Dose Mapping (ya conectado) sigue inactivo |
+
+Un visor en revisión se monta y aparece en menús si `VISORES_EN_REVISION` **o** su bandera propia está en `true`
+(`visorDisponible`, `BANDERAS_VISOR`). Todas siguen en `false` hasta que el responsable autorice cada visor.
 
 ## Fase 1 — Motor de campo único y desactivación controlada (PR #26, fusionada)
 
@@ -192,7 +199,7 @@ importado de punta a punta (geometría → barreras → campo → reporte).
 Salida / pruebas: cada ejemplo reproduce el valor publicado dentro de la tolerancia documentada; el caso
 DWG real queda como prueba E2E en CI.
 
-### Estado de la Fase 4 (rama `fase4`)
+### Estado de la Fase 4 (PR #29, fusionada)
 
 Entrada cumplida: Fase 3 fusionada (PR #28). Fuentes: NCRP 147 (Sección 5, pp. 69–101; Tabla 4.7, pp. 46–47;
 Figs. A.2/A.3, pp. 123–124) y NCRP 151 (§7.1, pp. 105–148; Tablas B.8a/B.8b, pp. 168–169), versiones con licencia
@@ -252,7 +259,7 @@ No reproducidos / pendientes (`it.todo`, sin ajustar la prueba):
   (Fig. A.2 de NCRP 151, lectura gráfica), §7.2 (CyberKnife, sin modalidad), §5.7 (densitometría).
 - Limitaciones del campo halladas con el DXF: el heat map del lienzo (`calculateHeatmap`) sólo muestrea ±200 px
   alrededor de las fuentes (±0.2 m en un DXF en mm); la banda de cada muro no cubre el cuadrado t × t de la esquina
-  exterior (el campo ahí sobrestima: conservador). Laberinto/puerta siguen fuera del campo.
+  exterior (el campo ahí sobrestima: conservador). Ambas corregidas en la Fase 5. Laberinto/puerta siguen fuera del campo.
 - `VISORES_EN_REVISION` y `HEATMAP_GPU` siguen en `false`.
 
 ## Fase 5 — Reactivar visores uno por uno
@@ -263,6 +270,57 @@ Trabajo, por visor (Heat Map Avanzado → Isodosis → Isosuperficie 3D → 3D D
 motor, añadir su prueba contra el motor y retirarlo de `IDS_VISORES_EN_REVISION` (o una bandera propia).
 
 Salida / pruebas: prueba unitaria visor ↔ motor; E2E que abre el visor desde menú/paleta; revisión física.
+
+### Estado de la Fase 5 (rama `fase5`)
+
+Entrada cumplida: Fase 4 fusionada (PR #29).
+
+Visores conectados al motor (todos vía `src/lib/visoresDosis.ts` → `doseFieldEngine`, sin física propia; plano,
+barreras y escala del lienzo de `canvasStore`; kerma en mSv/semana). **Siguen inactivos**: cada uno tiene su bandera en
+`featureFlags.ts`, en `false`; `VISORES_EN_REVISION` y `HEATMAP_GPU` siguen en `false` (el shader GPU no se tocó).
+Ningún visor se borró.
+1. **Heat Map Avanzado** (`HeatMapViewer`): `mallaHeatMapAvanzado` (120 columnas); escalas lineal/raíz/log₁₀ relativas al
+   máximo (`valorEscala`, 6 décadas), isodosis absolutas `NIVELES_ISODOSIS`, fuentes/barreras reales y selector de
+   componentes. Antes: tres fuentes ficticias («LINAC A/B, HDR») con una exponencial sin unidades.
+2. **Curvas Isodosis** (`IsodosisViewer`): `isodosisPlano` (80 columnas) con niveles absolutos P/T ∪ 0.02…5 mSv/semana
+   (P y T editables) y marching squares de `doseMapEngine.extractContours` sobre los valores del motor. Antes: fuente en
+   el centro del lienzo y niveles «%» de una exponencial.
+3. **Isosuperficie 3D** (`Isosurface3DDialog`): `malla3DPlano` — un corte `calcularMallaRegular` por altura (0.25…2.75 m);
+   la fuente queda a su `isocenterHeight_m` y el motor recibe la distancia vertical |h − z| (a z = 0 es exactamente el campo
+   2D); sin crédito de oblicuidad vertical (conservador); se omiten puntos a < 0.3 m de una fuente. Niveles en
+   mSv/semana. Antes: Γ = 0.11 sobre «Ci» en una sala fija de 10×8×6 m. Corregido además que el diálogo nunca abría
+   (`dialogs.isosurface3d?.open` sobre un booleano; el mismo patrón está en otros 18 diálogos fuera de alcance).
+4. **3D Dose Mapping** (`DoseMapping3D`): origen por omisión «Plano del lienzo» (`meshDoseMapping3D`: vóxeles de
+   `malla3DPlano`, x/altura/y en m); la zonificación del visor es por tasa, así que se usa la tasa media = kerma semanal /
+   40 h (`tasaMedia_uSv_h`). La sala sintética de la Fase 3 queda como opción.
+
+Limitaciones de la Fase 4 corregidas:
+- **Dominio del heat map del lienzo en metros** (`dominioHeatmap`, `calcularMallaDosis`): antes ±200 px alrededor de cada
+  fuente (±0.2 m en un DXF en mm). Ahora: fuentes y barreras + 1 m, unido al radio R donde el kerma sin blindaje de cada
+  fuente cae bajo `UMBRAL_DOMINIO_HEATMAP_mSv_semana` = 0.002 mSv/semana (P/10 de zona no controlada), R = √(K(1 m)/umbral)
+  acotado a [1, 10] m. Paso = máx(`gridSize` px, lado mayor / 80): el número de puntos no depende de la escala. Los puntos
+  son centros de celda (`paso_px`, que usa el lienzo para el radio del círculo). `calculateHeatmapGrid`/`heatmapGridPoints`
+  (`@deprecated`) conservan su malla antigua.
+- **Uniones de muros en esquina** (`unionesDeBarreras`, `cuerdaEnBarrera(…, uniones)`): dos barreras que comparten extremo
+  (±1 cm) se cortan en inglete por la recta vértice interior → intersección de las caras exteriores (espesores distintos
+  incluidos). Esquina exterior: se cubre el hueco t₁ × t₂ (en el DXF de la Fase 4 el campo en la diagonal bajaba de
+  0.699 mGy/semana a ≤ P/T = 0.02); esquina entrante: sin doble crédito en el solape. Se omiten (corte recto, como antes):
+  3+ barreras en un extremo, uniones en T, muros colineales y ángulos con inglete > 4·t. Las uniones se calculan una vez por
+  malla (caché por arreglo de barreras + firma geométrica).
+
+Pruebas (`src/__tests__/lib/doseFieldEngineFase5.test.tsx`, 17): banderas por visor en `false` y habilitación individual;
+por visor, ≥ 10 puntos frente a `dosisEnPunto` (< 1 %; en la práctica redondeo Float32) con todas las componentes y con
+selecciones, y montaje del visor en jsdom con el plano del lienzo aunque su bandera esté apagada; dominio del heat map con
+el mismo plano a 0.01 y 0.001 m/px (mismo dominio en m, mismo kerma, puntos acotados) y radio de umbral; esquina exterior
+(transmisión idéntica a un muro continuo en ±0.06 rad alrededor de la diagonal), esquina entrante (igual a un solo muro) y
+cuerda con/sin unión. `dxfPuntaAPunta.test.ts` ahora exige ≤ P/T en todos los puntos fuera de la sala (diagonales incluidas)
+y que el heat map del lienzo cubra la sala y los muros con el valor del motor. Las pruebas de Fase 1 que comparaban la malla
+con `calculateHeatmapGrid` comparan ahora punto a punto con `calculateUnshieldedKerma`.
+`tsc -p tsconfig.app.json`, `vitest run` (67 archivos, 538 pruebas), ESLint de los archivos tocados sin errores y
+`vite build` en verde.
+
+Pendiente: E2E que abra cada visor desde menú/paleta (requiere build con su bandera) y revisión física por el responsable
+antes de encender cada `VISOR_*`; uniones en T; laberinto/puerta y fotoneutrones en el campo; interfaz para `ejeGantry_deg`.
 
 ## Fase 6 — Consolidación de bundle y 3D (sólo r3f)
 
