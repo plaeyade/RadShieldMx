@@ -135,7 +135,8 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main'
+    # Repo privado: Pages sólo cuando se vuelva público (variable de repositorio PAGES_HABILITADO=true).
+    if: github.ref == 'refs/heads/main' && vars.PAGES_HABILITADO == 'true'
     permissions:
       pages: write
       id-token: write
