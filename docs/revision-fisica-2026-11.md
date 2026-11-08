@@ -81,5 +81,5 @@ Pendiente: hay otras tablas de materiales (`materialDatabase.ts`, `f510Diagnosti
 ## Bloques HD TM NIPOL (11-2026)
 
 Los TVL de `tm-nipoll-n40/n50` no tenían fuente. Se sustituyen por bloques HD de 3.5, 4.0, 5.0 y 5.5 g/cm³ con
-TVL por masa desde el concreto de NCRP 151. El certificado ININ LSCD-589/TD/2024 queda como evidencia,
+TVL por envolvente de masa de concreto y acero (NCRP 151) y densidad seca IMCYC. El certificado ININ LSCD-589/TD/2024 queda como evidencia,
 con validación pendiente: ver `docs/validacion-bloques-hd.md`.

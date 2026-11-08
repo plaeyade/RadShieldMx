@@ -7,7 +7,7 @@
  * la validación de `docs/validacion-bloques-hd.md`. El TVL de diseño es el de concreto de NCRP 151 (Tabla B.2,
  * TVL₁ y TVLₑ) escalado por masa a la densidad nominal — conservador para mezclas con hierro en MV.
  */
-import { TABLA_B_2 } from '@/lib/ncrp151';
+import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
 
 export type EnergiaHD = 'Co60' | '6' | '18';
 export type DensidadMedida = 3.5 | 4.0 | 5.0;
@@ -74,17 +74,27 @@ export const U_EXPANDIDA_TVL = 0.25;
 const RHO_CONCRETO = 2.35;
 const RHO_ACERO = 7.87;
 
-/** TVL de diseño (cm): concreto NCRP 151 escalado por masa a la densidad nominal. */
+/**
+ * TVL de diseño (cm): envolvente por masa de concreto y acero de NCRP 151 (Tabla B.2) a la densidad dada.
+ * Una mezcla Fe–Ca–Si queda entre ambos por unidad de masa: en Co-60 (Compton, Z/A) el acero es el peor,
+ * a ≥ 10 MV (pares) el concreto. El máximo de los dos es conservador a toda energía.
+ */
 export function tvlDisenoHD(densidad: number, energia: EnergiaHD | '10' | '15' | '25'): { tvl1_cm: number; tvle_cm: number } {
   if (!(densidad > 0)) throw new Error('Densidad inválida');
   const c = TABLA_B_2.concrete[energia];
-  const f = RHO_CONCRETO / densidad;
-  return { tvl1_cm: +(c.tvl1_cm * f).toFixed(1), tvle_cm: +(c.tvle_cm * f).toFixed(1) };
+  const a = TABLA_B_2.steel[energia];
+  const env = (xc: number, xa: number) => +(Math.max(xc * RHO_CONCRETO, xa * RHO_ACERO) / densidad).toFixed(1);
+  return { tvl1_cm: env(c.tvl1_cm, a.tvl1_cm), tvle_cm: env(c.tvle_cm, a.tvle_cm) };
 }
 
-/** Cota física: una mezcla cuyo elemento más pesado relevante es Fe no atenúa por masa mejor que el acero. */
-export function tvlCotaAcero(densidad: number, energia: EnergiaHD): number {
-  return +((TABLA_B_2.steel[energia].tvle_cm * RHO_ACERO) / densidad).toFixed(1);
+/** TVL de fuga (cm): envolvente de Tabla B.7 (concreto) y B.2 primaria del acero, por masa. */
+export function tvlFugaHD(densidad: number, energia: EnergiaHD | '10' | '15' | '25'): number {
+  return +(Math.max(TABLA_B_7[energia].tvl1_cm * RHO_CONCRETO, TABLA_B_2.steel[energia].tvl1_cm * RHO_ACERO) / densidad).toFixed(1);
+}
+
+/** Cota inferior física: ninguna mezcla de concreto y hierro atenúa por masa mejor que el mejor de los dos. */
+export function tvlCotaInferior(densidad: number, energia: EnergiaHD): number {
+  return +(Math.min(TABLA_B_2.concrete[energia].tvle_cm * RHO_CONCRETO, TABLA_B_2.steel[energia].tvle_cm * RHO_ACERO) / densidad).toFixed(1);
 }
 
 export interface Hallazgo { nivel: 'bloquea' | 'advierte'; texto: string }
@@ -99,11 +109,12 @@ export function revisarCertificado(): Hallazgo[] {
       if (Math.abs(desdeMu - inf) / inf > 0.04) {
         h.push({ nivel: 'advierte', texto: `${d} g/cm³, ${e === 'Co60' ? 'Co-60' : `${e} MV`}: la Tabla 5 da ${inf} cm, pero ln10/μ' de la Tabla 4 da ${desdeMu.toFixed(1)} cm.` });
       }
+      // El bloque 3.5 lleva 13 % de Ba (mejor que Fe a 18 MV por pares): la cota concreto/acero no le aplica.
       if (d === 5.0 || d === 4.0) {
-        const cota = tvlCotaAcero(d, e);
-        if (inf < cota) {
-          const rhoImplicita = (TABLA_B_2.steel[e].tvle_cm * RHO_ACERO) / inf;
-          h.push({ nivel: 'bloquea', texto: `${d} g/cm³, ${e === 'Co60' ? 'Co-60' : `${e} MV`}: TVL ${inf} cm es menor que el del acero a igual masa (${cota} cm); exigiría ρ ≥ ${rhoImplicita.toFixed(2)} g/cm³. Geometría de medición no de haz amplio o densidad mal asignada.` });
+        const cota = tvlCotaInferior(d, e);
+        if (inf < cota - 0.05) {
+          const rhoImplicita = (cota * d) / inf;
+          h.push({ nivel: 'bloquea', texto: `${d} g/cm³, ${e === 'Co60' ? 'Co-60' : `${e} MV`}: TVL ${inf} cm es menor que el de concreto o acero a igual masa (${cota} cm); exigiría ρ ≥ ${rhoImplicita.toFixed(2)} g/cm³. Geometría de medición no de haz amplio o densidad mal asignada.` });
         }
       }
     }

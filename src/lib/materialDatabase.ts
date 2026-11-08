@@ -5,16 +5,11 @@
 // =============================================================================
 
 import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
-import { densidadDiseno } from '@/lib/ininBloquesHD';
+import { densidadDiseno, tvlDisenoHD, tvlFugaHD } from '@/lib/ininBloquesHD';
 
 // Fuente única para los materiales de referencia de NCRP 151: Tabla B.2 (primaria, TVL₁) y
 // Tabla B.7 (fuga en concreto, TVL₁). Para acero y plomo la secundaria usa la primaria (conservador).
 const ENERGIAS = { '6MV': '6', '10MV': '10', '15MV': '15', '18MV': '18', '25MV': '25', Co60: 'Co60' } as const;
-/** TVL₁ de una tabla de concreto NCRP 151 escalado por masa a otra densidad. */
-function tvlMasa(tabla: Record<string, { tvl1_cm: number }>, rho: number): Record<string, number> {
-  return Object.fromEntries(Object.entries(ENERGIAS).map(([k, e]) => [k, +((tabla[e].tvl1_cm * 2.35) / rho).toFixed(1)]));
-}
-
 function tvlNCRP(mat: 'concrete' | 'steel' | 'lead', tipo: 'primary' | 'secondary'): Record<string, number> {
   return Object.fromEntries(
     Object.entries(ENERGIAS).map(([k, e]) => [
@@ -179,7 +174,7 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     normativa: ['NCRP 151', 'AAPM'],
     notes: 'Panel compuesto alta densidad. Alternativa a concreto barita. Instalación modular.',
   },
-  // Bloques HD TM NIPOL: TVL de diseño = concreto NCRP 151 escalado por masa (ver ininBloquesHD.ts).
+  // Bloques HD TM NIPOL: TVL de diseño = envolvente por masa de concreto y acero NCRP 151 (ver ininBloquesHD.ts).
   // El certificado ININ LSCD-589/TD/2024 (3.5, 4.0 y 5.0 g/cm³) queda como evidencia, pendiente de validación.
   ...([
     ['tm-nipol-hd35', 3.5, 'TM NIPOL HD 3.5'],
@@ -193,12 +188,12 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     name,
     category: 'composite',
     density_g_cm3: rho,
-    TVL_primary_cm: tvlMasa(TABLA_B_2.concrete, rho),
-    TVL_secondary_cm: tvlMasa(TABLA_B_7, rho),
+    TVL_primary_cm: Object.fromEntries(Object.entries(ENERGIAS).map(([k, e]) => [k, tvlDisenoHD(rho, e).tvl1_cm])),
+    TVL_secondary_cm: Object.fromEntries(Object.entries(ENERGIAS).map(([k, e]) => [k, tvlFugaHD(rho, e)])),
     thickness_mm_std: [130, 260],
     manufacturer: 'TM NIPOL (México)',
     normativa: ['NCRP 151', 'ININ CE.CB.LSCD-589/TD/2024'],
-    notes: `Bloque 13×13×26 cm, nominal ${nominal} g/cm³; densidad de diseño ${rho} (${fuente}). TVL por masa desde concreto NCRP 151; los TVL del ININ no se adoptan hasta validar (docs/validacion-bloques-hd.md).`,
+    notes: `Bloque 13×13×26 cm, nominal ${nominal} g/cm³; densidad de diseño ${rho} (${fuente}). TVL = envolvente por masa de concreto y acero (NCRP 151); los TVL del ININ no se adoptan hasta validar (docs/validacion-bloques-hd.md).`,
     };
   }),
   {
