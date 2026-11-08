@@ -12,7 +12,7 @@
 
 export type EnergiaMV = 4 | 6 | 10 | 15 | 18 | 20 | 25 | 30 | 'Co60';
 export type MaterialNCRP151 = 'concrete' | 'steel' | 'lead';
-interface TvlPar { tvl1_cm: number; tvle_cm: number }
+export interface TvlPar { tvl1_cm: number; tvle_cm: number }
 
 const par = (tvl1_cm: number, tvle_cm: number): TvlPar => ({ tvl1_cm, tvle_cm });
 
@@ -81,6 +81,16 @@ export function espesorTVL(B: number, tvl: TvlPar): number {
   if (B >= 1) return 0;
   const n = Math.log10(1 / B);
   return n < 1 ? n * tvl.tvl1_cm : tvl.tvl1_cm + (n - 1) * tvl.tvle_cm;
+}
+
+/**
+ * Inversa exacta de la Ec. 2.3 (`espesorTVL`): transmisión B de un espesor t (cm).
+ * t ≤ TVL₁ → B = 10^(−t/TVL₁); t > TVL₁ → B = 10^−(1 + (t − TVL₁)/TVLₑ).
+ */
+export function transmisionTVL(t_cm: number, tvl: TvlPar): number {
+  if (!(t_cm > 0)) return 1;
+  const n = t_cm <= tvl.tvl1_cm ? t_cm / tvl.tvl1_cm : 1 + (t_cm - tvl.tvl1_cm) / tvl.tvle_cm;
+  return Math.pow(10, -n);
 }
 
 export interface Componente { espesor_cm: number; tvl_cm: number; nombre: string }

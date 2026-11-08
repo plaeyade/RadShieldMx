@@ -5,6 +5,12 @@ import { bootWorkspace } from './helpers';
 
 const outputDir = path.resolve('outputs', 'f456_f458_babylon_parity_export');
 
+
+// Fase 1 motor de dosis: la vista previa Babylon está detrás de VISOR_3D_BABYLON (apagada por omisión).
+// Esta prueba sólo aplica a un build con VITE_VISOR_3D_BABYLON=true; ejecutarla con E2E_VISOR_3D_BABYLON=1.
+const VISOR_3D_BABYLON = process.env.E2E_VISOR_3D_BABYLON === '1';
+test.skip(!VISOR_3D_BABYLON, 'Babylon desactivado (featureFlags.VISOR_3D_BABYLON); ver docs/plan-motores-calculo.md');
+
 test('F456-F458 shows Babylon scene parity, performance and export controls', async ({ page }) => {
   test.setTimeout(120_000);
   await mkdir(outputDir, { recursive: true });

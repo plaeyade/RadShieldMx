@@ -67,3 +67,51 @@ export function reset() {
   Object.assign(featureFlags, DEFAULT);
   localStorage.removeItem(STORAGE_KEY);
 }
+
+// ───────────────────────────────────────────────────────────────
+// Fase 1 del motor de dosis unificado (docs/plan-motores-calculo.md)
+// Banderas de compilación: sólo se activan con variables VITE_* en el build, no desde localStorage,
+// para que una preferencia guardada no reabra visores con dosis no físicas.
+// ───────────────────────────────────────────────────────────────
+
+/**
+ * `false` (por omisión): los visores en revisión quedan inactivos — sin entrada en menús, barra
+ * lateral ni paleta de comandos, y sin montarse — porque muestran dosis que no salen del motor
+ * de campo (`doseFieldEngine`). Su código se conserva para reactivarlos uno por uno (Fase 5).
+ */
+export const VISORES_EN_REVISION: boolean = import.meta.env.VITE_VISORES_EN_REVISION === 'true';
+
+/** `false`: el heat map del lienzo se calcula en CPU con `doseFieldEngine` (el shader WebGPU no está portado). */
+export const HEATMAP_GPU: boolean = import.meta.env.VITE_HEATMAP_GPU === 'true';
+
+/** `false`: no se dibujan sobre el lienzo los HUD de depuración del renderer (F436–F445, F621–F695). */
+export const DEPURACION_RENDER: boolean = import.meta.env.VITE_DEPURACION_RENDER === 'true';
+
+/** `false`: la vista previa Babylon (F455–F474) de Inspección 3D no se monta ni descarga @babylonjs/*. */
+export const VISOR_3D_BABYLON: boolean = import.meta.env.VITE_VISOR_3D_BABYLON === 'true';
+
+export const NOTA_VISOR_EN_REVISION = 'En revisión: se reactivará con el motor de dosis unificado';
+
+/**
+ * Identificadores (diálogo o comando, sin distinguir mayúsculas) de los visores en revisión:
+ * Curvas Isodosis, 3D Dose Mapping, Heat Map Avanzado e Isosuperficie 3D.
+ */
+export const IDS_VISORES_EN_REVISION: readonly string[] = ['isodosis', 'dose3d', 'heatmap', 'isosurface3d'];
+
+export function esVisorEnRevision(id: string): boolean {
+  return IDS_VISORES_EN_REVISION.includes(id.toLowerCase());
+}
+
+/** ¿Se puede abrir/montar este visor? Siempre true para lo que no está en revisión. */
+export function visorDisponible(id: string, habilitados: boolean = VISORES_EN_REVISION): boolean {
+  return habilitados || !esVisorEnRevision(id);
+}
+
+/** Quita de una lista de menú las entradas de visores en revisión (mientras la bandera esté apagada). */
+export function filtrarVisoresEnRevision<T>(
+  items: readonly T[],
+  idDe: (item: T) => string,
+  habilitados: boolean = VISORES_EN_REVISION,
+): T[] {
+  return items.filter((item) => visorDisponible(idDe(item), habilitados));
+}

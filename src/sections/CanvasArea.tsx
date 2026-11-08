@@ -107,7 +107,7 @@ import { buildUnityWebglExportedBuildContract } from '@/lib/medical3D/unityWebgl
 import { buildAdvancedPhotorealPackContract } from '@/lib/medical3D/advancedPhotorealPack';
 import { buildF696F700PhotorealAssetReadiness } from '@/lib/medical3D/f696F700PhotorealAssetReadiness';
 import { buildDefaultPbrMaterialDatabase, buildPbrMaterialDbUpdate } from '@/lib/medical3D/pbrMaterialDatabase';
-import { isEnabled } from '@/lib/featureFlags';
+import { DEPURACION_RENDER, isEnabled } from '@/lib/featureFlags';
 import { buildF515CanvasEventHardening, routeCanvasEventV2WithGate } from '@/lib/f515CanvasEventHardening';
 import type { CanvasEventModeV2 } from '@/lib/canvas/eventControllerV2';
 import ClinicalProjectMap from '@/components/ClinicalProjectMap';
@@ -1584,11 +1584,13 @@ export default function CanvasArea({
     if (canvas.height !== height) canvas.height = height;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const shouldShowRendererV2Overlay =
+    // HUD de depuración del renderer (F436–F445, F621–F640) dibujado sobre el plano: sólo con
+    // DEPURACION_RENDER. El <canvas> overlay se mantiene montado (pointer-events:none).
+    const shouldShowRendererV2Overlay = DEPURACION_RENDER && (
       f442ToF445RendererV2Runtime.activationMode === 'flagged-active' ||
       canvasChromeMode === 'guided' ||
       visualMode === 'structure' ||
-      visualMode === 'isocontours';
+      visualMode === 'isocontours');
     if (!shouldShowRendererV2Overlay) return;
 
     drawF442ToF445RendererV2Overlay(

@@ -12,7 +12,6 @@ import {
   calculateUnshieldedKerma,
   generateSamplePoints,
   roundThickness,
-  calculateHeatmapGrid,
   buildCalculationTrace,
   buildCalculationUnitSnapshot,
   buildConservativeCalculationComparison,
@@ -21,6 +20,7 @@ import {
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
+import { calcularMallaDosis } from '@/lib/doseFieldEngine';
 
 export function useShieldingEngine() {
 
@@ -159,9 +159,12 @@ export function useShieldingEngine() {
     sources: RadiationSource[],
     scale_m_per_pixel: number,
     gridSize: number = 50,
-    ctIsodosisProfile?: CTIsodosisProfile
+    ctIsodosisProfile?: CTIsodosisProfile,
+    barriers: Barrier[] = [],
   ) => {
-    return calculateHeatmapGrid(sources, scale_m_per_pixel, gridSize, ctIsodosisProfile);
+    // Fase 1 (docs/plan-motores-calculo.md): el heat map usa el motor de campo único y atenúa por
+    // las barreras con espesor instalado/calculado que cruza cada rayo fuente → punto.
+    return calcularMallaDosis(sources, scale_m_per_pixel, gridSize, { barriers, ctIsodosisProfile, materials: MATERIALS });
   }, []);
 
   return { calculateAllBarriers, calculateHeatmap, roundThickness };

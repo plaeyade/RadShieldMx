@@ -39,7 +39,11 @@ export const DISTRIBUCION_POR_MODALIDAD: Record<string, { primaria?: Distribucio
   'mammo-mlo': { secundaria: 'mammography_room' },
 };
 
-const LINAC = /^linac-/;
+/** Modalidades de teleterapia de megavoltaje cubiertas por NCRP 151 en el lienzo. */
+export const LINAC = /^linac-/;
+
+/** Materiales del catálogo que el motor NCRP 151 dimensiona (resto: motor punto-kernel). */
+export const MATERIALES_NCRP151 = ['CONCRETE235', 'PB', 'STEEL', 'CONCRETEBARITE', 'CONCRETEIRON'] as const;
 
 export interface PuntoMuestreo { x: number; y: number }
 
@@ -57,14 +61,16 @@ function distancia(s: RadiationSource, p: PuntoMuestreo, escala: number): number
   return Math.max(0.3, Math.sqrt(dx * dx + dy * dy + dz * dz));
 }
 
-function material147(m: ShieldingMaterial): MaterialNCRP147 | null {
+/** Material del catálogo → material de las tablas NCRP 147 (null si no está tabulado). */
+export function material147(m: ShieldingMaterial): MaterialNCRP147 | null {
   if (m.code === 'PB') return 'lead';
   if (m.code === 'CONCRETE235') return 'concrete';
   if (m.code === 'GYPSUM') return 'gypsum';
   return null;
 }
 
-function material151(m: ShieldingMaterial): { mat: MaterialNCRP151; escala: number } {
+/** Material del catálogo → material NCRP 151; `escala` convierte espesor de concreto equivalente a espesor real. */
+export function material151(m: ShieldingMaterial): { mat: MaterialNCRP151; escala: number } {
   if (m.code === 'PB') return { mat: 'lead', escala: 1 };
   if (m.code === 'STEEL') return { mat: 'steel', escala: 1 };
   // Concreto y materiales de baja Z: equivalencia másica con concreto de 2.35 g/cm³.
@@ -165,7 +171,7 @@ function teleterapia(
   const espesores: Record<string, number> = {};
   let kermaMax = 0;
   for (const m of materiales) {
-    if (!['CONCRETE235', 'PB', 'STEEL', 'CONCRETEBARITE', 'CONCRETEIRON'].includes(m.code)) continue;
+    if (!(MATERIALES_NCRP151 as readonly string[]).includes(m.code)) continue;
     const { mat, escala: esc } = material151(m);
     let peor = 0;
     for (const p of puntos) {
