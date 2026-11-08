@@ -44,12 +44,14 @@ import { MATERIALS, type Barrier, type RadiationSource, type ShieldingMaterial }
 import {
   archerTransmission,
   calculateUnshieldedKerma,
+  ALIAS_MATERIAL_CATALOGO,
   clampTransmission,
+  codigoCatalogo,
   getShieldingEnergyKey,
   heatmapGridPoints,
   tvlTransmission,
 } from '@/lib/shieldingMath';
-import { PREBLINDAJE_MM, TABLA_B_1, TABLA_C_1, transmisionArcher, type Archer, type MaterialNCRP147 } from '@/lib/ncrp147';
+import { PREBLINDAJE_MM, TABLA_B_1, TABLA_C_1, transmisionArcher, transmisionTC, type Archer, type MaterialNCRP147 } from '@/lib/ncrp147';
 import {
   OBLICUIDAD_MAX_DATOS_DEG,
   TABLA_B_2,
@@ -71,8 +73,11 @@ import {
   DISTRIBUCION_POR_MODALIDAD,
   LINAC,
   MATERIALES_NCRP151,
+  TC,
   distancia,
   fuenteTeleterapiaDe,
+  geometria147,
+  kvpTC,
   material147,
   material151,
   terminoNCRP147,
@@ -172,6 +177,8 @@ function fraccion(v: unknown): number | undefined {
   return typeof v === 'number' && v > 0 && v <= 1 ? v : undefined;
 }
 
+export { ALIAS_MATERIAL_CATALOGO, codigoCatalogo };
+
 /**
  * Capas instaladas de una barrera, en este orden de prioridad:
  * `shieldingLayers` (preset laminado) → `thickness_mm` (espesor capturado) →
@@ -179,11 +186,12 @@ function fraccion(v: unknown): number | undefined {
  */
 export function capasDeBarrera(barrier: Barrier): CapaBlindaje[] {
   const capas = (barrier.shieldingLayers ?? []).filter((c) => c.materialCode && positivo(c.thickness_mm));
-  if (capas.length) return capas.map((c) => ({ materialCode: c.materialCode, thickness_mm: c.thickness_mm }));
-  if (positivo(barrier.thickness_mm)) return [{ materialCode: barrier.materialCode, thickness_mm: barrier.thickness_mm }];
+  if (capas.length) return capas.map((c) => ({ materialCode: codigoCatalogo(c.materialCode), thickness_mm: c.thickness_mm }));
+  const code = codigoCatalogo(barrier.materialCode);
+  if (positivo(barrier.thickness_mm)) return [{ materialCode: code, thickness_mm: barrier.thickness_mm }];
   const req = barrier.requiredThickness_mm;
-  const t = typeof req === 'number' ? req : req?.[barrier.materialCode];
-  return positivo(t) ? [{ materialCode: barrier.materialCode, thickness_mm: t }] : [];
+  const t = typeof req === 'number' ? req : req?.[barrier.materialCode] ?? req?.[code];
+  return positivo(t) ? [{ materialCode: code, thickness_mm: t }] : [];
 }
 
 /**
@@ -290,6 +298,10 @@ export function transmisionCapa(
   if (mod.category === 'diagnostic') {
     const dist = DISTRIBUCION_POR_MODALIDAD[mod.id];
     const mat = material147(material);
+    // TC (NCRP 147 §5.6): secundaria de TC de las Figs. A.2 (plomo) y A.3 (concreto).
+    if (TC.test(mod.id) && (mat === 'lead' || mat === 'concrete')) {
+      return { transmision: clampTransmission(transmisionTC(recorrido_mm, mat, kvpTC(source))), metodo: 'NCRP147_ARCHER' };
+    }
     if (dist && mat) {
       const ajuste = esPrimaria && dist.primaria ? TABLA_B_1[dist.primaria][mat] : TABLA_C_1[dist.secundaria][mat];
       return { transmision: clampTransmission(transmisionArcher(recorrido_mm, ajuste)), metodo: 'NCRP147_ARCHER' };
@@ -363,7 +375,8 @@ function recorridoConTope(g: CruceGeometrico, anguloMax_deg: number): number {
 }
 
 function material(materials: ShieldingMaterial[], code: string): ShieldingMaterial | undefined {
-  return materials.find((m) => m.code === code);
+  const c = codigoCatalogo(code);
+  return materials.find((m) => m.code === c);
 }
 
 /** Primaria o fuga NCRP 151: TVL₁/TVLₑ por capa, espesor oblicuo y corrección del §2.2 (p. 24). */
@@ -495,7 +508,7 @@ function modelosDeFuente(
         factorExtra: () => (pre.restante_mm?.lead !== undefined ? clampTransmission(transmisionArcher(pre.restante_mm.lead, prim.ajustes.lead)) : 1),
       });
     }
-    const sec = terminoNCRP147(source, d, false, U);
+    const sec = terminoNCRP147(source, d, false, U, geometria147(bSec?.scatterAngle_deg));
     if (sec) {
       modelos.push({ componente: 'secundaria147', K0: sec.K, transmitir: (g) => transmitirArcher147(g, sec.ajustes, materials, anguloMax, {}) });
     }

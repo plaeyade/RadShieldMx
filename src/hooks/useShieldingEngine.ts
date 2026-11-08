@@ -19,7 +19,7 @@ import {
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
-import { calcularMallaDosis, dosisEnPunto } from '@/lib/doseFieldEngine';
+import { calcularMallaDosis, codigoCatalogo, dosisEnPunto } from '@/lib/doseFieldEngine';
 
 export function useShieldingEngine() {
 
@@ -72,7 +72,7 @@ export function useShieldingEngine() {
         if (thickness > 0) requiredThickness[mat.code] = thickness;
       }
       // NCRP 147 (diagnóstico) y NCRP 151 (teleterapia MV) sustituyen al punto-kernel cuando aplican.
-      const normativo = esCiclotron ? null : calcularBarreraNormativa(b, sources, points, scale_m_per_pixel, MATERIALS);
+      const normativo = esCiclotron ? null : calcularBarreraNormativa(b, sources, points, scale_m_per_pixel, MATERIALS, ctIsodosisProfile);
       if (normativo) {
         for (const k of Object.keys(requiredThickness)) delete requiredThickness[k];
         Object.assign(requiredThickness, normativo.espesores_mm);
@@ -103,9 +103,11 @@ export function useShieldingEngine() {
         energyKey,
         minSourceDistance_m,
       });
-      const selectedMaterial = MATERIALS.find((mat) => mat.code === b.materialCode) ?? MATERIALS[0];
-      const selectedThickness = typeof requiredThickness[b.materialCode] === 'number'
-        ? requiredThickness[b.materialCode]
+      // Códigos del importador CAD («concreto», «plomo»…) → catálogo (Fase 4).
+      const codigo = codigoCatalogo(b.materialCode);
+      const selectedMaterial = MATERIALS.find((mat) => mat.code === codigo) ?? MATERIALS[0];
+      const selectedThickness = typeof requiredThickness[codigo] === 'number'
+        ? requiredThickness[codigo]
         : Math.max(0, ...Object.values(requiredThickness).filter(Number.isFinite));
       const unitSnapshot = buildCalculationUnitSnapshot({
         barrier: b,

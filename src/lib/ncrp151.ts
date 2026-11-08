@@ -71,9 +71,16 @@ export function fraccionDispersion(e: EnergiaMV, theta_deg: number): number {
   return Math.max(TABLA_B_4['18'][i], TABLA_B_4['24'][i]);
 }
 
+/**
+ * TVL de la dispersión del paciente en concreto (Tabla B.5a). Por debajo de 15° (primer ángulo tabulado) el TVL
+ * crece hacia el del haz primario: §7.1.3 (p. 110) usa 45 cm para 18 MV a ~10° (= TVL₁ primario, Tabla B.2) y
+ * 35 cm para 6 MV (interpolado). El motor toma max(B.5a a 15°, TVL₁ primario de B.2): conservador. Antes usaba el
+ * valor de 15° (44 cm a 18 MV), que subestimaba la transmisión a ángulos pequeños.
+ */
 export function tvlDispersionConcreto(e: EnergiaMV, theta_deg: number): number {
   const i = indiceAngulo(ANGULOS_B_5A, theta_deg);
   const fila = TABLA_B_5A[clave(e)] ?? TABLA_B_5A[e === 30 || e === 25 ? '24' : '18'];
+  if (theta_deg < ANGULOS_B_5A[0]) return Math.max(fila[0], TABLA_B_2.concrete[clave(e)].tvl1_cm);
   return fila[i];
 }
 
@@ -104,6 +111,20 @@ export function combinarDosFuentes(componentes: Componente[]): number {
   const tvlMax = Math.max(...v.map((c) => c.tvl_cm));
   for (const c of v.slice(1)) if (t - c.espesor_cm < tvlMax) { t += LOG10_2 * tvlMax; break; }
   return t;
+}
+
+/**
+ * Regla de las dos fuentes aplicada por tipo, como en los ejemplos §7.1.5 (pp. 114–115) y §7.1.8 (p. 123):
+ * primero se combinan las energías de cada tipo (dispersión del paciente; fuga) y después los dos resultados,
+ * sumando el mayor HVL de todos si difieren menos de un TVL. Con la fuga se usa siempre TVL₁ (≥ TVLₑ): el
+ * informe alterna TVL₁ (§7.1.5, §7.1.9 IMRT) y TVLₑ (§7.1.8); la diferencia es ≤ 0.301 × 2 cm ≈ 0.6 cm por paso.
+ * El §7.1.15 aplica la regla sólo al par mayor (73 cm); este criterio da más espesor (conservador).
+ */
+export function combinarPorTipo(grupos: Componente[][]): number {
+  const parciales: Componente[] = grupos
+    .filter((g) => g.length)
+    .map((g, i) => ({ espesor_cm: combinarDosFuentes(g), tvl_cm: Math.max(...g.map((c) => c.tvl_cm)), nombre: `grupo ${i + 1}` }));
+  return combinarDosFuentes(parciales);
 }
 
 export interface FuenteTeleterapia {

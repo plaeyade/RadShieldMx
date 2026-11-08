@@ -4,7 +4,7 @@
  * Fotones (≤10 MV y componente fotónica en >10 MV): Ec. 2.9 a 2.14 (McGinley y James, 1997).
  * Alta energía (>10 MV): rayos gamma de captura (Ec. 2.15–2.17, McGinley et al., 1995) y
  * neutrones (Kersey, Ec. 2.18; Wu y McGinley, Ec. 2.19–2.21). Puerta: §2.4.3 y ejemplo §7.1.13.
- * Datos: Tabla B.8a (albedo del concreto, incidencia normal) y Tabla B.9 (Q_n y H₀).
+ * Datos: Tablas B.8a/B.8b (albedo del concreto, incidencia normal y a 45°) y Tabla B.9 (Q_n y H₀).
  */
 import { fraccionDispersion, type EnergiaMV } from '@/lib/ncrp151';
 
@@ -29,6 +29,37 @@ export function albedoConcreto(fuente: string, angulo_deg = 0): number {
   let i = 0;
   ANGULOS_B_8A.forEach((a, k) => { if (a <= angulo_deg) i = k; });
   return fila[i] * 1e-3;
+}
+
+/** Tabla B.8b — albedo diferencial del concreto, incidencia a 45° (×10⁻³), ángulos de reflexión 0/30/45/60/75°. */
+export const TABLA_B_8B: Record<string, number[]> = {
+  '30': [4.8, 5.0, 4.9, 4.0, 3.0],
+  '24': [3.7, 3.9, 3.9, 3.7, 3.4],
+  '18': [4.5, 4.6, 4.6, 4.3, 4.0],
+  '10': [5.1, 5.7, 5.8, 6.0, 6.0],
+  '6': [6.4, 7.1, 7.3, 7.7, 8.0],
+  '4': [7.6, 8.5, 9.0, 9.2, 9.5],
+  Co60: [9.0, 10.2, 11.0, 11.5, 12.0],
+  '0.5MeV': [22.0, 22.5, 22.0, 20.0, 18.0],
+  '0.25MeV': [36.0, 34.5, 31.0, 25.0, 18.0],
+};
+
+/** Albedo del concreto con incidencia a 45° (Tabla B.8b); ángulo de reflexión inferior de la tabla. */
+export function albedoConcreto45(fuente: string, angulo_deg = 0): number {
+  const fila = TABLA_B_8B[fuente];
+  if (!fila) throw new RangeError(`Tabla B.8b no tiene la fuente ${fuente}`);
+  let i = 0;
+  ANGULOS_B_8A.forEach((a, k) => { if (a <= angulo_deg) i = k; });
+  return fila[i] * 1e-3;
+}
+
+/** Fila de B.8a/B.8b para una energía de teleterapia: la tabulada inmediatamente inferior (albedo mayor: conservador). */
+export function filaAlbedo(e: EnergiaMV): string {
+  if (e === 'Co60') return 'Co60';
+  const filas = [4, 6, 10, 18, 24, 30];
+  let f = 4;
+  for (const x of filas) if (x <= e) f = x;
+  return String(f);
 }
 
 /** Tabla B.9 — Q_n (neutrones por Gy en el isocentro) y H₀ (mSv/Gy a 1.41 m), máximos por modelo. */
@@ -74,6 +105,11 @@ export interface GeometriaLaberinto {
   /** Ec. 2.12: blanco → centro de la puerta a través del muro interior (d_L) y transmisión de ese muro (B). */
   dL_m: number; B_muroZ: number;
   dsca_m?: number;
+  /**
+   * Ec. 2.10: distancia del BLANCO a la línea media del laberinto en el muro G para la fuga dispersada (d_LS en
+   * §7.1.10.2, p. 130: 7.9 m); la Ec. 2.11 usa d_sec desde el paciente (7.3 m). Por omisión, `dsec_m`.
+   */
+  dsecFuga_m?: number;
 }
 
 export interface CargaLaberinto {
@@ -98,10 +134,13 @@ export function fotonesEnPuerta(g: GeometriaLaberinto, c: CargaLaberinto): Foton
   const e = String(c.energia);
   const alfa0 = c.alfa0 ?? albedoConcreto(e, 0);
   const alfaZ = c.alfaZ ?? albedoConcreto('0.5MeV', 0);           // §2.4.1: 0.5 MeV en la segunda reflexión
-  const alfa1F = c.alfa1Fuga ?? albedoConcreto(Number(c.energia) >= 10 ? '10' : '6', 0); // 1.4–1.5 MeV ≈ fila de 6–10 MV
-  const alfa1P = c.alfa1Paciente ?? albedoConcreto('0.5MeV', 0);  // §2.4.1: 0.5 MeV, conservador
+  // α₁ (Ec. 2.10 y 2.11): la fuga y la dispersión del paciente llegan al muro G a ~45°; el ejemplo §7.1.10.2–3
+  // (pp. 130–131) usa la Tabla B.8b (45°, reflexión 0°): 18 MV 4.5×10⁻³, 6 MV 6.4×10⁻³ y 0.5 MeV 2.2×10⁻².
+  // Antes se usaba la Tabla B.8a (incidencia normal), hasta 17 % menor (no conservador).
+  const alfa1F = c.alfa1Fuga ?? albedoConcreto45(filaAlbedo(c.energia), 0);
+  const alfa1P = c.alfa1Paciente ?? albedoConcreto45('0.5MeV', 0);  // §2.4.1: 0.5 MeV, conservador
   const HS = (c.W_Gy_semana * UG * alfa0 * g.A0_m2 * alfaZ * g.Az_m2) / (g.dh_m * g.dr_m * g.dz_m) ** 2;
-  const HLS = (Lf * c.WL_Gy_semana * UG * alfa1F * g.A1_m2) / (g.dsec_m * g.dzz_m) ** 2;
+  const HLS = (Lf * c.WL_Gy_semana * UG * alfa1F * g.A1_m2) / ((g.dsecFuga_m ?? g.dsec_m) * g.dzz_m) ** 2;
   const a = fraccionDispersion(c.energia, 45);
   const Hps = (a * c.W_Gy_semana * UG * (F / 400) * alfa1P * g.A1_m2) / ((g.dsca_m ?? 1) * g.dsec_m * g.dzz_m) ** 2;
   const HLT = (Lf * c.WL_Gy_semana * UG * g.B_muroZ) / (g.dL_m * g.dL_m);

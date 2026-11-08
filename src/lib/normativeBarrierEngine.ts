@@ -5,17 +5,19 @@
  */
 import type { Barrier, RadiationSource, ShieldingMaterial } from '@/types/radshield';
 import {
+  K1_SEC_MASTOGRAFIA_ISOCENTRO_mGy,
   TABLA_4_5,
   TABLA_4_7,
   TABLA_B_1,
   TABLA_C_1,
   transmisionArcher,
+  transmisionTC,
   type Archer,
   type DistribucionNCRP147,
   type MaterialNCRP147,
 } from '@/lib/ncrp147';
 import {
-  combinarDosFuentes,
+  combinarPorTipo,
   dispersion,
   energiaDesdeClave,
   espesorSumaDirecta,
@@ -35,7 +37,8 @@ import {
   type FuenteTeleterapia,
   type MaterialNCRP151,
 } from '@/lib/ncrp151';
-import { getShieldingEnergyKey } from '@/lib/shieldingMath';
+import { calculateUnshieldedKerma, getShieldingEnergyKey } from '@/lib/shieldingMath';
+import type { CTIsodosisProfile } from '@/types/ctIsodosis';
 
 /** Distribución de carga de NCRP 147 (TG9) por modalidad del catálogo. */
 export const DISTRIBUCION_POR_MODALIDAD: Record<string, { primaria?: DistribucionNCRP147; secundaria: DistribucionNCRP147 }> = {
@@ -47,7 +50,32 @@ export const DISTRIBUCION_POR_MODALIDAD: Record<string, { primaria?: Distribucio
   'fluoro-gi': { secundaria: 'fluoro_tube_rf' },
   'mammo-cc': { secundaria: 'mammography_room' },
   'mammo-mlo': { secundaria: 'mammography_room' },
+  // Angiografía (NCRP 147 §5.1, Tabla 4.7): el intensificador intercepta la primaria; sólo secundaria.
+  // El catálogo de modalidades aún no las expone; el motor las acepta con estos ids.
+  'angio-cardiac': { secundaria: 'cardiac_angiography' },
+  'angio-peripheral': { secundaria: 'peripheral_angiography' },
 };
+
+/** Modalidades de TC (NCRP 147 §5.6): κ·DLP (`calculateCTKerma`) y transmisión de las Figs. A.2/A.3. */
+export const TC = /^ct-(head|body)$/;
+
+/** kVp de las curvas de TC: 120 o 140 si la etiqueta lo fija; si no (p. ej. «120-140 kVp»), ambas (conservador). */
+export function kvpTC(s: RadiationSource): 120 | 140 | undefined {
+  const l = s.modality.energyLabel ?? '';
+  const t120 = /120/.test(l), t140 = /140/.test(l);
+  if (t120 && !t140) return 120;
+  if (t140 && !t120) return 140;
+  return undefined;
+}
+
+/**
+ * Columna de la Tabla 4.7 según el ángulo de dispersión de la barrera: 90° («lateral», fuga + side-scatter)
+ * si 60° ≤ θ ≤ 120°; si no (o sin ángulo), 135° («frontal», fuga + forward/backscatter), que la nota a de la
+ * Tabla 4.7 usa también para la dispersión hacia adelante: conservador.
+ */
+export function geometria147(theta_deg?: number): 'lateral' | 'frontal' {
+  return typeof theta_deg === 'number' && theta_deg >= 60 && theta_deg <= 120 ? 'lateral' : 'frontal';
+}
 
 /**
  * Modalidades de teleterapia de megavoltaje cubiertas por NCRP 151 en el lienzo: aceleradores
@@ -94,10 +122,11 @@ export function material151(m: ShieldingMaterial): { mat: MaterialNCRP151; escal
 /**
  * Kerma sin blindaje NCRP 147 de una fuente diagnóstica a d (m), mGy/semana: primaria K¹_P·U·N/d²
  * (Tabla 4.5, ajuste B.1) si se pide y la distribución la tabula; si no, secundaria K¹_sec·N/d²
- * (Tabla 4.7, columna de 135° — fuga + dispersión frontal/retro, la mayor: conservador; ajuste C.1).
+ * (Tabla 4.7, ajuste C.1) con la columna de `geometria` (por omisión 135°, fuga + dispersión frontal/retro,
+ * la mayor: conservador). Mastografía: 3.6×10⁻² mGy/paciente a 1 m del isocentro (Tabla 4.7 nota f, §5.5).
  */
 export function terminoNCRP147(
-  s: RadiationSource, d_m: number, primariaSiAplica: boolean, U: number,
+  s: RadiationSource, d_m: number, primariaSiAplica: boolean, U: number, geometria: 'lateral' | 'frontal' = 'frontal',
 ): { tipo: 'primaria' | 'secundaria'; K: number; ajustes: Record<MaterialNCRP147, Archer> } | null {
   const dist = DISTRIBUCION_POR_MODALIDAD[s.modality.id];
   if (!dist) return null;
@@ -106,12 +135,13 @@ export function terminoNCRP147(
   if (primariaSiAplica && dist.primaria && k45) {
     return { tipo: 'primaria', K: (k45.K1P_mGy * U * N) / (d_m * d_m), ajustes: TABLA_B_1[dist.primaria] };
   }
-  return { tipo: 'secundaria', K: (TABLA_4_7[dist.secundaria].frontal * N) / (d_m * d_m), ajustes: TABLA_C_1[dist.secundaria] };
+  const k1 = dist.secundaria === 'mammography_room' ? K1_SEC_MASTOGRAFIA_ISOCENTRO_mGy : TABLA_4_7[dist.secundaria][geometria];
+  return { tipo: 'secundaria', K: (k1 * N) / (d_m * d_m), ajustes: TABLA_C_1[dist.secundaria] };
 }
 
-/** Espesor x (mm) tal que Σ Kᵢ·Bᵢ(x) = P/T (bisección; cada fuente con su ajuste de Archer). */
-function espesorMultiFuente(terminos: { K: number; ajuste: Archer }[], meta: number): number {
-  const f = (x: number) => terminos.reduce((s, t) => s + t.K * transmisionArcher(x, t.ajuste), 0);
+/** Espesor x (mm) tal que Σ Kᵢ·Bᵢ(x) = P/T (bisección; cada fuente con su transmisión). */
+export function espesorMultiFuente(terminos: { K: number; ajuste?: Archer; B?: (x_mm: number) => number }[], meta: number): number {
+  const f = (x: number) => terminos.reduce((s, t) => s + t.K * (t.B ? t.B(x) : transmisionArcher(x, t.ajuste!)), 0);
   if (f(0) <= meta) return 0;
   let lo = 0, hi = 1;
   while (f(hi) > meta && hi < 1e5) hi *= 2;
@@ -146,6 +176,7 @@ export function calcularBarreraNormativa(
   puntos: PuntoMuestreo[],
   escala: number,
   materiales: ShieldingMaterial[],
+  ctIsodosisProfile?: CTIsodosisProfile,
 ): ResultadoNormativo | null {
   if (!fuentes.length || !puntos.length) return null;
   const T = barrera.occupancyFactor > 0 && barrera.occupancyFactor <= 1 ? barrera.occupancyFactor : 1;
@@ -156,14 +187,48 @@ export function calcularBarreraNormativa(
   const tele = fuentes.filter((s) => LINAC.test(s.modality.id));
   if (diag.length && diag.length === fuentes.length) return diagnostico(diag, puntos, escala, materiales, P, T, esPrimaria, barrera);
   if (tele.length && tele.length === fuentes.length) return teleterapia(tele, puntos, escala, materiales, P, T, esPrimaria, barrera);
+  if (fuentes.every((s) => TC.test(s.modality.id))) return tomografia(fuentes, puntos, escala, materiales, P, T, ctIsodosisProfile);
   return null;
+}
+
+/**
+ * TC (NCRP 147 §5.6): K = Σ κ·DLP·N/d² (`calculateUnshieldedKerma`, Ec. 5.10) y transmisión de las Figs. A.2/A.3
+ * (plomo y concreto; no hay curva de TC para otros materiales). Antes el espesor de TC salía de los parámetros
+ * de Archer genéricos del material, no de la secundaria de TC.
+ */
+function tomografia(
+  fuentes: RadiationSource[], puntos: PuntoMuestreo[], escala: number, materiales: ShieldingMaterial[],
+  P: number, T: number, perfil?: CTIsodosisProfile,
+): ResultadoNormativo {
+  const notas = ['NCRP 147 §5.6: κ·DLP (Ec. 5.10) y secundaria de TC de las Figs. A.2/A.3 (Simpkin, 1991).'];
+  const espesores: Record<string, number> = {};
+  let kermaMax = 0;
+  for (const m of materiales) {
+    const mat = material147(m);
+    if (mat !== 'lead' && mat !== 'concrete') continue;
+    let peor = 0;
+    for (const p of puntos) {
+      const terminos = fuentes.map((s) => {
+        const kvp = kvpTC(s);
+        return { K: calculateUnshieldedKerma(s, p.x, p.y, escala, perfil), B: (x: number) => transmisionTC(x, mat, kvp) };
+      });
+      kermaMax = Math.max(kermaMax, terminos.reduce((a, t) => a + t.K, 0));
+      peor = Math.max(peor, espesorMultiFuente(terminos, P / T));
+    }
+    if (peor > 0) espesores[m.code] = peor;
+  }
+  if (fuentes.some((s) => !kvpTC(s))) notas.push('kVp no definido (120–140): se toma la mayor transmisión de las curvas de 120 y 140 kVp.');
+  return { metodo: 'NCRP147', espesores_mm: espesores, kermaMax_mSv_semana: kermaMax, notas };
 }
 
 function diagnostico(
   fuentes: RadiationSource[], puntos: PuntoMuestreo[], escala: number, materiales: ShieldingMaterial[],
   P: number, T: number, esPrimaria: boolean, barrera: Barrier,
 ): ResultadoNormativo {
-  const notas: string[] = ['NCRP 147: Ec. 4.3/4.4, Tablas 4.5, 4.7, B.1 y C.1; sin acreditar preblindaje (conservador).'];
+  const notas: string[] = [
+    'NCRP 147: Ec. 4.3/4.4, Tablas 4.5, 4.7, B.1 y C.1; sin acreditar preblindaje (conservador).',
+    `Secundaria: columna de ${geometria147(barrera.scatterAngle_deg) === 'lateral' ? '90°' : '135°'} de la Tabla 4.7.`,
+  ];
   const U = barrera.useFactor > 0 && barrera.useFactor <= 1 ? barrera.useFactor : 1;
   const espesores: Record<string, number> = {};
   let kermaMax = 0;
@@ -174,7 +239,7 @@ function diagnostico(
     for (const p of puntos) {
       const terminos: { K: number; ajuste: Archer }[] = [];
       for (const s of fuentes) {
-        const t = terminoNCRP147(s, distancia(s, p, escala), esPrimaria, U);
+        const t = terminoNCRP147(s, distancia(s, p, escala), esPrimaria, U, geometria147(barrera.scatterAngle_deg));
         if (t) terminos.push({ K: t.K, ajuste: t.ajustes[mat] });
       }
       kermaMax = Math.max(kermaMax, terminos.reduce((a, t) => a + t.K, 0));
@@ -198,7 +263,7 @@ function teleterapia(
   const notas: string[] = [
     esPrimaria
       ? 'NCRP 151: primaria (Ec. 2.1, 2.3; Tabla B.2).'
-      : `NCRP 151: fuga (Ec. 2.8, Tabla B.7) + dispersión del paciente a ${theta}° (Ec. 2.7, Tablas B.4/B.5a), regla de dos fuentes.`,
+      : `NCRP 151: fuga (Ec. 2.8, Tabla B.7) + dispersión del paciente a ${theta}° (Ec. 2.7, Tablas B.4/B.5a), regla de dos fuentes por tipo (§7.1.5).`,
   ];
   const fts = fuentes.map(fuenteTeleterapiaDe);
   if (!esPrimaria && fuentes.some((s) => s.imrtFraction === undefined)) {
@@ -213,6 +278,7 @@ function teleterapia(
     let porSumaDirecta = false;
     for (const p of puntos) {
       const comps: Componente[] = [];
+      const porTipo: Record<'fuga' | 'dispersion', Componente[]> = { fuga: [], dispersion: [] };
       const directos: TerminoDirecto[] = [];
       let kPunto = 0;
       fuentes.forEach((s, i) => {
@@ -225,8 +291,11 @@ function teleterapia(
           directos.push({ K_Sv_semana: kermaPrimaria(f, U, d), transmision: (t) => transmisionTVL(t, tvl) });
         } else {
           const g = { U, dsec_m: d, theta_deg: theta };
-          comps.push(fuga(f, { P_Sv_semana: P, T, dL_m: d, material: mat }));
-          comps.push(dispersion(f, { P_Sv_semana: P, T, ...g, material: mat }));
+          const cf = fuga(f, { P_Sv_semana: P, T, dL_m: d, material: mat });
+          const cd = dispersion(f, { P_Sv_semana: P, T, ...g, material: mat });
+          comps.push(cf, cd);
+          porTipo.fuga.push(cf);
+          porTipo.dispersion.push(cd);
           const tvlL = tvlFuga(f.energia, mat);
           const tvlS = tvlDispersion(f.energia, mat, theta);
           directos.push(
@@ -239,7 +308,9 @@ function teleterapia(
       kermaMax = Math.max(kermaMax, kPunto);
       // Regla del informe (primaria: la mayor; secundaria: dos fuentes) y verificación con la suma directa
       // Σ K·B ≤ P/T del motor de campo; se toma el mayor de los dos espesores.
-      const regla = esPrimaria ? Math.max(0, ...comps.map((c) => c.espesor_cm)) : combinarDosFuentes(comps);
+      // Secundaria (§7.1.5, pp. 114–115; §7.1.8, p. 123): dos fuentes por tipo (dispersión entre energías, fuga
+      // entre energías) y después dispersión vs. fuga con el mayor HVL.
+      const regla = esPrimaria ? Math.max(0, ...comps.map((c) => c.espesor_cm)) : combinarPorTipo([porTipo.dispersion, porTipo.fuga]);
       const directo = espesorSumaDirecta(directos, P, T);
       if (directo > regla + 1e-6) porSumaDirecta = true;
       peor = Math.max(peor, regla, directo);

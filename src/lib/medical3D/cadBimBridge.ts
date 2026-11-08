@@ -86,9 +86,22 @@ function inferThicknessMm(text: string, fallback = 200) {
   return amount;
 }
 
+/** Espesor declarado explícitamente en el nombre de la capa con unidad (p. ej. «…_300MM», «25cm»); null si no. */
+export function espesorDeclaradoCapa(layer: string): number | null {
+  const m = layer.toLowerCase().match(/(\d+(?:\.\d+)?)\s*(mm|cm|m)(?![a-z])/);
+  if (!m) return null;
+  const v = Number(m[1]);
+  if (!(v > 0)) return null;
+  return m[2] === 'm' ? v * 1000 : m[2] === 'cm' ? v * 10 : v;
+}
+
 function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint): Barrier {
   const layerText = `${layer} ${name}`;
   const materialCode = inferMaterial(layerText);
+  // Fase 4: el espesor se lee sólo de la capa (antes también del nombre «DXF n (…)», que daba «n mm»). Si la
+  // capa lo declara con unidad, es el espesor INSTALADO (`thickness_mm`): el motor de campo lo atenúa y la
+  // verificación lo compara con el requerido.
+  const declarado = espesorDeclaradoCapa(layer);
   return {
     id,
     x1: start.x,
@@ -101,7 +114,8 @@ function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, e
     occupancyFactor: 1,
     designGoal_mSv_per_wk: 0.02,
     materialCode,
-    requiredThickness_mm: inferThicknessMm(layerText, materialCode === 'plomo' ? 3 : 200),
+    requiredThickness_mm: inferThicknessMm(layer, materialCode === 'plomo' ? 3 : 200),
+    ...(declarado ? { thickness_mm: declarado } : {}),
   };
 }
 
