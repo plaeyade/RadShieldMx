@@ -74,8 +74,8 @@ export const TVL_PRIMARIA_CM: Record<string, Record<string, number>> = {
   // ── Compuestos comerciales ──
   'verishield-220':  { '6MV': 40.0, '10MV': 40.0, '15MV': 44.0, '18MV': 48.0, '25MV': 53.0, 'Co60': 23.0 },
   'verishield-260':  { '6MV': 34.0, '10MV': 35.0, '15MV': 39.0, '18MV': 42.0, '25MV': 47.0, 'Co60': 19.5 },
-  'tm-nipoll-n40':   { '6MV': 23.0, '10MV': 24.5, '15MV': 27.0, '18MV': 30.0, '25MV': 34.0, 'Co60': 14.5 },
-  'tm-nipoll-n50':   { '6MV': 18.5, '10MV': 19.5, '15MV': 22.0, '18MV': 24.0, '25MV': 27.0, 'Co60': 11.5 },
+  'tm-nipoll-n40':   { '6MV': 21.4, '10MV': 23.6, '15MV': 26.2, '18MV': 27.5, '25MV': 29.4, 'Co60': 15.0 },  // TVLe: envolvente concreto/acero NCRP 151 por masa, ρ seca IMCYC (ininBloquesHD.ts)
+  'tm-nipoll-n50':   { '6MV': 19.7, '10MV': 21.8, '15MV': 24.1, '18MV': 25.3, '25MV': 27.1, 'Co60': 13.8 },  // TVLe: envolvente concreto/acero NCRP 151 por masa, ρ seca IMCYC (ininBloquesHD.ts)
   'nelco-n125':      { '6MV': 28.0, '10MV': 29.0, '15MV': 33.0, '18MV': 37.0, '25MV': 42.0, 'Co60': 17.0 },
   'nelco-n145':      { '6MV': 20.5, '10MV': 21.5, '15MV': 24.0, '18MV': 26.5, '25MV': 30.5, 'Co60': 12.6 },
   // ─– Especiales ──
@@ -101,8 +101,8 @@ export const TVL1_PRIMARIA_CM: Record<string, Record<string, number>> = {
   'lead-sheet':      { '10MV': 5.7,  '15MV': 6.7,  '18MV': 7.7,  '25MV': 9.0 },
   'verishield-220':  { '10MV': 39.0, '15MV': 43.0, '18MV': 47.0, '25MV': 52.0 },
   'verishield-260':  { '10MV': 34.0, '15MV': 38.0, '18MV': 41.0, '25MV': 46.0 },
-  'tm-nipoll-n40':   { '10MV': 23.0, '15MV': 26.0, '18MV': 29.0, '25MV': 33.0 },
-  'tm-nipoll-n50':   { '10MV': 19.0, '15MV': 21.0, '18MV': 23.0, '25MV': 26.0 },
+  'tm-nipoll-n40':   { '10MV': 26.2, '15MV': 28.1, '18MV': 28.7, '25MV': 31.3 },
+  'tm-nipoll-n50':   { '10MV': 24.1, '15MV': 25.9, '18MV': 26.5, '25MV': 28.9 },
   'nelco-n125':      { '10MV': 28.0, '15MV': 32.0, '18MV': 36.0, '25MV': 41.0 },
   'nelco-n145':      { '10MV': 21.0, '15MV': 23.0, '18MV': 25.0, '25MV': 29.0 },
   tungsten:          { '10MV': 4.0,  '15MV': 4.8,  '18MV': 5.5,  '25MV': 6.8 },
@@ -135,8 +135,8 @@ export const MATERIAL_PROPERTIES_CALC: Record<string, { density: number; TVL_6MV
   // Compuestos comerciales
   'verishield-220':   { density: 2.20, TVL_6MV_cm: 40.0, TVL_Co60_cm: 23.0, name: 'VeriShield 2.20' },
   'verishield-260':   { density: 2.60, TVL_6MV_cm: 34.0, TVL_Co60_cm: 19.5, name: 'VeriShield 2.60' },
-  'tm-nipoll-n40':    { density: 3.80, TVL_6MV_cm: 23.0, TVL_Co60_cm: 14.5, name: 'TM Nipoll N40' },
-  'tm-nipoll-n50':    { density: 4.80, TVL_6MV_cm: 18.5, TVL_Co60_cm: 11.5, name: 'TM Nipoll N50' },
+  'tm-nipoll-n40':    { density: 3.68, TVL_6MV_cm: 21.4, TVL_Co60_cm: 15.0, name: 'TM NIPOL HD 4.0 (ρ seca 3.68)' },
+  'tm-nipoll-n50':    { density: 3.99, TVL_6MV_cm: 19.7, TVL_Co60_cm: 13.8, name: 'TM NIPOL HD 5.0 (ρ seca 3.99)' },
   'nelco-n125':       { density: 3.25, TVL_6MV_cm: 28.0, TVL_Co60_cm: 17.0, name: 'Nelco N125' },
   'nelco-n145':       { density: 4.45, TVL_6MV_cm: 20.5, TVL_Co60_cm: 12.6, name: 'Nelco N145' },
   // Especiales

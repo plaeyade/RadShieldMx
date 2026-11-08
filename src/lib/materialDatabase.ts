@@ -5,6 +5,7 @@
 // =============================================================================
 
 import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
+import { densidadDiseno, tvlDisenoHD, tvlFugaHD } from '@/lib/ininBloquesHD';
 
 // Fuente única para los materiales de referencia de NCRP 151: Tabla B.2 (primaria, TVL₁) y
 // Tabla B.7 (fuga en concreto, TVL₁). Para acero y plomo la secundaria usa la primaria (conservador).
@@ -173,30 +174,28 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     normativa: ['NCRP 151', 'AAPM'],
     notes: 'Panel compuesto alta densidad. Alternativa a concreto barita. Instalación modular.',
   },
-  {
-    id: 'tm-nipoll-n40',
-    name: 'TM Nipoll N40',
+  // Bloques HD TM NIPOL: TVL de diseño = envolvente por masa de concreto y acero NCRP 151 (ver ininBloquesHD.ts).
+  // El certificado ININ LSCD-589/TD/2024 (3.5, 4.0 y 5.0 g/cm³) queda como evidencia, pendiente de validación.
+  ...([
+    ['tm-nipol-hd35', 3.5, 'TM NIPOL HD 3.5'],
+    ['tm-nipoll-n40', 4.0, 'TM NIPOL HD 4.0'],
+    ['tm-nipoll-n50', 5.0, 'TM NIPOL HD 5.0'],
+    ['tm-nipol-hd55', 5.5, 'TM NIPOL HD 5.5 (recomendado linac; sin medición)'],
+  ] as const).map(([id, nominal, name]): ShieldingMaterial => {
+    const { rho, fuente } = densidadDiseno(nominal);
+    return {
+    id,
+    name,
     category: 'composite',
-    density_g_cm3: 3.80,
-    TVL_primary_cm: { '6MV': 23.0, '10MV': 24.5, '15MV': 27.0, '18MV': 30.0, '25MV': 34.0, 'Co60': 14.5 },
-    TVL_secondary_cm: { '6MV': 19.0, '10MV': 20.5, '15MV': 23.0, '18MV': 25.5, '25MV': 29.0, 'Co60': 11.8 },
-    thickness_mm_std: [50, 75, 100, 150],
-    manufacturer: 'TM Technologie Médicale',
-    normativa: ['NCRP 151', 'IEC 60601'],
-    notes: 'Panel modular compuesto ultra-denso. Instalación en seco. Fabricado en Francia.',
-  },
-  {
-    id: 'tm-nipoll-n50',
-    name: 'TM Nipoll N50',
-    category: 'composite',
-    density_g_cm3: 4.80,
-    TVL_primary_cm: { '6MV': 18.5, '10MV': 19.5, '15MV': 22.0, '18MV': 24.0, '25MV': 27.0, 'Co60': 11.5 },
-    TVL_secondary_cm: { '6MV': 15.5, '10MV': 16.5, '15MV': 18.5, '18MV': 20.5, '25MV': 23.0, 'Co60': 9.5 },
-    thickness_mm_std: [40, 60, 80, 100],
-    manufacturer: 'TM Technologie Médicale',
-    normativa: ['NCRP 151', 'IEC 60601'],
-    notes: 'Máxima densidad TM Nipoll. Equivalente a concreto hierro pero modular.',
-  },
+    density_g_cm3: rho,
+    TVL_primary_cm: Object.fromEntries(Object.entries(ENERGIAS).map(([k, e]) => [k, tvlDisenoHD(rho, e).tvl1_cm])),
+    TVL_secondary_cm: Object.fromEntries(Object.entries(ENERGIAS).map(([k, e]) => [k, tvlFugaHD(rho, e)])),
+    thickness_mm_std: [130, 260],
+    manufacturer: 'TM NIPOL (México)',
+    normativa: ['NCRP 151', 'ININ CE.CB.LSCD-589/TD/2024'],
+    notes: `Bloque 13×13×26 cm, nominal ${nominal} g/cm³; densidad de diseño ${rho} (${fuente}). TVL = envolvente por masa de concreto y acero (NCRP 151); los TVL del ININ no se adoptan hasta validar (docs/validacion-bloques-hd.md).`,
+    };
+  }),
   {
     id: 'v-250',
     name: 'Bloques V-250 (concreto barita)',

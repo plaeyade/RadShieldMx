@@ -446,7 +446,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
                 ))}
               </div>
               <Card className="bg-blue-50 border-blue-200"><CardContent className="p-3 text-xs text-blue-800">
-                <strong>NCRP 151 Tabla B.1:</strong> Los TVL listados son para radiación primaria. Para radiación secundaria dispersa, multiplicar por 0.85. Materiales comerciales (Nelco, TM Nipoll, VeriShield) tienen TVL validados experimentalmente.
+                <strong>NCRP 151 Tabla B.1:</strong> Los TVL listados son para radiación primaria. Para radiación secundaria dispersa, multiplicar por 0.85. Materiales comerciales: verificar la fuente de cada TVL; los bloques TM NIPOL usan la envolvente por masa de concreto y acero hasta validar sus mediciones (docs/validacion-bloques-hd.md).
               </CardContent></Card>
             </div>
           )}
