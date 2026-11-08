@@ -30,9 +30,9 @@
  * corta una esquina). En barreras laminadas la cuerda se reparte en proporción al espesor de cada capa.
  *
  * Incidencia oblicua:
- * - Primaria y fuga NCRP 151: espesor oblicuo, con la corrección del §2.4 (θ > 45° y B < 10⁻³: +1 HVL en MV,
- *   +2 HVL en Co-60; `correccionOblicuidad`) y sin crédito adicional más allá de 70° (límite de los datos de
- *   Kirn/Biggs).
+ * - Primaria y fuga NCRP 151: espesor oblicuo, con la corrección del §2.2 (p. 24: θ > 45°, ≈ 1 HVL en alta
+ *   energía y ≈ 2 HVL en baja energía, concreto; `correccionOblicuidad`, aplicada si B < 10⁻³) y sin crédito
+ *   adicional más allá de 70° (tope conservador del motor).
  * - Dispersión del paciente: espesor normal, sin crédito por oblicuidad. NCRP 151 no da un criterio único
  *   (sus ejemplos se contradicen) y los TVL de la Tabla B.5a ya son de haz ancho: conservador.
  * - Diagnóstico y resto: espesor oblicuo con crédito limitado a θ ≤ 60° (como en la Fase 1).
@@ -112,7 +112,7 @@ export interface CruceBarrera {
   factorOblicuidad: number;
   capas: CapaCruzada[];
   transmision: number;
-  /** HVL descontados por la corrección de oblicuidad de NCRP 151 §2.4 (0, 1 o 2). */
+  /** HVL descontados por la corrección de oblicuidad de NCRP 151 §2.2, p. 24 (0, 1 o 2). */
   hvlDescontados: number;
 }
 
@@ -366,7 +366,7 @@ function material(materials: ShieldingMaterial[], code: string): ShieldingMateri
   return materials.find((m) => m.code === code);
 }
 
-/** Primaria o fuga NCRP 151: TVL₁/TVLₑ por capa, espesor oblicuo y corrección del §2.4. */
+/** Primaria o fuga NCRP 151: TVL₁/TVLₑ por capa, espesor oblicuo y corrección del §2.2 (p. 24). */
 function transmitirTVL151(
   g: CruceGeometrico, componente: 'primaria' | 'fuga', e: EnergiaMV, source: RadiationSource, materials: ShieldingMaterial[],
 ): CruceBarrera {
@@ -599,4 +599,133 @@ export function calcularMallaDosis(
     const d = dosisEnPunto(sources, x, y, scale_m_per_pixel, opciones);
     return { x, y, kerma: d.kerma_mSv_semana, kermaSinBlindaje: d.kermaSinBlindaje_mSv_semana };
   });
+}
+
+// ───────────────────────────────────────────────────────────────
+// Fase 3: componentes seleccionables y mallas regulares para los visores
+// (DoseMapDialog, SpatialDoseMapDialog, modo dosis de Medical 3D, doseMappingEngine).
+// Unidades: coordenadas del plano en px, distancias físicas en m (vía scale_m_per_pixel), kerma en
+// mSv/semana (mGy ≈ mSv). Ningún visor calcula física propia: todos llaman a `dosisEnPunto`.
+// ───────────────────────────────────────────────────────────────
+
+export const COMPONENTES_CAMPO: readonly ComponenteCampo[] = [
+  'primaria', 'fuga', 'dispersion', 'primaria147', 'secundaria147', 'kermaUnico',
+];
+
+export const ETIQUETA_COMPONENTE: Record<ComponenteCampo, string> = {
+  primaria: 'Primaria (NCRP 151)',
+  fuga: 'Fuga del cabezal (NCRP 151)',
+  dispersion: 'Dispersión del paciente (NCRP 151)',
+  primaria147: 'Primaria diagnóstico (NCRP 147)',
+  secundaria147: 'Secundaria diagnóstico (NCRP 147)',
+  kermaUnico: 'Kerma único (TC, medicina nuclear, braquiterapia…)',
+};
+
+/**
+ * Kerma del punto sumando sólo las componentes indicadas. Sin lista (o con todas) es
+ * `d.kerma_mSv_semana`, exactamente.
+ */
+export function kermaFiltrado(d: DosisEnPunto, componentes?: readonly ComponenteCampo[]): number {
+  if (!componentes) return d.kerma_mSv_semana;
+  return d.porFuente
+    .flatMap((f) => f.componentes)
+    .filter((c) => componentes.includes(c.componente))
+    .reduce((a, c) => a + c.kerma_mSv_semana, 0);
+}
+
+/** Componentes presentes en el campo de estas fuentes (para ofrecer sólo las que existen). */
+export function componentesPresentes(
+  sources: RadiationSource[], scale_m_per_pixel: number, opciones: OpcionesCampoDosis = {},
+): ComponenteCampo[] {
+  const vistos = new Set<ComponenteCampo>();
+  for (const s of sources) {
+    // Un punto a 1 m de la fuente sin barreras: la primaria aparece (sin orientación) en el interior.
+    const dx = scale_m_per_pixel > 0 ? 1 / scale_m_per_pixel : 100;
+    const c = contribucionFuente(s, s.x + dx, s.y, scale_m_per_pixel, { ...opciones, barriers: [] });
+    c.componentes.forEach((k) => vistos.add(k.componente));
+  }
+  return COMPONENTES_CAMPO.filter((k) => vistos.has(k));
+}
+
+export interface RectanguloPlano { x0: number; y0: number; ancho: number; alto: number }
+
+/**
+ * Rectángulo (px) que contiene fuentes y barreras del plano más un margen en metros.
+ * Sin geometría devuelve null.
+ */
+export function limitesDelPlano(
+  plano: { sources: { x: number; y: number }[]; barriers: Pick<Barrier, 'x1' | 'y1' | 'x2' | 'y2'>[]; scale_m_per_pixel: number },
+  margen_m = 1,
+): RectanguloPlano | null {
+  const xs: number[] = [], ys: number[] = [];
+  plano.sources.forEach((s) => { xs.push(s.x); ys.push(s.y); });
+  plano.barriers.forEach((b) => { xs.push(b.x1, b.x2); ys.push(b.y1, b.y2); });
+  if (!xs.length) return null;
+  const m = plano.scale_m_per_pixel > 0 ? margen_m / plano.scale_m_per_pixel : 0;
+  const x0 = Math.min(...xs) - m, y0 = Math.min(...ys) - m;
+  return { x0, y0, ancho: Math.max(Math.max(...xs) + m - x0, 1), alto: Math.max(Math.max(...ys) + m - y0, 1) };
+}
+
+export interface MallaRegularDosis {
+  /** Celdas en x (columnas) y en y (filas). */
+  nx: number;
+  ny: number;
+  /** Esquina superior izquierda del rectángulo muestreado (px). */
+  x0_px: number;
+  y0_px: number;
+  /** Lado de la celda (px y m). Los valores se toman en el centro de cada celda. */
+  paso_px: number;
+  paso_m: number;
+  scale_m_per_pixel: number;
+  /** Kerma con barreras de las componentes seleccionadas, mSv/semana; índice iy·nx + ix. */
+  valores: Float32Array;
+  /** Kerma sin blindaje de las mismas componentes, mSv/semana. */
+  sinBlindaje: Float32Array;
+  componentes?: readonly ComponenteCampo[];
+}
+
+export interface OpcionesMallaRegular extends OpcionesCampoDosis {
+  /** Componentes a sumar; por omisión todas. */
+  componentes?: readonly ComponenteCampo[];
+}
+
+/** Centro (px) de la celda (ix, iy) de una malla regular. */
+export function centroCelda(m: Pick<MallaRegularDosis, 'x0_px' | 'y0_px' | 'paso_px'>, ix: number, iy: number): { x: number; y: number } {
+  return { x: m.x0_px + (ix + 0.5) * m.paso_px, y: m.y0_px + (iy + 0.5) * m.paso_px };
+}
+
+/**
+ * Malla regular de celdas cuadradas sobre `rect` (px) con `nx` columnas; las filas salen del alto.
+ * Cada valor es `dosisEnPunto` en el centro de la celda (con las barreras de `opciones`).
+ */
+export function calcularMallaRegular(
+  sources: RadiationSource[],
+  scale_m_per_pixel: number,
+  rect: RectanguloPlano,
+  nx: number,
+  opciones: OpcionesMallaRegular = {},
+): MallaRegularDosis {
+  const cols = Math.max(1, Math.round(nx));
+  const paso_px = rect.ancho / cols;
+  const ny = Math.max(1, Math.ceil(rect.alto / paso_px - 1e-9));
+  const valores = new Float32Array(cols * ny);
+  const sinBlindaje = new Float32Array(cols * ny);
+  const { componentes, ...campo } = opciones;
+  const base = { x0_px: rect.x0, y0_px: rect.y0, paso_px };
+  for (let iy = 0; iy < ny; iy++) {
+    for (let ix = 0; ix < cols; ix++) {
+      const { x, y } = centroCelda(base, ix, iy);
+      const d = dosisEnPunto(sources, x, y, scale_m_per_pixel, campo);
+      const k = iy * cols + ix;
+      valores[k] = kermaFiltrado(d, componentes);
+      sinBlindaje[k] = componentes
+        ? d.porFuente.flatMap((f) => f.componentes).filter((c) => componentes.includes(c.componente))
+          .reduce((a, c) => a + c.kermaSinBlindaje_mSv_semana, 0)
+        : d.kermaSinBlindaje_mSv_semana;
+    }
+  }
+  return {
+    nx: cols, ny, x0_px: rect.x0, y0_px: rect.y0, paso_px, paso_m: paso_px * scale_m_per_pixel,
+    scale_m_per_pixel, valores, sinBlindaje, componentes,
+  };
 }

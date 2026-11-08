@@ -8,7 +8,7 @@
  * - Tabla B.7 (p. 167): TVL₁/TVLₑ de la radiación de fuga en concreto.
  * Ecuaciones 2.1 (primaria), 2.3 (espesor con TVL₁ y TVLₑ), 2.7 (dispersión del paciente),
  * 2.8 (fuga, fracción 10⁻³), 3.6 (carga de fuga con IMRT), la regla de las dos fuentes (§1.4.3) y la
- * corrección de incidencia oblicua (§2.4).
+ * corrección de incidencia oblicua (§2.2, p. 24).
  */
 
 export type EnergiaMV = 4 | 6 | 10 | 15 | 18 | 20 | 25 | 30 | 'Co60';
@@ -176,20 +176,21 @@ export function transmisionUnTVL(t_cm: number, tvl_cm: number): number {
 }
 
 // ───────────────────────────────────────────────────────────────
-// Incidencia oblicua (NCRP 151 §2.4; Kirn et al. 1954; Biggs 1996, datos de 0° a 70°)
+// Incidencia oblicua (NCRP 151 §2.2, p. 24: para θ > 45°, ≈ 2 HVL en baja energía y ≈ 1 HVL en alta energía,
+// en concreto). El umbral B < 10⁻³ y el tope de 70° son criterios conservadores del motor (Fase 2).
 // ───────────────────────────────────────────────────────────────
 
 /** Por encima de este ángulo la aproximación de espesor oblicuo t/cos θ sobrestima la atenuación. */
 export const OBLICUIDAD_UMBRAL_DEG = 45;
-/** Límite de los datos de oblicuidad (Biggs: 0°–70°): no se acredita recorrido adicional más allá. */
+/** Tope del motor para el espesor oblicuo (conservador): no se acredita recorrido adicional más allá de 70°. */
 export const OBLICUIDAD_MAX_DATOS_DEG = 70;
-/** Umbral de transmisión de la regla de NCRP 151 §2.4. */
+/** Umbral de transmisión a partir del cual el motor aplica la corrección de NCRP 151 §2.2 (p. 24). */
 export const OBLICUIDAD_B_UMBRAL = 1e-3;
 
 /**
- * Corrección de NCRP 151 §2.4 a la transmisión calculada con el espesor oblicuo t/cos θ: para θ > 45° y
+ * Corrección de NCRP 151 §2.2 (p. 24) a la transmisión calculada con el espesor oblicuo t/cos θ: para θ > 45° y
  * B < 10⁻³ el espesor oblicuo sobrestima la atenuación (los fotones dispersados en la barrera salen por
- * un camino más corto); se descuenta ≈ 1 HVL para rayos X de MV y ≈ 2 HVL para Co-60 (baja energía),
+ * un camino más corto); se descuenta ≈ 1 HVL en alta energía (rayos X de MV) y ≈ 2 HVL en baja energía (Co-60),
  * es decir B × 2 o B × 4, sin superar la transmisión a incidencia normal.
  */
 export function correccionOblicuidad(

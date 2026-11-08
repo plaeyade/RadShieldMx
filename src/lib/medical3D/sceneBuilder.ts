@@ -1,5 +1,7 @@
 import type { Barrier, FloorPlan, RadiationSource } from '@/types/radshield';
 import { getEquipmentVisualProfile } from '@/lib/equipmentVisuals';
+import { calcularMallaRegular, centroCelda, type ComponenteCampo } from '@/lib/doseFieldEngine';
+import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
 
 export type MedicalRoomPreset = 'linac' | 'petct' | 'ct' | 'gammaKnife' | 'hdr' | 'radiofarmacia';
 export type Medical3DMode = 'presentation' | 'technical' | 'dose';
@@ -29,9 +31,71 @@ export interface MedicalEquipment {
 
 export interface MedicalDosePoint {
   id: string;
+  /** Centro de la celda (m; y = altura de dibujo). */
   position: [number, number, number];
+  /** Semilado de la celda (m). */
   radius: number;
+  /** Opacidad de dibujo (0.15–0.6), creciente con log₁₀ del kerma. */
   intensity: number;
+  /** Kerma semanal del motor de campo en el centro de la celda (mSv/semana). */
+  kerma_mSv_semana: number;
+  /** Respecto de NCRP 147/151: > 0.1 controlada, > 0.02 supervisada, resto libre. */
+  nivel: 'controlada' | 'supervisada' | 'libre';
+}
+
+/** Opciones del modo dosis: si se pide, `dosePoints` es una malla del motor de campo (`doseFieldEngine`). */
+export interface OpcionesEscenaMedica {
+  dosis?: {
+    componentes?: readonly ComponenteCampo[];
+    /** Columnas de la malla sobre el ancho de la escena (por omisión 24). */
+    columnas?: number;
+  };
+}
+
+export const COLUMNAS_DOSIS_3D = 24;
+
+export function nivelDosis(kerma_mSv_semana: number): MedicalDosePoint['nivel'] {
+  if (kerma_mSv_semana > NCRP_DESIGN_GOALS.controlled) return 'controlada';
+  if (kerma_mSv_semana > NCRP_DESIGN_GOALS.uncontrolled) return 'supervisada';
+  return 'libre';
+}
+
+/**
+ * Malla de dosis del modo «Dosis» de Medical 3D, en el plano del piso de la escena. Coordenadas de la
+ * escena en m = px × scale (las mismas de muros y equipos); el kerma sale de `calcularMallaRegular`.
+ */
+export function dosePointsDesdeMotor(
+  floorPlan: FloorPlan,
+  bounds_m: { minX: number; minZ: number; width: number; depth: number },
+  opciones: NonNullable<OpcionesEscenaMedica['dosis']> = {},
+): MedicalDosePoint[] {
+  const scale = floorPlan.scale_m_per_pixel || 0.01;
+  const sources = floorPlan.sources || [];
+  if (!sources.length) return [];
+  const rect = { x0: bounds_m.minX / scale, y0: bounds_m.minZ / scale, ancho: bounds_m.width / scale, alto: bounds_m.depth / scale };
+  const malla = calcularMallaRegular(sources, scale, rect, opciones.columnas ?? COLUMNAS_DOSIS_3D, {
+    barriers: floorPlan.barriers || [],
+    componentes: opciones.componentes,
+  });
+  const piso = Math.log10(NCRP_DESIGN_GOALS.uncontrolled / 10);
+  const techo = Math.log10(NCRP_DESIGN_GOALS.controlled * 100);
+  const puntos: MedicalDosePoint[] = [];
+  for (let iy = 0; iy < malla.ny; iy++) {
+    for (let ix = 0; ix < malla.nx; ix++) {
+      const k = malla.valores[iy * malla.nx + ix];
+      const { x, y } = centroCelda(malla, ix, iy);
+      const t = k > 0 ? Math.min(1, Math.max(0, (Math.log10(k) - piso) / (techo - piso))) : 0;
+      puntos.push({
+        id: `dose-${ix}-${iy}`,
+        position: [x * scale, 0.03, y * scale],
+        radius: malla.paso_m / 2,
+        intensity: 0.15 + 0.45 * t,
+        kerma_mSv_semana: k,
+        nivel: nivelDosis(k),
+      });
+    }
+  }
+  return puntos;
 }
 
 export interface MedicalZone {
@@ -110,7 +174,11 @@ function presetLabel(preset: MedicalRoomPreset): string {
   return labels[preset];
 }
 
-export function buildMedicalScene(floorPlan: FloorPlan = DEFAULT_MEDICAL_SCENE_FLOOR_PLAN, preset: MedicalRoomPreset = 'linac'): MedicalScene {
+export function buildMedicalScene(
+  floorPlan: FloorPlan = DEFAULT_MEDICAL_SCENE_FLOOR_PLAN,
+  preset: MedicalRoomPreset = 'linac',
+  opciones: OpcionesEscenaMedica = {},
+): MedicalScene {
   const safeFloorPlan = floorPlan ?? DEFAULT_MEDICAL_SCENE_FLOOR_PLAN;
   const scale = safeFloorPlan.scale_m_per_pixel || 0.01;
   const barriers = safeFloorPlan.barriers || [];
@@ -177,12 +245,11 @@ export function buildMedicalScene(floorPlan: FloorPlan = DEFAULT_MEDICAL_SCENE_F
         ragTags: [preset, 'default-equipment'],
       }];
 
-  const dosePoints = equipment.flatMap((eq) => [0.9, 1.7, 2.6].map((radius, index) => ({
-    id: `${eq.id}-dose-${index}`,
-    position: [eq.position[0], 0.05 + index * 0.02, eq.position[2]] as [number, number, number],
-    radius,
-    intensity: 0.35 - index * 0.08,
-  })));
+  // Fase 3: antes eran anillos fijos de 0.9/1.7/2.6 m sin física. Ahora, sólo si se pide el modo dosis
+  // (el cálculo no se hace en cada render del lienzo), una malla del motor de campo con las barreras.
+  const dosePoints = opciones.dosis
+    ? dosePointsDesdeMotor(safeFloorPlan, { minX: center[0] - width / 2, minZ: center[2] - depth / 2, width, depth }, opciones.dosis)
+    : [];
 
   const zones = (safeFloorPlan.occupiedRegions || [])
     .filter((region) => region.points.length >= 3)

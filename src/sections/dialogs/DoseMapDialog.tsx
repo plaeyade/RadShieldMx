@@ -2,10 +2,14 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *  RadShield-MX v31 — Dose Map Visualization Dialog
  *  2D heatmap + isodose contours on canvas + 3D preview in Three.js
+ *
+ *  Fase 3 (docs/plan-motores-calculo.md): la malla sale de `calcularMallaRegular` (doseFieldEngine) con
+ *  las fuentes, las barreras reales y la escala del plano; las componentes del campo son seleccionables.
+ *  Kerma en mSv/semana (sin T); P/T se dibuja como isodosis.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -24,10 +28,13 @@ import {
   Radio, Shield, Settings, RotateCcw, Map, Activity
 } from 'lucide-react';
 import {
-  calculateDoseGrid, renderDoseHeatmap, generateDose3DMesh,
-  calculateDoseStats, TVL_PRIMARY_CONCRETE_MM,
-  type DoseGridConfig, type DoseGridResult, type ColorMap,
+  renderDoseHeatmap, generateDose3DMesh, calculateDoseStats, resultadoDesdeMalla, resultadoLogaritmico,
+  type DoseGridResult, type ColorMap,
 } from '@/lib/doseMapEngine';
+import { useCanvasStore } from '@/stores/canvasStore';
+import { componentesPresentes, type ComponenteCampo } from '@/lib/doseFieldEngine';
+import { NIVELES_ISODOSIS, mallaDoseMap } from '@/lib/visoresDosis';
+import { SelectorComponentesDosis } from './SelectorComponentesDosis';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -40,14 +47,14 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
   const [colorMap, setColorMap] = useState<ColorMap>('jet');
   const [showContours, setShowContours] = useState(true);
   const [gridRes, setGridRes] = useState('80');
-  const [roomWidth, setRoomWidth] = useState('8');
-  const [roomDepth, setRoomDepth] = useState('8');
+  const floorPlan = useCanvasStore((st) => st.floorPlan);
+  const [componentes, setComponentes] = useState<ComponenteCampo[] | undefined>(undefined);
+  const disponibles = useMemo(
+    () => componentesPresentes(floorPlan.sources, floorPlan.scale_m_per_pixel),
+    [floorPlan.sources, floorPlan.scale_m_per_pixel],
+  );
   const [occupancyFactor, setOccupancyFactor] = useState('0.2');
   const [designDose, setDesignDose] = useState('0.02');
-  const [sourceEnergy, setSourceEnergy] = useState('6MV');
-  const [sourceWorkload, setSourceWorkload] = useState('40');
-  const [sourceUseFactor, setSourceUseFactor] = useState('0.25');
-  const [barrierThickness, setBarrierThickness] = useState('1000');
   const [result, setResult] = useState<DoseGridResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [stats, setStats] = useState<ReturnType<typeof calculateDoseStats> | null>(null);
@@ -60,40 +67,21 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     const t0 = performance.now();
 
     const w = parseInt(gridRes) || 80;
-    const h = parseInt(gridRes) || 80;
-    const rw = parseFloat(roomWidth) || 8;
-    const rd = parseFloat(roomDepth) || 8;
-    const cellSize = rw / w;
-
-    const config: DoseGridConfig = {
-      width: w, height: h, cellSize_m: cellSize,
-      sources: [
-        { x: rw * 0.5, y: rd * 0.5, energyLabel: sourceEnergy,
-          workload_Gy_week: parseFloat(sourceWorkload) || 40,
-          useFactor: parseFloat(sourceUseFactor) || 0.25, isPrimary: true },
-      ],
-      barriers: [
-        { x1: rw * 0.2, y1: rd * 0.3, x2: rw * 0.8, y2: rd * 0.3,
-          thickness_mm: parseFloat(barrierThickness) || 1000,
-          material: 'concreto',
-          tvl_mm: TVL_PRIMARY_CONCRETE_MM[sourceEnergy] || 369 },
-        { x1: rw * 0.2, y1: rd * 0.7, x2: rw * 0.8, y2: rd * 0.7,
-          thickness_mm: parseFloat(barrierThickness) || 1000,
-          material: 'concreto',
-          tvl_mm: TVL_PRIMARY_CONCRETE_MM[sourceEnergy] || 369 },
-        { x1: rw * 0.3, y1: rd * 0.3, x2: rw * 0.3, y2: rd * 0.7,
-          thickness_mm: parseFloat(barrierThickness) || 800,
-          material: 'concreto',
-          tvl_mm: TVL_PRIMARY_CONCRETE_MM[sourceEnergy] || 369 },
-      ],
-      occupancyFactor: parseFloat(occupancyFactor) || 0.2,
-      designDose_mSv_week: parseFloat(designDose) || 0.02,
-      colorMap,
-      contourLevels: [0.02, 0.1, 0.5, 1.0, 2.0, 5.0],
-    };
+    const T = parseFloat(occupancyFactor) || 1;
+    const P = parseFloat(designDose) || 0.02;
+    const malla = mallaDoseMap(floorPlan, w, componentes);
+    if (!malla) {
+      toast.error('El plano no tiene fuentes: agrega una fuente en el lienzo.');
+      setIsCalculating(false);
+      return;
+    }
+    const h = malla.ny;
+    const rect = { x0: malla.x0_px, y0: malla.y0_px, ancho: malla.nx * malla.paso_px, alto: malla.ny * malla.paso_px };
+    const niveles = Array.from(new Set([P / T, ...NIVELES_ISODOSIS])).sort((x, y) => x - y);
 
     try {
-      const res = calculateDoseGrid(config);
+      const res = resultadoDesdeMalla(malla, niveles, performance.now() - t0);
+      const vista = resultadoLogaritmico(res);
       setResult(res);
       setStats(calculateDoseStats(res));
 
@@ -106,12 +94,15 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
           // Draw room outline
           ctx.fillStyle = '#1a1a2e';
           ctx.fillRect(0, 0, canvas2DRef.current.width, canvas2DRef.current.height);
-          renderDoseHeatmap(ctx, res, canvas2DRef.current.width, canvas2DRef.current.height, colorMap, showContours);
+          renderDoseHeatmap(ctx, vista, canvas2DRef.current.width, canvas2DRef.current.height, colorMap, showContours);
+          const cw = canvas2DRef.current.width, ch = canvas2DRef.current.height;
+          const aX = (x: number) => ((x - rect.x0) / rect.ancho) * cw;
+          const aY = (y: number) => ((y - rect.y0) / rect.alto) * ch;
 
           // Draw source
-          if (showSources) {
-            const sx = (config.sources[0].x / rw) * canvas2DRef.current.width;
-            const sy = (config.sources[0].y / rd) * canvas2DRef.current.height;
+          if (showSources) for (const fuente of floorPlan.sources) {
+            const sx = aX(fuente.x);
+            const sy = aY(fuente.y);
             ctx.fillStyle = '#ff3300';
             ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
             ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
@@ -122,11 +113,11 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
 
           // Draw barriers
           if (showBarriers) {
-            for (const b of config.barriers) {
-              const bx1 = (b.x1 / rw) * canvas2DRef.current.width;
-              const by1 = (b.y1 / rd) * canvas2DRef.current.height;
-              const bx2 = (b.x2 / rw) * canvas2DRef.current.width;
-              const by2 = (b.y2 / rd) * canvas2DRef.current.height;
+            for (const b of floorPlan.barriers) {
+              const bx1 = aX(b.x1);
+              const by1 = aY(b.y1);
+              const bx2 = aX(b.x2);
+              const by2 = aY(b.y2);
               ctx.strokeStyle = 'rgba(255,255,255,0.8)';
               ctx.lineWidth = 4;
               ctx.setLineDash([5, 3]);
@@ -136,12 +127,12 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
           }
 
           // Legend
-          drawLegend(ctx, canvas2DRef.current.width, canvas2DRef.current.height, res, colorMap);
+          drawLegend(ctx, canvas2DRef.current.width, canvas2DRef.current.height, vista, colorMap);
         }
       }
 
       // Render 3D
-      render3D(res);
+      render3D(vista);
 
       const dt = performance.now() - t0;
       toast.success(`Dose map calculado: ${w}×${h} = ${w * h} celdas en ${dt.toFixed(0)} ms`);
@@ -150,8 +141,8 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     } finally {
       setIsCalculating(false);
     }
-  }, [colorMap, showContours, gridRes, roomWidth, roomDepth, occupancyFactor, designDose,
-      sourceEnergy, sourceWorkload, sourceUseFactor, barrierThickness, showSources, showBarriers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- render3D sólo depende de colorMap (ya listado)
+  }, [colorMap, showContours, gridRes, occupancyFactor, designDose, floorPlan, componentes, showSources, showBarriers]);
 
   // ─── 3D rendering ───
   const render3D = useCallback((res: DoseGridResult) => {
@@ -168,7 +159,9 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     scene.background = new THREE.Color(0x0a0a1a);
 
     const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.01, 100);
-    camera.position.set(6, 8, 6);
+    const cx = (res.width * res.cellSize_m) / 2, cz = (res.height * res.cellSize_m) / 2;
+    const r = Math.max(cx, cz, 1);
+    camera.position.set(cx + r, r * 1.6, cz + r);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
@@ -177,13 +170,14 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
-    controls.target.set(4, 0, 4);
+    controls.target.set(cx, 0, cz);
 
     scene.add(new THREE.AmbientLight(0x404040, 0.5));
     const dl = new THREE.DirectionalLight(0xffffff, 0.7);
     dl.position.set(5, 10, 5); scene.add(dl);
 
     // Dose surface mesh
+    // res viene en log₁₀(mSv/semana): una década = 0.3 m de altura.
     const meshData = generateDose3DMesh(res, colorMap, 0.3);
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(Array.from(meshData.vertices), 3));
@@ -198,14 +192,9 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     scene.add(new THREE.Mesh(geometry, material));
 
     // Grid
-    scene.add(new THREE.GridHelper(10, 20, 0x333355, 0x222233));
-
-    // Source indicator
-    const sg = new THREE.SphereGeometry(0.15, 16, 16);
-    const sm = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const sp = new THREE.Mesh(sg, sm);
-    sp.position.set(4, 0.3, 4);
-    scene.add(sp);
+    const grid = new THREE.GridHelper(2 * r, 20, 0x333355, 0x222233);
+    grid.position.set(cx, 0, cz);
+    scene.add(grid);
 
     const animate = () => {
       animRef.current = requestAnimationFrame(animate);
@@ -227,7 +216,7 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     ctx.fillRect(lx - 4, ly - 16, lw + 8, 76);
 
     ctx.fillStyle = '#fff'; ctx.font = '9px sans-serif';
-    ctx.fillText('mSv/semana', lx, ly - 6);
+    ctx.fillText('mSv/semana (escala log)', lx, ly - 6);
 
     for (let i = 0; i < 20; i++) {
       const t = i / 19;
@@ -249,8 +238,8 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     }
 
     ctx.fillStyle = '#fff'; ctx.font = '8px sans-serif';
-    ctx.fillText(res.minDose.toFixed(2), lx, ly + 18);
-    ctx.fillText(res.maxDose.toFixed(2), lx + lw - 20, ly + 18);
+    ctx.fillText(Math.pow(10, res.minDose).toExponential(1), lx, ly + 18);
+    ctx.fillText(Math.pow(10, res.maxDose).toExponential(1), lx + lw - 34, ly + 18);
   }
 
   return (
@@ -318,38 +307,18 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
             <TabsContent value="config" className="mt-0 h-full m-0">
               <ScrollArea className="h-full px-5 py-4">
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {/* Source */}
-                  <div className="space-y-2">
+                  {/* Plano */}
+                  <div className="space-y-2 col-span-2" data-testid="dosemap-plano">
                     <div className="text-[11px] font-semibold text-rose-700 flex items-center gap-1">
-                      <Radio className="w-3.5 h-3.5" /> Fuente de Radiación
+                      <Radio className="w-3.5 h-3.5" /> Fuentes y barreras del plano
                     </div>
-                    <div><Label className="text-[10px]">Energía</Label>
-                      <Select value={sourceEnergy} onValueChange={setSourceEnergy}>
-                        <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(TVL_PRIMARY_CONCRETE_MM).map(e => (
-                            <SelectItem key={e} value={e} className="text-xs">{e}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="text-[10px] text-slate-600 flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      {floorPlan.sources.length} fuente(s), {floorPlan.barriers.length} barrera(s), escala {floorPlan.scale_m_per_pixel.toFixed(4)} m/px.
+                      Carga, energía y espesores se editan en el lienzo; el mapa usa el motor de campo (NCRP 151/147, TG-108).
                     </div>
-                    <div><Label className="text-[10px]">Workload (Gy/sem)</Label><Input value={sourceWorkload} onChange={e => setSourceWorkload(e.target.value)} type="number" className="h-7 text-xs" /></div>
-                    <div><Label className="text-[10px]">Factor de uso (U)</Label><Input value={sourceUseFactor} onChange={e => setSourceUseFactor(e.target.value)} type="number" step="0.05" className="h-7 text-xs" /></div>
-                  </div>
-
-                  {/* Room */}
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-semibold text-blue-700 flex items-center gap-1">
-                      <Shield className="w-3.5 h-3.5" /> Habitación y Barreras
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div><Label className="text-[10px]">Ancho (m)</Label><Input value={roomWidth} onChange={e => setRoomWidth(e.target.value)} type="number" className="h-7 text-xs" /></div>
-                      <div><Label className="text-[10px]">Profundidad (m)</Label><Input value={roomDepth} onChange={e => setRoomDepth(e.target.value)} type="number" className="h-7 text-xs" /></div>
-                    </div>
-                    <div><Label className="text-[10px]">Espesor barrera (mm)</Label><Input value={barrierThickness} onChange={e => setBarrierThickness(e.target.value)} type="number" className="h-7 text-xs" /></div>
-                    <div className="text-[9px] text-slate-400">
-                      TVL primario {sourceEnergy}: {TVL_PRIMARY_CONCRETE_MM[sourceEnergy] || '-'} mm concreto
-                    </div>
+                    <div className="text-[10px] font-medium text-slate-700">Componentes del campo</div>
+                    <SelectorComponentesDosis disponibles={disponibles} seleccion={componentes} onChange={setComponentes} testId="dosemap-componentes" />
                   </div>
 
                   {/* Grid */}
@@ -389,7 +358,7 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
                       <Activity className="w-3.5 h-3.5" /> Límites Regulatorios
                     </div>
                     <div><Label className="text-[10px]">Factor ocupación (T)</Label><Input value={occupancyFactor} onChange={e => setOccupancyFactor(e.target.value)} type="number" step="0.05" className="h-7 text-xs" /></div>
-                    <div><Label className="text-[10px]">Dosis diseño público (mSv/sem)</Label><Input value={designDose} onChange={e => setDesignDose(e.target.value)} type="number" step="0.01" className="h-7 text-xs" /></div>
+                    <div><Label className="text-[10px]">Objetivo de diseño P (mSv/sem): isodosis P/T</Label><Input value={designDose} onChange={e => setDesignDose(e.target.value)} type="number" step="0.01" className="h-7 text-xs" /></div>
                     <div className="text-[9px] text-amber-600">
                       NCRP 151: 0.02 mSv/sem (público), 0.4 mSv/sem (personal controlado)
                     </div>

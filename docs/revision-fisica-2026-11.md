@@ -84,7 +84,8 @@ Pendiente: hay otras tablas de materiales (`materialDatabase.ts`, `f510Diagnosti
   y dispersión del paciente con las mismas ecuaciones y tablas que el cálculo por barrera (NCRP 151 Ec. 2.1,
   2.7, 2.8, 3.6; Tablas B.2, B.4, B.5a, B.7). En diagnóstico TG9 usa las Tablas 4.5/4.7 de NCRP 147 en lugar
   del K¹ del catálogo (p. ej. tórax 1.2 en vez de 0.17 mGy/paciente: el mapa subestimaba ~7×).
-- Oblicuidad según NCRP 151 §2.4 (espesor oblicuo, +1/+2 HVL para θ > 45° y B < 10⁻³, sin crédito > 70°; sin
+- Oblicuidad según NCRP 151 §2.2, p. 24 (espesor oblicuo; para θ > 45°, ≈ 2 HVL en baja energía y ≈ 1 HVL en alta
+  energía, concreto; el motor la aplica si B < 10⁻³ y no da crédito > 70°; sin
   crédito para la dispersión del paciente). Ver `docs/plan-motores-calculo.md`.
 - **Hallazgo:** con cuatro componentes secundarias (fuga y dispersión de un equipo 6/18 MV) la regla de las dos
   fuentes, aplicada una sola vez, puede dejar Σ K·B hasta ~1 % (máximo teórico ~10 %) sobre P/T. El motor

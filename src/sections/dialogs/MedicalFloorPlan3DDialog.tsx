@@ -46,6 +46,8 @@ import { buildF459F463VisualStack } from '@/lib/medical3D/f459F463VisualStack';
 import { buildF464F468VisualBetaContract } from '@/lib/medical3D/f464F468VisualBeta';
 import { buildF520F524DeepRendererBabylonContract } from '@/lib/f520F524DeepRendererBabylon';
 import { NOTA_VISOR_EN_REVISION, VISOR_3D_BABYLON } from '@/lib/featureFlags';
+import { componentesPresentes, type ComponenteCampo } from '@/lib/doseFieldEngine';
+import { SelectorComponentesDosis } from './SelectorComponentesDosis';
 
 interface Props {
   open: boolean;
@@ -657,10 +659,11 @@ function DoseOverlays({ scene, visible }: { scene: MedicalScene; visible: boolea
   if (!visible) return null;
   return (
     <>
+      {/* Fase 3: celdas del motor de campo (doseFieldEngine), color por nivel NCRP 147/151. */}
       {scene.dosePoints.map((point) => (
         <mesh key={point.id} position={point.position} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[point.radius * 0.72, point.radius, 96]} />
-          <meshBasicMaterial color={point.intensity > 0.28 ? '#ef4444' : point.intensity > 0.2 ? '#f59e0b' : '#22c55e'} transparent opacity={point.intensity} side={THREE.DoubleSide} />
+          <planeGeometry args={[point.radius * 2, point.radius * 2]} />
+          <meshBasicMaterial color={point.nivel === 'controlada' ? '#ef4444' : point.nivel === 'supervisada' ? '#f59e0b' : '#22c55e'} transparent opacity={point.intensity} side={THREE.DoubleSide} depthWrite={false} />
         </mesh>
       ))}
     </>
@@ -1704,7 +1707,15 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeFloorPlan = importedFloorPlan || floorPlan;
-  const scene = useMemo(() => buildMedicalScene(activeFloorPlan, preset), [activeFloorPlan, preset]);
+  const [componentesDosis, setComponentesDosis] = useState<ComponenteCampo[] | undefined>(undefined);
+  const componentesDisponibles = useMemo(
+    () => componentesPresentes(activeFloorPlan.sources || [], activeFloorPlan.scale_m_per_pixel || 0.01),
+    [activeFloorPlan],
+  );
+  const scene = useMemo(
+    () => buildMedicalScene(activeFloorPlan, preset, { dosis: { componentes: componentesDosis } }),
+    [activeFloorPlan, preset, componentesDosis],
+  );
   const f92Inspection = useMemo(() => buildF923DInspectionSummary(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const f147Inspection = useMemo(() => buildF147Medical3DInspection(scene, activeFloorPlan), [activeFloorPlan, scene]);
   const renderStrategy = useMemo(() => getMedical3DRenderStrategy(renderEngine), [renderEngine]);
@@ -2261,6 +2272,14 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+              {mode === 'dose' && (
+                <div className="space-y-1 rounded border border-slate-200 bg-white p-2" data-testid="medical3d-dosis-motor">
+                  <div className="text-[9px] text-slate-600">
+                    Kerma semanal del motor de campo con las barreras del plano: rojo &gt; 0.1, ámbar &gt; 0.02 mSv/sem.
+                  </div>
+                  <SelectorComponentesDosis disponibles={componentesDisponibles} seleccion={componentesDosis} onChange={setComponentesDosis} testId="medical3d-componentes" />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 rounded border border-emerald-100 bg-emerald-50 p-2" data-testid="f364-three-visual-workflow">
