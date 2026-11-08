@@ -9,7 +9,6 @@ import {
   inverseArcher,
   tvlThickness,
   exponentialThickness,
-  calculateUnshieldedKerma,
   generateSamplePoints,
   roundThickness,
   buildCalculationTrace,
@@ -20,7 +19,7 @@ import {
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
-import { calcularMallaDosis } from '@/lib/doseFieldEngine';
+import { calcularMallaDosis, dosisEnPunto } from '@/lib/doseFieldEngine';
 
 export function useShieldingEngine() {
 
@@ -38,15 +37,16 @@ export function useShieldingEngine() {
       let maxKerma = 0;
       let minSourceDistance_m = Infinity;
       for (const p of points) {
-        let kerma = 0;
         for (const s of sources) {
           const dx = (p.x - s.x) * scale_m_per_pixel;
           const dy = (p.y - s.y) * scale_m_per_pixel;
           const dz = s.isocenterHeight_m || 0;
           minSourceDistance_m = Math.min(minSourceDistance_m, Math.sqrt(dx * dx + dy * dy + dz * dz));
-          kerma += calculateUnshieldedKerma(s, p.x, p.y, scale_m_per_pixel, ctIsodosisProfile);
         }
-        maxKerma = Math.max(maxKerma, kerma);
+        // Fase 2: el kerma sin blindaje en los puntos de muestreo sale del motor de campo (mismas
+        // componentes que el mapa; la barrera sólo clasifica primaria/secundaria, no atenúa aquí).
+        const d = dosisEnPunto(sources, p.x, p.y, scale_m_per_pixel, { barriers: [b], ctIsodosisProfile, materials: MATERIALS });
+        maxKerma = Math.max(maxKerma, d.kermaSinBlindaje_mSv_semana);
       }
 
       const requiredThickness: Record<string, number> = {};
@@ -162,8 +162,8 @@ export function useShieldingEngine() {
     ctIsodosisProfile?: CTIsodosisProfile,
     barriers: Barrier[] = [],
   ) => {
-    // Fase 1 (docs/plan-motores-calculo.md): el heat map usa el motor de campo único y atenúa por
-    // las barreras con espesor instalado/calculado que cruza cada rayo fuente → punto.
+    // Fases 1–2 (docs/plan-motores-calculo.md): el heat map usa el motor de campo único, por componentes
+    // (primaria/fuga/dispersión en teleterapia), y atenúa por las barreras que cruza cada rayo.
     return calcularMallaDosis(sources, scale_m_per_pixel, gridSize, { barriers, ctIsodosisProfile, materials: MATERIALS });
   }, []);
 

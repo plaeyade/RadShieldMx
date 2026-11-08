@@ -373,6 +373,9 @@ export interface RadiationSource {
   // NCRP 151 Ec. 3.6: fracción de la carga con IMRT y factor C_I (por omisión 0.5 y 5)
   imrtFraction?: number;
   imrtFactor?: number;
+  // Motor de campo (Fase 2): orientación en planta del eje de rotación del gantry (grados, 0 = +x del
+  // lienzo). Si existe, la primaria sólo llega a la franja que barre el haz; si no, a las barreras primarias.
+  ejeGantry_deg?: number;
 }
 
 export interface Barrier {

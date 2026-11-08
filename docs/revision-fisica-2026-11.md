@@ -78,6 +78,18 @@ Pendiente: hay otras tablas de materiales (`materialDatabase.ts`, `f510Diagnosti
 - Siguen en el motor anterior: TC (κ), medicina nuclear, braquiterapia, Gamma Knife y ciclotrón (módulo
   propio). Pendiente: laberinto y puerta ≥ 10 MV, fotoneutrones.
 
+## Cuarta ronda — campo de dosis por componentes (Fase 2, 11-2026)
+
+- El mapa de dosis ya no usa «2 Gy × fracciones × U / d²» para teleterapia: separa primaria, fuga (con IMRT)
+  y dispersión del paciente con las mismas ecuaciones y tablas que el cálculo por barrera (NCRP 151 Ec. 2.1,
+  2.7, 2.8, 3.6; Tablas B.2, B.4, B.5a, B.7). En diagnóstico TG9 usa las Tablas 4.5/4.7 de NCRP 147 en lugar
+  del K¹ del catálogo (p. ej. tórax 1.2 en vez de 0.17 mGy/paciente: el mapa subestimaba ~7×).
+- Oblicuidad según NCRP 151 §2.4 (espesor oblicuo, +1/+2 HVL para θ > 45° y B < 10⁻³, sin crédito > 70°; sin
+  crédito para la dispersión del paciente). Ver `docs/plan-motores-calculo.md`.
+- **Hallazgo:** con cuatro componentes secundarias (fuga y dispersión de un equipo 6/18 MV) la regla de las dos
+  fuentes, aplicada una sola vez, puede dejar Σ K·B hasta ~1 % (máximo teórico ~10 %) sobre P/T. El motor
+  normativo verifica ahora la suma directa y toma el mayor espesor; los ejemplos §7.1 siguen reproduciéndose.
+
 ## Bloques HD TM NIPOL (11-2026)
 
 Los TVL de `tm-nipoll-n40/n50` no tenían fuente. Se sustituyen por bloques HD de 3.5, 4.0, 5.0 y 5.5 g/cm³ con

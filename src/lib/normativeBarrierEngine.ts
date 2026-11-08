@@ -18,10 +18,20 @@ import {
   combinarDosFuentes,
   dispersion,
   energiaDesdeClave,
-  fraccionDispersion,
+  espesorSumaDirecta,
   fuga,
+  kermaDispersion,
+  kermaFuga,
+  kermaPrimaria,
   primaria,
+  transmisionTVL,
+  transmisionUnTVL,
+  tvlDispersion,
+  tvlFuga,
+  tvlPrimaria,
   type Componente,
+  type TerminoDirecto,
+  type EnergiaMV,
   type FuenteTeleterapia,
   type MaterialNCRP151,
 } from '@/lib/ncrp151';
@@ -39,8 +49,11 @@ export const DISTRIBUCION_POR_MODALIDAD: Record<string, { primaria?: Distribucio
   'mammo-mlo': { secundaria: 'mammography_room' },
 };
 
-/** Modalidades de teleterapia de megavoltaje cubiertas por NCRP 151 en el lienzo. */
-export const LINAC = /^linac-/;
+/**
+ * Modalidades de teleterapia de megavoltaje cubiertas por NCRP 151 en el lienzo: aceleradores
+ * (`linac-*`) y unidades de Co-60 de teleterapia (`tele-co60*`; Gamma Knife queda fuera: es autoblindado).
+ */
+export const LINAC = /^(linac-|tele-co60)/;
 
 /** Materiales del catálogo que el motor NCRP 151 dimensiona (resto: motor punto-kernel). */
 export const MATERIALES_NCRP151 = ['CONCRETE235', 'PB', 'STEEL', 'CONCRETEBARITE', 'CONCRETEIRON'] as const;
@@ -54,7 +67,8 @@ export interface ResultadoNormativo {
   notas: string[];
 }
 
-function distancia(s: RadiationSource, p: PuntoMuestreo, escala: number): number {
+/** Distancia fuente → punto (m), con la altura del isocentro y un mínimo de 0.3 m. */
+export function distancia(s: RadiationSource, p: PuntoMuestreo, escala: number): number {
   const dx = (p.x - s.x) * escala;
   const dy = (p.y - s.y) * escala;
   const dz = s.isocenterHeight_m || 0;
@@ -77,6 +91,24 @@ export function material151(m: ShieldingMaterial): { mat: MaterialNCRP151; escal
   return { mat: 'concrete', escala: 2.35 / (m.density || 2.35) };
 }
 
+/**
+ * Kerma sin blindaje NCRP 147 de una fuente diagnóstica a d (m), mGy/semana: primaria K¹_P·U·N/d²
+ * (Tabla 4.5, ajuste B.1) si se pide y la distribución la tabula; si no, secundaria K¹_sec·N/d²
+ * (Tabla 4.7, columna de 135° — fuga + dispersión frontal/retro, la mayor: conservador; ajuste C.1).
+ */
+export function terminoNCRP147(
+  s: RadiationSource, d_m: number, primariaSiAplica: boolean, U: number,
+): { tipo: 'primaria' | 'secundaria'; K: number; ajustes: Record<MaterialNCRP147, Archer> } | null {
+  const dist = DISTRIBUCION_POR_MODALIDAD[s.modality.id];
+  if (!dist) return null;
+  const N = s.workloadValue;
+  const k45 = dist.primaria ? TABLA_4_5[dist.primaria] : undefined;
+  if (primariaSiAplica && dist.primaria && k45) {
+    return { tipo: 'primaria', K: (k45.K1P_mGy * U * N) / (d_m * d_m), ajustes: TABLA_B_1[dist.primaria] };
+  }
+  return { tipo: 'secundaria', K: (TABLA_4_7[dist.secundaria].frontal * N) / (d_m * d_m), ajustes: TABLA_C_1[dist.secundaria] };
+}
+
 /** Espesor x (mm) tal que Σ Kᵢ·Bᵢ(x) = P/T (bisección; cada fuente con su ajuste de Archer). */
 function espesorMultiFuente(terminos: { K: number; ajuste: Archer }[], meta: number): number {
   const f = (x: number) => terminos.reduce((s, t) => s + t.K * transmisionArcher(x, t.ajuste), 0);
@@ -85,6 +117,27 @@ function espesorMultiFuente(terminos: { K: number; ajuste: Archer }[], meta: num
   while (f(hi) > meta && hi < 1e5) hi *= 2;
   for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (f(mid) > meta) lo = mid; else hi = mid; }
   return hi;
+}
+
+/** Energía NCRP 151 de una fuente de teleterapia (clave «18MV»/«Co60», o etiqueta «Co-60»). */
+export function energiaTeleterapia(s: RadiationSource): EnergiaMV | null {
+  return energiaDesdeClave(getShieldingEnergyKey(s)) ?? (/co-?60/i.test(s.modality.energyLabel ?? '') ? 'Co60' : null);
+}
+
+/**
+ * Fuente NCRP 151 de una fuente del lienzo: W = fracciones/semana × Gy/fracción en el isocentro;
+ * IMRT por omisión 50 % con C_I = 5 (ejemplo §7.1.4). null si no es teleterapia o sin energía tabulada.
+ */
+export function fuenteTeleterapiaDe(s: RadiationSource): FuenteTeleterapia | null {
+  if (!LINAC.test(s.modality.id)) return null;
+  const e = energiaTeleterapia(s);
+  if (!e) return null;
+  return {
+    energia: e,
+    W_Gy_semana: s.workloadValue * (s.modality.doseRateConstant || 2),
+    fraccionIMRT: s.imrtFraction ?? 0.5,
+    factorIMRT: s.imrtFactor ?? 5,
+  };
 }
 
 export function calcularBarreraNormativa(
@@ -121,16 +174,8 @@ function diagnostico(
     for (const p of puntos) {
       const terminos: { K: number; ajuste: Archer }[] = [];
       for (const s of fuentes) {
-        const d = distancia(s, p, escala);
-        const dist = DISTRIBUCION_POR_MODALIDAD[s.modality.id];
-        const N = s.workloadValue;
-        const k45 = dist.primaria ? TABLA_4_5[dist.primaria] : undefined;
-        if (esPrimaria && dist.primaria && k45) {
-          terminos.push({ K: (k45.K1P_mGy * U * N) / (d * d), ajuste: TABLA_B_1[dist.primaria][mat] });
-        } else {
-          // Fuga + dispersión 135° (columna mayor de la Tabla 4.7: conservador).
-          terminos.push({ K: (TABLA_4_7[dist.secundaria].frontal * N) / (d * d), ajuste: TABLA_C_1[dist.secundaria][mat] });
-        }
+        const t = terminoNCRP147(s, distancia(s, p, escala), esPrimaria, U);
+        if (t) terminos.push({ K: t.K, ajuste: t.ajustes[mat] });
       }
       kermaMax = Math.max(kermaMax, terminos.reduce((a, t) => a + t.K, 0));
       peor = Math.max(peor, espesorMultiFuente(terminos, P / T));
@@ -155,16 +200,7 @@ function teleterapia(
       ? 'NCRP 151: primaria (Ec. 2.1, 2.3; Tabla B.2).'
       : `NCRP 151: fuga (Ec. 2.8, Tabla B.7) + dispersión del paciente a ${theta}° (Ec. 2.7, Tablas B.4/B.5a), regla de dos fuentes.`,
   ];
-  const fts: (FuenteTeleterapia | null)[] = fuentes.map((s) => {
-    const e = energiaDesdeClave(getShieldingEnergyKey(s));
-    if (!e) return null;
-    return {
-      energia: e,
-      W_Gy_semana: s.workloadValue * (s.modality.doseRateConstant || 2),
-      fraccionIMRT: s.imrtFraction ?? 0.5,
-      factorIMRT: s.imrtFactor ?? 5,
-    };
-  });
+  const fts = fuentes.map(fuenteTeleterapiaDe);
   if (!esPrimaria && fuentes.some((s) => s.imrtFraction === undefined)) {
     notas.push('Fuga con IMRT por omisión: 50 % de la carga con C_I = 5 (valores del ejemplo §7.1.4).');
   }
@@ -174,25 +210,41 @@ function teleterapia(
     if (!(MATERIALES_NCRP151 as readonly string[]).includes(m.code)) continue;
     const { mat, escala: esc } = material151(m);
     let peor = 0;
+    let porSumaDirecta = false;
     for (const p of puntos) {
       const comps: Componente[] = [];
+      const directos: TerminoDirecto[] = [];
+      let kPunto = 0;
       fuentes.forEach((s, i) => {
         const f = fts[i];
         if (!f) return;
         const d = distancia(s, p, escala);
         if (esPrimaria) {
           comps.push(primaria(f, { P_Sv_semana: P, T, U, d_m: d, material: mat }));
-          kermaMax = Math.max(kermaMax, (f.W_Gy_semana * U * 1000) / (d * d));
+          const tvl = tvlPrimaria(f.energia, mat);
+          directos.push({ K_Sv_semana: kermaPrimaria(f, U, d), transmision: (t) => transmisionTVL(t, tvl) });
         } else {
+          const g = { U, dsec_m: d, theta_deg: theta };
           comps.push(fuga(f, { P_Sv_semana: P, T, dL_m: d, material: mat }));
-          comps.push(dispersion(f, { P_Sv_semana: P, T, U, dsec_m: d, theta_deg: theta, material: mat }));
-          const WL = f.W_Gy_semana * (1 - (f.fraccionIMRT ?? 0)) + (f.factorIMRT ?? 1) * (f.fraccionIMRT ?? 0) * f.W_Gy_semana;
-          const a = fraccionDispersion(f.energia, theta);
-          kermaMax = Math.max(kermaMax, ((1e-3 * WL + (a * f.W_Gy_semana * U * 1600) / 400) * 1000) / (d * d));
+          comps.push(dispersion(f, { P_Sv_semana: P, T, ...g, material: mat }));
+          const tvlL = tvlFuga(f.energia, mat);
+          const tvlS = tvlDispersion(f.energia, mat, theta);
+          directos.push(
+            { K_Sv_semana: kermaFuga(f, d), transmision: (t) => transmisionTVL(t, tvlL) },
+            { K_Sv_semana: kermaDispersion(f, g), transmision: (t) => transmisionUnTVL(t, tvlS) },
+          );
         }
       });
-      peor = Math.max(peor, esPrimaria ? Math.max(0, ...comps.map((c) => c.espesor_cm)) : combinarDosFuentes(comps));
+      for (const x of directos) kPunto += x.K_Sv_semana * 1000;
+      kermaMax = Math.max(kermaMax, kPunto);
+      // Regla del informe (primaria: la mayor; secundaria: dos fuentes) y verificación con la suma directa
+      // Σ K·B ≤ P/T del motor de campo; se toma el mayor de los dos espesores.
+      const regla = esPrimaria ? Math.max(0, ...comps.map((c) => c.espesor_cm)) : combinarDosFuentes(comps);
+      const directo = espesorSumaDirecta(directos, P, T);
+      if (directo > regla + 1e-6) porSumaDirecta = true;
+      peor = Math.max(peor, regla, directo);
     }
+    if (porSumaDirecta) notas.push(`${m.code}: la suma directa de componentes exige más espesor que la regla de NCRP 151; se usa la suma directa.`);
     if (peor > 0) espesores[m.code] = peor * 10 * esc;
     if (esc !== 1) notas.push(`${m.code}: espesor por equivalencia másica con concreto (ρ = ${m.density} g/cm³).`);
   }
