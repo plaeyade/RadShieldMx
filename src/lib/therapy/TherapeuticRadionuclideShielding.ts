@@ -69,6 +69,11 @@ export interface TaskDoseResult {
   minLead_mm: number; minConcrete_mm: number;
 }
 
+/** Tasa a 1 m del paciente por GBq: la mayor entre la de la tabla y la de la fuente puntual (Γ·1000). */
+export function patientRate1m_uSvh_perGBq(nuc: TherapyNuclide): number {
+  return Math.max(nuc.patientDoseRate_1m_uSvh_perGBq, nuc.gammaConstant_uSvm2perGBqh * 1000);
+}
+
 export function calculateTaskDose(task: TherapyRoomTask, designLimit_uSv_week: number = 100): TaskDoseResult {
   const nuc = THERAPY_NUCLIDES.find(n => n.symbol === task.nuclide) || THERAPY_NUCLIDES[0];
   const admin_GBq = task.activity_MBq / 1000;
@@ -76,8 +81,12 @@ export function calculateTaskDose(task: TherapyRoomTask, designLimit_uSv_week: n
   let weeklyDose_uSv = 0;
 
   if (task.taskType === 'patient_handling') {
-    // Use patient dose rate at 1m, scaled by distance
-    weeklyDose_uSv = task.frequency_perWeek * nuc.patientDoseRate_1m_uSvh_perGBq * admin_GBq * time_h / (task.distance_m * task.distance_m);
+    // Tasa a 1 m del paciente. Revisión 8c: la tabla (sin fuente) quedaba muy por debajo de la fuente puntual Γ·A
+    // (p. ej. I-131 2.3 frente a 59.5 μSv/h por GBq; Pb-212 1.8 frente a 190; Ac-225 2.5 frente a 65), cuando la
+    // autoabsorción del paciente sólo puede bajar la tasa respecto de la fuente puntual sin blindaje. Mientras no haya
+    // tasas medidas citadas se usa la mayor de las dos: Γ·1000 (μSv·m²/(GBq·h)) es la cota conservadora.
+    const tasa_1m = patientRate1m_uSvh_perGBq(nuc);
+    weeklyDose_uSv = task.frequency_perWeek * tasa_1m * admin_GBq * time_h / (task.distance_m * task.distance_m);
   } else {
     // Preparation, admin, waste: use gamma constant
     weeklyDose_uSv = task.frequency_perWeek * admin_GBq * nuc.gammaConstant_uSvm2perGBqh * time_h * 1000 / (task.distance_m * task.distance_m);

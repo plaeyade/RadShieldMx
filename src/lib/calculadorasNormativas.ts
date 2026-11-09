@@ -376,7 +376,7 @@ export interface ResultadoOblicuo {
 
 /**
  * Incidencia oblicua sobre una barrera de t cm: recorrido t/cos θ (tope 70°); para θ > 45° la transmisión a incidencia
- * normal (`correccionOblicuidad`, NCRP 151 §2.2 / NCRP 147), y el espesor a incidencia normal que da la misma transmisión.
+ * normal (`correccionOblicuidad`, NCRP 151 §2.2 / NCRP 147 §1.4.3), y el espesor a incidencia normal que da la misma transmisión.
  */
 export function incidenciaOblicua(e: EnergiaMV, material: MaterialNCRP151, t_cm: number, theta_deg: number): ResultadoOblicuo {
   const tvl = tvlPrimaria(e, material);

@@ -10,12 +10,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { OBLICUIDAD_UMBRAL_DEG, TABLA_B_2, correccionOblicuidad, espesorTVL, transmisionTVL } from '@/lib/ncrp151';
 import { OBJETIVO_GAMMA_KNIFE, blindajeCo60, incidenciaOblicua } from '@/lib/calculadorasNormativas';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
-import { THERAPY_NUCLIDES, calculateTaskDose } from '@/lib/therapy/TherapeuticRadionuclideShielding';
+import { THERAPY_NUCLIDES, calculateTaskDose, patientRate1m_uSvh_perGBq } from '@/lib/therapy/TherapeuticRadionuclideShielding';
 import GammaKnifeDialog from '@/sections/dialogs/GammaKnifeDialog';
 
 afterEach(cleanup);
 
-describe('oblicuidad: nunca menos conservadora que la incidencia normal', () => {
+describe('oblicuidad: para θ > 45° nunca menos conservadora que la incidencia normal (hasta 45° se acredita t/cos θ)', () => {
   it('frontera B = 10⁻³: sin salto; a ambos lados la transmisión es la normal', () => {
     // Espesor normal t₀ tal que la oblicua a 60° (recorrido 2·t₀) da exactamente B = 10⁻³ con 18 MV en concreto.
     const tvl = TABLA_B_2.concrete['18'];
@@ -49,6 +49,25 @@ describe('oblicuidad: nunca menos conservadora que la incidencia normal', () => 
     const Bo = transmisionTVL(100 / Math.cos(Math.PI / 4), tvl), Bn = transmisionTVL(100, tvl);
     expect(correccionOblicuidad(Bo, Bn, OBLICUIDAD_UMBRAL_DEG).transmision).toBe(Bo);
     expect(correccionOblicuidad(Bo, Bn, OBLICUIDAD_UMBRAL_DEG + 0.01).transmision).toBe(Bn);
+  });
+});
+
+describe('oblicuidad θ ≤ 45°: el crédito t/cos θ es menos conservador que el perpendicular (lo permite NCRP 151 §2.2)', () => {
+  it('a 30° y 45° la transmisión corregida es la oblicua, menor que la normal', () => {
+    for (const th of [30, 45]) {
+      const r = incidenciaOblicua(6, 'concrete', 150, th);
+      expect(r.B_corregida).toBe(r.B_oblicua);
+      expect(r.B_corregida).toBeLessThan(r.B_normal);
+    }
+  });
+});
+
+describe('terapia: tasa a 1 m del paciente acotada por la fuente puntual', () => {
+  it('nunca menor que Γ·1000; Pb-212 ≥ 190 μSv/h por GBq e I-131 ≥ 59.5', () => {
+    for (const n of THERAPY_NUCLIDES) expect(patientRate1m_uSvh_perGBq(n)).toBeGreaterThanOrEqual(n.gammaConstant_uSvm2perGBqh * 1000);
+    expect(patientRate1m_uSvh_perGBq(THERAPY_NUCLIDES.find(x => x.symbol === 'Pb-212')!)).toBeGreaterThanOrEqual(190);
+    const r = calculateTaskDose({ name: 'x', nuclide: 'I-131', activity_MBq: 1000, frequency_perWeek: 1, duration_min: 60, distance_m: 1, taskType: 'patient_handling' });
+    expect(r.weeklyDose_uSv).toBeCloseTo(59.5, 6);
   });
 });
 

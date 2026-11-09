@@ -199,10 +199,13 @@ export function transmisionUnTVL(t_cm: number, tvl_cm: number): number {
 // ───────────────────────────────────────────────────────────────
 // Incidencia oblicua (NCRP 151 §2.2, p. 24). Hasta 45° el espesor oblicuo t/cos θ es válido. Para θ > 45° el
 // espesor oblicuo sobrestima la atenuación y NCRP 151 sólo da una corrección aproximada (≈ 2 HVL en baja energía,
-// ≈ 1 HVL en alta energía) y sólo para concreto; NCRP 147 (§4) calcula a incidencia normal. Revisión 8c: el motor
-// antes aplicaba esa corrección sólo con B < 10⁻³, de modo que justo por encima del umbral la transmisión podía ser
-// hasta ×2 menor (menos conservadora) que justo por debajo. Ahora, para θ > 45° y cualquier B o material, la
-// transmisión es la de incidencia normal: nunca menor que la del espesor perpendicular y continua en B.
+// ≈ 1 HVL en alta energía) y sólo para concreto y atenuaciones de órdenes de magnitud; NCRP 147 §1.4.3 enumera la
+// incidencia perpendicular entre sus suposiciones conservadoras. Revisión 8c: el motor antes aplicaba esa corrección
+// sólo con B < 10⁻³, con un salto ×2 en el umbral. Ahora, para θ > 45° (cualquier B o material) se usa la transmisión
+// a incidencia normal, que no acredita ninguna oblicuidad. Para θ ≤ 45° SÍ se acredita t/cos θ, que da menos
+// transmisión que el espesor perpendicular (es decir, es menos conservador que él); lo permite el §2.2, que trata el
+// efecto de la dispersión como «un pequeño aumento» del espesor, aquí no aplicado. En θ = 45° hay un salto (de crédito
+// completo a ninguno) hacia el lado conservador.
 // ───────────────────────────────────────────────────────────────
 
 /** Por encima de este ángulo la aproximación de espesor oblicuo t/cos θ sobrestima la atenuación. */
@@ -211,10 +214,10 @@ export const OBLICUIDAD_UMBRAL_DEG = 45;
 export const OBLICUIDAD_MAX_DATOS_DEG = 70;
 
 /**
- * Corrección de oblicuidad (NCRP 151 §2.2, p. 24; NCRP 147 §4): para θ ≤ 45° se usa la transmisión con el espesor
- * oblicuo t/cos θ; para θ > 45° se devuelve la transmisión a incidencia normal (sin crédito por oblicuidad), que es
- * siempre ≥ la oblicua con 1 o 2 HVL descontados (la corrección aproximada del §2.2) y no depende de B ni del
- * material. `hvlDescontados` es el número de HVL que se restituyen respecto del espesor oblicuo: log₂(B_n/B_o).
+ * Corrección de oblicuidad (NCRP 151 §2.2, p. 24; NCRP 147 §1.4.3): para θ ≤ 45° se usa la transmisión con el espesor
+ * oblicuo t/cos θ (crédito por oblicuidad: menos conservador que el espesor perpendicular, permitido por el §2.2); para
+ * θ > 45° se devuelve la transmisión a incidencia normal (sin crédito), que no depende de B ni del material y, en el
+ * dominio del §2.2 (atenuación de órdenes de magnitud), es ≥ la oblicua con 1 o 2 HVL descontados. `hvlDescontados` es el número de HVL que se restituyen respecto del espesor oblicuo: log₂(B_n/B_o).
  */
 export function correccionOblicuidad(
   B_oblicua: number, B_normal: number, theta_deg: number,

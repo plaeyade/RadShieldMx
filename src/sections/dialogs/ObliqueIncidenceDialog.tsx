@@ -3,7 +3,8 @@
  *
  * Antes: t_eff = t/cos θ sin límite, que para θ > 45° sobrestima la atenuación (no conservador). Ahora usa
  * `incidenciaOblicua` (recorrido t/cos θ con tope de 70°, TVL₁/TVLₑ de NCRP 151 Tabla B.2 y la corrección de §2.2:
- * para θ > 45° se usa la transmisión a incidencia normal, nunca menos conservadora que el espesor perpendicular).
+ * para θ > 45° se usa la transmisión a incidencia normal, sin crédito por oblicuidad). Hasta 45° el crédito t/cos θ
+ * es menos conservador que el espesor perpendicular; lo permite el §2.2.
  */
 import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -35,7 +36,8 @@ export default function ObliqueIncidenceDialog({ open, onClose }: Props) {
           </DialogTitle>
           <DialogDescription className="text-[11px]">
             Recorrido t/cos θ (tope 70°) hasta 45°. Para θ &gt; 45° el espesor oblicuo sobrestima la atenuación (NCRP 151 §2.2)
-            y se usa la transmisión a incidencia normal (NCRP 147), nunca menos conservadora.
+            y se usa la transmisión a incidencia normal, sin crédito por oblicuidad (NCRP 147 §1.4.3). Hasta 45° se acredita
+            t/cos θ, que da menos transmisión que el espesor perpendicular.
           </DialogDescription>
         </DialogHeader>
 

@@ -35,8 +35,9 @@
  *
  * Incidencia oblicua:
  * - Primaria y fuga NCRP 151: espesor oblicuo t/cos θ hasta 45°; para θ > 45° la transmisión a incidencia
- *   normal (`correccionOblicuidad`, §2.2 p. 24 y NCRP 147: nunca menos conservadora que el espesor perpendicular,
- *   para cualquier B y material).
+ *   normal (`correccionOblicuidad`, §2.2 p. 24 y NCRP 147 §1.4.3), para cualquier B y material. Hasta 45° el
+ *   crédito t/cos θ sí es menos conservador que el espesor perpendicular (lo permite el §2.2); el §2.2 recomienda
+ *   aplicar la oblicuidad sólo a la primaria, porque la fuga y la dispersión son fuentes difusas.
  * - Dispersión del paciente: espesor normal, sin crédito por oblicuidad. NCRP 151 no da un criterio único
  *   (sus ejemplos se contradicen) y los TVL de la Tabla B.5a ya son de haz ancho: conservador.
  * - Diagnóstico y resto: espesor oblicuo con crédito limitado a θ ≤ 60° (como en la Fase 1).
