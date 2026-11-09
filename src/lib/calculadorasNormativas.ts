@@ -20,7 +20,7 @@ import {
   type Componente, type EnergiaMV, type FuenteTeleterapia, type MaterialNCRP151,
 } from './ncrp151';
 import {
-  ETIQUETAS_NCRP147, TABLA_4_5, TABLA_4_7, TABLA_B_1, TABLA_C_1, espesorArcher, transmisionArcher,
+  AJUSTES_TC, ETIQUETAS_NCRP147, TABLA_4_5, TABLA_4_7, TABLA_B_1, TABLA_C_1, espesorArcher, transmisionArcher,
   type Archer, type DistribucionNCRP147, type MaterialNCRP147,
 } from './ncrp147';
 import { NUCLIDOS_PET, dosisSemanalTG108, type EntradaTG108, type NuclidoPET } from './tg108';
@@ -298,6 +298,47 @@ export function espesorRequeridoHaz(c: CargaHaz, material: string, P_mSv_semana:
   const K = kermaSinBlindajeHaz(c);
   return espesorHaz(c, material, Math.min(1, P_mSv_semana / (T * K)));
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tomografía computarizada — NCRP 147 §5.6.1 (método DLP) y Figs. A.2/A.3.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** κ (cm⁻¹) de NCRP 147 §5.6.1: cabeza 9×10⁻⁵; cuerpo 3×10⁻⁴ con el factor 1.2 del DLP de cuerpo (Ec. 5.7). */
+export const KAPPA_TC = { cabeza: 9e-5, cuerpo: 1.2 * 3e-4 } as const;
+
+export interface EntradaTC {
+  /** Procedimientos por semana y DLP por procedimiento (mGy·cm), por tipo. */
+  N_cuerpo: number; DLP_cuerpo_mGy_cm: number;
+  N_cabeza: number; DLP_cabeza_mGy_cm: number;
+  /** Factor por estudios con y sin contraste (NCRP 147 usa 1.4). */
+  factorContraste: number;
+  kvp: 120 | 140;
+  d_m: number; P_mSv_semana: number; T: number;
+}
+
+export interface ResultadoTC {
+  K1_cuerpo_mGy: number; K1_cabeza_mGy: number;
+  K_mGy_semana: number; B_requerida: number;
+  espesores_mm: { lead: number; concrete: number };
+}
+
+/** Kerma secundario semanal de TC a d m del isocentro y espesores de plomo y concreto (Figs. A.2/A.3). */
+export function blindajeTC(e: EntradaTC): ResultadoTC {
+  if (!(e.d_m > 0)) throw new RangeError('La distancia debe ser positiva');
+  if (!(e.T > 0 && e.T <= 1)) throw new RangeError('T debe estar en (0, 1]');
+  const K1_cuerpo_mGy = KAPPA_TC.cuerpo * e.DLP_cuerpo_mGy_cm * e.factorContraste;
+  const K1_cabeza_mGy = KAPPA_TC.cabeza * e.DLP_cabeza_mGy_cm * e.factorContraste;
+  const K_mGy_semana = (e.N_cuerpo * K1_cuerpo_mGy + e.N_cabeza * K1_cabeza_mGy) / (e.d_m * e.d_m);
+  const B_requerida = K_mGy_semana > 0 ? Math.min(1, e.P_mSv_semana / (e.T * K_mGy_semana)) : 1;
+  const t = (m: 'lead' | 'concrete') => (B_requerida >= 1 ? 0 : espesorArcher(B_requerida, AJUSTES_TC[e.kvp][m]));
+  return { K1_cuerpo_mGy, K1_cabeza_mGy, K_mGy_semana, B_requerida, espesores_mm: { lead: t('lead'), concrete: t('concrete') } };
+}
+
+/** NCRP 147 §5.6.1: 150 de cuerpo (DLP 550) y 30 de cabeza (DLP 1 200), ×1.4, 120 kVp, muro a 3 m, P = 0.02, T = 1. */
+export const TC_INICIAL: EntradaTC = {
+  N_cuerpo: 150, DLP_cuerpo_mGy_cm: 550, N_cabeza: 30, DLP_cabeza_mGy_cm: 1200, factorContraste: 1.4, kvp: 120,
+  d_m: 3, P_mSv_semana: 0.02, T: 1,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Comparación de materiales (costo, masa, espesor) y frente de Pareto.

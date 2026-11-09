@@ -28,9 +28,9 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 | | Cantidad |
 |---|---|
 | Diálogos revisados | 202 |
-| Estado OK / riesgo / error | 75 / 96 / 31 |
-| Prioridad alta / media / baja / sin acción | 1 / 67 / 70 / 64 |
-| Calculadoras migradas al motor (Fase 7 + Fase 8a) | 10 + 13 |
+| Estado OK / riesgo / error | 76 / 96 / 30 |
+| Prioridad alta / media / baja / sin acción | 0 / 67 / 70 / 65 |
+| Calculadoras migradas al motor (Fase 7 + Fase 8a + MultiEnergySpectra) | 10 + 13 + 1 |
 | Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
 
 ### Hallazgos transversales (de la revisión de la Fase 7; los cuatro primeros se corrigieron en la Fase 8)
@@ -63,7 +63,9 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 - **«Failed to fetch» de DoseMapping3D:** `<Text>` de drei (troika-three-text) descarga la fuente de un CDN y fallaba sin
   red; DoseMapping3D y Viewer3D usan ahora `<Html>`. En Chrome los 16 diálogos tocados abren, calculan y dejan la
   consola sin errores (sólo avisos de three.js).
-- Pendiente de prioridad alta: MultiEnergySpectra (fuera del alcance de 8a/8b). Resto: Fase 8c (prioridad media).
+- MultiEnergySpectra (último de prioridad alta): el espectro entra por los ajustes de Archer de NCRP 147 (Tablas B.1/C.1)
+  y, en TC, por el método DLP (§5.6.1, `blindajeTC`); reproduce §5.3.3.1, §5.3.1.1 y §5.6.1
+  (`src/__tests__/validacion/multiEnergySpectra.test.tsx`). No queda ningún diálogo de prioridad alta; resto: Fase 8c.
 
 ## Tabla completa
 
@@ -71,7 +73,6 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 
 | Diálogo | Función | Fuente de datos | Motor / cálculo | Estado | Hallazgo | Propuesta | Prioridad | Esfuerzo | Navegador |
 |---|---|---|---|---|---|---|---|---|---|
-| `MultiEnergySpectraDialog` | Espectros TASMIP | entrada del usuario | fórmula local | error | K = W/d² sin K¹ ni U/T: el espesor no tiene base dimensional. | Usar `espesorRequeridoHaz` (NCRP 147). | alta | bajo | abre (app); consola sin errores |
 | `AlaraWizardDialog` | Sustitución de materiales (costo/espacio) | tabla fija en el diálogo | ninguno | riesgo | Porcentajes de costo/espacio/peso fijos; `costDelta` se calcula y no se muestra; cita «Mosaics Atomics» (producto de terceros). | Calcular equivalencias con `espesorRequeridoHaz` y costos de `compararMateriales`. | media | medio | abre (app); consola sin errores |
 | `AnimatedDoseMapsDialog` | Mapa de dosis animado (decaimiento) | parámetros internos | fórmula local (A·½^(t/T½)/d², unidades arbitrarias) | riesgo | Mapa decorativo en unidades arbitrarias, no usa el plano ni `doseFieldEngine`; textos en inglés. | Animar `mallaDosis` del plano con el decaimiento o marcar como ilustrativo. | media | medio | abre (app); consola sin errores |
 | `AnnualDoseReport` | Dosis anual acumulada por mes | entrada del usuario | fórmula local | riesgo | Factores estacionales arbitrarios; «annualOccupational = anual/T» invierte el factor de ocupación; límite fijo 20 mSv. | Partir de la dosis semanal del motor en un punto del plano y aplicar T una sola vez. | media | bajo | abre (app); consola sin errores |
@@ -243,6 +244,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `MCConfigDialog` | Configurar simulación MC | entrada del usuario | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
 | `MCDialog` | Exportar macros GEANT4/GATE | plano del proyecto (useCanvasStore/props) | useMCBridge | OK | — | — | — | — | abre (app); calcula al pulsar «Generar y Descargar Macros MC»; consola sin errores |
 | `MazeCalculatorDialog` | Laberinto y puerta (NCRP 151 §2.4) | entrada del usuario | ncrp151Laberinto | OK | Validado con §7.1 (Fase 4). | — | — | — | abre (app); consola sin errores |
+| `MultiEnergySpectraDialog` | Blindaje con espectros polienergéticos (NCRP 147) | entrada del usuario | espesorRequeridoHaz (Archer B.1/C.1) + blindajeTC (§5.6.1, Figs. A.2/A.3) | OK | Fase 8: el espectro entra por los ajustes de Archer de cada distribución de carga y, en TC, por el método DLP; se quitaron los TVL «TASMIP» sin fuente (0.30 mm Pb a 120 kVp). Reproduce §5.3.3.1 (1.3 mm Pb), §5.3.1.1 (107 mm) y §5.6.1 (1.5 mm Pb). HVL sólo informativos. | — | — | — | abre (app); consola sin errores |
 | `MultiLayerShieldDialog` | Blindaje multicapa | entrada del usuario | calculadorasNormativas.blindajeMulticapa | OK | Fase 7: transmisión NCRP 147/151 por capa y K¹; probado. | — | — | — | abre (app); consola sin errores |
 | `MultiObjectiveOptimizerDialog` | Optimizador de materiales PET | entrada del usuario | blindajePET + compararMateriales | OK | Fase 7: TG-108 y frente de Pareto. | — | — | — | abre (app); consola sin errores |
 | `NCRPValidationDialog` | Suite de validación | motor real | normativeBarrierEngine, ncrp147/151, tg108 | OK | Fase 8b: 17 casos recalculados con el motor contra NCRP 147 §5, NCRP 151 §7.1 y TG-108; fallan si el motor se desvía. | — | — | — | abre (app); calcula al pulsar «Ejecutar Validacion»; consola sin errores |

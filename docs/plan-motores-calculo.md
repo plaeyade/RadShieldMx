@@ -375,7 +375,7 @@ Salida / pruebas: `src/__tests__/validacion/calculadorasNormativas.test.ts` (NCR
 `src/__tests__/dialogs/calculadorasFase7.test.tsx` (cada diálogo muestra lo que calcula el motor; DXF de la
 Fase 4 calculado por lotes y exportado → reimportado sin cambios).
 
-## Fase 8 — Resto de calculadoras (8a y 8b hechas; 8c propuesta)
+## Fase 8 — Resto de calculadoras (8a, 8b y MultiEnergySpectra hechas; 8c propuesta)
 
 La revisión a fondo (`docs/revision-dialogos.md`, Fase 7) encontró 16 diálogos de prioridad alta fuera de las 9 ya
 migradas y 65 de prioridad media. Orden propuesto:
@@ -394,12 +394,17 @@ migradas y 65 de prioridad media. Orden propuesto:
    (skyshine Ec. 5.1, albedo, oblicuidad §2.2, CBCT, IPEM 109, terapia, BIMRAD, optimizadores), textos normativos
    erróneos (EPA, transporte SSR-6, Gamma Knife, Manual §3.1) y unificación de límites de dosis en una tabla citada.
 
-Hecho (8a + 8b): todos los de 8a salvo MultiEnergySpectra, con prueba contra ejemplo publicado
+Hecho (8a + 8b): todos los de 8a, con prueba contra ejemplo publicado
 (`src/__tests__/validacion/fase8.test.tsx`: NCRP 151 §7.1.1/§7.1.5 y Tablas B.2/B.9, NCRP 147 §5.3.3.1, TG-108
 Ejemplo 2 y Tablas IV/V); 8b completo (`NCRPValidationSuite` con 17 casos publicados recalculados por el motor,
 `lib/reporteCNSNSHtml`, sin certificaciones ni alertas inventadas). El «Failed to fetch» de DoseMapping3D era la fuente
 de `<Text>` (troika) pedida a un CDN; se usa `<Html>`. Nota: `tsc -p .` no comprueba nada (tsconfig raíz con
 `files: []`); la comprobación real es `tsc -p tsconfig.app.json` (`npm run check:app`).
+
+MultiEnergySpectra (PR aparte): ya no usa un TVL «TASMIP» por kVp (sin fuente; 0.30 mm Pb a 120 kVp, un HVL) sino
+`espesorRequeridoHaz` con la distribución de carga NCRP 147 (Archer B.1/C.1, que ya integra el espectro) y, para TC,
+`blindajeTC` (§5.6.1, κ·DLP·1.4 y Figs. A.2/A.3). Prueba: §5.3.3.1 (1.3 mm Pb), §5.3.1.1 (107 mm de concreto) y §5.6.1
+(K = 5.2 mGy/semana, 1.5 mm Pb). Con esto no queda ningún diálogo de prioridad alta.
 
 Salida esperada de 8c: ningún diálogo con física local sin prueba contra NCRP 147/151 o TG-108; cada diálogo de
 cálculo con una prueba de componente.
