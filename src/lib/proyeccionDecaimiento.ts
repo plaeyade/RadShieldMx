@@ -11,6 +11,16 @@ export interface PuntoProyeccion {
   dosisAcumulada_mSv: number;
 }
 
+/** Horas de un año: tope físico de la permanencia en un punto (ocupación continua). */
+export const HORAS_MAX_ANIO = 8760;
+
+/** Valida la permanencia (h/año): 0 ≤ h ≤ 8760. Devuelve el valor usable y, si no lo era, el motivo. */
+export function validarPermanencia(h: number): { horas: number; error: string | null } {
+  if (!Number.isFinite(h) || h < 0) return { horas: 0, error: 'La permanencia debe ser un número ≥ 0 h/año.' };
+  if (h > HORAS_MAX_ANIO) return { horas: HORAS_MAX_ANIO, error: `La permanencia no puede exceder ${HORAS_MAX_ANIO} h/año (un año completo); se usa ${HORAS_MAX_ANIO}.` };
+  return { horas: h, error: null };
+}
+
 export function proyeccionDecaimiento(o: {
   actividad0: number;
   T12_anios: number;
@@ -22,7 +32,7 @@ export function proyeccionDecaimiento(o: {
   const paso = o.paso_anios ?? 5;
   if (!(o.T12_anios > 0) || !(paso > 0) || !(o.anios >= 0)) return [];
   const lambda = Math.LN2 / o.T12_anios;
-  const h = Math.max(0, o.horasPorAnio);
+  const h = validarPermanencia(o.horasPorAnio).horas;
   const puntos: PuntoProyeccion[] = [];
   for (let y = 0; y <= o.anios + 1e-9; y += paso) {
     const f = Math.exp(-lambda * y);

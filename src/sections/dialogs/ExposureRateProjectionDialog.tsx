@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import '@/components/ui/separator';
 import { Clock, TrendingDown, CalendarDays } from 'lucide-react';
-import { proyeccionDecaimiento } from '@/lib/proyeccionDecaimiento';
+import { HORAS_MAX_ANIO, proyeccionDecaimiento, validarPermanencia } from '@/lib/proyeccionDecaimiento';
 
 interface ExposureEntry {
   year: number;
@@ -26,13 +26,14 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
 
   const [horasPorAnio, setHorasPorAnio] = useState(8760); // permanencia en el punto (8760 h = continua)
 
+  const permanencia = validarPermanencia(horasPorAnio);
   // Fase 8d: dosis acumulada por integración exacta del decaimiento y horas de permanencia editables.
   const data: ExposureEntry[] = useMemo(
     () => proyeccionDecaimiento({
       actividad0: initialActivity, T12_anios: halfLife_years, tasa0_uSv_h: initialExposure,
-      anios: projectionYears, horasPorAnio,
+      anios: projectionYears, horasPorAnio: permanencia.horas,
     }).map((p) => ({ year: p.anio, activity_Ci: p.actividad, exposureRate_uSv_h: p.tasa_uSv_h, accumulatedDose_mSv: p.dosisAcumulada_mSv })),
-    [initialActivity, halfLife_years, initialExposure, projectionYears, horasPorAnio],
+    [initialActivity, halfLife_years, initialExposure, projectionYears, permanencia.horas],
   );
 
   const maxExposure = Math.max(...data.map(d => d.exposureRate_uSv_h), 1e-30);
@@ -67,7 +68,8 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
           </div>
           <div>
             <label className="text-[10px] text-slate-500 font-medium" htmlFor="erp-horas">Permanencia (h/año)</label>
-            <Input id="erp-horas" type="number" className="h-7 text-xs mt-0.5" value={horasPorAnio} onChange={e => setHorasPorAnio(Number(e.target.value))} />
+            <Input id="erp-horas" type="number" min={0} max={HORAS_MAX_ANIO} className="h-7 text-xs mt-0.5" value={horasPorAnio} onChange={e => setHorasPorAnio(Number(e.target.value))} aria-invalid={permanencia.error !== null} aria-describedby={permanencia.error ? 'erp-horas-error' : undefined} />
+            {permanencia.error && <p id="erp-horas-error" role="alert" className="text-[9px] text-red-600 mt-0.5">{permanencia.error}</p>}
           </div>
         </div>
 

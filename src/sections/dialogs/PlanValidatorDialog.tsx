@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { FloorPlan } from '@/types/radshield';
-import { areaAproximadaSala } from '@/lib/areaPlano';
+import { areaSalaDeFuente } from '@/lib/areaPlano';
 import {
   CheckCircle2, XCircle, AlertTriangle, Ruler, Building2,
   LayoutDashboard, ScanLine, FileCheck, Download, MapPin,
@@ -86,7 +86,7 @@ const ADJACENCY_RULES: { types: [string, string]; minWallThickness_cm: number; r
   { types: ['hdr-192ir', 'mammo-cc'], minWallThickness_cm: 100, reason: 'Braquiterapia HDR requiere separación de áreas públicas' },
 ];
 
-function runValidations(floorPlan: FloorPlan, scale_m_per_px: number): ValidationResult[] {
+function runValidations(floorPlan: FloorPlan, scale_m_per_px: number, areasManuales: Record<string, number> = {}): ValidationResult[] {
   const results: ValidationResult[] = [];
 
   // 1. Scale check
@@ -127,19 +127,20 @@ function runValidations(floorPlan: FloorPlan, scale_m_per_px: number): Validatio
       });
     }
 
-    // Área aproximada: rectángulo que contiene las barreras (o el plano completo si no hay barreras).
-    const area = areaAproximadaSala(floorPlan, scale_m_per_px);
+    // Área de la sala: polígono cerrado de barreras que encierra la fuente (fórmula de Gauss); si no hay contorno,
+    // captura manual. No se usa el rectángulo de todas las barreras: en planos con varias salas sobrestima el área.
     if (!minArea) return;
-    if (!area) {
-      results.push({ status: 'warning', category: `Equipo #${idx + 1}`, message: 'No se pudo estimar el área de la sala', detail: 'Faltan barreras o el tamaño del plano', recommendation: 'Dibuje las barreras de la sala' });
+    const area = areaSalaDeFuente(floorPlan, src, scale_m_per_px, { areaManual_m2: areasManuales[src.id] });
+    if (area.area_m2 === null) {
+      results.push({ status: 'warning', category: `Equipo #${idx + 1}`, message: `Área de la sala no evaluada: capture el área manualmente (mínimo ${minArea} m²)`, detail: 'La fuente no queda dentro de un contorno cerrado de barreras (muros que no cierran o puertas sin dibujar)', recommendation: 'Cierre el contorno de la sala con barreras o capture su área en «Área de la sala (m²)»' });
       return;
     }
     const approxArea = area.area_m2;
-    const origen = area.origen === 'barreras' ? 'rectángulo de las barreras' : 'plano completo';
+    const origen = area.origen === 'contorno' ? 'polígono de la sala' : 'captura manual';
     if (approxArea < minArea) {
-      results.push({ status: 'fail', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m², ${origen}) menor al mínimo requerido (${minArea} m²)`, detail: `Para ${src.modality.name} se requieren al menos ${minArea} m²`, recommendation: 'Aumente las dimensiones de la habitación o considere reubicación' });
+      results.push({ status: 'fail', category: `Equipo #${idx + 1}`, message: `Área de la sala (${approxArea.toFixed(1)} m², ${origen}) menor al mínimo requerido (${minArea} m²)`, detail: `Para ${src.modality.name} se requieren al menos ${minArea} m²`, recommendation: 'Aumente las dimensiones de la habitación o considere reubicación' });
     } else {
-      results.push({ status: 'pass', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m², ${origen}) cumple requisito mínimo (${minArea} m²)` });
+      results.push({ status: 'pass', category: `Equipo #${idx + 1}`, message: `Área de la sala (${approxArea.toFixed(1)} m², ${origen}) cumple requisito mínimo (${minArea} m²)` });
     }
   });
 
@@ -171,10 +172,12 @@ export default function PlanValidatorDialog({ open, onOpenChange, floorPlan }: P
   const [scaleInput, setScaleInput] = useState<string>((floorPlan as any).scale?.toString() || floorPlan.scale_m_per_pixel?.toString() || '0.01');
   const [results, setResults] = useState<ValidationResult[]>([]);
   const [hasRun, setHasRun] = useState(false);
+  const [areasManuales, setAreasManuales] = useState<Record<string, string>>({});
 
   const handleValidate = () => {
     const scale = parseFloat(scaleInput) || 0.01;
-    const res = runValidations(floorPlan, scale);
+    const manuales = Object.fromEntries(Object.entries(areasManuales).map(([id, v]) => [id, parseFloat(v)]).filter(([, v]) => Number.isFinite(v) && (v as number) > 0));
+    const res = runValidations(floorPlan, scale, manuales);
     setResults(res);
     setHasRun(true);
   };
@@ -257,6 +260,17 @@ export default function PlanValidatorDialog({ open, onOpenChange, floorPlan }: P
                     </Select>
                   </div>
                 </div>
+                {(floorPlan.sources?.length ?? 0) > 0 && (
+                  <div className="space-y-1" data-testid="areas-manuales">
+                    <Label className="text-xs font-medium">Área de la sala (m²), sólo si no hay contorno cerrado de barreras</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {floorPlan.sources.map((s, i) => (
+                        <Input key={s.id} type="number" min="0" step="0.1" placeholder={`#${i + 1} ${s.modality.name}`} aria-label={`Área de la sala del equipo #${i + 1} (m²)`}
+                          value={areasManuales[s.id] ?? ''} onChange={e => setAreasManuales(prev => ({ ...prev, [s.id]: e.target.value }))} className="h-8 text-xs" />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Button onClick={handleValidate} className="flex-1">
                     <FileCheck className="w-4 h-4 mr-2" /> Ejecutar Validación

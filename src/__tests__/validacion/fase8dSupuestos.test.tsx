@@ -4,7 +4,7 @@
  */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { proyeccionDecaimiento } from '@/lib/proyeccionDecaimiento';
+import { proyeccionDecaimiento, validarPermanencia } from '@/lib/proyeccionDecaimiento';
 import ExposureRateProjectionDialog from '@/sections/dialogs/ExposureRateProjectionDialog';
 
 afterEach(cleanup);
@@ -31,5 +31,23 @@ describe('Proyección con decaimiento', () => {
     const continua = Number(filas()[1]);
     fireEvent.change(screen.getByLabelText('Permanencia (h/año)'), { target: { value: '2190' } });
     expect(Number(filas()[1])).toBeCloseTo(continua / 4, 0);
+  });
+
+  it('la permanencia se limita a 0–8760 h/año con mensaje', () => {
+    expect(validarPermanencia(2000)).toEqual({ horas: 2000, error: null });
+    expect(validarPermanencia(10000).horas).toBe(8760);
+    expect(validarPermanencia(10000).error).toMatch(/8760/);
+    expect(validarPermanencia(-5)).toMatchObject({ horas: 0 });
+    expect(validarPermanencia(Number.NaN).error).not.toBeNull();
+    const base = { actividad0: 1, T12_anios: 1e9, tasa0_uSv_h: 1, anios: 5 };
+    expect(proyeccionDecaimiento({ ...base, horasPorAnio: 20000 })[1].dosisAcumulada_mSv).toBeCloseTo(proyeccionDecaimiento({ ...base, horasPorAnio: 8760 })[1].dosisAcumulada_mSv, 9);
+
+    render(<ExposureRateProjectionDialog open onOpenChange={() => {}} />);
+    const filas = () => screen.getAllByRole('row').slice(1).map((tr) => tr.lastElementChild!.textContent);
+    const continua = filas()[1];
+    expect(screen.queryByRole('alert')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Permanencia (h/año)'), { target: { value: '9000' } });
+    expect(screen.getByRole('alert').textContent).toMatch(/no puede exceder 8760/);
+    expect(filas()[1]).toBe(continua);
   });
 });

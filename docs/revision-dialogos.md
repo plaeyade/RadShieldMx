@@ -119,10 +119,11 @@ Pruebas en `src/__tests__/validacion/fase8c.test.tsx` (21 casos).
     `lib/autoatenuacionPaciente`); Eₙ de ISO 13528 con ambas incertidumbres y referencias de NCRP 151 Tabla B.2
     (`lib/numeroEn`); límites del asistente de ejemplos desde `lib/limitesDosis`.
   - *Geometría del plano:* el mapeo CAD compara palabras completas y prioriza el material específico
-    (`lib/cadMaterialMapping`); el validador estima el área con el rectángulo de las barreras y no con un lienzo
-    fijo de 1200×800 px (`lib/areaPlano`).
-  - *Supuestos fijos:* la proyección de tasa con decaimiento integra la dosis y deja editable la permanencia
-    (`lib/proyeccionDecaimiento`).
+    (`lib/cadMaterialMapping`); el validador toma el área del polígono cerrado de barreras que encierra cada fuente
+    (fórmula de Gauss; en planos con varias salas el rectángulo de todas las barreras no es conservador) y, sin
+    contorno cerrado, pide capturarla a mano (`lib/areaPlano`).
+  - *Supuestos fijos:* la proyección de tasa con decaimiento integra la dosis y deja editable la permanencia,
+    limitada a 0–8760 h/año con aviso (`lib/proyeccionDecaimiento`).
 
 ## Tabla completa
 
@@ -182,7 +183,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `EvidencePackDialog` | Paquete de evidencia | plano del proyecto (useCanvasStore/props) | lib/evidencePack + f* | OK | Con pruebas; sin DialogTitle. | Título accesible. | baja | bajo | abre (montado aislado); consola sin errores |
 | `ExampleWizardDialog` | Asistente de ejemplos | tabla fija en el diálogo | lib/limitesDosis | OK | Fase 8d: límites de `lib/limitesDosis` (público 1 mSv/año, ICRP 103; RGSR 1988 como histórico) y PET remite a TG-108 en lugar de espesores fijos de 1–3 mm Pb. | — | — | — | abre (app); consola sin errores |
 | `ExperimentalValidationDialog` | Validación con medición | entrada del usuario | lib/numeroEn (ISO 13528) | OK | Fase 8d: Eₙ = Δ/√(U_x² + U_X²), concordante si \|Eₙ\| ≤ 1 (antes \|Δ\| ≤ 2u sólo con la medición); referencias de NCRP 151 Tabla B.2 en lugar de publicaciones sin verificar; en español. | — | — | — | abre (app); consola sin errores |
-| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | lib/proyeccionDecaimiento | OK | Fase 8d: dosis acumulada por integración exacta del decaimiento (antes tasa del inicio de cada tramo de 5 años; el año 0 ya acumulaba) con horas de permanencia editables (8760 h por omisión); título en español. | — | — | — | abre (app); consola sin errores |
+| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | lib/proyeccionDecaimiento | OK | Fase 8d: dosis acumulada por integración exacta del decaimiento (antes tasa del inicio de cada tramo de 5 años; el año 0 ya acumulaba) con horas de permanencia editables (8760 h por omisión, máximo 8760 h/año con aviso); título en español. | — | — | — | abre (app); consola sin errores |
 | `ExternalConnectorDialog` | Conectores externos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Catálogo; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
 | `FLUKAInputGenerator` | Generador de entrada FLUKA | entrada del usuario | generador de texto | riesgo | Textos en inglés; no validado con FLUKA. | Traducir; prueba de sintaxis. | baja | bajo | abre (montado aislado); consola sin errores |
 | `GATESimulationDialog` | Macros GATE PET/SPECT | entrada del usuario | generador de texto (nuclearMedicine) | riesgo | Generador; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
@@ -223,7 +224,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `Parametric3DDialog` | Primitivas 3D | estado local | ninguno (informativo) | error | Inaccesible (nada lo abre); 2 errores ESLint no-unused-expressions. | Enlazar o retirar. | baja | bajo | abre (app); consola sin errores |
 | `ParametricBunkerDesigner` | Diseñador paramétrico de búnker | entrada del usuario | lib/bunkerParametrico | OK | Fase 8c: «Generar» crea el plano (4 barreras a escala y la fuente) sin espera simulada. | Añadir el laberinto al plano generado. | baja | medio | abre (app); consola sin errores |
 | `PerformanceDashboardDialog` | Tablero de rendimiento | valores aleatorios | ninguno (informativo) | riesgo | Fase 8c: Rotulado con DatosEjemploBanner (datos de ejemplo). | Medir con `performance` o retirar. | baja | medio | abre (app); consola sin errores |
-| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales + lib/areaPlano | OK | Fase 8d: el área sale del rectángulo de las barreras (o del plano) y no de un lienzo fijo de 1200×800 px; el mensaje indica el origen. | — | — | — | abre (app); calcula al pulsar «Validar»; consola sin errores |
+| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales + lib/areaPlano | OK | Fase 8d: el área sale del polígono cerrado de barreras que encierra cada fuente (fórmula de Gauss, uniones en T y tolerancia de 5 cm), no de un lienzo fijo de 1200×800 px ni del rectángulo de todas las barreras; sin contorno cerrado avisa y exige captura manual; el mensaje indica el origen. | — | — | — | abre (app); calcula al pulsar «Validar»; consola sin errores |
 | `PointCloudImportDialog` | Importar nube de puntos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Sólo información; inglés. | Traducir u ocultar. | baja | bajo | abre (app); consola sin errores |
 | `PythonIntegrationDialog` | Python (Pyodide) | entrada del usuario | código de ejemplo | riesgo | El ejemplo usa P(mSv)/W(cGy) con un solo TVL. | Corregir el ejemplo. | baja | bajo | abre (app); calcula al pulsar «Code Runner»; consola sin errores |
 | `RealTime3DDialog` | Exploración 3D | plano del proyecto (useCanvasStore/props) | realTime3DEngine (three) | riesgo | Usa un plano de demostración si no hay barreras; advertencia de GPU en consola. | Mostrar vacío en lugar de demo. | baja | bajo | abre (app); consola sin errores |
