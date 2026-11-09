@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { GitCompareArrows, ArrowRight, BookOpen } from 'lucide-react';
 
 interface DesignVersion {
@@ -16,7 +17,7 @@ const VERSIONS: DesignVersion[] = [
 ];
 
 export default function DesignCompareDialog() {
-  const open = useAppStore(s => s.dialogs.designCompare?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.designCompare));
   const close = () => useAppStore.getState().close('designCompare');
   const [selA, setSelA] = useState(0);
   const [selB, setSelB] = useState(2);
@@ -35,6 +36,7 @@ export default function DesignCompareDialog() {
             <span className="text-[10px] font-mono text-slate-400">Before / After optimization</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Las tres versiones comparadas son datos fijos de ejemplo, no versiones del proyecto." />
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <select value={selA} onChange={e => setSelA(+e.target.value)} className="text-xs border rounded p-1 flex-1">

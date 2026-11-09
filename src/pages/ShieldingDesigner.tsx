@@ -6,7 +6,6 @@ import { useShieldingEngine } from '@/hooks/useShieldingEngine';
 import { useCanvas } from '@/hooks/useCanvas';
 import { useControlledAreas } from '@/hooks/useControlledAreas';
 import { useFileSystemAccess } from '@/hooks/useFileSystemAccess';
-import { useWebGPU } from '@/hooks/useWebGPU';
 import { useBroadcastChannel } from '@/hooks/useBroadcastChannel';
 import { useWebWorker } from '@/hooks/useWebWorker';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
@@ -15,7 +14,7 @@ import { useWASM } from '@/hooks/useWASM';
 import { useCalculationCache } from '@/hooks/useCalculationCache';
 import { useWorkerCalculation } from '@/hooks/useWorkerCalculation';
 import { useHighContrast } from '@/hooks/useHighContrast';
-import { useWebGPUHeatmap } from '@/hooks/useWebGPUHeatmap';
+import type { WebGPUHeatmapApi } from '@/hooks/WebGPUHeatmapBridge';
 import { useCanvasKeyboardNav } from '@/hooks/useCanvasKeyboardNav';
 import '@/lib/shieldingMath';
 import {
@@ -55,8 +54,9 @@ import { captureException } from '@/lib/sentry';
 import { buildKimiOAuthUrl } from '@/lib/authConfig';
 import { trpc } from '@/providers/trpc';
 import { type CTIsodosisProfile, parseIsodosisFile } from '@/types/ctIsodosis';
-import { type CNSNSReportData, generateCNSNSReport } from '@/hooks/useCNSNSReport';
-import { generateGEANT4Macro, generateGATEMacro, generateValidationInstructions, type MCConfig } from '@/hooks/useMCBridge';
+// Fase 6: docx (≈690 kB) y jspdf (≈340 kB) se cargan bajo demanda al generar el reporte.
+import type { CNSNSReportData } from '@/hooks/useCNSNSReport';
+import type { MCConfig } from '@/hooks/useMCBridge';
 // ═══ State Management: Zustand stores (Phase 0 - ready for v53-v60) ═══
 import { useAppStore } from '@/stores/appStore';
 import LazyDialog from '@/components/LazyDialog';
@@ -65,7 +65,7 @@ import LazyDialog from '@/components/LazyDialog';
 import Toolbar from '@/sections/Toolbar';
 import Sidebar from '@/sections/Sidebar';
 import CanvasArea from '@/sections/CanvasArea';
-import DxfImportReviewPanel from '@/sections/DxfImportReviewPanel';
+const DxfImportReviewPanel = lazy(() => import('@/sections/DxfImportReviewPanel'));
 import ResultsPanel from '@/sections/ResultsPanel';
 // v82: Canvas enhancements
 import { useCanvasLayers } from '@/hooks/useCanvasLayers';
@@ -76,9 +76,11 @@ import CanvasLayersPanel from '@/sections/CanvasLayersPanel';
 import ShapeLibrary from '@/sections/ShapeLibrary';
 import type { ShapeItem } from '@/sections/ShapeLibrary';
 // v82/F134: Update Center
-import UpdateAppDialog from '@/sections/dialogs/UpdateAppDialog';
+const UpdateAppDialog = lazy(() => import('@/sections/dialogs/UpdateAppDialog'));
+// Fase 6: el shader WebGPU sólo se descarga con HEATMAP_GPU activa.
+const WebGPUHeatmapBridge = lazy(() => import('@/hooks/WebGPUHeatmapBridge'));
 // v80: Smart Rooms
-import RoomTemplatePanel from '@/sections/RoomTemplatePanel';
+const RoomTemplatePanel = lazy(() => import('@/sections/RoomTemplatePanel'));
 import { useRoomTemplates } from '@/hooks/useRoomTemplates';
 // v85: SmartBarrier AI + SourceSelector
 import { useSmartBarrier } from '@/hooks/useSmartBarrier';
@@ -90,11 +92,11 @@ import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit'
 import StatusBar from '@/sections/StatusBar';
 import WelcomeScreen from '@/sections/WelcomeScreen';
 
-import SmartSearchDICOMDialog from '@/sections/dialogs/SmartSearchDICOMDialog';
-import LogFileAnalysisDialog from '@/sections/dialogs/LogFileAnalysisDialog';
+const SmartSearchDICOMDialog = lazy(() => import('@/sections/dialogs/SmartSearchDICOMDialog'));
+const LogFileAnalysisDialog = lazy(() => import('@/sections/dialogs/LogFileAnalysisDialog'));
 import CommandPalette, { DEFAULT_COMMANDS } from '@/sections/dialogs/CommandPalette';
 import UndoRedoHistoryPanel from '@/sections/dialogs/UndoRedoHistoryPanel';
-import ContextualHelpPanel from '@/sections/ContextualHelpPanel';
+const ContextualHelpPanel = lazy(() => import('@/sections/ContextualHelpPanel'));
 import { HEATMAP_GPU, visorDisponible } from '@/lib/featureFlags';
 // Visores en revisión (Fase 1 del motor de dosis): carga diferida y sólo se montan con
 // VISORES_EN_REVISION activa; DoseMapping3D arrastraba @react-three/* al chunk de entrada.
@@ -344,7 +346,6 @@ const FloorCeilingDialog = lazy(() => import('@/sections/dialogs/FloorCeilingDia
 const ICRU57Dialog = lazy(() => import('@/sections/dialogs/ICRU57Dialog'));
 const ICRU96Dialog = lazy(() => import('@/sections/dialogs/ICRU96Dialog'));
 const TutorialDialog = lazy(() => import('@/sections/dialogs/TutorialDialog'));
-import { generatePDFReport } from '@/hooks/usePDFGenerator';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -811,7 +812,6 @@ export default function ShieldingDesigner() {
     toast.success(`Plantilla aplicada al plano: ${barriers.length} barreras, ${sources.length} fuentes, ${occupiedRegions.length} zonas`);
   }, [floorPlan.scale_m_per_pixel, roomTemplates, setFloorPlan]);
   const fileSystem = useFileSystemAccess();
-  const webgpu = useWebGPU();
   const broadcastChannel = useBroadcastChannel();
   const webWorker = useWebWorker();
   const indexedDB = useIndexedDB();
@@ -822,7 +822,8 @@ export default function ShieldingDesigner() {
   const workerCalculation = useWorkerCalculation();
   const highContrast = useHighContrast();
   // v48: WebGPU heatmap
-  const webgpuHeatmap = useWebGPUHeatmap();
+  const webgpuHeatmapRef = useRef<WebGPUHeatmapApi | null>(null);
+  const onWebGPUHeatmapReady = useCallback((api: WebGPUHeatmapApi) => { webgpuHeatmapRef.current = api; }, []);
   // D.1: Screen Wake Lock API — keeps screen awake during calculations
   const wakeLock = useWakeLock();
   // D.2: Web Share API — native OS share sheet
@@ -1356,7 +1357,8 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     let hm: { x: number; y: number; kerma: number }[] | null = null;
     // HEATMAP_GPU apagada: el shader WebGPU (W·U/d² en px) no está portado al motor de campo y
     // no atenúa por barreras; se usa siempre el motor de CPU (doseFieldEngine).
-    if (HEATMAP_GPU && webgpuHeatmap.available) {
+    const webgpuHeatmap = webgpuHeatmapRef.current;
+    if (HEATMAP_GPU && webgpuHeatmap?.available) {
       hm = await webgpuHeatmap.computeHeatmap(floorPlan.sources, floorPlan.scale_m_per_pixel, 40);
     }
     if (!hm) {
@@ -1364,7 +1366,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
     setHeatmapData(hm);
     return hm;
-  }, [calculateHeatmap, floorPlan.barriers, floorPlan.scale_m_per_pixel, floorPlan.sources, isodosisProfiles, selectedIsodosisId, webgpuHeatmap]);
+  }, [calculateHeatmap, floorPlan.barriers, floorPlan.scale_m_per_pixel, floorPlan.sources, isodosisProfiles, selectedIsodosisId]);
 
   const handleToggleHeatmap = useCallback(async (enabled: boolean) => {
     setHeatmapEnabled(enabled);
@@ -2023,12 +2025,12 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
 
   const generateReport = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${floorPlan.name.replace(/\s+/g,'_')}.docx`; a.click(); URL.revokeObjectURL(url); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
+    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${floorPlan.name.replace(/\s+/g,'_')}.docx`; a.click(); URL.revokeObjectURL(url); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
   }, [floorPlan, reportMeta, canvasRef, barrierResults, sampleLines]);
 
-  const generateMCMacro = useCallback(() => {
+  const generateMCMacro = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    try { const macroG4=generateGEANT4Macro(floorPlan,mcConfig,''); const macroGate=generateGATEMacro(floorPlan,mcConfig,''); const instructions=generateValidationInstructions(floorPlan,mcConfig);
+    try { const { generateGEANT4Macro, generateGATEMacro, generateValidationInstructions } = await import('@/hooks/useMCBridge'); const macroG4=generateGEANT4Macro(floorPlan,mcConfig,''); const macroGate=generateGATEMacro(floorPlan,mcConfig,''); const instructions=generateValidationInstructions(floorPlan,mcConfig);
       const dl=(content:string,fn:string)=>{const blob=new Blob([content],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();URL.revokeObjectURL(url);};
       dl(macroG4,`${floorPlan.name.replace(/\s+/g,'_')}_geant4.mac`); dl(macroGate,`${floorPlan.name.replace(/\s+/g,'_')}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${floorPlan.name.replace(/\s+/g,'_')}.txt`);
       toast.success('Macros MC descargados'); useAppStore.getState().close('mc');
@@ -2038,8 +2040,9 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
   const handleUpdateSelected = useCallback((props: Partial<Barrier> | Partial<RadiationSource> | Partial<CriticalPoint> | Partial<OccupiedRegion>) => { updateSelected(props); }, [updateSelected]);
 
   // v10.1: PDF generation
-  const handleGeneratePDF = useCallback(() => {
+  const handleGeneratePDF = useCallback(async () => {
     if (!floorPlan.barriers.some(b => b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+    const { generatePDFReport } = await import('@/hooks/usePDFGenerator');
     const blob = generatePDFReport(floorPlan, { ...reportMeta, date: new Date().toLocaleDateString('es-MX'), barrierResults, sampleLines });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${floorPlan.name.replace(/\s+/g, '_')}.pdf`; a.click(); URL.revokeObjectURL(url);
@@ -2278,6 +2281,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onPanMode={() => setActiveTool(prev => prev === 'pan' ? 'select' : 'pan')}
           isPanMode={activeTool === 'pan'}
         />
+      {HEATMAP_GPU && <Suspense fallback={null}><WebGPUHeatmapBridge onReady={onWebGPUHeatmapReady} /></Suspense>}
       {/* v82/F134: Update Center Dialog */}
               <LazyDialog name="updateCenter" component={UpdateAppDialog} />
       {/* v80: Room Template Panel */}
@@ -2305,13 +2309,13 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         </div>
       )}
       {showRoomTemplates && (
-        <RoomTemplatePanel
+        <Suspense fallback={null}><RoomTemplatePanel
           templates={roomTemplates.templates}
           categories={roomTemplates.categories}
           activeTemplate={roomTemplates.activeTemplate}
           onApply={applyRoomTemplateToFloorPlan}
           onClose={() => setShowRoomTemplates(false)}
-        />
+        /></Suspense>
       )}
       <Suspense fallback={null}>
         <OnboardingTour key={onboardingTourKey} />
@@ -2454,7 +2458,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         </div>
       )}
       {!showWelcomeScreen && showDxfImportReview && floorPlan.importMetadata && (
-        <DxfImportReviewPanel
+        <Suspense fallback={null}><DxfImportReviewPanel
           floorPlan={floorPlan}
           onClose={() => setShowDxfImportReview(false)}
           onConfirm={handleConfirmDxfGeometry}
@@ -2462,7 +2466,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onRunCalculations={() => void runConfirmedDxfPreliminaryCalculation(floorPlan)}
           onOpenMemoriaAI={() => useAppStore.getState().open('memoriaAI')}
           onOpenEvidencePack={() => useAppStore.getState().open('evidencePack')}
-        />
+        /></Suspense>
       )}
       {/* Help panel floating button */}
       {!showWelcomeScreen && (

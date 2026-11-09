@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Brain, Zap, AlertTriangle, Info, TrendingUp } from 'lucide-react';
 import { SHIELDING_MATERIALS } from '@/lib/xcomAttenuation';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
@@ -52,7 +53,7 @@ function predictShieldingThickness(
 }
 
 export default function OnnxPredictorDialog() {
-  const open = useAppStore(s => s.dialogs.onnxPredictor?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.onnxPredictor));
   const close = () => useAppStore.getState().close('onnxPredictor');
 
   const [energy, setEnergy] = useState('6');
@@ -95,6 +96,7 @@ export default function OnnxPredictorDialog() {
             <Badge variant="outline" className="text-[9px]">ONNX Runtime</Badge>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="No hay modelo ONNX: es una regla TVL heurística con confianza fija; no usa normativeBarrierEngine." />
 
         <div className="text-[10px] text-slate-500 bg-purple-50 rounded-md p-2 mb-3 flex items-start gap-2">
           <Info className="w-3 h-3 text-purple-400 mt-0.5 shrink-0" />

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Atom, BookOpen } from 'lucide-react';
 
 interface Nuclide {
@@ -62,7 +62,7 @@ const CATEGORIES: Record<string, { label: string; color: string; bg: string }> =
 };
 
 export default function NuclideLibrary500Dialog() {
-  const open = useAppStore(s => s.dialogs.nuclideLibrary500?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.nuclideLibrary500));
   const close = () => useAppStore.getState().close('nuclideLibrary500');
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('');

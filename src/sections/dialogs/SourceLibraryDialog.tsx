@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Radio, BookOpen, Zap, Box, Circle, Minus, Disc, Hexagon } from 'lucide-react';
 
 const GEOMETRIES = [
@@ -35,7 +36,7 @@ const NUCLIDES = [
 ];
 
 export default function SourceLibraryDialog() {
-  const open = useAppStore(s => s.dialogs.sourceLibrary?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.sourceLibrary));
   const close = () => useAppStore.getState().close('sourceLibrary');
   const [geom, setGeom] = useState('point');
   const [nuclide, setNuclide] = useState('co60');
@@ -54,6 +55,7 @@ export default function SourceLibraryDialog() {
             <span className="text-[10px] font-mono text-slate-400">7 geometries | 14 radionuclides</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="La tasa de dosis mostrada ignora distancia y geometría (A × Γ × 1000 a 1 m) y las constantes Γ no indican unidades." />
         <div className="space-y-3">
           <div>
             <Label className="text-[10px] font-semibold text-slate-600">Geometria de Fuente</Label>

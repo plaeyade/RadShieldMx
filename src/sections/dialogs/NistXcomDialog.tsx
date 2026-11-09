@@ -18,11 +18,11 @@ import {
   interpolateAttenuation,
   getMaterialOptions,
 } from '@/lib/xcomAttenuation';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Atom, Calculator, ArrowRight, Database, BookOpen } from 'lucide-react';
 
 export default function NistXcomDialog() {
-  const open = useAppStore(s => s.dialogs.nistXcom?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.nistXcom));
   const close = () => useAppStore.getState().close('nistXcom');
 
   const [selectedMaterial, setSelectedMaterial] = useState('PB');

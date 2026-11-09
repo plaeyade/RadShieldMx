@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Layers, Plus, Trash2, Calculator, BookOpen } from 'lucide-react';
 
 const MATS = [
@@ -21,7 +22,7 @@ const BFM = [{ id: 'gp', name: 'Geometric Progression' }, { id: 'taylor', name: 
 interface L { id: string; m: string; t: number; }
 
 export default function MultiLayerShieldDialog() {
-  const open = useAppStore(s => s.dialogs.multiLayerShield?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.multiLayerShield));
   const close = () => useAppStore.getState().close('multiLayerShield');
   const [e, setE] = useState(150);
   const [bm, setBm] = useState('gp');
@@ -54,6 +55,7 @@ export default function MultiLayerShieldDialog() {
             <span className="text-[10px] font-mono text-slate-400">B_total = B1 x B2 x ... x Bn</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Tabla TVL local (los valores de 150 kVp son HVL y los de 6 MV para Pb, W y PE no corresponden a NCRP 151) y factores de buildup heurísticos; no usa doseFieldEngine." />
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             <div><Label className="text-[10px]">Energia (kVp/MV)</Label><Input type="number" value={e} onChange={x => setE(+x.target.value)} className="h-7 text-xs" /></div>

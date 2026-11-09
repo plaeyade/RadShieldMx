@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Play, Pause, RotateCcw, BookOpen } from 'lucide-react';
 
 export default function DoseSweepDialog() {
-  const open = useAppStore(s => s.dialogs.doseSweep?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.doseSweep));
   const close = () => useAppStore.getState().close('doseSweep');
   const cv = useRef<HTMLCanvasElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -81,6 +82,7 @@ export default function DoseSweepDialog() {
             <span className="text-[10px] font-mono text-slate-400">360deg rotation visualization</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Las isodosis son círculos decorativos a radios fijos; no provienen de doseFieldEngine." />
         <div className="space-y-3">
           <div className="flex gap-2">
             <Button size="sm" variant={playing ? 'default' : 'outline'} className="h-8 text-[10px] gap-1" onClick={() => setPlaying(!playing)}>

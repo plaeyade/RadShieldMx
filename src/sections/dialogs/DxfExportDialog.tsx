@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { FileDown, BookOpen } from 'lucide-react';
 
 const FORMATS = [
@@ -47,7 +48,7 @@ function generateDXF(floorPlan: any, scale: number): string {
 }
 
 export default function DxfExportDialog() {
-  const open = useAppStore(s => s.dialogs.dxfExport?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.dxfExport));
   const close = () => useAppStore.getState().close('dxfExport');
   const [format, setFormat] = useState('dxf');
   const [scaleId, setScaleId] = useState('1:100');
@@ -94,6 +95,7 @@ export default function DxfExportDialog() {
             <span className="text-[10px] font-mono text-slate-400">DXF | DWG | SVG | JSON</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Exporta un plano de ejemplo fijo (no el proyecto abierto); DWG y SVG no generan el formato anunciado." />
         <div className="space-y-3">
           <div><Label className="text-[10px]">Formato</Label>
             <Select value={format} onValueChange={setFormat}>

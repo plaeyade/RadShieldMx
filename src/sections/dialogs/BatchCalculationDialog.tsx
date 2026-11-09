@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Layers, Play, RotateCcw, CheckCircle2, Clock } from 'lucide-react';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 
 interface BatchBarrier {
   id: string;
@@ -118,6 +119,7 @@ export default function BatchCalculationDialog({ open, onOpenChange }: BatchCalc
             <Badge variant="outline" className="text-[10px]">{selectedCount} seleccionadas</Badge>
           </DialogTitle>
         </DialogHeader>
+        <div className="px-6"><SyntheticResultBanner detalle="El kerma por barrera es un número aleatorio y el espesor requerido es el espesor actual; no se calcula nada." /></div>
 
         <div className="px-6 pb-3 flex items-center gap-2">
           <Button size="sm" variant="default" className="h-7 text-xs gap-1" onClick={runBatch} disabled={isRunning || selectedCount === 0}>

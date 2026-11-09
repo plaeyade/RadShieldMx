@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Moon, Sun, Monitor, Palette, BookOpen } from 'lucide-react';
 
 const THEMES = [
@@ -22,7 +22,7 @@ const ACCENT_COLORS = [
 ];
 
 export default function DarkModeDialog() {
-  const open = useAppStore(s => s.dialogs.darkMode?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.darkMode));
   const close = () => useAppStore.getState().close('darkMode');
   const [theme, setTheme] = useState(() => localStorage.getItem('rs-theme') || 'system');
   const [accent, setAccent] = useState(() => localStorage.getItem('rs-accent') || 'orange');

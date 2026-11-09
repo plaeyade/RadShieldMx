@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { TrendingDown, Trophy, BookOpen } from 'lucide-react';
 
 const MATERIALS = [
@@ -15,7 +16,7 @@ const MATERIALS = [
   { id: 'w', name: 'Tungsteno', cost: 35.0, weight: 19.3, tvl150: 0.09, tvl6: 2.1 },
 ];
 
-interface Solution { id: number; material: string; thickness: number; cost: number; weight: number; space: number; dose: number; score: number; }
+interface Solution { id: number; material: string; thickness: number; cost: number; weight: number; space: number; score: number; }
 
 function solvePareto(energy: number, ntv: number, area: number, wCost: number, wWeight: number, wSpace: number): Solution[] {
   const solutions: Solution[] = [];
@@ -26,15 +27,14 @@ function solvePareto(energy: number, ntv: number, area: number, wCost: number, w
     const vol = (t / 1000) * area;
     const w = vol * m.weight * 1000;
     const c = w * m.cost;
-    const dose = 0.1 * Math.random();
     const score = wCost * (c / 1000) + wWeight * (w / 10000) + wSpace * (t / 100);
-    solutions.push({ id: id++, material: m.name, thickness: t, cost: c, weight: w, space: t, dose, score });
+    solutions.push({ id: id++, material: m.name, thickness: t, cost: c, weight: w, space: t, score });
   }
   return solutions.sort((a, b) => a.score - b.score);
 }
 
 export default function ParetoOptimizerDialog() {
-  const open = useAppStore(s => s.dialogs.paretoOptimizer?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.paretoOptimizer));
   const close = () => useAppStore.getState().close('paretoOptimizer');
   const [energy, setEnergy] = useState(150);
   const [ntv, setNtv] = useState(3.5);
@@ -55,6 +55,7 @@ export default function ParetoOptimizerDialog() {
             <span className="text-[10px] font-mono text-slate-400">Multi-objective ranking</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Tabla TVL local (los valores de 150 kVp son HVL y los de 6 MV para Pb, W y PE no corresponden a NCRP 151); no usa normativeBarrierEngine." />
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             <div><Label className="text-[10px]">Energia (kVp/MV)</Label><Input type="number" value={energy} onChange={e => setEnergy(+e.target.value)} className="h-7 text-xs" /></div>
