@@ -1,3 +1,4 @@
+import { rutaPublica } from '@/lib/rutaPublica';
 import type { MedicalScene } from './sceneBuilder';
 import { buildUnityExternalViewerUrl, getUnityExternalViewerBaseUrl } from './unityExternalViewerBridge';
 
@@ -8,7 +9,7 @@ export interface UnityWebglExportedBuildContract {
   source: 'env-url' | 'local-public-folder' | 'missing';
   viewerUrl: string | null;
   localFolder: 'public/unity/radshield-medical-3d';
-  publicPath: '/unity/radshield-medical-3d/index.html';
+  publicPath: 'unity/radshield-medical-3d/index.html';
   expectedFiles: string[];
   scenePackage: {
     roomName: string;
@@ -34,7 +35,7 @@ export interface UnityWebglExportedBuildContract {
 export function getUnityLocalBuildBaseUrl(): string | null {
   const enabled = import.meta.env.VITE_MEDICAL_3D_UNITY_LOCAL_BUILD;
   if (enabled !== 'true') return null;
-  return '/unity/radshield-medical-3d/index.html';
+  return rutaPublica('unity/radshield-medical-3d/index.html');
 }
 
 export function buildUnityWebglExportedBuildUrl(scene: MedicalScene): string | null {
@@ -63,7 +64,8 @@ export function buildUnityWebglExportedBuildContract(scene: MedicalScene): Unity
     source,
     viewerUrl,
     localFolder: 'public/unity/radshield-medical-3d',
-    publicPath: '/unity/radshield-medical-3d/index.html',
+    // Fase 9: relativa a la base del despliegue (raíz o /RadShieldMx/ en GitHub Pages); ver rutaPublica.
+    publicPath: 'unity/radshield-medical-3d/index.html',
     expectedFiles: [
       'index.html',
       'Build/*.loader.js',

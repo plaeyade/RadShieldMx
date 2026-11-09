@@ -4,7 +4,9 @@
  */
 const CACHE_NAME = 'radshield-v50';
 const CALC_CACHE_NAME = 'radshield-calcs-v50';
-const ASSETS = ['/index.html', '/manifest.json', '/icon-192x192.png', '/icon-512x512.png'];
+// Fase 9: rutas relativas al alcance del SW (raíz del dominio o /RadShieldMx/ en GitHub Pages).
+const BASE = new URL(self.registration ? self.registration.scope : self.location.href).pathname.replace(/[^/]*$/, '');
+const ASSETS = ['index.html', 'manifest.json', 'icon-192x192.png', 'icon-512x512.png'].map((a) => BASE + a);
 
 // Precache assets en install
 self.addEventListener('install', (e) => {
@@ -48,7 +50,7 @@ self.addEventListener('fetch', (e) => {
   }
 
   // Assets estaticos: stale-while-revalidate
-  if (request.method === 'GET' && (url.pathname.startsWith('/assets/') || url.pathname === '/')) {
+  if (request.method === 'GET' && (url.pathname.startsWith(BASE + 'assets/') || url.pathname === BASE)) {
     e.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
         const cached = await cache.match(request);
@@ -69,7 +71,7 @@ self.addEventListener('fetch', (e) => {
         if (cached) return cached;
         // Offline fallback para HTML
         if (request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/index.html');
+          return caches.match(BASE + 'index.html');
         }
         return new Response('Offline', { status: 503 });
       })

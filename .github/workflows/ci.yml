@@ -74,7 +74,14 @@ jobs:
         run: npm ci
 
       - name: Build for production (CI mode)
+        # Fase 9: el artefacto `dist` es el que publica el job `deploy` en GitHub Pages
+        # (https://<usuario>.github.io/RadShieldMx/), así que se construye con esa base.
+        env:
+          VITE_BASE_PATH: /RadShieldMx/
         run: npm run build
+
+      - name: Verify GitHub Pages base path
+        run: node scripts/verificar-base-pages.mjs dist /RadShieldMx/
 
       - name: Report bundle size
         run: |

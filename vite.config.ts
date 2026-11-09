@@ -8,8 +8,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig(({ mode }) => {
   // Con VITE_VISOR_3D_BABYLON apagada Babylon queda como rama muerta; asignarle un chunk sólo daría un chunk vacío.
   const babylonActivo = loadEnv(mode, process.cwd(), 'VITE_').VITE_VISOR_3D_BABYLON === 'true';
+  // Fase 9 (GitHub Pages): el CI construye con VITE_BASE_PATH=/RadShieldMx/ (el sitio vive en /<repo>/); en local,
+  // Netlify, Vercel y Docker la base relativa './' sigue sirviendo desde cualquier carpeta.
+  const base = process.env.VITE_BASE_PATH || './';
   return {
-  base: './',
+  base,
   plugins: [react()],
   resolve: {
     alias: {

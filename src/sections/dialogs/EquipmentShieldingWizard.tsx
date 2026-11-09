@@ -1,3 +1,4 @@
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,18 +83,18 @@ const OCCUPANCY_FACTORS = [
 
 // Site planning images by equipment model
 const SITE_PLAN_IMAGES: Record<string, string> = {
-  'TrueBeam': '/installation-guides/8_Room_Dimensions_Requirements_to_Install.png',
-  'TrueBeam STx': '/installation-guides/8_Room_Dimensions_Requirements_to_Install.png',
-  'Halcyon': '/installation-guides/8_Room_Dimensions_Requirements_to_Install.png',
-  'Edge': '/installation-guides/8_Room_Dimensions_Requirements_to_Install.png',
-  'VitalBeam': '/installation-guides/8_Room_Dimensions_Requirements_to_Install.png',
-  'Versa HD': '/installation-guides/6_Room_Dimensions_Requirements_to_Install.png',
-  'Infinity': '/installation-guides/6_Room_Dimensions_Requirements_to_Install.png',
-  'Unity MR-Linac': '/installation-guides/6_Room_Dimensions_Requirements_to_Install.png',
-  'Leksell Gamma Knife Icon': '/installation-guides/9_Room_Dimensions_Requirements_to_Install.png',
-  'Leksell Gamma Knife Esprit': '/installation-guides/9_Room_Dimensions_Requirements_to_Install.png',
-  'SOMATOM Force': '/installation-guides/7_SPECT_CT_Imaging_Room_AUSHFG_202.png',
-  'SOMATOM X.ceed': '/installation-guides/7_SPECT_CT_Imaging_Room_AUSHFG_202.png',
+  'TrueBeam': rutaPublica('installation-guides/8_Room_Dimensions_Requirements_to_Install.png'),
+  'TrueBeam STx': rutaPublica('installation-guides/8_Room_Dimensions_Requirements_to_Install.png'),
+  'Halcyon': rutaPublica('installation-guides/8_Room_Dimensions_Requirements_to_Install.png'),
+  'Edge': rutaPublica('installation-guides/8_Room_Dimensions_Requirements_to_Install.png'),
+  'VitalBeam': rutaPublica('installation-guides/8_Room_Dimensions_Requirements_to_Install.png'),
+  'Versa HD': rutaPublica('installation-guides/6_Room_Dimensions_Requirements_to_Install.png'),
+  'Infinity': rutaPublica('installation-guides/6_Room_Dimensions_Requirements_to_Install.png'),
+  'Unity MR-Linac': rutaPublica('installation-guides/6_Room_Dimensions_Requirements_to_Install.png'),
+  'Leksell Gamma Knife Icon': rutaPublica('installation-guides/9_Room_Dimensions_Requirements_to_Install.png'),
+  'Leksell Gamma Knife Esprit': rutaPublica('installation-guides/9_Room_Dimensions_Requirements_to_Install.png'),
+  'SOMATOM Force': rutaPublica('installation-guides/7_SPECT_CT_Imaging_Room_AUSHFG_202.png'),
+  'SOMATOM X.ceed': rutaPublica('installation-guides/7_SPECT_CT_Imaging_Room_AUSHFG_202.png'),
 };
 
 const STEPS = [

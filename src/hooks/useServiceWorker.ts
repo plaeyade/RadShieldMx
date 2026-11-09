@@ -4,6 +4,7 @@
  * Disabled by default during static stabilization to avoid stale cached bundles.
  * Enable with VITE_ENABLE_SERVICE_WORKER=true when shipping a PWA build.
  */
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -49,7 +50,7 @@ export function useServiceWorker() {
     };
 
     navigator.serviceWorker
-      .register('/sw-v50.js', { scope: '/' })
+      .register(rutaPublica('sw-v50.js'), { scope: import.meta.env.BASE_URL })
       .then((registration) => {
         setSwRegistration(registration);
         setIsRegistered(true);

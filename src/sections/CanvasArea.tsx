@@ -365,6 +365,12 @@ export default function CanvasArea({
   const freehandCanvasRef = useRef<HTMLCanvasElement>(null);
   const rendererV2OverlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Fase 9: CanvasArea se carga diferida (lazy) desde ShieldingDesigner; al montarse, el <canvas> principal aparece
+  // después del efecto de tamaño de useCanvas. Un «resize» sintético lo dimensiona y lo redibuja.
+  useEffect(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, []);
+
   // Track canvas size for responsive rendering
   useEffect(() => {
     const updateSize = () => {

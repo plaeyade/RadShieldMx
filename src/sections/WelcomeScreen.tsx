@@ -1,3 +1,4 @@
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useState, useEffect } from 'react';
 import {
   Shield, Play, FolderOpen, Upload, BookOpen, X, Activity, Radio, Atom, Zap, Calculator, FileText,
@@ -123,7 +124,7 @@ export default function WelcomeScreen({ onNewProject, onOpenProject, onImportDXF
             </div>
             <div className="w-[480px] bg-white rounded-lg shadow-2xl p-4 shrink-0">
               <div className="border border-slate-200 rounded-lg overflow-hidden mb-3">
-                <img src="/mosaic-preview.png" alt="Report preview" className="w-full h-48 object-cover bg-slate-100" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <img src={rutaPublica('mosaic-preview.png')} alt="Report preview" className="w-full h-48 object-cover bg-slate-100" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 <div className="p-3 bg-slate-50">
                   <div className="h-2 w-3/4 bg-slate-200 rounded mb-2" /><div className="h-2 w-1/2 bg-slate-200 rounded" />
                 </div>

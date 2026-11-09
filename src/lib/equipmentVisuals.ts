@@ -1,3 +1,4 @@
+import { rutaPublica } from '@/lib/rutaPublica';
 import type { RadiationSource } from '@/types/radshield';
 
 export type EquipmentIconKind =
@@ -33,7 +34,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#2563eb',
     accentColor: '#38bdf8',
     footprint_m: { width: 3.2, depth: 4.2 },
-    preferredAsset: '/equipment-images/3_TrueBeam_Linear_Accelerator_Radiotherapy.png',
+    preferredAsset: rutaPublica('equipment-images/3_TrueBeam_Linear_Accelerator_Radiotherapy.png'),
     ragTags: ['NCRP151', 'LINAC', 'primary-barrier', 'secondary-barrier'],
   },
   gammaKnife: {
@@ -43,7 +44,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#7c3aed',
     accentColor: '#c4b5fd',
     footprint_m: { width: 2.8, depth: 3.1 },
-    preferredAsset: '/equipment-images/7_Leksell_Gamma_Knife_Icon_.png',
+    preferredAsset: rutaPublica('equipment-images/7_Leksell_Gamma_Knife_Icon_.png'),
     ragTags: ['AAPMTG56', 'Co60', 'stereotactic', 'maze'],
   },
   ct: {
@@ -53,7 +54,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#0891b2',
     accentColor: '#67e8f9',
     footprint_m: { width: 2.5, depth: 4.6 },
-    preferredAsset: '/equipment-images/6_CT_Scanners_National_Imaging_Solution.png',
+    preferredAsset: rutaPublica('equipment-images/6_CT_Scanners_National_Imaging_Solution.png'),
     ragTags: ['NCRP147', 'CT', 'scatter', 'workload'],
   },
   petct: {
@@ -63,7 +64,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#16a34a',
     accentColor: '#86efac',
     footprint_m: { width: 2.8, depth: 5.0 },
-    preferredAsset: '/equipment-images/1_Biograph_Vision_PET_CT_Scanner.png',
+    preferredAsset: rutaPublica('equipment-images/1_Biograph_Vision_PET_CT_Scanner.png'),
     ragTags: ['AAPMTG108', 'PET', 'F18', '511keV'],
   },
   hdr: {
@@ -73,7 +74,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#dc2626',
     accentColor: '#fca5a5',
     footprint_m: { width: 1.4, depth: 1.8 },
-    preferredAsset: '/equipment-images/4_Elekta_Flexitron_Afterloader_For.png',
+    preferredAsset: rutaPublica('equipment-images/4_Elekta_Flexitron_Afterloader_For.png'),
     ragTags: ['NCRP151', 'HDR', 'Ir192', 'brachytherapy'],
   },
   cyclotron: {
@@ -83,7 +84,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#ea580c',
     accentColor: '#fdba74',
     footprint_m: { width: 4.5, depth: 4.5 },
-    preferredAsset: '/equipment-images/1_Cyclone_KIUBE_IBA_Radio_Pharma_Solution.png',
+    preferredAsset: rutaPublica('equipment-images/1_Cyclone_KIUBE_IBA_Radio_Pharma_Solution.png'),
     ragTags: ['IAEA_SRS47', 'cyclotron', 'neutron', 'activation'],
   },
   spect: {
@@ -93,7 +94,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#0f766e',
     accentColor: '#5eead4',
     footprint_m: { width: 2.6, depth: 3.4 },
-    preferredAsset: '/equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png',
+    preferredAsset: rutaPublica('equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png'),
     ragTags: ['TG108', 'SPECT', 'Tc99m', 'gamma-camera'],
   },
   mammography: {
@@ -103,7 +104,7 @@ const profiles: Record<EquipmentIconKind, EquipmentVisualProfile> = {
     color: '#be185d',
     accentColor: '#f9a8d4',
     footprint_m: { width: 1.8, depth: 2.2 },
-    preferredAsset: '/equipment-images/2_Selenia_Dimensions_Mammography_System.png',
+    preferredAsset: rutaPublica('equipment-images/2_Selenia_Dimensions_Mammography_System.png'),
     ragTags: ['NCRP147', 'mammography', 'low-energy', 'lead-equivalent'],
   },
   generic: {

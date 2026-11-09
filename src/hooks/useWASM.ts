@@ -4,6 +4,7 @@
  * Módulo custom 547 bytes con: inverse_archer, tvl_thickness, dose_from_source, gamma_index
  * Fallback a JS puro si WASM no disponible
  */
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
@@ -64,7 +65,7 @@ export function useWASM(): WASMInterface {
           return;
         }
 
-        const response = await fetch('/wasm/shielding_math.wasm');
+        const response = await fetch(rutaPublica('wasm/shielding_math.wasm'));
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         if (!(await hasValidWasmHeader(response))) {
           return;
