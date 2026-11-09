@@ -45,7 +45,7 @@ test.describe('F404 Archivo menu functional QA - f404-file-menu-functional', () 
       ['f404-file-export-csv', /Exportar Resultados/i],
       ['f404-file-export-cnsns', /Generar Memoria Analitica CNSNS/i],
       ['f404-file-audit-trail', /Audit Trail/i],
-      ['f404-file-log-analysis', /Log File Analysis/i],
+      ['f404-file-log-analysis', /Requerido contra instalado/i],
     ];
 
     for (const [itemTestId, dialogName] of radixChecks) {

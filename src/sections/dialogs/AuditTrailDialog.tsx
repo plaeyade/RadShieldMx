@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Activity, Download, Clock, User, FileEdit, Trash2, LogIn, LogOut, Calculator, FileText, FileDown } from 'lucide-react';
-import { trpc } from '@/providers/trpc';
+import { BACKEND_ENABLED, trpc } from '@/providers/trpc';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; projectId: string; }
 
@@ -24,7 +24,7 @@ export default function AuditTrailDialog({ open, onOpenChange, projectId }: Prop
   const [limit] = useState(50);
   const { data: auditEntries, isLoading } = trpc.audit.list.useQuery(
     { projectId, limit },
-    { enabled: open && !!projectId }
+    { enabled: BACKEND_ENABLED && open && !!projectId }
   );
 
   const exportCSV = () => {
@@ -69,7 +69,13 @@ export default function AuditTrailDialog({ open, onOpenChange, projectId }: Prop
         <ScrollArea className="flex-1 border rounded-md">
           <div className="p-2 space-y-1">
             {isLoading && <div className="text-center text-gray-400 text-sm py-8">Cargando registros...</div>}
-            {!isLoading && !auditEntries?.length && (
+            {!BACKEND_ENABLED && (
+              <div data-testid="audit-trail-sin-servidor" className="text-center text-gray-500 text-sm py-8">
+                Sin servidor configurado: la bitácora de auditoría se guarda en el backend y no está disponible en este modo.<br />
+                Los eventos con fecha del plano (importación y cálculo) se ven en «Bitácora de auditoría».
+              </div>
+            )}
+            {BACKEND_ENABLED && !isLoading && !auditEntries?.length && (
               <div className="text-center text-gray-400 text-sm py-8">
                 Sin registros de auditoría.<br />Las acciones se registrarán automáticamente al guardar, calcular o exportar.
               </div>

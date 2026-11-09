@@ -31,6 +31,8 @@ interface WizardState {
   concreteThickness_cm: number;
   direction: '0deg' | '90deg' | '180deg';
   yearsOperation: number;
+  /** Fase 9: horas de haz por año (antes 4000 h fijas); 0–8760. */
+  horasHazAnio: number;
   useLocalShielding: boolean;
   includeDecommissioning: boolean;
   results: CalcResult | null;
@@ -127,8 +129,9 @@ function calculateCyclotronShielding(state: WizardState): CalcResult {
   // Decommissioning
   const decomm = calculateDecommissioningLayer_KIUBE(state.yearsOperation, state.beamCurrent_uA);
 
-  // Annual dose at point behind wall (assuming 4000 h/year operation)
-  const annualDose = (doseBehindWall * 4000) / 1000; // mSv/year
+  // Dosis anual tras el muro con las horas de haz por año que captura el usuario (Fase 9: antes 4000 h fijas).
+  const horas = Math.min(Math.max(Number.isFinite(state.horasHazAnio) ? state.horasHazAnio : 4000, 0), 8760);
+  const annualDose = (doseBehindWall * horas) / 1000; // μSv/h × h/año → mSv/año
   const meetsLimit = annualDose <= 20; // Mexican POE limit
 
   // Radionuclides
@@ -380,6 +383,7 @@ export default function CycloneKIUBEWizard({ open, onOpenChange }: Props) {
     concreteThickness_cm: 220,
     direction: '0deg',
     yearsOperation: 10,
+    horasHazAnio: 4000,
     useLocalShielding: false,
     includeDecommissioning: true,
     results: null,
@@ -566,6 +570,10 @@ export default function CycloneKIUBEWizard({ open, onOpenChange }: Props) {
                     <div>
                       <Label className="text-xs">Años de operación</Label>
                       <Input type="number" value={state.yearsOperation} onChange={e => update({ yearsOperation: parseInt(e.target.value) || 10 })} className="h-8" />
+                    </div>
+                    <div>
+                      <Label className="text-xs" htmlFor="kiube-horas">Horas de haz por año (0–8760)</Label>
+                      <Input id="kiube-horas" type="number" min={0} max={8760} value={state.horasHazAnio} onChange={e => update({ horasHazAnio: Math.min(Math.max(Number(e.target.value) || 0, 0), 8760) })} className="h-8" />
                     </div>
                   </div>
 

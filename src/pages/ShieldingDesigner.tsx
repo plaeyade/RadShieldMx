@@ -66,7 +66,9 @@ import LazyDialog from '@/components/LazyDialog';
 // react-resizable-panels removed — using flexbox layout for simplicity
 import Toolbar from '@/sections/Toolbar';
 import Sidebar from '@/sections/Sidebar';
-import CanvasArea from '@/sections/CanvasArea';
+// Fase 9: CanvasArea (≈ 450 kB con sus módulos de QA F90–F695) se descarga aparte; la pantalla de bienvenida se
+// muestra mientras tanto y la entrada baja de 1 400 kB.
+const CanvasArea = lazy(() => import('@/sections/CanvasArea'));
 const DxfImportReviewPanel = lazy(() => import('@/sections/DxfImportReviewPanel'));
 import ResultsPanel from '@/sections/ResultsPanel';
 // v82: Canvas enhancements
@@ -2354,6 +2356,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   className="hidden"
                   onChange={handleImageUpload}
                 />
+                <Suspense fallback={<div data-testid="canvas-cargando" className="flex flex-1 items-center justify-center text-xs text-slate-400">Cargando lienzo…</div>}>
                 <CanvasArea
                   canvasRef={canvasRef} canvasState={canvasState} setCanvasState={setCanvasState}
                   floorPlan={floorPlan}
@@ -2401,6 +2404,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   freehandEnabled={freehandDraw.isEnabled}
                   activeLayer={canvasLayers.activeLayer}
                 />
+                </Suspense>
                 <ResultsPanel floorPlan={floorPlan} roundThickness={roundThickness} />
                 {/* v47 Fase 2.10: Canvas search (Ctrl+F) */}
                 <CanvasSearch

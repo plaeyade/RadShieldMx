@@ -67,7 +67,7 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
       const response = await fetch(`${serverUrl}/system`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
-        // CORS may block this in browser — will use mock data as fallback
+        // CORS puede bloquear la petición; en ese caso se informa el error (sin datos de demostración).
       }).catch(() => null);
 
       if (response && response.ok) {
@@ -76,20 +76,15 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
         toast.success(`Conectado a Orthanc v${sysInfo.Version || 'unknown'}`);
         await loadStudies();
       } else {
-        // Mock connection for demo
-        setIsConnected(true);
-        setStudies([
-          { id: '1.2.840.113619.2.55.3.604688119.868.12345', patientName: 'DEMO^PACIENTE 06', patientId: 'HL-2024-001', studyDate: '2024-03-15', modality: 'CT', description: 'CHEST W/O CONTRAST', numSeries: 3, numInstances: 287, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12346', patientName: 'DEMO^PACIENTE 07', patientId: 'HL-2024-002', studyDate: '2024-03-18', modality: 'RTDOSE', description: 'THORAX VMAT DOSE CALC', numSeries: 5, numInstances: 452, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12347', patientName: 'DEMO^PACIENTE 08', patientId: 'HL-2024-003', studyDate: '2024-03-20', modality: 'RTPLAN', description: 'PROSTATE IMRT PLAN', numSeries: 8, numInstances: 1205, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12348', patientName: 'DEMO^PACIENTE 09', patientId: 'HL-2024-004', studyDate: '2024-03-22', modality: 'CT', description: 'PELVIS W CONTRAST', numSeries: 4, numInstances: 389, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12349', patientName: 'DEMO^PACIENTE 10', patientId: 'HL-2024-005', studyDate: '2024-03-25', modality: 'PET', description: 'WHOLE BODY FDG PET/CT', numSeries: 12, numInstances: 2340, status: 'available' },
-        ]);
-        toast.success('Conectado a Orthanc (datos demo)');
+        // Fase 9: si el servidor configurado no responde no se simula la conexión con estudios de demostración.
+        setIsConnected(false);
+        setStudies([]);
+        toast.error('No se pudo conectar con Orthanc: revise la URL, el CORS y las credenciales');
       }
     } catch {
-      setIsConnected(true);
-      toast.info('Modo demo: datos de muestra cargados');
+      setIsConnected(false);
+      setStudies([]);
+      toast.error('No se pudo conectar con Orthanc');
     } finally {
       setIsLoading(false);
     }

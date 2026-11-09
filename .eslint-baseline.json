@@ -1,5 +1,5 @@
 {
- "total": 143,
+ "total": 130,
  "errores": {
   "api/ai-router.ts::@typescript-eslint/no-unused-vars": 1,
   "api/project-router.ts::@typescript-eslint/no-unused-vars": 1,
@@ -40,7 +40,6 @@
   "src/sections/dialogs/AutoBarrierDetectionDialog.tsx::react-hooks/refs": 1,
   "src/sections/dialogs/CloudSyncDialog.tsx::react-hooks/immutability": 2,
   "src/sections/dialogs/CloudSyncDialog.tsx::react-hooks/set-state-in-effect": 1,
-  "src/sections/dialogs/CompareScenariosDialog.tsx::react-hooks/static-components": 6,
   "src/sections/dialogs/ComplianceCertificationDialog.tsx::react-hooks/purity": 2,
   "src/sections/dialogs/DVHAnalyzer.tsx::@typescript-eslint/no-unused-expressions": 1,
   "src/sections/dialogs/DoseMapDialog.tsx::react-hooks/immutability": 2,
@@ -48,14 +47,10 @@
   "src/sections/dialogs/GammaIndexAnalyzer.tsx::@typescript-eslint/no-unused-expressions": 2,
   "src/sections/dialogs/MCCloudDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/MCCloudDialog.tsx::react-hooks/set-state-in-effect": 1,
-  "src/sections/dialogs/MCResultsDialog.tsx::react-hooks/rules-of-hooks": 2,
-  "src/sections/dialogs/NativeMCDialog.tsx::react-hooks/set-state-in-effect": 1,
   "src/sections/dialogs/PACSRealDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/Parametric3DDialog.tsx::@typescript-eslint/no-unused-expressions": 2,
-  "src/sections/dialogs/PerformanceDashboardDialog.tsx::react-hooks/purity": 3,
   "src/sections/dialogs/RealTime3DDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/RegulatoryReportDialog.tsx::react-hooks/purity": 1,
-  "src/sections/dialogs/ShapesReconstructionDialog.tsx::react-hooks/set-state-in-effect": 1,
   "src/sections/dialogs/medical3d/escena/camaras.tsx::react-hooks/immutability": 3
  }
 }

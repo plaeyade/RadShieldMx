@@ -2,21 +2,21 @@
   "name": "RadShield-MX: Blindaje Radiológico para Instalaciones Médicas",
   "short_name": "RadShield-MX",
   "description": "Plataforma integral para el diseño y validación de blindajes radiológicos en instalaciones médicas según NCRP 151, NCRP 147 y normativa CNSNS",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#dc2626",
   "orientation": "any",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -26,7 +26,7 @@
   "lang": "es-MX",
   "dir": "ltr",
   "share_target": {
-    "action": "/",
+    "action": "./",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
@@ -46,15 +46,15 @@
       "name": "Nuevo Proyecto",
       "short_name": "Nuevo",
       "description": "Crear un nuevo proyecto de blindaje",
-      "url": "/?action=new",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "url": "./?action=new",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Calcular Blindajes",
       "short_name": "Calcular",
       "description": "Ejecutar cálculo de blindajes",
-      "url": "/?action=calculate",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "url": "./?action=calculate",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

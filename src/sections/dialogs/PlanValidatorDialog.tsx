@@ -1,3 +1,4 @@
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -341,22 +342,22 @@ export default function PlanValidatorDialog({ open, onOpenChange, floorPlan }: P
                   const clearance = EQUIPMENT_CLEARANCE[mod.id];
                   const minArea = ROOM_MIN_AREA[mod.id];
                   const imgMap: Record<string, string> = {
-                    'linac-6mv': '/equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png',
-                    'linac-10mv': '/equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png',
-                    'linac-15mv': '/equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png',
-                    'linac-18mv': '/equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png',
-                    'gamma-knife': '/equipment-images/7_Leksell_Gamma_Knife_Icon_.png',
-                    'hdr-192ir': '/equipment-images/4_Elekta_Flexitron_Afterloader_For.png',
-                    'pet-f18': '/equipment-images/1_Biograph_Vision_PET_CT_Scanner.png',
-                    'pet-gallium': '/equipment-images/1_Biograph_Vision_PET_CT_Scanner.png',
-                    'spect-tc99m': '/equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png',
-                    'radioiodine-i131': '/equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png',
-                    'ct-head': '/equipment-images/6_CT_Scanners_National_Imaging_Solution.png',
-                    'ct-body': '/equipment-images/6_CT_Scanners_National_Imaging_Solution.png',
-                    'mammo-cc': '/equipment-images/2_Selenia_Dimensions_Mammography_System.png',
-                    'mammo-mlo': '/equipment-images/2_Selenia_Dimensions_Mammography_System.png',
-                    'cyclotron-16mev': '/equipment-images/1_Biograph_Vision_PET_CT_Scanner.png',
-                    'cyclotron-11mev': '/equipment-images/1_Biograph_Vision_PET_CT_Scanner.png',
+                    'linac-6mv': rutaPublica('equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png'),
+                    'linac-10mv': rutaPublica('equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png'),
+                    'linac-15mv': rutaPublica('equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png'),
+                    'linac-18mv': rutaPublica('equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png'),
+                    'gamma-knife': rutaPublica('equipment-images/7_Leksell_Gamma_Knife_Icon_.png'),
+                    'hdr-192ir': rutaPublica('equipment-images/4_Elekta_Flexitron_Afterloader_For.png'),
+                    'pet-f18': rutaPublica('equipment-images/1_Biograph_Vision_PET_CT_Scanner.png'),
+                    'pet-gallium': rutaPublica('equipment-images/1_Biograph_Vision_PET_CT_Scanner.png'),
+                    'spect-tc99m': rutaPublica('equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png'),
+                    'radioiodine-i131': rutaPublica('equipment-images/3_NM_CT_860_SPECT_CT_Sytem_GE_HealthCare.png'),
+                    'ct-head': rutaPublica('equipment-images/6_CT_Scanners_National_Imaging_Solution.png'),
+                    'ct-body': rutaPublica('equipment-images/6_CT_Scanners_National_Imaging_Solution.png'),
+                    'mammo-cc': rutaPublica('equipment-images/2_Selenia_Dimensions_Mammography_System.png'),
+                    'mammo-mlo': rutaPublica('equipment-images/2_Selenia_Dimensions_Mammography_System.png'),
+                    'cyclotron-16mev': rutaPublica('equipment-images/1_Biograph_Vision_PET_CT_Scanner.png'),
+                    'cyclotron-11mev': rutaPublica('equipment-images/1_Biograph_Vision_PET_CT_Scanner.png'),
                   };
                   return (
                     <Card key={idx}>
@@ -370,7 +371,7 @@ export default function PlanValidatorDialog({ open, onOpenChange, floorPlan }: P
                         <div className="grid grid-cols-[120px_1fr] gap-3">
                           <div className="bg-slate-50 rounded overflow-hidden flex items-center justify-center h-[100px]">
                             <img
-                              src={imgMap[mod.id] || '/equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png'}
+                              src={imgMap[mod.id] || rutaPublica('equipment-images/5_Refurbished_Elekta_Versa_HD_Linear.png')}
                               alt={mod.name}
                               className="max-h-full max-w-full object-contain"
                               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}

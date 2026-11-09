@@ -169,9 +169,10 @@ describe('Datos y textos', () => {
     expect(LIMITES_DOSIS.objetivosDiseno.controlada_mSv_semana).toBe(0.1);
   });
 
-  it('datos de demostración rotulados y pacientes anonimizados', () => {
+  it('datos de demostración retirados (Fase 9: la bitácora es la del proyecto) y pacientes anonimizados', () => {
     render(<AuditLogDialog open onClose={() => {}} />);
-    expect(screen.getAllByTestId('datos-ejemplo').length).toBeGreaterThan(0);
+    expect(screen.queryAllByTestId('datos-ejemplo')).toHaveLength(0);
+    expect(screen.getByTestId('bitacora-estado').textContent).toMatch(/Sin servidor/);
     for (const f of ['PACSIntegrationDialog.tsx', 'PACSRealDialog.tsx', 'SmartSearchDICOMDialog.tsx']) {
       expect(fuente(f)).not.toMatch(/patientName: '(?!DEMO)[^']+'/);
     }

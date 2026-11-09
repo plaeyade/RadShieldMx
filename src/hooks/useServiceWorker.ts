@@ -4,6 +4,7 @@
  * Disabled by default during static stabilization to avoid stale cached bundles.
  * Enable with VITE_ENABLE_SERVICE_WORKER=true when shipping a PWA build.
  */
+import { rutaPublica } from '@/lib/rutaPublica';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,17 +12,27 @@ export function isServiceWorkerEnabled(): boolean {
   return import.meta.env.VITE_ENABLE_SERVICE_WORKER === 'true';
 }
 
-export async function clearRadShieldServiceWorkerState(): Promise<void> {
+/**
+ * Fase 9: en GitHub Pages el origen (<usuario>.github.io) lo comparten otros sitios del mismo usuario. La limpieza sólo
+ * toca los registros cuyo alcance cae dentro de la base de RadShield-MX y las cachés con su prefijo (ver sw-v50.js).
+ */
+export async function clearRadShieldServiceWorkerState(base: string = import.meta.env.BASE_URL ?? '/'): Promise<void> {
+  const basePath = new URL(base, window.location.href).pathname;
   if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
     const registrations = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(registrations.map((registration) => registration.unregister()));
+    await Promise.all(
+      registrations
+        .filter((registration) => new URL(registration.scope).pathname.startsWith(basePath))
+        .map((registration) => registration.unregister()),
+    );
   }
 
   if ('caches' in window) {
     const cacheNames = await caches.keys();
+    const propio = `radshield-${basePath}:`;
     await Promise.all(
       cacheNames
-        .filter((name) => name.startsWith('radshield-'))
+        .filter((name) => name.startsWith(propio) || (basePath === '/' && /^radshield-(calcs-)?v\d+$/.test(name)))
         .map((name) => caches.delete(name)),
     );
   }
@@ -49,7 +60,7 @@ export function useServiceWorker() {
     };
 
     navigator.serviceWorker
-      .register('/sw-v50.js', { scope: '/' })
+      .register(rutaPublica('sw-v50.js'), { scope: import.meta.env.BASE_URL })
       .then((registration) => {
         setSwRegistration(registration);
         setIsRegistered(true);

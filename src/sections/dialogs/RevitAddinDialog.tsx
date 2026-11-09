@@ -34,16 +34,22 @@ namespace RadShieldRevitAddin
         {
           // Create wall with shielding thickness
           WallType wt = GetOrCreateShieldingWallType(doc, barrier.materialCode, barrier.thickness_mm);
+          // Coordenadas del lienzo en px -> m con la escala del plano -> pies (unidad interna de Revit).
+          // (Antes se dividian los px entre 304.8 como si fueran mm.)
+          double k = data.scale_m_per_pixel / 0.3048;
           Wall wall = Wall.Create(doc, Line.CreateBound(
-            new XYZ(barrier.x1/304.8, barrier.y1/304.8, 0),
-            new XYZ(barrier.x2/304.8, barrier.y2/304.8, 0)), wt.Id, doc.ActiveView.GenLevel.Id, 3.0, 0, false, false);
+            new XYZ(barrier.x1 * k, barrier.y1 * k, 0),
+            new XYZ(barrier.x2 * k, barrier.y2 * k, 0)), wt.Id, doc.ActiveView.GenLevel.Id, 3.0 / 0.3048, 0, false, false);
 
           // Set RS shared parameters
           wall.LookupParameter("RS_ShieldingType")?.Set(barrier.barrierType);
           wall.LookupParameter("RS_DesignGoal_mSv")?.Set(barrier.designGoal);
           wall.LookupParameter("RS_MaterialCode")?.Set(barrier.materialCode);
-          wall.LookupParameter("RS_RequiredThickness_mm")?.Set(barrier.thickness_mm);
-          wall.LookupParameter("RS_PassFail")?.Set("PASS");
+          // Requerido = espesor del motor (null si la barrera no se calculó); instalado = espesor declarado del muro.
+          if (barrier.requiredThickness_mm.HasValue) wall.LookupParameter("RS_RequiredThickness_mm")?.Set(barrier.requiredThickness_mm.Value);
+          wall.LookupParameter("RS_ActualThickness_mm")?.Set(barrier.thickness_mm);
+          // Estado de la verificacion exportado por RadShield (instalado >= requerido); sin dato no se marca PASS.
+          wall.LookupParameter("RS_PassFail")?.Set(barrier.verificacion ?? "SIN VERIFICAR");
         }
         tx.Commit();
       }
