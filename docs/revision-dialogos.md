@@ -28,8 +28,8 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 | | Cantidad |
 |---|---|
 | Diálogos revisados | 202 |
-| Estado OK / riesgo / error | 117 / 84 / 1 |
-| Prioridad alta / media / baja / sin acción | 0 / 0 / 104 / 98 |
+| Estado OK / riesgo / error | 118 / 83 / 1 |
+| Prioridad alta / media / baja / sin acción | 0 / 0 / 103 / 99 |
 | Calculadoras migradas al motor (Fase 7 + Fase 8a + MultiEnergySpectra) | 10 + 13 + 1 |
 | Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
 | Fase 8c + 8d: diálogos de prioridad media atendidos | 67 de 67 (8d: división de MedicalFloorPlan3D) |
@@ -121,6 +121,8 @@ Pruebas en `src/__tests__/validacion/fase8c.test.tsx` (21 casos).
   - *Geometría del plano:* el mapeo CAD compara palabras completas y prioriza el material específico
     (`lib/cadMaterialMapping`); el validador estima el área con el rectángulo de las barreras y no con un lienzo
     fijo de 1200×800 px (`lib/areaPlano`).
+  - *Supuestos fijos:* la proyección de tasa con decaimiento integra la dosis y deja editable la permanencia
+    (`lib/proyeccionDecaimiento`).
 
 ## Tabla completa
 
@@ -180,7 +182,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `EvidencePackDialog` | Paquete de evidencia | plano del proyecto (useCanvasStore/props) | lib/evidencePack + f* | OK | Con pruebas; sin DialogTitle. | Título accesible. | baja | bajo | abre (montado aislado); consola sin errores |
 | `ExampleWizardDialog` | Asistente de ejemplos | tabla fija en el diálogo | lib/limitesDosis | OK | Fase 8d: límites de `lib/limitesDosis` (público 1 mSv/año, ICRP 103; RGSR 1988 como histórico) y PET remite a TG-108 en lugar de espesores fijos de 1–3 mm Pb. | — | — | — | abre (app); consola sin errores |
 | `ExperimentalValidationDialog` | Validación con medición | entrada del usuario | lib/numeroEn (ISO 13528) | OK | Fase 8d: Eₙ = Δ/√(U_x² + U_X²), concordante si \|Eₙ\| ≤ 1 (antes \|Δ\| ≤ 2u sólo con la medición); referencias de NCRP 151 Tabla B.2 en lugar de publicaciones sin verificar; en español. | — | — | — | abre (app); consola sin errores |
-| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | fórmula local | riesgo | Dosis de 5 años con ocupación 8760 h/año fija; título en inglés. | Hacer editable la ocupación; traducir. | baja | bajo | abre (app); consola sin errores |
+| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | lib/proyeccionDecaimiento | OK | Fase 8d: dosis acumulada por integración exacta del decaimiento (antes tasa del inicio de cada tramo de 5 años; el año 0 ya acumulaba) con horas de permanencia editables (8760 h por omisión); título en español. | — | — | — | abre (app); consola sin errores |
 | `ExternalConnectorDialog` | Conectores externos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Catálogo; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
 | `FLUKAInputGenerator` | Generador de entrada FLUKA | entrada del usuario | generador de texto | riesgo | Textos en inglés; no validado con FLUKA. | Traducir; prueba de sintaxis. | baja | bajo | abre (montado aislado); consola sin errores |
 | `GATESimulationDialog` | Macros GATE PET/SPECT | entrada del usuario | generador de texto (nuclearMedicine) | riesgo | Generador; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |

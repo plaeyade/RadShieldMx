@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import '@/components/ui/separator';
 import { Clock, TrendingDown, CalendarDays } from 'lucide-react';
+import { proyeccionDecaimiento } from '@/lib/proyeccionDecaimiento';
 
 interface ExposureEntry {
   year: number;
@@ -23,21 +24,18 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
   const [initialExposure, setInitialExposure] = useState(250); // uSv/h at 1m
   const [projectionYears, setProjectionYears] = useState(100);
 
-  const data = useMemo(() => {
-    const entries: ExposureEntry[] = [];
-    const lambda = Math.log(2) / halfLife_years;
-    for (let y = 0; y <= projectionYears; y += 5) {
-      const activity_Ci = initialActivity * Math.exp(-lambda * y);
-      const exposureRate = initialExposure * Math.exp(-lambda * y);
-      // Rough accumulated dose over that 5-year period
-      const periodDose = exposureRate * 8760 * 5 / 1000; // mSv over 5 years
-      const accumulatedDose = entries.length > 0 ? entries[entries.length - 1].accumulatedDose_mSv + periodDose : periodDose;
-      entries.push({ year: y, activity_Ci, exposureRate_uSv_h: exposureRate, accumulatedDose_mSv: accumulatedDose });
-    }
-    return entries;
-  }, [initialActivity, halfLife_years, initialExposure, projectionYears]);
+  const [horasPorAnio, setHorasPorAnio] = useState(8760); // permanencia en el punto (8760 h = continua)
 
-  const maxExposure = Math.max(...data.map(d => d.exposureRate_uSv_h));
+  // Fase 8d: dosis acumulada por integración exacta del decaimiento y horas de permanencia editables.
+  const data: ExposureEntry[] = useMemo(
+    () => proyeccionDecaimiento({
+      actividad0: initialActivity, T12_anios: halfLife_years, tasa0_uSv_h: initialExposure,
+      anios: projectionYears, horasPorAnio,
+    }).map((p) => ({ year: p.anio, activity_Ci: p.actividad, exposureRate_uSv_h: p.tasa_uSv_h, accumulatedDose_mSv: p.dosisAcumulada_mSv })),
+    [initialActivity, halfLife_years, initialExposure, projectionYears, horasPorAnio],
+  );
+
+  const maxExposure = Math.max(...data.map(d => d.exposureRate_uSv_h), 1e-30);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,12 +43,12 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Clock className="w-5 h-5 text-blue-500" />
-            Exposure Rate vs Time Projection
+            Proyección de tasa de dosis en el tiempo
             <Badge variant="outline" className="text-[10px]">MicroShield Pro</Badge>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pb-3 grid grid-cols-4 gap-2">
+        <div className="px-6 pb-3 grid grid-cols-5 gap-2">
           <div>
             <label className="text-[10px] text-slate-500 font-medium">Actividad Inicial (Ci)</label>
             <Input type="number" className="h-7 text-xs mt-0.5" value={initialActivity} onChange={e => setInitialActivity(Number(e.target.value))} />
@@ -66,6 +64,10 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
           <div>
             <label className="text-[10px] text-slate-500 font-medium">Proyeccion (anos)</label>
             <Input type="number" className="h-7 text-xs mt-0.5" value={projectionYears} onChange={e => setProjectionYears(Number(e.target.value))} />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 font-medium" htmlFor="erp-horas">Permanencia (h/año)</label>
+            <Input id="erp-horas" type="number" className="h-7 text-xs mt-0.5" value={horasPorAnio} onChange={e => setHorasPorAnio(Number(e.target.value))} />
           </div>
         </div>
 
@@ -97,7 +99,7 @@ export default function ExposureRateProjectionDialog({ open, onOpenChange }: Exp
           </h4>
           <div className="flex items-end gap-0.5 h-28 border-b border-l border-slate-200">
             {data.map(d => {
-              const maxDose = Math.max(...data.map(x => x.accumulatedDose_mSv));
+              const maxDose = Math.max(...data.map(x => x.accumulatedDose_mSv), 1e-30);
               const h = (d.accumulatedDose_mSv / maxDose) * 100;
               return (
                 <div key={d.year} className="flex-1 flex flex-col items-center gap-0.5">
