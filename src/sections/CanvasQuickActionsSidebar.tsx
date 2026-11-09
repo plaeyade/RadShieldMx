@@ -45,8 +45,8 @@ const ACTION_GROUPS: QuickActionGroup[] = [
     label: 'Analisis',
     buttons: [
       { id: 'nist', label: 'NIST', icon: Database, iconColor: 'text-emerald-500', bgColor: 'bg-white', hoverBg: 'hover:bg-emerald-50', dialogName: 'nistXcom', title: 'NIST XCOM Coeficientes de atenuacion' },
-      { id: 'ml', label: 'ML', icon: Brain, iconColor: 'text-purple-500', bgColor: 'bg-white', hoverBg: 'hover:bg-purple-50', dialogName: 'onnxPredictor', title: 'ML Predictor ONNX espesor optimo' },
-      { id: 'opt', label: 'Opt', icon: TrendingDown, iconColor: 'text-teal-500', bgColor: 'bg-white', hoverBg: 'hover:bg-teal-50', dialogName: 'multiObjectiveOptimizer', title: 'Optimizador multi-objetivo costo+peso+espacio' },
+      { id: 'ml', label: 'PET', icon: Brain, iconColor: 'text-purple-500', bgColor: 'bg-white', hoverBg: 'hover:bg-purple-50', dialogName: 'onnxPredictor', title: 'Espesor PET (TG-108)' },
+      { id: 'opt', label: 'Opt', icon: TrendingDown, iconColor: 'text-teal-500', bgColor: 'bg-white', hoverBg: 'hover:bg-teal-50', dialogName: 'multiObjectiveOptimizer', title: 'Optimizador de materiales PET: costo, masa y espesor' },
       { id: 'comp', label: 'Comp', icon: GitCompareArrows, iconColor: 'text-orange-500', bgColor: 'bg-white', hoverBg: 'hover:bg-orange-50', dialogName: 'materialComparison', title: 'Comparacion materiales Pb vs Concrete vs Steel' },
       { id: 'map', label: 'Map', icon: Crosshair, iconColor: 'text-red-500', bgColor: 'bg-white', hoverBg: 'hover:bg-red-50', dialogName: 'spatialDoseMap', title: 'Mapa de dosis espacial 2D heatmap' },
     ],
@@ -57,7 +57,7 @@ const ACTION_GROUPS: QuickActionGroup[] = [
     buttons: [
       { id: 'transport', label: 'Trans', icon: Truck, iconColor: 'text-indigo-500', bgColor: 'bg-white', hoverBg: 'hover:bg-indigo-50', dialogName: 'transportDialog', title: 'Transporte Material Radiactivo SSR-6' },
       { id: 'opencv', label: 'CV', icon: ScanEye, iconColor: 'text-emerald-500', bgColor: 'bg-white', hoverBg: 'hover:bg-emerald-50', dialogName: 'floorPlanFeatures', title: 'OpenCV deteccion automatica paredes' },
-      { id: 'mc', label: 'MC', icon: Atom, iconColor: 'text-green-500', bgColor: 'bg-white', hoverBg: 'hover:bg-green-50', dialogName: 'geant4Mc', title: 'Geant4 Monte Carlo Gold Standard' },
+      { id: 'mc', label: 'MC', icon: Atom, iconColor: 'text-green-500', bgColor: 'bg-white', hoverBg: 'hover:bg-green-50', dialogName: 'geant4Mc', title: 'Referencia analítica TG-108 para comparar con Geant4' },
     ],
   },
   {

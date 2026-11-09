@@ -127,8 +127,8 @@ const NCRP_TOOLS = [
    ═══════════════════════════════════════════ */
 const ANALYSIS_TOOLS = filtrarVisoresEnRevision([
   { icon: Database,         label: 'NIST', dialog: 'nistXcom',                title: 'NIST XCOM Coef. Atenuacion',      color: '#059669', bg: '#ecfdf5' },
-  { icon: Brain,            label: 'ML',   dialog: 'onnxPredictor',           title: 'ML Predictor ONNX espesor',       color: '#7c3aed', bg: '#f5f3ff' },
-  { icon: TrendingDown,     label: 'Opt',  dialog: 'multiObjectiveOptimizer', title: 'Optimizador Multi-Objetivo',      color: '#0d9488', bg: '#f0fdfa' },
+  { icon: Brain,            label: 'PET',  dialog: 'onnxPredictor',           title: 'Espesor PET (TG-108)',            color: '#7c3aed', bg: '#f5f3ff' },
+  { icon: TrendingDown,     label: 'Opt',  dialog: 'multiObjectiveOptimizer', title: 'Optimizador de materiales PET',   color: '#0d9488', bg: '#f0fdfa' },
   { icon: GitCompareArrows, label: 'Comp', dialog: 'materialComparison',      title: 'Comparacion Materiales Pb/Concr', color: '#ea580c', bg: '#fff7ed' },
   { icon: Crosshair,        label: 'Dose', dialog: 'spatialDoseMap',          title: 'Mapa Dosis 2D Heatmap',           color: '#e11d48', bg: '#fff1f2' },
   { icon: ShieldHalf,       label: 'MLay', dialog: 'multiLayerShield',        title: 'Multi-Layer Shield — Barreras laminadas', color: '#b45309', bg: '#fef3c7' },
@@ -146,7 +146,7 @@ const ANALYSIS_TOOLS = filtrarVisoresEnRevision([
 const UTILITY_TOOLS = [
   { icon: Truck,      label: 'Trans', dialog: 'transportDialog',   title: 'Transporte SSR-6 Radiactivo',     color: '#4f46e5', bg: '#eef2ff' },
   { icon: ScanEye,    label: 'CV',    dialog: 'floorPlanFeatures', title: 'OpenCV Deteccion Automatica',     color: '#16a34a', bg: '#f0fdf4' },
-  { icon: Atom,       label: 'MC',    dialog: 'geant4Mc',          title: 'Geant4 Monte Carlo Gold Std',     color: '#16a34a', bg: '#f0fdf4' },
+  { icon: Atom,       label: 'MC',    dialog: 'geant4Mc',          title: 'Referencia analítica para Geant4', color: '#16a34a', bg: '#f0fdf4' },
   { icon: Building2,  label: 'IFC',   dialog: 'revitIfcImport',    title: 'Revit IFC Import Modelo BIM',     color: '#2563eb', bg: '#eff6ff' },
   { icon: Code,       label: 'Add',   dialog: 'revitAddin',        title: 'Revit Add-in Template C#',        color: '#4f46e5', bg: '#eef2ff' },
   { icon: Layers,     label: 'Lab',   dialog: 'maze',              title: 'Laberinto NCRP 151',              color: '#7c3aed', bg: '#f5f3ff' },

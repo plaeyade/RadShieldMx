@@ -1,102 +1,74 @@
-/**
- * v105: Multi-Objective Shielding Optimizer
- */
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+// MultiObjectiveOptimizerDialog — elección de material para una sala PET por costo, masa y espesor.
+// Fase 7: espesores con AAPM TG-108 (`blindajePET`: Γ, absorción del paciente, decaimiento y Tabla V) y frente de
+// Pareto con `compararMateriales`. Antes: W = GBq × 1000 sin constante gamma y una «dosis» que crecía con el espesor.
+import { useMemo, useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useAppStore, dialogoAbierto } from '@/stores/appStore';
-import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
-import { TrendingDown, Zap, CheckCircle, AlertTriangle } from 'lucide-react';
-import { SHIELDING_MATERIALS, calculateRequiredThickness } from '@/lib/xcomAttenuation';
-import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
-
-function optimize(energy_MeV: number, activity_GBq: number, distance_m: number, occ: number, useF: number, mats: string[], cw: number, ww: number, sw: number) {
-  const P = NCRP_DESIGN_GOALS.uncontrolled, W = activity_GBq * 1000;
-  const B = Math.max((P * distance_m * distance_m) / (W * useF * occ), 1e-10);
-  return mats.map(mc => {
-    const mat = SHIELDING_MATERIALS.find(m => m.code === mc);
-    if (!mat) return null;
-    const t = calculateRequiredThickness(mc, energy_MeV, B);
-    if (!t) return null;
-    const mass = 10 * (t / 1000) * mat.density_g_per_cm3 * 1000;
-    const costs: Record<string, number> = { PB: 2.5, CONCRETE: 0.15, STEEL: 1.2, GYPSUM: 0.4, POLYETHYLENE: 3.5, BPE: 8.0, TUNGSTEN: 45.0 };
-    const dose = P * B / Math.exp(-(mat.data.find(d => d.energy_MeV >= energy_MeV)?.mu_1_per_cm ?? 0.05) * (t / 10));
-    const score = cw * (mass * (costs[mc] ?? 1)) / 50000 + ww * mass / 50000 + sw * t / 1000;
-    return { code: mc, name: mat.nameEs, t, cost: mass * (costs[mc] ?? 1), mass, dose, pass: dose <= P * 1.05, score };
-  }).filter(Boolean).sort((a, b) => (a?.score ?? 0) - (b?.score ?? 0));
-}
+import { TrendingDown, CheckCircle } from 'lucide-react';
+import EntradaFuentePET from '@/components/EntradaFuentePET';
+import { PET_INICIAL } from '@/lib/calculadorasNormativas';
+import {
+  COSTO_REFERENCIA_USD_KG, MATERIALES_PET, NOMBRE_MATERIAL, blindajePET, compararMateriales, type EntradaPET,
+} from '@/lib/calculadorasNormativas';
 
 export default function MultiObjectiveOptimizerDialog() {
   const open = useAppStore(s => dialogoAbierto(s.dialogs.multiObjectiveOptimizer));
   const close = () => useAppStore.getState().close('multiObjectiveOptimizer');
-  const [energy, setEnergy] = useState('6');
-  const [activity, setActivity] = useState('100');
-  const [dist, setDist] = useState('3');
-  const [occ] = useState('0.2');
-  const [useF] = useState('0.25');
-  const [cw, setCw] = useState('0.5');
-  const [ww, setWw] = useState('0.3');
-  const [sw, setSw] = useState('0.2');
-  const [mats] = useState(['CONCRETE', 'PB', 'STEEL']);
-  const [run, setRun] = useState(false);
-  const [res, setRes] = useState<any[] | null>(null);
-
-  const go = () => { setRun(true); setTimeout(() => { setRes(optimize(parseFloat(energy)||6, parseFloat(activity)||100, parseFloat(dist)||3, parseFloat(occ)||0.2, parseFloat(useF)||0.25, mats, parseFloat(cw)||0.5, parseFloat(ww)||0.3, parseFloat(sw)||0.2)); setRun(false); }, 600); };
-  if (!open) return null;
+  const [e, setE] = useState<EntradaPET>(PET_INICIAL);
+  const [area, setArea] = useState(12);
+  const [costos, setCostos] = useState<Record<string, number>>(COSTO_REFERENCIA_USD_KG);
+  const [pesos, setPesos] = useState({ costo: 0.4, masa: 0.3, espesor: 0.3 });
+  const { r, opciones, error } = useMemo(() => {
+    try {
+      const r = blindajePET({ ...e, T: Math.min(1, e.T) });
+      return { r, opciones: compararMateriales(r.espesores_mm, area, costos, pesos), error: null };
+    } catch (err) { return { r: null, opciones: [], error: (err as Error).message }; }
+  }, [e, area, costos, pesos]);
 
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
-            <TrendingDown className="w-4 h-4 text-teal-500" /> Multi-Objective Optimizer (v105)
-            <Badge variant="outline" className="text-[9px]">Costo+Peso+Espacio</Badge>
+            <TrendingDown className="w-4 h-4 text-teal-500" /> Optimizador de materiales para sala PET
+            <Badge variant="outline" className="text-[9px]">TG-108 · costo + masa + espesor</Badge>
           </DialogTitle>
+          <DialogDescription className="text-[10px]">Espesor requerido por material con TG-108; ordenado por suma ponderada y marcado si pertenece al frente de Pareto.</DialogDescription>
         </DialogHeader>
-        <SyntheticResultBanner detalle="Usa W = actividad (GBq) × 1000 sin constante gamma ni rendimiento del equipo; la dosis resultante no es física. No usa normativeBarrierEngine." />
-        <div className="grid grid-cols-3 gap-3 mb-2">
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">E (MeV)</label><Input type="number" step="0.1" value={energy} onChange={e => setEnergy(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">A (GBq)</label><Input type="number" step="1" value={activity} onChange={e => setActivity(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">d (m)</label><Input type="number" step="0.1" value={dist} onChange={e => setDist(e.target.value)} className="text-[11px] h-7" /></div>
+        <EntradaFuentePET v={e} onChange={setE} prefijo="moo" />
+        <div className="grid grid-cols-4 gap-2 mt-2">
+          <div><Label htmlFor="moo-area" className="text-[10px]">Área de la barrera (m²)</Label><Input id="moo-area" type="number" value={area} onChange={x => setArea(+x.target.value)} className="h-7 text-xs" /></div>
+          {(['costo', 'masa', 'espesor'] as const).map(k => (
+            <div key={k}><Label htmlFor={`moo-w-${k}`} className="text-[10px]">Peso de {k}: {pesos[k].toFixed(1)}</Label>
+              <Input id={`moo-w-${k}`} type="range" min={0} max={1} step={0.1} value={pesos[k]} onChange={x => setPesos(p => ({ ...p, [k]: +x.target.value }))} className="h-7" /></div>
+          ))}
+          {MATERIALES_PET.map(m => (
+            <div key={m}><Label htmlFor={`moo-c-${m}`} className="text-[10px]">Costo {NOMBRE_MATERIAL[m]} (USD/kg, estimado)</Label>
+              <Input id={`moo-c-${m}`} type="number" step="any" value={costos[m] ?? 0} onChange={x => setCostos(c => ({ ...c, [m]: +x.target.value }))} className="h-7 text-xs" /></div>
+          ))}
         </div>
-        <div className="bg-slate-50 rounded-md p-2 mb-2 text-[10px]">
-          <div className="font-medium text-slate-600 mb-1">Pesos optimizacion</div>
-          <div className="grid grid-cols-3 gap-2">
-            <div><label className="text-[9px] text-slate-500">Costo $</label><Input type="number" step="0.1" value={cw} onChange={e => setCw(e.target.value)} className="text-[11px] h-6" /></div>
-            <div><label className="text-[9px] text-slate-500">Peso kg</label><Input type="number" step="0.1" value={ww} onChange={e => setWw(e.target.value)} className="text-[11px] h-6" /></div>
-            <div><label className="text-[9px] text-slate-500">Espacio mm</label><Input type="number" step="0.1" value={sw} onChange={e => setSw(e.target.value)} className="text-[11px] h-6" /></div>
-          </div>
-        </div>
-        <Button onClick={go} disabled={run} className="w-full h-8 text-[11px] bg-teal-600 hover:bg-teal-700"><Zap className="w-3 h-3 mr-1" />{run ? 'Optimizando...' : 'Optimizar'}</Button>
-        {run && <Progress value={50} className="h-1 mt-2" />}
-        {res && res.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <div className="text-[10px] font-medium text-slate-700">Resultados (mejor primero)</div>
-            {res.map((r: any, i: number) => (
-              <div key={i} className={`border rounded-md p-2 ${i === 0 ? 'border-teal-300 bg-teal-50' : 'bg-white'}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-slate-400">#{i + 1}</span>
-                    <span className="text-[11px] font-semibold">{r.name}</span>
-                    {i === 0 && <Badge className="text-[8px] bg-teal-100 text-teal-700">OPTIMO</Badge>}
-                    {r.pass ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-red-500" />}
-                  </div>
-                  <span className="text-[9px] text-slate-400">Score: {r.score.toFixed(4)}</span>
-                </div>
-                <div className="grid grid-cols-4 gap-2 text-[9px]">
-                  <div><span className="text-slate-400">Esp:</span> <strong>{r.t.toFixed(1)} mm</strong></div>
-                  <div><span className="text-slate-400">$:</span> <strong>${r.cost.toLocaleString()}</strong></div>
-                  <div><span className="text-slate-400">Kg:</span> <strong>{r.mass.toFixed(0)}</strong></div>
-                  <div><span className="text-slate-400">Dosis:</span> <strong>{r.dose.toFixed(4)}</strong></div>
-                </div>
-              </div>
-            ))}
+        {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+        {r && (
+          <div className="mt-3 text-[10px] space-y-1">
+            <div>Dosis sin blindaje {(r.D_mSv_semana * 1000).toFixed(1)} μSv/semana · B requerida {r.B_requerida.toFixed(3)}</div>
+            <table className="w-full" data-testid="moo-tabla">
+              <thead><tr className="text-left text-slate-500"><th>#</th><th>Material</th><th>Espesor (mm)</th><th>Masa (kg)</th><th>Costo (USD)</th><th>Pareto</th><th>Puntaje</th></tr></thead>
+              <tbody>
+                {opciones.map((o, i) => (
+                  <tr key={o.material} className={`border-t ${i === 0 ? 'bg-teal-50' : ''}`}>
+                    <td>{i === 0 ? <CheckCircle className="w-3 h-3 text-teal-600" /> : i + 1}</td><td>{NOMBRE_MATERIAL[o.material]}</td>
+                    <td className="font-mono">{o.espesor_mm.toFixed(1)}</td><td className="font-mono">{o.masa_kg.toFixed(0)}</td>
+                    <td className="font-mono">{o.costo_usd.toFixed(0)}</td><td>{o.pareto ? 'sí' : 'dominada'}</td><td className="font-mono">{o.puntaje.toFixed(3)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-[9px] text-slate-400">{r.referencia}. Los costos por kg son estimaciones editables, no datos normativos.</p>
           </div>
         )}
-        <p className="text-[8px] text-slate-400 mt-2">NCRP 147/151 | Costos USD/kg aproximados 2024</p>
       </DialogContent>
     </Dialog>
   );

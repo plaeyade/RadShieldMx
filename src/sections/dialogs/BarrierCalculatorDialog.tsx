@@ -1,318 +1,243 @@
-// Fase 1: BarrierCalculatorDialog -- Calculo de blindajes NCRP 151/147 en webapp
-import { useState, useCallback, useMemo } from 'react';
+// BarrierCalculatorDialog — calculadora de barreras de megavoltaje (NCRP 151).
+// Fase 7: primaria, fuga y dispersión del paciente por separado, TVL₁/TVLₑ, regla de las dos fuentes y criterio
+// de cumplimiento T·K ≤ P, con el núcleo común `barreraMV` (calculadorasNormativas → ncrp151).
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Calculator, Download, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
-import { MATERIALS } from '@/types/radshield';
-import { roundThickness } from '@/lib/shieldingMath';
+import {
+  ENERGIAS_MV_TABULADAS, MATERIALES_MV, NOMBRE_MATERIAL, OBJETIVOS_DISENO, barreraMV,
+  type EntradaBarreraMV, type ResultadoBarreraMV,
+} from '@/lib/calculadorasNormativas';
+import type { EnergiaMV, MaterialNCRP151 } from '@/lib/ncrp151';
 
-interface CalcResult {
-  barrierType: string;
-  energy_MeV: number;
-  workload_Gy_per_week: number;
-  distance_m: number;
-  materialCode: string;
-  designGoal_mSv_per_week: number;
-  useFactor: number;
-  occupancyFactor: number;
-  unshieldedKerma_mSv_per_week: number;
-  requiredThickness_mm: number;
-  requiredThickness_cm: number;
-  roundedThickness_mm: number;
-  transmission: number;
-  shieldedKerma_mSv_per_week: number;
-  passesCNSNS: boolean;
-  passesALARA: boolean;
-  nTVLs: number;
-  tvl_mm: number;
-}
-
-const BARRIER_TYPES = [
-  { value: 'primary', label: 'Barrera Primaria (haz directo)', designGoal: 0.02, useFactor: 0.25 },
-  { value: 'primary_imrt', label: 'Primaria IMRT (VMAT/SBRT)', designGoal: 0.02, useFactor: 0.25 },
-  { value: 'secondary_scatter', label: 'Secundaria - Dispersion', designGoal: 0.02, useFactor: 1.0 },
-  { value: 'secondary_leakage', label: 'Secundaria - Fuga cabezal', designGoal: 0.02, useFactor: 1.0 },
-  { value: 'secondary_twosource', label: 'Two-Source Rule', designGoal: 0.02, useFactor: 1.0 },
-  { value: 'door_maze', label: 'Puerta laberinto', designGoal: 0.02, useFactor: 1.0 },
+/** NCRP 151 Tabla B.1 (factores de ocupación sugeridos). */
+const OCUPACION = [
+  { value: 1, label: '1 — oficinas, consultorios, sala de control' },
+  { value: 0.5, label: '1/2 — salas de tratamiento contiguas, exploración' },
+  { value: 0.2, label: '1/5 — pasillos, salas de descanso del personal' },
+  { value: 0.125, label: '1/8 — puertas de sala de tratamiento' },
+  { value: 0.05, label: '1/20 — baños públicos, almacenes, salas de espera' },
+  { value: 0.025, label: '1/40 — exteriores, estacionamientos, escaleras' },
 ];
 
-const OCCUPANCY_FACTORS = [
-  { value: 1.0, label: 'Control total (POE)' },
-  { value: 0.5, label: 'Recepcion / Oficinas' },
-  { value: 0.2, label: 'Pasillos / Escaleras' },
-  { value: 0.125, label: 'Banios publicos' },
-  { value: 0.05, label: 'Estacionamiento / Ascensores' },
-];
+interface Props { open: boolean; onOpenChange: (open: boolean) => void }
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+interface Registro { entrada: EntradaBarreraMV; resultado: ResultadoBarreraMV }
+
+const sel = 'h-9 w-full rounded-md border border-input bg-transparent px-2 text-sm';
 
 export default function BarrierCalculatorDialog({ open, onOpenChange }: Props) {
-  const [energy, setEnergy] = useState(6);
-  const [workload, setWorkload] = useState(450);
-  const [distance, setDistance] = useState(4.5);
-  const [materialCode, setMaterialCode] = useState('CONCRETE235');
-  const [barrierType, setBarrierType] = useState('primary');
-  const [occupancy, setOccupancy] = useState(0.2);
-  const [leakageFraction, setLeakageFraction] = useState(0.001);
-  const [results, setResults] = useState<CalcResult[]>([]);
-  const [lastCalc, setLastCalc] = useState<CalcResult | null>(null);
+  const [tipo, setTipo] = useState<'primaria' | 'secundaria'>('primaria');
+  const [e1, setE1] = useState<EnergiaMV>(18);
+  const [w1, setW1] = useState(450);
+  const [doble, setDoble] = useState(false);
+  const [e2, setE2] = useState<EnergiaMV>(6);
+  const [w2, setW2] = useState(225);
+  const [imrt, setImrt] = useState(0);
+  const [ci, setCi] = useState(5);
+  const [material, setMaterial] = useState<MaterialNCRP151>('concrete');
+  const [areaId, setAreaId] = useState<string>('no_controlada');
+  const [T, setT] = useState(0.025);
+  const [U, setU] = useState(0.25);
+  const [d, setD] = useState(7.2);
+  const [dL, setDL] = useState<number | ''>('');
+  const [theta, setTheta] = useState(30);
+  const [historial, setHistorial] = useState<Registro[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const ultimo = historial[historial.length - 1] ?? null;
+  const P = OBJETIVOS_DISENO.find((o) => o.id === areaId)!.P_mSv_semana;
 
-  const material = useMemo(() => MATERIALS.find(m => m.code === materialCode) || MATERIALS[0], [materialCode]);
-  const barrierConfig = useMemo(() => BARRIER_TYPES.find(b => b.value === barrierType) || BARRIER_TYPES[0], [barrierType]);
-
-  const calculate = useCallback(() => {
-    const designGoal = barrierConfig.designGoal;
-    const useFactor = barrierConfig.useFactor;
-    const occupancyFactor = occupancy;
-
-    const unshieldedKerma = (workload * useFactor * occupancyFactor * 1000) / (distance ** 2);
-    const requiredTransmission = designGoal / (unshieldedKerma || 1);
-
-    const energyKey = energy <= 6 ? '6MV' : energy <= 10 ? '10MV' : energy <= 15 ? '15MV' : '18MV';
-    const tvlValue = material.TVL_mm?.[energyKey] || material.TVL_mm?.['6MV'] || 350;
-
-    const nTVLs = -Math.log10(requiredTransmission);
-    const requiredThickness_mm = nTVLs * tvlValue;
-    const requiredThickness_cm = requiredThickness_mm / 10;
-    const rounded_mm = roundThickness(requiredThickness_mm, materialCode);
-    const transmission = Math.pow(10, -rounded_mm / tvlValue);
-    const shieldedKerma = unshieldedKerma * transmission;
-
-    const passesCNSNS = shieldedKerma <= designGoal * 1.2;
-    const passesALARA = shieldedKerma <= designGoal * 1.1;
-
-    const result: CalcResult = {
-      barrierType: barrierConfig.label,
-      energy_MeV: energy,
-      workload_Gy_per_week: workload,
-      distance_m: distance,
-      materialCode,
-      designGoal_mSv_per_week: designGoal,
-      useFactor,
-      occupancyFactor,
-      unshieldedKerma_mSv_per_week: unshieldedKerma,
-      requiredThickness_mm,
-      requiredThickness_cm,
-      roundedThickness_mm: rounded_mm,
-      transmission,
-      shieldedKerma_mSv_per_week: shieldedKerma,
-      passesCNSNS,
-      passesALARA,
-      nTVLs,
-      tvl_mm: tvlValue,
+  const calcular = useCallback(() => {
+    const haz = (energia: EnergiaMV, W: number) => ({ energia, W_Gy_semana: W, fraccionIMRT: imrt / 100, factorIMRT: ci });
+    const entrada: EntradaBarreraMV = {
+      tipo, material, P_mSv_semana: P, T, U, d_m: d,
+      haces: doble ? [haz(e1, w1), haz(e2, w2)] : [haz(e1, w1)],
+      ...(tipo === 'secundaria' ? { theta_deg: theta, ...(dL !== '' ? { dL_m: dL } : {}) } : {}),
     };
+    try {
+      const resultado = barreraMV(entrada);
+      setError(null);
+      setHistorial((h) => [...h, { entrada, resultado }]);
+      toast.success(`Espesor ${resultado.espesorRedondeado_cm.toFixed(1)} cm de ${NOMBRE_MATERIAL[material]}`);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, [tipo, material, P, T, U, d, doble, e1, w1, e2, w2, imrt, ci, theta, dL]);
 
-    setLastCalc(result);
-    setResults(prev => [...prev, result]);
-    toast.success(`Calculo completado: ${rounded_mm.toFixed(1)} mm ${material.name}`);
-  }, [energy, workload, distance, materialCode, barrierType, occupancy, barrierConfig, material]);
-
-  const exportCSV = useCallback(() => {
-    if (!lastCalc) return;
-    const headers = [
-      'Tipo_Barrera', 'Energia_MeV', 'Workload_Gy_sem', 'Distancia_m',
-      'Material', 'Espesor_Calculado_mm', 'Espesor_Redondeado_mm',
-      'Espesor_cm', 'n_TVLs', 'TVL_mm', 'Kerma_Sin_Blindaje_mSv_sem',
-      'Kerma_Con_Blindaje_mSv_sem', 'Cumple_CNSNS', 'Cumple_ALARA'
-    ];
-    const row = [
-      lastCalc.barrierType, lastCalc.energy_MeV, lastCalc.workload_Gy_per_week, lastCalc.distance_m,
-      lastCalc.materialCode, lastCalc.requiredThickness_mm.toFixed(2), lastCalc.roundedThickness_mm.toFixed(2),
-      lastCalc.requiredThickness_cm.toFixed(2), lastCalc.nTVLs.toFixed(2), lastCalc.tvl_mm,
-      lastCalc.unshieldedKerma_mSv_per_week.toFixed(4),
-      lastCalc.shieldedKerma_mSv_per_week.toFixed(6), lastCalc.passesCNSNS ? 'SI' : 'NO', lastCalc.passesALARA ? 'SI' : 'NO'
-    ];
-    const csv = [headers.join(','), row.join(',')].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Barrera_${lastCalc.barrierType.replace(/\s+/g, '_')}_${energy}MV.csv`;
-    a.click();
-    toast.success('CSV exportado');
-  }, [lastCalc, energy]);
-
-  const exportAllCSV = useCallback(() => {
-    if (results.length === 0) return;
-    const headers = ['Tipo_Barrera', 'Energia_MeV', 'Workload_Gy_sem', 'Distancia_m', 'Material', 'Espesor_Calculado_mm', 'Espesor_Redondeado_mm', 'Espesor_cm', 'n_TVLs', 'TVL_mm', 'Kerma_Sin_Blindaje_mSv_sem', 'Kerma_Con_Blindaje_mSv_sem', 'Cumple_CNSNS', 'Cumple_ALARA'];
-    const rows = results.map(r => [
-      r.barrierType, r.energy_MeV, r.workload_Gy_per_week, r.distance_m, r.materialCode,
-      r.requiredThickness_mm.toFixed(2), r.roundedThickness_mm.toFixed(2), r.requiredThickness_cm.toFixed(2),
-      r.nTVLs.toFixed(2), r.tvl_mm, r.unshieldedKerma_mSv_per_week.toFixed(4),
-      r.shieldedKerma_mSv_per_week.toFixed(6),
-      r.passesCNSNS ? 'SI' : 'NO', r.passesALARA ? 'SI' : 'NO'
+  const exportarCSV = useCallback(() => {
+    if (!historial.length) return;
+    const enc = ['Tipo', 'Energias_MV', 'W_Gy_sem', 'Material', 'P_mSv_sem', 'T', 'U', 'd_m', 'K_sin_mSv_sem',
+      'Espesor_dos_fuentes_cm', 'Espesor_suma_directa_cm', 'Espesor_redondeado_cm', 'T_K_con_blindaje_mSv_sem', 'Cumple'];
+    const filas = historial.map(({ entrada: e, resultado: r }) => [
+      e.tipo, e.haces.map((h) => h.energia).join('/'), e.haces.map((h) => h.W_Gy_semana).join('/'), e.material,
+      e.P_mSv_semana, e.T, e.U, e.d_m, r.K_sin_blindaje_mSv_semana.toFixed(4), r.espesorDosFuentes_cm.toFixed(2),
+      r.espesorSumaDirecta_cm.toFixed(2), r.espesorRedondeado_cm.toFixed(1), r.dosisOcupacion_mSv_semana.toExponential(3),
+      r.cumple ? 'SI' : 'NO',
     ].join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([[enc.join(','), ...filas].join('\n')], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Barreras_Calculadas_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Barreras_NCRP151_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
-    toast.success(`${results.length} barreras exportadas a CSV`);
-  }, [results]);
+    URL.revokeObjectURL(a.href);
+    toast.success(`${historial.length} cálculo(s) exportados a CSV`);
+  }, [historial]);
 
-  const clearResults = useCallback(() => {
-    setResults([]);
-    setLastCalc(null);
-  }, []);
+  const energiaSelect = (v: EnergiaMV, set: (e: EnergiaMV) => void, id: string) => (
+    <select id={id} className={sel} value={String(v)} onChange={(ev) => set(Number(ev.target.value) as EnergiaMV)}>
+      {ENERGIAS_MV_TABULADAS.map((e) => <option key={e} value={e}>{e} MV</option>)}
+    </select>
+  );
+  const num = (id: string, label: string, v: number, set: (n: number) => void, step = 0.1) => (
+    <div className="space-y-1">
+      <Label htmlFor={id}>{label}</Label>
+      <Input id={id} type="number" step={step} value={v} onChange={(ev) => set(Number(ev.target.value))} />
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calculator className="w-5 h-5 text-blue-500" />
-            Calculadora de Blindajes -- NCRP 151 / 147
+            Calculadora de barreras de megavoltaje — NCRP 151
           </DialogTitle>
+          <DialogDescription>
+            Primaria (Ec. 2.1), dispersión del paciente (Ec. 2.7) y fuga (Ec. 2.8) por separado, con TVL₁/TVLₑ y la regla de las dos fuentes.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-4 flex-1 min-h-0">
-          {/* Left panel: Inputs */}
           <div className="w-1/2 space-y-3 overflow-auto pr-2">
-            <div className="space-y-1.5">
-              <Label>Tipo de Barrera</Label>
-              <Select value={barrierType} onValueChange={setBarrierType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {BARRIER_TYPES.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="space-y-1">
+              <Label htmlFor="bc-tipo">Tipo de barrera</Label>
+              <select id="bc-tipo" className={sel} value={tipo} onChange={(ev) => setTipo(ev.target.value as 'primaria' | 'secundaria')}>
+                <option value="primaria">Primaria (haz directo)</option>
+                <option value="secundaria">Secundaria (dispersión del paciente + fuga del cabezal)</option>
+              </select>
             </div>
-
             <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label>Energia (MV)</Label>
-                <Input type="number" min={4} max={25} step={1} value={energy} onChange={e => setEnergy(Number(e.target.value))} />
-              </div>
-              <div className="space-y-1">
-                <Label>Workload (Gy/sem)</Label>
-                <Input type="number" min={10} max={2000} step={10} value={workload} onChange={e => setWorkload(Number(e.target.value))} />
-              </div>
+              <div className="space-y-1"><Label htmlFor="bc-e1">Energía</Label>{energiaSelect(e1, setE1, 'bc-e1')}</div>
+              {num('bc-w1', 'Carga W (Gy/semana en el isocentro)', w1, setW1, 10)}
             </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label>Distancia (m)</Label>
-                <Input type="number" min={0.5} max={20} step={0.1} value={distance} onChange={e => setDistance(Number(e.target.value))} />
-              </div>
-              <div className="space-y-1">
-                <Label>Factor Ocupacion (T)</Label>
-                <Select value={String(occupancy)} onValueChange={v => setOccupancy(Number(v))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {OCCUPANCY_FACTORS.map(o => <SelectItem key={o.value} value={String(o.value)}>{o.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>Material de Blindaje</Label>
-              <Select value={materialCode} onValueChange={setMaterialCode}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {MATERIALS.map(m => <SelectItem key={m.code} value={m.code}>{m.name} (TVL 6MV: {m.TVL_mm?.['6MV'] || '?'} mm)</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {barrierType.includes('leakage') && (
-              <div className="space-y-1">
-                <Label>Fraccion de Fuga (10^-3 default)</Label>
-                <Input type="number" min={0.0001} max={0.01} step={0.0001} value={leakageFraction} onChange={e => setLeakageFraction(Number(e.target.value))} />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={doble} onChange={(ev) => setDoble(ev.target.checked)} /> Equipo de doble energía
+            </label>
+            {doble && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1"><Label htmlFor="bc-e2">Segunda energía</Label>{energiaSelect(e2, setE2, 'bc-e2')}</div>
+                {num('bc-w2', 'Carga W₂ (Gy/semana)', w2, setW2, 10)}
               </div>
             )}
-
-            <Button onClick={calculate} className="w-full">
-              <Calculator className="w-4 h-4 mr-1.5" /> Calcular Blindaje
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="bc-material">Material</Label>
+                <select id="bc-material" className={sel} value={material} onChange={(ev) => setMaterial(ev.target.value as MaterialNCRP151)}>
+                  {MATERIALES_MV.map((m) => <option key={m} value={m}>{NOMBRE_MATERIAL[m]}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="bc-area">Objetivo de diseño P</Label>
+                <select id="bc-area" className={sel} value={areaId} onChange={(ev) => setAreaId(ev.target.value)}>
+                  {OBJETIVOS_DISENO.map((o) => <option key={o.id} value={o.id}>{o.etiqueta}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="bc-T">Factor de ocupación T</Label>
+                <select id="bc-T" className={sel} value={String(T)} onChange={(ev) => setT(Number(ev.target.value))}>
+                  {OCUPACION.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              {num('bc-U', tipo === 'primaria' ? 'Factor de uso U' : 'Factor de uso U (haz al paciente)', U, setU, 0.05)}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {num('bc-d', tipo === 'primaria' ? 'Distancia blanco → punto protegido (m)' : 'Distancia isocentro → punto, d_sec (m)', d, setD)}
+              {tipo === 'secundaria' && num('bc-theta', 'Ángulo de dispersión θ (°)', theta, setTheta, 5)}
+            </div>
+            {tipo === 'secundaria' && (
+              <div className="space-y-1">
+                <Label htmlFor="bc-dL">Distancia de fuga d_L (m; vacío = d_sec)</Label>
+                <Input id="bc-dL" type="number" step={0.1} value={dL} onChange={(ev) => setDL(ev.target.value === '' ? '' : Number(ev.target.value))} />
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              {num('bc-imrt', 'Fracción IMRT de la carga (%)', imrt, setImrt, 5)}
+              {num('bc-ci', 'Factor IMRT C_I (Ec. 3.6)', ci, setCi, 0.5)}
+            </div>
+            <Button onClick={calcular} className="w-full" data-testid="bc-calcular">
+              <Calculator className="w-4 h-4 mr-1.5" /> Calcular
             </Button>
-
-            {results.length > 0 && (
+            {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+            {historial.length > 0 && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={exportAllCSV} className="flex-1">
-                  <Download className="w-3.5 h-3.5 mr-1" /> Exportar Todo ({results.length})
+                <Button variant="outline" size="sm" onClick={exportarCSV} className="flex-1">
+                  <Download className="w-3.5 h-3.5 mr-1" /> Exportar CSV ({historial.length})
                 </Button>
-                <Button variant="ghost" size="sm" onClick={clearResults}>Limpiar</Button>
+                <Button variant="ghost" size="sm" onClick={() => setHistorial([])}>Limpiar</Button>
               </div>
             )}
-
-            <p className="text-[10px] text-gray-400">
-              Metodologia: n = log10(K_sin/P), x = n x TVL. Redondeo constructivo segun material.
-            </p>
           </div>
 
-          {/* Right panel: Results */}
           <div className="w-1/2 border-l pl-4 overflow-auto">
-            {lastCalc ? (
-              <div className="space-y-3">
-                {/* Dictamen */}
-                <div className={`p-3 rounded-lg border flex items-center gap-3 ${
-                  lastCalc.passesALARA ? 'bg-green-50 border-green-300' :
-                  lastCalc.passesCNSNS ? 'bg-yellow-50 border-yellow-300' :
-                  'bg-red-50 border-red-300'
-                }`}>
-                  {lastCalc.passesCNSNS ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />}
+            {ultimo ? (
+              <div className="space-y-3" data-testid="bc-resultado">
+                <div className={`p-3 rounded-lg border flex items-center gap-3 ${ultimo.resultado.cumple ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
+                  {ultimo.resultado.cumple ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />}
                   <div>
-                    <div className="font-bold text-sm">
-                      {lastCalc.passesALARA ? 'CUMPLE ALARA (<10%)' :
-                       lastCalc.passesCNSNS ? 'CUMPLE CNSNS (<20%)' :
-                       'NO CUMPLE -- REVISAR'}
-                    </div>
+                    <div className="font-bold text-sm" data-testid="bc-dictamen">{ultimo.resultado.cumple ? 'CUMPLE: T·K ≤ P' : 'NO CUMPLE: T·K > P'}</div>
                     <div className="text-xs text-gray-500">
-                      K con blindaje: {lastCalc.shieldedKerma_mSv_per_week.toFixed(4)} mSv/sem vs diseno {lastCalc.designGoal_mSv_per_week} mSv/sem
+                      T·K con {ultimo.resultado.espesorRedondeado_cm.toFixed(1)} cm: {ultimo.resultado.dosisOcupacion_mSv_semana.toExponential(2)} mSv/semana; P = {ultimo.entrada.P_mSv_semana} mSv/semana
                     </div>
                   </div>
                 </div>
-
-                {/* Key metrics */}
                 <div className="grid grid-cols-2 gap-2">
-                  <ResultBox label="Espesor Calculado" value={`${lastCalc.requiredThickness_cm.toFixed(1)} cm`} sub={`${lastCalc.requiredThickness_mm.toFixed(1)} mm`} highlight />
-                  <ResultBox label="Espesor Redondeado" value={`${lastCalc.roundedThickness_mm.toFixed(1)} mm`} sub={`${(lastCalc.roundedThickness_mm / 10).toFixed(2)} cm`} highlight />
-                  <ResultBox label={`TVL (${energy}MV)`} value={`${lastCalc.tvl_mm} mm`} sub={`${lastCalc.nTVLs.toFixed(2)} TVLs`} />
-                  <ResultBox label="Transmision B(x)" value={`${lastCalc.transmission}`} />
-                  <ResultBox label="K sin blindaje" value={`${lastCalc.unshieldedKerma_mSv_per_week.toFixed(2)}`} unit="mSv/sem" />
-                  <ResultBox label="K con blindaje" value={`${lastCalc.shieldedKerma_mSv_per_week.toFixed(4)}`} unit="mSv/sem" color={lastCalc.passesCNSNS ? 'text-green-600' : 'text-red-600'} />
+                  <Caja etiqueta="Espesor adoptado" valor={`${ultimo.resultado.espesor_cm.toFixed(1)} cm`} sub="mayor de los dos métodos" destacado testid="bc-espesor" />
+                  <Caja etiqueta="Espesor redondeado" valor={`${ultimo.resultado.espesorRedondeado_cm.toFixed(1)} cm`} destacado />
+                  <Caja etiqueta="Regla de dos fuentes" valor={`${ultimo.resultado.espesorDosFuentes_cm.toFixed(1)} cm`} sub="NCRP 151 §1.4.3" />
+                  <Caja etiqueta="Suma directa Σ K·B·T = P" valor={`${ultimo.resultado.espesorSumaDirecta_cm.toFixed(1)} cm`} />
+                  <Caja etiqueta="K sin blindaje" valor={`${ultimo.resultado.K_sin_blindaje_mSv_semana.toPrecision(3)} mSv/semana`} />
+                  <Caja etiqueta="K con blindaje" valor={`${ultimo.resultado.K_con_blindaje_mSv_semana.toExponential(2)} mSv/semana`} />
                 </div>
-
-                {/* Formula reference */}
-                <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-[10px] text-gray-500 font-mono">
-                  <div>n = log10({lastCalc.unshieldedKerma_mSv_per_week.toFixed(2)} / {lastCalc.designGoal_mSv_per_week}) = {lastCalc.nTVLs.toFixed(2)}</div>
-                  <div>x = {lastCalc.nTVLs.toFixed(2)} x {lastCalc.tvl_mm} = {lastCalc.requiredThickness_mm.toFixed(1)} mm</div>
-                  <div>B(x) = 10^(-{lastCalc.roundedThickness_mm.toFixed(1)} / {lastCalc.tvl_mm}) = {lastCalc.transmission}</div>
-                </div>
-
-                <Button variant="outline" size="sm" onClick={exportCSV} className="w-full">
-                  <Download className="w-3.5 h-3.5 mr-1" /> Exportar CSV
-                </Button>
+                <table className="w-full text-[11px]">
+                  <thead><tr className="text-left text-gray-500"><th>Componente</th><th>K (mSv/sem)</th><th>B</th><th>t (cm)</th><th>TVL (cm)</th></tr></thead>
+                  <tbody>
+                    {ultimo.resultado.componentes.map((c) => (
+                      <tr key={c.nombre} className="border-t">
+                        <td>{c.nombre}</td><td className="font-mono">{c.K_mSv_semana.toPrecision(3)}</td>
+                        <td className="font-mono">{c.B_requerida.toExponential(2)}</td><td className="font-mono">{c.espesor_cm.toFixed(1)}</td>
+                        <td className="font-mono">{c.tvl_cm}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="text-[10px] text-gray-400">{ultimo.resultado.referencia}. Kerma en aire ≈ dosis equivalente (Sv ≈ Gy).</p>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <Shield className="w-12 h-12 mb-2 opacity-30" />
-                <p className="text-sm">Configure parametros y presione Calcular</p>
-                <p className="text-xs mt-1">Metodologia: NCRP 151 §4.2.3</p>
+                <p className="text-sm">Configure los parámetros y presione Calcular</p>
+                <p className="text-xs mt-1">Valores iniciales: ejemplo §7.1.1 de NCRP 151 (149.6 cm de concreto)</p>
               </div>
             )}
-
-            {/* History */}
-            {results.length > 1 && (
+            {historial.length > 1 && (
               <div className="mt-4 pt-3 border-t">
-                <h4 className="text-xs font-semibold text-gray-500 mb-2">Historial ({results.length})</h4>
+                <h4 className="text-xs font-semibold text-gray-500 mb-2">Historial ({historial.length})</h4>
                 <ScrollArea className="max-h-40">
                   <div className="space-y-1">
-                    {results.map((r, i) => (
+                    {historial.map((r, i) => (
                       <div key={i} className="flex items-center gap-2 text-[10px] p-1.5 rounded bg-gray-50 dark:bg-gray-800">
-                        <Badge variant={r.passesCNSNS ? "default" : "destructive"} className="text-[8px] h-4 px-1">{i + 1}</Badge>
-                        <span className="flex-1 truncate">{r.barrierType}</span>
-                        <span className="font-mono">{r.roundedThickness_mm.toFixed(0)} mm</span>
-                        <span className={r.passesCNSNS ? 'text-green-600' : 'text-red-600'}>{r.passesCNSNS ? 'OK' : 'FAIL'}</span>
+                        <Badge variant={r.resultado.cumple ? 'default' : 'destructive'} className="text-[8px] h-4 px-1">{i + 1}</Badge>
+                        <span className="flex-1 truncate">{r.entrada.tipo} {r.entrada.haces.map((h) => `${h.energia} MV`).join('/')}</span>
+                        <span className="font-mono">{r.resultado.espesorRedondeado_cm.toFixed(1)} cm</span>
                       </div>
                     ))}
                   </div>
@@ -326,15 +251,12 @@ export default function BarrierCalculatorDialog({ open, onOpenChange }: Props) {
   );
 }
 
-function ResultBox({ label, value, sub, unit, highlight, color }: {
-  label: string; value: string; sub?: string; unit?: string; highlight?: boolean; color?: string;
-}) {
+function Caja({ etiqueta, valor, sub, destacado, testid }: { etiqueta: string; valor: string; sub?: string; destacado?: boolean; testid?: string }) {
   return (
-    <div className={`p-2 rounded border ${highlight ? 'bg-blue-50 dark:bg-blue-950 border-blue-200' : 'bg-gray-50 dark:bg-gray-800 border-gray-200'}`}>
-      <div className="text-[10px] text-gray-500 uppercase tracking-wide">{label}</div>
-      <div className={`text-sm font-bold ${color || 'text-gray-800 dark:text-gray-200'}`}>{value}</div>
+    <div className={`p-2 rounded border ${destacado ? 'bg-blue-50 dark:bg-blue-950 border-blue-200' : 'bg-gray-50 dark:bg-gray-800 border-gray-200'}`}>
+      <div className="text-[10px] text-gray-500 uppercase tracking-wide">{etiqueta}</div>
+      <div className="text-sm font-bold text-gray-800 dark:text-gray-200" data-testid={testid}>{valor}</div>
       {sub && <div className="text-[10px] text-gray-400">{sub}</div>}
-      {unit && <div className="text-[10px] text-gray-400">{unit}</div>}
     </div>
   );
 }
