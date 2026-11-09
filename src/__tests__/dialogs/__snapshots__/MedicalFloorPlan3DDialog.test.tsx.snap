@@ -1,0 +1,1030 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MedicalFloorPlan3DDialog — exportaciones > el JSON de revisión conserva su contenido (instantánea) 1`] = `
+{
+  "assetPipeline": {
+    "acceptedStaticAssets": [
+      "glb",
+      "gltf",
+      "png",
+      "svg",
+    ],
+    "equipmentAssets": [
+      {
+        "footprint_m": [
+          3.2,
+          4.2,
+        ],
+        "id": "linac",
+        "name": "LINAC",
+        "preferredAsset": "/equipment-images/3_TrueBeam_Linear_Accelerator_Radiotherapy.png",
+        "ragTags": [
+          "NCRP151",
+          "LINAC",
+          "primary-barrier",
+          "secondary-barrier",
+        ],
+      },
+    ],
+    "nativeCadFlow": [
+      "DXF/IFC import summary",
+      "ODA/Forge external conversion pending",
+      "GLB handoff for viewer engines",
+    ],
+    "schema": "radshield-mx.medical3d.assetPipeline.v1",
+  },
+  "babylonReadiness": {
+    "activationGates": [
+      "F310 real operator Three/R3F sin regresiones.",
+      "Dynamic import aislado y fallback automatico a Three/R3F.",
+      "Smoke visual desktop/mobile con canvas no blanco.",
+      "Bundle budget y rollback documentado.",
+      "Export JSON/GLTF compatible con Memoria IA y Evidence Pack.",
+    ],
+    "clinicalRole": "Visualizacion PBR/WebGPU/WebXR para inspeccion. No calcula blindaje ni sustituye Memoria IA/Evidence Pack.",
+    "fallbackEngine": "three-r3f",
+    "featureFlag": "VITE_MEDICAL_3D_BABYLON_ADAPTER",
+    "installCommand": "npm install @babylonjs/core @babylonjs/loaders",
+    "readiness": "ready-for-install",
+    "requiredPackages": [
+      "@babylonjs/core",
+      "@babylonjs/loaders",
+    ],
+    "requiredSceneFields": [
+      "bounds",
+      "walls.position/size/thickness/materialCode",
+      "equipment.position/footprint/assetHint",
+      "zones.points/controlled",
+      "review.maxRequiredThickness_mm",
+    ],
+    "runtimeFlag": "VITE_MEDICAL_3D_BABYLON_RUNTIME",
+    "sceneSummary": {
+      "equipment": 1,
+      "hasControlledZones": false,
+      "hasThicknessData": true,
+      "roomName": "LINAC bunker",
+      "walls": 3,
+      "zones": 0,
+    },
+    "schema": "radshield-mx.medical-3d.babylon-adapter.v1",
+    "warnings": [
+      "No activar Babylon en produccion hasta tener paquete instalado, flag activo y smoke visual.",
+      "Mantener Three/R3F como fallback obligatorio.",
+      "WebGPU/WebXR dependen del navegador y no deben ser requisito de calculo clinico.",
+    ],
+  },
+  "bounds": {
+    "center": [
+      3.5,
+      0,
+      4,
+    ],
+    "depth": 10,
+    "width": 9,
+  },
+  "equipment": [
+    {
+      "assetHint": "/equipment-images/3_TrueBeam_Linear_Accelerator_Radiotherapy.png",
+      "footprint_m": [
+        3.2,
+        4.2,
+      ],
+      "id": "linac",
+      "kind": "linac",
+      "name": "LINAC",
+      "position": [
+        4,
+        0,
+        4,
+      ],
+      "ragTags": [
+        "NCRP151",
+        "LINAC",
+        "primary-barrier",
+        "secondary-barrier",
+      ],
+    },
+  ],
+  "f367F370ReleaseIntegration": {
+    "externalApis": {
+      "nextPhases": [
+        "F269 OCR cloud adapter smoke: Google Document AI primary, Textract fallback.",
+        "F270 APS DWG fixture smoke; ODA remains private post-release route.",
+        "F271 literature deep-dive: Crossref + Semantic Scholar metadata and citation ranking.",
+        "F272 external Monte Carlo runner contracts: GATE/OpenGATE/Geant4/EGSnrc.",
+      ],
+      "nonNegotiableControls": [
+        "No secrets in VITE_* or static frontend.",
+        "All cloud OCR/CAD/MC calls go through backend or operator runner.",
+        "Hash every input/output and preserve page/layer/run metadata.",
+        "No PHI/private plans on public static host.",
+        "External MC results must include engine version, physics list/data library, seed, histories, uncertainty and run manifest.",
+      ],
+      "phase": "F268A",
+      "providers": [
+        {
+          "acceptedInputs": [
+            "pdf",
+            "tiff",
+            "png",
+          ],
+          "bestUse": "OCR/layout/table extraction for scanned NCRP/IAEA/material PDFs and analytic memories.",
+          "category": "ocr",
+          "id": "google-document-ai",
+          "label": "Google Document AI",
+          "outputs": [
+            "text",
+            "page-layout",
+            "tables",
+            "confidence",
+            "source-page-map",
+          ],
+          "releaseGate": "F269 OCR cloud smoke with non-sensitive searchable/scan fixture.",
+          "requiredSecrets": [
+            "GOOGLE_APPLICATION_CREDENTIALS",
+            "GOOGLE_DOCUMENTAI_PROJECT_ID",
+            "GOOGLE_DOCUMENTAI_LOCATION",
+            "GOOGLE_DOCUMENTAI_PROCESSOR_ID",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "server-only",
+        },
+        {
+          "acceptedInputs": [
+            "pdf",
+            "tiff",
+            "png",
+            "jpg",
+          ],
+          "bestUse": "OCR/forms/tables fallback for reports, checklists and scanned memorias.",
+          "category": "ocr",
+          "id": "amazon-textract",
+          "label": "Amazon Textract",
+          "outputs": [
+            "text",
+            "tables",
+            "forms",
+            "confidence",
+            "blocks-json",
+          ],
+          "releaseGate": "F269B Textract fallback smoke with explicit cost/PHI warning.",
+          "requiredSecrets": [
+            "AWS_REGION",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_TEXTRACT_BUCKET",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "server-only",
+        },
+        {
+          "acceptedInputs": [
+            "doi",
+            "title",
+            "author",
+            "year",
+          ],
+          "bestUse": "DOI metadata, journal provenance and bibliography normalization for Memoria IA.",
+          "category": "literature",
+          "id": "crossref",
+          "label": "Crossref REST API",
+          "outputs": [
+            "metadata",
+            "doi",
+            "publisher",
+            "journal",
+            "reference-list",
+          ],
+          "releaseGate": "F271 literature metadata smoke; never auto-updates calculation constants.",
+          "requiredSecrets": [],
+          "safeFrontendExposure": "public-status-only",
+          "status": "ready-to-configure",
+        },
+        {
+          "acceptedInputs": [
+            "doi",
+            "paper-id",
+            "title-query",
+          ],
+          "bestUse": "Deep-dive literature graph, citations and related work for evidence review.",
+          "category": "literature",
+          "id": "semantic-scholar",
+          "label": "Semantic Scholar API",
+          "outputs": [
+            "paper-metadata",
+            "citations",
+            "references",
+            "abstract",
+          ],
+          "releaseGate": "F271 literature deep-dive smoke with source ranking and hallucination guardrails.",
+          "requiredSecrets": [
+            "SEMANTIC_SCHOLAR_API_KEY optional",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "ready-to-configure",
+        },
+        {
+          "acceptedInputs": [
+            "dwg",
+            "dgn",
+            "dxf",
+          ],
+          "bestUse": "Private/enterprise DWG/DGN/DXF conversion when APS cloud is not acceptable.",
+          "category": "cad",
+          "id": "oda-drawings-sdk",
+          "label": "ODA Drawings SDK",
+          "outputs": [
+            "dxf",
+            "svg",
+            "ifc",
+            "pdf",
+            "png",
+          ],
+          "releaseGate": "Post-release private service smoke; keep manual DXF fallback.",
+          "requiredSecrets": [
+            "ODA_SERVICE_URL",
+            "ODA_API_KEY",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "deferred-post-release",
+        },
+        {
+          "acceptedInputs": [
+            "dwg",
+          ],
+          "bestUse": "Primary DWG->DXF conversion preserving AutoCAD layer/block semantics.",
+          "category": "cad",
+          "id": "aps-design-automation",
+          "label": "Autodesk Platform Services Design Automation",
+          "outputs": [
+            "dxf",
+            "svg",
+            "pdf",
+          ],
+          "releaseGate": "F270 APS DWG smoke with non-sensitive fixture and layer/scale audit.",
+          "requiredSecrets": [
+            "DWG_CONVERSION_PROVIDER",
+            "APS_CLIENT_ID",
+            "APS_CLIENT_SECRET",
+            "APS_BUCKET_KEY",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "server-only",
+        },
+        {
+          "acceptedInputs": [
+            "geometry.gdml",
+            "materials.json",
+            "sources.json",
+            "gate.py",
+          ],
+          "bestUse": "Primary medical Monte Carlo external engine for NM/PET/SPECT/radiotherapy scenarios.",
+          "category": "monte-carlo",
+          "id": "gate-opengate",
+          "label": "GATE / OpenGATE",
+          "outputs": [
+            "dose-map",
+            "actors",
+            "uncertainty",
+            "run-manifest",
+          ],
+          "releaseGate": "F272 external MC export/import smoke; not required for static frontend release.",
+          "requiredSecrets": [
+            "GATE_RUNNER_URL optional",
+            "GATE_RUNNER_TOKEN optional",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "external-engine",
+        },
+        {
+          "acceptedInputs": [
+            "gdml",
+            "mac",
+            "materials.gdml",
+          ],
+          "bestUse": "General transport, GDML geometry, shielding studies and scoring mesh.",
+          "category": "monte-carlo",
+          "id": "geant4",
+          "label": "Geant4",
+          "outputs": [
+            "dose.csv",
+            "flux.csv",
+            "summary.json",
+          ],
+          "releaseGate": "F272 external runner smoke with version/physics-list/hash evidence.",
+          "requiredSecrets": [
+            "GEANT4_RUNNER_URL optional",
+            "GEANT4_RUNNER_TOKEN optional",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "external-engine",
+        },
+        {
+          "acceptedInputs": [
+            "egsinp",
+            "egsgeom",
+            "source-model",
+          ],
+          "bestUse": "Photon/electron and brachytherapy specialized validation for HDR/Co-60/Ir-192 cases.",
+          "category": "monte-carlo",
+          "id": "egsnrc-egs-brachy",
+          "label": "EGSnrc / egs_brachy",
+          "outputs": [
+            "3ddose",
+            "egsdat",
+            "statdose.csv",
+          ],
+          "releaseGate": "F272B EGSnrc/egs_brachy smoke against a known brachy fixture.",
+          "requiredSecrets": [
+            "EGSNRC_RUNNER_URL optional",
+            "EGSNRC_RUNNER_TOKEN optional",
+          ],
+          "safeFrontendExposure": "public-status-only",
+          "status": "external-engine",
+        },
+      ],
+      "releaseDecision": "F268A adds API/motor readiness without turning on live external calls. Static frontend can remain stable; live adapters require backend credentials and fixture smokes.",
+      "status": "api-readiness-gate-implemented",
+    },
+    "externalEngines": {
+      "clinicalControls": [
+        "External MC is a verification/research adapter, not a certified clinical engine inside the static app.",
+        "Every run must be reproducible by package hash, engine version, physics list/data library, seed and histories.",
+        "Forward MC: source/equipment/floorplan -> dose/scoring.",
+        "Reverse MC: target threshold/hotspot -> required shielding candidates, then re-check with deterministic NCRP/IAEA workflow.",
+        "Signed reports require physicist/RSO review and numeric QA before claiming clinical acceptance.",
+      ],
+      "commonInputs": [
+        "floorplan geometry",
+        "equipment/source model",
+        "material map",
+        "controlled zones",
+        "scoring mesh",
+        "simulation objective",
+      ],
+      "commonOutputs": [
+        "dose map",
+        "uncertainty",
+        "hotspot table",
+        "regulatory threshold comparison",
+        "engine manifest",
+        "input/output hashes",
+      ],
+      "engines": [
+        {
+          "id": "gate-opengate",
+          "inputArtifacts": [
+            "geometry.gdml",
+            "materials.json",
+            "sources.json",
+            "scoring.json",
+            "gate.py",
+          ],
+          "outputArtifacts": [
+            "dose-map.npz",
+            "dose.csv",
+            "uncertainty.json",
+            "run-manifest.json",
+          ],
+          "requiredRuntimeEvidence": [
+            "GATE/OpenGATE version",
+            "Geant4 version",
+            "physics list",
+            "seed",
+            "histories",
+            "actor/scoring configuration",
+          ],
+          "role": "Preferred medical NM/PET/SPECT and radiotherapy research runner.",
+          "status": "runner-contract-ready-waiting",
+        },
+        {
+          "id": "geant4",
+          "inputArtifacts": [
+            "geometry.gdml",
+            "materials.gdml",
+            "source.mac",
+            "scoring.mac",
+          ],
+          "outputArtifacts": [
+            "dose.csv",
+            "flux.csv",
+            "tracks.root optional",
+            "run-manifest.json",
+          ],
+          "requiredRuntimeEvidence": [
+            "Geant4 version",
+            "physics list",
+            "cross-section/data library",
+            "seed",
+            "threads",
+            "histories",
+          ],
+          "role": "General shielding/engineering transport runner for GDML and custom scoring.",
+          "status": "runner-contract-ready-waiting",
+        },
+        {
+          "id": "egsnrc-egs-brachy",
+          "inputArtifacts": [
+            "case.egsinp",
+            "geometry.egsgeom",
+            "source-model.json",
+            "materials.pegs4dat",
+          ],
+          "outputArtifacts": [
+            "case.3ddose",
+            "statdose.csv",
+            "egsdat",
+            "run-manifest.json",
+          ],
+          "requiredRuntimeEvidence": [
+            "EGSnrc version",
+            "egs_brachy version where used",
+            "source model hash",
+            "transport cutoffs",
+            "histories",
+          ],
+          "role": "Photon/electron and brachytherapy specialized validation runner.",
+          "status": "runner-contract-ready-waiting",
+        },
+      ],
+      "packageSchema": "radshield-mx.external-mc-runner.f272.v1",
+      "phase": "F272",
+      "releaseDecision": "F272 closes the external Monte Carlo contract. Live execution waits for external runners; the frontend can export/import manifests without bundling MC engines.",
+      "status": "external-monte-carlo-runner-contract-ready",
+    },
+    "phase": "F367-F370",
+    "photorealism": {
+      "activeEngine": "three-r3f",
+      "assetLanes": [
+        "Procedural PBR materials for concrete, lead, steel, glass and HD masonry.",
+        "Equipment symbols/footprints now; GLB/GLTF manufacturer assets later.",
+        "Unity external viewer for high-fidelity walkthrough only when URL/build exists.",
+      ],
+      "captureTargets": [
+        "overview",
+        "barriers",
+        "equipment",
+        "dose",
+        "walkthrough",
+      ],
+      "deferredEngine": "babylon",
+      "pbrMaterials": [
+        "concrete-shield",
+        "high-density-masonry",
+        "lead-shield",
+        "steel-structure",
+        "leaded-glass",
+      ],
+      "riskControls": [
+        "No photoreal output is a calculation result.",
+        "Every visual must carry sceneHash and preset.",
+        "Advanced assets must not hide barriers, labels, material bands or dose overlays.",
+      ],
+      "schema": "radshield-mx.medical3d.photoreal-advanced.f369.v1",
+    },
+    "releaseGate": {
+      "blockedClaims": [
+        "No certified Monte Carlo clinical engine until external runner version/data libraries are validated.",
+        "No native DWG in browser; use APS/ODA/DXF conversion.",
+        "No Babylon runtime until dependency lane passes build/smoke.",
+      ],
+      "buildScope": [
+        "static frontend",
+        "Three/R3F Medical 3D",
+        "visual evidence pack",
+        "external runner manifests",
+      ],
+      "decision": "frontend-beta-ready-with-external-runners",
+      "nextUserTest": [
+        "Open beta frontend.",
+        "Load/draw a real floorplan.",
+        "Open Medical 3D and capture the four required presets.",
+        "Export Memoria IA, PDF Report and Evidence Pack.",
+        "Record any missing action as post-beta issue, not another speculative phase.",
+      ],
+      "schema": "radshield-mx.beta-release.f370.v1",
+    },
+    "status": "beta-release-integration-ready",
+    "unityWebgl": {
+      "acceptedInputs": [
+        "medical_3d_unity_handoff_*.json",
+        "medical_3d_*.obj",
+        "future GLB/GLTF case pack",
+      ],
+      "enabledBy": [
+        "VITE_MEDICAL_3D_UNITY_EXTERNAL_VIEWER",
+        "VITE_MEDICAL_3D_UNITY_WEBGL_URL",
+      ],
+      "expectedOutputs": [
+        "snapshot PNG",
+        "camera bookmarks JSON",
+        "walkthrough recording reference",
+        "viewer manifest",
+      ],
+      "fallback": "three-r3f",
+      "mode": "external-webgl-viewer",
+      "schema": "radshield-mx.medical3d.unity-webgl-formal.f368.v1",
+      "smokeRequired": [
+        "loads URL",
+        "loads room geometry",
+        "shows equipment",
+        "shows material zones",
+        "returns visual evidence only",
+      ],
+    },
+    "visualEvidence": {
+      "documentSurfaces": [
+        "Memoria IA",
+        "PDF Report",
+        "Evidence Pack",
+        "Update Center",
+      ],
+      "minimumCapturePolicy": "Vista general + barreras + equipos + dosis; recorrido recomendado si hay inspeccion de sala.",
+      "missingIfNotAttached": [
+        "Attach exported 3D visual evidence pack before signed report.",
+      ],
+      "requiredFiles": [
+        "medical_3d_visual_evidence_pack_*.json",
+        "PNG captures by preset",
+        "medical_3d_review_*.json",
+      ],
+      "schema": "radshield-mx.medical3d.visual-evidence-pack.f365-f366.v1",
+    },
+  },
+  "floorPlan": "Bunker prueba",
+  "generatedBy": "RadShield-MX Medical 3D Floor Plan",
+  "importSummary": null,
+  "review": {
+    "maxRequiredThickness_mm": 1500,
+    "primaryBarriers": 1,
+    "secondaryBarriers": 2,
+  },
+  "roomName": "LINAC bunker",
+  "sceneHash": "scene-180d8ca1",
+  "threeR3fInspection": {
+    "beamGuides": "Guia visual no dosimetrica de haz/isocentro/fuente.",
+    "enabledAids": {
+      "beamGuides": true,
+      "equipmentFootprints": true,
+      "materialBands": true,
+      "roomRulers": true,
+    },
+    "equipmentFootprints": "Huella real de cada equipo para revisar espacio libre y colisiones.",
+    "materialBands": "Banda superior por muro: tipo de barrera + espesor relativo.",
+    "roomRulers": "Cotas visuales de ancho/profundidad para inspeccion rapida.",
+    "schema": "radshield-mx.medical3d.three-r3f-inspection.v1",
+  },
+  "visualEvidence": {
+    "cameraBookmarkPolicy": "Use F147 stations plus user snapshot for final visual evidence.",
+    "captureTargets": [
+      "Memoria IA",
+      "PDF report",
+      "Evidence Pack",
+      "CNSNS/UAQ anexos",
+    ],
+    "lightingPreset": "clinical",
+    "photorealWalkthrough": false,
+    "sceneHash": "scene-180d8ca1",
+    "schema": "radshield-mx.medical3d.visualEvidence.v1",
+    "stationBookmarks": [
+      {
+        "evidence": [
+          "captura PNG",
+          "nombre de plano",
+          "escala",
+          "zonas visibles",
+        ],
+        "id": "entry-overview",
+        "label": "Entrada / vista general",
+        "lookAt": [
+          3.5,
+          1.25,
+          4,
+        ],
+        "order": 1,
+        "position": [
+          3.5,
+          1.65,
+          7.6,
+        ],
+        "purpose": "Verificar lectura espacial de sala, acceso, equipo y volumen de blindaje.",
+      },
+      {
+        "evidence": [
+          "footprint real",
+          "asset/simbolo equipo",
+          "tags RAG",
+          "zona controlada",
+        ],
+        "id": "equipment-footprint",
+        "label": "Equipo / isocentro",
+        "lookAt": [
+          4,
+          0.9,
+          4,
+        ],
+        "order": 2,
+        "position": [
+          6.2,
+          1.65,
+          6.4,
+        ],
+        "purpose": "Revisar footprint, orientacion, clearances y relacion con barreras.",
+      },
+      {
+        "evidence": [
+          "espesor mm",
+          "material",
+          "tipo primaria/secundaria",
+          "cita de calculo",
+        ],
+        "id": "critical-wall",
+        "label": "Barrera critica",
+        "lookAt": [
+          7,
+          1.45,
+          4,
+        ],
+        "order": 3,
+        "position": [
+          8.8,
+          1.65,
+          5.8,
+        ],
+        "purpose": "Inspeccionar espesor requerido, material, tipo de barrera y acabado visible.",
+      },
+    ],
+    "visualEvidenceCaptures": [],
+    "visualEvidenceGate": {
+      "captureCount": 0,
+      "checklistReady": false,
+      "checklistTotal": 5,
+      "minimumCapturesReady": false,
+      "missingWorkflows": [
+        "overview",
+        "barriers",
+        "equipment",
+        "dose",
+      ],
+      "readyChecklist": 4,
+      "recommendation": "Faltan capturas: overview, barriers, equipment, dose.",
+      "requiredWorkflows": [
+        "overview",
+        "barriers",
+        "equipment",
+        "dose",
+      ],
+      "schema": "radshield-mx.medical3d.visual-evidence-gate.f366.v1",
+      "status": "pending",
+      "walkthroughCaptured": false,
+    },
+    "visualOnlyDisclaimer": "La escena 3D es evidencia visual de revision; los calculos firmables se toman del motor de blindaje y sus citas.",
+    "visualWorkflow": "overview",
+    "visualWorkflowChecklist": [
+      {
+        "evidence": "3 muros, 1 equipos",
+        "id": "geometry",
+        "label": "Geometria cargada",
+        "status": "ready",
+      },
+      {
+        "evidence": "Bandas material/espesor activas",
+        "id": "materials",
+        "label": "Materiales visibles",
+        "status": "ready",
+      },
+      {
+        "evidence": "1 footprint(s)",
+        "id": "equipment",
+        "label": "Equipos sembrados",
+        "status": "ready",
+      },
+      {
+        "evidence": "648 puntos visuales, 0 zonas",
+        "id": "dose-context",
+        "label": "Contexto dosis/zonas",
+        "status": "review",
+      },
+      {
+        "evidence": "3 bookmark(s) F147",
+        "id": "stations",
+        "label": "Estaciones de recorrido",
+        "status": "ready",
+      },
+    ],
+  },
+  "walls": [
+    {
+      "barrierType": "primary",
+      "id": "primaria",
+      "materialCode": "CONCRETE235",
+      "name": "primaria",
+      "requiredThickness_mm": 1500,
+      "thickness_m": 1.5,
+    },
+    {
+      "barrierType": "secondary",
+      "id": "secundaria",
+      "materialCode": "CONCRETE235",
+      "name": "secundaria",
+      "requiredThickness_mm": 900,
+      "thickness_m": 0.9,
+    },
+    {
+      "barrierType": "secondary",
+      "id": "plomo",
+      "materialCode": "PB",
+      "name": "plomo",
+      "requiredThickness_mm": 2,
+      "thickness_m": 0.12,
+    },
+  ],
+  "zones": [],
+}
+`;
+
+exports[`MedicalFloorPlan3DDialog — exportaciones > el OBJ y el tour visual conservan su contenido (instantánea) 1`] = `
+{
+  "obj": "# RadShield-MX Medical 3D Floor Plan
+# Scene: LINAC bunker
+# Walls: 3
+# Equipment: 1
+o medical_floor_plan
+o floor
+v -1.0000 -0.1000 -1.0000
+v 8.0000 -0.1000 -1.0000
+v 8.0000 0.0000 -1.0000
+v -1.0000 0.0000 -1.0000
+v -1.0000 -0.1000 9.0000
+v 8.0000 -0.1000 9.0000
+v 8.0000 0.0000 9.0000
+v -1.0000 0.0000 9.0000
+f 1 2 3 4
+f 5 8 7 6
+f 1 5 6 2
+f 2 6 7 3
+f 3 7 8 4
+f 5 1 4 8
+o primaria
+v 3.0000 0.0000 3.2500
+v 11.0000 0.0000 3.2500
+v 11.0000 3.1000 3.2500
+v 3.0000 3.1000 3.2500
+v 3.0000 0.0000 4.7500
+v 11.0000 0.0000 4.7500
+v 11.0000 3.1000 4.7500
+v 3.0000 3.1000 4.7500
+f 9 10 11 12
+f 13 16 15 14
+f 9 13 14 10
+f 10 14 15 11
+f 11 15 16 12
+f 13 9 12 16
+o secundaria
+v 0.0000 0.0000 6.5500
+v 7.0000 0.0000 6.5500
+v 7.0000 3.1000 6.5500
+v 0.0000 3.1000 6.5500
+v 0.0000 0.0000 7.4500
+v 7.0000 0.0000 7.4500
+v 7.0000 3.1000 7.4500
+v 0.0000 3.1000 7.4500
+f 17 18 19 20
+f 21 24 23 22
+f 17 21 22 18
+f 18 22 23 19
+f 19 23 24 20
+f 21 17 20 24
+o plomo
+v 0.0000 0.0000 2.4400
+v 3.0000 0.0000 2.4400
+v 3.0000 3.1000 2.4400
+v 0.0000 3.1000 2.4400
+v 0.0000 0.0000 2.5600
+v 3.0000 0.0000 2.5600
+v 3.0000 3.1000 2.5600
+v 0.0000 3.1000 2.5600
+f 25 26 27 28
+f 29 32 31 30
+f 25 29 30 26
+f 26 30 31 27
+f 27 31 32 28
+f 29 25 28 32
+o LINAC
+v 2.4000 0.0000 1.9000
+v 5.6000 0.0000 1.9000
+v 5.6000 1.1000 1.9000
+v 2.4000 1.1000 1.9000
+v 2.4000 0.0000 6.1000
+v 5.6000 0.0000 6.1000
+v 5.6000 1.1000 6.1000
+v 2.4000 1.1000 6.1000
+f 33 34 35 36
+f 37 40 39 38
+f 33 37 38 34
+f 34 38 39 35
+f 35 39 40 36
+f 37 33 36 40
+",
+  "tour": {
+    "activeWorkflow": "overview",
+    "captureSequence": [
+      "Aplicar Vista general y capturar sala completa.",
+      "Aplicar Barreras y capturar espesores/materiales.",
+      "Aplicar Equipos y validar footprints/isocentro/fuente.",
+      "Aplicar Dosis y capturar heatmap/zonas.",
+      "Aplicar Recorrido y guardar estaciones relevantes.",
+    ],
+    "checklist": [
+      {
+        "evidence": "3 muros, 1 equipos",
+        "id": "geometry",
+        "label": "Geometria cargada",
+        "status": "ready",
+      },
+      {
+        "evidence": "Bandas material/espesor activas",
+        "id": "materials",
+        "label": "Materiales visibles",
+        "status": "ready",
+      },
+      {
+        "evidence": "1 footprint(s)",
+        "id": "equipment",
+        "label": "Equipos sembrados",
+        "status": "ready",
+      },
+      {
+        "evidence": "648 puntos visuales, 0 zonas",
+        "id": "dose-context",
+        "label": "Contexto dosis/zonas",
+        "status": "review",
+      },
+      {
+        "evidence": "3 bookmark(s) F147",
+        "id": "stations",
+        "label": "Estaciones de recorrido",
+        "status": "ready",
+      },
+    ],
+    "disclaimer": "Paquete visual no certificable; alimentar Memoria IA/Evidence Pack junto con calculo trazable y citas.",
+    "floorPlan": "Bunker prueba",
+    "generatedBy": "RadShield-MX F364 Three/R3F Visual Workflow",
+    "roomName": "LINAC bunker",
+    "sceneHash": "scene-180d8ca1",
+    "schema": "radshield-mx.medical3d.visual-workflow.f364.v1",
+    "stationBookmarks": [
+      {
+        "evidence": [
+          "captura PNG",
+          "nombre de plano",
+          "escala",
+          "zonas visibles",
+        ],
+        "id": "entry-overview",
+        "label": "Entrada / vista general",
+        "lookAt": [
+          3.5,
+          1.25,
+          4,
+        ],
+        "order": 1,
+        "position": [
+          3.5,
+          1.65,
+          7.6,
+        ],
+        "purpose": "Verificar lectura espacial de sala, acceso, equipo y volumen de blindaje.",
+      },
+      {
+        "evidence": [
+          "footprint real",
+          "asset/simbolo equipo",
+          "tags RAG",
+          "zona controlada",
+        ],
+        "id": "equipment-footprint",
+        "label": "Equipo / isocentro",
+        "lookAt": [
+          4,
+          0.9,
+          4,
+        ],
+        "order": 2,
+        "position": [
+          6.2,
+          1.65,
+          6.4,
+        ],
+        "purpose": "Revisar footprint, orientacion, clearances y relacion con barreras.",
+      },
+      {
+        "evidence": [
+          "espesor mm",
+          "material",
+          "tipo primaria/secundaria",
+          "cita de calculo",
+        ],
+        "id": "critical-wall",
+        "label": "Barrera critica",
+        "lookAt": [
+          7,
+          1.45,
+          4,
+        ],
+        "order": 3,
+        "position": [
+          8.8,
+          1.65,
+          5.8,
+        ],
+        "purpose": "Inspeccionar espesor requerido, material, tipo de barrera y acabado visible.",
+      },
+    ],
+    "workflows": [
+      {
+        "aids": {
+          "beamGuides": true,
+          "equipmentFootprints": true,
+          "materialBands": true,
+          "roomRulers": true,
+        },
+        "description": "Sala completa, zonas y lectura rapida para explicar el caso.",
+        "id": "overview",
+        "inspection": true,
+        "label": "Vista general",
+        "lighting": "clinical",
+        "mode": "presentation",
+        "photoreal": false,
+        "walkthrough": false,
+      },
+      {
+        "aids": {
+          "beamGuides": true,
+          "equipmentFootprints": false,
+          "materialBands": true,
+          "roomRulers": true,
+        },
+        "description": "Materiales, espesores y cotas para revisar blindaje.",
+        "id": "barriers",
+        "inspection": true,
+        "label": "Barreras",
+        "lighting": "inspection",
+        "mode": "technical",
+        "photoreal": false,
+        "walkthrough": false,
+      },
+      {
+        "aids": {
+          "beamGuides": true,
+          "equipmentFootprints": true,
+          "materialBands": false,
+          "roomRulers": true,
+        },
+        "description": "Footprints, isocentro/fuente y espacio libre.",
+        "id": "equipment",
+        "inspection": true,
+        "label": "Equipos",
+        "lighting": "clinical",
+        "mode": "technical",
+        "photoreal": false,
+        "walkthrough": false,
+      },
+      {
+        "aids": {
+          "beamGuides": true,
+          "equipmentFootprints": true,
+          "materialBands": true,
+          "roomRulers": false,
+        },
+        "description": "Heatmap, guia de fuente y lectura de zonas controladas.",
+        "id": "dose",
+        "inspection": true,
+        "label": "Dosis",
+        "lighting": "inspection",
+        "mode": "dose",
+        "photoreal": false,
+        "walkthrough": false,
+      },
+      {
+        "aids": {
+          "beamGuides": true,
+          "equipmentFootprints": true,
+          "materialBands": true,
+          "roomRulers": true,
+        },
+        "description": "WASD con colisiones, PBR ligero y estaciones visuales.",
+        "id": "walkthrough",
+        "inspection": true,
+        "label": "Recorrido",
+        "lighting": "warm",
+        "mode": "presentation",
+        "photoreal": true,
+        "walkthrough": true,
+      },
+    ],
+  },
+}
+`;
+
+exports[`MedicalFloorPlan3DDialog — render > el texto de la barra lateral y del visor no cambia (instantánea) 1`] = `"Medical 3D Floor PlanOfflineThree.js / React Three FiberCAD/BIM Fase 42Sala clinicaLINAC bunkerModo Presentacion Tecnico DosisFlujo visual 3DPresets para capturas, memoria y evidencia.overviewVista generalpresentationSala completa, zonas y lectura rapida para explicar el caso.BarrerastechnicalMateriales, espesores y cotas para revisar blindaje.EquipostechnicalFootprints, isocentro/fuente y espacio libre.DosisdoseHeatmap, guia de fuente y lectura de zonas controladas.RecorridopresentationWASD con colisiones, PBR ligero y estaciones visuales.Geometria cargadareadyMateriales visiblesreadyEquipos sembradosreadyContexto dosis/zonasreviewEstaciones de recorridoready Exportar tour visualEvidencia visualCapturas PNG trazadas por preset + compuerta QA.pendingCapturas0Checklist4/5Faltantesoverview, barriers, equipment, doseFaltan capturas: overview, barriers, equipment, dose. Capturar PackF367-F370 integracion3D documental, Unity WebGL externo, motores y fotorrealismo.beta-release-integration-readyUnity: external-webgl-viewer / fallback three-r3fMC: gate-opengate:runner-contract-ready-waiting | geant4:runner-contract-ready-waiting | egsnrc-egs-brachy:runner-contract-ready-waitingFotoreal: three-r3f; Babylon pendienteBeta: frontend-beta-ready-with-external-runners Export F367-F370F459-F463 visual stackUnity, Babylon, fotorealismo, PBR DB y WASD.visual-stack-readyF459Unity bridge realistaF460Unity scene payloadF461Fotorealismo avanzado nivel 1F462Galeria PBR de materialesF463Recorrido WASD visualDB PBR f461-f463.1: 5 materiales. Unity externo queda visual-only hasta URL real.F464-F468 RC visual betaQA 3D, materiales, sync canvas/3D, Memoria IA y gate beta.beta-visual-reviewF464reviewF465readyF466readyF467reviewF468reviewThree/R3FreadyBabylonreviewWASDreviewUnityurl-pending Export F464-F468 betaF465 materiales vinculadosPBR + densidad + kg/m2 para toolbox tecnica.3primaria1500 mmConcreto alta densidad / 3200 kg/m3Carga visual: 4800 kg/m2secundaria900 mmConcreto alta densidad / 3200 kg/m3Carga visual: 2880 kg/m2plomo2 mmConcreto alta densidad / 3200 kg/m3Carga visual: 6.4 kg/m2F466 sync canvas/3DTargets auditables para seleccionar, inspeccionar y capturar.4primariawallbarrier:primaria -> wall:primariasecundariawallbarrier:secundaria -> wall:secundariaplomowallbarrier:plomo -> wall:plomoLINACequipmentsource:linac -> equipment:linacF467 Memoria IA visualCapturas y secciones para PDF/Evidence.0 caps- Resumen visual BIM/3D- Anexo de materiales PBR/tecnicos- Sincronizacion plano-3D- Capturas para Memoria IAF385-F386 capacidades productivasSolo Three/R3F queda activo en el bundle actual; Unity/Babylon requieren gate live.claim guardThree/R3F productivoactivoMotor visual principal con Canvas, recorrido, PBR ligero y evidencia visual exportable.Babylon runtimeinstaladoDependencias locales presentes; ejecutar smoke visual F455 para habilitar paridad post-beta.Unity URLpendienteFalta VITE_MEDICAL_3D_UNITY_WEBGL_URL para probar visor externo real.Motor 3DThree.js / React Three Fiberactivethree-r3fVisor principal integrado al frontend React para inspeccion 3D, snapshots y evidencia.Activo por defecto; debe pasar F197/F207/F296-F300/F307-F309 antes de publicar.Vista previa Babylon — En revisión: se reactivará con el motor de dosis unificado. El visor 3D activo es Three/R3F.F520-F524 Deep renderer + Babylondeep-lane-blockedPick 5Cam 3Over 4Reemplazo de canvas base: false. Babylon y renderer v2 quedan visuales hasta repetir QA/rollback. Exportar handoff 3DF459-F460 Unity bridgeviewer-url-missingURL pendiente por VITE_MEDICAL_3D_UNITY_WEBGL_URLHandoff listo: geometria, materiales PBR, bookmarks y boundary visual-only. Three/R3F queda como fallback clinico visual.Muros 3Eq 1Zonas 0PBR 5F475-F478 Unity WebGL realCarpeta exportada, iframe/new-tab, handoff JSON y QA live gate.export-folder-requiredFuente missingMuros 3Equipos 1Zonas 0Carpeta requerida: public/unity/radshield-medical-3dindex.html | Build/*.loader.js | Build/*.framework.js | Build/*.data | Build/*.wasm | TemplateData/*Activar con \`VITE_MEDICAL_3D_UNITY_LOCAL_BUILD=true\` o URL publicada en \`VITE_MEDICAL_3D_UNITY_WEBGL_URL\`.Copie un build Unity WebGL real o configure URL externa para habilitar el iframe.blockedBridge de casomedical_3d_unity_handoff_*.json; eventos radshield:scene-ready, radshield:snapshot-request, radshield:camera-bookmarkUnity WebGL is an external visual walkthrough. It consumes RadShield scene metadata and must not author signed shielding calculations. Unity case Abrir/preview Unity JSON Abrir UnityTecho translucidoDetalle clinicoInspeccion visualRecorrido WASDMouse-lookColisionesRecorrido fotorealLuz clinicaClinica balanceada. Hash visual: scene-180d8ca1 Preset recorrido fotoreal WASDF461 fotorrealismo avanzadoThree/R3F + Babylon preview con ACES, PBR, sombras y recorrido.standardDPR 1-1.5ACES exp 1.00PCFSoftShadowMapclinical-softboxPhotoreal output is visual evidence only. No modifica calculos ni memoria firmable.F479-F483 fotorealismo avanzadoTexturas, HDRI, decals, presets y QA/export visual.asset-folder-readyAssets procedural-safeMateriales 5HDRI procedural-softboxDecals 5Asset root: public/medical3d/photorealConcreto alta densidad: albedo/normal/roughness/ao | Plomo laminado: albedo/roughness/metalness | Acero/marcos: albedo/normal/roughness/metalness | Piso clinico/acabado: albedo/normal/roughness | TM/NIPOLL HD: albedo/normal/roughness/aoHDRI esperadopublic/medical3d/photoreal/hdri/clinical_softbox.hdr; fallback Three/R3F procedural lightsSimbolo radiacion / acceso controladopuertas y zonas controladasEtiqueta penetracion MEPductos, sleeves y huecos sobre barreraRol primaria/secundaria/laberintocara superior/lateral de barreraFootprint fabricante/equipobase de LINAC/Gamma Knife/CiclotronInspeccion tecnicareadyPresentacionreadyCinematicogatedPhotoreal assets are visual evidence only. Texture appearance must not override TVL, density, cost, structural load or citation authority. Export F479-F483F462 materiales PBRFotos/swatch procedurales para acabados, carga visual y evidencia.f461-f463.1Concreto alta densidad3200 kg/m3R 0.88 / M 0.00Plomo laminado11340 kg/m3R 0.46 / M 0.42Acero estructural7850 kg/m3R 0.36 / M 0.62Vidrio plomado5200 kg/m3R 0.16 / M 0.02Polietileno borado960 kg/m3R 0.64 / M 0.00 Actualizar DB Export DBF463 recorrido WASDGuia visual de inspeccion navegable y capturas.OFFQWEASDRShiftCtrlW/S avanza-retrocede, A/D lateral, Q/E gira, R/F altura, Shift acelera, Ctrl reduce velocidad. Mouse-look requiere activar recorrido.F409 / F408 salida 3DEscena exportable para Evidence Pack, Memoria IA y visor externo.unity-scene-export-reviewMuros 3Equipos 1Zonas 0No controlled/public zones in scene.Three/R3F ayudas visualesCapas no dosimetricas para inspeccion, evidencia y recorrido.4/4Bandas material/espesorONColor por tipo de barrera y espesor relativo.Huellas de equipoONFootprint real para espacio libre y colision.Guias de haz/fuenteONVisual no certificable para orientar isocentro/fuente.Reglas de salaONCotas visuales de ancho y profundidad.Babylon: reparacion/instalacionready-for-installDependencias locales verificadas. F456-F458 agrega paridad de escena, medicion de rendimiento/fallback y export PNG visual.runtime-ready / parity-readyPBR concrete shielding shell | cutaway bunker preview | medical equipment proxy | controlled-area translucent overlay | Three/R3F fallback retainedParidad: 3 muros, 1 equipos, 0 zonas. Export PNG: ready.Instalacion normalnpm install @babylonjs/core @babylonjs/loadersCuando npm ya puede escribir cache y resolver registry.npmjs.org sin EACCES.Cache local del reponpm install @babylonjs/core @babylonjs/loaders --cache .npm-cache-babylon --prefer-onlineCuando el bloqueo viene de permisos/carpeta cache global de npm.Gestor alternocorepack enable && pnpm add @babylonjs/core @babylonjs/loadersCuando npm insiste en EACCES aunque Node y red funcionen.Tarballs localesnpm pack @babylonjs/core @babylonjs/loaders && npm install ./babylonjs-core-*.tgz ./babylonjs-loaders-*.tgzCuando hay que descargar paquetes fuera del entorno de Codex y traerlos al repo.F92 inspeccion 3DreadyMuros: 3Equipos: 1Zonas: 0Control: 0Max espesor: 1500.0 mm1 pendiente(s) antes de captura final.F147 inspeccion medica 3D3 estacionesWASD/flechas para avance, A/D para lateral, Q/E para giro; OrbitControls para revision general.Entrada / vista generalVerificar lectura espacial de sala, acceso, equipo y volumen de blindaje.Equipo / isocentroRevisar footprint, orientacion, clearances y relacion con barreras.Barrera criticaInspeccionar espesor requerido, material, tipo de barrera y acabado visible.READY Geometria desde floorplan/barriersREADY Equipo con footprint y simbolo 3DREADY Espesores visibles por barreraREVIEW Zonas controladas/ocupadas visiblesREADY PNG/OBJ/JSON/F147 pack exportables Exportar F147 packCAD/BIM Importar DXF/IFC PNG OBJ JSONCADx / AI RenderCADx Studio queda como referencia/integracion externa para AI design/render en navegador; RadShield-MX exporta briefs auditables y mantiene calculos de blindaje separados del render generativo. Exportar AI BriefCADCodeVerifyCADCodeVerify se integra como protocolo de verificacion externa/inspirada en VLM: RadShield-MX genera preguntas y feedback auditables, pero no acepta geometria generativa sin revision fisica/regulatoria. Exportar Verify PackLINAC bunkerBarreras: 3Equipos: 1Zonas: 0Primarias/sec.: 1/2Max. espesor: 1500 mmEscala: 0.0100 m/pxArea aprox.: 90.0 m2El render es una visualizacion de revision. Los espesores y resultados regulatorios deben validarse en los modulos de calculo.F364: Vista generalChecklist 4/5Orbit: click + dragZoom: scrollInspeccion por clickRender activo R3Fscene-180d8ca1Close"`;
