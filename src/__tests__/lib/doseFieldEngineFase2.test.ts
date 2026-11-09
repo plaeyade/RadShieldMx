@@ -162,18 +162,19 @@ describe('Fase 2 — oblicuidad (NCRP 151 §2.2, p. 24)', () => {
   const muro = (t_mm: number) => barrera({ x1: 3, x2: 3, y1: -500, y2: 500, thickness_mm: t_mm });
   const y60 = 6 * Math.tan((60 * Math.PI) / 180); // punto (6, y60): rayo a 60° de la normal del muro x = 3
 
-  it('θ = 60° y B < 10⁻³: espesor oblicuo t/cos θ con +1 HVL (MV)', () => {
+  it('θ = 60°: sin crédito por oblicuidad, transmisión a incidencia normal (MV)', () => {
     const t = 1500;
     const d = dosisEnPunto([linac18()], 6, y60, 1, { barriers: [muro(t)] });
     const c = comp(d, 'primaria')!.cruces[0];
     expect(c.cosTheta).toBeCloseTo(0.5, 9);
     const Bobl = transmisionTVL((t / 0.5) / 10, TABLA_B_2.concrete['18']);
     expect(Bobl).toBeLessThan(1e-3);
-    expect(c.hvlDescontados).toBe(1);
-    expect(c.transmision).toBeCloseTo(Bobl * 2, 14);
+    const Bnor = transmisionTVL(t / 10, TABLA_B_2.concrete['18']);
+    expect(c.hvlDescontados).toBeCloseTo(Math.log2(Bnor / Bobl), 9);
+    expect(c.transmision / Bnor).toBeCloseTo(1, 12);
   });
 
-  it('Co-60 (teleterapia, «tele-co60»): +2 HVL; la corrección nunca supera la transmisión normal', () => {
+  it('Co-60 (teleterapia, «tele-co60»): θ > 45° → transmisión normal, nunca menor que la de incidencia perpendicular', () => {
     const co = fuente('linac-6mv', {
       modality: { ...modalidad('linac-6mv'), id: 'tele-co60', name: 'Co-60', energyLabel: '1.25 MeV γ (Co-60)' },
     });
@@ -182,8 +183,8 @@ describe('Fase 2 — oblicuidad (NCRP 151 §2.2, p. 24)', () => {
     const c = comp(d, 'primaria')!.cruces[0];
     const Bobl = transmisionTVL((t / 0.5) / 10, TABLA_B_2.concrete.Co60);
     const Bnor = transmisionTVL(t / 10, TABLA_B_2.concrete.Co60);
-    expect(c.hvlDescontados).toBe(2);
-    expect(c.transmision).toBeCloseTo(Math.min(Bnor, Bobl * 4), 14);
+    expect(c.transmision / Bnor).toBeCloseTo(1, 12);
+    expect(c.transmision).toBeGreaterThanOrEqual(Bobl * 4);
   });
 
   it(`sin crédito adicional más allá de ${OBLICUIDAD_MAX_DATOS_DEG}° (tope del motor)`, () => {
@@ -203,6 +204,19 @@ describe('Fase 2 — oblicuidad (NCRP 151 §2.2, p. 24)', () => {
     const s = comp(d, 'dispersion')!.cruces[0];
     expect(s.capas[0].recorrido_mm).toBeCloseTo(t, 9);
     expect(s.transmision).toBeCloseTo(transmisionUnTVL(t / 10, tvlDispersionConcreto(18, 30)), 14);
+  });
+
+  it('la fuga no recibe crédito por oblicuidad (NCRP 151 §2.2: sólo la primaria), a 45° ni a 60°', () => {
+    const t = 1200;
+    for (const y of [6, 6 * Math.tan(Math.PI / 3)]) {
+      const d = dosisEnPunto([linac18()], 6, y, 1, { barriers: [muro(t)] });
+      const f = comp(d, 'fuga')!.cruces[0];
+      expect(f.capas[0].recorrido_mm).toBeCloseTo(t, 9);
+      expect(f.hvlDescontados).toBe(0);
+      expect(f.transmision).toBeCloseTo(transmisionTVL(t / 10, TABLA_B_7['18']), 14);
+      // La primaria a 45° sí acredita t/cos θ: menos transmisión que la fuga con el mismo TVL normal.
+      if (y === 6) expect(comp(d, 'primaria')!.cruces[0].transmision).toBeCloseTo(transmisionTVL((t * Math.SQRT2) / 10, TABLA_B_2.concrete['18']), 14);
+    }
   });
 });
 

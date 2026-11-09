@@ -29,3 +29,14 @@ export function stampNotForSignature(doc: { getNumberOfPages(): number; setPage(
     doc.text('PRELIMINAR — no válido para firma ni presentación regulatoria (núcleo de cálculo pendiente de validación)', w / 2, h - 4, { align: 'center' });
   }
 }
+
+/**
+ * Fase 8c: rotula datos de ejemplo (bitácoras, tableros, comparadores) que no salen del proyecto ni de un registro real.
+ */
+export function DatosEjemploBanner({ detalle }: { detalle: string }) {
+  return (
+    <div role="note" data-testid="datos-ejemplo" className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+      <strong>DATOS DE EJEMPLO.</strong> {detalle}
+    </div>
+  );
+}

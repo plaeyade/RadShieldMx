@@ -1,4 +1,5 @@
 // Fase 2: CNSNSChecklistDialog -- Checklist interactivo con progreso visual para dictamen CNSNS
+import { LIMITES_DOSIS } from '@/lib/limitesDosis';
 import { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,8 @@ interface CheckItem {
 
 const DEFAULT_CHECKLIST: CheckItem[] = [
   // NOM-008-NUCL
-  { id: '008-1', category: 'NOM-008-NUCL', requirement: 'Dosis POE < 50 mSv/ano', norm: 'NOM-008 §4.1', status: 'pending', notes: '' },
-  { id: '008-2', category: 'NOM-008-NUCL', requirement: 'Dosis publico < 5 mSv/ano', norm: 'NOM-008 §4.2', status: 'pending', notes: '' },
+  { id: '008-1', category: 'NOM-008-NUCL', requirement: `Dosis POE ≤ ${LIMITES_DOSIS.icrp103.poe_mSv_anio} mSv/año (promedio 5 años; ≤ ${LIMITES_DOSIS.icrp103.poeMaxUnAnio_mSv} en un año)`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.poe_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
+  { id: '008-2', category: 'NOM-008-NUCL', requirement: `Dosis al público ≤ ${LIMITES_DOSIS.icrp103.publico_mSv_anio} mSv/año`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.publico_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
   { id: '008-3', category: 'NOM-008-NUCL', requirement: 'Dosimetria personal obligatoria', norm: 'NOM-008 §7.1', status: 'pending', notes: '' },
   { id: '008-4', category: 'NOM-008-NUCL', requirement: 'Area controlada delimitada', norm: 'NOM-008 §5.1', status: 'pending', notes: '' },
   { id: '008-5', category: 'NOM-008-NUCL', requirement: 'Señalizacion radiologica', norm: 'NOM-008 §5.2', status: 'pending', notes: '' },
@@ -57,7 +58,7 @@ const DEFAULT_CHECKLIST: CheckItem[] = [
   { id: '147-2', category: 'NCRP 147', requirement: 'Ocupancia factor correcto', norm: 'NCRP 147 Tabla 4.1', status: 'pending', notes: '' },
 
   // AAPM TG 108
-  { id: '108-1', category: 'AAPM TG 108', requirement: 'Dosis nuclear < 20 mSv/ano', norm: 'TG 108 §3.1', status: 'pending', notes: '' },
+  { id: '108-1', category: 'AAPM TG 108', requirement: `Objetivos de diseño: ${LIMITES_DOSIS.objetivosDiseno.controlada_mSv_semana} mSv/semana (controlada) y ${LIMITES_DOSIS.objetivosDiseno.noControlada_mSv_semana} mSv/semana (no controlada)`, norm: 'AAPM TG-108 (adopta los objetivos de NCRP 147)', status: 'pending', notes: '' },
 
   // CNSNS Especifico
   { id: 'cnsns-1', category: 'CNSNS', requirement: 'Dictamen tecnico firmado por FM', norm: 'CNSNS R4', status: 'pending', notes: '' },

@@ -2,6 +2,7 @@
 // MonteCarloIntegrationDialog.tsx — Geant4 / MCNP6 / FLUKA MC from UI
 // Cloud-based MC simulation with macro generation
 // =============================================================================
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,7 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
             <Badge variant="outline" className="text-[10px]">{code.toUpperCase()}</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Simulación propia con números aleatorios y sin caso de validación: no usar para diseño." />
 
         <Tabs defaultValue="setup" className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-4 shrink-0">

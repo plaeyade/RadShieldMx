@@ -1,84 +1,97 @@
 /**
- * ChiltonSkyshineDialog — MC-05 UI: Skyshine Calculator
- * Metodo de Chilton et al. para radioterapia megavoltaje.
+ * ChiltonSkyshineDialog — skyshine de fotones de un acelerador (NCRP 151 §5.1, Ec. 5.1; McGinley 2002).
+ *
+ * Antes usaba G = (h/d)²·f(E)·e^(−μd/3) con coeficientes sin fuente. Ahora: Ḣ = 2.5×10⁷·B_xs·Ḋ₀·Ω^1.3/(dᵢ·dₛ)²,
+ * con B_xs del techo por TVL₁/TVLₑ de la Tabla B.2. Validado contra la columna «calculada» de la Tabla 5.1.
+ * NCRP 151 advierte que la ecuación da, a lo sumo, el orden de magnitud (medido/calculado 0.25–5.3).
  */
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { X, Cloud, BarChart3, Download } from 'lucide-react';
-import { calculateSkyshine, DEFAULT_DISTANCES } from '@/lib/skyshine/ChiltonSkyshine';
+import {
+  ENERGIAS_MV_TABULADAS, energiaTabuladaMV,
+} from '@/lib/calculadorasNormativas';
+import { anguloSolidoCampo, skyshineFotones, transmisionTVL, tvlPrimaria } from '@/lib/ncrp151';
+
+const DISTANCIAS_M = [5, 7.5, 10, 15, 20, 30, 50];
+
+function Num({ id, label, value, onChange, step }: { id: string; label: string; value: number; onChange: (n: number) => void; step?: number }) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-[10px] font-medium text-slate-500">{label}</label>
+      <input id={id} data-testid={id} type="number" step={step} value={value} onChange={e => onChange(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" />
+    </div>
+  );
+}
 
 export default function ChiltonSkyshineDialog({ onClose }: { onClose: () => void }) {
-  const [energy, setEnergy] = useState(10);
-  const [workload, setWorkload] = useState(500);
-  const [barrierH, setBarrierH] = useState(3.0);
-  const [roofThick, setRoofThick] = useState(300);
-  const [beamAngle, setBeamAngle] = useState(0);
-  const [distances] = useState(DEFAULT_DISTANCES.join(', '));
+  const [energia, setEnergia] = useState(18);
+  const [W, setW] = useState(450);
+  const [techo_cm, setTecho] = useState(0);
+  const [campo_cm, setCampo] = useState(40);
+  const [di, setDi] = useState(5.97);
 
-  const result = useMemo(() => {
-    const d = distances.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n) && n > 0);
-    return calculateSkyshine({ energyMV: energy, workloadGym2Week: workload, barrierHeightM: barrierH, roofThicknessMm: roofThick, distancesM: d.length > 0 ? d : [...DEFAULT_DISTANCES], beamAngleDeg: beamAngle });
-  }, [energy, workload, barrierH, roofThick, beamAngle, distances]);
+  const r = useMemo(() => {
+    const e = energiaTabuladaMV(energia);
+    const B_xs = transmisionTVL(techo_cm, tvlPrimaria(e, 'concrete'));
+    const omega = anguloSolidoCampo(campo_cm / 100, campo_cm / 100, 1);
+    const puntos = DISTANCIAS_M.map(ds => ({ ds, uSv_semana: skyshineFotones({ B_xs, D0: W, omega_sr: omega, di_m: di, ds_m: ds }) / 1000 }));
+    return { e, B_xs, omega, puntos };
+  }, [energia, W, techo_cm, campo_cm, di]);
+
+  const max = Math.max(...r.puntos.map(p => p.uSv_semana), 1e-9);
 
   const exportCSV = () => {
-    const h = ['Distancia_m', 'Dosis_uSv_sem'];
-    const csv = [h, ...result.points.map(p => [p.distanceM, p.doseUSvWeek.toFixed(4)])]
-      .map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Skyshine_${new Date().toISOString().split('T')[0]}.csv`; a.click(); URL.revokeObjectURL(url);
+    const csv = [['ds_m', 'uSv_semana'], ...r.puntos.map(p => [p.ds, p.uSv_semana.toPrecision(4)])].map(x => x.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'skyshine_ncrp151.csv'; a.click(); URL.revokeObjectURL(url);
   };
-
-  const maxDose = Math.max(...result.points.map(p => p.doseUSvWeek), 0.001);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="sky-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-t-lg">
-          <div className="flex items-center gap-3"><Cloud className="w-6 h-6" /><div><h2 id="sky-title" className="text-lg font-bold">Chilton Skyshine Calculator</h2><p className="text-xs text-sky-100">NCRP 151 Sec. 5.4 — v50</p></div></div>
+          <div className="flex items-center gap-3"><Cloud className="w-6 h-6" /><div><h2 id="sky-title" className="text-lg font-bold">Skyshine de fotones</h2><p className="text-xs text-sky-100">NCRP 151 §5.1, Ec. 5.1 (McGinley, 2002)</p></div></div>
           <button onClick={onClose} className="p-1.5 rounded hover:bg-white/20" aria-label="Cerrar"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 p-3 bg-slate-50 rounded-lg border text-xs">
-            <div><label className="text-[10px] font-medium text-slate-500">Energia (MV)</label><input type="number" value={energy} onChange={e => setEnergy(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" min={4} max={25} /></div>
-            <div><label className="text-[10px] font-medium text-slate-500">Carga (Gy·m²/sem)</label><input type="number" value={workload} onChange={e => setWorkload(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" min={0} /></div>
-            <div><label className="text-[10px] font-medium text-slate-500">Altura barrera (m)</label><input type="number" value={barrierH} onChange={e => setBarrierH(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" step={0.1} min={0.5} /></div>
-            <div></div>
-            <div><label className="text-[10px] font-medium text-slate-500">Techo concreto (mm)</label><input type="number" value={roofThick} onChange={e => setRoofThick(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" min={0} /></div>
-            <div><label className="text-[10px] font-medium text-slate-500">Angulo haz (deg)</label><input type="number" value={beamAngle} onChange={e => setBeamAngle(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded" min={0} max={90} /></div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 p-3 bg-slate-50 rounded-lg border text-xs">
+            <div>
+              <label htmlFor="sky-e" className="text-[10px] font-medium text-slate-500">Energía (MV)</label>
+              <select id="sky-e" data-testid="sky-e" value={energia} onChange={e => setEnergia(Number(e.target.value))} className="w-full mt-1 p-1.5 border rounded">
+                {ENERGIAS_MV_TABULADAS.map(x => <option key={x} value={x}>{x} MV</option>)}
+              </select>
+            </div>
+            <Num id="sky-w" label="Carga W a 1 m (Gy/semana)" value={W} onChange={setW} />
+            <Num id="sky-techo" label="Techo de concreto (cm)" value={techo_cm} onChange={setTecho} />
+            <Num id="sky-campo" label="Campo máximo a 1 m (cm)" value={campo_cm} onChange={setCampo} />
+            <Num id="sky-di" label="dᵢ: blanco → 2 m sobre el techo (m)" step={0.1} value={di} onChange={setDi} />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 bg-blue-50 rounded border"><div className="text-lg font-bold text-blue-700">{result.roofTransmission.toExponential(2)}</div><div className="text-[10px] text-slate-500">Transmision techo</div></div>
-            <div className="text-center p-2 bg-orange-50 rounded border"><div className="text-lg font-bold text-orange-700">{result.maxDoseUSv.toFixed(3)}</div><div className="text-[10px] text-slate-500">Max uSv/sem</div></div>
-            <div className="text-center p-2 bg-sky-50 rounded border"><div className="text-lg font-bold text-sky-700">{result.angleCorrection.toFixed(1)}x</div><div className="text-[10px] text-slate-500">Corr. angular</div></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="text-center p-2 bg-blue-50 rounded border"><div className="text-lg font-bold text-blue-700" data-testid="sky-bxs">{r.B_xs.toExponential(2)}</div><div className="text-[10px] text-slate-500">B_xs del techo (Tabla B.2, {r.e} MV)</div></div>
+            <div className="text-center p-2 bg-sky-50 rounded border"><div className="text-lg font-bold text-sky-700" data-testid="sky-omega">{r.omega.toFixed(3)} sr</div><div className="text-[10px] text-slate-500">Ángulo sólido Ω del campo</div></div>
           </div>
 
-          {/* Skyshine chart as horizontal bars */}
           <div className="border rounded-lg overflow-hidden">
-            <div className="px-3 py-2 bg-slate-50 border-b text-sm font-semibold flex items-center gap-2"><BarChart3 className="w-4 h-4" />Dosis Skyshine vs Distancia</div>
+            <div className="px-3 py-2 bg-slate-50 border-b text-sm font-semibold flex items-center gap-2"><BarChart3 className="w-4 h-4" />Equivalente de dosis semanal a nivel del suelo vs dₛ</div>
             <div className="p-3 space-y-1">
-              {result.points.map((p, i) => {
-                const barWidth = Math.min((p.doseUSvWeek / maxDose) * 100, 100);
-                return (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="w-12 text-right text-[10px] font-mono text-slate-600">{p.distanceM}m</div>
-                    <div className="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all" style={{ width: `${barWidth}%` }} />
-                    </div>
-                    <div className="w-16 text-right text-[10px] font-mono">{p.doseUSvWeek.toFixed(4)}</div>
-                  </div>
-                );
-              })}
+              {r.puntos.map(p => (
+                <div key={p.ds} className="flex items-center gap-2">
+                  <div className="w-12 text-right text-[10px] font-mono text-slate-600">{p.ds} m</div>
+                  <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden"><div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full" style={{ width: `${(p.uSv_semana / max) * 100}%` }} /></div>
+                  <div className="w-24 text-right text-[10px] font-mono" data-testid={`sky-h-${p.ds}`}>{p.uSv_semana.toPrecision(3)} μSv</div>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="p-3 bg-sky-50 rounded-lg border text-xs space-y-1">
-            <p className="font-semibold text-sky-800">Referencia Chilton et al.:</p>
-            <p>• Dosis skyshine = K_primaria × B_techo × G(d,h,E) × α(θ)</p>
-            <p>• G(d,h,E) = (h/d)² × f(E) × exp(-μd/3) — funcion de Chilton</p>
-            <p>• α(θ): correccion angular (0°=1.0x, 30°=1.3x, 45°=1.8x, 60°=2.4x)</p>
+            <p className="font-mono">Ḣ (nSv) = 2.5×10⁷ · B_xs · W · Ω^1.3 / (dᵢ · dₛ)²</p>
+            <p>Con W en Gy/semana a 1 m el resultado es por semana. NCRP 151 (Tablas 5.1 y 5.2) muestra que la ecuación da, a lo sumo,
+              el orden de magnitud: lo medido llega a ser 5 veces lo calculado lejos de la sala. Los neutrones (Ec. 5.2) no se incluyen.</p>
           </div>
         </div>
-        <div className="flex justify-between px-5 py-3 border-t bg-slate-50 rounded-b-lg"><span className="text-xs text-slate-500">Chilton Skyshine v50</span><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-600 text-white text-xs font-medium hover:bg-sky-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>
+        <div className="flex justify-end px-5 py-3 border-t bg-slate-50 rounded-b-lg"><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-600 text-white text-xs font-medium hover:bg-sky-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>
       </div>
     </div>
   );

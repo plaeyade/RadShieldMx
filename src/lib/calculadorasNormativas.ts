@@ -15,8 +15,8 @@
  * Unidades: objetivos P y kerma en mSv/semana (≈ mGy/semana); espesores en mm salvo donde el nombre diga _cm.
  */
 import {
-  combinarDosFuentes, combinarPorTipo, espesorSumaDirecta, fraccionDispersion, kermaDispersion, kermaFuga, kermaPrimaria,
-  transmisionTVL, transmisionUnTVL, tvlDispersion, tvlFuga, tvlPrimaria,
+  OBLICUIDAD_MAX_DATOS_DEG, combinarDosFuentes, combinarPorTipo, correccionOblicuidad, espesorSumaDirecta, espesorTVL,
+  fraccionDispersion, kermaDispersion, kermaFuga, kermaPrimaria, transmisionTVL, transmisionUnTVL, tvlDispersion, tvlFuga, tvlPrimaria,
   type Componente, type EnergiaMV, type FuenteTeleterapia, type MaterialNCRP151,
 } from './ncrp151';
 import {
@@ -34,6 +34,18 @@ export const OBJETIVOS_DISENO = [
   { id: 'controlada', P_mSv_semana: NCRP_DESIGN_GOALS.controlled, etiqueta: 'Área controlada (0.1 mSv/semana)' },
   { id: 'no_controlada', P_mSv_semana: NCRP_DESIGN_GOALS.uncontrolled, etiqueta: 'Área no controlada / público (0.02 mSv/semana)' },
 ] as const;
+
+/**
+ * Objetivo de diseño para el ejemplo Gamma Knife (S1a, cuarto de control; pendiente de la revisión 8c). El expediente
+ * usaba P = 400 μSv/semana, cuatro veces el objetivo de NCRP 147 §1.3 / NCRP 151 §1.2 para área controlada
+ * (0.1 mSv/semana); el de área no controlada es 0.02 mSv/semana. Se adopta el de NCRP salvo que el criterio de la
+ * CNSNS aplicable a la licencia sea más estricto: en ese caso cámbielo aquí o en el selector «Objetivo P».
+ */
+export const OBJETIVO_GAMMA_KNIFE = {
+  P_mSv_semana: NCRP_DESIGN_GOALS.controlled as number,
+  P_expediente_mSv_semana: 0.4,
+  fuente: 'NCRP 147 §1.3 / NCRP 151 §1.2: 0.1 mSv/semana en área controlada (verifique el criterio de la CNSNS de la licencia)',
+};
 
 /** Densidades nominales (g/cm³) de los materiales con datos normativos. Yeso: placa de yeso de NCRP 147 (0.705). */
 export const DENSIDAD_G_CM3: Record<string, number> = { lead: 11.35, concrete: 2.35, steel: 7.87, iron: 7.87, gypsum: 0.705 };
@@ -339,6 +351,42 @@ export const TC_INICIAL: EntradaTC = {
   N_cuerpo: 150, DLP_cuerpo_mGy_cm: 550, N_cabeza: 30, DLP_cabeza_mGy_cm: 1200, factorContraste: 1.4, kvp: 120,
   d_m: 3, P_mSv_semana: 0.02, T: 1,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Co-60 (Gamma Knife, braquiterapia HDR, teleterapia) e incidencia oblicua — NCRP 151 Tabla B.2 y §2.2.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ResultadoCo60 { B_requerida: number; espesores_cm: Record<MaterialNCRP151, number> }
+
+/**
+ * Espesores para Co-60 con TVL₁/TVLₑ de NCRP 151 Tabla B.2 (concreto 21, acero 7.0, plomo 4.0 cm):
+ * B = P / (T·U·K), con K el kerma semanal sin blindaje en el punto (mismas unidades que P).
+ */
+export function blindajeCo60(K_semana: number, P_semana: number, T: number, U = 1): ResultadoCo60 {
+  if (!(T > 0 && T <= 1)) throw new RangeError('T debe estar en (0, 1]');
+  const B_requerida = K_semana > 0 && U > 0 ? Math.min(1, P_semana / (T * U * K_semana)) : 1;
+  const espesores_cm = Object.fromEntries(MATERIALES_MV.map((m) => [m, espesorTVL(B_requerida, tvlPrimaria('Co60', m))])) as Record<MaterialNCRP151, number>;
+  return { B_requerida, espesores_cm };
+}
+
+export interface ResultadoOblicuo {
+  B_normal: number; B_oblicua: number; B_corregida: number; hvlDescontados: number;
+  recorrido_cm: number; espesorEquivalenteNormal_cm: number;
+}
+
+/**
+ * Incidencia oblicua sobre una barrera de t cm: recorrido t/cos θ (tope 70°); para θ > 45° la transmisión a incidencia
+ * normal (`correccionOblicuidad`, NCRP 151 §2.2 / NCRP 147 §1.4.3), y el espesor a incidencia normal que da la misma transmisión.
+ */
+export function incidenciaOblicua(e: EnergiaMV, material: MaterialNCRP151, t_cm: number, theta_deg: number): ResultadoOblicuo {
+  const tvl = tvlPrimaria(e, material);
+  const th = Math.min(Math.max(theta_deg, 0), OBLICUIDAD_MAX_DATOS_DEG);
+  const recorrido_cm = t_cm / Math.cos((th * Math.PI) / 180);
+  const B_normal = transmisionTVL(t_cm, tvl);
+  const B_oblicua = transmisionTVL(recorrido_cm, tvl);
+  const c = correccionOblicuidad(B_oblicua, B_normal, theta_deg);
+  return { B_normal, B_oblicua, B_corregida: c.transmision, hvlDescontados: c.hvlDescontados, recorrido_cm, espesorEquivalenteNormal_cm: espesorTVL(c.transmision, tvl) };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Comparación de materiales (costo, masa, espesor) y frente de Pareto.

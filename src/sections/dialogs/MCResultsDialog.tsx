@@ -1,4 +1,5 @@
 // Batch 8-1: MC Results Dialog — visualización gráfica de resultados Monte Carlo
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -43,6 +44,7 @@ export default function MCResultsDialog({ open, onOpenChange, resultJson }: Prop
           <DialogHeader>
             <DialogTitle>Resultados Monte Carlo</DialogTitle>
           </DialogHeader>
+        <DatosEjemploBanner detalle="El histograma y la curva de convergencia son curvas generadas, no resultados de una simulación." />
           <div className="text-center text-gray-500 py-8">Sin resultados disponibles. Ejecute una simulación primero.</div>
         </DialogContent>
       </Dialog>

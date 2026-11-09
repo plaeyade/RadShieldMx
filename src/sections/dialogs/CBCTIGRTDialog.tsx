@@ -9,7 +9,9 @@ import '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Scan, CheckCircle, AlertTriangle, Calculator, BookOpen } from 'lucide-react';
-import { CBCT_SYSTEMS, HVL_CBCT_KV, calculateCBCTDose, getCBCTShieldingRecommendation } from '@/lib/cbctIGRTData';
+import { CBCT_SYSTEMS, HVL_CBCT_KV, getCBCTShieldingRecommendation } from '@/lib/cbctIGRTData';
+import { OBJETIVOS_DISENO, blindajeTC } from '@/lib/calculadorasNormativas';
+import { transmisionTC } from '@/lib/ncrp147';
 import { toast } from 'sonner';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
@@ -18,7 +20,7 @@ const COL = ['bg-blue-50 border-blue-200','bg-emerald-50 border-emerald-200','bg
 export default function CBCTIGRTDialog({ open, onOpenChange }: Props) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }}>
+    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }} role="dialog" aria-modal="true" aria-label="Blindaje CBCT / IGRT">
       <CBCTContent onOpenChange={onOpenChange} />
     </div>
   );
@@ -31,23 +33,38 @@ function CBCTContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }
   const [patientsPerWeek, setPatientsPerWeek] = useState('25');
   const [distanceM, setDistanceM] = useState('4.5');
   const [shieldingMm, setShieldingMm] = useState('200');
-  const [result, setResult] = useState<any>(null);
-  const [recommendation, setRecommendation] = useState<any>(null);
+  const [dlp, setDlp] = useState('500');
+  const [T, setT] = useState('1');
+  const [P, setP] = useState(String(OBJETIVOS_DISENO[1].P_mSv_semana));
+  const [result, setResult] = useState<{ K: number; B_existente: number; dosis: number; cumple: boolean; plomo: number; concreto: number } | null>(null);
+  const [recommendation, setRecommendation] = useState<ReturnType<typeof getCBCTShieldingRecommendation> | null>(null);
 
-  const sys = CBCT_SYSTEMS[systemIdx];
 
+  // Fase 8c: antes, dosis = (kVp/100)·(mA/20)·(t/60)·0.1 sin K¹. Ahora la CBCT se trata como TC de cuerpo con el método
+  // DLP de NCRP 147 §5.6.1 (K¹ = 1.2·3×10⁻⁴·DLP por estudio) y la transmisión de secundaria de TC (Figs. A.2/A.3).
   const calculate = useCallback(() => {
-    const res = calculateCBCTDose({
-      kVp: Number(kVp), mA: sys.mA_max, exposure_time_s: sys.exposure_per_scan_mAs / sys.mA_max,
-      scans_per_patient: Number(scansPerPatient), patients_per_week: Number(patientsPerWeek),
-      distance_m: Number(distanceM), isocenter_shielding_mm: Number(shieldingMm),
-    });
-    setResult(res);
+    const kvp: 120 | 140 = Number(kVp) <= 120 ? 120 : 140;
+    let r: ReturnType<typeof blindajeTC>;
+    try {
+      r = blindajeTC({
+        N_cuerpo: Number(patientsPerWeek), DLP_cuerpo_mGy_cm: Number(dlp), N_cabeza: 0, DLP_cabeza_mGy_cm: 0,
+        factorContraste: Number(scansPerPatient), kvp, d_m: Number(distanceM), P_mSv_semana: Number(P), T: Number(T),
+      });
+    } catch (e) {
+      // Sin esto la excepción dejaba visible el resultado anterior (posiblemente «basta») con entradas inválidas.
+      setResult(null); setRecommendation(null);
+      toast.error((e as Error).message);
+      return;
+    }
+    const B_existente = transmisionTC(Number(shieldingMm), 'concrete', kvp);
+    const dosis = Number(T) * r.K_mGy_semana * B_existente;
+    // NaN (entradas no numéricas) no cumple: la comparación con NaN es falsa.
+    setResult({ K: r.K_mGy_semana, B_existente, dosis, cumple: Number.isFinite(dosis) && dosis <= Number(P), plomo: r.espesores_mm.lead, concreto: r.espesores_mm.concrete });
     setRecommendation(getCBCTShieldingRecommendation({
       kVp: Number(kVp), hasMaze: true, distance_to_control_m: Number(distanceM),
     }));
     toast.success('Cálculo CBCT completado');
-  }, [kVp, sys, scansPerPatient, patientsPerWeek, distanceM, shieldingMm]);
+  }, [kVp, scansPerPatient, patientsPerWeek, distanceM, shieldingMm, dlp, T, P]);
 
   return (
     <div className="flex flex-col h-full">
@@ -103,7 +120,17 @@ function CBCTContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }
                   <div><Label className="text-xs">Pacientes/sem</Label><Input value={patientsPerWeek} onChange={e => setPatientsPerWeek(e.target.value)} /></div>
                   <div><Label className="text-xs">Distancia fuente→punto (m)</Label><Input value={distanceM} onChange={e => setDistanceM(e.target.value)} /></div>
                 </div>
-                <div><Label className="text-xs">Blindaje isocentro existente (mm concreto)</Label><Input value={shieldingMm} onChange={e => setShieldingMm(e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label htmlFor="cbct-dlp" className="text-xs">DLP por estudio (mGy·cm, dato del equipo)</Label><Input id="cbct-dlp" data-testid="cbct-dlp" value={dlp} onChange={e => setDlp(e.target.value)} /></div>
+                  <div><Label htmlFor="cbct-blindaje" className="text-xs">Concreto existente (mm)</Label><Input id="cbct-blindaje" data-testid="cbct-blindaje" value={shieldingMm} onChange={e => setShieldingMm(e.target.value)} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label htmlFor="cbct-t" className="text-xs">Ocupación T</Label><Input id="cbct-t" data-testid="cbct-t" value={T} onChange={e => setT(e.target.value)} /></div>
+                  <div><Label htmlFor="cbct-p" className="text-xs">Objetivo P</Label>
+                    <select id="cbct-p" data-testid="cbct-p" value={P} onChange={e => setP(e.target.value)} className="w-full h-9 text-xs border rounded px-2">
+                      {OBJETIVOS_DISENO.map(o => <option key={o.id} value={String(o.P_mSv_semana)}>{o.etiqueta}</option>)}
+                    </select></div>
+                </div>
                 <Button onClick={calculate} className="w-full bg-cyan-600 hover:bg-cyan-700"><Calculator className="w-4 h-4 mr-2" />Calcular Dosis CBCT</Button>
               </CardContent>
             </Card>
@@ -112,14 +139,16 @@ function CBCTContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }
             <div className="space-y-4">
               {result && (
                 <>
-                  <Card className={result.passes ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}>
-                    <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2">{result.passes ? <CheckCircle className="w-4 h-4 text-green-600"/> : <AlertTriangle className="w-4 h-4 text-red-600"/>}Resultados</CardTitle></CardHeader>
+                  <Card className={result.cumple ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2">{result.cumple ? <CheckCircle className="w-4 h-4 text-green-600"/> : <AlertTriangle className="w-4 h-4 text-red-600"/>}Resultados</CardTitle></CardHeader>
                     <CardContent className="space-y-2">
                       <div className="grid grid-cols-2 gap-3">
-                        <div className={`${COL[0]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">Dosis semanal</div><div className="text-2xl font-bold">{result.weekly_dose_mSv} <span className="text-sm">mSv/sem</span></div></div>
-                        <div className={`${COL[1]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">Dosis anual</div><div className="text-2xl font-bold">{result.annual_dose_mSv} <span className="text-sm">mSv/año</span></div></div>
+                        <div className={`${COL[0]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">K sin blindaje</div><div className="text-2xl font-bold" data-testid="cbct-k">{result.K.toPrecision(3)} <span className="text-sm">mGy/semana</span></div></div>
+                        <div className={`${COL[1]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">T·K·B tras el concreto existente</div><div className="text-2xl font-bold" data-testid="cbct-dosis">{result.dosis.toExponential(2)} <span className="text-sm">mSv/semana</span></div></div>
+                        <div className={`${COL[2]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">Plomo requerido (sin otro blindaje)</div><div className="text-xl font-bold" data-testid="cbct-plomo">{result.plomo.toFixed(2)} mm</div></div>
+                        <div className={`${COL[3]} border-2 rounded-lg p-3`}><div className="text-xs font-semibold opacity-70">Concreto requerido</div><div className="text-xl font-bold" data-testid="cbct-concreto">{result.concreto.toFixed(0)} mm</div></div>
                       </div>
-                      <div className={`text-xs p-2 rounded ${result.passes ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{result.notes}</div>
+                      <div className={`text-xs p-2 rounded ${result.cumple ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{result.cumple ? 'El concreto existente basta para la carga CBCT.' : 'El concreto existente no basta para la carga CBCT.'} Aproximación: CBCT como TC de cuerpo (NCRP 147 §5.6.1, Figs. A.2/A.3).</div>
                     </CardContent>
                   </Card>
 
@@ -144,7 +173,7 @@ function CBCTContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }
 
           {/* HVL Reference */}
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">HVL/TVL CBCT por material y energía (mm)</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">HVL/TVL CBCT por material y energía (mm) — referencia, no se usa en el cálculo</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">

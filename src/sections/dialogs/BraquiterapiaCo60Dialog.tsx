@@ -1,7 +1,7 @@
 // BraquiterapiaCo60Dialog.tsx -- Dialogo especializado para Braquiterapia HDR Co-60
 // Basado en Anexo CNSNS Permiso Construccion IJC Zapopan A00.200/2445/2023
 
-import { useState } from 'react';
+import CalculadoraCo60 from './CalculadoraCo60';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,6 @@ interface Props {
 }
 
 export default function BraquiterapiaCo60Dialog({ open, onOpenChange }: Props) {
-  const [calcB, setCalcB] = useState<{ P: number; d: number; W: number; T: number; result: number } | null>(null);
 
   const handleExport = () => {
     const lines: string[] = [];
@@ -57,14 +56,6 @@ export default function BraquiterapiaCo60Dialog({ open, onOpenChange }: Props) {
     toast.success('Datos Braqui Co-60 exportados');
   };
 
-  const doCalc = () => {
-    const P = 0.1; // mSv/sem POE
-    const d = 2.5; // m
-    const W = 256.41; // mGy m2/sem
-    const T = 0.125; // 1/8
-    const B = (P * d * d) / (W * 1 * T);
-    setCalcB({ P, d, W, T, result: B });
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -284,34 +275,10 @@ export default function BraquiterapiaCo60Dialog({ open, onOpenChange }: Props) {
 
             <TabsContent value="calc" className="mt-0 space-y-3">
               <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Calculator className="w-4 h-4 text-amber-600" /> Calculadora rapida de blindaje Braqui HDR Co-60</h3>
-              <div className="bg-gray-50 rounded-md p-3 border border-gray-100 space-y-2">
-                <div className="text-[11px] text-gray-600">
-                  <strong>Ejemplo precalculado:</strong> Punto P (puerta), POE, P = 0.1 mSv/sem, d = 2.5 m, W = 256.41 mGy m²/sem, T = 1/8.
-                </div>
-                <Button size="sm" onClick={doCalc} className="text-xs">Calcular B y espesor</Button>
-                {calcB && (
-                  <div className="p-2 bg-white rounded border text-[11px] space-y-1">
-                    <p><strong>B</strong> = (P × d²) / (W × U × T) = ({calcB.P} × {calcB.d}²) / ({calcB.W} × 1 × {calcB.T}) = <strong>{calcB.result.toExponential(4)}</strong></p>
-                    <p><strong>1/B</strong> = <strong>{(1/calcB.result).toFixed(0)}</strong></p>
-                    <p><strong>Plomo</strong> = TVL × log₁₀(1/B) = 4.0 × log₁₀({(1/calcB.result).toFixed(0)}) = <strong>{(4.0 * Math.log10(1/calcB.result)).toFixed(2)} cm</strong></p>
-                    <p><strong>Concreto</strong> = TVL × log₁₀(1/B) = 20.6 × log₁₀({(1/calcB.result).toFixed(0)}) = <strong>{(20.6 * Math.log10(1/calcB.result)).toFixed(2)} cm</strong></p>
-                  </div>
-                )}
+              <div className="text-[11px] text-gray-600">
+                Valores iniciales: punto P (puerta) del expediente, POE, P = 0.1 mSv/semana, d = 2.5 m, W = 256.41 mGy·m²/semana, T = 1/8. Todos editables.
               </div>
-
-              <div className="bg-gray-50 rounded-md p-3 border border-gray-100">
-                <div className="text-xs font-medium text-gray-700">Parametros de entrada (template)</div>
-                <div className="grid grid-cols-2 gap-2 text-[10px] mt-1">
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Actividad fuente (GBq):</div><div className="text-amber-700 font-mono">[Ingresar]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Pacientes/semana:</div><div className="text-amber-700 font-mono">[Ingresar]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Dosis/tratamiento (Gy):</div><div className="text-amber-700 font-mono">[Ingresar]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Tiempo/paciente (h):</div><div className="text-amber-700 font-mono">[Ingresar]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Distancia pared (m):</div><div className="text-amber-700 font-mono">[Ingresar]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Factor ocupacion T:</div><div className="text-amber-700 font-mono">[1 / 1/2 / 1/4 / 1/8 / 1/16]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Limite dosis P (mSv/sem):</div><div className="text-amber-700 font-mono">[0.1 POE / 0.02 publico / 0.01 publico]</div></div>
-                  <div className="p-2 bg-white rounded border"><div className="font-medium">Material:</div><div className="text-amber-700 font-mono">[Concreto / Plomo / Acero]</div></div>
-                </div>
-              </div>
+              <CalculadoraCo60 inicial={{ modo: 'carga', W_mGy_m2: 256.41, d_m: 2.5, P_mSv: 0.1, T: 0.125 }} />
             </TabsContent>
           </ScrollArea>
         </Tabs>

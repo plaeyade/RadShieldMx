@@ -97,25 +97,25 @@ const EQUIPMENT_DB: Record<string, {
   'gamma_knife_perfexion': {
     name: 'Gamma Knife Perfexion', modality: 'Radiosurgery', energies: ['Co-60 (1.17, 1.33 MeV)'],
     workload_h_week: 20, typical_dose_Gy: 12.0, patient_throughput_day: 4,
-    source_isotv: 'Elekta Leksell Gamma Knife Perfexion / Icon', shielding_notes: '60Co sources: permanent installation. Shielding based on source activity (typically 200-400 Ci). Primary barrier: direct beam. TVL concrete ~210 mm. TVL lead ~55 mm.',
+    source_isotv: 'Elekta Leksell Gamma Knife Perfexion / Icon', shielding_notes: '60Co sources: permanent installation. Shielding based on source activity (typically 200-400 Ci). Primary barrier: direct beam. TVL concrete 210 mm, lead 40 mm (NCRP 151 Table B.2, Co-60).',
     regulatory_ref: 'NCRP 151 (2005), Sec. 4.3.1',
   },
   'hdr_ir192': {
     name: 'HDR Ir-192', modality: 'Brachytherapy', energies: ['Ir-192 (0.38 MeV avg)'],
     workload_h_week: 10, typical_dose_Gy: 15.0, patient_throughput_day: 3,
-    source_isotv: 'Varian Varisource / Elekta Flexitron', shielding_notes: 'HDR afterloader: source returns to safe when not in use. Room is controlled area. TVL lead ~7 mm. TVL concrete ~61 mm.',
+    source_isotv: 'Varian Varisource / Elekta Flexitron', shielding_notes: 'HDR afterloader: source returns to safe when not in use. Room is controlled area. Ir-192: HVL lead ≈ 3 mm (TVL ≈ 16 mm), TVL concrete ≈ 150 mm (literature values, not from NCRP 151).',
     regulatory_ref: 'NCRP 151 (2005), Sec. 4.4.1',
   },
   'pet_ct_fdg': {
     name: 'PET/CT (F-18 FDG)', modality: 'Nuclear Medicine', energies: ['511 keV annihilation'],
     workload_h_week: 30, typical_dose_Gy: 0, patient_throughput_day: 12,
-    source_isotv: 'Siemens Biograph / GE Discovery', shielding_notes: '511 keV annihilation photons. Isotropic source distribution. TVL concrete ~260 mm. Self-shielding from Uptake room to Scan room. Dose limits: public areas per NCRP 147.',
+    source_isotv: 'Siemens Biograph / GE Discovery', shielding_notes: '511 keV annihilation photons. Isotropic source distribution. First TVL (TG-108 Table V, broad beam): lead ≈ 16 mm, concrete ≈ 190 mm. Self-shielding from Uptake room to Scan room. Dose limits: public areas per NCRP 147.',
     regulatory_ref: 'NCRP 147 (2004)',
   },
   'spect_tcm': {
     name: 'SPECT/CT (Tc-99m)', modality: 'Nuclear Medicine', energies: ['140 keV'],
     workload_h_week: 30, typical_dose_Gy: 0, patient_throughput_day: 15,
-    source_isotv: 'Siemens Symbia / GE Discovery NM', shielding_notes: '140 keV photons from Tc-99m. Low energy, easy to shield. TVL lead ~0.3 mm. TVL concrete ~22 mm.',
+    source_isotv: 'Siemens Symbia / GE Discovery NM', shielding_notes: '140 keV photons from Tc-99m. Low energy, easy to shield. HVL lead ≈ 0.27 mm (TVL ≈ 0.9 mm). TVL concrete ~22 mm (narrow beam).',
     regulatory_ref: 'NCRP 147 (2004)',
   },
   'cyclotron_18mev': {
@@ -277,7 +277,7 @@ export default function MemoriaAIWizard({
       } else if (input.includes('gamma knife') || input.includes('radiocirugía')) {
         addAIMessage('**Gamma Knife** — fuente de Co-60 con blindaje especializado. El TVL en concreto es de ~210 mm. ¿Es modelo Perfexion o Icon?', ['Perfexion', 'Icon']);
       } else if (input.includes('hdr') || input.includes('braquiterapia')) {
-        addAIMessage('**Braquiterapia HDR** con Ir-192. El blindaje es más ligero debido a la baja energía (380 keV promedio). TVL en plomo solo ~7 mm.', ['Ir-192', 'Co-60 HDR']);
+        addAIMessage('**Braquiterapia HDR** con Ir-192. El blindaje es más ligero debido a la baja energía (380 keV promedio). HVL en plomo ≈ 3 mm (TVL ≈ 16 mm).', ['Ir-192', 'Co-60 HDR']);
       } else {
         addAIMessage('Entendido. Para avanzar, selecciona el equipo de la lista a la izquierda y yo completaré automáticamente los valores de referencia según NCRP 151.');
       }

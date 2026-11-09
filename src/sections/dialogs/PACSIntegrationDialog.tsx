@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -58,7 +59,7 @@ interface DICOMStudy {
 const MOCK_STUDIES: DICOMStudy[] = [
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.1',
-    patientName: 'GARCIA LOPEZ JUAN MANUEL', patientID: 'PAT-2024-001',
+    patientName: 'DEMO^PACIENTE 01', patientID: 'PAT-2024-001',
     accessionNumber: 'ACC-2024-00001', studyDate: '2026-05-28',
     studyDescription: 'CT CHEST ABDOMEN PELVIS W CONTRAST',
     modality: 'CT', numSeries: 3, numInstances: 512,
@@ -67,7 +68,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.2',
-    patientName: 'MARTINEZ SANCHEZ MARIA ELENA', patientID: 'PAT-2024-002',
+    patientName: 'DEMO^PACIENTE 02', patientID: 'PAT-2024-002',
     accessionNumber: 'ACC-2024-00002', studyDate: '2026-05-29',
     studyDescription: 'PET/CT WHOLE BODY FDG',
     modality: 'PT', numSeries: 5, numInstances: 1024,
@@ -76,7 +77,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.3',
-    patientName: 'HERNANDEZ PEREZ ROBERTO', patientID: 'PAT-2024-003',
+    patientName: 'DEMO^PACIENTE 03', patientID: 'PAT-2024-003',
     accessionNumber: 'ACC-2024-00003', studyDate: '2026-05-30',
     studyDescription: 'LINAC VMAT PLANNING CT 120kV',
     modality: 'CT', numSeries: 2, numInstances: 256,
@@ -85,7 +86,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.4',
-    patientName: 'LOPEZ GOMEZ CARMEN', patientID: 'PAT-2024-004',
+    patientName: 'DEMO^PACIENTE 04', patientID: 'PAT-2024-004',
     accessionNumber: 'ACC-2024-00004', studyDate: '2026-05-27',
     studyDescription: 'SPECT MYOCARDIAL PERFUSION REST STRESS',
     modality: 'NM', numSeries: 4, numInstances: 180,
@@ -93,7 +94,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.5',
-    patientName: 'CASTRO DIAZ ALBERTO', patientID: 'PAT-2024-005',
+    patientName: 'DEMO^PACIENTE 05', patientID: 'PAT-2024-005',
     accessionNumber: 'ACC-2024-00005', studyDate: '2026-06-01',
     studyDescription: 'XR CHEST PA AND LATERAL',
     modality: 'XR', numSeries: 1, numInstances: 2,
@@ -101,7 +102,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.6',
-    patientName: 'RUIZ FERNANDEZ PATRICIA', patientID: 'PAT-2024-006',
+    patientName: 'DEMO^PACIENTE 06', patientID: 'PAT-2024-006',
     accessionNumber: 'ACC-2024-00006', studyDate: '2026-06-01',
     studyDescription: 'CBCT PLANNING HEAD AND NECK',
     modality: 'CT', numSeries: 1, numInstances: 384,
@@ -110,7 +111,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.7',
-    patientName: 'MORALES VEGA JORGE LUIS', patientID: 'PAT-2024-007',
+    patientName: 'DEMO^PACIENTE 07', patientID: 'PAT-2024-007',
     accessionNumber: 'ACC-2024-00007', studyDate: '2026-05-31',
     studyDescription: 'BUNKER RADIATION SURVEY DOSE MAP',
     modality: 'OT', numSeries: 1, numInstances: 12,
@@ -118,7 +119,7 @@ const MOCK_STUDIES: DICOMStudy[] = [
   },
   {
     studyInstanceUID: '1.2.840.113619.2.55.3.2831164358.123.1234567890.8',
-    patientName: 'SANTOS CRUZ ANA LUCIA', patientID: 'PAT-2024-008',
+    patientName: 'DEMO^PACIENTE 08', patientID: 'PAT-2024-008',
     accessionNumber: 'ACC-2024-00008', studyDate: '2026-05-30',
     studyDescription: 'MAMMOGRAPHY BILATERAL CC MLO',
     modality: 'MG', numSeries: 2, numInstances: 8,
@@ -212,6 +213,7 @@ export default function PACSIntegrationDialog({ open, onOpenChange }: Props) {
             </Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los estudios mostrados sin servidor son de demostración y están anonimizados." />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid grid-cols-4 w-full shrink-0">

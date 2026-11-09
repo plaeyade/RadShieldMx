@@ -30,7 +30,7 @@ const EPA_SECTIONS: GuidanceSection[] = [
       { label: 'Area controlada (POE)', value: '5 mGy/año = 0.1 mGy/semana', note: 'Equivalente a 100 uSv/semana. Consistente con NCRP 151 §2.1' },
       { label: 'Area no controlada (publico)', value: '1 mGy/año = 0.02 mGy/semana', note: 'Equivalente a 20 uSv/semana. Consistente con NCRP 151 §2.1' },
       { label: 'Embarazada ocupacional', value: '0.5 mSv/mes = 5 mSv/gestacion', note: 'FGR 14 §3.2.3. Mismo que NOM-008-NUCL-2011 §4.3' },
-      { label: 'Area controlada (NCRP 147)', value: '20 uSv/semana', note: 'FGR 14 adopta limites NCRP 147 para diagnostico' },
+      { label: 'Objetivos NCRP 147 (diagnóstico)', value: 'Controlada 0.1 mGy/semana; no controlada 0.02 mGy/semana', note: 'NCRP 147 §1.3 (kerma en aire). Antes decía «controlada 20 μSv/semana», que es el objetivo NO controlado.' },
     ],
   },
   {

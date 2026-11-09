@@ -106,7 +106,8 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
     const area = memoria.areasAdyacentes[areaIdx];
     if (!area || !material) return null;
     const energy = parseInt(memoria.energia_MV);
-    const P = 0.02; // mSv/sem (público por defecto)
+    // Fase 8c: P según el área (antes 0.02 fijo para todas): controlada 0.1, no controlada 0.02 mSv/semana (NCRP 151 §1.2).
+    const P = area.tipo === 'control' || area.tipo === 'controlada' ? 0.1 : 0.02;
     
     if (area.barrera === 'primaria') {
       return calculateLINACPrimaryBarrier({
@@ -401,8 +402,13 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
               {memoria.areasAdyacentes.map((area: any, i: number) => (
                 <Card key={i} className="border-slate-200">
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Área {i+1}: {area.nombre}</CardTitle></CardHeader>
-                  <CardContent className="grid grid-cols-5 gap-3 pt-0">
+                  <CardContent className="grid grid-cols-6 gap-3 pt-0">
                     <div><Label className="text-xs">Nombre</Label><Input value={area.nombre} onChange={e => { const arr = [...memoria.areasAdyacentes]; arr[i].nombre = e.target.value; update('areasAdyacentes', arr); }} className="h-9" /></div>
+                    <div><Label className="text-xs">Área</Label>
+                      <Select value={area.tipo === 'control' || area.tipo === 'controlada' ? 'controlada' : 'publico'} onValueChange={v => { const arr = [...memoria.areasAdyacentes]; arr[i].tipo = v; update('areasAdyacentes', arr); }}><SelectTrigger className="h-9"><SelectValue/></SelectTrigger>
+                        <SelectContent><SelectItem value="controlada">Controlada (P = 0.1)</SelectItem><SelectItem value="publico">No controlada (P = 0.02)</SelectItem></SelectContent>
+                      </Select>
+                    </div>
                     <div><Label className="text-xs">Factor T</Label><Input type="number" step="0.05" value={area.T} onChange={e => { const arr = [...memoria.areasAdyacentes]; arr[i].T = parseFloat(e.target.value); update('areasAdyacentes', arr); }} className="h-9" /></div>
                     <div><Label className="text-xs">Factor U</Label><Input type="number" step="0.05" value={area.U} onChange={e => { const arr = [...memoria.areasAdyacentes]; arr[i].U = parseFloat(e.target.value); update('areasAdyacentes', arr); }} className="h-9" /></div>
                     <div><Label className="text-xs">Distancia d (m)</Label><Input type="number" step="0.1" value={area.d} onChange={e => { const arr = [...memoria.areasAdyacentes]; arr[i].d = parseFloat(e.target.value); update('areasAdyacentes', arr); }} className="h-9" /></div>

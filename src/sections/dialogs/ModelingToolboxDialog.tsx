@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import '@/components/ui/separator';
 import { toast } from 'sonner';
+import { skyshineFotones } from '@/lib/ncrp151';
 import {
   Box, Layers, Ruler, Calculator, Zap, Shield,
   Atom, GitBranch, Copy, Play, RotateCcw
@@ -20,44 +21,46 @@ interface QuickCalc {
 
 const QUICK_CALCS: QuickCalc[] = [
   {
-    id: 'tvl-to-thickness', name: 'TVL → Thickness', icon: Layers,
-    inputs: ['Number of TVLs', 'TVL value (cm)'], formula: ([n, tvl]) => n * tvl, unit: 'cm',
+    id: 'tvl-to-thickness', name: 'TVL → espesor', icon: Layers,
+    inputs: ['Número de TVL', 'TVL (cm)'], formula: ([n, tvl]) => n * tvl, unit: 'cm',
   },
   {
-    id: 'hvl-to-transmission', name: 'HVL → Transmission', icon: Shield,
-    inputs: ['Number of HVLs'], formula: ([n]) => Math.pow(0.5, n), unit: 'fraction',
+    id: 'hvl-to-transmission', name: 'HVL → transmisión', icon: Shield,
+    inputs: ['Número de HVL'], formula: ([n]) => Math.pow(0.5, n), unit: 'fraction',
   },
   {
-    id: 'tvl-to-transmission', name: 'TVL → Transmission', icon: Shield,
-    inputs: ['Number of TVLs'], formula: ([n]) => Math.pow(0.1, n), unit: 'fraction',
+    id: 'tvl-to-transmission', name: 'TVL → transmisión', icon: Shield,
+    inputs: ['Número de TVL'], formula: ([n]) => Math.pow(0.1, n), unit: 'fraction',
   },
   {
-    id: 'inverse-square', name: 'Inverse Square Law', icon: Calculator,
-    inputs: ['Dose at d1 (uSv/h)', 'd1 (m)', 'd2 (m)'], formula: ([d1, d1m, d2m]) => d1 * (d1m * d1m) / (d2m * d2m), unit: 'uSv/h',
+    id: 'inverse-square', name: 'Inverso del cuadrado', icon: Calculator,
+    inputs: ['Tasa en d1 (μSv/h)', 'd1 (m)', 'd2 (m)'], formula: ([d1, d1m, d2m]) => d1 * (d1m * d1m) / (d2m * d2m), unit: 'uSv/h',
   },
   {
-    id: 'workload-to-hours', name: 'Workload → Hours', icon: Play,
-    inputs: ['Workload (Gy/week)', 'Dose per patient (Gy)'], formula: ([w, dp]) => w / dp, unit: 'patients/week',
+    id: 'workload-to-hours', name: 'Carga → pacientes', icon: Play,
+    inputs: ['Carga (Gy/semana)', 'Dosis por paciente (Gy)'], formula: ([w, dp]) => w / dp, unit: 'patients/week',
   },
   {
-    id: 'decay-activity', name: 'Radioactive Decay', icon: Atom,
-    inputs: ['Initial A (MBq)', 'Half-life (h)', 'Time (h)'], formula: ([a0, t12, t]) => a0 * Math.pow(0.5, t / t12), unit: 'MBq',
+    id: 'decay-activity', name: 'Decaimiento radiactivo', icon: Atom,
+    inputs: ['A inicial (MBq)', 'Periodo (h)', 'Tiempo (h)'], formula: ([a0, t12, t]) => a0 * Math.pow(0.5, t / t12), unit: 'MBq',
   },
   {
-    id: 'barrier-transmission', name: 'Barrier Transmission', icon: Layers,
-    inputs: ['Thickness (cm)', 'HVL (cm)'], formula: ([t, hvl]) => Math.pow(0.5, t / hvl), unit: 'fraction',
+    id: 'barrier-transmission', name: 'Transmisión de barrera', icon: Layers,
+    inputs: ['Espesor (cm)', 'HVL (cm)'], formula: ([t, hvl]) => Math.pow(0.5, t / hvl), unit: 'fraction',
   },
   {
-    id: 'dose-to-tvl', name: 'Dose → TVLs needed', icon: Ruler,
-    inputs: ['Current dose (uSv/h)', 'Desired dose (uSv/h)'], formula: ([c, d]) => Math.log10(c / d), unit: 'TVLs',
+    id: 'dose-to-tvl', name: 'Dosis → TVL necesarios', icon: Ruler,
+    inputs: ['Tasa actual (μSv/h)', 'Tasa deseada (μSv/h)'], formula: ([c, d]) => Math.log10(c / d), unit: 'TVLs',
   },
   {
-    id: 'neutron-tvl', name: 'Neutron TVL → Thickness', icon: Atom,
-    inputs: ['TVL (cm)', 'Dose reduction factor'], formula: ([tvl, drf]) => Math.log10(drf) * tvl, unit: 'cm',
+    id: 'neutron-tvl', name: 'TVL de neutrones → espesor', icon: Atom,
+    inputs: ['TVL (cm)', 'Factor de reducción'], formula: ([tvl, drf]) => Math.log10(drf) * tvl, unit: 'cm',
   },
   {
-    id: 'skyshine', name: 'Skyshine Factor', icon: Zap,
-    inputs: ['Roof attenuation', 'Albedo coeff', 'Distance (m)'], formula: ([ra, al, d]) => ra * al * 100 / (d * d), unit: 'fraction',
+    // Fase 8c: antes «ra·α·100/d²» sin base; ahora NCRP 151 Ec. 5.1 (orden de magnitud).
+    id: 'skyshine', name: 'Skyshine de fotones (NCRP 151 Ec. 5.1)', icon: Zap,
+    inputs: ['B_xs del techo', 'Ḋ₀ a 1 m (Gy/h)', 'Ω del haz (sr)', 'dᵢ (m)', 'dₛ (m)'],
+    formula: ([B, D0, om, di, ds]) => skyshineFotones({ B_xs: B, D0, omega_sr: om, di_m: di, ds_m: ds }), unit: 'nSv/h',
   },
 ];
 
@@ -68,16 +71,16 @@ export default function ModelingToolboxDialog({ open, onOpenChange }: Props) {
 
   const runCalc = (calc: QuickCalc) => {
     const vals = (calcValues[calc.id] || []).map(Number);
-    if (vals.some(isNaN)) { toast.error('Enter all values'); return; }
+    if (vals.some(isNaN)) { toast.error('Complete todos los valores'); return; }
     try {
       const result = calc.formula(vals);
       setCalcResults(prev => ({ ...prev, [calc.id]: result }));
-    } catch { toast.error('Calculation error'); }
+    } catch { toast.error('Error de cálculo'); }
   };
 
   const copyResult = (val: number, unit: string) => {
     navigator.clipboard.writeText(`${val.toFixed(4)} ${unit}`);
-    toast.success('Copied to clipboard');
+    toast.success('Copiado al portapapeles');
   };
 
   return (

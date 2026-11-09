@@ -4,7 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { X, Activity, Table, Download } from 'lucide-react';
-import { DEFAULT_SPECT_PROCEDURES, calculateSPECTShielding } from '@/lib/spect/IPEMReport109';
+import { DEFAULT_SPECT_PROCEDURES, calculateSPECTShielding, salaSPECT } from '@/lib/spect/IPEMReport109';
 import type { SPECTProcedure } from '@/lib/spect/IPEMReport109';
 
 export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }) {
@@ -15,8 +15,9 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
   const [designGoal, setDesignGoal] = useState(100);
 
   const results = useMemo(() => procedures.map(p => calculateSPECTShielding({ procedure: p, distance_m, wallThickness_mm: wallThick_mm, wallMaterial, designGoal_uSv_week: designGoal })), [procedures, distance_m, wallThick_mm, wallMaterial, designGoal]);
-  const totalKerma = results.reduce((s, r) => s + r.weeklyKerma_uSv, 0);
-  const totalShielded = results.reduce((s, r) => s + r.shieldedKerma_uSv, 0);
+  const sala = useMemo(() => salaSPECT(procedures, distance_m, wallThick_mm, wallMaterial, designGoal), [procedures, distance_m, wallThick_mm, wallMaterial, designGoal]);
+  const totalKerma = sala.total_uSv;
+  const totalShielded = sala.totalBlindado_uSv;
 
   const updateProc = (i: number, f: keyof SPECTProcedure, v: number) => setProcedures(prev => prev.map((p, j) => j === i ? { ...p, [f]: v } : p));
 
@@ -31,7 +32,7 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="ipem-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-indigo-600 to-blue-700 text-white rounded-t-lg">
-          <div className="flex items-center gap-3"><Activity className="w-6 h-6" /><div><h2 id="ipem-title" className="text-lg font-bold">IPEM Report 109 — SPECT Shielding</h2><p className="text-xs text-indigo-100">Institute of Physics and Engineering in Medicine, 2014 — v50</p></div></div>
+          <div className="flex items-center gap-3"><Activity className="w-6 h-6" /><div><h2 id="ipem-title" className="text-lg font-bold">Blindaje SPECT (IPEM Report 109)</h2><p className="text-xs text-indigo-100">Institute of Physics and Engineering in Medicine, 2014 — v50</p></div></div>
           <button onClick={onClose} className="p-1.5 rounded hover:bg-white/20" aria-label="Cerrar"><X className="w-5 h-5" /></button>
         </div>
 
@@ -47,6 +48,11 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
             <div className="text-center p-2 bg-indigo-50 rounded border"><div className="text-lg font-bold text-indigo-700">{procedures.reduce((s, p) => s + p.patientsPerWeek, 0)}</div><div className="text-[10px] text-slate-500">Pac/sem</div></div>
             <div className="text-center p-2 bg-orange-50 rounded border"><div className="text-lg font-bold text-orange-700">{totalKerma.toFixed(1)}</div><div className="text-[10px] text-slate-500">uSv/sem sin blind</div></div>
             <div className={`text-center p-2 rounded border ${totalShielded <= designGoal ? 'bg-emerald-50' : 'bg-red-50'}`}><div className={`text-lg font-bold ${totalShielded <= designGoal ? 'text-emerald-700' : 'text-red-700'}`}>{totalShielded.toFixed(1)}</div><div className="text-[10px] text-slate-500">uSv/sem con blind</div></div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs" data-testid="ipem-sala">
+            <div className="p-2 rounded border bg-white">Plomo total para la sala (suma de procedimientos): <strong data-testid="ipem-plomo">{sala.plomo_mm.toFixed(2)} mm</strong></div>
+            <div className="p-2 rounded border bg-white">Concreto total: <strong data-testid="ipem-concreto">{sala.concreto_mm.toFixed(0)} mm</strong></div>
+            <div className="col-span-2 text-[10px] text-slate-500">TVL de haz estrecho sin acumulación ni atenuación del paciente (conservador en la atenuación del paciente, no en la acumulación); número de TVL continuo. Los «Pb req» por fila son para cada procedimiento aislado.</div>
           </div>
 
           <div className="border rounded-lg overflow-hidden">

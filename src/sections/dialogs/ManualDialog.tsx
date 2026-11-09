@@ -84,7 +84,7 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
   { id:'2.3', t:'canvas', title:'2.3 Sample Lines y Cálculo RadShield', content:`Líneas de muestreo a 0.3 m más allá de cada barrera (NCRP 147, DeLorenzo et al. 2016). 200 puntos por barrera. Cálculo de kerma por ley del inverso del cuadrado + scatter-primary ratio de McGinley. Espesor por inverseArcher() (NCRP 147) o tvlThickness() (NCRP 151). Conversión concreto-plomo basada en TVLs reales (corregido en v42).` },
 
   // ── SECCIÓN 3: CÁLCULOS ──
-  { id:'3.1', t:'calc', title:'3.1 Motor Principal NCRP 147/151', content:`**NCRP 147:** B = P·d²/(W·U·T), luego t = inverseArcher(B) con α=2.246, β=5.73, γ=0.547. Barreras primarias, secundarias (scatter), y leakage.
+  { id:'3.1', t:'calc', title:'3.1 Motor Principal NCRP 147/151', content:`**NCRP 147:** K = K¹·U·N/d² (Tablas 4.5 y 4.7), B = P/(T·K) y t = inversa de Archer con el ajuste (α, β, γ) de la distribución de carga y el material (Tablas B.1 y C.1; preblindaje de la Tabla 4.6). La TC usa las Figs. A.2/A.3 (α=2.246, β=5.73, γ=0.547 es el ajuste del plomo a 120 kVp sólo para TC). **NCRP 151:** primaria Ec. 2.1, fuga Ec. 2.8 y dispersión Ec. 2.7 con TVL₁/TVLₑ (Tablas B.2, B.5a, B.7) y la regla de las dos fuentes (§1.4.3). **PET:** AAPM TG-108 (Γ, absorción 0.36, decaimiento, Tabla V). Barreras primarias, secundarias (scatter), y leakage.
 
 **NCRP 151:** t = TVL × log₁₀(K_unshielded/P). Tablas TVL para concreto, plomo, acero, hasta 25 MV. Laberintos (neutrones + capture gamma), skyshine, fotoneutrones.
 

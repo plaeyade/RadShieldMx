@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -73,6 +74,7 @@ export default function LogFileAnalysisDialog({ open, onOpenChange }: LogFileAna
             Log File Analysis — Planificado vs Entregado
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los resultados mostrados son fijos de demostración; no se analizó ningún archivo de registro real." />
 
         <div className="px-6 pb-3">
           {/* Summary cards */}

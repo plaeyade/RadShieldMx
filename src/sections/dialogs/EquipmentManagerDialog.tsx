@@ -7,6 +7,8 @@
  */
 
 import { useState, useMemo } from 'react';
+import { MATERIALES_MV, NOMBRE_MATERIAL, OBJETIVOS_DISENO, barreraMV, energiaTabuladaMV } from '@/lib/calculadorasNormativas';
+import { tvlPrimaria, type EnergiaMV, type MaterialNCRP151 } from '@/lib/ncrp151';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -338,9 +340,10 @@ export default function EquipmentManagerDialog({ open, onOpenChange }: Equipment
                     </thead>
                     <tbody>
                       {[
-                        ['Primary barrier TVL (concrete)', `${selected.tvl_concrete_6MV_cm} cm`, 'NCRP 151 Table B.4'],
-                        ['Primary barrier TVL (Pb)', `${selected.tvl_lead_6MV_mm} mm`, 'NCRP 151 Table B.4'],
-                        ['Primary barrier TVL (steel)', `${selected.tvl_steel_6MV_mm} mm`, 'NCRP 151 Table B.4'],
+                        ...(energiaEquipo(selected) ? MATERIALES_MV.map(m => {
+                          const t = tvlPrimaria(energiaEquipo(selected)!, m);
+                          return [`TVL₁ / TVLₑ primaria (${NOMBRE_MATERIAL[m]})`, `${t.tvl1_cm} / ${t.tvle_cm} cm`, 'NCRP 151 Tabla B.2'];
+                        }) : []),
                         ['Workload (conventional)', `${selected.workload_NCRP151_Gy_week} Gy/wk`, 'NCRP 151 Table B.2'],
                         ['Workload (IMRT/VMAT)', `${selected.workload_IMRT_Gy_week} Gy/wk`, 'NCRP 151 Table B.2'],
                         ['Leakage radiation', `${selected.leakage_percent}%`, 'IEC 60601-2-1'],
@@ -372,83 +375,61 @@ export default function EquipmentManagerDialog({ open, onOpenChange }: Equipment
   );
 }
 
-// ─── Quick Barrier Calculator sub-component ───
+// ─── Calculadora rápida de barrera primaria (Fase 8c: NCRP 151 con `barreraMV`) ───
+/** Energía tabulada de NCRP 151 para el equipo (Co-60 para Gamma Knife); null si no aplica (ciclotrón). */
+function energiaEquipo(e: Equipment): EnergiaMV | null {
+  if (e.category === 'GammaKnife' || Math.abs(e.energy_MV - 1.25) < 0.01) return 'Co60';
+  if (!(e.energy_MV >= 1)) return null;
+  return energiaTabuladaMV(Math.max(4, e.energy_MV));
+}
+
 function QuickBarrierCalc({ equipment }: { equipment: Equipment }) {
   const [distance_m, setDistance] = useState(4.0);
   const [occupancy_T, setOccupancy] = useState(1.0);
   const [designGoal_mSv, setDesignGoal] = useState(0.02);
-  const [material, setMaterial] = useState<'concrete' | 'lead' | 'steel'>('concrete');
+  const [U, setU] = useState(0.25);
+  const [material, setMaterial] = useState<MaterialNCRP151>('concrete');
+  const energia = energiaEquipo(equipment);
 
-  const tvl = material === 'concrete' ? equipment.tvl_concrete_6MV_cm / 10 :
-    material === 'lead' ? equipment.tvl_lead_6MV_mm / 10 :
-      equipment.tvl_steel_6MV_mm / 10;
+  const r = useMemo(() => {
+    if (!energia || !(equipment.workload_NCRP151_Gy_week > 0)) return null;
+    try {
+      return barreraMV({
+        tipo: 'primaria', haces: [{ energia, W_Gy_semana: equipment.workload_NCRP151_Gy_week }], material,
+        P_mSv_semana: designGoal_mSv, T: occupancy_T, U, d_m: distance_m,
+      });
+    } catch { return null; }
+  }, [energia, equipment.workload_NCRP151_Gy_week, material, designGoal_mSv, occupancy_T, U, distance_m]);
 
-  // NCRP 151: K = W × U × T / d² × B
-  const W_Gy_week = equipment.workload_NCRP151_Gy_week;
-  const U = 0.25;
-  const kerma_unshielded = (W_Gy_week * U * occupancy_T) / (distance_m * distance_m) * 1000; // mSv/week
-  const B = designGoal_mSv / (kerma_unshielded || 1);
-  const nTVL = -Math.log10(Math.max(B, 1e-10));
-  const thickness_dm = nTVL * tvl; // dm
-  const thickness_cm = thickness_dm * 10;
+  if (!energia) return <div className="text-[10px] text-slate-500" data-testid="eqm-sin-calculo">Este equipo no es una fuente de fotones de teleterapia: use el diálogo específico (ciclotrón, PET).</div>;
 
+  const sel = 'w-full border rounded px-1 py-0.5 text-[10px]';
   return (
-    <div className="bg-slate-50 rounded-lg p-3 border space-y-2 text-[10px]">
-      <div className="grid grid-cols-4 gap-2">
-        <div>
-          <div className="text-slate-500">Distance (m)</div>
-          <input type="number" min={0.5} max={50} step={0.1} value={distance_m}
-            onChange={e => setDistance(Number(e.target.value))}
-            className="w-full border rounded px-1 py-0.5 text-[10px]" />
-        </div>
-        <div>
-          <div className="text-slate-500">Occupancy (T)</div>
-          <select value={occupancy_T} onChange={e => setOccupancy(Number(e.target.value))}
-            className="w-full border rounded px-1 py-0.5 text-[10px]">
-            <option value={1}>1.0 (Full)</option>
-            <option value={0.5}>0.5 (Partial)</option>
-            <option value={0.2}>0.2 (Occasional)</option>
-            <option value={0.125}>0.125 (Rare)</option>
-            <option value={0.05}>0.05 (Very rare)</option>
-          </select>
-        </div>
-        <div>
-          <div className="text-slate-500">Design P (mSv/wk)</div>
-          <select value={designGoal_mSv} onChange={e => setDesignGoal(Number(e.target.value))}
-            className="w-full border rounded px-1 py-0.5 text-[10px]">
-            <option value={0.02}>0.02 (Public)</option>
-            <option value={0.1}>0.1 (Occupied)</option>
-            <option value={0.5}>0.5 (Controlled)</option>
-          </select>
-        </div>
-        <div>
-          <div className="text-slate-500">Material</div>
-          <select value={material} onChange={e => setMaterial(e.target.value as any)}
-            className="w-full border rounded px-1 py-0.5 text-[10px]">
-            <option value="concrete">Concrete</option>
-            <option value="lead">Lead</option>
-            <option value="steel">Steel</option>
-          </select>
-        </div>
+    <div className="bg-slate-50 rounded-lg p-3 border space-y-2 text-[10px]" data-testid="eqm-calc">
+      <div className="grid grid-cols-5 gap-2">
+        <div><label htmlFor="eqm-d" className="text-slate-500">Distancia blanco → punto (m)</label>
+          <input id="eqm-d" data-testid="eqm-d" type="number" min={0.5} max={50} step={0.1} value={distance_m} onChange={e => setDistance(Number(e.target.value))} className={sel} /></div>
+        <div><label htmlFor="eqm-t" className="text-slate-500">Ocupación T</label>
+          <input id="eqm-t" data-testid="eqm-t" type="number" min={0.01} max={1} step={0.05} value={occupancy_T} onChange={e => setOccupancy(Number(e.target.value))} className={sel} /></div>
+        <div><label htmlFor="eqm-u" className="text-slate-500">Uso U</label>
+          <input id="eqm-u" data-testid="eqm-u" type="number" min={0.01} max={1} step={0.05} value={U} onChange={e => setU(Number(e.target.value))} className={sel} /></div>
+        <div><label htmlFor="eqm-p" className="text-slate-500">Objetivo P</label>
+          <select id="eqm-p" data-testid="eqm-p" value={designGoal_mSv} onChange={e => setDesignGoal(Number(e.target.value))} className={sel}>
+            {OBJETIVOS_DISENO.map(o => <option key={o.id} value={o.P_mSv_semana}>{o.etiqueta}</option>)}
+          </select></div>
+        <div><label htmlFor="eqm-m" className="text-slate-500">Material</label>
+          <select id="eqm-m" data-testid="eqm-m" value={material} onChange={e => setMaterial(e.target.value as MaterialNCRP151)} className={sel}>
+            {MATERIALES_MV.map(m => <option key={m} value={m}>{NOMBRE_MATERIAL[m]}</option>)}
+          </select></div>
       </div>
-      <div className="grid grid-cols-4 gap-2 mt-2">
-        <div className="bg-white rounded p-1.5 border text-center">
-          <div className="text-slate-500">Unshielded K</div>
-          <div className="font-bold text-red-600">{kerma_unshielded.toFixed(2)} mSv/wk</div>
+      {r && (
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          <div className="bg-white rounded p-1.5 border text-center"><div className="text-slate-500">K sin blindaje (W·U/d²)</div><div className="font-bold text-red-600">{r.K_sin_blindaje_mSv_semana.toPrecision(3)} mSv/semana</div></div>
+          <div className="bg-white rounded p-1.5 border text-center"><div className="text-slate-500">B = P/(T·K)</div><div className="font-mono">{r.componentes[0].B_requerida.toExponential(2)}</div></div>
+          <div className="bg-emerald-50 rounded p-1.5 border border-emerald-200 text-center"><div className="text-emerald-600">Espesor ({NOMBRE_MATERIAL[material]})</div><div className="font-bold text-emerald-800" data-testid="eqm-espesor">{r.espesor_cm.toFixed(1)} cm</div></div>
         </div>
-        <div className="bg-white rounded p-1.5 border text-center">
-          <div className="text-slate-500">B factor</div>
-          <div className="font-mono">{B.toExponential(2)}</div>
-        </div>
-        <div className="bg-white rounded p-1.5 border text-center">
-          <div className="text-slate-500">n TVL</div>
-          <div className="font-bold text-blue-600">{nTVL.toFixed(2)}</div>
-        </div>
-        <div className="bg-emerald-50 rounded p-1.5 border border-emerald-200 text-center">
-          <div className="text-emerald-600">Thickness ({material})</div>
-          <div className="font-bold text-emerald-800">{thickness_cm.toFixed(1)} cm</div>
-        </div>
-      </div>
+      )}
+      <div className="text-slate-500">Primaria NCRP 151 Ec. 2.1 + 2.3 con TVL₁/TVLₑ de la Tabla B.2 a {String(energia)}{energia === 'Co60' ? '' : ' MV'}; la fuga y la dispersión de las secundarias se calculan en el asistente por equipo.</div>
     </div>
   );
 }

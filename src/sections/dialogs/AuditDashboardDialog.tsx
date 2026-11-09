@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +73,7 @@ export default function AuditDashboardDialog({ open, onOpenChange }: AuditDashbo
             <Badge variant="outline" className="text-[10px]">{stats.total} eventos</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los eventos, usuarios y fechas son ilustrativos: no es la bitácora de auditoría del proyecto." />
 
         {/* Stats cards */}
         <div className="px-6 pb-3 grid grid-cols-4 gap-2">

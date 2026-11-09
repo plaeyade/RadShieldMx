@@ -1,10 +1,11 @@
 // Fase 2: DashboardCalcDialog -- Replica de DASHBOARD_ING del Excel
+import { verificarPlano } from '@/lib/verificacionBlindaje';
 import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Gauge, AlertTriangle, CheckCircle, TrendingUp, Shield, Activity, BarChart3 } from 'lucide-react';
-import type { Barrier, FloorPlan } from '@/types/radshield';
+import type { FloorPlan } from '@/types/radshield';
 
 interface Props {
   open: boolean;
@@ -22,41 +23,22 @@ const MODULES = [
   { id: 'cyclotron', name: 'Ciclotron / Radiofarmacia', norma: 'IAEA TRS 430, NOM-036' },
 ];
 
-function getThicknessValue(barrier: Barrier): number {
-  const thickness = barrier.requiredThickness_mm;
-  if (typeof thickness === 'number') return thickness;
-  if (!thickness) return 0;
-  if (barrier.materialCode && typeof thickness[barrier.materialCode] === 'number') {
-    return thickness[barrier.materialCode];
-  }
-  return Object.values(thickness)[0] ?? 0;
-}
-
-function getInstalledThicknessValue(barrier: Barrier): number {
-  return barrier.thickness_mm ?? getThicknessValue(barrier);
-}
-
 export default function DashboardCalcDialog({ open, onOpenChange, floorPlan }: Props) {
+  // Fase 8c: una barrera cumple sólo si el espesor instalado ≥ requerido (`verificarPlano`); antes contaba como «OK»
+  // con el 90 % del requerido y las barreras sin cálculo o sin espesor también contaban. Sin espesor por omisión de 200 mm.
   const stats = useMemo(() => {
     const numSources = floorPlan.sources.length;
     const numBarriers = floorPlan.barriers.length;
-    const numCalculated = floorPlan.barriers.filter(b => b.requiredThickness_mm !== undefined).length;
+    const v = verificarPlano(floorPlan);
+    const requeridos = v.filas.map(f => f.requerido_mm).filter((x): x is number => x !== null);
+    const numCalculated = requeridos.length;
     const maxDose = numBarriers > 0
       ? Math.max(...floorPlan.barriers.map(b => b.designGoal_mSv_per_wk || 0.02))
       : 0.02;
-    const avgThickness = numBarriers > 0
-      ? (floorPlan.barriers.reduce((sum, b) => sum + (getThicknessValue(b) || 200), 0) / numBarriers)
-      : 0;
-    const barriersOK = floorPlan.barriers.filter(b => {
-      const required = getThicknessValue(b);
-      const rounded = getInstalledThicknessValue(b);
-      return rounded >= required * 0.9; // Within 10% tolerance
-    }).length;
+    const avgThickness = requeridos.length > 0 ? requeridos.reduce((a, x) => a + x, 0) / requeridos.length : 0;
+    const barriersOK = v.resumen.cumple;
     const compliance = numBarriers > 0 ? Math.round((barriersOK / numBarriers) * 100) : 0;
-
-    return {
-      numSources, numBarriers, numCalculated, maxDose, avgThickness, barriersOK, compliance
-    };
+    return { numSources, numBarriers, numCalculated, maxDose, avgThickness, barriersOK, compliance, pendientes: v.resumen.pendientes };
   }, [floorPlan]);
 
   return (
@@ -74,13 +56,13 @@ export default function DashboardCalcDialog({ open, onOpenChange, floorPlan }: P
             {/* KPIs Row */}
             <div className="grid grid-cols-4 gap-3">
               <KpiCard
-                label="Dosis Max (mSv/sem)"
+                label="Objetivo P máx. (mSv/sem)"
                 value={stats.maxDose.toFixed(3)}
                 status={stats.maxDose <= 0.02 ? 'ok' : stats.maxDose <= 0.1 ? 'warning' : 'fail'}
                 icon={<Activity className="w-4 h-4" />}
               />
               <KpiCard
-                label="Espesor Promedio"
+                label="Espesor requerido promedio"
                 value={`${(stats.avgThickness / 10).toFixed(1)} cm`}
                 sub={`${stats.avgThickness.toFixed(0)} mm`}
                 status="info"
@@ -109,12 +91,10 @@ export default function DashboardCalcDialog({ open, onOpenChange, floorPlan }: P
               {stats.maxDose <= 0.02 ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />}
               <div>
                 <div className="font-bold text-sm">
-                  {stats.maxDose <= 0.02 ? 'CUMPLE ALARA' :
-                   stats.maxDose <= 0.1 ? 'CUMPLE CNSNS (limite publico)' :
-                   'EXCEDE LIMITES -- REVISAR'}
+                  {stats.numBarriers > 0 && stats.barriersOK === stats.numBarriers ? 'Todas las barreras cumplen (instalado ≥ requerido)' : `${stats.numBarriers - stats.barriersOK} barrera(s) sin cumplir o pendientes`}
                 </div>
                 <div className="text-xs text-gray-500">
-                  Limite ALARA: 0.05 mSv/ano (0.001 mSv/sem) | Limite POE: 20 mSv/ano (0.4 mSv/sem) | Publico: 1 mSv/ano (0.02 mSv/sem)
+                  Objetivos de diseño NCRP 147/151: área controlada 0.1 mSv/semana; no controlada 0.02 mSv/semana. {stats.pendientes} barrera(s) sin cálculo o sin espesor declarado.
                 </div>
               </div>
             </div>

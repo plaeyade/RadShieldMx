@@ -107,35 +107,26 @@ export default function MCNPCyclotronDialog({ open, onOpenChange }: MCNPCyclotro
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('calculator');
 
-  // Neutron dose calculations
+  // Estimación de neutrones (Fase 8c). Antes: H(1 m) = Q·2×10⁻¹³·3600 sin 1/(4πr²) y P en μSv contra H en Sv.
+  // Ahora: Q = Y·I (n/s, con Y en n/μC e I en μA = μC/s); φ(1 m) = Q/(4π·100²) n/(cm²·s); H = φ·h·3600 con h el
+  // coeficiente fluencia → H*(10) (editable; por omisión ICRP 74 a 1 MeV, 416 pSv·cm²). Sin modelo de laberinto propio
+  // (se retiró el factor 0.3^(L/2) sin referencia). Es una estimación de orden de magnitud: confírmela con la corrida MCNP.
+  const [h_Sv_cm2, setH] = useState(4.16e-10);
   const neutronCalcs = useMemo(() => {
     const cyc = selectedCyc;
     const mat = shieldMaterial;
-
-    // Neutron source strength (n/s)
-    // Simplified: neutron yield per microamp = n/(uC) * uA * C/(uC conversion)
-    const Q_n_simplified = cyc.neutronYield_n_per_uC * cyc.current_uA * 1e-6 * 1e6; // n/s (simplified for display)
-
-    // Dose equivalent at 1m (uSv/h) - NCRP 151 Eq. 4.5
-    const H_1m = Q_n_simplified * 2e-13 * 3600; // 2e-13 Sv per neutron fluence at 1m
-
-    // Required thickness using removal cross section
-    const P = 10; // 10 uSv/week design goal for controlled area
-    const B_required = P / (H_1m * workload_h_week);
-    const thickness_cm = -Math.log(B_required) * mat.tvla / Math.log(10);
-
-    // TVL approach
+    const Q_n_simplified = cyc.neutronYield_n_per_uC * cyc.current_uA; // n/s
+    const fluencia_1m = Q_n_simplified / (4 * Math.PI * 100 * 100); // n/(cm²·s)
+    const H_1m = fluencia_1m * h_Sv_cm2 * 3600 * 1e6; // μSv/h
+    const P = 10; // μSv/semana (objetivo usado por el generador)
+    const B_required = Math.min(1, P / (H_1m * workload_h_week));
     const tvla_cm = mat.tvla;
-    const nTVL = Math.log10(H_1m * workload_h_week / P);
-
-    // Maze calculation (McGinley)
-    const mazeDose = H_1m * Math.pow(0.3, Math.floor(cyc.mazeLength_m / 2));
-
-    return {
-      Q_n_simplified, H_1m, B_required, thickness_cm, tvla_cm,
-      nTVL, mazeDose, P,
-    };
-  }, [selectedCyc, shieldMaterial, workload_h_week]);
+    const nTVL = B_required < 1 ? -Math.log10(B_required) : 0;
+    const thickness_cm = nTVL * tvla_cm;
+    // Sin coeficiente de conversión o con datos no finitos no hay estimación: el estado no puede ser «CUMPLE».
+    const valido = h_Sv_cm2 > 0 && Number.isFinite(H_1m) && Number.isFinite(thickness_cm);
+    return { Q_n_simplified, H_1m, B_required, thickness_cm, tvla_cm, nTVL, P, valido };
+  }, [selectedCyc, shieldMaterial, workload_h_week, h_Sv_cm2]);
 
   // Generate MCNP input
   const generateMCNP = () => {
@@ -356,7 +347,7 @@ PRINT   40 110 120
               <div className="grid grid-cols-3 gap-2 text-[10px]">
                 <div className="bg-cyan-50 rounded-md p-2 border border-cyan-200">
                   <div className="text-cyan-600">Neutron dose @ 1m</div>
-                  <div className="font-bold text-cyan-800 text-sm">{neutronCalcs.H_1m.toFixed(1)} uSv/h</div>
+                  <div className="font-bold text-cyan-800 text-sm" data-testid="mcnp-h1m">{neutronCalcs.H_1m.toPrecision(3)} μSv/h</div>
                 </div>
                 <div className="bg-amber-50 rounded-md p-2 border border-amber-200">
                   <div className="text-amber-600">Required thickness</div>
@@ -364,8 +355,9 @@ PRINT   40 110 120
                   <div className="text-amber-600">({neutronCalcs.nTVL.toFixed(1)} TVL)</div>
                 </div>
                 <div className="bg-emerald-50 rounded-md p-2 border border-emerald-200">
-                  <div className="text-emerald-600">Maze exit dose</div>
-                  <div className="font-bold text-emerald-800 text-sm">{neutronCalcs.mazeDose.toFixed(3)} uSv/h</div>
+                  <label htmlFor="mcnp-h" className="text-emerald-600">Coef. fluencia → H*(10) (Sv·cm²)</label>
+                  <input id="mcnp-h" data-testid="mcnp-h" type="number" step="any" value={h_Sv_cm2} onChange={e => setH(Number(e.target.value))} className="w-full border rounded px-1 text-[10px]" />
+                  <div className="text-emerald-700">Laberinto: use la calculadora de laberinto.</div>
                 </div>
               </div>
 
@@ -383,12 +375,12 @@ PRINT   40 110 120
                 <tbody>
                   {[
                     ['Wall thickness (cm)', selectedCyc.bunkerWall_m * 100, Math.max(0, neutronCalcs.thickness_cm)],
-                    ['Roof thickness (cm)', selectedCyc.roofThickness_m * 100, Math.max(0, neutronCalcs.thickness_cm * 0.7)],
-                    ['Maze length (m)', selectedCyc.mazeLength_m, selectedCyc.mazeLength_m],
-                  ].map(([label, design, calc], i) => {
-                    const ratio = (calc as number) / (design as number);
-                    const status = ratio > 1.1 ? 'PASS' : ratio > 0.9 ? 'OK' : 'MARGINAL';
-                    const color = status === 'PASS' ? 'text-emerald-600' : status === 'OK' ? 'text-blue-600' : 'text-amber-600';
+                    // Techo: mismo estimado que el muro (antes × 0.7 sin referencia, que daba «CUMPLE» con el 70 % del espesor).
+                    ['Roof thickness (cm)', selectedCyc.roofThickness_m * 100, Math.max(0, neutronCalcs.thickness_cm)],
+                                      ].map(([label, design, calc], i) => {
+                    // Cumple si el diseño es al menos el estimado (antes el estado estaba invertido: «PASS» si lo calculado superaba al diseño).
+                    const status = !neutronCalcs.valido ? 'SIN DATOS' : (design as number) >= (calc as number) ? 'CUMPLE' : 'INSUFICIENTE';
+                    const color = status === 'CUMPLE' ? 'text-emerald-600' : 'text-amber-600';
                     return (
                       <tr key={i} className="border-b border-slate-100">
                         <td className="py-1 px-2">{label as string}</td>

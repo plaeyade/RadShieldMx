@@ -3,6 +3,7 @@
  * Complete audit trail for regulatory inspection
  * NOM-008-NUCL-2018 §8, ISO 27001:2022 A.12.4
  */
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,7 @@ export default function AuditLogDialog({ open, onClose }: Props) {
             <Badge variant="outline" className="text-[10px]">E.9</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los eventos (incluidos los usuarios con dominio institucional) son ficticios: no es un registro de inspección." />
 
         <div className="flex gap-2 mb-3">
           <div className="flex-1 relative">

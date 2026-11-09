@@ -121,6 +121,11 @@ export default function ICRU57Dialog({ open, onClose }: ICRU57DialogProps) {
           <p className="text-sm text-muted-foreground">
             Coeficientes de conversion de fluencia a dosis efectiva para radiacion externa (fotones, neutrones, electrones, protones, etc.)
           </p>
+          <p role="alert" className="mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-800" data-testid="icru57-aviso">
+            Valores sin verificar: los coeficientes de fotones de esta tabla no coinciden con ICRP 74 / ICRU 57 (p. ej. a 0.5 MeV AP
+            la tabla publica ≈ 2.4 pSv·cm², aquí «6.7») y el informe no está en el repositorio para contrastarlos. No los use en cálculos;
+            consulte las tablas A.17 y siguientes del informe original.
+          </p>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 pb-6">

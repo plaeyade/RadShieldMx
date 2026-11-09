@@ -197,31 +197,35 @@ export function transmisionUnTVL(t_cm: number, tvl_cm: number): number {
 }
 
 // ───────────────────────────────────────────────────────────────
-// Incidencia oblicua (NCRP 151 §2.2, p. 24: para θ > 45°, ≈ 2 HVL en baja energía y ≈ 1 HVL en alta energía,
-// en concreto). El umbral B < 10⁻³ y el tope de 70° son criterios conservadores del motor (Fase 2).
+// Incidencia oblicua (NCRP 151 §2.2, p. 24). Hasta 45° el espesor oblicuo t/cos θ es válido. Para θ > 45° el
+// espesor oblicuo sobrestima la atenuación y NCRP 151 sólo da una corrección aproximada (≈ 2 HVL en baja energía,
+// ≈ 1 HVL en alta energía) y sólo para concreto y atenuaciones de órdenes de magnitud; NCRP 147 §1.4.3 enumera la
+// incidencia perpendicular entre sus suposiciones conservadoras. Revisión 8c: el motor antes aplicaba esa corrección
+// sólo con B < 10⁻³, con un salto ×2 en el umbral. Ahora, para θ > 45° (cualquier B o material) se usa la transmisión
+// a incidencia normal, que no acredita ninguna oblicuidad. Para θ ≤ 45° SÍ se acredita t/cos θ, que da menos
+// transmisión que el espesor perpendicular (es decir, es menos conservador que él); lo permite el §2.2, que trata el
+// efecto de la dispersión como «un pequeño aumento» del espesor, aquí no aplicado. En θ = 45° hay un salto (de crédito
+// completo a ninguno) hacia el lado conservador.
 // ───────────────────────────────────────────────────────────────
 
 /** Por encima de este ángulo la aproximación de espesor oblicuo t/cos θ sobrestima la atenuación. */
 export const OBLICUIDAD_UMBRAL_DEG = 45;
 /** Tope del motor para el espesor oblicuo (conservador): no se acredita recorrido adicional más allá de 70°. */
 export const OBLICUIDAD_MAX_DATOS_DEG = 70;
-/** Umbral de transmisión a partir del cual el motor aplica la corrección de NCRP 151 §2.2 (p. 24). */
-export const OBLICUIDAD_B_UMBRAL = 1e-3;
 
 /**
- * Corrección de NCRP 151 §2.2 (p. 24) a la transmisión calculada con el espesor oblicuo t/cos θ: para θ > 45° y
- * B < 10⁻³ el espesor oblicuo sobrestima la atenuación (los fotones dispersados en la barrera salen por
- * un camino más corto); se descuenta ≈ 1 HVL en alta energía (rayos X de MV) y ≈ 2 HVL en baja energía (Co-60),
- * es decir B × 2 o B × 4, sin superar la transmisión a incidencia normal.
+ * Corrección de oblicuidad (NCRP 151 §2.2, p. 24; NCRP 147 §1.4.3): para θ ≤ 45° se usa la transmisión con el espesor
+ * oblicuo t/cos θ (crédito por oblicuidad: menos conservador que el espesor perpendicular, permitido por el §2.2); para
+ * θ > 45° se devuelve la transmisión a incidencia normal (sin crédito), que no depende de B ni del material y, en el
+ * dominio del §2.2 (atenuación de órdenes de magnitud), es ≥ la oblicua con 1 o 2 HVL descontados. `hvlDescontados` es el número de HVL que se restituyen respecto del espesor oblicuo: log₂(B_n/B_o).
  */
 export function correccionOblicuidad(
-  B_oblicua: number, B_normal: number, theta_deg: number, e: EnergiaMV,
+  B_oblicua: number, B_normal: number, theta_deg: number,
 ): { transmision: number; hvlDescontados: number } {
-  if (!(theta_deg > OBLICUIDAD_UMBRAL_DEG + 1e-9) || !(B_oblicua < OBLICUIDAD_B_UMBRAL)) {
-    return { transmision: B_oblicua, hvlDescontados: 0 };
-  }
-  const k = e === 'Co60' ? 2 : 1;
-  return { transmision: Math.min(B_normal, B_oblicua * Math.pow(2, k)), hvlDescontados: k };
+  if (!(theta_deg > OBLICUIDAD_UMBRAL_DEG + 1e-9)) return { transmision: B_oblicua, hvlDescontados: 0 };
+  const transmision = Math.max(B_normal, B_oblicua);
+  const hvl = B_oblicua > 0 && transmision > B_oblicua ? Math.log2(transmision / B_oblicua) : 0;
+  return { transmision, hvlDescontados: Number.isFinite(hvl) ? hvl : 0 };
 }
 
 export interface TerminoDirecto { K_Sv_semana: number; transmision: (t_cm: number) => number }
@@ -275,4 +279,35 @@ export function energiaDesdeClave(k: string): EnergiaMV | null {
   if (!m) return null;
   const e = Number(m[1]);
   return ([4, 6, 10, 15, 18, 20, 25, 30] as const).find((x) => x === e) ?? null;
+}
+
+// ───────────────────────────────────────────────────────────────
+// Skyshine de fotones (NCRP 151 §5.1, Ec. 5.1, método de McGinley 2002).
+// Ḣ (nSv/h) = 2.5×10⁷ · B_xs · Ḋ₀ · Ω^1.3 / (dᵢ · dₛ)². Con Ḋ₀ en Gy/h da nSv/h; con la carga W en Gy/semana
+// a 1 m da nSv/semana (la ecuación es lineal en Ḋ₀). NCRP 151 advierte que es, a lo sumo, una estimación de orden
+// de magnitud (Tabla 5.1: medido/calculado entre 0.25 y 5.3).
+// ───────────────────────────────────────────────────────────────
+
+export interface EntradaSkyshine {
+  /** Transmisión del techo para la primaria (B_xs). */
+  B_xs: number;
+  /** Rendimiento a 1 m del blanco: Gy/h (tasa) o Gy/semana (carga W). */
+  D0: number;
+  /** Ángulo sólido del haz máximo (sr). */
+  omega_sr: number;
+  /** Distancia vertical del blanco a un punto 2 m sobre el techo (m). */
+  di_m: number;
+  /** Distancia horizontal del isocentro al punto de cálculo (m). */
+  ds_m: number;
+}
+
+/** Ec. 5.1: nSv por unidad de tiempo de D0 (h o semana). */
+export function skyshineFotones(e: EntradaSkyshine): number {
+  if (!(e.di_m > 0 && e.ds_m > 0)) throw new RangeError('dᵢ y dₛ deben ser positivas');
+  return (2.5e7 * e.B_xs * e.D0 * Math.pow(e.omega_sr, 1.3)) / Math.pow(e.di_m * e.ds_m, 2);
+}
+
+/** Ángulo sólido (sr) de un campo rectangular a × b definido a la distancia d (Ω = 4·asin(ab / √((a²+4d²)(b²+4d²)))). */
+export function anguloSolidoCampo(a_m: number, b_m: number, d_m = 1): number {
+  return 4 * Math.asin((a_m * b_m) / Math.sqrt((a_m * a_m + 4 * d_m * d_m) * (b_m * b_m + 4 * d_m * d_m)));
 }

@@ -34,9 +34,11 @@
  * sin blindaje y en una esquina entrante se elimina el solape (sin doble crédito).
  *
  * Incidencia oblicua:
- * - Primaria y fuga NCRP 151: espesor oblicuo, con la corrección del §2.2 (p. 24: θ > 45°, ≈ 1 HVL en alta
- *   energía y ≈ 2 HVL en baja energía, concreto; `correccionOblicuidad`, aplicada si B < 10⁻³) y sin crédito
- *   adicional más allá de 70° (tope conservador del motor).
+ * - Primaria NCRP 151: espesor oblicuo t/cos θ hasta 45°; para θ > 45° la transmisión a incidencia
+ *   normal (`correccionOblicuidad`, §2.2 p. 24 y NCRP 147 §1.4.3), para cualquier B y material. Hasta 45° el
+ *   crédito t/cos θ sí es menos conservador que el espesor perpendicular (lo permite el §2.2); el §2.2 recomienda
+ *   aplicar la oblicuidad sólo a la primaria, porque la fuga y la dispersión son fuentes difusas.
+ * - Fuga NCRP 151: espesor normal, sin crédito por oblicuidad (§2.2).
  * - Dispersión del paciente: espesor normal, sin crédito por oblicuidad. NCRP 151 no da un criterio único
  *   (sus ejemplos se contradicen) y los TVL de la Tabla B.5a ya son de haz ancho: conservador.
  * - Diagnóstico y resto: espesor oblicuo con crédito limitado a θ ≤ 60° (como en la Fase 1).
@@ -120,7 +122,7 @@ export interface CruceBarrera {
   factorOblicuidad: number;
   capas: CapaCruzada[];
   transmision: number;
-  /** HVL descontados por la corrección de oblicuidad de NCRP 151 §2.2, p. 24 (0, 1 o 2). */
+  /** HVL restituidos por la corrección de oblicuidad (θ > 45° → incidencia normal): log₂(B_normal/B_oblicua). */
   hvlDescontados: number;
 }
 
@@ -502,11 +504,16 @@ function material(materials: ShieldingMaterial[], code: string): ShieldingMateri
   return materials.find((m) => m.code === c);
 }
 
-/** Primaria o fuga NCRP 151: TVL₁/TVLₑ por capa, espesor oblicuo y corrección del §2.2 (p. 24). */
+/**
+ * Primaria o fuga NCRP 151: TVL₁/TVLₑ por capa. La primaria usa el espesor oblicuo y la corrección del §2.2 (p. 24);
+ * la fuga, el espesor normal sin crédito de oblicuidad (§2.2: la oblicuidad sólo se considera para la primaria, porque
+ * la fuga y la dispersión son fuentes demasiado difusas para asignarles un ángulo).
+ */
 function transmitirTVL151(
   g: CruceGeometrico, componente: 'primaria' | 'fuga', e: EnergiaMV, source: RadiationSource, materials: ShieldingMaterial[],
 ): CruceBarrera {
-  const recorrido = recorridoConTope(g, OBLICUIDAD_MAX_DATOS_DEG);
+  const conOblicuidad = componente === 'primaria';
+  const recorrido = conOblicuidad ? recorridoConTope(g, OBLICUIDAD_MAX_DATOS_DEG) : g.profundidad_mm;
   let Bo = 1, Bn = 1;
   const capas = g.capas.map((capa): CapaCruzada => {
     const parte = capa.thickness_mm / g.espesor_mm;
@@ -527,8 +534,9 @@ function transmitirTVL151(
     Bo *= bo; Bn *= bn;
     return { ...capa, recorrido_mm: rec, transmision: bo, metodo };
   });
+  if (!conOblicuidad) return cruce(g, recorrido, capas, clampTransmission(Bn));
   const theta = Math.acos(Math.min(1, g.cosTheta)) / RAD;
-  const c = correccionOblicuidad(Bo, Bn, theta, e);
+  const c = correccionOblicuidad(Bo, Bn, theta);
   return cruce(g, recorrido, capas, clampTransmission(c.transmision), c.hvlDescontados);
 }
 

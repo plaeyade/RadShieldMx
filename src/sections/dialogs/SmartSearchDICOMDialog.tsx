@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -21,16 +22,16 @@ interface DICOMStudy {
 }
 
 const MOCK_STUDIES: DICOMStudy[] = [
-  { id: 'D001', patientName: 'Garcia Lopez, Maria Elena', mrn: 'MRN-2026-001482', studyDate: '2026-05-28', modality: 'CT', description: 'CT Torax c/contraste - Planificacion RT', numSeries: 4, numImages: 248, institution: 'HGR 196 Ciudad Juarez', fileSize: '156 MB', isImported: true },
-  { id: 'D002', patientName: 'Hernandez Ruiz, Carlos Alberto', mrn: 'MRN-2026-002193', studyDate: '2026-05-27', modality: 'CT', description: 'CT Pelvis - Braquiterapia HDR', numSeries: 3, numImages: 186, institution: 'HGR 196 Ciudad Juarez', fileSize: '98 MB', isImported: true },
-  { id: 'D003', patientName: 'Martinez Flores, Ana Lucia', mrn: 'MRN-2026-001891', studyDate: '2026-05-26', modality: 'PET-CT', description: 'PET-CT FDG Oncologico - Dosis I-131', numSeries: 6, numImages: 412, institution: 'HGR 196 Ciudad Juarez', fileSize: '312 MB', isImported: false },
-  { id: 'D004', patientName: 'Lopez Chavez, Roberto', mrn: 'MRN-2026-002045', studyDate: '2026-05-25', modality: 'CT', description: 'CT Craneo - Gamma Knife Perfexion', numSeries: 3, numImages: 164, institution: 'HGR 196 Ciudad Juarez', fileSize: '87 MB', isImported: false },
-  { id: 'D005', patientName: 'Sanchez Morales, Diana Paola', mrn: 'MRN-2026-001756', studyDate: '2026-05-24', modality: 'MR', description: 'MR Prostata - Planificacion VMAT', numSeries: 5, numImages: 320, institution: 'HGR 196 Ciudad Juarez', fileSize: '198 MB', isImported: true },
-  { id: 'D006', patientName: 'Perez Aguilar, Jorge Luis', mrn: 'MRN-2026-002301', studyDate: '2026-05-23', modality: 'CT', description: 'CT Simulacion - LINAC 6MV', numSeries: 2, numImages: 128, institution: 'HGR 196 Ciudad Juarez', fileSize: '76 MB', isImported: false },
-  { id: 'D007', patientName: 'Torres Vega, Carmen Isabel', mrn: 'MRN-2026-001934', studyDate: '2026-05-22', modality: 'PET-CT', description: 'PET-CT Ga-68 DOTATATE - Terapia Lu-177', numSeries: 7, numImages: 534, institution: 'HGR 196 Ciudad Juarez', fileSize: '445 MB', isImported: true },
-  { id: 'D008', patientName: 'Ramirez Castillo, Fernando', mrn: 'MRN-2026-002112', studyDate: '2026-05-21', modality: 'CT', description: 'CT Torax/Abdomen - Verificacion blindaje', numSeries: 4, numImages: 286, institution: 'HGR 196 Ciudad Juarez', fileSize: '178 MB', isImported: false },
-  { id: 'D009', patientName: 'Castro Mendez, Lucia', mrn: 'MRN-2026-001567', studyDate: '2026-05-20', modality: 'CT', description: 'CT Cervical - Planificacion SRS', numSeries: 3, numImages: 192, institution: 'HGR 196 Ciudad Juarez', fileSize: '112 MB', isImported: false },
-  { id: 'D010', patientName: 'Vargas Reyes, Miguel Angel', mrn: 'MRN-2026-002267', studyDate: '2026-05-19', modality: 'PET-CT', description: 'PET-CT FDG - Dosimetria post Lu-177', numSeries: 5, numImages: 368, institution: 'HGR 196 Ciudad Juarez', fileSize: '289 MB', isImported: true },
+  { id: 'D001', patientName: 'DEMO^PACIENTE 01', mrn: 'DEMO-0001', studyDate: '2026-05-28', modality: 'CT', description: 'CT Torax c/contraste - Planificacion RT', numSeries: 4, numImages: 248, institution: 'Institución demo', fileSize: '156 MB', isImported: true },
+  { id: 'D002', patientName: 'DEMO^PACIENTE 02', mrn: 'DEMO-0002', studyDate: '2026-05-27', modality: 'CT', description: 'CT Pelvis - Braquiterapia HDR', numSeries: 3, numImages: 186, institution: 'Institución demo', fileSize: '98 MB', isImported: true },
+  { id: 'D003', patientName: 'DEMO^PACIENTE 03', mrn: 'DEMO-0003', studyDate: '2026-05-26', modality: 'PET-CT', description: 'PET-CT FDG Oncologico - Dosis I-131', numSeries: 6, numImages: 412, institution: 'Institución demo', fileSize: '312 MB', isImported: false },
+  { id: 'D004', patientName: 'DEMO^PACIENTE 04', mrn: 'DEMO-0004', studyDate: '2026-05-25', modality: 'CT', description: 'CT Craneo - Gamma Knife Perfexion', numSeries: 3, numImages: 164, institution: 'Institución demo', fileSize: '87 MB', isImported: false },
+  { id: 'D005', patientName: 'DEMO^PACIENTE 05', mrn: 'DEMO-0005', studyDate: '2026-05-24', modality: 'MR', description: 'MR Prostata - Planificacion VMAT', numSeries: 5, numImages: 320, institution: 'Institución demo', fileSize: '198 MB', isImported: true },
+  { id: 'D006', patientName: 'DEMO^PACIENTE 06', mrn: 'DEMO-0006', studyDate: '2026-05-23', modality: 'CT', description: 'CT Simulacion - LINAC 6MV', numSeries: 2, numImages: 128, institution: 'Institución demo', fileSize: '76 MB', isImported: false },
+  { id: 'D007', patientName: 'DEMO^PACIENTE 07', mrn: 'DEMO-0007', studyDate: '2026-05-22', modality: 'PET-CT', description: 'PET-CT Ga-68 DOTATATE - Terapia Lu-177', numSeries: 7, numImages: 534, institution: 'Institución demo', fileSize: '445 MB', isImported: true },
+  { id: 'D008', patientName: 'DEMO^PACIENTE 08', mrn: 'DEMO-0008', studyDate: '2026-05-21', modality: 'CT', description: 'CT Torax/Abdomen - Verificacion blindaje', numSeries: 4, numImages: 286, institution: 'Institución demo', fileSize: '178 MB', isImported: false },
+  { id: 'D009', patientName: 'DEMO^PACIENTE 09', mrn: 'DEMO-0009', studyDate: '2026-05-20', modality: 'CT', description: 'CT Cervical - Planificacion SRS', numSeries: 3, numImages: 192, institution: 'Institución demo', fileSize: '112 MB', isImported: false },
+  { id: 'D010', patientName: 'DEMO^PACIENTE 10', mrn: 'DEMO-0010', studyDate: '2026-05-19', modality: 'PET-CT', description: 'PET-CT FDG - Dosimetria post Lu-177', numSeries: 5, numImages: 368, institution: 'Institución demo', fileSize: '289 MB', isImported: true },
 ];
 
 interface SmartSearchDICOMDialogProps {
@@ -89,6 +90,7 @@ export default function SmartSearchDICOMDialog({ open, onOpenChange, onSelectStu
             <Badge variant="outline" className="text-[10px] ml-2">{filteredStudies.length} estudios</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los pacientes y estudios son de demostración y están anonimizados." />
 
         <div className="px-6 pb-4 space-y-3">
           {/* Search input */}

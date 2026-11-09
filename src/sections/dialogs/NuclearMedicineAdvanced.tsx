@@ -4,6 +4,7 @@
 // Based on: AAPM TG 108, NCRP 147/151 Ch.B.7, ICRP 106, IAEA SSG-46
 // =============================================================================
 import { useState, useMemo } from 'react';
+import { espesorPET } from '@/lib/calculadorasNormativas';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -26,7 +27,7 @@ import { BACKEND_ENABLED, trpc } from '@/providers/trpc';
 import { useAuth } from '@/hooks/useAuth';
 import {
   RADIONUCLIDES, NM_ROOM_CONFIGS,
-  calculateWeeklyKerma, calculateNMBarrierThickness,
+  calculateWeeklyKerma,
   decayedActivity, estimateMIRDDose,
   canReleasePatient, bremsstrahlungShielding,
 } from '@/lib/nuclearMedicine';
@@ -60,6 +61,17 @@ import {
 } from '@/lib/dosimetryPersistenceAdapter';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
+
+const EMISORES_511 = new Set(['F-18', 'Ga-68', 'Cu-64']);
+
+/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+ en plomo/concreto; si no, n·TVL de biblioteca. */
+function espesorNM(simbolo: string, material: string, B: number, tvl_mm: number): { mm: number; metodo: string } {
+  if (B >= 1) return { mm: 0, metodo: '—' };
+  if (EMISORES_511.has(simbolo) && (material === 'lead' || material === 'concrete')) {
+    return { mm: espesorPET(material, B), metodo: 'AAPM TG-108 Tabla V (banda ancha, 511 keV)' };
+  }
+  return { mm: -Math.log10(B) * tvl_mm, metodo: 'TVL de biblioteca (sin validar contra un informe)' };
+}
 
 function getCategoryColor(cat: string): string {
   switch (cat) {
@@ -109,6 +121,9 @@ export default function NuclearMedicineAdvanced({ open, onOpenChange }: Props) {
   );
 
   // ── Calculations ──
+  // Fase 8c: para emisores β+ (511 keV) el espesor sale de la transmisión de banda ancha de AAPM TG-108 Tabla V
+  // (`espesorPET`; antes, TVL de biblioteca: F-18 plomo 13.6 mm frente a ≈ 16.5 mm de TG-108, no conservador). Para el
+  // resto se conserva el TVL de la biblioteca, rotulado como no validado.
   const shieldingCalc = useMemo(() => {
     if (!nuclide) return null;
     const A = parseFloat(activity_GBq) || 0;
@@ -118,21 +133,22 @@ export default function NuclearMedicineAdvanced({ open, onOpenChange }: Props) {
     const kermaUnshielded = calculateWeeklyKerma(nuclide.gammaConstant_mSv_m2_GBq_h, A, t, d);
     const tvl = materialType === 'lead' ? nuclide.TVL_lead_mm : nuclide.TVL_concrete_mm;
     const hvl = materialType === 'lead' ? nuclide.HVL_lead_mm : nuclide.HVL_concrete_mm;
-    const thickness = calculateNMBarrierThickness(nuclide.gammaConstant_mSv_m2_GBq_h, A, t, d, P, tvl);
-    const transmission = kermaUnshielded > 0 ? P / 1000 / kermaUnshielded : 0;
-    return { kermaUnshielded, thickness, transmission, tvl, hvl };
+    const transmission = kermaUnshielded > 0 ? Math.min(1, P / 1000 / kermaUnshielded) : 1;
+    const e = espesorNM(nuclide.symbol, materialType, transmission, tvl);
+    return { kermaUnshielded, thickness: e.mm, metodo: e.metodo, transmission, tvl, hvl };
   }, [nuclide, activity_GBq, distance_m, hoursPerWeek, designGoal_uSv, materialType]);
 
   const roomCalc = useMemo(() => {
     if (!nuclide || !room) return null;
     const A = room.typicalDose_GBq;
     const d = room.distanceToBarrier_m;
-    const t = room.patientsPerWeek * 1; // 1 hour per patient
+    const t = room.patientsPerWeek * 1; // 1 h por paciente (supuesto de la configuración de sala)
     const P = room.designGoal_uSv_week;
     const kermaUnshielded = calculateWeeklyKerma(nuclide.gammaConstant_mSv_m2_GBq_h, A, t, d);
-    const leadThickness = calculateNMBarrierThickness(nuclide.gammaConstant_mSv_m2_GBq_h, A, t, d, P, nuclide.TVL_lead_mm);
-    const concreteThickness = calculateNMBarrierThickness(nuclide.gammaConstant_mSv_m2_GBq_h, A, t, d, P, nuclide.TVL_concrete_mm);
-    return { kermaUnshielded, leadThickness, concreteThickness };
+    const B = kermaUnshielded > 0 ? Math.min(1, P / 1000 / kermaUnshielded) : 1;
+    const pb = espesorNM(nuclide.symbol, 'lead', B, nuclide.TVL_lead_mm);
+    const conc = espesorNM(nuclide.symbol, 'concrete', B, nuclide.TVL_concrete_mm);
+    return { kermaUnshielded, leadThickness: pb.mm, concreteThickness: conc.mm, metodo: pb.metodo };
   }, [nuclide, room]);
 
   const decayData = useMemo(() => {
@@ -510,6 +526,7 @@ export default function NuclearMedicineAdvanced({ open, onOpenChange }: Props) {
                         <p className={`text-2xl font-bold ${shieldingCalc.thickness > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                           {shieldingCalc.thickness.toFixed(1)} mm
                         </p>
+                        <p className="text-[10px] text-muted-foreground" data-testid="nm-metodo">{shieldingCalc.metodo}</p>
                       </CardContent>
                     </Card>
                     <Card className="bg-blue-50 dark:bg-blue-950">
@@ -588,6 +605,7 @@ export default function NuclearMedicineAdvanced({ open, onOpenChange }: Props) {
                         <p className="text-xs text-muted-foreground">Concrete required</p>
                         <p className="text-2xl font-bold text-stone-600">{roomCalc.concreteThickness.toFixed(0)} mm</p>
                         <p className="text-xs text-muted-foreground">({(roomCalc.concreteThickness / 10).toFixed(1)} cm)</p>
+                        <p className="text-[10px] text-muted-foreground">{roomCalc.metodo}</p>
                       </CardContent>
                     </Card>
                   </div>

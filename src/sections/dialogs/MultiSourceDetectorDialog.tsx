@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -323,6 +324,7 @@ export default function MultiSourceDetectorDialog({ open, onOpenChange }: Props)
             <Badge variant="secondary" className="text-[10px]">{job.sources.length} src / {job.detectors.length} det</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Resultados e incertidumbres de un modelo propio sin validar contra el motor de dosis." />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid grid-cols-4 w-full shrink-0">

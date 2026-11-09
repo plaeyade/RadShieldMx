@@ -152,13 +152,17 @@ export default function BIMRADDialog({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Box className="h-5 w-5 text-blue-500" />
-            BIMRAD — BIM-based Radiation Modeling
+            BIMRAD — modelado de radiación sobre BIM
             <Badge variant="outline" className="text-[10px]">BIMRAD / NET 2025</Badge>
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Methodology: BIMRAD (BIM-based Radiation Modeling) — Inverse source strength, dose distribution, ALARA analysis
+            Metodología BIMRAD: intensidad de fuente inversa, distribución de dosis y análisis ALARA
           </p>
         </DialogHeader>
+        <div className="mx-6 rounded border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-800" data-testid="bimrad-aviso">
+          Ilustrativo: fuente puntual con Γ de F-18 sobre la geometría del IFC. Plomo y concreto atenúan con AAPM TG-108 Tabla V (511 keV);
+          otros materiales con un TVL de 0.1 m sin fuente. Para diseño, importe el plano y calcule con el motor de dosis.
+        </div>
 
         {/* Progress */}
         <div className="px-6">

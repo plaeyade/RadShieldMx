@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import '@/components/ui/separator';
@@ -30,7 +31,7 @@ const BERGER_BF: Record<string, Record<number, number[]>> = {
 
 function getBuildupFactor(mat: string, energy: number, mfpIdx: number): number {
   const data = BERGER_BF[mat];
-  if (!data) return BERGER_BF['Concreto'][1][mfpIdx] || 1;
+  if (!data) return NaN; // sin datos para este material (antes: valores del concreto en silencio)
   const keys = Object.keys(data).map(Number).sort((a, b) => a - b);
   const closest = keys.reduce((p, c) => Math.abs(c - energy) < Math.abs(p - energy) ? c : p, keys[0]);
   return data[closest]?.[mfpIdx] || 1;
@@ -65,6 +66,7 @@ export default function BuildupFactorDialog({ open, onOpenChange }: BuildupFacto
             <Badge variant="outline" className="text-[10px]">MicroShield Pro</Badge>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Fase 8c: la tabla de acumulación no tiene referencia trazable (no es ANSI/ANS-6.4.3) y es físicamente inconsistente (p. ej. da más acumulación en plomo que en agua). Se muestra el valor del punto de energía más cercano; los materiales sin datos ya no toman en silencio los del concreto. No la use para diseño: los motores usan transmisión de banda ancha medida (NCRP 147/151, TG-108), que ya incluye la acumulación." />
 
         <div className="px-6 pb-3 flex items-center gap-3">
           <div className="flex-1">
