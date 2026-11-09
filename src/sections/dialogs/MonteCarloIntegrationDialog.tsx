@@ -1,21 +1,23 @@
 // =============================================================================
 // MonteCarloIntegrationDialog.tsx — Geant4 / MCNP6 / FLUKA MC from UI
 // Cloud-based MC simulation with macro generation
+// Fase 9: la simulación propia (números aleatorios, sin caso de validación) queda desactivada; el diálogo genera el
+// macro para correrlo en Geant4/MCNP6/FLUKA y muestra como referencia la transmisión de NCRP 151 (Tabla B.2) de los
+// espesores capturados (`lib/referenciaMC`). Antes «vs NCRP» comparaba con un TVL fijo de 37 cm.
 // =============================================================================
-import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Atom, Play, Download, Copy, Cpu, FlaskConical, Timer, BarChart3 } from 'lucide-react';
-import { MC_PRESETS, generateGeant4Macro, generateMCNPInput, runMonteCarloSimulation, type MCConfig, type MCResult } from '@/lib/monteCarloEngine';
+import { Atom, Download, Copy, Cpu, FlaskConical, BarChart3 } from 'lucide-react';
+import { MC_PRESETS, generateGeant4Macro, generateMCNPInput, type MCConfig } from '@/lib/monteCarloEngine';
+import { referenciaNCRP151 } from '@/lib/referenciaMC';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -28,12 +30,10 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
   const [thicknesses, setThicknesses] = useState('20,40,60,80,100');
   const [nParticles, setNParticles] = useState('1e6');
   const [macro, setMacro] = useState('');
-  const [results, setResults] = useState<MCResult[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
 
   const config: MCConfig = {
     code, geometry: 'box', material, particle, energy_MeV: parseFloat(energy) || 6,
-    numParticles: parseInt(nParticles.replace('e', '')) || 1e6,
+    numParticles: Math.round(Number(nParticles)) || 1e6,
     thicknesses_cm: thicknesses.split(',').map(s => parseFloat(s.trim())).filter(Boolean),
     physicsList: 'G4EmStandardPhysics_option4',
     tallies: ['surface_current', 'surface_flux', 'energy_deposit'],
@@ -45,15 +45,10 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
     toast.success(`${code.toUpperCase()} macro generated`);
   }, [code, config]);
 
-  const runSim = useCallback(() => {
-    setIsRunning(true);
-    setTimeout(() => {
-      const res = runMonteCarloSimulation(config);
-      setResults(res);
-      setIsRunning(false);
-      toast.success(`MC simulation: ${res.length} thickness points`);
-    }, 1500);
-  }, [config]);
+  const referencia = useMemo(
+    () => referenciaNCRP151(particle, parseFloat(energy), material, thicknesses.split(',').map((s) => parseFloat(s.trim()))),
+    [particle, energy, material, thicknesses],
+  );
 
   const applyPreset = useCallback((key: string) => {
     const p = MC_PRESETS[key];
@@ -77,14 +72,17 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
             <Badge variant="outline" className="text-[10px]">{code.toUpperCase()}</Badge>
           </DialogTitle>
         </DialogHeader>
-        <DatosEjemploBanner detalle="Simulación propia con números aleatorios y sin caso de validación: no usar para diseño." />
+        <p data-testid="mc-simulacion-desactivada" role="note" className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <strong>Simulación en el navegador desactivada:</strong> no hay un transporte validado. Exporte el macro, córralo en
+          el código elegido y compare con la referencia de NCRP 151.
+        </p>
 
         <Tabs defaultValue="setup" className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-4 shrink-0">
             <TabsTrigger value="setup"><Cpu className="h-3.5 w-3.5 mr-1" />Setup</TabsTrigger>
             <TabsTrigger value="macro"><FlaskConical className="h-3.5 w-3.5 mr-1" />Macro</TabsTrigger>
-            <TabsTrigger value="results"><BarChart3 className="h-3.5 w-3.5 mr-1" />Results</TabsTrigger>
-            <TabsTrigger value="compare"><BarChart3 className="h-3.5 w-3.5 mr-1" />vs NCRP</TabsTrigger>
+            <TabsTrigger value="results"><BarChart3 className="h-3.5 w-3.5 mr-1" />Resultados</TabsTrigger>
+            <TabsTrigger value="compare"><BarChart3 className="h-3.5 w-3.5 mr-1" />Referencia NCRP 151</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1 pr-2">
@@ -119,11 +117,7 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
                   <Input value={nParticles} onChange={e => setNParticles(e.target.value)} placeholder="Particles" />
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={genMacro} variant="outline"><FlaskConical className="h-4 w-4 mr-1" />Generate Macro</Button>
-                  <Button onClick={runSim} disabled={isRunning}>
-                    {isRunning ? <Timer className="h-4 w-4 mr-1 animate-spin" /> : <Play className="h-4 w-4 mr-1" />}
-                    Run MC Simulation
-                  </Button>
+                  <Button onClick={genMacro} variant="outline"><FlaskConical className="h-4 w-4 mr-1" />Generar macro</Button>
                 </div>
               </TabsContent>
 
@@ -140,40 +134,28 @@ export default function MonteCarloIntegrationDialog({ open, onOpenChange }: Prop
               </TabsContent>
 
               <TabsContent value="results" className="mt-2">
-                {results.length > 0 ? (
-                  <div className="space-y-2">
-                    <div className="overflow-auto">
-                      <table className="w-full text-xs">
-                        <thead className="sticky top-0 bg-background"><tr className="border-b">
-                          <th className="text-left py-1">Thickness (cm)</th><th className="text-right">Transmitted</th><th className="text-right">Uncertainty</th><th className="text-right">TVL (cm)</th><th className="text-right">Build (ms)</th>
-                        </tr></thead>
-                        <tbody>{results.map((r, i) => (
-                          <tr key={i} className="border-b hover:bg-muted/50">
-                            <td className="py-1 font-mono">{r.thickness_cm}</td>
-                            <td className="text-right font-mono">{r.transmittedFraction.toExponential(3)}</td>
-                            <td className="text-right font-mono">±{r.uncertainty_percent.toFixed(1)}%</td>
-                            <td className="text-right font-mono">{r.tvl_cm.toFixed(1)}</td>
-                            <td className="text-right font-mono">{r.buildTime_ms.toFixed(0)}</td>
-                          </tr>
-                        ))}</tbody>
-                      </table>
-                    </div>
-                  </div>
-                ) : <div className="text-center py-8 text-muted-foreground">Run simulation first</div>}
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  Sin resultados: la app no ejecuta Monte Carlo. Los resultados se obtienen corriendo el macro en el código externo.
+                </div>
               </TabsContent>
 
               <TabsContent value="compare" className="mt-2">
-                <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200">
-                  <CardContent className="pt-4 text-sm text-amber-700 dark:text-amber-300">
-                    <p className="font-medium">MC vs NCRP 151 Validation</p>
-                    <p>Compare Monte Carlo results with NCRP 151 analytical values. Typical agreement: 2-5% for simple geometries, up to 10-15% for complex bunker geometries.</p>
-                  </CardContent>
-                </Card>
-                {results.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">MC TVL</p><p className="text-xl font-bold">{results[0].tvl_cm.toFixed(1)} cm</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">NCRP TVL</p><p className="text-xl font-bold">37.0 cm</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Agreement</p><p className="text-xl font-bold">{((1 - Math.abs(results[0].tvl_cm - 37) / 37) * 100).toFixed(1)}%</p></CardContent></Card>
+                {referencia ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      NCRP 151 Ec. 2.3, Tabla B.2 (primaria, banda ancha): {referencia.energia === 'Co60' ? 'Co-60' : `${referencia.energia} MV`}, {referencia.material}
+                      — TVL₁ {referencia.tvl.tvl1_cm} cm, TVLₑ {referencia.tvl.tvle_cm} cm.
+                    </p>
+                    <table data-testid="mc-referencia-ncrp151" className="w-full text-xs">
+                      <thead><tr className="border-b"><th className="text-left py-1">Espesor (cm)</th><th className="text-right">Transmisión B</th></tr></thead>
+                      <tbody>{referencia.filas.map((r) => (
+                        <tr key={r.t_cm} className="border-b"><td className="py-1 font-mono">{r.t_cm}</td><td className="text-right font-mono">{r.transmision.toExponential(3)}</td></tr>
+                      ))}</tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Sin referencia: NCRP 151 Tabla B.2 sólo tabula fotones de Co-60 y de 4–30 MV en concreto, acero y plomo (G4_CONCRETE, G4_Fe, G4_Pb).
                   </div>
                 )}
               </TabsContent>
