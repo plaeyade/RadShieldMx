@@ -9,7 +9,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { Crosshair, Palette } from 'lucide-react';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
@@ -34,7 +34,7 @@ function getColor(value: number, maxVal: number): string {
 }
 
 export default function SpatialDoseMapDialog() {
-  const open = useAppStore(s => s.dialogs.spatialDoseMap?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.spatialDoseMap));
   const close = () => useAppStore.getState().close('spatialDoseMap');
   const floorPlan = useCanvasStore(s => s.floorPlan);
   const canvasRef = useRef<HTMLCanvasElement>(null);

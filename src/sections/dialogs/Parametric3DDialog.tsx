@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Box, RotateCcw, Move3D, BookOpen, Plus, Minus } from 'lucide-react';
 
 interface Primitive { type: 'box' | 'cylinder' | 'sphere'; x: number; y: number; z: number; w: number; h: number; d: number; color: string; }
@@ -79,7 +79,7 @@ function drawSphere(ctx: CanvasRenderingContext2D, p: Primitive, rx: number, ry:
 }
 
 export default function Parametric3DDialog() {
-  const open = useAppStore(s => s.dialogs.parametric3d?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.parametric3d));
   const close = () => useAppStore.getState().close('parametric3d');
   const cv = useRef<HTMLCanvasElement>(null);
   const [prims, setPrims] = useState<Primitive[]>([

@@ -5,7 +5,7 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { GitCompareArrows } from 'lucide-react';
 import { SHIELDING_MATERIALS } from '@/lib/xcomAttenuation';
 import { buildF123MaterialDecisionMatrix } from '@/lib/f123MaterialDecisionMatrix';
@@ -28,7 +28,7 @@ function structuralStatus(kgM2: number) {
 }
 
 export default function MaterialComparisonDialog() {
-  const open = useAppStore(s => s.dialogs.materialComparison?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.materialComparison));
   const close = () => useAppStore.getState().close('materialComparison');
   const [energy, setEnergy] = useState('1');
   const [registryEnergy, setRegistryEnergy] = useState('15MV');

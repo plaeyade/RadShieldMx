@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Building2, Code, Copy, CheckCircle, FileCode, BookOpen } from 'lucide-react';
 
 const REVIT_CS_TEMPLATE = `using Autodesk.Revit.DB;
@@ -66,7 +66,7 @@ const SHARED_PARAMS_XML = `<?xml version="1.0" encoding="utf-8"?>
 </RadShieldSharedParameters>`;
 
 export default function RevitAddinDialog() {
-  const open = useAppStore(s => s.dialogs.revitAddin?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.revitAddin));
   const close = () => useAppStore.getState().close('revitAddin');
   const [copied, setCopied] = useState<'cs' | 'xml' | null>(null);
   const [activeTab, setActiveTab] = useState<'cs' | 'xml' | 'guide'>('cs');

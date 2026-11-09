@@ -8,7 +8,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
   Play, Calculator, BookOpen, Layers, BarChart3, FileText, Pencil,
   Scan, Cpu, Atom, FolderOpen, Wand2, Settings,
@@ -143,6 +143,8 @@ export default function CommandPalette({ open, onOpenChange, actions }: CommandP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg p-0 overflow-hidden">
+        {/* Radix exige un DialogTitle (si falta, registra un error en consola y el lector de pantalla no anuncia el diálogo). */}
+        <DialogTitle className="sr-only">Paleta de comandos</DialogTitle>
         <Command>
           <CommandInput placeholder="Escribe para buscar comandos..." autoFocus />
           <CommandList className="max-h-[60vh]">

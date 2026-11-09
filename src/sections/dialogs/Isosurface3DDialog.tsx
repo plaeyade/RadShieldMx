@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { NIVELES_ISOSUPERFICIE, malla3DPlano, type PuntoDosis3D } from '@/lib/visoresDosis';
 import { Box, RotateCcw, Move3D, BookOpen } from 'lucide-react';
@@ -28,9 +28,7 @@ function proj(x: number, y: number, z: number, v: Vista) {
 }
 
 export default function Isosurface3DDialog() {
-  // `dialogs[nombre]` es booleano en appStore (`open()` guarda `true`); `?.open` sobre un booleano daba
-  // siempre undefined y el diálogo nunca se abría. Se aceptan ambas formas.
-  const open = useAppStore(s => { const d = s.dialogs.isosurface3d; return d === true || d?.open === true; });
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.isosurface3d));
   const close = () => useAppStore.getState().close('isosurface3d');
   const floorPlan = useCanvasStore((st) => st.floorPlan);
   const cv = useRef<HTMLCanvasElement>(null);

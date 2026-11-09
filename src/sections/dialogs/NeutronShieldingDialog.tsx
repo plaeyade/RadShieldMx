@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Atom, Info } from 'lucide-react';
 
 const NEUTRON_MATERIALS = [
@@ -28,7 +29,7 @@ const ENERGY_LEVELS = [
 ];
 
 export default function NeutronShieldingDialog() {
-  const open = useAppStore(s => s.dialogs.neutronShielding?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.neutronShielding));
   const close = () => useAppStore.getState().close('neutronShielding');
   const [mv, setMv] = useState('18');
   const [distance, setDistance] = useState('3');
@@ -61,9 +62,10 @@ export default function NeutronShieldingDialog() {
             <Badge variant="outline" className="text-[9px]">NCRP 151 Table B.7</Badge>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Multiplica un rendimiento en Gy/h por una carga en Gy/sem y usa TVL de neutrones fijos; unidades inconsistentes con NCRP 151 §2.4." />
         <div className="text-[10px] text-slate-500 bg-blue-50 rounded-md p-2 mb-3 flex items-start gap-2">
           <Info className="w-3 h-3 text-blue-400 mt-0.5 shrink-0" />
-          Blindaje neutronico para energias 003E 10 MV. Moderacion + captura termica con boro.
+          Blindaje neutronico para energías ≥ 10 MV. Moderacion + captura termica con boro.
         </div>
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Energia MV</label>

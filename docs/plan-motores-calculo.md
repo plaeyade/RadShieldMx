@@ -322,15 +322,35 @@ con `calculateHeatmapGrid` comparan ahora punto a punto con `calculateUnshielded
 Pendiente: E2E que abra cada visor desde menú/paleta (requiere build con su bandera) y revisión física por el responsable
 antes de encender cada `VISOR_*`; uniones en T; laberinto/puerta y fotoneutrones en el campo; interfaz para `ejeGantry_deg`.
 
-## Fase 6 — Consolidación de bundle y 3D (sólo r3f)
+## Fase 6 — Consolidación de bundle y apertura de diálogos (hecha)
 
 Entrada: Fase 5 al menos para los visores 3D.
 
-Trabajo: un único stack 3D (three / @react-three/*); eliminar el código Babylon (`MedicalFloorPlan3DDialog`
-F455–F474, `src/lib/medical3D/babylon*`) y `@babylonjs/*` de `package.json`; portar o eliminar el shader
-WebGPU (`HEATMAP_GPU`); `manualChunks` y más `lazy()` hasta que el chunk de entrada quede < 1500 kB.
+Decisión del propietario (2026-11-08): **se conserva Babylon** (código de `MedicalFloorPlan3DDialog`
+F455–F474, `src/lib/medical3D/babylon*` y `@babylonjs/*` en `package.json`); el plan original de eliminarlo
+y quedarse sólo con r3f queda descartado. `VISORES_EN_REVISION`, `VISOR_*` y `HEATMAP_GPU` siguen en `false`.
 
-Salida / pruebas: `vite build` sin advertencias de tamaño; E2E de Medical 3D en verde con r3f.
+Trabajo hecho:
+
+- Chunk de entrada < 1500 kB sin quitar Babylon: `docx` y `jspdf` (reportes CNSNS/PDF) y `useMCBridge`
+  se cargan con `import()` al generar; `UpdateAppDialog`, `SmartSearchDICOMDialog`, `LogFileAnalysisDialog`,
+  `ContextualHelpPanel`, `RoomTemplatePanel` y `DxfImportReviewPanel` pasan a `lazy()`; el shader WebGPU
+  (`useWebGPU`/`useWebGPUHeatmap`) sólo se monta con `HEATMAP_GPU` vía `WebGPUHeatmapBridge` (lazy).
+- `manualChunks` en `vite.config.ts`: `vendor-three`, `vendor-r3f`, `gpu-heatmap` y `vendor-babylon`
+  (este último sólo si `VITE_VISOR_3D_BABYLON=true`; apagado, Babylon es rama muerta y no se emite chunk vacío).
+  Las dependencias compartidas con la entrada (react, react-dom, scheduler, zustand, sonner, ayudantes de
+  Rollup) se fijan en `vendor-react`: sin eso Rollup las metía en `vendor-r3f`/`gpu-heatmap` y la entrada
+  importaba esos chunks de forma estática (se descargaban al arrancar).
+- 20 diálogos leían `s.dialogs.x?.open` sobre un booleano y nunca abrían; ahora usan `dialogoAbierto()`
+  (`appStore.ts`), con prueba `src/__tests__/dialogs/dialogosAbren.test.tsx`.
+- Revisión exhaustiva de diálogos: `docs/revision-dialogos.md` (tabla diálogo · función · estado · hallazgo ·
+  propuesta · prioridad). Lo trivial se corrigió aquí; las calculadoras con física local quedan como propuesta.
+
+Salida / pruebas: `vite build` sin advertencias de tamaño; tsc, vitest y eslint (sin errores nuevos en
+archivos tocados) en verde.
+
+Pendiente (Fase 7 propuesta): migrar `BarrierCalculatorDialog` y las calculadoras de prioridad alta de
+`docs/revision-dialogos.md` a `normativeBarrierEngine`; E2E de Medical 3D con r3f y con Babylon activado.
 
 ## Medidas de bundle
 
@@ -338,3 +358,5 @@ Salida / pruebas: `vite build` sin advertencias de tamaño; E2E de Medical 3D en
 |---|---|---|---|
 | Antes (main `fab96e5`) | 3 987 kB | 18 MB | sí (core 4 874 kB, texture 1 014 kB, …) |
 | Después de Fase 1 | 2 900 kB | 8.3 MB | no |
+| Antes de Fase 6 (main `2dcc424`) | 2 914 kB | 8.1 MB | no |
+| Después de Fase 6 (precarga: `vendor-react` 219 kB) | 1 395 kB | 8.1 MB | no (rama muerta tras `VISOR_3D_BABYLON`; `vendor-babylon` sólo si se activa) |

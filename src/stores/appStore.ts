@@ -181,6 +181,14 @@ export const DIALOGOS_REDIRIGIDOS: Readonly<Record<string, string>> = {
 
 export const resolverDialogo = (name: string): string => DIALOGOS_REDIRIGIDOS[name] ?? name;
 
+/**
+ * Estado abierto de un diálogo. `dialogs[nombre]` es booleano (`open()` guarda `true`); varios diálogos
+ * leían `dialogs.x?.open ?? false`, que sobre un booleano siempre da `false`, y nunca se abrían (Fase 6).
+ * Se acepta también la forma `{ open: true }` por compatibilidad.
+ */
+export const dialogoAbierto = (d: unknown): boolean =>
+  d === true || (typeof d === "object" && d !== null && (d as { open?: unknown }).open === true);
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Dialogs
   dialogs: Object.fromEntries(DIALOG_NAMES.map((n) => [n, false])) as Record<string, any>,

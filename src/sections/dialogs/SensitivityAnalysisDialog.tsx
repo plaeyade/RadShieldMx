@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { BarChart3, ArrowUpDown, BookOpen } from 'lucide-react';
 
 interface _TornadoBar { param: string; base: number; low: number; high: number; deltaLow: number; deltaHigh: number; color: string; }
@@ -25,7 +26,7 @@ function calcThickness(W: number, d: number, T: number, U: number, P: number, kV
 }
 
 export default function SensitivityAnalysisDialog() {
-  const open = useAppStore(s => s.dialogs.sensitivityAnalysis?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.sensitivityAnalysis));
   const close = () => useAppStore.getState().close('sensitivityAnalysis');
   const [values, setValues] = useState<Record<string, number>>(Object.fromEntries(PARAMS.map(p => [p.key, p.base])));
   const update = (key: string, val: number) => setValues(p => ({ ...p, [key]: val }));
@@ -55,6 +56,7 @@ export default function SensitivityAnalysisDialog() {
             <span className="text-[10px] font-mono text-slate-400">Tornado charts ±20%</span>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="B = P·d²/(W·U·T) sin rendimiento K¹ (mGy/mA·min a 1 m) y TVL único de concreto; no usa normativeBarrierEngine." />
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
             {PARAMS.map(p => (

@@ -4,7 +4,7 @@ import '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Wand2, ArrowRightLeft, BookOpen } from 'lucide-react';
 
 const SUBSTITUTES = [
@@ -16,7 +16,7 @@ const SUBSTITUTES = [
 ];
 
 export default function AlaraWizardDialog() {
-  const open = useAppStore(s => s.dialogs.alaraWizard?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.alaraWizard));
   const close = () => useAppStore.getState().close('alaraWizard');
   const [currentMat, setCurrentMat] = useState('Plomo (Pb)');
   const [thickness, setThickness] = useState(3.0);

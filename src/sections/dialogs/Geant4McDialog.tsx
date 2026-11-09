@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { Atom, Play, CheckCircle, AlertTriangle, Activity, Timer, Database } from 'lucide-react';
 import { SHIELDING_MATERIALS, calculateTransmission } from '@/lib/xcomAttenuation';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
@@ -37,7 +37,7 @@ function runMonteCarlo(energy_MeV: number, activity_GBq: number, distance_m: num
 }
 
 export default function Geant4McDialog() {
-  const open = useAppStore(s => s.dialogs.geant4Mc?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.geant4Mc));
   const close = () => useAppStore.getState().close('geant4Mc');
   const [energy, setEnergy] = useState('6');
   const [activity, setActivity] = useState('100');

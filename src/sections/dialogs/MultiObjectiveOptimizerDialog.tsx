@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useAppStore } from '@/stores/appStore';
+import { useAppStore, dialogoAbierto } from '@/stores/appStore';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { TrendingDown, Zap, CheckCircle, AlertTriangle } from 'lucide-react';
 import { SHIELDING_MATERIALS, calculateRequiredThickness } from '@/lib/xcomAttenuation';
 import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
@@ -29,7 +30,7 @@ function optimize(energy_MeV: number, activity_GBq: number, distance_m: number, 
 }
 
 export default function MultiObjectiveOptimizerDialog() {
-  const open = useAppStore(s => s.dialogs.multiObjectiveOptimizer?.open ?? false);
+  const open = useAppStore(s => dialogoAbierto(s.dialogs.multiObjectiveOptimizer));
   const close = () => useAppStore.getState().close('multiObjectiveOptimizer');
   const [energy, setEnergy] = useState('6');
   const [activity, setActivity] = useState('100');
@@ -55,6 +56,7 @@ export default function MultiObjectiveOptimizerDialog() {
             <Badge variant="outline" className="text-[9px]">Costo+Peso+Espacio</Badge>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Usa W = actividad (GBq) × 1000 sin constante gamma ni rendimiento del equipo; la dosis resultante no es física. No usa normativeBarrierEngine." />
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">E (MeV)</label><Input type="number" step="0.1" value={energy} onChange={e => setEnergy(e.target.value)} className="text-[11px] h-7" /></div>
           <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">A (GBq)</label><Input type="number" step="1" value={activity} onChange={e => setActivity(e.target.value)} className="text-[11px] h-7" /></div>
