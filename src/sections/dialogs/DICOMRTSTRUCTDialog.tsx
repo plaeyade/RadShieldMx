@@ -29,12 +29,12 @@ export default function DICOMRTSTRUCTDialog({ open, onOpenChange }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="rtstruct-title">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center gap-2">
             <Scan className="w-5 h-5 text-blue-600" />
-            <h2 className="text-sm font-bold text-slate-800">DICOM RTSTRUCT Import</h2>
+            <h2 id="rtstruct-title" className="text-sm font-bold text-slate-800">Importar DICOM RTSTRUCT</h2>
           </div>
           <button aria-label="Cerrar DICOM RTSTRUCT Import" onClick={() => onOpenChange(false)} className="w-7 h-7 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100"><X className="w-4 h-4" /></button>
         </div>
@@ -85,10 +85,7 @@ export default function DICOMRTSTRUCTDialog({ open, onOpenChange }: Props) {
                   </div>
                 ))}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-[10px] text-blue-700">
-                  <p className="font-semibold mb-1">Shielding Calculation:</p>
-                  <p>• PTV distance to barrier: 3.2 m</p>
-                  <p>• Estimated dose at barrier: 0.45 mGy/wk</p>
-                  <p>• Required Pb: 2.35 mm</p>
+                  Las estructuras importadas sirven de referencia geométrica; el blindaje se calcula con el motor sobre el plano (aquí no hay valores fijos de dosis ni de plomo).
                 </div>
               </div>
             )}

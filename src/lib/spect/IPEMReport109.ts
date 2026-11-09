@@ -13,8 +13,8 @@ export interface SPECTRadionuclide {
 }
 
 export const SPECT_RADIONUCLIDES: SPECTRadionuclide[] = [
-  { name: 'Technetium-99m', symbol: 'Tc-99m', halfLife_h: 6.01, gamma_MeV: 0.140, photonYield: 0.885, gammaConstant_uSvm2perGBqh: 0.0593, tenthValueLead_mm: 0.25, tenthValueConcrete_mm: 22 },
-  { name: 'Thallium-201', symbol: 'Tl-201', halfLife_h: 73.1, gamma_MeV: 0.135, photonYield: 0.53, gammaConstant_uSvm2perGBqh: 0.0364, tenthValueLead_mm: 0.21, tenthValueConcrete_mm: 18 },
+  { name: 'Technetium-99m', symbol: 'Tc-99m', halfLife_h: 6.01, gamma_MeV: 0.140, photonYield: 0.885, gammaConstant_uSvm2perGBqh: 0.0593, tenthValueLead_mm: 0.83, tenthValueConcrete_mm: 22 },
+  { name: 'Thallium-201', symbol: 'Tl-201', halfLife_h: 73.1, gamma_MeV: 0.135, photonYield: 0.53, gammaConstant_uSvm2perGBqh: 0.0364, tenthValueLead_mm: 0.70, tenthValueConcrete_mm: 18 },
   { name: 'Iodine-123', symbol: 'I-123', halfLife_h: 13.2, gamma_MeV: 0.159, photonYield: 0.83, gammaConstant_uSvm2perGBqh: 0.0583, tenthValueLead_mm: 0.50, tenthValueConcrete_mm: 42 },
   { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gamma_MeV: 0.364, photonYield: 0.81, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 3.0, tenthValueConcrete_mm: 170 },
   { name: 'Gallium-67', symbol: 'Ga-67', halfLife_h: 78.3, gamma_MeV: 0.093, photonYield: 0.65, gammaConstant_uSvm2perGBqh: 0.0215, tenthValueLead_mm: 0.80, tenthValueConcrete_mm: 65 },
@@ -52,16 +52,45 @@ export interface SPECTShieldingResult {
   transmission: number;
 }
 
+/**
+ * TVL por material (Fase 8c). Tc-99m y Tl-201 traían la HVL como TVL (0.25 y 0.21 mm Pb); ahora 3.32 × HVL
+ * (Tc-99m: 0.83 mm, coherente con μ/ρ = 2.3 cm²/g de XCOM a 140 keV). El yeso se escala por densidad desde el
+ * concreto (2.35/0.705), en lugar del factor 1.5 sin fuente. Siguen siendo TVL de haz estrecho: sin acumulación.
+ */
+export function tvlSPECT(rad: SPECTRadionuclide, material: 'lead' | 'concrete' | 'gypsum'): number {
+  if (material === 'lead') return rad.tenthValueLead_mm;
+  return material === 'concrete' ? rad.tenthValueConcrete_mm : rad.tenthValueConcrete_mm * (2.35 / 0.705);
+}
+
+/** Sala completa: la suma de todos los procedimientos se compara con la meta una sola vez. */
+export function salaSPECT(procs: SPECTProcedure[], distance_m: number, wallThickness_mm: number, wallMaterial: 'lead' | 'concrete' | 'gypsum', designGoal_uSv_week: number) {
+  const r = procs.map(p => calculateSPECTShielding({ procedure: p, distance_m, wallThickness_mm, wallMaterial, designGoal_uSv_week }));
+  const total = r.reduce((a, x) => a + x.weeklyKerma_uSv, 0);
+  const totalBlindado = r.reduce((a, x) => a + x.shieldedKerma_uSv, 0);
+  // Espesor que lleva la suma a la meta (bisección sobre Σ Kᵢ·10^(−t/TVLᵢ)).
+  const espesor = (mat: 'lead' | 'concrete') => {
+    const tv = procs.map(p => tvlSPECT(SPECT_RADIONUCLIDES.find(x => x.symbol === p.radionuclide) || SPECT_RADIONUCLIDES[0], mat));
+    const f = (t: number) => r.reduce((a, x, k) => a + x.weeklyKerma_uSv * Math.pow(10, -t / tv[k]), 0);
+    if (f(0) <= designGoal_uSv_week) return 0;
+    let lo = 0, hi = 1;
+    while (f(hi) > designGoal_uSv_week && hi < 1e5) hi *= 2;
+    for (let k = 0; k < 80; k++) { const m = (lo + hi) / 2; if (f(m) > designGoal_uSv_week) lo = m; else hi = m; }
+    return hi;
+  };
+  return { resultados: r, total_uSv: total, totalBlindado_uSv: totalBlindado, cumple: totalBlindado <= designGoal_uSv_week, plomo_mm: espesor('lead'), concreto_mm: espesor('concrete') };
+}
+
 export function calculateSPECTShielding(i: SPECTShieldingInput): SPECTShieldingResult {
   const rad = SPECT_RADIONUCLIDES.find(r => r.symbol === i.procedure.radionuclide) || SPECT_RADIONUCLIDES[0];
   const admin_GBq = i.procedure.avgAdminActivity_MBQ / 1000;
   const time_h = i.procedure.avgImagingTime_min / 60;
   const weeklyKerma = i.procedure.patientsPerWeek * admin_GBq * rad.gammaConstant_uSvm2perGBqh * time_h * 1000 / (i.distance_m * i.distance_m);
-  const tvl = i.wallMaterial === 'lead' ? rad.tenthValueLead_mm : i.wallMaterial === 'concrete' ? rad.tenthValueConcrete_mm : rad.tenthValueConcrete_mm * 1.5;
+  const tvl = tvlSPECT(rad, i.wallMaterial);
   const transmission = i.wallThickness_mm > 0 ? Math.pow(10, -i.wallThickness_mm / tvl) : 1;
   const shieldedKerma = weeklyKerma * transmission;
-  const ratio = shieldedKerma > 0 ? i.designGoal_uSv_week / shieldedKerma : Infinity;
-  const reqTvl = ratio > 0 && ratio < 1 ? Math.ceil(-Math.log10(ratio)) : 0;
+  // Número de TVL continuo (antes Math.ceil); espesor total requerido (sin descontar la pared actual).
+  const ratio0 = weeklyKerma > 0 ? i.designGoal_uSv_week / weeklyKerma : Infinity;
+  const reqTvl = ratio0 > 0 && ratio0 < 1 ? -Math.log10(ratio0) : 0;
   return { weeklyKerma_uSv: weeklyKerma, shieldedKerma_uSv: shieldedKerma, withinGoal: shieldedKerma <= i.designGoal_uSv_week, requiredLead_mm: reqTvl * rad.tenthValueLead_mm, requiredConcrete_mm: reqTvl * rad.tenthValueConcrete_mm, requiredTVL: reqTvl, transmission };
 }
 

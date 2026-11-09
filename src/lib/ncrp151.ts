@@ -276,3 +276,34 @@ export function energiaDesdeClave(k: string): EnergiaMV | null {
   const e = Number(m[1]);
   return ([4, 6, 10, 15, 18, 20, 25, 30] as const).find((x) => x === e) ?? null;
 }
+
+// ───────────────────────────────────────────────────────────────
+// Skyshine de fotones (NCRP 151 §5.1, Ec. 5.1, método de McGinley 2002).
+// Ḣ (nSv/h) = 2.5×10⁷ · B_xs · Ḋ₀ · Ω^1.3 / (dᵢ · dₛ)². Con Ḋ₀ en Gy/h da nSv/h; con la carga W en Gy/semana
+// a 1 m da nSv/semana (la ecuación es lineal en Ḋ₀). NCRP 151 advierte que es, a lo sumo, una estimación de orden
+// de magnitud (Tabla 5.1: medido/calculado entre 0.25 y 5.3).
+// ───────────────────────────────────────────────────────────────
+
+export interface EntradaSkyshine {
+  /** Transmisión del techo para la primaria (B_xs). */
+  B_xs: number;
+  /** Rendimiento a 1 m del blanco: Gy/h (tasa) o Gy/semana (carga W). */
+  D0: number;
+  /** Ángulo sólido del haz máximo (sr). */
+  omega_sr: number;
+  /** Distancia vertical del blanco a un punto 2 m sobre el techo (m). */
+  di_m: number;
+  /** Distancia horizontal del isocentro al punto de cálculo (m). */
+  ds_m: number;
+}
+
+/** Ec. 5.1: nSv por unidad de tiempo de D0 (h o semana). */
+export function skyshineFotones(e: EntradaSkyshine): number {
+  if (!(e.di_m > 0 && e.ds_m > 0)) throw new RangeError('dᵢ y dₛ deben ser positivas');
+  return (2.5e7 * e.B_xs * e.D0 * Math.pow(e.omega_sr, 1.3)) / Math.pow(e.di_m * e.ds_m, 2);
+}
+
+/** Ángulo sólido (sr) de un campo rectangular a × b definido a la distancia d (Ω = 4·asin(ab / √((a²+4d²)(b²+4d²)))). */
+export function anguloSolidoCampo(a_m: number, b_m: number, d_m = 1): number {
+  return 4 * Math.asin((a_m * b_m) / Math.sqrt((a_m * a_m + 4 * d_m * d_m) * (b_m * b_m + 4 * d_m * d_m)));
+}

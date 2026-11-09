@@ -2,6 +2,7 @@
  * CompareScenariosDialog - UI-01: comparacion side-by-side de escenarios.
  * F389 migra el dialog legacy a DialogShell para convivir con el canvas.
  */
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState } from 'react';
 import { GitCompare, ArrowRight, AlertTriangle, CheckCircle, DollarSign, Shield, Ruler } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
@@ -125,6 +126,7 @@ export default function CompareScenariosDialog({ onClose }: { onClose: () => voi
             <p className="text-xs text-violet-700">Ventana movible para comparar sin perder de vista el canvas.</p>
           </div>
         </div>
+        <DatosEjemploBanner detalle="Los escenarios A/B y sus dosis son fijos de demostración; no provienen del proyecto." />
 
         <div className="grid grid-cols-3 gap-2">
           <div className="text-xs font-semibold uppercase text-slate-500">Parametro</div>

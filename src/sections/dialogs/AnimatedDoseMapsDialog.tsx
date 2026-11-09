@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ export default function AnimatedDoseMapsDialog({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-500" />Animated Dose Maps</DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Mapa ilustrativo en unidades arbitrarias: no usa el plano ni el motor de dosis." />
         <ScrollArea className="flex-1 pr-2">
           <div className="space-y-3">
             <div className="flex gap-2 items-center">

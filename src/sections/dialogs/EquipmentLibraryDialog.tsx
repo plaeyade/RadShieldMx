@@ -42,7 +42,7 @@ const LINAC_SPECS = {
 const GAMMAKNIFE_SPECS = {
   title: 'Gamma Knife',
   models: [
-    { name: 'Gamma Knife Perfexion / Icon', sources: '192 + 8 Co-60', activityPerSource: '1.1 Ci', halfLife: '5.27 años', tvlConcrete: '22 cm', tvlLead: '6 cm', maxField: '16 cm diam', accuracy: '0.15 mm' },
+    { name: 'Gamma Knife Perfexion / Icon', sources: '192 + 8 Co-60', activityPerSource: '1.1 Ci', halfLife: '5.27 años', tvlConcrete: '21 cm (NCRP 151 B.2)', tvlLead: '4.0 cm (NCRP 151 B.2)', maxField: '16 cm diam', accuracy: '0.15 mm' },
   ],
   norms: ['NCRP 91', 'IAEA TECDOC 1040', 'CNSNS'],
   applications: ['Radiocirugia intracraneal', 'SRS fraccionado (Icon)'],
@@ -51,8 +51,8 @@ const GAMMAKNIFE_SPECS = {
 const BRAQUI_SPECS = {
   title: 'Braquiterapia de Alta Tasa (HDR)',
   models: [
-    { name: 'Flexitron / MicroSelectron', source: 'Ir-192', activity: '10 Ci', halfLife: '73.8 dias', tvlConcrete: '15 cm', tvlLead: '3 mm', doseRateAt1m: '0.018 mSv/h', applications: 'Ginecologia, prostata, mama, piel' },
-    { name: 'Braquiterapia Co-60', source: 'Co-60', activity: 'Variable', halfLife: '5.27 años', tvlConcrete: '22 cm', tvlLead: '6 cm', doseRateAt1m: 'Variable', applications: 'Ginecologia, cuello uterino' },
+    { name: 'Flexitron / MicroSelectron', source: 'Ir-192', activity: '10 Ci', halfLife: '73.8 dias', tvlConcrete: '≈ 15 cm (literatura)', tvlLead: '≈ 16 mm (la HVL es ≈ 3 mm)', doseRateAt1m: '0.018 mSv/h', applications: 'Ginecologia, prostata, mama, piel' },
+    { name: 'Braquiterapia Co-60', source: 'Co-60', activity: 'Variable', halfLife: '5.27 años', tvlConcrete: '21 cm (NCRP 151 B.2)', tvlLead: '4.0 cm (NCRP 151 B.2)', doseRateAt1m: 'Variable', applications: 'Ginecologia, cuello uterino' },
   ],
   norms: ['NCRP 91', 'IAEA TECDOC 1274', 'AAPM TG 43', 'CNSNS'],
 };
@@ -60,8 +60,8 @@ const BRAQUI_SPECS = {
 const PETCT_SPECS = {
   title: 'PET-CT',
   radionuclides: [
-    { name: 'F-18 FDG', halfLife: '110 min', maxActivity: '740 MBq', tvlConcrete511keV: '52 cm', tvlLead511keV: '1.1 cm', eGamma: '511 keV (positrones)' },
-    { name: 'Ga-68 DOTATATE', halfLife: '68 min', maxActivity: '200 MBq', tvlConcrete511keV: '52 cm', tvlLead511keV: '1.1 cm', eGamma: '511 keV' },
+    { name: 'F-18 FDG', halfLife: '110 min', maxActivity: '740 MBq', tvlConcrete511keV: '19 cm (1.er TVL, TG-108 Tabla V)', tvlLead511keV: '1.6 cm (1.er TVL, TG-108 Tabla V)', eGamma: '511 keV (positrones)' },
+    { name: 'Ga-68 DOTATATE', halfLife: '68 min', maxActivity: '200 MBq', tvlConcrete511keV: '19 cm (1.er TVL, TG-108 Tabla V)', tvlLead511keV: '1.6 cm (1.er TVL, TG-108 Tabla V)', eGamma: '511 keV' },
   ],
   norms: ['NCRP 144', 'IAEA SRS 44', 'CNSNS'],
 };
@@ -69,8 +69,8 @@ const PETCT_SPECS = {
 const SPECT_SPECS = {
   title: 'SPECT / Gamma Camera',
   radionuclides: [
-    { name: 'Tc-99m', halfLife: '6.01 h', maxActivity: '925 MBq', tvlConcrete140keV: '15 cm', tvlLead140keV: '0.3 mm', eGamma: '140 keV' },
-    { name: 'I-131', halfLife: '8.02 d', maxActivity: '7.4 GBq', tvlConcrete364keV: '28 cm', tvlLead364keV: '0.6 cm', eGamma: '364 keV' },
+    { name: 'Tc-99m', halfLife: '6.01 h', maxActivity: '925 MBq', tvlConcrete140keV: '15 cm', tvlLead140keV: '≈ 0.9 mm (la HVL es ≈ 0.27 mm)', eGamma: '140 keV' },
+    { name: 'I-131', halfLife: '8.02 d', maxActivity: '7.4 GBq', tvlConcrete364keV: '28 cm', tvlLead364keV: '≈ 1.1 cm (3.32 × HVL de ≈ 3 mm, haz estrecho)', eGamma: '364 keV' },
   ],
   norms: ['NCRP 144', 'IAEA SRS 44'],
 };

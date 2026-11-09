@@ -86,11 +86,11 @@ export default function ParametricBunkerDesigner({ open, onOpenChange, onGenerat
   };
 
   const handleGenerate = () => {
+    // Fase 8c: sin espera simulada; genera el plano en ShieldingDesigner (`lib/bunkerParametrico`).
     setGenerating(true);
-    setTimeout(() => {
-      setGenerating(false);
-      onGenerate?.({ template: selectedTemplate, ...config });
-    }, 2000);
+    const defaults = template.defaults as unknown as Record<string, number>;
+    onGenerate?.({ template: selectedTemplate, ...defaults, ...config });
+    setGenerating(false);
   };
 
   const progress = ((step + 1) / STEPS.length) * 100;

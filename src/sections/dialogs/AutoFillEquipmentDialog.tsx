@@ -1,4 +1,5 @@
 // AutoFillEquipmentDialog.tsx — Auto-fill from Equipment Database
+import type { EquipoCatalogo } from '@/lib/equipoAFuente';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Cpu, Zap } from 'lucide-react';
 
-interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
+interface Props { open: boolean; onOpenChange: (v: boolean) => void; onApply?: (e: EquipoCatalogo) => boolean; }
 
 const EQUIPMENT_DB = [
   { id: 'varian_truebeam', name: 'Varian TrueBeam', vendor: 'Varian', energies: [6, 10, 15, 18], maxMU_min: 2400, leakage_pct: 0.1, fieldSize_cm: '40x40', workload_Gy_week: 500, tvl_concrete_6mv: 37, tvl_concrete_10mv: 37, tvl_concrete_18mv: 45, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
@@ -25,14 +26,17 @@ const EQUIPMENT_DB = [
   { id: 'mri_linac', name: 'ViewRay MRIdian', vendor: 'ViewRay', energies: [6, 7], maxMU_min: 800, leakage_pct: 0.1, fieldSize_cm: '27.4x27.4', workload_Gy_week: 300, tvl_concrete_6mv: 37, isoHeight_m: 1.0, sourceAxis_m: 0.9 },
 ];
 
-export default function AutoFillEquipmentDialog({ open, onOpenChange }: Props) {
+export default function AutoFillEquipmentDialog({ open, onOpenChange, onApply }: Props) {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<typeof EQUIPMENT_DB[0] | null>(null);
   const filtered = EQUIPMENT_DB.filter(e => e.name.toLowerCase().includes(search.toLowerCase()) || e.vendor.toLowerCase().includes(search.toLowerCase()));
 
   const applyEquipment = () => {
     if (!selected) return;
-    toast.success(`${selected.name} parameters loaded`);
+    // Fase 8c: aplica de verdad los parámetros a la fuente seleccionada del plano (antes sólo un aviso).
+    if (!onApply) { toast.error('No hay plano activo'); return; }
+    if (onApply(selected)) { toast.success(`${selected.name}: modalidad, carga e isocentro aplicados a la fuente seleccionada`); onOpenChange(false); }
+    else toast.error('Seleccione primero una fuente en el plano');
   };
 
   return (
@@ -72,7 +76,7 @@ export default function AutoFillEquipmentDialog({ open, onOpenChange }: Props) {
                     </div>
                   </CardContent>
                 </Card>
-                <Button onClick={applyEquipment} className="w-full"><Zap className="h-4 w-4 mr-2" />Apply to Shielding Calculator</Button>
+                <Button onClick={applyEquipment} className="w-full"><Zap className="h-4 w-4 mr-2" />Aplicar a la fuente seleccionada</Button>
               </>
             )}
           </div>

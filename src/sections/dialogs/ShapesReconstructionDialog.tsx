@@ -6,6 +6,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -323,6 +324,7 @@ export default function ShapesReconstructionDialog({ open, onOpenChange }: Shape
             <Badge className="text-[9px] bg-emerald-100 text-emerald-700">v33</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Los contornos se generan al azar; no provienen de un RTSTRUCT real." />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mx-5 mt-2 shrink-0">

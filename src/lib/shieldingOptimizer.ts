@@ -14,6 +14,8 @@
  *  Reference: NCRP 151, Deb (2002) NSGA-II, ICRP 103 ALARA
  * ═══════════════════════════════════════════════════════════════════════════
  */
+import { barreraMV, energiaTabuladaMV } from './calculadorasNormativas';
+import type { MaterialNCRP151 } from './ncrp151';
 
 import './costDatabase';
 
@@ -93,7 +95,7 @@ export interface OptimizationResult {
   calculationTime_ms: number;
 }
 
-// ─── Material options with NCRP 151 TVL data ───────────────────────
+// ─── Opciones de material (los campos tvl_*_6MV_mm son históricos y ya no se usan en el cálculo) ───
 
 export const OPTIMIZATION_MATERIALS: MaterialOption[] = [
   { key: 'concreto_ordinario', name: 'Concreto ordinario', density_kg_m3: 2350, tvl_primary_6MV_mm: 369, tvl_secondary_6MV_mm: 293, cost_per_m3: 180, max_thickness_mm: 3000, min_thickness_mm: 100, complexity_score: 2 },
@@ -107,35 +109,41 @@ export const OPTIMIZATION_MATERIALS: MaterialOption[] = [
   { key: 'tierra_apisonada', name: 'Tierra apisonada', density_kg_m3: 1800, tvl_primary_6MV_mm: 500, tvl_secondary_6MV_mm: 420, cost_per_m3: 30, max_thickness_mm: 5000, min_thickness_mm: 300, complexity_score: 6 },
 ];
 
-// ─── TVL scaling by energy (relative to 6 MV) ──────────────────────
+// ─── Espesor requerido (Fase 8c) ────────────────────────────────────
+//
+// Antes: n = −log₁₀(B) por un solo TVL "de 6 MV" propio (plomo 55 mm, tungsteno 15 mm) escalado por energía con
+// factores sin fuente, y B = P·d²/(W·U·T) también para las secundarias. Ahora:
+// - concreto ordinario, acero y plomo: `barreraMV` (NCRP 151: primaria Ec. 2.1, o fuga + dispersión Ec. 2.7/2.8,
+//   TVL₁/TVLₑ de las Tablas B.2, B.5a y B.7, regla de las dos fuentes);
+// - el resto de materiales, que NCRP 151 no tabula: equivalencia de masa por unidad de área con el concreto
+//   (tungsteno: con el plomo). Es una aproximación razonable en la región Compton de los haces de MV y se marca
+//   como tal en el diálogo.
 
-const TVL_ENERGY_SCALE: Record<number, number> = {
-  4: 0.95, 6: 1.0, 10: 1.11, 15: 1.19, 18: 1.24, 25: 1.30,
+const BASE_NCRP151: Record<string, MaterialNCRP151> = {
+  concreto_ordinario: 'concrete', acero_estructural: 'steel', plomo_laminado: 'lead', tungsteno: 'lead',
 };
+const DENSIDAD_BASE_KG_M3: Record<MaterialNCRP151, number> = { concrete: 2350, steel: 7870, lead: 11350 };
 
-function getTvlScale(energy_MV: number): number {
-  return TVL_ENERGY_SCALE[energy_MV] || 1.0;
+/** Material de referencia NCRP 151 y si el espesor es por equivalencia de densidad. */
+export function referenciaMaterial(key: string): { base: MaterialNCRP151; porDensidad: boolean } {
+  const base = BASE_NCRP151[key] ?? 'concrete';
+  return { base, porDensidad: !(key in BASE_NCRP151) || key === 'tungsteno' };
 }
 
-// ─── Required thickness calculation ──────────────────────────────────
-
-/**
- * Calculate required TVL count for a barrier using NCRP 151 formula.
- * B = P × d² / (W × U × T)
- * n = -log₁₀(B)
- * thickness = n × TVL
- */
-function requiredThickness(
+export function requiredThickness(
   barrier: OptimizationBarrier,
   material: MaterialOption,
   energy_MV: number
 ): number {
-  const B = (barrier.dose_limit_mSv_week * barrier.distance_to_source_m * barrier.distance_to_source_m) /
-            (barrier.workload_Gy_week * 1000 * barrier.use_factor * barrier.occupancy_factor);
-  const nTvl = -Math.log10(Math.max(B, 1e-10));
-  const tvlScale = getTvlScale(energy_MV);
-  const tvl = barrier.is_primary ? material.tvl_primary_6MV_mm : material.tvl_secondary_6MV_mm;
-  return nTvl * tvl * tvlScale;
+  const { base, porDensidad } = referenciaMaterial(material.key);
+  const r = barreraMV({
+    tipo: barrier.is_primary ? 'primaria' : 'secundaria',
+    haces: [{ energia: energiaTabuladaMV(energy_MV), W_Gy_semana: barrier.workload_Gy_week }],
+    material: base, P_mSv_semana: barrier.dose_limit_mSv_week, T: barrier.occupancy_factor,
+    U: barrier.use_factor, d_m: barrier.distance_to_source_m,
+  });
+  const t_mm = r.espesor_cm * 10;
+  return porDensidad ? t_mm * DENSIDAD_BASE_KG_M3[base] / material.density_kg_m3 : t_mm;
 }
 
 // ─── Genetic Algorithm ──────────────────────────────────────────────

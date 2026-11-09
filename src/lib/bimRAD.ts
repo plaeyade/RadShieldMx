@@ -7,6 +7,7 @@
 
 type Vec3 = [number, number, number];
 
+import { transmisionPET } from './calculadorasNormativas';
 export interface BIMElement {
   id: string;
   ifcType: string; // IfcWall, IfcSpace, IfcDoor, IfcWindow, etc.
@@ -236,6 +237,20 @@ export interface DoseRateDistribution {
   source: string;
 }
 
+/**
+ * Fase 8c: la fuente de este cálculo es un emisor β+ (Γ por omisión de F-18), así que plomo y concreto atenúan con la
+ * transmisión de banda ancha a 511 keV de AAPM TG-108 Tabla V (antes: TVL fijos de 5 mm de plomo y 370 mm de concreto,
+ * los de 6 MV para el concreto y un valor sin fuente para el plomo). Se expresa como el TVL equivalente que da la misma
+ * transmisión para el espesor de la barrera. Otros materiales: 0.1 m sin fuente (se avisa en el diálogo).
+ */
+export function tvlEquivalente511(material: string | undefined, t_m: number): number {
+  if ((material === 'lead' || material === 'concrete') && t_m > 0) {
+    const B = transmisionPET(material, t_m * 1000);
+    return B < 1 ? t_m / -Math.log10(B) : Infinity;
+  }
+  return 0.1;
+}
+
 export function computeBIMDoseDistribution(
   model: BIMModel,
   sourcePosition: Vec3,
@@ -251,7 +266,7 @@ export function computeBIMDoseDistribution(
     .map(e => ({
       position: e.geometry.vertices.length > 0 ? e.geometry.vertices[0] : [0, 0, 0],
       thickness_m: e.material!.thickness_m,
-      tvl_m: e.shieldingMaterial === 'lead' ? 0.005 : e.shieldingMaterial === 'concrete' ? 0.37 : 0.1,
+      tvl_m: tvlEquivalente511(e.shieldingMaterial, e.material!.thickness_m),
     }));
 
   // Compute for each space
@@ -336,8 +351,8 @@ export const IFC_TO_SHIELDING_MATERIAL: Record<string, {
 }> = {
   'Concrete, Cast-in-Place': { shieldingMaterial: 'concrete', density_kg_m3: 2350, tvl_6MV_cm: 37 },
   'Concrete, Heavy (Barite)': { shieldingMaterial: 'barite_concrete', density_kg_m3: 3500, tvl_6MV_cm: 28 },
-  'Lead': { shieldingMaterial: 'lead', density_kg_m3: 11340, tvl_6MV_cm: 0.5 },
-  'Steel': { shieldingMaterial: 'steel', density_kg_m3: 7850, tvl_6MV_cm: 9 },
+  'Lead': { shieldingMaterial: 'lead', density_kg_m3: 11340, tvl_6MV_cm: 5.7 },
+  'Steel': { shieldingMaterial: 'steel', density_kg_m3: 7850, tvl_6MV_cm: 10 },
   'Gypsum Board': { shieldingMaterial: 'gypsum', density_kg_m3: 800, tvl_6MV_cm: 120 },
   'Brick': { shieldingMaterial: 'brick', density_kg_m3: 1800, tvl_6MV_cm: 50 },
   'Polyethylene': { shieldingMaterial: 'polyethylene', density_kg_m3: 950, tvl_6MV_cm: 15 },

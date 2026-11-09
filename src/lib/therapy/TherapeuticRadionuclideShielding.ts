@@ -7,6 +7,7 @@
 
 export interface TherapyNuclide {
   name: string; symbol: string; halfLife_h: number;
+  /** Constante gamma en μSv·m²/(MBq·h) (el nombre del campo conserva «GBq» por compatibilidad; el cálculo usa MBq). */
   gammaConstant_uSvm2perGBqh: number; tenthValueLead_mm: number;
   tenthValueConcrete_mm: number; maxBetaEnergy_MeV: number;
   meanBetaEnergy_MeV: number; maxRangePb_mm: number; // beta range in lead
@@ -66,7 +67,8 @@ export function calculateTaskDose(task: TherapyRoomTask, designLimit_uSv_week: n
   const fractionOfLimit = annualDose_mSv / 20; // 20 mSv/year limit
   const shieldingRequired = weeklyDose_uSv > designLimit_uSv_week;
   const ratio = weeklyDose_uSv > 0 ? designLimit_uSv_week / weeklyDose_uSv : Infinity;
-  const tvlNeeded = ratio > 0 && ratio < 1 ? Math.ceil(-Math.log10(ratio)) : 0;
+  // Número de TVL continuo (antes se redondeaba hacia arriba a un entero, lo que inflaba el espesor hasta 1 TVL).
+  const tvlNeeded = ratio > 0 && ratio < 1 ? -Math.log10(ratio) : 0;
 
   return { task, nuclide: nuc, weeklyDose_uSv, annualDose_mSv, fractionOfLimit, shieldingRequired, minLead_mm: tvlNeeded * nuc.tenthValueLead_mm, minConcrete_mm: tvlNeeded * nuc.tenthValueConcrete_mm };
 }
@@ -77,5 +79,6 @@ export function getRoomSummary(tasks: TherapyRoomTask[], designLimit_uSv_week: n
   const totalAnnual_mSv = results.reduce((s, r) => s + r.annualDose_mSv, 0);
   const maxFraction = Math.max(...results.map(r => r.fractionOfLimit), 0);
   const shieldingTasks = results.filter(r => r.shieldingRequired);
-  return { results, totalWeekly_uSv, totalAnnual_mSv, maxFraction, withinLimits: totalWeekly_uSv <= designLimit_uSv_week * tasks.length, shieldingTasksCount: shieldingTasks.length };
+  // La sala cumple si la suma de todas las tareas no supera el objetivo semanal (antes: objetivo × número de tareas).
+  return { results, totalWeekly_uSv, totalAnnual_mSv, maxFraction, totalFraction: totalAnnual_mSv / 20, withinLimits: totalWeekly_uSv <= designLimit_uSv_week, shieldingTasksCount: shieldingTasks.length };
 }

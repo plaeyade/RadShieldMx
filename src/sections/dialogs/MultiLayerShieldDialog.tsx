@@ -19,9 +19,11 @@ import {
 interface Capa extends CapaMulticapa { id: string }
 const sel = 'h-7 w-full rounded-md border border-input px-1 text-xs';
 
-export default function MultiLayerShieldDialog() {
-  const open = useAppStore(s => dialogoAbierto(s.dialogs.multiLayerShield));
-  const close = () => useAppStore.getState().close('multiLayerShield');
+/** Con `open`/`onClose` se controla desde fuera (p. ej. LaminatedBarrierCalculator); sin ellos, desde el store. */
+export default function MultiLayerShieldDialog(props: { open?: boolean; onClose?: () => void } = {}) {
+  const abiertoStore = useAppStore(s => dialogoAbierto(s.dialogs.multiLayerShield));
+  const open = props.open ?? abiertoStore;
+  const close = () => (props.onClose ? props.onClose() : useAppStore.getState().close('multiLayerShield'));
   const [carga, setCarga] = useState<CargaHaz>(CARGA_MV_INICIAL);
   const [areaId, setAreaId] = useState<string>('no_controlada');
   const [T, setT] = useState(0.025);

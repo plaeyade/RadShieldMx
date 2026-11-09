@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -127,6 +128,7 @@ export default function CompareModeDialog({ open, onOpenChange }: CompareModeDia
             Compare Mode — Escenarios Lado a Lado
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Las dosis y los costos de los escenarios son fijos; no provienen del proyecto ni del motor de cálculo." />
 
         {/* Selectors */}
         <div className="px-6 pb-3 grid grid-cols-2 gap-4">

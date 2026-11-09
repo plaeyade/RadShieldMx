@@ -7,6 +7,7 @@
  * - DCHAIN-PHITS Manual (JAEA, 2026)
  * - ICRP 144: Radiological Protection from Occupational Exposure
  */
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { useState } from 'react';
 import { X, Atom, Calculator, Clock, Radiation, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -135,12 +136,12 @@ export default function DCHAINActivationCalculator({ open, onOpenChange }: Props
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="dchain-title">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-indigo-50">
           <div className="flex items-center gap-2">
             <Atom className="w-5 h-5 text-purple-600" />
-            <h2 className="text-sm font-bold text-slate-800">DCHAIN-PHITS Activation Calculator</h2>
+            <h2 id="dchain-title" className="text-sm font-bold text-slate-800">Activación (estilo DCHAIN-PHITS) — ilustrativo</h2>
           </div>
           <button
             aria-label="Cerrar DCHAIN-PHITS Activation Calculator"
@@ -150,6 +151,7 @@ export default function DCHAINActivationCalculator({ open, onOpenChange }: Props
             <X className="w-4 h-4" />
           </button>
         </div>
+        <div className="px-5 pt-3"><SyntheticResultBanner detalle="Fase 8c: usa saturación y decaimiento de F-18 para cualquier blanco y un rendimiento ad hoc; no es DCHAIN-PHITS ni un cálculo validado." /></div>
 
         <div className="flex flex-1 overflow-hidden">
           {/* Config Panel */}

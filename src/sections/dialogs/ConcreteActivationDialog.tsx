@@ -11,6 +11,7 @@
  */
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,6 +79,7 @@ export default function ConcreteActivationDialog({ open, onClose }: Props) {
             <Badge variant="outline" className="text-[10px]">B.13</Badge>
           </DialogTitle>
         </DialogHeader>
+        <SyntheticResultBanner detalle="Fase 8c: la tasa Φ·10⁻¹⁰·Y·E·f·(t/100) no tiene base dimensional ni referencia trazable; los valores son sólo ilustrativos. Para activación use un cálculo de transporte (DCHAIN/FLUKA) o datos medidos." />
 
         <div className="bg-rose-50 border border-rose-100 rounded-lg p-3 text-[11px] text-rose-700">
           <BookOpen className="w-4 h-4 inline mr-1" />

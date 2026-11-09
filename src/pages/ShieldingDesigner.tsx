@@ -1,3 +1,5 @@
+import { aplicarEquipoAFuente, type EquipoCatalogo } from '@/lib/equipoAFuente';
+import { generarBunker, type ConfigBunker } from '@/lib/bunkerParametrico';
 import { useState, useCallback, Suspense, lazy, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { CriticalPoint, FloorPlan, Barrier, RadiationSource, OccupiedRegion } from '@/types/radshield';
@@ -2650,7 +2652,13 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="exampleWizard" component={ExampleWizardDialog} />
         <LazyDialog name="cadImport" component={CADImportDialog} />
         {/* v16: New feature dialogs */}
-        <LazyDialog name="parametricBunker" component={ParametricBunkerDesigner} />
+        <LazyDialog name="parametricBunker" component={ParametricBunkerDesigner} onGenerate={(cfg: ConfigBunker) => {
+          const g = generarBunker(cfg, floorPlan.scale_m_per_pixel || 0.01);
+          setFloorPlan(prev => ({ ...prev, name: `Búnker paramétrico (${cfg.template})`, barriers: g.barriers, sources: g.sources,
+            width_pixels: Math.max(prev.width_pixels, g.ancho_px), height_pixels: Math.max(prev.height_pixels, g.alto_px) }));
+          useAppStore.getState().close('parametricBunker');
+          toast.success(`Plano generado: ${g.barriers.length} barreras y 1 fuente; ejecute el cálculo para dimensionar`);
+        }} />
         <LazyDialog name="mlPrediction" component={MLPredictionDialog} />
         <LazyDialog name="keyboardConfig" component={KeyboardConfigDialog} />
         <LazyDialog name="cnsnsAutoReport" component={CNSNSAutoReportDialog} />
@@ -2691,7 +2699,11 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="autoBarrier" component={AutoBarrierDetectionDialog} />
         <LazyDialog name="predictiveMaterial" component={PredictiveMaterialDialog} />
         <LazyDialog name="anomalyDetection" component={AnomalyDetectionDialog} />
-        <LazyDialog name="autoFillEquipment" component={AutoFillEquipmentDialog} />
+        <LazyDialog name="autoFillEquipment" component={AutoFillEquipmentDialog} onApply={(eq: EquipoCatalogo) => {
+          if (!selectedSource) return false;
+          setFloorPlan(prev => ({ ...prev, sources: prev.sources.map(s => (s.id === selectedSource.id ? aplicarEquipoAFuente(s, eq) : s)) }));
+          return true;
+        }} />
         <LazyDialog name="videoTutorial" component={VideoTutorialGenerator} />
         <LazyDialog name="animatedDose" component={AnimatedDoseMapsDialog} />
         <LazyDialog name="pointCloud" component={PointCloudImportDialog} />

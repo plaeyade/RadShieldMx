@@ -152,9 +152,10 @@ const UTILITY_TOOLS = [
   { icon: Layers,     label: 'Lab',   dialog: 'maze',              title: 'Laberinto NCRP 151',              color: '#7c3aed', bg: '#f5f3ff' },
   { icon: Box,        label: '3D',    dialog: 'viewer3d',          title: 'Visor 3D Bunker',                 color: '#0891b2', bg: '#ecfeff' },
   { icon: Stethoscope,label: 'Med3D', dialog: 'medicalFloorPlan3D', title: 'Plano medico 3D fotorealista',    color: '#0f766e', bg: '#ccfbf1' },
-  { icon: Wand2,      label: 'ALARA', dialog: 'alaraWizard',       title: 'ALARA Wizard — Cost-Benefit',     color: '#10b981', bg: '#ecfdf5' },
+  { icon: Wand2,      label: 'ALARA', dialog: 'alaraWizard',       title: 'Asistente ALARA — sustitución de materiales',     color: '#10b981', bg: '#ecfdf5' },
   { icon: Moon,       label: 'Dark',  dialog: 'darkMode',          title: 'Dark Mode — Tema y colores',      color: '#475569', bg: '#f1f5f9' },
   { icon: Keyboard,   label: 'Keys',  dialog: 'keyboardShortcuts', title: 'Atajos de teclado personalizables', color: '#475569', bg: '#f1f5f9' },
+  { icon: Library,    label: 'Mat',   dialog: 'materialLibrary',   title: 'Biblioteca de materiales (propios y del sistema)', color: '#b45309', bg: '#fef3c7' },
 ];
 
 /* ═══════════════════════════════════════════
@@ -163,6 +164,7 @@ const UTILITY_TOOLS = [
 const IO_TOOLS = [
   { icon: FileDown,       label: 'Exp',  dialog: 'batchReportExporter', title: 'Exportar Reporte Batch',        color: '#db2777', bg: '#fdf2f8' },
   { icon: FileText,       label: 'Rep',  dialog: 'regulatoryReport',    title: 'Memoria Regulatoria CNSNS',     color: '#d97706', bg: '#fef3c7' },
+  { icon: FileText,       label: 'Gest', dialog: 'reportManager',       title: 'Gestor de reportes guardados',  color: '#d97706', bg: '#fef3c7' },
   { icon: FileText,       label: 'PDF',  dialog: 'pdfReport',           title: 'PDF Report — CNSNS LA-007/01',  color: '#b45309', bg: '#fef3c7' },
   { icon: GitCompareArrows, label: 'Diff', dialog: 'designCompare',     title: 'Design Compare — Before/After', color: '#2563eb', bg: '#eff6ff' },
   { icon: FileDown,       label: 'DXF',  dialog: 'dxfExport',           title: 'Exportar DXF/DWG/SVG/JSON',     color: '#ea580c', bg: '#fff7ed' },

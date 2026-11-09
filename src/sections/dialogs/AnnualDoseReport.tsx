@@ -24,16 +24,19 @@ import { Calendar, Download, TrendingUp } from 'lucide-react';
 interface Props { open: boolean; onClose: () => void; }
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const DEFAULT_SEASONAL = [1.0,0.95,1.05,1.0,0.95,0.85,0.8,0.85,0.95,1.05,1.1,1.15]; // Winter peak, Summer low
+// Fase 8c: los factores estacionales por omisión eran arbitrarios (pico invernal 1.15); ahora 1.0 y editables.
+const DEFAULT_SEASONAL = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 function calcAnnual(
   weeklyBase_mSv: number, seasonal: number[], weeksOff: number,
-  maintenanceWeeks: number, occupancyFactor: number
+  maintenanceWeeks: number, occupancyFactor: number, limite_mSv: number
 ): { monthly: number[]; annualTotal: number; annualOccupational: number; limitPercent: number } {
-  const effectiveWeeks = 52 - weeksOff - maintenanceWeeks;
-  const monthly = seasonal.map(s => weeklyBase_mSv * s * (effectiveWeeks / 52) * 4.33 * occupancyFactor);
+  // T se aplica una sola vez: dosis = kerma semanal en el punto (sin T) × T × semanas efectivas × factor estacional.
+  const effectiveWeeks = Math.max(0, 52 - weeksOff - maintenanceWeeks);
+  const kermaMensual = seasonal.map(s => weeklyBase_mSv * s * (effectiveWeeks / 12));
+  const monthly = kermaMensual.map(k => k * occupancyFactor);
   const annualTotal = monthly.reduce((a, b) => a + b, 0);
-  return { monthly, annualTotal, annualOccupational: annualTotal / occupancyFactor, limitPercent: (annualTotal / 20) * 100 };
+  return { monthly, annualTotal, annualOccupational: kermaMensual.reduce((a, b) => a + b, 0), limitPercent: (annualTotal / limite_mSv) * 100 };
 }
 
 export default function AnnualDoseReport({ open, onClose }: Props) {
@@ -42,15 +45,16 @@ export default function AnnualDoseReport({ open, onClose }: Props) {
   const [weeksOff, setWeeksOff] = useState(4);
   const [maintenanceWeeks, setMaintenanceWeeks] = useState(2);
   const [occupancy, setOccupancy] = useState(1.0);
+  const [limite, setLimite] = useState(1);
 
-  const result = useMemo(() => calcAnnual(weeklyBase, seasonalFactors, weeksOff, maintenanceWeeks, occupancy),
-    [weeklyBase, seasonalFactors, weeksOff, maintenanceWeeks, occupancy]);
+  const result = useMemo(() => calcAnnual(weeklyBase, seasonalFactors, weeksOff, maintenanceWeeks, occupancy, limite),
+    [weeklyBase, seasonalFactors, weeksOff, maintenanceWeeks, occupancy, limite]);
 
   const exportCSV = () => {
     let csv = 'Mes,Dosis_mSv,Factor_estacional\n';
     result.monthly.forEach((d, i) => csv += `${MONTHS[i]},${d.toFixed(4)},${seasonalFactors[i]}\n`);
     csv += `TOTAL ANUAL,${result.annualTotal.toFixed(4)},\n`;
-    csv += `LIMIT % (20mSv),${result.limitPercent.toFixed(2)},\n`;
+    csv += `% del limite (${limite} mSv/a),${result.limitPercent.toFixed(2)},\n`;
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'annual_dose_report.csv'; a.click();
@@ -76,10 +80,10 @@ export default function AnnualDoseReport({ open, onClose }: Props) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div><Label className="text-[11px]">Dosis semanal base (mSv/sem)</Label><Input type="number" step={0.001} value={weeklyBase} onChange={e => setWeeklyBase(parseFloat(e.target.value) || 0)} className="h-8 text-xs" /></div>
+          <div><Label htmlFor="adr-k" className="text-[11px]">Kerma semanal en el punto, sin T (mSv/semana)</Label><Input id="adr-k" data-testid="adr-k" type="number" step={0.001} value={weeklyBase} onChange={e => setWeeklyBase(parseFloat(e.target.value) || 0)} className="h-8 text-xs" /></div>
           <div><Label className="text-[11px]">Semanas vacaciones/año</Label><Input type="number" value={weeksOff} onChange={e => setWeeksOff(parseInt(e.target.value) || 0)} className="h-8 text-xs" /></div>
           <div><Label className="text-[11px]">Semanas mantenimiento</Label><Input type="number" value={maintenanceWeeks} onChange={e => setMaintenanceWeeks(parseInt(e.target.value) || 0)} className="h-8 text-xs" /></div>
-          <div><Label className="text-[11px]">Factor ocupación (T)</Label><Input type="number" step={0.05} value={occupancy} onChange={e => setOccupancy(parseFloat(e.target.value) || 0)} className="h-8 text-xs" /></div>
+          <div><Label htmlFor="adr-t" className="text-[11px]">Factor ocupación (T)</Label><Input id="adr-t" data-testid="adr-t" type="number" step={0.05} value={occupancy} onChange={e => setOccupancy(parseFloat(e.target.value) || 0)} className="h-8 text-xs" /></div>
         </div>
 
         <div className="text-xs font-semibold text-slate-600">Factores estacionales (multiplicador)</div>
@@ -110,18 +114,20 @@ export default function AnnualDoseReport({ open, onClose }: Props) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="bg-white rounded p-2 border">
             <div className="text-[9px] text-slate-500">Dosis Anual</div>
-            <div className={`text-lg font-bold ${result.annualTotal > 20 ? 'text-red-600' : result.annualTotal > 5 ? 'text-amber-600' : 'text-emerald-600'}`}>{result.annualTotal.toFixed(3)}</div>
+            <div className={`text-lg font-bold ${result.limitPercent > 100 ? 'text-red-600' : result.limitPercent > 25 ? 'text-amber-600' : 'text-emerald-600'}`} data-testid="adr-anual">{result.annualTotal.toFixed(3)}</div>
             <div className="text-[9px] text-slate-400">mSv/año</div>
           </div>
           <div className="bg-white rounded p-2 border">
-            <div className="text-[9px] text-slate-500">Dosis Ocupacional</div>
+            <div className="text-[9px] text-slate-500">Kerma anual en el punto</div>
             <div className="text-lg font-bold text-slate-700">{result.annualOccupational.toFixed(3)}</div>
-            <div className="text-[9px] text-slate-400">sin T factor</div>
+            <div className="text-[9px] text-slate-400">sin T (persona siempre presente)</div>
           </div>
           <div className="bg-white rounded p-2 border">
-            <div className="text-[9px] text-slate-500">% Límite ICRP</div>
+            <label htmlFor="adr-lim" className="text-[9px] text-slate-500">% del límite</label>
             <div className={`text-lg font-bold ${result.limitPercent > 100 ? 'text-red-600' : result.limitPercent > 25 ? 'text-amber-600' : 'text-emerald-600'}`}>{result.limitPercent.toFixed(1)}%</div>
-            <div className="text-[9px] text-slate-400">de 20 mSv</div>
+            <select id="adr-lim" data-testid="adr-lim" value={limite} onChange={e => setLimite(Number(e.target.value))} className="text-[9px] border rounded">
+              <option value={1}>Público: 1 mSv/año</option><option value={20}>POE: 20 mSv/año</option>
+            </select>
           </div>
         </div>
 

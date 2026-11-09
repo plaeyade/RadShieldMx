@@ -9,6 +9,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -52,11 +53,11 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
       if (!isOrthancConfigured(serverUrl)) {
         setIsConnected(true);
         setStudies([
-          { id: '1.2.840.113619.2.55.3.604688119.868.12345', patientName: 'GARCIA LOPEZ JUAN', patientId: 'HL-2024-001', studyDate: '2024-03-15', modality: 'CT', description: 'CHEST W/O CONTRAST', numSeries: 3, numInstances: 287, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12346', patientName: 'MARTINEZ SANCHEZ MARIA', patientId: 'HL-2024-002', studyDate: '2024-03-18', modality: 'RTDOSE', description: 'THORAX VMAT DOSE CALC', numSeries: 5, numInstances: 452, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12347', patientName: 'HERNANDEZ PEREZ CARLOS', patientId: 'HL-2024-003', studyDate: '2024-03-20', modality: 'RTPLAN', description: 'PROSTATE IMRT PLAN', numSeries: 8, numInstances: 1205, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12348', patientName: 'LOPEZ MARTINEZ ANA', patientId: 'HL-2024-004', studyDate: '2024-03-22', modality: 'CT', description: 'PELVIS W CONTRAST', numSeries: 4, numInstances: 389, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12349', patientName: 'GONZALEZ RAMIREZ LUIS', patientId: 'HL-2024-005', studyDate: '2024-03-25', modality: 'PET', description: 'WHOLE BODY FDG PET/CT', numSeries: 12, numInstances: 2340, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12345', patientName: 'DEMO^PACIENTE 01', patientId: 'HL-2024-001', studyDate: '2024-03-15', modality: 'CT', description: 'CHEST W/O CONTRAST', numSeries: 3, numInstances: 287, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12346', patientName: 'DEMO^PACIENTE 02', patientId: 'HL-2024-002', studyDate: '2024-03-18', modality: 'RTDOSE', description: 'THORAX VMAT DOSE CALC', numSeries: 5, numInstances: 452, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12347', patientName: 'DEMO^PACIENTE 03', patientId: 'HL-2024-003', studyDate: '2024-03-20', modality: 'RTPLAN', description: 'PROSTATE IMRT PLAN', numSeries: 8, numInstances: 1205, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12348', patientName: 'DEMO^PACIENTE 04', patientId: 'HL-2024-004', studyDate: '2024-03-22', modality: 'CT', description: 'PELVIS W CONTRAST', numSeries: 4, numInstances: 389, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12349', patientName: 'DEMO^PACIENTE 05', patientId: 'HL-2024-005', studyDate: '2024-03-25', modality: 'PET', description: 'WHOLE BODY FDG PET/CT', numSeries: 12, numInstances: 2340, status: 'available' },
         ]);
         toast.info('Modo demo PACS: configure VITE_ENABLE_PACS_REAL=true y VITE_ORTHANC_URL para conectar a Orthanc real');
         return;
@@ -78,11 +79,11 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
         // Mock connection for demo
         setIsConnected(true);
         setStudies([
-          { id: '1.2.840.113619.2.55.3.604688119.868.12345', patientName: 'GARCIA LOPEZ JUAN', patientId: 'HL-2024-001', studyDate: '2024-03-15', modality: 'CT', description: 'CHEST W/O CONTRAST', numSeries: 3, numInstances: 287, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12346', patientName: 'MARTINEZ SANCHEZ MARIA', patientId: 'HL-2024-002', studyDate: '2024-03-18', modality: 'RTDOSE', description: 'THORAX VMAT DOSE CALC', numSeries: 5, numInstances: 452, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12347', patientName: 'HERNANDEZ PEREZ CARLOS', patientId: 'HL-2024-003', studyDate: '2024-03-20', modality: 'RTPLAN', description: 'PROSTATE IMRT PLAN', numSeries: 8, numInstances: 1205, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12348', patientName: 'LOPEZ MARTINEZ ANA', patientId: 'HL-2024-004', studyDate: '2024-03-22', modality: 'CT', description: 'PELVIS W CONTRAST', numSeries: 4, numInstances: 389, status: 'available' },
-          { id: '1.2.840.113619.2.55.3.604688119.868.12349', patientName: 'GONZALEZ RAMIREZ LUIS', patientId: 'HL-2024-005', studyDate: '2024-03-25', modality: 'PET', description: 'WHOLE BODY FDG PET/CT', numSeries: 12, numInstances: 2340, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12345', patientName: 'DEMO^PACIENTE 06', patientId: 'HL-2024-001', studyDate: '2024-03-15', modality: 'CT', description: 'CHEST W/O CONTRAST', numSeries: 3, numInstances: 287, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12346', patientName: 'DEMO^PACIENTE 07', patientId: 'HL-2024-002', studyDate: '2024-03-18', modality: 'RTDOSE', description: 'THORAX VMAT DOSE CALC', numSeries: 5, numInstances: 452, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12347', patientName: 'DEMO^PACIENTE 08', patientId: 'HL-2024-003', studyDate: '2024-03-20', modality: 'RTPLAN', description: 'PROSTATE IMRT PLAN', numSeries: 8, numInstances: 1205, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12348', patientName: 'DEMO^PACIENTE 09', patientId: 'HL-2024-004', studyDate: '2024-03-22', modality: 'CT', description: 'PELVIS W CONTRAST', numSeries: 4, numInstances: 389, status: 'available' },
+          { id: '1.2.840.113619.2.55.3.604688119.868.12349', patientName: 'DEMO^PACIENTE 10', patientId: 'HL-2024-005', studyDate: '2024-03-25', modality: 'PET', description: 'WHOLE BODY FDG PET/CT', numSeries: 12, numInstances: 2340, status: 'available' },
         ]);
         toast.success('Conectado a Orthanc (datos demo)');
       }
@@ -125,6 +126,7 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
             <Badge className="text-[9px] bg-cyan-100 text-cyan-700">v32</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Sin servidor PACS configurado se muestran estudios de demostración anonimizados." />
 
         <Tabs defaultValue="connection" className="flex flex-col">
           <TabsList className="mx-5 mt-2 grid grid-cols-3 h-8">

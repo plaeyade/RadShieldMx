@@ -375,7 +375,7 @@ Salida / pruebas: `src/__tests__/validacion/calculadorasNormativas.test.ts` (NCR
 `src/__tests__/dialogs/calculadorasFase7.test.tsx` (cada diálogo muestra lo que calcula el motor; DXF de la
 Fase 4 calculado por lotes y exportado → reimportado sin cambios).
 
-## Fase 8 — Resto de calculadoras (8a, 8b y MultiEnergySpectra hechas; 8c propuesta)
+## Fase 8 — Resto de calculadoras (8a, 8b, MultiEnergySpectra y 8c hechas)
 
 La revisión a fondo (`docs/revision-dialogos.md`, Fase 7) encontró 16 diálogos de prioridad alta fuera de las 9 ya
 migradas y 65 de prioridad media. Orden propuesto:
@@ -408,6 +408,15 @@ MultiEnergySpectra (PR aparte): ya no usa un TVL «TASMIP» por kVp (sin fuente;
 
 Salida esperada de 8c: ningún diálogo con física local sin prueba contra NCRP 147/151 o TG-108; cada diálogo de
 cálculo con una prueba de componente.
+
+Hecho (8c, PR aparte): 66 de los 67 diálogos de prioridad media, agrupados por tema (detalle en
+`docs/revision-dialogos.md`). Funciones nuevas en el núcleo: `ncrp151.skyshineFotones` (Ec. 5.1) y `anguloSolidoCampo`;
+`calculadorasNormativas.blindajeCo60`, `incidenciaOblicua` y `blindajeTC` (este último del PR de MultiEnergySpectra);
+`lib/limitesDosis`, `lib/bunkerParametrico`, `lib/equipoAFuente`; `shieldingOptimizer.requiredThickness` sobre
+`barreraMV`; `spect/IPEMReport109.salaSPECT`. Componentes comunes: `ComparadorMateriales`, `CalculadoraCo60`,
+`RedireccionDialogo`, `DatosEjemploBanner`. Prueba: `src/__tests__/validacion/fase8c.test.tsx` (NCRP 151 Tabla 5.1,
+§7.1.1 y Tabla B.2; NCRP 147 §5.3.1.2; TG-108 Tabla V; SSR-6; y cada corrección de estado o de unidades). Queda la
+división de `MedicalFloorPlan3DDialog`; los diálogos sólo rotulados como demostración pasan a prioridad baja.
 
 ## Medidas de bundle
 

@@ -2,6 +2,7 @@
 // DashboardDialog - Dashboard ejecutivo con KPIs.
 // F396 migra el fullscreen legacy a FullscreenShell controlado.
 // =============================================================================
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +61,7 @@ function DashboardContent({ onOpenChange }: { onOpenChange: (open: boolean) => v
   return (
     <FullscreenShell
       title="Dashboard Ejecutivo"
-      subtitle="KPIs del sistema de blindajes - actualizado en tiempo real - F396"
+      subtitle="KPIs de demostración del sistema de blindajes"
       icon={<BarChart3 className="h-5 w-5" />}
       accentClassName="bg-indigo-600"
       traceId="f396-dashboard-fullscreen-shell"
@@ -69,6 +70,7 @@ function DashboardContent({ onOpenChange }: { onOpenChange: (open: boolean) => v
     >
       <div className="h-full overflow-auto p-6">
         <div className="mx-auto max-w-6xl space-y-6">
+          <DatosEjemploBanner detalle="Los módulos muestran dosis y espesores fijos de demostración; para el estado real del proyecto use el tablero de cálculo (DashboardCalc), que verifica cada barrera." />
           <div className="grid grid-cols-4 gap-4">
             {cards.map((c) => {
               const Icon = c.icon;

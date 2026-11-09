@@ -1,3 +1,4 @@
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -217,6 +218,7 @@ export default function NativeMCDialog({ open, onOpenChange }: Props) {
             <Badge variant="secondary" className="text-[10px]">Photon Transport</Badge>
           </DialogTitle>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Transporte de fotones propio sin caso de validación contra transmisión de banda ancha conocida." />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid grid-cols-4 w-full shrink-0">

@@ -3025,7 +3025,7 @@ export default function MedicalFloorPlan3DDialog({ open, onOpenChange, floorPlan
                 gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
                 onCreated={({ gl }) => {
                   gl.shadowMap.enabled = true;
-                  gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                  gl.shadowMap.type = THREE.PCFShadowMap; // Fase 8c: PCFSoftShadowMap está obsoleto en three (se degradaba a PCFShadowMap con aviso)
                   gl.toneMapping = THREE.ACESFilmicToneMapping;
                   gl.toneMappingExposure = photorealAdvancedProfile.exposure;
                   gl.outputColorSpace = THREE.SRGBColorSpace;

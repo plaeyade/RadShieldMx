@@ -4,6 +4,7 @@
  * algorithm analysis, audit results, and configurable thresholds.
  */
 
+import { DatosEjemploBanner } from '@/components/SyntheticResultBanner';
 import { useState, useEffect, useCallback, useRef, type CSSProperties, type ComponentType } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -227,6 +228,7 @@ export default function PerformanceDashboardDialog({ open, onClose }: { open: bo
             </div>
           </div>
         </DialogHeader>
+        <DatosEjemploBanner detalle="Memoria, tiempos y calificaciones son valores simulados (aleatorios o fijos), no mediciones del navegador." />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mx-6 mt-4 bg-slate-900 border border-slate-700 shrink-0">

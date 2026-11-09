@@ -32,6 +32,9 @@ interface ParsedRoom {
   width: number; height: number;
 }
 
+/** Escala del plano generado desde IFC (m por píxel). */
+const ESCALA_IFC_M_POR_PX = 0.01;
+
 /** Simple IFC wall parser (IFC2X3/IFC4) */
 function parseIfcWalls(ifcText: string): { walls: ParsedWall[]; rooms: ParsedRoom[] } {
   const walls: ParsedWall[] = [];
@@ -47,16 +50,16 @@ function parseIfcWalls(ifcText: string): { walls: ParsedWall[]; rooms: ParsedRoo
       // Extract coordinates from axis placement or geometry
       const coords = line.match(/[-+]?[0-9]*\.?[0-9]+/g);
       if (coords && coords.length >= 4) {
-        const x1 = parseFloat(coords[0]) * 100; // m → cm → px approx
-        const y1 = parseFloat(coords[1]) * 100;
-        const x2 = parseFloat(coords[2]) * 100;
-        const y2 = parseFloat(coords[3]) * 100;
+        const x1 = parseFloat(coords[0]) / ESCALA_IFC_M_POR_PX; // m → px a 0.01 m/px
+        const y1 = parseFloat(coords[1]) / ESCALA_IFC_M_POR_PX;
+        const x2 = parseFloat(coords[2]) / ESCALA_IFC_M_POR_PX;
+        const y2 = parseFloat(coords[3]) / ESCALA_IFC_M_POR_PX;
         walls.push({
           id: `revit-wall-${Date.now()}-${wallCount}`,
           name: name.replace(/\\X\\[0-9A-F]{4}/g, ''), // Decode IFC unicode
           x1, y1, x2, y2,
           thickness_mm: 235, // Default concrete
-          length_m: Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 100,
+          length_m: Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) * ESCALA_IFC_M_POR_PX,
           material: 'CONCRETE235',
         });
         wallCount++;
@@ -115,6 +118,9 @@ export default function RevitIfcImportDialog() {
       fileName,
       version: 'v102',
       timestamp: new Date().toISOString(),
+      // Fase 8c: las coordenadas se pasan de m a px con ×100, es decir 0.01 m/px; se declara la escala para que el
+      // plano importado no tome la escala del plano abierto (antes «m × 100 → px aprox.» la ignoraba).
+      scale_m_per_pixel: ESCALA_IFC_M_POR_PX,
       compatibility: buildRevitCompatibilityManifest({
         sourceFile: fileName,
         wallCount: parsed.walls.length,

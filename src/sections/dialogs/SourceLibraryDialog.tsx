@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAppStore, dialogoAbierto } from '@/stores/appStore';
-import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
 import { Radio, BookOpen, Zap, Box, Circle, Minus, Disc, Hexagon } from 'lucide-react';
 
 const GEOMETRIES = [
@@ -19,7 +18,7 @@ const GEOMETRIES = [
 ];
 
 const NUCLIDES = [
-  { id: 'co60', name: 'Co-60', e: 1.17, e2: 1.33, gamma: 1.11, half: 5.27 },
+  { id: 'co60', name: 'Co-60', e: 1.17, e2: 1.33, gamma: 0.306, half: 5.27 },
   { id: 'cs137', name: 'Cs-137', e: 0.662, gamma: 0.0771, half: 30.17 },
   { id: 'ir192', name: 'Ir-192', e: 0.38, gamma: 0.111, half: 0.198 },
   { id: 'i131', name: 'I-131', e: 0.364, gamma: 0.0557, half: 8.02 },
@@ -35,27 +34,36 @@ const NUCLIDES = [
   { id: 'sr90', name: 'Sr-90', e: 0.546, gamma: 0.0, half: 28.8 },
 ];
 
+/**
+ * Fase 8c: Γ como constante de tasa de kerma en aire en μGy·m²/(MBq·h). Sólo estos valores se verificaron
+ * (Co-60 corregido de 1.11 a 0.306; Cs-137 0.0771; Ir-192 0.111; I-131 ≈ 0.057; F-18 0.143 de TG-108). El resto de la
+ * tabla mezcla unidades (R·m²/(h·Ci) y otras) y no se usa para calcular.
+ */
+const GAMMA_VERIFICADA = new Set(['co60', 'cs137', 'ir192', 'i131', 'f18']);
+
 export default function SourceLibraryDialog() {
   const open = useAppStore(s => dialogoAbierto(s.dialogs.sourceLibrary));
   const close = () => useAppStore.getState().close('sourceLibrary');
   const [geom, setGeom] = useState('point');
   const [nuclide, setNuclide] = useState('co60');
   const [activity, setActivity] = useState(1000);
+  const [d_m, setD] = useState(1);
   const [dims, setDims] = useState({ l: 100, r: 10, h: 50, w: 100, theta: 14 });
   const selG = GEOMETRIES.find(g => g.id === geom);
   const selN = NUCLIDES.find(n => n.id === nuclide);
-  const dr = selN ? (activity * selN.gamma * 1000) / (1 * 1) : 0;
+  // Fuente puntual: K̇ = A·Γ/d² (μGy/h). Las demás geometrías se describen pero no se calculan aquí.
+  const verificada = !!selN && GAMMA_VERIFICADA.has(selN.id);
+  const dr = selN && verificada && d_m > 0 ? (activity * selN.gamma) / (d_m * d_m) : null;
 
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Radio className="w-5 h-5 text-[#ef4444]" /> Source Library — v115
+            <Radio className="w-5 h-5 text-[#ef4444]" /> Biblioteca de fuentes
             <span className="text-[10px] font-mono text-slate-400">7 geometries | 14 radionuclides</span>
           </DialogTitle>
         </DialogHeader>
-        <SyntheticResultBanner detalle="La tasa de dosis mostrada ignora distancia y geometría (A × Γ × 1000 a 1 m) y las constantes Γ no indican unidades." />
         <div className="space-y-3">
           <div>
             <Label className="text-[10px] font-semibold text-slate-600">Geometria de Fuente</Label>
@@ -81,11 +89,14 @@ export default function SourceLibraryDialog() {
               <Select value={nuclide} onValueChange={setNuclide}>
                 <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {NUCLIDES.map(n => <SelectItem key={n.id} value={n.id} className="text-xs">{n.name} — Gamma={n.gamma} R-m2/hr-Ci</SelectItem>)}
+                  {NUCLIDES.map(n => <SelectItem key={n.id} value={n.id} className="text-xs">{n.name}{GAMMA_VERIFICADA.has(n.id) ? ` — Γ = ${n.gamma} μGy·m²/(MBq·h)` : ' — Γ sin verificar'}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div><Label className="text-[10px]">Actividad (Ci)</Label><Input type="number" value={activity} onChange={e => setActivity(+e.target.value)} className="h-7 text-xs" /></div>
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label htmlFor="src-a" className="text-[10px]">Actividad (MBq)</Label><Input id="src-a" data-testid="src-a" type="number" value={activity} onChange={e => setActivity(+e.target.value)} className="h-7 text-xs" /></div>
+              <div><Label htmlFor="src-d" className="text-[10px]">Distancia (m)</Label><Input id="src-d" data-testid="src-d" type="number" step={0.1} value={d_m} onChange={e => setD(+e.target.value)} className="h-7 text-xs" /></div>
+            </div>
           </div>
           {selG && selG.id !== 'point' && (
             <Card className="border-slate-200"><CardContent className="p-2">
@@ -104,10 +115,10 @@ export default function SourceLibraryDialog() {
               <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
                 <div><span className="text-slate-500">Radionucleido:</span> <span className="font-semibold">{selN.name}</span></div>
                 <div><span className="text-slate-500">Energia:</span> <span className="font-mono">{selN.e} {selN.e2 ? `+ ${selN.e2}` : ''} MeV</span></div>
-                <div><span className="text-slate-500">Gamma:</span> <span className="font-mono">{selN.gamma} R.m2/hr.Ci</span></div>
+                <div><span className="text-slate-500">Γ:</span> <span className="font-mono">{verificada ? `${selN.gamma} μGy·m²/(MBq·h)` : 'sin verificar'}</span></div>
                 <div><span className="text-slate-500">Periodo:</span> <span className="font-mono">{selN.half} anos</span></div>
-                <div><span className="text-slate-500">Actividad:</span> <span className="font-mono">{activity.toLocaleString()} Ci</span></div>
-                <div><span className="text-slate-500">DR @ 1m:</span> <span className="font-mono font-bold text-red-600">{dr.toFixed(2)} mR/hr</span></div>
+                <div><span className="text-slate-500">Actividad:</span> <span className="font-mono">{activity.toLocaleString()} MBq</span></div>
+                <div><span className="text-slate-500">K̇ a {d_m} m (fuente puntual):</span> <span className="font-mono font-bold text-red-600" data-testid="src-dr">{dr === null ? '—' : `${dr.toPrecision(3)} μGy/h`}</span></div>
               </div>
             </div>
           )}

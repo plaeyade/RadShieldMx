@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useAppStore, dialogoAbierto } from '@/stores/appStore';
 import { GitCompareArrows } from 'lucide-react';
+import ComparadorMateriales from '@/components/ComparadorMateriales';
 import { SHIELDING_MATERIALS } from '@/lib/xcomAttenuation';
 import { buildF123MaterialDecisionMatrix } from '@/lib/f123MaterialDecisionMatrix';
 import { buildF124MaterialToolboxSummary } from '@/lib/f124MaterialToolboxConsolidation';
@@ -77,10 +78,14 @@ export default function MaterialComparisonDialog() {
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
-            <GitCompareArrows className="w-4 h-4 text-orange-500" /> Material Comparison (v106)
+            <GitCompareArrows className="w-4 h-4 text-orange-500" /> Comparación de materiales
             <Badge variant="outline" className="text-[9px]">7 Materiales</Badge>
           </DialogTitle>
         </DialogHeader>
+        <div className="mb-3 rounded-md border border-purple-100 p-3" data-testid="matcomp-normativo">
+          <h3 className="text-xs font-semibold mb-2">Comparador normativo (espesor de banda ancha NCRP 151 / NCRP 147)</h3>
+          <ComparadorMateriales prefijo="matcomp" />
+        </div>
         <div className="flex gap-3 mb-3">
           <div className="flex-1"><label className="text-[10px] text-slate-500 font-medium mb-1 block">Energia</label>
             <Select value={energy} onValueChange={setEnergy}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent>{[0.05, 0.1, 0.5, 1, 2, 4, 6, 10].map(e => <SelectItem key={e} value={e.toString()} className="text-[11px]">{e} MeV</SelectItem>)}</SelectContent></Select>
@@ -145,6 +150,10 @@ export default function MaterialComparisonDialog() {
           </p>
         </div>
         <div className="overflow-x-auto">
+          <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-100 rounded p-2 mb-1" data-testid="matcomp-haz-estrecho">
+            Tabla de haz estrecho (μ de XCOM, sin acumulación): sirve para comparar materiales entre sí, no para dimensionar.
+            Para espesores use el comparador normativo de arriba.
+          </p>
           <table className="w-full text-[10px]">
             <thead className="bg-slate-50"><tr><th className="text-left px-2 py-1.5">Material</th><th className="text-right px-2 py-1.5">ρ</th><th className="text-right px-2 py-1.5">Zeff</th><th className="text-right px-2 py-1.5">HVL mm</th><th className="text-right px-2 py-1.5">TVL mm</th><th className="text-right px-2 py-1.5">kg@HVL</th><th className="text-right px-2 py-1.5">$@HVL</th><th className="text-right px-2 py-1.5">kg@2TVL</th><th className="text-right px-2 py-1.5">$@2TVL</th></tr></thead>
             <tbody>{data.map((c, i) => (

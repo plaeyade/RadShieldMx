@@ -15,28 +15,31 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+// Fase 8c: categorías de bultos según IAEA SSR-6 (Rev. 1, 2018). IT = índice de transporte = tasa máxima a 1 m
+// (mSv/h) × 100. Antes II-Amarilla decía «< 10 mSv/h a 1 m» (es IT ≤ 1 → ≤ 10 μSv/h) y III-Amarilla «> 10 mSv/h a 1 m»
+// (es IT ≤ 10 → ≤ 0.1 mSv/h a 1 m, con superficie ≤ 2 mSv/h).
 const TRANSPORT_CATEGORIES = [
   {
-    cat: "I-BLANCO", name: "Excepcion (I-Blanco)",
-    description: "Dosis superficial < 5 uSv/h. Etiqueta EXCEPCION.",
-    examples: ["Fuentes de calibracion debil", "Muestras de laboratorio (< A2)"],
-    limit: "Tasa de dosis < 5 uSv/h a la superficie del envase",
+    cat: "I-BLANCA", name: "Categoría I-BLANCA",
+    description: "IT = 0; tasa en la superficie ≤ 5 μSv/h. Etiqueta I-BLANCA.",
+    examples: ["Fuentes de calibración débiles", "Muestras de laboratorio de baja actividad"],
+    limit: "IT = 0 (≤ 0.5 μSv/h a 1 m) y superficie ≤ 5 μSv/h",
     color: "bg-slate-100 text-slate-700 border-slate-300",
-    risk: "Nulo"
+    risk: "Bajo"
   },
   {
-    cat: "II-AMARILLO", name: "Tipo A / B(U) — Categoria II (Amarillo)",
-    description: "Dosis superficial 5 uSv/h — 500 uSv/h. Etiqueta AMARILLA II.",
-    examples: ["Generadores de Mo-99/Tc-99m", "Fuentes de Ir-192 para braquiterapia", "Fuentes de I-131 terapeutico"],
-    limit: "Tasa de dosis: 5-500 uSv/h superficie. < 10 mSv/h a 1m.",
+    cat: "II-AMARILLA", name: "Categoría II-AMARILLA",
+    description: "0 < IT ≤ 1; 5 μSv/h < superficie ≤ 0.5 mSv/h. Etiqueta II-AMARILLA.",
+    examples: ["Generadores de Mo-99/Tc-99m", "Fuentes de Ir-192 para braquiterapia", "Fuentes de I-131 terapéutico"],
+    limit: "IT ≤ 1 (≤ 10 μSv/h a 1 m) y superficie ≤ 0.5 mSv/h",
     color: "bg-yellow-50 text-yellow-800 border-yellow-400",
     risk: "Medio"
   },
   {
-    cat: "III-AMARILLO", name: "Tipo B(U)/B(M) — Categoria III (Amarillo-III)",
-    description: "Dosis superficial > 500 uSv/h o > 10 mSv/h a 1m. Etiqueta AMARILLA III.",
-    examples: ["Fuentes de Co-60 para teleterapia", "Contenedores de Ir-192 de alta actividad", "Material irradiado (MTR/SNF)"],
-    limit: "Tasa de dosis > 500 uSv/h superficie O > 10 mSv/h a 1m.",
+    cat: "III-AMARILLA", name: "Categoría III-AMARILLA",
+    description: "1 < IT ≤ 10; 0.5 mSv/h < superficie ≤ 2 mSv/h. Etiqueta III-AMARILLA. Con IT > 10 o superficie > 2 mSv/h: uso exclusivo.",
+    examples: ["Fuentes de Co-60 para teleterapia", "Contenedores de Ir-192 de alta actividad"],
+    limit: "IT ≤ 10 (≤ 0.1 mSv/h a 1 m) y superficie ≤ 2 mSv/h (uso exclusivo hasta 10 mSv/h)",
     color: "bg-orange-50 text-orange-800 border-orange-500",
     risk: "Alto"
   },

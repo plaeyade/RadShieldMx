@@ -15,8 +15,8 @@
  * Unidades: objetivos P y kerma en mSv/semana (≈ mGy/semana); espesores en mm salvo donde el nombre diga _cm.
  */
 import {
-  combinarDosFuentes, combinarPorTipo, espesorSumaDirecta, fraccionDispersion, kermaDispersion, kermaFuga, kermaPrimaria,
-  transmisionTVL, transmisionUnTVL, tvlDispersion, tvlFuga, tvlPrimaria,
+  OBLICUIDAD_MAX_DATOS_DEG, combinarDosFuentes, combinarPorTipo, correccionOblicuidad, espesorSumaDirecta, espesorTVL,
+  fraccionDispersion, kermaDispersion, kermaFuga, kermaPrimaria, transmisionTVL, transmisionUnTVL, tvlDispersion, tvlFuga, tvlPrimaria,
   type Componente, type EnergiaMV, type FuenteTeleterapia, type MaterialNCRP151,
 } from './ncrp151';
 import {
@@ -339,6 +339,42 @@ export const TC_INICIAL: EntradaTC = {
   N_cuerpo: 150, DLP_cuerpo_mGy_cm: 550, N_cabeza: 30, DLP_cabeza_mGy_cm: 1200, factorContraste: 1.4, kvp: 120,
   d_m: 3, P_mSv_semana: 0.02, T: 1,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Co-60 (Gamma Knife, braquiterapia HDR, teleterapia) e incidencia oblicua — NCRP 151 Tabla B.2 y §2.2.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ResultadoCo60 { B_requerida: number; espesores_cm: Record<MaterialNCRP151, number> }
+
+/**
+ * Espesores para Co-60 con TVL₁/TVLₑ de NCRP 151 Tabla B.2 (concreto 21, acero 7.0, plomo 4.0 cm):
+ * B = P / (T·U·K), con K el kerma semanal sin blindaje en el punto (mismas unidades que P).
+ */
+export function blindajeCo60(K_semana: number, P_semana: number, T: number, U = 1): ResultadoCo60 {
+  if (!(T > 0 && T <= 1)) throw new RangeError('T debe estar en (0, 1]');
+  const B_requerida = K_semana > 0 && U > 0 ? Math.min(1, P_semana / (T * U * K_semana)) : 1;
+  const espesores_cm = Object.fromEntries(MATERIALES_MV.map((m) => [m, espesorTVL(B_requerida, tvlPrimaria('Co60', m))])) as Record<MaterialNCRP151, number>;
+  return { B_requerida, espesores_cm };
+}
+
+export interface ResultadoOblicuo {
+  B_normal: number; B_oblicua: number; B_corregida: number; hvlDescontados: number;
+  recorrido_cm: number; espesorEquivalenteNormal_cm: number;
+}
+
+/**
+ * Incidencia oblicua sobre una barrera de t cm: recorrido t/cos θ (tope 70°), corrección de NCRP 151 §2.2 para θ > 45°
+ * y B < 10⁻³ (`correccionOblicuidad`), y el espesor a incidencia normal que da la misma transmisión.
+ */
+export function incidenciaOblicua(e: EnergiaMV, material: MaterialNCRP151, t_cm: number, theta_deg: number): ResultadoOblicuo {
+  const tvl = tvlPrimaria(e, material);
+  const th = Math.min(Math.max(theta_deg, 0), OBLICUIDAD_MAX_DATOS_DEG);
+  const recorrido_cm = t_cm / Math.cos((th * Math.PI) / 180);
+  const B_normal = transmisionTVL(t_cm, tvl);
+  const B_oblicua = transmisionTVL(recorrido_cm, tvl);
+  const c = correccionOblicuidad(B_oblicua, B_normal, theta_deg, e);
+  return { B_normal, B_oblicua, B_corregida: c.transmision, hvlDescontados: c.hvlDescontados, recorrido_cm, espesorEquivalenteNormal_cm: espesorTVL(c.transmision, tvl) };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Comparación de materiales (costo, masa, espesor) y frente de Pareto.

@@ -17,15 +17,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { TrendingDown, Play, Download, CheckCircle, AlertTriangle, Star, BarChart3, Layers, DollarSign, Weight } from 'lucide-react';
 import {
-  runShieldingOptimization, OPTIMIZATION_MATERIALS,
+  runShieldingOptimization, OPTIMIZATION_MATERIALS, referenciaMaterial,
   type OptimizerConfig, type OptimizationBarrier, type OptimizationResult, type ObjectiveFunction,
 } from '@/lib/shieldingOptimizer';
+import { NOMBRE_MATERIAL } from '@/lib/calculadorasNormativas';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 const DEFAULT_BARRIERS: OptimizationBarrier[] = [
   { id: 'p1', name: 'Pared Primaria (gantro)', area_m2: 18, distance_to_source_m: 4.2, use_factor: 0.25, occupancy_factor: 0.2, dose_limit_mSv_week: 0.02, workload_Gy_week: 40, is_primary: true, is_maze: false, current_thickness_mm: 1400, current_material: 'concreto_ordinario' },
-  { id: 's1', name: 'Pared Secundaria (control)', area_m2: 15, distance_to_source_m: 4.5, use_factor: 1.0, occupancy_factor: 1.0, dose_limit_mSv_week: 0.4, workload_Gy_week: 40, is_primary: false, is_maze: false, current_thickness_mm: 900, current_material: 'concreto_ordinario' },
+  { id: 's1', name: 'Pared Secundaria (control)', area_m2: 15, distance_to_source_m: 4.5, use_factor: 1.0, occupancy_factor: 1.0, dose_limit_mSv_week: 0.1, workload_Gy_week: 40, is_primary: false, is_maze: false, current_thickness_mm: 900, current_material: 'concreto_ordinario' },
   { id: 's2', name: 'Pared Secundaria (pasillo)', area_m2: 15, distance_to_source_m: 3.8, use_factor: 1.0, occupancy_factor: 0.125, dose_limit_mSv_week: 0.02, workload_Gy_week: 40, is_primary: false, is_maze: false, current_thickness_mm: 700, current_material: 'concreto_ordinario' },
   { id: 'm1', name: 'Maze (laberinto)', area_m2: 8, distance_to_source_m: 5.5, use_factor: 0.25, occupancy_factor: 0.125, dose_limit_mSv_week: 0.02, workload_Gy_week: 40, is_primary: false, is_maze: true, current_thickness_mm: 1000, current_material: 'concreto_ordinario' },
   { id: 't1', name: 'Techo', area_m2: 36, distance_to_source_m: 3.5, use_factor: 0.25, occupancy_factor: 0.025, dose_limit_mSv_week: 0.02, workload_Gy_week: 40, is_primary: true, is_maze: false, current_thickness_mm: 1200, current_material: 'concreto_ordinario' },
@@ -91,7 +92,7 @@ export default function ShieldingOptimizerDialog({ open, onOpenChange }: Props) 
         <DialogHeader className="px-5 pt-4 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2 text-base">
             <TrendingDown className="w-5 h-5 text-emerald-500" />
-            Shielding Optimizer — Algoritmo Genetico (NSGA-II)
+            Optimizador de blindaje — algoritmo genético (NSGA-II) sobre NCRP 151
             <Badge className="text-[9px] bg-emerald-100 text-emerald-700">v32</Badge>
           </DialogTitle>
         </DialogHeader>
@@ -150,7 +151,7 @@ export default function ShieldingOptimizerDialog({ open, onOpenChange }: Props) 
                       {OPTIMIZATION_MATERIALS.map(m => (
                         <div key={m.key} className="flex justify-between text-[10px] bg-slate-50 p-1.5 rounded border">
                           <span><strong>{m.name}</strong></span>
-                          <span className="text-slate-500">${m.cost_per_m3.toLocaleString()}/m3 | {m.density_kg_m3} kg/m3 | TVL={m.tvl_primary_6MV_mm}mm</span>
+                          <span className="text-slate-500">${m.cost_per_m3.toLocaleString()}/m3 | {m.density_kg_m3} kg/m3 | {referenciaMaterial(m.key).porDensidad ? `equiv. por densidad con ${NOMBRE_MATERIAL[referenciaMaterial(m.key).base]}` : 'NCRP 151 (Tablas B.2/B.7)'}</span>
                         </div>
                       ))}
                     </div>
