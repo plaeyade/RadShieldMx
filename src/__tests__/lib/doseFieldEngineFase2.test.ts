@@ -205,6 +205,19 @@ describe('Fase 2 — oblicuidad (NCRP 151 §2.2, p. 24)', () => {
     expect(s.capas[0].recorrido_mm).toBeCloseTo(t, 9);
     expect(s.transmision).toBeCloseTo(transmisionUnTVL(t / 10, tvlDispersionConcreto(18, 30)), 14);
   });
+
+  it('la fuga no recibe crédito por oblicuidad (NCRP 151 §2.2: sólo la primaria), a 45° ni a 60°', () => {
+    const t = 1200;
+    for (const y of [6, 6 * Math.tan(Math.PI / 3)]) {
+      const d = dosisEnPunto([linac18()], 6, y, 1, { barriers: [muro(t)] });
+      const f = comp(d, 'fuga')!.cruces[0];
+      expect(f.capas[0].recorrido_mm).toBeCloseTo(t, 9);
+      expect(f.hvlDescontados).toBe(0);
+      expect(f.transmision).toBeCloseTo(transmisionTVL(t / 10, TABLA_B_7['18']), 14);
+      // La primaria a 45° sí acredita t/cos θ: menos transmisión que la fuga con el mismo TVL normal.
+      if (y === 6) expect(comp(d, 'primaria')!.cruces[0].transmision).toBeCloseTo(transmisionTVL((t * Math.SQRT2) / 10, TABLA_B_2.concrete['18']), 14);
+    }
+  });
 });
 
 describe('Fase 2 — espesor geométrico de la barrera', () => {
