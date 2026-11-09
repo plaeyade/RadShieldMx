@@ -28,8 +28,8 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 | | Cantidad |
 |---|---|
 | Diálogos revisados | 202 |
-| Estado OK / riesgo / error | 115 / 86 / 1 |
-| Prioridad alta / media / baja / sin acción | 0 / 0 / 106 / 96 |
+| Estado OK / riesgo / error | 117 / 84 / 1 |
+| Prioridad alta / media / baja / sin acción | 0 / 0 / 104 / 98 |
 | Calculadoras migradas al motor (Fase 7 + Fase 8a + MultiEnergySpectra) | 10 + 13 + 1 |
 | Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
 | Fase 8c + 8d: diálogos de prioridad media atendidos | 67 de 67 (8d: división de MedicalFloorPlan3D) |
@@ -118,6 +118,9 @@ Pruebas en `src/__tests__/validacion/fase8c.test.tsx` (21 casos).
   - *Factores y criterios normativos:* autoatenuación del paciente con TG-108 (PET 0.64; TC y SPECT sin reducción,
     `lib/autoatenuacionPaciente`); Eₙ de ISO 13528 con ambas incertidumbres y referencias de NCRP 151 Tabla B.2
     (`lib/numeroEn`); límites del asistente de ejemplos desde `lib/limitesDosis`.
+  - *Geometría del plano:* el mapeo CAD compara palabras completas y prioriza el material específico
+    (`lib/cadMaterialMapping`); el validador estima el área con el rectángulo de las barreras y no con un lienzo
+    fijo de 1200×800 px (`lib/areaPlano`).
 
 ## Tabla completa
 
@@ -143,7 +146,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `BatchImportDialog` | Importación CSV/Excel | archivo del usuario | useBatchImport | OK | Importa barreras al plano. | Prueba de componente. | baja | bajo | abre (app); consola sin errores |
 | `BatemanDecayDialog` | Solucionador de Bateman | lib/batemanSolver | lib/batemanSolver | riesgo | Error de consola por clave React duplicada (dos entradas «Rb-82») — *corregido aquí*; textos en inglés. | Desambiguar el símbolo de «Rb-82 (generador)» en la biblioteca; traducir. | baja | bajo | abre (app); calcula al pulsar «Solve»; consola sin errores |
 | `BuildupFactorDialog` | Factor de acumulación multicapa | tabla local de buildup | fórmula local | riesgo | Fase 8c: aviso de tabla sin referencia y físicamente inconsistente; materiales sin datos ya no toman los del concreto. | Sustituir por ANS-6.4.3 (GP) citada o retirar. | baja | medio | abre (app); consola sin errores |
-| `CADAssemblyMapper` | Asignación de materiales a ensamblajes CAD | archivo del usuario | reglas regex | riesgo | Patrones como /w/ y /al/ coinciden con «wall»; textos en inglés. | Anclar los patrones a palabras completas; traducir. | baja | bajo | abre (montado aislado); consola sin errores |
+| `CADAssemblyMapper` | Asignación de materiales a ensamblajes CAD | archivo del usuario | lib/cadMaterialMapping | OK | Fase 8d: asignación por palabras completas con el material específico antes que «muro» (antes «Water» salía tungsteno, «Hall» aluminio, «Concrete» aire y «Wall_Steel» concreto). Textos en inglés. | — | — | — | abre (montado aislado); consola sin errores |
 | `CADImportDialog` | Importar geometrías CAD | archivo del usuario | ninguno (informativo) | riesgo | Varios formatos marcados «future». | Ocultar los no disponibles. | baja | bajo | abre (app); consola sin errores |
 | `CADToMCImport` | CAD → geometría Monte Carlo | archivo del usuario | generador de texto | riesgo | Genera cajas envolventes; textos en inglés; sin DialogTitle. | Traducir y añadir título. | baja | bajo | abre (montado aislado); consola sin errores |
 | `CBCTIGRTDialog` | Blindaje adicional CBCT/IGRT | entrada del usuario | blindajeTC (NCRP 147 §5.6.1) + transmisionTC | OK | Fase 8c: CBCT como TC de cuerpo por DLP; dosis tras el concreto existente con Figs. A.2/A.3 (antes fórmula empírica sin K¹). | Tomar el DLP por estudio del fabricante. | baja | bajo | abre (app); calcula al pulsar «Calcular Dosis CBCT»; consola sin errores |
@@ -218,7 +221,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `Parametric3DDialog` | Primitivas 3D | estado local | ninguno (informativo) | error | Inaccesible (nada lo abre); 2 errores ESLint no-unused-expressions. | Enlazar o retirar. | baja | bajo | abre (app); consola sin errores |
 | `ParametricBunkerDesigner` | Diseñador paramétrico de búnker | entrada del usuario | lib/bunkerParametrico | OK | Fase 8c: «Generar» crea el plano (4 barreras a escala y la fuente) sin espera simulada. | Añadir el laberinto al plano generado. | baja | medio | abre (app); consola sin errores |
 | `PerformanceDashboardDialog` | Tablero de rendimiento | valores aleatorios | ninguno (informativo) | riesgo | Fase 8c: Rotulado con DatosEjemploBanner (datos de ejemplo). | Medir con `performance` o retirar. | baja | medio | abre (app); consola sin errores |
-| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales | riesgo | Supone un lienzo de 1200×800 px para el área. | Usar el tamaño real del plano. | baja | bajo | abre (app); calcula al pulsar «Validar»; consola sin errores |
+| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales + lib/areaPlano | OK | Fase 8d: el área sale del rectángulo de las barreras (o del plano) y no de un lienzo fijo de 1200×800 px; el mensaje indica el origen. | — | — | — | abre (app); calcula al pulsar «Validar»; consola sin errores |
 | `PointCloudImportDialog` | Importar nube de puntos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Sólo información; inglés. | Traducir u ocultar. | baja | bajo | abre (app); consola sin errores |
 | `PythonIntegrationDialog` | Python (Pyodide) | entrada del usuario | código de ejemplo | riesgo | El ejemplo usa P(mSv)/W(cGy) con un solo TVL. | Corregir el ejemplo. | baja | bajo | abre (app); calcula al pulsar «Code Runner»; consola sin errores |
 | `RealTime3DDialog` | Exploración 3D | plano del proyecto (useCanvasStore/props) | realTime3DEngine (three) | riesgo | Usa un plano de demostración si no hay barreras; advertencia de GPU en consola. | Mostrar vacío en lugar de demo. | baja | bajo | abre (app); consola sin errores |

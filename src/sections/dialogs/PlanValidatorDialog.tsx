@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { FloorPlan } from '@/types/radshield';
+import { areaAproximadaSala } from '@/lib/areaPlano';
 import {
   CheckCircle2, XCircle, AlertTriangle, Ruler, Building2,
   LayoutDashboard, ScanLine, FileCheck, Download, MapPin,
@@ -126,15 +127,19 @@ function runValidations(floorPlan: FloorPlan, scale_m_per_px: number): Validatio
       });
     }
 
-    // Room area (approximate from canvas dimensions)
-    const canvasWidthM = 1200 * scale_m_per_px; // rough canvas px
-    const canvasHeightM = 800 * scale_m_per_px;
-    const approxArea = canvasWidthM * canvasHeightM;
-
-    if (minArea && approxArea < minArea) {
-      results.push({ status: 'fail', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m²) menor al mínimo requerido (${minArea} m²)`, detail: `Para ${src.modality.name} se requieren al menos ${minArea} m²`, recommendation: 'Aumente las dimensiones de la habitación o considere reubicación' });
-    } else if (minArea) {
-      results.push({ status: 'pass', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m²) cumple requisito mínimo (${minArea} m²)` });
+    // Área aproximada: rectángulo que contiene las barreras (o el plano completo si no hay barreras).
+    const area = areaAproximadaSala(floorPlan, scale_m_per_px);
+    if (!minArea) return;
+    if (!area) {
+      results.push({ status: 'warning', category: `Equipo #${idx + 1}`, message: 'No se pudo estimar el área de la sala', detail: 'Faltan barreras o el tamaño del plano', recommendation: 'Dibuje las barreras de la sala' });
+      return;
+    }
+    const approxArea = area.area_m2;
+    const origen = area.origen === 'barreras' ? 'rectángulo de las barreras' : 'plano completo';
+    if (approxArea < minArea) {
+      results.push({ status: 'fail', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m², ${origen}) menor al mínimo requerido (${minArea} m²)`, detail: `Para ${src.modality.name} se requieren al menos ${minArea} m²`, recommendation: 'Aumente las dimensiones de la habitación o considere reubicación' });
+    } else {
+      results.push({ status: 'pass', category: `Equipo #${idx + 1}`, message: `Área estimada (${approxArea.toFixed(1)} m², ${origen}) cumple requisito mínimo (${minArea} m²)` });
     }
   });
 
