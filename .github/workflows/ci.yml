@@ -142,8 +142,9 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
-    # Repo privado: Pages sólo cuando se vuelva público (variable de repositorio PAGES_HABILITADO=true).
-    if: github.ref == 'refs/heads/main' && vars.PAGES_HABILITADO == 'true'
+    # Repo público (autorizado por el propietario el 2026-11-09): publica en cada push a main.
+    # Para pausar el despliegue sin tocar el workflow: variable de repositorio PAGES_HABILITADO=false.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_HABILITADO != 'false'
     permissions:
       pages: write
       id-token: write
