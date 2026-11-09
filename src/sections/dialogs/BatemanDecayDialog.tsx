@@ -88,7 +88,7 @@ export default function BatemanDecayDialog({ open, onOpenChange }: Props) {
                 <ScrollArea className="h-48 border rounded">
                   <div className="space-y-0.5 p-1">
                     {filteredNuclides.map(n => (
-                      <div key={n.symbol} className={`text-xs p-1.5 rounded cursor-pointer ${selectedNuclide === n.symbol ? 'bg-primary/10 font-medium' : 'hover:bg-muted'}`}
+                      <div key={`${n.symbol}-${n.name}`} className={`text-xs p-1.5 rounded cursor-pointer ${selectedNuclide === n.symbol ? 'bg-primary/10 font-medium' : 'hover:bg-muted'}`}
                         onClick={() => setSelectedNuclide(n.symbol)}>
                         {n.symbol} — {n.name}
                       </div>

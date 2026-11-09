@@ -352,6 +352,51 @@ archivos tocados) en verde.
 Pendiente (Fase 7 propuesta): migrar `BarrierCalculatorDialog` y las calculadoras de prioridad alta de
 `docs/revision-dialogos.md` a `normativeBarrierEngine`; E2E de Medical 3D con r3f y con Babylon activado.
 
+## Fase 7 — Calculadoras de diálogo sobre los motores normativos (hecha)
+
+Entrada: Fase 6 (diálogos que abren) y la revisión de `docs/revision-dialogos.md`.
+
+Trabajo hecho:
+
+- `src/lib/calculadorasNormativas.ts`, núcleo común de las calculadoras:
+  - `barreraMV` (NCRP 151): primaria (Ec. 2.1), dispersión del paciente (Ec. 2.7) y fuga (Ec. 2.8) por separado,
+    TVL₁/TVLₑ (Tablas B.2, B.5a, B.7), una o dos energías, regla de las dos fuentes por tipo (§1.4.3) y suma
+    directa; se adopta el mayor y cumple sólo si T·K ≤ P.
+  - Carga de haz (`kermaSinBlindajeHaz`, `espesorHaz`, `transmisionHaz`): NCRP 151 primaria o NCRP 147 con K¹
+    (Tablas 4.5/4.7) y Archer (B.1/C.1); `blindajeMulticapa` (Π Bᵢ) y `compararMateriales` (frente de Pareto).
+  - `blindajePET` (AAPM TG-108): Γ, absorción del paciente, decaimiento (Ec. 2–3 y 9–10) y Tabla V a 511 keV.
+- Reescritos sobre ese núcleo: BarrierCalculator, ScenarioAnalysis, Sensitivity, ParetoOptimizer, MultiLayerShield,
+  OnnxPredictor (ahora «Espesor PET TG-108»), MultiObjectiveOptimizer (materiales PET) y Geant4Mc (referencia
+  analítica, sin Monte Carlo simulado). BatchCalculation usa `useShieldingEngine` sobre el plano real y DxfExport
+  exporta el proyecto con `lib/dxfExport` (sin rotular JSON como DWG). Sin aviso de resultados sintéticos en ellos.
+
+Salida / pruebas: `src/__tests__/validacion/calculadorasNormativas.test.ts` (NCRP 151 §7.1.1 149.6 cm, §7.1.5
+66.4 cm; NCRP 147 §5.3.1.1 107 mm, §5.3.3.1 1.3 mm; TG-108 Ejemplos 1–2 y Tablas IV/V) y
+`src/__tests__/dialogs/calculadorasFase7.test.tsx` (cada diálogo muestra lo que calcula el motor; DXF de la
+Fase 4 calculado por lotes y exportado → reimportado sin cambios).
+
+## Fase 8 — Propuesta: resto de calculadoras (prioridades alta y media de la revisión)
+
+La revisión a fondo (`docs/revision-dialogos.md`, Fase 7) encontró 16 diálogos de prioridad alta fuera de las 9 ya
+migradas y 65 de prioridad media. Orden propuesto:
+
+1. **8a — errores de unidades y fórmulas que dan espesores no conservadores** (prioridad alta): patrón
+   `B = P(mSv)·d²/W(Gy)` sin ×10⁻³ en VersaHD15MV, ElectronApplicator, EquipmentShieldingWizard, `lib/agents/tools`
+   (ShieldingDesignAgent) y `lib/ml/trainingData` (MLPrediction); `useFloorCeilingCalc` (kerma 1000× bajo),
+   `useNeutronCalc` (n TVL × HVL), CrossValidation, TornadoSensitivity (inversa de Archer), MultiEnergySpectra,
+   NuclearDoseGrid y AAPMTG108PET. Todas pasan a `barreraMV`/`espesorRequeridoHaz`/`blindajePET` con prueba contra
+   un ejemplo publicado.
+2. **8b — información falsa o fija presentada como real** (alta): NCRPValidation (casos `calc: () => expected`;
+   sustituir por la suite de la Fase 4), CNSNSAutoReport (resultados fijos), ComplianceCertification
+   (certificaciones inexistentes) y RegulatoryAlerts (alertas inventadas).
+3. **8c — prioridad media**: datos de demostración en auditoría/logs/tableros/comparadores, diálogos inaccesibles
+   (MaterialLibrary, ReportManager, MCResults, ParametricBunker sin `onGenerate`), modelos propios sin validación
+   (skyshine Ec. 5.1, albedo, oblicuidad §2.2, CBCT, IPEM 109, terapia, BIMRAD, optimizadores), textos normativos
+   erróneos (EPA, transporte SSR-6, Gamma Knife, Manual §3.1) y unificación de límites de dosis en una tabla citada.
+
+Salida esperada: ningún diálogo con física local sin prueba contra NCRP 147/151 o TG-108; cada diálogo de
+cálculo con una prueba de componente.
+
 ## Medidas de bundle
 
 | | Chunk de entrada | JS total en `dist/assets` | Chunks Babylon |
