@@ -825,7 +825,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <SmartItem icon={Ruler} iconColor="bg-amber-500" label="Oblique Incidence Correction" onClick={onObliqueIncidence} desc="McGinley Eq.3-4 — t_eff = t/cos(θ)" />
                   <SmartItem icon={Zap} iconColor="bg-yellow-500" label="Multi-Energy Spectra (TASMIP)" onClick={onMultiEnergySpectra} desc="Boone 1997 — 14 kVp configs" />
                   <SmartItem icon={BarChart3} iconColor="bg-blue-500" label="Adaptive Sampling Config" onClick={onAdaptiveSampling} desc="Press 2007 — Gradient-based density" />
-                  <SmartItem icon={Shield} iconColor="bg-teal-500" label="Patient Self-Shielding" onClick={onSelfShielding} desc="AAPM TG 108 — 25-45% reduction" />
+                  <SmartItem icon={Shield} iconColor="bg-teal-500" label="Autoatenuación del paciente" onClick={onSelfShielding} desc="AAPM TG-108 — PET: 0.36 absorbido" />
                   <SmartItem icon={Cloud} iconColor="bg-sky-500" label="Chilton Skyshine" onClick={onChiltonSkyshine} desc="NCRP 151 Sec. 5.4 — Roof scatter" />
                   <SmartItem icon={FileText} iconColor="bg-violet-500" label="Transmission Curve Import" onClick={onTransmissionCurve} desc="NCRP 147 §4.3 — Measured HVL/TVL" />
                   <SmartItem icon={GitBranch} iconColor="bg-orange-500" label="Neutron Maze Calculator" onClick={onNeutronMaze} desc="NCRP 151 §5.3 — Albedo + capture γ" />
