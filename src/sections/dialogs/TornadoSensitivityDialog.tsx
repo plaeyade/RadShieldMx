@@ -1,23 +1,27 @@
 import { useState, useMemo } from 'react';
 import { Wind, AlertTriangle, Download } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
+import { espesorRequeridoHaz } from '@/lib/calculadorasNormativas';
 
+// Fase 8a: antes K = W·(F/400)/d² sin rendimiento K¹ (mGy por paciente a 1 m) y la inversa de Archer estaba mal
+// escrita (con los valores iniciales daba ln de un número negativo → NaN). Ahora el espesor de plomo es el de
+// NCRP 147 (Ec. 4.3/4.8; Tabla 4.5 y Tabla B.1, «Rad Room (chest bucky)») con `espesorRequeridoHaz`, que usa la
+// inversa correcta x = ln[(B^−γ + β/α)/(1 + β/α)]/(αγ). Valores iniciales: §5.3.3.1 (1.3 mm de plomo).
 const PARAM_DEFS = [
-  { key: 'kVp', name: 'Tension (kVp)', unit: 'kVp', def: 125 },
-  { key: 'workload', name: 'Carga trabajo', unit: 'mA*min/sem', def: 500 },
+  { key: 'N', name: 'Pacientes/semana', unit: '', def: 125 },
   { key: 'distance', name: 'Distancia', unit: 'm', def: 2.5 },
-  { key: 'fieldSize', name: 'Campo', unit: 'cm2', def: 1000 },
-  { key: 'designGoal', name: 'Meta diseño', unit: 'uSv/sem', def: 100 },
+  { key: 'U', name: 'Factor de uso U', unit: '', def: 1 },
+  { key: 'T', name: 'Ocupación T', unit: '', def: 0.2 },
+  { key: 'designGoal', name: 'Meta de diseño', unit: 'μSv/sem', def: 20 },
 ] as const;
 
-// Simplified NCRP 147 primary barrier
 const calcThickness = (p: Record<string, number>): number => {
-  const B = { 100: [2.50, 18.6, 0.0380], 125: [2.194, 7.16, 0.0563], 150: [1.71, 3.57, 0.0664] } as const;
-  const [a, b, g] = (B as any)[p.kVp] ?? B[125];
-  const K = p.workload * (p.fieldSize / 400) / (p.distance ** 2);
-  const trans = p.designGoal / K;
-  if (trans >= 1) return 0;
-  return Math.max(0, (1 / (a * g)) * Math.log((b / a) / ((1 + b / a) * trans ** g - b / a)));
+  try {
+    return espesorRequeridoHaz(
+      { regimen: 'diagnostico', distribucion: 'rad_room_chest_bucky', barrera: 'primaria', N_pacientes_semana: p.N, U: p.U, d_m: p.distance },
+      'lead', p.designGoal / 1000, Math.min(1, p.T),
+    );
+  } catch { return 0; }
 };
 
 export default function TornadoSensitivityDialog({ onClose }: { onClose: () => void }) {
@@ -54,14 +58,14 @@ export default function TornadoSensitivityDialog({ onClose }: { onClose: () => v
 
   return (
     <DialogShell
-      title="Tornado Sensitivity Analysis"
-      subtitle="+/-20% por parametro | v50.4"
+      title="Análisis de sensibilidad (tornado) — NCRP 147"
+      subtitle="±20 % por parámetro · plomo, Rad Room (chest bucky), Tablas 4.5 y B.1"
       gradientFrom="from-teal-600"
       gradientTo="to-emerald-700"
       maxWidth="max-w-4xl"
       onClose={onClose}
       footer={<>
-        <span className="text-xs text-slate-500">Tornado v50.4</span>
+        <span className="text-xs text-slate-500">NCRP 147 Ec. 4.3/4.8</span>
         <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-teal-600 text-white text-xs font-medium hover:bg-teal-700">
           <Download className="w-3.5 h-3.5" />CSV
         </button>
@@ -71,15 +75,15 @@ export default function TornadoSensitivityDialog({ onClose }: { onClose: () => v
       <div className="grid grid-cols-5 gap-2 p-3 bg-slate-50 rounded-lg border">
         {PARAM_DEFS.map(pd => (
           <div key={pd.key}>
-            <label className="text-[10px] font-medium text-slate-500">{pd.name}</label>
-            <input type="number" value={vals[pd.key]} onChange={e => setVals(v => ({ ...v, [pd.key]: Number(e.target.value) }))} className="w-full mt-1 text-xs p-1.5 border rounded" />
+            <label htmlFor={`tor-${pd.key}`} className="text-[10px] font-medium text-slate-500">{pd.name}{pd.unit ? ` (${pd.unit})` : ''}</label>
+            <input id={`tor-${pd.key}`} type="number" step="any" value={vals[pd.key]} onChange={e => setVals(v => ({ ...v, [pd.key]: Number(e.target.value) }))} className="w-full mt-1 text-xs p-1.5 border rounded" />
           </div>
         ))}
       </div>
 
       <div className="text-center p-2 bg-blue-50 rounded border">
-        <div className="text-xs text-blue-600">Espesor base Pb</div>
-        <div className="text-2xl font-bold font-mono text-blue-800">{base.toFixed(3)} mm</div>
+        <div className="text-xs text-blue-600">Espesor base de plomo (total, sin descontar preblindaje)</div>
+        <div className="text-2xl font-bold font-mono text-blue-800" data-testid="tor-base">{base.toFixed(3)} mm</div>
       </div>
 
       {/* Tornado bars */}
@@ -91,7 +95,7 @@ export default function TornadoSensitivityDialog({ onClose }: { onClose: () => v
             const rw = p.rp > base ? Math.min(((p.rp - base) / maxSwing) * 40, 40) : 0;
             return (
               <div key={i} className="flex items-center gap-2">
-                <div className="w-28 text-right text-xs font-medium text-slate-700">{p.name} {i === 0 && <span className="text-amber-600 text-[9px]">(critico)</span>}</div>
+                <div className="w-28 text-right text-xs font-medium text-slate-700">{p.name} {i === 0 && <span className="text-amber-600 text-[9px]">(crítico)</span>}</div>
                 <div className="flex-1 flex items-center h-5 relative">
                   <div className="absolute left-1/2 w-px h-full bg-slate-300" />
                   {lw > 0 && <div className="h-4 bg-red-400 rounded-l absolute" style={{ right: '50%', width: `${lw}%` }} />}
@@ -108,8 +112,8 @@ export default function TornadoSensitivityDialog({ onClose }: { onClose: () => v
       <div className="p-3 bg-amber-50 rounded-lg border flex items-start gap-2">
         <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div className="text-xs">
-          <p className="font-semibold text-amber-800">Parametro mas critico: {params[0]?.name}</p>
-          <p className="text-amber-700">Mayor impacto en espesor de blindaje. Asegure medicion precisa. Menos critico: {params[params.length - 1]?.name}.</p>
+          <p className="font-semibold text-amber-800">Parámetro más crítico: {params[0]?.name}</p>
+          <p className="text-amber-700">Mayor impacto en el espesor. Menos crítico: {params[params.length - 1]?.name}.</p>
         </div>
       </div>
     </DialogShell>

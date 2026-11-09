@@ -53,7 +53,7 @@ export default function ShieldingDesignAgentDialog({ open, onOpenChange }: Props
         roomDimensions: { width: parseFloat(roomW), length: parseFloat(roomL), height: parseFloat(roomH) },
         distances: { North: parseFloat(distN), South: parseFloat(distS), East: parseFloat(distE), West: parseFloat(distW) },
         materials: ["concrete"],
-        goalDoseControlled: 0.4,
+        goalDoseControlled: 0.1, // NCRP 151 §1.3: 0.1 mSv/semana en área controlada
         goalDoseUncontrolled: 0.02,
         occupancy: { North: 0.2, South: 1.0, East: 0.5, West: 0.125 },
         useFactor: 0.25,

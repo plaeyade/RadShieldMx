@@ -5,7 +5,7 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-import { generateTrainingDataset } from "../trainingData";
+import { espesorReferenciaNCRP151, generateTrainingDataset } from "../trainingData";
 
 interface AnomalyResult {
   isAnomaly: boolean;
@@ -97,13 +97,9 @@ class IsolationForest {
 
 let forest: IsolationForest | null = null;
 
-// NCRP 151 expected thickness formula (baseline)
+// Espesor esperado NCRP 151 en concreto (Fase 8a: `barreraMV`; antes mezclaba mSv con Gy)
 function expectedThickness(energy: number, distance: number, workload: number, occupancy: number, goalDose: number, useFactor: number): number {
-  const tvl: Record<number, number> = { 4: 35, 6: 37, 10: 37, 15: 44, 18: 45, 20: 46, 24: 48 };
-  const tv = tvl[Math.round(energy)] || 37;
-  const B = Math.max(1e-10, (goalDose * distance * distance) / (workload * useFactor * occupancy));
-  const n = Math.max(0, -Math.log10(B));
-  return n * tv;
+  return espesorReferenciaNCRP151(energy, distance, workload, occupancy, goalDose, useFactor, "concrete");
 }
 
 export function detectAnomaly(

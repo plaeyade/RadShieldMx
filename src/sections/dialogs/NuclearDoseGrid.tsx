@@ -12,113 +12,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { RADIONUCLIDOS_MALLA as RADIONUCLIDES, calculateDoseAtPoint, type ShieldingBarrier } from '@/lib/mallaNuclear';
 import {
   Grid3X3, Download, Activity, Map, BarChart3,
   CheckCircle, AlertTriangle, Info
 } from 'lucide-react';
 
-interface Radionuclide {
-  name: string;
-  halfLife_h: number;
-  gammaConstant_uSv_m2_per_GBq_h: number;
-  betaPlus_frac: number;
-  avgBetaPlusEnergy_MeV: number;
-  gammaKeV: number[];
-  gammaIntensity: number[];
-}
-
-const RADIONUCLIDES: Record<string, Radionuclide> = {
-  'F-18': {
-    name: 'Fluorine-18', halfLife_h: 1.83,
-    gammaConstant_uSv_m2_per_GBq_h: 0.143,
-    betaPlus_frac: 0.967, avgBetaPlusEnergy_MeV: 0.250,
-    gammaKeV: [511], gammaIntensity: [1.939]
-  },
-  'Ga-68': {
-    name: 'Gallium-68', halfLife_h: 1.13,
-    gammaConstant_uSv_m2_per_GBq_h: 0.134,
-    betaPlus_frac: 0.891, avgBetaPlusEnergy_MeV: 0.836,
-    gammaKeV: [511, 1077], gammaIntensity: [1.782, 0.032]
-  },
-  'Tc-99m': {
-    name: 'Technetium-99m', halfLife_h: 6.01,
-    gammaConstant_uSv_m2_per_GBq_h: 0.0303,
-    betaPlus_frac: 0, avgBetaPlusEnergy_MeV: 0,
-    gammaKeV: [140], gammaIntensity: [0.885]
-  },
-  'I-131': {
-    name: 'Iodine-131', halfLife_h: 193.5,
-    gammaConstant_uSv_m2_per_GBq_h: 0.0595,
-    betaPlus_frac: 0, avgBetaPlusEnergy_MeV: 0,
-    gammaKeV: [364, 637], gammaIntensity: [0.812, 0.071]
-  },
-  'Y-90': {
-    name: 'Yttrium-90', halfLife_h: 64.0,
-    gammaConstant_uSv_m2_per_GBq_h: 0.0045,
-    betaPlus_frac: 0, avgBetaPlusEnergy_MeV: 0,
-    gammaKeV: [], gammaIntensity: []
-  },
-  'Lu-177': {
-    name: 'Lutetium-177', halfLife_h: 161.1,
-    gammaConstant_uSv_m2_per_GBq_h: 0.0056,
-    betaPlus_frac: 0, avgBetaPlusEnergy_MeV: 0,
-    gammaKeV: [113, 208], gammaIntensity: [0.064, 0.105]
-  },
-};
-
+// Fase 8a: los datos de nucleidos y el cálculo por punto están en `lib/mallaNuclear` (Γ por MBq y transmisión de
+// banda ancha de TG-108 a 511 keV). Antes Γ por MBq se multiplicaba por la actividad en GBq (1000× bajo) y la
+// atenuación era «espesor_mm/10 TVL» o un número de TVL fijo (3 mm de Pb = 3 TVL a 511 keV, cuando B ≈ 0.8).
 interface GridPoint {
   x: number; // m
   y: number; // m
   doseRate_uSv_h: number;
   cumulativeDose_uSv: number;
   distance_m: number;
-}
-
-interface ShieldingBarrier {
-  name: string;
-  material: string;
-  thickness_mm: number;
-  position_x?: number;
-  hvl_mm?: number;
-  tvls?: number;
-}
-
-function calculateDoseAtPoint(
-  px: number, py: number,
-  sources: Array<{ x: number; y: number; activity_GBq: number; nuclide: string; useTime_h: number }>,
-  barriers: ShieldingBarrier[]
-): { doseRate: number; cumulative: number } {
-  let totalDoseRate = 0;
-
-  sources.forEach(src => {
-    const nuc = RADIONUCLIDES[src.nuclide];
-    if (!nuc) return;
-
-    const dx = px - src.x;
-    const dy = py - src.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 0.1) return;
-
-    // Free-air dose rate from point source: H = Gamma * A / d^2
-    let doseRate = (nuc.gammaConstant_uSv_m2_per_GBq_h * src.activity_GBq) / (dist * dist);
-
-    // Apply barrier attenuation (simplified TVL model)
-    barriers.forEach(barrier => {
-      // Check if point is behind barrier (simplified: barriers at x=position)
-      if (barrier.position_x !== undefined && px > barrier.position_x && src.x < barrier.position_x) {
-        const tvls = barrier.tvls || barrier.thickness_mm / 10; // rough estimate
-        doseRate *= Math.pow(10, -tvls);
-      }
-    });
-
-    totalDoseRate += doseRate;
-  });
-
-  // Cumulative dose = doseRate * max exposure time across sources
-  const maxTime = Math.max(...sources.map(s => s.useTime_h), 1);
-  const cumulative = totalDoseRate * maxTime;
-
-  return { doseRate: totalDoseRate, cumulative };
 }
 
 function generateGrid(
@@ -251,7 +159,7 @@ export default function NuclearDoseGrid({ open, onClose }: NuclearDoseGridProps)
   const [showIsodoses, setShowIsodoses] = useState(true);
   const [activeTab, setActiveTab] = useState('grid');
   const [barriers] = useState<ShieldingBarrier[]>([
-    { name: 'Lead shield', material: 'Pb', thickness_mm: 3, position_x: 1.5, tvls: 3 },
+    { name: 'Blindaje de plomo', material: 'Pb', thickness_mm: 3, position_x: 1.5 },
   ]);
 
   const sources = useMemo(() => [{
@@ -336,7 +244,7 @@ export default function NuclearDoseGrid({ open, onClose }: NuclearDoseGridProps)
               </div>
               {nucData && (
                 <div className="text-[10px] text-slate-500 space-y-0.5 bg-white rounded p-2 border">
-                  <div>Γ = {nucData.gammaConstant_uSv_m2_per_GBq_h} μSv·m²/GBq·h</div>
+                  <div>Γ = {nucData.gammaConstant_uSv_m2_per_MBq_h} μSv·m²/(MBq·h)</div>
                   <div>T½ = {nucData.halfLife_h} h</div>
                   {nucData.betaPlus_frac > 0 && <div>β⁺ = {(nucData.betaPlus_frac * 100).toFixed(1)}%</div>}
                   <div>γ lines: {nucData.gammaKeV.map((e, i) => `${e}keV (${(nucData.gammaIntensity[i] * 100).toFixed(1)}%)`).join(', ') || 'None (pure beta)'}</div>

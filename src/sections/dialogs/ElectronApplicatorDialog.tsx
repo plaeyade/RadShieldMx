@@ -25,6 +25,10 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Zap, Calculator, Play, BookOpen, AlertTriangle, CheckCircle } from 'lucide-react';
+import { barreraMV, energiaTabuladaMV } from '@/lib/calculadorasNormativas';
+import { tvlPrimaria, type MaterialNCRP151 } from '@/lib/ncrp151';
+
+const MATERIAL_NCRP151: Record<string, MaterialNCRP151> = { pb: 'lead', steel: 'steel', concrete: 'concrete' };
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -70,6 +74,7 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
   const [occupancyFactor, setOccupancy] = useState('0.2');
   const [doseLimit_mSv_week, setDoseLimit] = useState('0.02');
   const [useFactor, setUseFactor] = useState('1.0');
+  const [patients_week, setPatients] = useState('25');
   const [selectedMaterial, setSelectedMaterial] = useState('pb');
   const [result, setResult] = useState<any>(null);
 
@@ -87,25 +92,23 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
       const limit = parseFloat(doseLimit_mSv_week) || 0.02;
       const uf = parseFloat(useFactor) || 1.0;
 
-      // Total dose at isocenter (cGy)
-      const totalDose_cGy = d_rate * t_time;
-
-      // X-ray contamination dose
+      // Fase 8a: antes B = P(mSv)·d²/(D(Gy)·U·T·25), que mezclaba mSv con Gy (B 1000× mayor, ≈ 3 TVL de menos), con
+      // 5 pacientes × 5 días ocultos y TVL de electrones sin referencia. La barrera la determinan los fotones de
+      // contaminación: carga W_x = W_e·f_x (Gy/semana) tratada como haz primario NCRP 151 (Ec. 2.1/2.3) a la energía
+      // tabulada igual o superior a la de los electrones (conservador), con `barreraMV`.
+      const N = parseFloat(patients_week) || 0;
+      const totalDose_cGy = d_rate * t_time; // por paciente en el isocentro (1 UM ≈ 1 cGy)
       const xrayDose_cGy = totalDose_cGy * xrayFrac;
-
-      // Dose at barrier distance (inverse square + attenuation)
-      // B = P * d^2 / (W * U * T)
-      const workload_cGy_week = totalDose_cGy * 5 * 5; // 5 days, 5 patients
-      const B = (limit * dist_m * dist_m) / ((xrayDose_cGy / 100) * uf * occ * 5 * 5);
-
-      // Required TVL count
-      const nTvl = -Math.log10(Math.max(B, 1e-10));
-
-      // Thickness by material
-      let thickness_mm = 0;
-      if (selectedMaterial === 'pb') thickness_mm = nTvl * data.tvl_mm_pb;
-      else if (selectedMaterial === 'steel') thickness_mm = nTvl * data.hvl_mm_steel * 3.32; // ~3.32 HVL = 1 TVL
-      else if (selectedMaterial === 'concrete') thickness_mm = nTvl * data.tvl_mm_concrete;
+      const workload_cGy_week = totalDose_cGy * N;
+      const Wx_Gy_week = (xrayDose_cGy / 100) * N;
+      const mat = MATERIAL_NCRP151[selectedMaterial];
+      const r = barreraMV({
+        tipo: 'primaria', haces: [{ energia: energiaTabuladaMV(en), W_Gy_semana: Wx_Gy_week }], material: mat,
+        P_mSv_semana: limit, T: Math.min(1, occ), U: uf, d_m: dist_m,
+      });
+      const B = r.componentes[0].B_requerida;
+      const nTvl = B >= 1 ? 0 : Math.log10(1 / B);
+      const thickness_mm = r.espesor_cm * 10;
 
       // Surface dose at patient
       const surfaceDose_cGy = totalDose_cGy * (FOIL_TRANSMISSION[en] || 0.58);
@@ -121,17 +124,18 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
         surfaceDose_cGy,
         energy_MeV: en,
         material: selectedMaterial,
-        isCompliant: B > 0 && thickness_mm > 0,
+        isCompliant: r.cumple,
+        energiaFotones: energiaTabuladaMV(en),
       });
 
       toast.success(`Calculo completado: ${thickness_mm.toFixed(1)} mm ${selectedMaterial === 'pb' ? 'plomo' : selectedMaterial === 'steel' ? 'acero' : 'concreto'}`);
     } catch (e) {
       toast.error('Error: ' + (e as Error).message);
     }
-  }, [energy, ssd, doseRate_MU_min, treatmentTime_min, distanceToBarrier_m, occupancyFactor, doseLimit_mSv_week, useFactor, selectedMaterial, data, en, xrayFrac]);
+  }, [ssd, doseRate_MU_min, treatmentTime_min, distanceToBarrier_m, occupancyFactor, doseLimit_mSv_week, useFactor, selectedMaterial, en, xrayFrac, patients_week]);
 
   const materialName = selectedMaterial === 'pb' ? 'Plomo' : selectedMaterial === 'steel' ? 'Acero' : 'Concreto';
-  const tvlValue = selectedMaterial === 'pb' ? data.tvl_mm_pb : selectedMaterial === 'steel' ? data.hvl_mm_steel * 3.32 : data.tvl_mm_concrete;
+  const tvlValue = tvlPrimaria(energiaTabuladaMV(en), MATERIAL_NCRP151[selectedMaterial]).tvle_cm * 10;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,6 +187,7 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
                   <div><Label className="text-[10px]">Distancia a barrera (m)</Label><Input value={distanceToBarrier_m} onChange={e => setDistance(e.target.value)} type="number" step="0.1" className="h-7 text-xs" /></div>
                   <div><Label className="text-[10px]">Factor uso (U)</Label><Input value={useFactor} onChange={e => setUseFactor(e.target.value)} type="number" step="0.05" className="h-7 text-xs" /></div>
                   <div><Label className="text-[10px]">Factor ocupacion (T)</Label><Input value={occupancyFactor} onChange={e => setOccupancy(e.target.value)} type="number" step="0.05" className="h-7 text-xs" /></div>
+                  <div><Label htmlFor="ea-pac" className="text-[10px]">Pacientes por semana</Label><Input id="ea-pac" value={patients_week} onChange={e => setPatients(e.target.value)} type="number" className="h-7 text-xs" /></div>
                   <div><Label className="text-[10px]">Limite dosis (mSv/sem)</Label><Input value={doseLimit_mSv_week} onChange={e => setDoseLimit(e.target.value)} type="number" step="0.01" className="h-7 text-xs" /></div>
                   <div><Label className="text-[10px]">Material blindaje</Label>
                     <Select value={selectedMaterial} onValueChange={setSelectedMaterial}>
@@ -212,9 +217,9 @@ export default function ElectronApplicatorDialog({ open, onOpenChange }: Props) 
                       <Separator />
                       <div className="flex justify-between"><span className="text-slate-500">Factor transmision B:</span><strong>{result.transmission_B.toExponential(3)}</strong></div>
                       <div className="flex justify-between"><span className="text-slate-500">TVLs requeridos:</span><strong>{result.nTvl.toFixed(2)}</strong></div>
-                      <div className="flex justify-between"><span className="text-slate-500">TVL material:</span><strong>{tvlValue.toFixed(1)} mm</strong></div>
+                      <div className="flex justify-between"><span className="text-slate-500">TVLₑ (fotones {result.energiaFotones} MV, NCRP 151 B.2):</span><strong>{tvlValue.toFixed(1)} mm</strong></div>
                       <Separator />
-                      <div className="flex justify-between text-[12px]"><span className="text-slate-700 font-medium">Espesor {materialName}:</span><strong className="text-emerald-700">{result.thickness_mm.toFixed(1)} mm</strong></div>
+                      <div className="flex justify-between text-[12px]"><span className="text-slate-700 font-medium">Espesor {materialName}:</span><strong className="text-emerald-700" data-testid="ea-espesor">{result.thickness_mm.toFixed(1)} mm</strong></div>
                     </div>
 
                     {result.isCompliant ? (

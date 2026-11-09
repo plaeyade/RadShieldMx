@@ -5,48 +5,39 @@
  * Target: thickness_cm (calculated from NCRP 151)
  * ═══════════════════════════════════════════════════════════
  */
+import { barreraMV, energiaTabuladaMV } from "../calculadorasNormativas";
 
 export interface ShieldingDataPoint {
   energy: number;      // MV (4, 6, 10, 15, 18, 20, 24)
   distance: number;    // meters (1.5 to 8.0)
   workload: number;    // Gy/week (50 to 1000)
   occupancy: number;   // T factor (0.025 to 1.0)
-  goalDose: number;    // mSv/week (0.02 or 0.4)
+  goalDose: number;    // mSv/week (0.02 no controlada o 0.1 controlada)
   useFactor: number;   // U (0.25 for walls, 1.0 for floor)
   material: number;    // 0=concrete, 1=barite, 2=steel, 3=lead
   modality: number;    // 0=LINAC, 1=Co-60, 2=GammaKnife
   thickness: number;   // target: cm (from NCRP 151 calculation)
 }
 
-// TVL tables from NCRP 151 Table B.1 (cm)
-const TVL_TABLE: Record<string, Record<string, number>> = {
-  concrete: { "4": 29, "6": 37, "10": 37, "15": 44, "18": 45, "20": 46, "24": 48, "60Co": 21 },
-  barite:   { "4": 18, "6": 21, "10": 24, "15": 28, "18": 30, "20": 32, "24": 35, "60Co": 15 },
-  steel:    { "4": 7.0, "6": 10, "10": 11, "15": 11, "18": 11, "20": 11, "24": 11, "60Co": 7.0 },
-  lead:     { "4": 4.0, "6": 5.7, "10": 5.7, "15": 5.7, "18": 5.7, "20": 5.7, "24": 5.7, "60Co": 4.0 },
-};
-
 const MATERIALS = ["concrete", "barite", "steel", "lead"];
 
-function calculateThickness(
-  energy: number,
-  distance: number,
-  workload: number,
-  occupancy: number,
-  goalDose: number,
-  useFactor: number,
-  material: string
+/**
+ * Fase 8a: espesor objetivo con NCRP 151 (`barreraMV`, Ec. 2.1/2.3 con TVL₁/TVLₑ de la Tabla B.2). Antes era
+ * B = P(mSv)·d²/W(Gy) sin el factor 10⁻³ (≈ 3 TVL de menos) y con un solo TVL, así que el modelo aprendía espesores
+ * no conservadores. La barita usa el TVL del concreto 2.35 (conservador; NCRP 151 no la tabula).
+ */
+export function espesorReferenciaNCRP151(
+  energy: number, distance: number, workload: number, occupancy: number, goalDose: number, useFactor: number, material: string,
 ): number {
-  const energyKey = energy === 1.25 ? "60Co" : String(Math.round(energy));
-  const tvl = TVL_TABLE[material]?.[energyKey] || TVL_TABLE[material]["6"];
-  if (!tvl) return 0;
-
-  // NCRP 151: B = P * d^2 / (W * U * T)
-  const B = (goalDose * distance * distance) / (workload * useFactor * occupancy);
-  const clampedB = Math.max(1e-10, Math.min(1.0, B));
-  const n = -Math.log10(clampedB);
-  return Math.max(0, n * tvl);
+  const r = barreraMV({
+    tipo: "primaria", haces: [{ energia: energy > 1 && energy < 1.5 ? "Co60" : energiaTabuladaMV(energy), W_Gy_semana: workload }],
+    material: material === "lead" ? "lead" : material === "steel" ? "steel" : "concrete",
+    P_mSv_semana: goalDose, T: Math.min(1, occupancy), U: useFactor, d_m: distance,
+  });
+  return r.espesor_cm;
 }
+
+const calculateThickness = espesorReferenciaNCRP151;
 
 export function generateTrainingDataset(size: number = 2000): ShieldingDataPoint[] {
   const data: ShieldingDataPoint[] = [];
@@ -57,7 +48,7 @@ export function generateTrainingDataset(size: number = 2000): ShieldingDataPoint
     const distance = 1.5 + Math.random() * 6.5; // 1.5 to 8.0 m
     const workload = 50 + Math.random() * 950;   // 50 to 1000 Gy/wk
     const occupancy = [1.0, 0.5, 0.2, 0.125, 0.05, 0.025][Math.floor(Math.random() * 6)];
-    const goalDose = Math.random() > 0.5 ? 0.4 : 0.02; // controlled vs uncontrolled
+    const goalDose = Math.random() > 0.5 ? 0.1 : 0.02; // controlada (NCRP 151 §1.3) vs no controlada
     const useFactor = Math.random() > 0.5 ? 1.0 : 0.25; // floor vs wall
     const materialIdx = Math.floor(Math.random() * 4);  // 0-3
 
@@ -78,27 +69,8 @@ export function generateTrainingDataset(size: number = 2000): ShieldingDataPoint
     });
   }
 
-  // Add specific real-world examples
-  const realWorld: ShieldingDataPoint[] = [
-    // Varian iX 6 MV - Richardson example
-    { energy: 6, distance: 4.2, workload: 300, occupancy: 1.0, goalDose: 0.02, useFactor: 1.0, material: 0, modality: 0, thickness: 117 },
-    { energy: 6, distance: 5.5, workload: 300, occupancy: 1.0, goalDose: 0.4, useFactor: 0.25, material: 0, modality: 0, thickness: 44 },
-    // 15 MV typical
-    { energy: 15, distance: 4.0, workload: 500, occupancy: 1.0, goalDose: 0.02, useFactor: 1.0, material: 0, modality: 0, thickness: 152 },
-    { energy: 15, distance: 5.0, workload: 500, occupancy: 0.2, goalDose: 0.02, useFactor: 0.25, material: 0, modality: 0, thickness: 38 },
-    // 18 MV with neutrons
-    { energy: 18, distance: 4.5, workload: 600, occupancy: 1.0, goalDose: 0.02, useFactor: 1.0, material: 0, modality: 0, thickness: 172 },
-    // Co-60
-    { energy: 1.25, distance: 3.0, workload: 100, occupancy: 0.5, goalDose: 0.02, useFactor: 0.25, material: 0, modality: 1, thickness: 55 },
-    // Barite concrete
-    { energy: 6, distance: 4.0, workload: 400, occupancy: 1.0, goalDose: 0.02, useFactor: 1.0, material: 1, modality: 0, thickness: 70 },
-    // Steel
-    { energy: 10, distance: 3.5, workload: 300, occupancy: 0.5, goalDose: 0.4, useFactor: 0.25, material: 2, modality: 0, thickness: 12 },
-    // Lead
-    { energy: 6, distance: 2.0, workload: 200, occupancy: 0.2, goalDose: 0.02, useFactor: 0.25, material: 3, modality: 0, thickness: 5.7 },
-  ];
-
-  return [...data, ...realWorld];
+  // Fase 8a: se quitaron los «ejemplos reales» fijos (espesores calculados con la fórmula errónea, sin fuente).
+  return data;
 }
 
 // Normalize features for ML

@@ -1,6 +1,6 @@
-# Revisión a fondo de diálogos (Fase 7)
+# Revisión a fondo de diálogos (Fases 7 y 8)
 
-Fecha: 2026-11-09 · Rama `fase7` · Alcance: los 202 archivos de `src/sections/dialogs/`. Sustituye a la revisión
+Fecha: 2026-11-09 · Ramas `fase7` y `fase8` · Alcance: los 202 archivos de `src/sections/dialogs/`. Sustituye a la revisión
 automática de la Fase 6: no quedan filas «no revisado a fondo».
 
 ## Método
@@ -28,11 +28,12 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 | | Cantidad |
 |---|---|
 | Diálogos revisados | 202 |
-| Estado OK / riesgo / error | 63 / 93 / 46 |
-| Prioridad alta / media / baja / sin acción | 16 / 65 / 66 / 55 |
-| Calculadoras migradas al motor en la Fase 7 (ahora OK) | 10 (las 9 de prioridad alta + Geant4) |
+| Estado OK / riesgo / error | 75 / 96 / 31 |
+| Prioridad alta / media / baja / sin acción | 1 / 67 / 70 / 64 |
+| Calculadoras migradas al motor (Fase 7 + Fase 8a) | 10 + 13 |
+| Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
 
-### Hallazgos transversales
+### Hallazgos transversales (de la revisión de la Fase 7; los cuatro primeros se corrigieron en la Fase 8)
 
 - **Unidades mSv/Gy (×1000).** `B = P·d²/(W·U·T)` con P en mSv/semana y W en Gy/semana sin el factor 10⁻³ en
   VersaHD15MV, ElectronApplicator, EquipmentShieldingWizard, `lib/agents/tools` (ShieldingDesignAgent),
@@ -49,24 +50,20 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
   accesible, y 157 `DialogContent` no tienen `DialogDescription`. **Idioma:** 73 diálogos con varios textos visibles en inglés.
 - **Límites de dosis inconsistentes** entre diálogos (público 1 o 5 mSv/año; «controlada NCRP 147 = 20 μSv/semana»).
 
-### Los diálogos de prioridad alta (pendientes, propuesta de Fase 8)
+### Fase 8 (8a + 8b)
 
-- `AAPMTG108PETDialog`: K = N·A·Γ·t/d² sin absorción del paciente (0.36) ni decaimiento Rₜ; plomo con TVL 5.8 mm (TG-108 Tabla IV: B = 0.1 a ≈ 16.5 mm, no conservador ≈ 3×); la «dosis de TC» es proporcional al ESPESOR del muro.
-- `CNSNSAutoReportDialog`: El reporte trae resultados fijos («300 Gy/semana», «6 MV», «7/7 barreras cumplen») que no provienen del proyecto.
-- `ComplianceCertificationDialog`: Presenta como «activas» certificaciones que el producto no tiene (marcado CE 93/42/EEC, ISO 9001).
-- `CrossValidationDialog`: «Concreto» con α, β, γ = 2.246/5.73/0.547 (ajuste de PLOMO para TC 120 kVp, Fig. A.2); fórmula de Archer invertida mal; B = P/K mezcla mSv con Gy (×1000).
-- `ElectronApplicatorDialog`: B = P(mSv)·d²/(D(Gy)·U·T·25): mezcla mSv con Gy (B 1000× mayor → 3 TVL menos, no conservador); 5 pacientes × 5 días fijos.
-- `EquipmentShieldingWizard`: B = P(mSv)·d²/W(Gy) (1000×, no conservador); primaria sin T; IMRT aplicado a la primaria; escalera de TVL con ramas inalcanzables (≥10 MV devuelve 41 antes de ≥15/18); sin DialogTitle.
-- `FloorCeilingDialog`: H₀ = W·1000 rotulado μSv (es mGy) y luego ÷1000 contra P en mSv: el kerma queda 1000× bajo (≈ 3 TVL menos); techo tratado sólo con dispersión.
-- `MLPredictionDialog`: El conjunto de entrenamiento y el «benchmark NCRP 151» usan B = P(mSv)·d²/W(Gy) (1000×) y P = 0.4 mSv/semana como «controlada»; chunk de 897 kB.
-- `MultiEnergySpectraDialog`: K = W/d² sin K¹ ni U/T: el espesor no tiene base dimensional.
-- `NCRPValidationDialog`: Cada caso es `calc: () => expected`: siempre «24/24 OK, Motor validado» sin calcular nada; además los «TVL» esperados de NCRP 147 son HVL.
-- `NeutronDialog`: n = log10(H/P) (número de TVL) se multiplica por la HVL del material: espesor ≈ 3.3× menor; captura gamma = 30 % fijo.
-- `NuclearDoseGrid`: Si la barrera no trae su número de TVL, usa «tvls = espesor_mm/10»: 1 TVL por cm para cualquier material (1 cm de concreto a 511 keV es ≈ 0.05 TVL): subestima la dosis.
-- `RegulatoryAlertsDialog`: Alertas inventadas presentadas como publicadas («CNSNS-LA-003/2026», actualización de LA-001/2018 «critical»).
-- `ShieldingDesignAgentDialog`: La herramienta primaria usa B = P(mSv)·d²/W(Gy) (1000×); inaccesible desde menús.
-- `TornadoSensitivityDialog`: K sin K¹ y la inversa de Archer está mal escrita; duplica SensitivityAnalysis.
-- `VersaHD15MVDialog`: B = P(mSv)·d²/(W(Gy)·U·T) sin ×1000: con los valores iniciales da ≈ 84 cm de concreto frente a ≈ 205 cm con NCRP 151; factor IMRT aplicado a la primaria.
+- **8a, unidades y fórmulas:** VersaHD15MV, ElectronApplicator, EquipmentShieldingWizard (`lib/blindajeEquipo`), el
+  agente de diseño (`lib/agents/tools`), los datos de entrenamiento y el benchmark del ML, FloorCeiling, NeutronDialog
+  (`useNeutronCalc`), AAPMTG108PET, NuclearDoseGrid (`lib/mallaNuclear`), CrossValidation y TornadoSensitivity pasan a
+  `calculadorasNormativas`/`ncrp151Laberinto`/`tg108`, cada uno con prueba contra un ejemplo publicado
+  (`src/__tests__/validacion/fase8.test.tsx`).
+- **8b, datos falsos:** la suite NCRP calcula con el motor real (17 casos publicados; falla si no los reproduce); el
+  reporte CNSNS sale del proyecto o muestra estado vacío; se retiraron las certificaciones CE/FDA/ISO y las alertas
+  regulatorias inventadas.
+- **«Failed to fetch» de DoseMapping3D:** `<Text>` de drei (troika-three-text) descarga la fuente de un CDN y fallaba sin
+  red; DoseMapping3D y Viewer3D usan ahora `<Html>`. En Chrome los 16 diálogos tocados abren, calculan y dejan la
+  consola sin errores (sólo avisos de three.js).
+- Pendiente de prioridad alta: MultiEnergySpectra (fuera del alcance de 8a/8b). Resto: Fase 8c (prioridad media).
 
 ## Tabla completa
 
@@ -74,22 +71,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 
 | Diálogo | Función | Fuente de datos | Motor / cálculo | Estado | Hallazgo | Propuesta | Prioridad | Esfuerzo | Navegador |
 |---|---|---|---|---|---|---|---|---|---|
-| `AAPMTG108PETDialog` | Blindaje PET por procedimiento (TG-108) | entrada del usuario + tabla fija en el diálogo (5 procedimientos) | fórmula local | error | K = N·A·Γ·t/d² sin absorción del paciente (0.36) ni decaimiento Rₜ; plomo con TVL 5.8 mm (TG-108 Tabla IV: B = 0.1 a ≈ 16.5 mm, no conservador ≈ 3×); la «dosis de TC» es proporcional al ESPESOR del muro. | Usar `blindajePET` (Fase 7, TG-108 Ec. 2–3/9–10 y Tabla V) y NCRP 147 §5.6 para la TC; prueba con los Ejemplos 1–2 de TG-108. | alta | medio | abre (app); consola sin errores |
-| `CNSNSAutoReportDialog` | Reporte CNSNS automático (HTML) | contenido fijo | ninguno (informativo) | error | El reporte trae resultados fijos («300 Gy/semana», «6 MV», «7/7 barreras cumplen») que no provienen del proyecto. | Generar desde el plano con `generateCNSNSReport`/`buildAnalyticMemorySnapshot`. | alta | medio | abre (app); calcula al pulsar «Generar Reporte»; consola sin errores |
-| `ComplianceCertificationDialog` | Cumplimiento y certificaciones | tabla fija en el diálogo | ninguno (informativo) | error | Presenta como «activas» certificaciones que el producto no tiene (marcado CE 93/42/EEC, ISO 9001). | Retirar o rotular como plantilla de requisitos. | alta | bajo | abre (app); consola sin errores |
-| `CrossValidationDialog` | Validación cruzada NCRP 147 vs 151 | entrada del usuario | fórmula local | error | «Concreto» con α, β, γ = 2.246/5.73/0.547 (ajuste de PLOMO para TC 120 kVp, Fig. A.2); fórmula de Archer invertida mal; B = P/K mezcla mSv con Gy (×1000). | Comparar `espesorHaz` diagnóstico vs MV del núcleo Fase 7. | alta | medio | abre (app); consola sin errores |
-| `ElectronApplicatorDialog` | Blindaje del aplicador de electrones | entrada del usuario | fórmula local | error | B = P(mSv)·d²/(D(Gy)·U·T·25): mezcla mSv con Gy (B 1000× mayor → 3 TVL menos, no conservador); 5 pacientes × 5 días fijos. | Convertir P a Sv y calcular con `barreraMV` (contaminación de fotones). | alta | bajo | abre (app); calcula al pulsar «Calcular Blindaje»; consola sin errores |
-| `EquipmentShieldingWizard` | Asistente de blindaje por equipo | entrada del usuario | fórmula local | error | B = P(mSv)·d²/W(Gy) (1000×, no conservador); primaria sin T; IMRT aplicado a la primaria; escalera de TVL con ramas inalcanzables (≥10 MV devuelve 41 antes de ≥15/18); sin DialogTitle. | Reescribir sobre `barreraMV` (como BarrierCalculator). | alta | medio | abre (app); consola sin errores |
-| `FloorCeilingDialog` | Blindaje de piso y techo | entrada del usuario | hooks/useFloorCeilingCalc (propio) | error | H₀ = W·1000 rotulado μSv (es mGy) y luego ÷1000 contra P en mSv: el kerma queda 1000× bajo (≈ 3 TVL menos); techo tratado sólo con dispersión. | Usar `barreraMV` (primaria y secundaria) para techo y piso. | alta | medio | abre (app); consola sin errores |
-| `MLPredictionDialog` | Predictor ML de espesor | modelo entrenado con lib/ml/trainingData | useAutoML (propio) | error | El conjunto de entrenamiento y el «benchmark NCRP 151» usan B = P(mSv)·d²/W(Gy) (1000×) y P = 0.4 mSv/semana como «controlada»; chunk de 897 kB. | Generar los datos con `barreraMV` o retirar el ML. | alta | medio | abre (montado aislado); calcula al pulsar «Calculate with NCRP 151»; consola sin errores |
 | `MultiEnergySpectraDialog` | Espectros TASMIP | entrada del usuario | fórmula local | error | K = W/d² sin K¹ ni U/T: el espesor no tiene base dimensional. | Usar `espesorRequeridoHaz` (NCRP 147). | alta | bajo | abre (app); consola sin errores |
-| `NCRPValidationDialog` | Suite de validación NCRP | lib/validation/NCRPValidationSuite | ninguno | error | Cada caso es `calc: () => expected`: siempre «24/24 OK, Motor validado» sin calcular nada; además los «TVL» esperados de NCRP 147 son HVL. | Ejecutar los casos de la suite de la Fase 4 (normativeBarrierEngine vs §5 y §7.1). | alta | medio | abre (app); calcula al pulsar «Ejecutar Validacion»; consola sin errores |
-| `NeutronDialog` | Blindaje de neutrones (>10 MV) | entrada del usuario | hooks/useNeutronCalc (propio) | error | n = log10(H/P) (número de TVL) se multiplica por la HVL del material: espesor ≈ 3.3× menor; captura gamma = 30 % fijo. | Usar `ncrp151Laberinto` (como el laberinto) o TVL de NCRP 151. | alta | medio | abre (app); consola sin errores |
-| `NuclearDoseGrid` | Malla de dosis de medicina nuclear | entrada del usuario | fórmula local | error | Si la barrera no trae su número de TVL, usa «tvls = espesor_mm/10»: 1 TVL por cm para cualquier material (1 cm de concreto a 511 keV es ≈ 0.05 TVL): subestima la dosis. | Usar `transmisionPET`/`doseFieldEngine`. | alta | medio | abre (app); consola sin errores |
-| `RegulatoryAlertsDialog` | Alertas regulatorias | tabla fija en el diálogo | ninguno (informativo) | error | Alertas inventadas presentadas como publicadas («CNSNS-LA-003/2026», actualización de LA-001/2018 «critical»). | Retirar o conectar a una fuente oficial. | alta | bajo | abre (app); consola sin errores |
-| `ShieldingDesignAgentDialog` | Agente de diseño de blindaje | entrada del usuario | lib/agents (propio) | error | La herramienta primaria usa B = P(mSv)·d²/W(Gy) (1000×); inaccesible desde menús. | Herramientas sobre `barreraMV`. | alta | medio | abre (montado aislado); calcula al pulsar «Run Shielding Design Agent»; consola sin errores |
-| `TornadoSensitivityDialog` | Tornado (diagnóstico) | entrada del usuario | fórmula local | error | K sin K¹ y la inversa de Archer está mal escrita; duplica SensitivityAnalysis. | Redirigir a `sensitivityAnalysis` (Fase 7). | alta | bajo | abre (app); consola sin errores |
-| `VersaHD15MVDialog` | Elekta Versa HD 15 MV | entrada del usuario | fórmula local | error | B = P(mSv)·d²/(W(Gy)·U·T) sin ×1000: con los valores iniciales da ≈ 84 cm de concreto frente a ≈ 205 cm con NCRP 151; factor IMRT aplicado a la primaria. | Usar `barreraMV`. | alta | bajo | abre (app); calcula al pulsar «Calculadora»; consola sin errores |
 | `AlaraWizardDialog` | Sustitución de materiales (costo/espacio) | tabla fija en el diálogo | ninguno | riesgo | Porcentajes de costo/espacio/peso fijos; `costDelta` se calcula y no se muestra; cita «Mosaics Atomics» (producto de terceros). | Calcular equivalencias con `espesorRequeridoHaz` y costos de `compararMateriales`. | media | medio | abre (app); consola sin errores |
 | `AnimatedDoseMapsDialog` | Mapa de dosis animado (decaimiento) | parámetros internos | fórmula local (A·½^(t/T½)/d², unidades arbitrarias) | riesgo | Mapa decorativo en unidades arbitrarias, no usa el plano ni `doseFieldEngine`; textos en inglés. | Animar `mallaDosis` del plano con el decaimiento o marcar como ilustrativo. | media | medio | abre (app); consola sin errores |
 | `AnnualDoseReport` | Dosis anual acumulada por mes | entrada del usuario | fórmula local | riesgo | Factores estacionales arbitrarios; «annualOccupational = anual/T» invierte el factor de ocupación; límite fijo 20 mSv. | Partir de la dosis semanal del motor en un punto del plano y aplicar T una sola vez. | media | bajo | abre (app); consola sin errores |
@@ -138,6 +120,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `NativeMCDialog` | Motor Monte Carlo nativo | entrada del usuario | lib/nativeMCEngine (transporte con RNG propio) | riesgo | Transporte de fotones propio sin caso de validación; inglés. | Validar contra transmisión de banda ancha conocida. | media | alto | abre (app); calcula al pulsar «Run Simulation»; consola sin errores |
 | `NeutronMazeDialog` | Laberinto de neutrones | entrada del usuario | fórmula local | error | Atenuación 10^(−L/TVL) en lugar de Kersey/Wu–McGinley; duplica MazeCalculator. | Redirigir a `maze` (validado). | media | bajo | abre (app); consola sin errores |
 | `NeutronShieldingDialog` | Blindaje de neutrones (v109) | entrada del usuario | fórmula local | error | Gy/h × Gy/semana; TVL fijos; aviso (Fase 6). | Redirigir a `neutron` corregido o a `maze`. | media | bajo | abre (app); consola sin errores |
+| `NuclearDoseGrid` | Malla de dosis de medicina nuclear | entrada del usuario | lib/mallaNuclear (Γ por MBq + Tabla V) | riesgo | Fase 8a: corregido Γ por GBq (×1000) y la atenuación ficticia; para nucleidos no PET la barrera no se acredita (conservador). | Añadir transmisión de banda ancha validada para Tc-99m, I-131 y Lu-177. | media | medio | abre (app); consola sin errores |
 | `NuclearMedicineAdvanced` | Medicina nuclear avanzada | entrada del usuario | lib/nuclearMedicine (propio) | riesgo | TVL de biblioteca (F-18: plomo 13.6 mm, no conservador frente a ≈ 16.5 mm de TG-108); 1 h por paciente; sin absorción del paciente. | Usar `blindajePET` para PET y transmisión de banda ancha para el resto. | media | medio | abre (app); consola sin errores |
 | `ObliqueIncidenceDialog` | Corrección por incidencia oblicua | entrada del usuario | fórmula local | riesgo | t/cos θ sin la corrección de NCRP 151 §2.2 para θ > 45° (no conservador). | Usar `correccionOblicuidad` de ncrp151. | media | bajo | abre (app); consola sin errores |
 | `PACSIntegrationDialog` | Integración PACS | datos de demostración | ninguno (informativo) | riesgo | Estudios de ejemplo con nombres de paciente; inglés. | Datos anonimizados; traducir. | media | bajo | abre (app); consola sin errores |
@@ -150,6 +133,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `RevitIfcImportDialog` | Importación IFC de Revit | archivo del usuario | revitIntegration | riesgo | Coordenadas «m × 100 → px aprox.» ignoran la escala del plano. | Fijar `scale_m_per_pixel` al importar. | media | bajo | abre (app); consola sin errores |
 | `SecondaryBarrierAlbedoDialog` | Método de albedo | entrada del usuario | fórmula local | error | H·Πα(dᵢ/dᵢ₊₁)² sin área de reflexión A (las ecuaciones de laberinto de NCRP 151 §2.4 usan α·A/(dᵢ²·dⱼ²)). | Usar las funciones de laberinto de ncrp151Laberinto. | media | bajo | abre (montado aislado); consola sin errores |
 | `ShapesReconstructionDialog` | Reconstrucción de formas | datos sintéticos | fórmula local | riesgo | Contornos generados con `Math.random()`. | Usar RTSTRUCT real. | media | medio | abre (app); consola sin errores |
+| `ShieldingDesignAgentDialog` | Agente de diseño de blindaje | entrada del usuario | lib/agents/tools → barreraMV | riesgo | Fase 8a: herramientas primaria y secundaria sobre `barreraMV`; P controlada 0.1 (antes 0.4). Sigue sin acceso desde menús. | Enlazar desde un menú o retirar. | media | bajo | abre (montado aislado); calcula al pulsar «Run Shielding Design Agent»; consola sin errores |
 | `ShieldingOptimizerDialog` | Optimizador NSGA-II | entrada del usuario | lib/shieldingOptimizer (propio) | riesgo | TVL de 6 MV propios escalados por energía (plomo 55 mm, tungsteno 15 mm sin referencia). | Espesores con `espesorRequeridoHaz`. | media | medio | abre (app); calcula al pulsar «Ejecutar Optimizacion»; consola sin errores |
 | `SmartSearchDICOMDialog` | Búsqueda DICOM | datos de demostración | ninguno (informativo) | riesgo | Pacientes ficticios con nombres y MRN. | Anonimizar. | media | bajo | abre (app); consola sin errores |
 | `SourceLibraryDialog` | Biblioteca de fuentes | tabla fija en el diálogo | fórmula local | error | Tasa A·Γ·1000 sin geometría ni distancia; aviso (Fase 6). | Γ de nuclearMedicine y geometrías integradas. | media | medio | abre (app); consola sin errores |
@@ -179,10 +163,12 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `DarkModeDialog` | Apariencia | localStorage | ninguno (informativo) | riesgo | Duplica el conmutador de tema de la barra. | Unificar con `toggleDarkMode`. | baja | bajo | abre (app); consola sin errores |
 | `DecayChainsDialog` | Cadenas de decaimiento (generadores) | entrada del usuario | lib/decay/DecayChains | OK | Equilibrio transitorio estándar; sin DialogTitle. | Título accesible; prueba Mo-99/Tc-99m. | baja | bajo | abre (app); consola sin errores |
 | `DecayHeatCalculator` | Calor de decaimiento | entrada del usuario | fórmula local | riesgo | Cálculo simple A·q; textos parcialmente en inglés. | Prueba de componente. | baja | bajo | abre (app); consola sin errores |
-| `DoseMapping3D` | Mapa 3D de dosis (visor en revisión) | plano del proyecto (useCanvasStore/props) | doseMappingEngine/visoresDosis | riesgo | Tras VISOR_DOSE3D=false; textos «Avg/Max Dose». | Traducir y activar tras validación visual. | baja | bajo | abre (montado aislado); calcula al pulsar «Compute Mesh»; 2 aviso(s)/error(es) de consola |
+| `DoseMapping3D` | Mapa 3D de dosis (visor en revisión) | plano del proyecto | doseMappingEngine/visoresDosis | riesgo | Fase 8: el «Failed to fetch» venía de <Text> de drei (troika descarga la fuente de un CDN); se sustituyó por <Html>. Sigue tras VISOR_DOSE3D=false. | Traducir y activar tras validación visual. | baja | bajo | abre (montado aislado); calcula al pulsar «Compute Mesh»; 1 aviso(s)/error(es) de consola |
 | `DoseSweepDialog` | Barrido de dosis 360° | parámetros internos | ninguno (decorativo) | riesgo | Isodosis decorativas; tiene aviso (Fase 6). | Dibujar `mallaDosis` por ángulo o retirar. | baja | medio | abre (app); consola sin errores |
+| `ElectronApplicatorDialog` | Blindaje del aplicador de electrones | entrada del usuario | barreraMV (fotones de contaminación) | OK | Fase 8a: P en Sv; W_x = W_e·f_x como primaria NCRP 151 a la energía tabulada ≥ E_e; pacientes por semana como entrada. | Citar la fuente de f_x por energía. | baja | bajo | abre (app); calcula al pulsar «Calcular Blindaje»; consola sin errores |
 | `ElectronTransportDialog` | Transporte de electrones | entrada del usuario | lib/electronEngine | riesgo | Poderes de frenado propios sin prueba contra ESTAR; textos en inglés. | Prueba contra NIST ESTAR. | baja | medio | abre (app); calcula al pulsar «Ejecutar Transporte»; consola sin errores |
 | `EmergencyProceduresDialog` | Procedimientos de emergencia | tabla fija en el diálogo | ninguno (informativo) | riesgo | Contactos de ejemplo (Ext. 5500). | Hacer configurables los contactos. | baja | bajo | abre (app); consola sin errores |
+| `EquipmentShieldingWizard` | Asistente de blindaje por equipo | entrada del usuario | lib/blindajeEquipo → barreraMV | OK | Fase 8a: primaria/fuga/dispersión NCRP 151, IMRT en la fuga, material por omisión válido; PET/SPECT/TC remiten a sus diálogos. | Añadir título accesible. | baja | bajo | abre (app); consola sin errores |
 | `EvidencePackDialog` | Paquete de evidencia | plano del proyecto (useCanvasStore/props) | lib/evidencePack + f* | OK | Con pruebas; sin DialogTitle. | Título accesible. | baja | bajo | abre (montado aislado); consola sin errores |
 | `ExampleWizardDialog` | Asistente de ejemplos | tabla fija en el diálogo | ninguno (informativo) | riesgo | «Público < 5 mSv/año (NOM-008)» choca con 1 mSv/año de otros diálogos. | Unificar límites. | baja | bajo | abre (app); consola sin errores |
 | `ExperimentalValidationDialog` | Validación con medición | entrada del usuario | fórmula local | riesgo | Usa \|Δ\|/U_med sin combinar la incertidumbre del cálculo (Eₙ). | Eₙ = \|Δ\|/√(U₁² + U₂²). | baja | bajo | abre (app); consola sin errores |
@@ -200,6 +186,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `JENDL5DataViewer` | Visor de datos JENDL-5 | tabla fija en el diálogo | ninguno (informativo) | riesgo | Valores «representativos»; sin DialogTitle; inglés. | Título; traducir. | baja | bajo | abre (montado aislado); consola sin errores |
 | `LayoutBunkerDialog` | Layouts y zona controlada | plano del proyecto (useCanvasStore/props) | controlledZone* | OK | Con pruebas; sin DialogTitle. | Título accesible. | baja | bajo | abre (montado aislado); consola sin errores |
 | `MCNPGUIDeckGenerator` | Generador de mazo MCNP | entrada del usuario | generador de texto | riesgo | Comentario de conversión F6 incorrecto (MeV/g → Gy es ×1.602×10⁻¹⁰). | Corregir el comentario. | baja | bajo | abre (montado aislado); consola sin errores |
+| `MLPredictionDialog` | Predictor ML de espesor | modelo entrenado con espesores NCRP 151 | useAutoML + espesorReferenciaNCRP151 | riesgo | Fase 8a: datos de entrenamiento y benchmark con `barreraMV`; se quitaron los «ejemplos reales» sin fuente; clave del modelo v2. El modelo sigue siendo una aproximación del motor. | Mostrar siempre el benchmark NCRP 151 junto a la predicción. | baja | bajo | abre (app); calcula al pulsar «Calculate with NCRP 151»; consola sin errores |
 | `MaintenanceLogDialog` | Registro de mantenimiento | estado local | ninguno (informativo) | OK | Sin DialogTitle. | Título accesible. | baja | bajo | abre (app); consola sin errores |
 | `MaterialPropertyCalculator` | Propiedades de materiales (Phy-X) | entrada del usuario | lib/phyXData | riesgo | Z_eff y μ/ρ propios sin prueba contra Phy-X/XCOM; inglés. | Prueba contra XCOM. | baja | medio | abre (app); calcula al pulsar «Calculate Properties»; consola sin errores |
 | `NCRP151TablesDialog` | Tablas NCRP 151 | lib/ncrp151Tables | ninguno (informativo) | riesgo | Tablas independientes de `ncrp151.ts` (posible divergencia); sin DialogTitle. | Mostrar las tablas de `ncrp151.ts`. | baja | bajo | abre (app); consola sin errores |
@@ -213,6 +200,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `PointCloudImportDialog` | Importar nube de puntos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Sólo información; inglés. | Traducir u ocultar. | baja | bajo | abre (app); consola sin errores |
 | `PythonIntegrationDialog` | Python (Pyodide) | entrada del usuario | código de ejemplo | riesgo | El ejemplo usa P(mSv)/W(cGy) con un solo TVL. | Corregir el ejemplo. | baja | bajo | abre (app); calcula al pulsar «Code Runner»; consola sin errores |
 | `RealTime3DDialog` | Exploración 3D | plano del proyecto (useCanvasStore/props) | realTime3DEngine (three) | riesgo | Usa un plano de demostración si no hay barreras; advertencia de GPU en consola. | Mostrar vacío en lugar de demo. | baja | bajo | abre (app); consola sin errores |
+| `RegulatoryAlertsDialog` | Alertas regulatorias | ninguna fuente oficial | ninguno (informativo) | OK | Fase 8b: se quitaron las alertas inventadas; estado vacío que remite a DOF y CNSNS. | Conectar a una fuente oficial si se desea. | baja | medio | abre (app); consola sin errores |
 | `RegulatoryComparisonDialog` | Comparación regulatoria | lib/internationalRegulations | ninguno (informativo) | riesgo | Inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
 | `RevitAddinDialog` | Plantillas add-in Revit | tabla fija en el diálogo | ninguno (informativo) | riesgo | El C# divide coordenadas de lienzo (px) entre 304.8 como si fueran mm. | Convertir con la escala del plano. | baja | bajo | abre (app); consola sin errores |
 | `SelfShieldingDialog` | Autoblindaje del paciente | tabla fija en el diálogo | ninguno (informativo) | riesgo | Factores propios (PET F-18 0.70) en vez de 1 − 0.36 de TG-108. | Usar `ABSORCION_PACIENTE`. | baja | bajo | abre (app); consola sin errores |
@@ -221,6 +209,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `UncertaintyQuantificationDialog` | Incertidumbre GUM | entrada del usuario | lib/gumUncertainty | OK | Presupuesto GUM; título parcialmente en inglés. | Traducir. | baja | bajo | abre (app); calcula al pulsar «Compute GUM Budget»; consola sin errores |
 | `VersionHistoryDialog` | Historial de versiones | datos de demostración (DEMO_VERSIONS) | ninguno (informativo) | riesgo | Versiones ficticias; inglés. | Leer versiones guardadas. | baja | medio | abre (app); consola sin errores |
 | `VideoTutorialGenerator` | Videotutoriales | tabla fija en el diálogo | ninguno (informativo) | riesgo | Inglés. | Traducir. | baja | bajo | abre (app); calcula al pulsar «How to Calculate a Primary Bar»; consola sin errores |
+| `AAPMTG108PETDialog` | Blindaje PET por procedimiento (TG-108) | entrada del usuario | tg108.dosisSemanalTG108 + transmisionPET | OK | Fase 8a: dosis TG-108 con absorción y decaimiento, Tabla V; reproduce el Ejemplo 2 (59.7 μSv, ≈ 8 mm Pb); TC fuera. | — | — | — | abre (app); consola sin errores |
 | `AboutDialog` | Acerca de | tabla fija en el diálogo | ninguno (informativo) | OK | Texto institucional. | — | — | — | abre (app); consola sin errores |
 | `AnalyticsDialog` | Analítica de uso local | useAnalytics (localStorage) | ninguno (informativo) | OK | Métricas de uso locales. | — | — | — | abre (app); consola sin errores |
 | `BarrierCalculatorDialog` | Calculadora de barreras MV (NCRP 151) | entrada del usuario | calculadorasNormativas.barreraMV → ncrp151 | OK | Fase 7: primaria/fuga/dispersión, TVL₁/TVLₑ, dos fuentes, cumple sólo si T·K ≤ P; validada con §7.1.1 y §7.1.5. | — | — | — | abre (app); calcula al pulsar «Calcular»; consola sin errores |
@@ -228,18 +217,22 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `BatchReportExporterDialog` | Exportar reportes JSON/CSV | plano del proyecto (useCanvasStore/props) | ninguno (informativo) | OK | Exporta el plano. | — | — | — | abre (app); consola sin errores |
 | `BibliographyDialog` | Bibliografía | lib/bibliography | ninguno (informativo) | OK | Catálogo de referencias. | — | — | — | abre (app); consola sin errores |
 | `CADGeometryConverterDialog` | Guía CAD→GDML/ROOT | tabla fija en el diálogo | ninguno (informativo) | OK | Contenido metodológico. | — | — | — | abre (app); consola sin errores |
+| `CNSNSAutoReportDialog` | Reporte CNSNS desde el proyecto | plano del proyecto | lib/reporteCNSNSHtml + verificarBarrera | OK | Fase 8b: sin resultados fijos; sin barreras calculadas muestra estado vacío y no genera. | — | — | — | abre (app); consola sin errores |
 | `CNSNSDashboardDialog` | Tablero CNSNS | plano del proyecto (useCanvasStore/props) | ninguno (informativo) | OK | Resume kerma máximo de las barreras del plano. | — | — | — | abre (app); consola sin errores |
 | `CNSNSDialog` | Memoria analítica CNSNS (DOCX) | plano del proyecto (useCanvasStore/props) | useCNSNSReport (docx) | OK | Genera el DOCX con los resultados del plano. | — | — | — | abre (app); calcula al pulsar «Generar y Descargar DOCX»; consola sin errores |
 | `CertificationModeDialog` | Checklist LA-007/01 | tabla fija en el diálogo | ninguno (informativo) | OK | Lista de verificación. | — | — | — | abre (montado aislado); consola sin errores |
 | `ChecklistCNSNSDialog` | Checklist pre-CNSNS | tabla fija en el diálogo | ninguno (informativo) | OK | Lista de verificación. | — | — | — | abre (app); calcula al pulsar «Distancias fuente-punto de cal»; consola sin errores |
 | `CloudSyncDialog` | Sincronización en la nube | backend (lib/cloudSync) | ninguno (informativo) | OK | Requiere backend. | — | — | — | abre (app); consola sin errores |
 | `CommandPalette` | Paleta de comandos | props | ninguno (informativo) | OK | Título sr-only (Fase 6). | — | — | — | abre (montado aislado); consola sin errores |
+| `ComplianceCertificationDialog` | Cumplimiento y certificaciones | checklists de lib/internationalRegulations | ninguno (informativo) | OK | Fase 8b: se quitaron las certificaciones inexistentes (CE, FDA, ISO); estado vacío honesto. | — | — | — | abre (app); consola sin errores |
+| `CrossValidationDialog` | Comparación de métodos NCRP 151 | entrada del usuario | barreraMV | OK | Fase 8a: compara Ec. 2.3 (TVL₁/TVLₑ) con TVL único; reproduce §7.1.1. | — | — | — | abre (app); consola sin errores |
 | `DICOMDialog` | Importar DICOM | archivo del usuario | useDICOM | OK | Lectura de cabeceras. | — | — | — | abre (app); consola sin errores |
 | `DXFViewerDialog` | Visor e importación DXF | archivo del usuario | dxfParser + cadBimBridge | OK | Validado de punta a punta en la Fase 4. | — | — | — | abre (app); consola sin errores |
 | `DoseMapDialog` | Mapa de dosis 2D/3D | plano del proyecto (useCanvasStore/props) | doseFieldEngine (mallaDoseMap) | OK | Validado (Fases 3–5). | — | — | — | abre (app); consola sin errores |
 | `DxfExportDialog` | Exportar plano DXF/SVG/JSON | plano del proyecto (useCanvasStore/props) | lib/dxfExport | OK | Fase 7: exporta el proyecto; DXF reimportable (prueba de ida y vuelta). | — | — | — | abre (app); consola sin errores |
 | `EquipmentDBDialog` | Base de datos de equipos | tabla fija en el diálogo | ninguno (informativo) | OK | Catálogo («Infinity» es un modelo Elekta, no un error). | — | — | — | abre (app); consola sin errores |
 | `ExportDialog` | Exportar resultados | plano del proyecto (useCanvasStore/props) | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
+| `FloorCeilingDialog` | Blindaje de piso y techo | entrada del usuario | hooks/useFloorCeilingCalc → barreraMV | OK | Fase 8a: corregido el ×1000; techo y piso como barreras primarias (y secundarias) NCRP 151. | — | — | — | abre (app); consola sin errores |
 | `FloorPlanFeaturesPanel` | Herramientas del plano | plano del proyecto (useCanvasStore/props) | ninguno (informativo) | OK | — | — | — | — | abre (app); calcula al pulsar «Generar»; consola sin errores |
 | `Geant4McDialog` | Referencia analítica TG-108 para Geant4 | entrada del usuario | calculadorasNormativas.blindajePET | OK | Fase 7: sin Monte Carlo simulado; validado con Tabla V. | — | — | — | abre (app); consola sin errores |
 | `GlossaryDialog` | Glosario | tabla fija en el diálogo | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
@@ -252,7 +245,9 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `MazeCalculatorDialog` | Laberinto y puerta (NCRP 151 §2.4) | entrada del usuario | ncrp151Laberinto | OK | Validado con §7.1 (Fase 4). | — | — | — | abre (app); consola sin errores |
 | `MultiLayerShieldDialog` | Blindaje multicapa | entrada del usuario | calculadorasNormativas.blindajeMulticapa | OK | Fase 7: transmisión NCRP 147/151 por capa y K¹; probado. | — | — | — | abre (app); consola sin errores |
 | `MultiObjectiveOptimizerDialog` | Optimizador de materiales PET | entrada del usuario | blindajePET + compararMateriales | OK | Fase 7: TG-108 y frente de Pareto. | — | — | — | abre (app); consola sin errores |
+| `NCRPValidationDialog` | Suite de validación | motor real | normativeBarrierEngine, ncrp147/151, tg108 | OK | Fase 8b: 17 casos recalculados con el motor contra NCRP 147 §5, NCRP 151 §7.1 y TG-108; fallan si el motor se desvía. | — | — | — | abre (app); calcula al pulsar «Ejecutar Validacion»; consola sin errores |
 | `NISTLibraryDialog` | Biblioteca NIST | lib/nistMaterialLibrary | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
+| `NeutronDialog` | Neutrones (>10 MV) | entrada del usuario | hooks/useNeutronCalc → ncrp151Laberinto | OK | Fase 8a: H₀ de la Tabla B.9 y BPE con `puerta()` (§7.1.13); ya no multiplica n TVL por la HVL. Captura y fotones en «Laberinto y puerta». | — | — | — | abre (app); consola sin errores |
 | `NuclideDataViewer` | Datos de nucleidos (ICRP) | tabla fija en el diálogo | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
 | `OnnxPredictorDialog` | Espesor PET (TG-108) | entrada del usuario | blindajePET | OK | Fase 7: TG-108 Ejemplo 1 reproducido. | — | — | — | abre (app); consola sin errores |
 | `ParetoOptimizerDialog` | Comparación de materiales (Pareto) | entrada del usuario | espesorRequeridoHaz + compararMateriales | OK | Fase 7: NCRP 151/147 con K¹; probado. | — | — | — | abre (app); consola sin errores |
@@ -270,9 +265,11 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `SpatialDoseMapDialog` | Mapa espacial de dosis | plano del proyecto (useCanvasStore/props) | doseFieldEngine | OK | Validado (Fases 3–6). | — | — | — | abre (app); consola sin errores |
 | `SplashScreen` | Pantalla de inicio | tabla fija en el diálogo | ninguno (informativo) | OK | — | — | — | — | abre (montado aislado); consola sin errores |
 | `TechSpecsDialog` | Especificaciones técnicas | tabla fija en el diálogo | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
+| `TornadoSensitivityDialog` | Tornado (diagnóstico) | entrada del usuario | espesorRequeridoHaz (NCRP 147) | OK | Fase 8a: K con K¹ e inversa de Archer correcta; §5.3.3.1 (1.3 mm). | — | — | — | abre (app); consola sin errores |
 | `TutorialDialog` | Tutorial | tabla fija en el diálogo | ninguno (informativo) | OK | — | — | — | — | abre (app); consola sin errores |
 | `UndoRedoHistoryPanel` | Historial | props | ninguno (informativo) | OK | — | — | — | — | abre (montado aislado); consola sin errores |
 | `UpdateAppDialog` | Centro de actualizaciones | contratos f* | ninguno (informativo) | OK | Diferido con lazy() (Fase 6). | — | — | — | abre (montado aislado); consola sin errores |
 | `VentilationDialog` | Ventilación (Ar-41) | entrada del usuario | lib/ventilacionBunker | OK | Con referencia 10 CFR 20. | — | — | — | abre (app); consola sin errores |
-| `Viewer3DDialog` | Visor 3D GEANT4 | plano del proyecto (useCanvasStore/props) | r3f | OK | — | — | — | — | abre (app); consola sin errores |
+| `VersaHD15MVDialog` | Elekta Versa HD 15 MV | entrada del usuario | calculadorasNormativas.barreraMV | OK | Fase 8a: corregido el error ×1000 (antes ≈ 84 cm, ahora ≈ 205 cm con sus valores iniciales, NCRP 151 Tabla B.2); IMRT sólo en la fuga. | — | — | — | abre (app); calcula al pulsar «Calculadora»; consola sin errores |
+| `Viewer3DDialog` | Visor 3D GEANT4 | plano del proyecto | r3f | OK | Fase 8: etiqueta con <Html> en lugar de <Text> (sin descarga de fuentes de CDN). | — | — | — | abre (app); 1 aviso(s)/error(es) de consola |
 | `VoxelPhantomDialog` | Fantomas voxelizados ICRP | tabla fija en el diálogo | ninguno (informativo) | OK | Catálogo con dibujo esquemático. | — | — | — | abre (app); consola sin errores |

@@ -5,6 +5,14 @@
  */
 
 import type { AgentTool } from "./types";
+import { barreraMV, energiaTabuladaMV } from "../calculadorasNormativas";
+import type { MaterialNCRP151 } from "../ncrp151";
+
+// Fase 8a: las herramientas de barrera usan `barreraMV` (NCRP 151). Antes la primaria hacía
+// B = P(mSv)·d²/W(Gy) sin el factor 10⁻³ (≈ 3 TVL de menos). La barita se dimensiona con el TVL del concreto 2.35
+// (conservador: NCRP 151 no tabula concreto baritado).
+const materialMV = (m?: string): MaterialNCRP151 => (m === "lead" ? "lead" : m === "steel" ? "steel" : "concrete");
+const energiaMV = (e: number) => (e > 1 && e < 1.5 ? "Co60" as const : energiaTabuladaMV(e));
 
 // TVL database from NCRP 151 Table B.1
 const TVL_DB: Record<string, Record<string, { tvl1: number; tvle: number }>> = {
@@ -49,21 +57,22 @@ export const AGENT_TOOLS: AgentTool[] = [
       distance: { type: "number", description: "meters from target to barrier" },
       workload: { type: "number", description: "Gy/week" },
       occupancy: { type: "number", description: "T factor (0.01-1.0)" },
-      goalDose: { type: "number", description: "mSv/week (0.02 or 0.4)" },
+      goalDose: { type: "number", description: "mSv/week (0.02 no controlada o 0.1 controlada)" },
       useFactor: { type: "number", description: "U factor (0.25 or 1.0)" },
       material: { type: "string", description: "concrete, barite, steel, lead" },
     },
     execute: async (p) => {
-      const mat = p.material || "concrete";
-      const eKey = String(Math.round(p.energy));
-      const tvl = TVL_DB[mat]?.[eKey] || TVL_DB.concrete["6"];
-      const B = Math.max(1e-10, (p.goalDose * p.distance ** 2) / (p.workload * p.useFactor * p.occupancy));
-      const n = Math.max(0, -Math.log10(B));
-      const thickness = n <= 1 ? n * tvl.tvl1 : tvl.tvl1 + (n - 1) * tvl.tvle;
+      const r = barreraMV({
+        tipo: "primaria", haces: [{ energia: energiaMV(p.energy), W_Gy_semana: p.workload }], material: materialMV(p.material),
+        P_mSv_semana: p.goalDose, T: Math.min(1, p.occupancy), U: p.useFactor ?? 0.25, d_m: p.distance,
+      });
+      const c = r.componentes[0];
+      const n = c.B_requerida >= 1 ? 0 : Math.log10(1 / c.B_requerida);
+      const tvl = { tvl1: c.tvl_cm, tvle: c.tvl_cm };
       return {
-        B, nTVLs: n, thicknessCm: Math.round(thickness * 10) / 10,
-        tvl1: tvl.tvl1, tvle: tvl.tvle, meetsGoal: B <= 1,
-        formula: `B=${B.toExponential(2)}, n=${n.toFixed(2)}, t=${thickness.toFixed(1)}cm`,
+        B: c.B_requerida, nTVLs: n, thicknessCm: Math.round(r.espesor_cm * 10) / 10,
+        tvl1: tvl.tvl1, tvle: tvl.tvle, meetsGoal: r.cumple,
+        formula: `NCRP 151 Ec. 2.1/2.3: B=${c.B_requerida.toExponential(2)}, n=${n.toFixed(2)}, t=${r.espesor_cm.toFixed(1)}cm`,
       };
     },
   },
@@ -83,24 +92,17 @@ export const AGENT_TOOLS: AgentTool[] = [
       isLeakage: { type: "boolean", description: "calculate for leakage instead of scatter" },
     },
     execute: async (p) => {
-      const mat = p.material || "concrete";
-      const eKey = String(Math.round(p.energy));
-      const tvl = TVL_DB[mat]?.[eKey] || TVL_DB.concrete["6"];
-      let K: number;
-      if (p.isLeakage) {
-        K = (0.001 * p.workload * p.occupancy) / (p.distance ** 2);
-      } else {
-        const a = p.scatterFraction || 0.001;
-        K = (a * p.workload * p.occupancy) / (p.distance ** 2);
-      }
-      const B = Math.max(1e-10, p.goalDose / (K * 1000)); // convert to same units
-      const n = Math.max(0, -Math.log10(B));
-      const thickness = n <= 1 ? n * tvl.tvl1 : tvl.tvl1 + (n - 1) * tvl.tvle;
+      const r = barreraMV({
+        tipo: "secundaria", haces: [{ energia: energiaMV(p.energy), W_Gy_semana: p.workload }], material: materialMV(p.material),
+        P_mSv_semana: p.goalDose, T: Math.min(1, p.occupancy), U: 0.25, d_m: p.distance, theta_deg: 30,
+      });
+      const c = r.componentes.find((x) => x.tipo === (p.isLeakage ? "fuga" : "dispersion"))!;
       return {
-        doseRate: Math.round(K * 1000 * 100) / 100, B, nTVLs: n,
-        thicknessCm: Math.round(thickness * 10) / 10,
+        doseRate: Math.round(c.K_mSv_semana * 1000 * 100) / 100, B: c.B_requerida,
+        nTVLs: c.B_requerida >= 1 ? 0 : Math.log10(1 / c.B_requerida),
+        thicknessCm: Math.round(c.espesor_cm * 10) / 10,
         type: p.isLeakage ? "leakage" : "scatter",
-        meetsGoal: B <= 1,
+        meetsGoal: true,
       };
     },
   },

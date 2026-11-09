@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   FileDown,
 } from "lucide-react";
+import { barreraMV, MATERIALES_MV, NOMBRE_MATERIAL } from "@/lib/calculadorasNormativas";
+import type { MaterialNCRP151 } from "@/lib/ncrp151";
 
 interface VersaHD15MVDialogProps {
   open: boolean;
@@ -84,48 +86,36 @@ export default function VersaHD15MVDialog({ open, onClose }: VersaHD15MVDialogPr
     d: "5.5",
     u: "0.25",
     t_occ: "0.5",
-    tvl: "44",
     material: "concrete",
   });
   const [result, setResult] = useState<any>(null);
 
+  // Fase 8a: antes B = P(mSv)·d²/(W(Gy)·U·T) sin el factor 10⁻³ (≈ 3 TVL de menos) y el factor IMRT se aplicaba a la
+  // primaria. Ahora: NCRP 151 con `barreraMV` (Ec. 2.1/2.3, TVL₁/TVLₑ de la Tabla B.2 a 15 MV); el factor IMRT (Ec. 3.6)
+  // sólo afecta a la fuga de la barrera secundaria.
   const runCalculation = () => {
     const W = parseFloat(calcData.w) || 0;
     const P = parseFloat(calcData.p) || 0;
-    const d = parseFloat(calcData.d) || 1;
-    const U = parseFloat(calcData.u) || 1;
-    const T = parseFloat(calcData.t_occ) || 1;
-    const TVL = parseFloat(calcData.tvl) || 44;
-
-    if (W <= 0 || P <= 0 || d <= 0) {
-      setResult({ error: "Valores W, P y d deben ser mayores a cero" });
+    const d = parseFloat(calcData.d) || 0;
+    const U = parseFloat(calcData.u) || 0;
+    const T = parseFloat(calcData.t_occ) || 0;
+    if (W <= 0 || P <= 0 || d <= 0 || U <= 0 || !(T > 0 && T <= 1)) {
+      setResult({ error: "W, P, d y U deben ser mayores que cero y T debe estar en (0, 1]" });
       return;
     }
-
-    // Primary barrier: B = P * d^2 / (W * U * T)
-    const B = (P * d * d) / (W * U * T);
-    const n = B > 0 ? Math.log10(1 / B) : 0;
-    const t = n > 0 ? TVL * n : 0;
-    const t_rounded = Math.ceil(t);
-
-    // IMRT factor
-    const f_imrt = 2.8;
-    const W_imrt = W * f_imrt;
-    const B_imrt = (P * d * d) / (W_imrt * U * T);
-    const n_imrt = B_imrt > 0 ? Math.log10(1 / B_imrt) : 0;
-    const t_imrt = n_imrt > 0 ? TVL * n_imrt : 0;
-
+    const material = calcData.material as MaterialNCRP151;
+    const pri = barreraMV({ tipo: "primaria", haces: [{ energia: 15, W_Gy_semana: W }], material, P_mSv_semana: P, T, U, d_m: d });
+    const sec = barreraMV({ tipo: "secundaria", haces: [{ energia: 15, W_Gy_semana: W, fraccionIMRT: 1, factorIMRT: 2.8 }], material, P_mSv_semana: P, T, U, d_m: d });
+    const prim = pri.componentes[0];
     setResult({
-      B: B.toExponential(3),
-      n: n.toFixed(2),
-      t: t.toFixed(1),
-      t_rounded,
-      W_imrt: W_imrt.toFixed(0),
-      B_imrt: B_imrt.toExponential(3),
-      n_imrt: n_imrt.toFixed(2),
-      t_imrt: t_imrt.toFixed(1),
-      t_imrt_rounded: Math.ceil(t_imrt),
-      passes: B < 1,
+      B: prim.B_requerida.toExponential(3),
+      n: (prim.B_requerida >= 1 ? 0 : Math.log10(1 / prim.B_requerida)).toFixed(2),
+      t: pri.espesor_cm.toFixed(1),
+      t_rounded: pri.espesorRedondeado_cm.toFixed(1),
+      cumple: pri.cumple,
+      sec_t: sec.espesor_cm.toFixed(1),
+      sec_t_rounded: sec.espesorRedondeado_cm.toFixed(1),
+      sec_comp: sec.componentes.map((c) => `${c.nombre}: ${c.espesor_cm.toFixed(1)} cm`).join(" · "),
     });
   };
 
@@ -138,7 +128,7 @@ export default function VersaHD15MVDialog({ open, onClose }: VersaHD15MVDialogPr
       ["d (m)", calcData.d],
       ["U", calcData.u],
       ["T", calcData.t_occ],
-      ["TVL (cm)", calcData.tvl],
+      ["Material", calcData.material],
       ["B", result?.B || ""],
       ["n", result?.n || ""],
       ["t calculado (cm)", result?.t || ""],
@@ -416,8 +406,10 @@ export default function VersaHD15MVDialog({ open, onClose }: VersaHD15MVDialogPr
                       <Input id="t" value={calcData.t_occ} onChange={(e) => setCalcData({ ...calcData, t_occ: e.target.value })} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="tvl">TVL (cm)</Label>
-                      <Input id="tvl" value={calcData.tvl} onChange={(e) => setCalcData({ ...calcData, tvl: e.target.value })} />
+                      <Label htmlFor="vhd-material">Material (NCRP 151 Tabla B.2)</Label>
+                      <select id="vhd-material" className="h-9 w-full rounded-md border border-input px-2 text-sm" value={calcData.material} onChange={(e) => setCalcData({ ...calcData, material: e.target.value })}>
+                        {MATERIALES_MV.map((m) => <option key={m} value={m}>{NOMBRE_MATERIAL[m]}</option>)}
+                      </select>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -448,19 +440,19 @@ export default function VersaHD15MVDialog({ open, onClose }: VersaHD15MVDialogPr
                             <div>B = <span className="font-mono font-semibold">{result.B}</span></div>
                             <div>n = <span className="font-mono font-semibold">{result.n}</span></div>
                             <div>t calc. = <span className="font-mono font-semibold">{result.t} cm</span></div>
-                            <div>t prop. = <span className="font-mono font-semibold text-lg">{result.t_rounded} cm</span></div>
+                            <div>t prop. = <span className="font-mono font-semibold text-lg" data-testid="vhd-primaria">{result.t_rounded} cm</span></div>
+                            <div className="col-span-2 text-xs">{result.cumple ? "Cumple: T·K ≤ P con el espesor propuesto" : "No cumple"}</div>
                           </div>
                         </div>
                         <div className="rounded-lg border p-4 bg-amber-50">
                           <div className="flex items-center gap-2 mb-2">
                             <AlertTriangle className="h-5 w-5 text-amber-600" />
-                            <span className="font-semibold text-amber-800">Con factor IMRT (f=2.8)</span>
+                            <span className="font-semibold text-amber-800">Barrera secundaria con IMRT (C_I = 2.8 en la fuga, Ec. 3.6)</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>W_IMRT = <span className="font-mono">{result.W_imrt} Gy/sem</span></div>
-                            <div>B = <span className="font-mono">{result.B_imrt}</span></div>
-                            <div>n = <span className="font-mono">{result.n_imrt}</span></div>
-                            <div>t prop. = <span className="font-mono font-semibold text-lg">{result.t_imrt_rounded} cm</span></div>
+                            <div className="col-span-2 text-xs">{result.sec_comp}</div>
+                            <div>t calc. = <span className="font-mono">{result.sec_t} cm</span></div>
+                            <div>t prop. = <span className="font-mono font-semibold text-lg">{result.sec_t_rounded} cm</span></div>
                           </div>
                         </div>
                       </div>

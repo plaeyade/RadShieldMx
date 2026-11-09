@@ -16,66 +16,10 @@ interface RegulatoryAlert {
   action?: string;
 }
 
-const MOCK_ALERTS: RegulatoryAlert[] = [
-  { id: 'a1', title: 'CNSNS-LA-001/2018 Updated — New Shielding Requirements',
-    description: 'CNSNS published an update to LA-001/2018 requiring additional neutron shielding assessment for all installations using >10 MV LINACs.',
-    regulation: 'CNSNS-LA-001/2018', authority: 'CNSNS', severity: 'critical',
-    date: '2026-06-01', category: 'Mexico', read: false,
-    action: 'Review current shielding calculations and add neutron assessment if applicable',
-  },
-  { id: 'a2', title: 'ICRP 118 — Lens of Eye Dose Limit Enforcement Date',
-    description: 'The 20 mSv/y lens of eye dose limit (ICRP 118) is now being actively enforced by multiple national regulators.',
-    regulation: 'ICRP 118', authority: 'ICRP', severity: 'warning',
-    date: '2026-05-20', category: 'International', read: false,
-    action: 'Update dosimetry monitoring protocols to include lens dose assessment',
-  },
-  { id: 'a3', title: 'Euratom BSS 2013/59 — DRLs Update for CT Chest',
-    description: 'New Diagnostic Reference Levels published for CT Chest procedures in the EU. CTDIvol: 12 mGy (median), DLP: 420 mGy·cm.',
-    regulation: 'Euratom 2013/59', authority: 'European Commission', severity: 'info',
-    date: '2026-05-15', category: 'EU', read: true,
-    action: 'Compare local CT protocols against new DRLs',
-  },
-  { id: 'a4', title: 'NCRP 151 — Errata Published for Table B.4',
-    description: 'Errata published correcting TVL values for lead at 6 MV FFF beams in NCRP Report No. 151 Table B.4.',
-    regulation: 'NCRP 151', authority: 'NCRP', severity: 'critical',
-    date: '2026-04-28', category: 'USA', read: false,
-    action: 'Verify current shielding calculations use corrected TVL values',
-  },
-  { id: 'a5', title: 'NOM-008-ENER — Annual Compliance Deadline Approaching',
-    description: 'Annual compliance report due to Secretaria de Energia by June 30, 2026.',
-    regulation: 'NOM-008-ENER', authority: 'SENER', severity: 'warning',
-    date: '2026-05-10', category: 'Mexico', read: false,
-    action: 'Prepare and submit annual compliance report',
-  },
-  { id: 'a6', title: 'FDA — New Guidance on 510(k) for Radiation Shielding Devices',
-    description: 'FDA issued draft guidance for 510(k) submissions for radiation shielding devices and accessories.',
-    regulation: 'FDA 510(k)', authority: 'FDA', severity: 'info',
-    date: '2026-04-15', category: 'USA', read: true,
-  },
-  { id: 'a7', title: 'ARPANSA — RPS C-1 Revision Under Consultation',
-    description: 'ARPANSA is consulting on a revision to the Code of Practice for Medical Applications of Ionizing Radiation.',
-    regulation: 'RPS C-1', authority: 'ARPANSA', severity: 'info',
-    date: '2026-03-30', category: 'Australia', read: true,
-    action: 'Submit comments by July 31, 2026',
-  },
-  { id: 'a8', title: 'IAEA SRS 47 — Arabic Translation Now Available',
-    description: 'The IAEA Safety Report Series No. 47 is now available in Arabic.',
-    regulation: 'IAEA SRS 47', authority: 'IAEA', severity: 'info',
-    date: '2026-03-15', category: 'International', read: true,
-  },
-  { id: 'a9', title: 'CNSNS — Nueva Guia de Blindajes para Medicina Nuclear',
-    description: 'CNSNS publico una nueva guia especifica para blindajes en instalaciones de medicina nuclear (PET/CT, SPECT).',
-    regulation: 'CNSNS-LA-003/2026', authority: 'CNSNS', severity: 'critical',
-    date: '2026-06-02', category: 'Mexico', read: false,
-    action: 'Revisar y actualizar calculos de blindaje para medicina nuclear',
-  },
-  { id: 'a10', title: 'ISO 9001:2015 — Transition to ISO 9001:2025 Announced',
-    description: 'ISO announced a new version of ISO 9001 to be published in 2025. Transition period: 3 years.',
-    regulation: 'ISO 9001', authority: 'ISO', severity: 'warning',
-    date: '2026-02-20', category: 'International', read: true,
-    action: 'Plan transition to new standard version',
-  },
-];
+// Fase 8b: antes había 12 alertas inventadas presentadas como publicadas (p. ej. «CNSNS-LA-003/2026», una
+// «actualización de LA-001/2018» marcada como crítica). La aplicación no tiene una fuente oficial de alertas: la lista
+// queda vacía y el diálogo lo dice, en lugar de mostrar normativa ficticia.
+const ALERTAS_REGISTRADAS: RegulatoryAlert[] = [];
 
 const SEVERITY_CONFIG = {
   critical: { icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50 border-red-200', label: 'Critical' },
@@ -84,7 +28,7 @@ const SEVERITY_CONFIG = {
 };
 
 export default function RegulatoryAlertsDialog({ open, onOpenChange }: Props) {
-  const [alerts, setAlerts] = useState(MOCK_ALERTS);
+  const [alerts, setAlerts] = useState(ALERTAS_REGISTRADAS);
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSeverity] = useState('');
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
@@ -140,7 +84,7 @@ export default function RegulatoryAlertsDialog({ open, onOpenChange }: Props) {
         <ScrollArea className="flex-1">
           <div className="space-y-2 pr-2">
             {filtered.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8 text-sm">No alerts match your criteria</div>
+              <div className="text-center text-muted-foreground py-8 text-sm" data-testid="alertas-vacio">{alerts.length === 0 ? "No hay alertas regulatorias registradas. Consulte el Diario Oficial de la Federación y el sitio de la CNSNS para la normativa vigente." : "Ninguna alerta coincide con los filtros."}</div>
             ) : (
               filtered.map(alert => {
                 const sev = SEVERITY_CONFIG[alert.severity];
