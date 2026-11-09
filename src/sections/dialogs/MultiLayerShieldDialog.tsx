@@ -1,99 +1,104 @@
-import { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// MultiLayerShieldDialog — barrera de varias capas (B_total = Π Bᵢ).
+// Fase 7: la transmisión de cada capa sale de NCRP 151 (TVL₁/TVLₑ, Tabla B.2) o NCRP 147 (Archer, Tablas B.1/C.1)
+// con `blindajeMulticapa`; la dosis detrás incluye el rendimiento K¹ (o W·U/d²). Antes: tabla TVL local errónea,
+// factores de buildup heurísticos y área fija de 10 m².
+import { useMemo, useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useAppStore, dialogoAbierto } from '@/stores/appStore';
-import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
-import { Layers, Plus, Trash2, Calculator, BookOpen } from 'lucide-react';
+import { Layers, Plus, Trash2, BookOpen, CheckCircle, AlertTriangle } from 'lucide-react';
+import EntradaCargaHaz from '@/components/EntradaCargaHaz';
+import { CARGA_MV_INICIAL } from '@/lib/calculadorasNormativas';
+import {
+  NOMBRE_MATERIAL, OBJETIVOS_DISENO, blindajeMulticapa, materialesDe, referenciaHaz, type CapaMulticapa, type CargaHaz,
+} from '@/lib/calculadorasNormativas';
 
-const MATS = [
-  { id: 'pb', name: 'Plomo (Pb)', d: 11.35, tvl150: 0.29, tvl6: 4.9, cost: 2.5 },
-  { id: 'conc', name: 'Concreto (2.35)', d: 2.35, tvl150: 23.0, tvl6: 370, cost: 0.05 },
-  { id: 'steel', name: 'Acero (Fe)', d: 7.87, tvl150: 4.4, tvl6: 100, cost: 0.8 },
-  { id: 'barite', name: 'Concreto Baritado', d: 3.5, tvl150: 12.0, tvl6: 200, cost: 0.15 },
-  { id: 'bpe', name: 'PE Borado', d: 1.05, tvl150: 130.0, tvl6: 45, cost: 0.12 },
-  { id: 'w', name: 'Tungsteno (W)', d: 19.3, tvl150: 0.09, tvl6: 2.1, cost: 35.0 },
-];
-const BFM = [{ id: 'gp', name: 'Geometric Progression' }, { id: 'taylor', name: 'Taylor' }, { id: 'berger', name: 'Berger' }, { id: 'none', name: 'Narrow Beam' }];
-interface L { id: string; m: string; t: number; }
+interface Capa extends CapaMulticapa { id: string }
+const sel = 'h-7 w-full rounded-md border border-input px-1 text-xs';
 
 export default function MultiLayerShieldDialog() {
   const open = useAppStore(s => dialogoAbierto(s.dialogs.multiLayerShield));
   const close = () => useAppStore.getState().close('multiLayerShield');
-  const [e, setE] = useState(150);
-  const [bm, setBm] = useState('gp');
-  const [ls, setLs] = useState<L[]>([{ id: '1', m: 'pb', t: 2 }, { id: '2', m: 'conc', t: 200 }]);
-  const add = () => setLs(p => [...p, { id: Date.now().toString(), m: 'conc', t: 100 }]);
-  const rm = (id: string) => ls.length > 1 && setLs(p => p.filter(l => l.id !== id));
-  const up = (id: string, patch: Partial<L>) => setLs(p => p.map(l => l.id === id ? { ...l, ...patch } : l));
+  const [carga, setCarga] = useState<CargaHaz>(CARGA_MV_INICIAL);
+  const [areaId, setAreaId] = useState<string>('no_controlada');
+  const [T, setT] = useState(0.025);
+  const [area, setArea] = useState(20);
+  const [capas, setCapas] = useState<Capa[]>([{ id: '1', material: 'lead', espesor_mm: 50 }, { id: '2', material: 'concrete', espesor_mm: 1200 }]);
+  const P = OBJETIVOS_DISENO.find(o => o.id === areaId)!.P_mSv_semana;
+  const materiales = materialesDe(carga);
+  const cambiarCarga = (c: CargaHaz) => {
+    setCarga(c);
+    const ms = materialesDe(c);
+    setCapas(ls => ls.map(l => (ms.includes(l.material) ? l : { ...l, material: ms[0] })));
+  };
+  const up = (id: string, patch: Partial<Capa>) => setCapas(p => p.map(l => (l.id === id ? { ...l, ...patch } : l)));
 
-  const r = useMemo(() => {
-    const tk = e <= 150 ? 'tvl150' : 'tvl6';
-    let tB = 1, tC = 0, tW = 0, tT = 0;
-    const lr = ls.map(l => {
-      const m = MATS.find(x => x.id === l.m); if (!m) return null;
-      const tv = m[tk as keyof typeof m] as number, n = l.t / tv, B = Math.pow(10, -n);
-      const w = (l.t / 1000) * 10 * m.d * 1000, c = w * m.cost;
-      tB *= B; tC += c; tW += w; tT += l.t;
-      return { n, B, tv, w, c, mn: m.name };
-    }).filter(Boolean);
-    const ntv = -Math.log10(tB || 1e-10);
-    let b = 1; if (bm === 'gp') b = 1 + (ntv - 1) * 0.15; else if (bm === 'taylor') b = 1 + 0.5 * ntv; else if (bm === 'berger') b = 1 + 0.3 * ntv * Math.log(ntv + 1);
-    return { lr, tB, bb: tB * b, b, ntv, tC, tW, tT, eq: ntv * (e <= 150 ? 0.29 : 4.9) };
-  }, [ls, e, bm]);
+  const { r, error } = useMemo(() => {
+    try { return { r: blindajeMulticapa(carga, capas, P, T, area), error: null }; } catch (e) { return { r: null, error: (e as Error).message }; }
+  }, [carga, capas, P, T, area]);
 
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Layers className="w-5 h-5 text-[#f97316]" /> Multi-Layer Shield — v114
-            <span className="text-[10px] font-mono text-slate-400">B_total = B1 x B2 x ... x Bn</span>
+            <Layers className="w-5 h-5 text-[#f97316]" /> Blindaje multicapa — B_total = B₁ × B₂ × … × Bₙ
           </DialogTitle>
+          <DialogDescription className="text-xs">Transmisión de banda ancha por capa con {referenciaHaz(carga)}.</DialogDescription>
         </DialogHeader>
-        <SyntheticResultBanner detalle="Tabla TVL local (los valores de 150 kVp son HVL y los de 6 MV para Pb, W y PE no corresponden a NCRP 151) y factores de buildup heurísticos; no usa doseFieldEngine." />
         <div className="space-y-3">
+          <EntradaCargaHaz carga={carga} onChange={cambiarCarga} prefijo="ml" />
           <div className="grid grid-cols-3 gap-2">
-            <div><Label className="text-[10px]">Energia (kVp/MV)</Label><Input type="number" value={e} onChange={x => setE(+x.target.value)} className="h-7 text-xs" /></div>
-            <div><Label className="text-[10px]">Buildup</Label>
-              <Select value={bm} onValueChange={setBm}><SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>{BFM.map(m => <SelectItem key={m.id} value={m.id} className="text-xs">{m.name}</SelectItem>)}</SelectContent></Select>
-            </div>
-            <div className="flex items-end"><Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={add}><Plus className="w-3 h-3" />Capa</Button></div>
+            <div><Label htmlFor="ml-area-tipo" className="text-[10px]">Objetivo de diseño P</Label>
+              <select id="ml-area-tipo" className={sel} value={areaId} onChange={e => setAreaId(e.target.value)}>
+                {OBJETIVOS_DISENO.map(o => <option key={o.id} value={o.id}>{o.etiqueta}</option>)}
+              </select></div>
+            <div><Label htmlFor="ml-T" className="text-[10px]">Factor de ocupación T</Label><Input id="ml-T" type="number" step="any" value={T} onChange={e => setT(+e.target.value)} className="h-7 text-xs" /></div>
+            <div><Label htmlFor="ml-area" className="text-[10px]">Área de la barrera (m²)</Label><Input id="ml-area" type="number" value={area} onChange={e => setArea(+e.target.value)} className="h-7 text-xs" /></div>
           </div>
-          <div className="text-[9px] text-slate-400 bg-slate-50 p-1.5 rounded">B_i = 10^(-t_i/TVL_i) | B_total = prod(B_i) x buildup | {BFM.find(m => m.id === bm)?.name}</div>
-          <div className="space-y-1">
-            {ls.map((l, i) => (
-              <Card key={l.id} className="border-slate-200"><CardContent className="p-1.5 flex items-center gap-2">
-                <span className="text-[10px] font-mono text-slate-400 w-4">{i + 1}</span>
-                <Select value={l.m} onValueChange={v => up(l.id, { m: v })}>
-                  <SelectTrigger className="h-7 text-[10px] w-44"><SelectValue /></SelectTrigger>
-                  <SelectContent>{MATS.map(m => <SelectItem key={m.id} value={m.id} className="text-xs">{m.name}</SelectItem>)}</SelectContent></Select>
-                <Input type="number" value={l.t} onChange={x => up(l.id, { t: +x.target.value })} className="h-7 text-xs w-20" placeholder="mm" />
-                {r.lr[i] && <span className="text-[10px] font-mono ml-auto">B={r.lr[i]!.B.toExponential(2)} n={r.lr[i]!.n.toFixed(1)}</span>}
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-red-400" onClick={() => rm(l.id)} disabled={ls.length <= 1}><Trash2 className="w-3 h-3" /></Button>
-              </CardContent></Card>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold text-slate-600">Capas ({capas.length})</span>
+              <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => setCapas(p => [...p, { id: String(Date.now()), material: materiales[0], espesor_mm: 10 }])}>
+                <Plus className="w-3 h-3 mr-1" />Añadir capa
+              </Button>
+            </div>
+            {capas.map((l, i) => (
+              <div key={l.id} className="flex items-center gap-2">
+                <span className="text-[10px] w-6 text-slate-500">#{i + 1}</span>
+                <select aria-label={`Material de la capa ${i + 1}`} className={sel} value={l.material} onChange={e => up(l.id, { material: e.target.value })}>
+                  {materiales.map(m => <option key={m} value={m}>{NOMBRE_MATERIAL[m]}</option>)}
+                </select>
+                <Input aria-label={`Espesor de la capa ${i + 1} (mm)`} type="number" value={l.espesor_mm} onChange={e => up(l.id, { espesor_mm: +e.target.value })} className="h-7 text-xs w-28" />
+                <span className="text-[10px] text-slate-500">mm</span>
+                <span className="text-[10px] font-mono w-20">B = {r ? r.capas[i].transmision.toExponential(2) : '—'}</span>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label={`Quitar capa ${i + 1}`} disabled={capas.length <= 1} onClick={() => setCapas(p => p.filter(x => x.id !== l.id))}>
+                  <Trash2 className="w-3 h-3 text-red-400" />
+                </Button>
+              </div>
             ))}
           </div>
-          <Separator />
-          <div className="bg-gradient-to-r from-[#fff7ed] to-white rounded-lg border border-orange-100 p-3">
-            <div className="flex items-center gap-2 mb-1"><Calculator className="w-4 h-4 text-[#f97316]" /><span className="text-xs font-bold">Resultados</span></div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
-              <div><span className="text-slate-500">B narrow:</span> <span className="font-mono font-semibold">{r.tB.toExponential(3)}</span></div>
-              <div><span className="text-slate-500">B broad:</span> <span className="font-mono font-semibold text-[#f97316]">{r.bb.toExponential(3)}</span></div>
-              <div><span className="text-slate-500">Buildup:</span> <span className="font-mono">{r.b.toFixed(3)}</span></div>
-              <div><span className="text-slate-500">TVL eq:</span> <span className="font-mono font-semibold">{r.ntv.toFixed(2)} TVL</span></div>
-              <div><span className="text-slate-500">Pb eq:</span> <span className="font-mono font-semibold">{r.eq.toFixed(2)} mm</span></div>
-              <div><span className="text-slate-500">Espesor:</span> <span className="font-mono">{r.tT.toFixed(1)} mm</span></div>
-              <div><span className="text-slate-500">Peso:</span> <span className="font-mono">{(r.tW / 1000).toFixed(2)} ton</span></div>
-              <div><span className="text-slate-500">Costo:</span> <span className="font-mono">${r.tC.toFixed(0)} USD</span></div>
-            </div>
-          </div>
-          <div className="text-[9px] text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Ref: NCRP 151 App.B.3 | MicroShield v8 | Capo 1992 GP</div>
+          {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+          {r && (
+            <Card className={r.cumple ? 'border-green-300' : 'border-red-300'}><CardContent className="p-3 space-y-1 text-[11px]">
+              <div className="flex items-center gap-2 font-bold" data-testid="ml-dictamen">
+                {r.cumple ? <CheckCircle className="w-4 h-4 text-green-600" /> : <AlertTriangle className="w-4 h-4 text-red-600" />}
+                {r.cumple ? 'CUMPLE: T·K ≤ P' : 'NO CUMPLE: T·K > P'}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>B total: <span className="font-mono" data-testid="ml-btotal">{r.B_total.toExponential(3)}</span></div>
+                <div>K sin blindaje: <span className="font-mono">{r.K_sin_blindaje_mSv_semana.toPrecision(3)} mSv/sem</span></div>
+                <div>T·K con blindaje: <span className="font-mono">{r.dosisOcupacion_mSv_semana.toExponential(2)} mSv/sem (P = {P})</span></div>
+                <div>Equivalente en plomo: <span className="font-mono">{r.equivalentePlomo_mm.toFixed(1)} mm</span></div>
+                <div>Espesor total: <span className="font-mono">{r.espesorTotal_mm.toFixed(0)} mm</span></div>
+                <div>Masa total: <span className="font-mono">{(r.masaTotal_kg / 1000).toFixed(2)} t</span></div>
+              </div>
+            </CardContent></Card>
+          )}
+          <div className="text-[9px] text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Producto de transmisiones de banda ancha (incluyen la acumulación); sin factores de buildup adicionales.</div>
         </div>
       </DialogContent>
     </Dialog>

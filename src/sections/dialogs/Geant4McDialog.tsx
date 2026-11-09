@@ -1,89 +1,75 @@
-/**
- * v103: Geant4 Monte Carlo Microservice — Gold Standard Validation
- */
-import { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+// Geant4McDialog (clave `geant4Mc`) — referencia analítica TG-108 para comparar con una corrida Geant4 propia.
+// Fase 7: este diálogo no ejecuta Geant4 ni ningún Monte Carlo. Antes mostraba historias, tiempo de CPU y una
+// «dosis MC» que salía de una fórmula sin sentido dimensional (W = GBq × 1000). Ahora calcula, con AAPM TG-108
+// (`blindajePET`, `transmisionPET`), la dosis detrás de un espesor dado: el valor contra el que se valida un tally.
+import { useMemo, useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useAppStore, dialogoAbierto } from '@/stores/appStore';
-import { Atom, Play, CheckCircle, AlertTriangle, Activity, Timer, Database } from 'lucide-react';
-import { SHIELDING_MATERIALS, calculateTransmission } from '@/lib/xcomAttenuation';
-import { NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
-import { SyntheticResultBanner } from '@/components/SyntheticResultBanner';
+import { Atom, CheckCircle, AlertTriangle } from 'lucide-react';
+import EntradaFuentePET from '@/components/EntradaFuentePET';
+import { PET_INICIAL } from '@/lib/calculadorasNormativas';
+import {
+  MATERIALES_PET, NOMBRE_MATERIAL, blindajePET, transmisionPET, type EntradaPET, type MaterialPET,
+} from '@/lib/calculadorasNormativas';
 
-interface McResult {
-  mcDose_mSv_per_wk: number; mcTransmission: number;
-  percentDiff: number; pass: boolean;
-  histories: number; cpuTime_s: number;
-  hvl_mm: number; tvl_mm: number;
-}
-
-function runMonteCarlo(energy_MeV: number, activity_GBq: number, distance_m: number, thickness_mm: number, materialCode: string, nHistories: number): McResult {
-  const P = NCRP_DESIGN_GOALS.uncontrolled;
-  const W = activity_GBq * 1000;
-  const mcTransmission = calculateTransmission(materialCode, energy_MeV, thickness_mm) ?? Math.exp(-0.05 * (thickness_mm / 10));
-  const mcDose = P * (P * distance_m * distance_m / (W * 0.25 * 0.2) / mcTransmission) /* etapa 0: sin ruido aleatorio — valor analítico, no MC */;
-  const percentDiff = Math.abs((mcDose - P) / P) * 100;
-  const mat = SHIELDING_MATERIALS.find(m => m.code === materialCode);
-  return {
-    mcDose_mSv_per_wk: mcDose, mcTransmission, percentDiff, pass: percentDiff < 5,
-    histories: nHistories, cpuTime_s: nHistories / 50000,
-    hvl_mm: mat?.data.find(d => d.energy_MeV >= energy_MeV)?.halfValueLayer_mm ?? 30,
-    tvl_mm: mat?.data.find(d => d.energy_MeV >= energy_MeV)?.tenthValueLayer_mm ?? 100,
-  };
-}
+const sel = 'h-7 w-full rounded-md border border-input px-1 text-xs';
 
 export default function Geant4McDialog() {
   const open = useAppStore(s => dialogoAbierto(s.dialogs.geant4Mc));
   const close = () => useAppStore.getState().close('geant4Mc');
-  const [energy, setEnergy] = useState('6');
-  const [activity, setActivity] = useState('100');
-  const [distance, setDistance] = useState('3');
-  const [thickness, setThickness] = useState('235');
-  const [material, setMaterial] = useState('CONCRETE');
-  const [histories, setHistories] = useState('1000000');
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<McResult | null>(null);
-  const handleRun = async () => {
-    setRunning(true); setProgress(0); setResult(null);
-    for (let i = 1; i <= 10; i++) { await new Promise(r => setTimeout(r, 300)); setProgress(Math.round((i / 10) * 100)); }
-    setResult(runMonteCarlo(parseFloat(energy)||6, parseFloat(activity)||100, parseFloat(distance)||3, parseFloat(thickness)||235, material, parseInt(histories)||1e6));
-    setRunning(false);
-  };
-  const matNames = useMemo(() => SHIELDING_MATERIALS.map(m => ({ code: m.code, name: m.nameEs })), []);
-  if (!open) return null;
+  const [e, setE] = useState<EntradaPET>(PET_INICIAL);
+  const [material, setMaterial] = useState<MaterialPET>('lead');
+  const [espesor, setEspesor] = useState(12);
+  const [mc, setMc] = useState<number | ''>('');
+  const { r, error } = useMemo(() => {
+    try {
+      const T = Math.min(1, e.T);
+      const base = blindajePET({ ...e, T });
+      const B = transmisionPET(material, Math.max(0, espesor));
+      const D = base.D_mSv_semana * B;
+      return { r: { ...base, B, D, TD: T * D, cumple: T * D <= e.P_mSv_semana * (1 + 1e-9) }, error: null };
+    } catch (err) { return { r: null, error: (err as Error).message }; }
+  }, [e, material, espesor]);
+  const diferencia = r && mc !== '' && r.D > 0 ? (100 * (mc / 1000 - r.D)) / r.D : null;
+
   return (
     <Dialog open={open} onOpenChange={v => !v && close()}>
-      <DialogContent className="max-w-lg">
-        <SyntheticResultBanner />
-        <DialogHeader><DialogTitle className="flex items-center gap-2 text-sm"><Atom className="w-4 h-4 text-green-500" /> Geant4 Monte Carlo (v103)<Badge variant="outline" className="text-[9px]">Gold Standard</Badge></DialogTitle></DialogHeader>
-        <div className="text-[10px] text-slate-500 bg-green-50 rounded-md p-2 mb-3 flex items-start gap-2"><Activity className="w-3 h-3 text-green-400 mt-0.5 shrink-0" />Validacion MC vs NCRP. Tolerancia: 5% (NCRP 151 Sec. B.1)</div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Energia (MeV)</label><Input type="number" step="0.1" value={energy} onChange={e => setEnergy(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Actividad (GBq)</label><Input type="number" step="1" value={activity} onChange={e => setActivity(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Distancia (m)</label><Input type="number" step="0.1" value={distance} onChange={e => setDistance(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Espesor (mm)</label><Input type="number" step="1" value={thickness} onChange={e => setThickness(e.target.value)} className="text-[11px] h-7" /></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Material</label><Select value={material} onValueChange={setMaterial}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent>{matNames.map(m => <SelectItem key={m.code} value={m.code} className="text-[11px]">{m.name}</SelectItem>)}</SelectContent></Select></div>
-          <div><label className="text-[10px] text-slate-500 font-medium mb-1 block">Historias MC</label><Select value={histories} onValueChange={setHistories}><SelectTrigger className="text-[11px] h-7"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="100000">10⁵ (rapido)</SelectItem><SelectItem value="1000000">10⁶ (estandar)</SelectItem><SelectItem value="10000000">10⁷ (preciso)</SelectItem></SelectContent></Select></div>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <Atom className="w-4 h-4 text-green-600" /> Referencia analítica para validar Geant4 (PET, TG-108)
+            <Badge variant="outline" className="text-[9px]">sin transporte de partículas</Badge>
+          </DialogTitle>
+          <DialogDescription className="text-[10px]">Calcula la dosis semanal detrás del espesor indicado con TG-108 (Γ, absorción del paciente, decaimiento y Tabla V). Introduzca el resultado de su corrida Geant4 para compararlo.</DialogDescription>
+        </DialogHeader>
+        <EntradaFuentePET v={e} onChange={setE} prefijo="g4" />
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          <div><Label htmlFor="g4-mat" className="text-[10px]">Material del blindaje</Label>
+            <select id="g4-mat" className={sel} value={material} onChange={x => setMaterial(x.target.value as MaterialPET)}>
+              {MATERIALES_PET.map(m => <option key={m} value={m}>{NOMBRE_MATERIAL[m]}</option>)}
+            </select></div>
+          <div><Label htmlFor="g4-t" className="text-[10px]">Espesor (mm)</Label><Input id="g4-t" type="number" step="any" value={espesor} onChange={x => setEspesor(+x.target.value)} className="h-7 text-xs" /></div>
+          <div><Label htmlFor="g4-mc" className="text-[10px]">Resultado Geant4 (μSv/semana, opcional)</Label>
+            <Input id="g4-mc" type="number" step="any" value={mc} onChange={x => setMc(x.target.value === '' ? '' : +x.target.value)} className="h-7 text-xs" /></div>
         </div>
-        <Button onClick={handleRun} disabled={running} className="w-full h-8 text-[11px] bg-green-600 hover:bg-green-700"><Play className="w-3 h-3 mr-1" />{running ? `Simulando MC... ${progress}%` : 'Ejecutar Geant4 MC'}</Button>
-        {running && <Progress value={progress} className="h-1 mt-2" />}
-        {result && (
-          <div className="mt-3 border rounded-md p-3 bg-slate-50 space-y-2">
-            <div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-slate-700">Resultado Monte Carlo</span>{result.pass ? <Badge className="text-[9px] bg-green-100 text-green-700 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> PASS</Badge> : <Badge className="text-[9px] bg-red-100 text-red-700 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> FAIL</Badge>}</div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-white rounded p-2 text-center"><div className="text-[8px] text-slate-500">Dosis MC</div><div className="text-sm font-bold text-slate-700">{result.mcDose_mSv_per_wk.toFixed(4)}</div><div className="text-[8px] text-slate-400">mSv/sem</div></div>
-              <div className="bg-white rounded p-2 text-center"><div className="text-[8px] text-slate-500">Transmision</div><div className="text-sm font-bold text-slate-700">{result.mcTransmission.toExponential(2)}</div><div className="text-[8px] text-slate-400">B (MC)</div></div>
-              <div className="bg-white rounded p-2 text-center"><div className="text-[8px] text-slate-500">Diferencia</div><div className={`text-sm font-bold ${result.pass ? 'text-green-600' : 'text-red-600'}`}>{result.percentDiff.toFixed(2)}%</div><div className="text-[8px] text-slate-400">vs NCRP</div></div>
+        {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+        {r && (
+          <div className="border rounded-md p-3 bg-slate-50 mt-3 text-[11px] space-y-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div>Dosis sin blindaje: <strong>{(r.D_mSv_semana * 1000).toFixed(1)} μSv/semana</strong></div>
+              <div>Transmisión B({espesor} mm): <strong data-testid="g4-B">{r.B.toFixed(4)}</strong></div>
+              <div>Dosis detrás del blindaje: <strong data-testid="g4-D">{(r.D * 1000).toFixed(2)} μSv/semana</strong></div>
+              <div className="flex items-center gap-1">{r.cumple ? <CheckCircle className="w-3 h-3 text-green-600" /> : <AlertTriangle className="w-3 h-3 text-red-600" />}
+                T·D = {(r.TD * 1000).toFixed(2)} μSv/semana {r.cumple ? '≤' : '>'} P = {(e.P_mSv_semana * 1000).toFixed(0)} μSv/semana</div>
+              <div>Espesor requerido de {NOMBRE_MATERIAL[material]}: <strong>{r.espesores_mm[material].toFixed(1)} mm</strong></div>
+              {diferencia !== null && <div>Diferencia Geant4 − analítico: <strong>{diferencia.toFixed(1)} %</strong></div>}
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[9px] text-slate-500"><div className="flex items-center gap-1"><Database className="w-3 h-3" /> Historias: {result.histories.toLocaleString()}</div><div className="flex items-center gap-1"><Timer className="w-3 h-3" /> CPU: {result.cpuTime_s.toFixed(1)}s</div><div>HVL: {result.hvl_mm.toFixed(1)} mm</div><div>TVL: {result.tvl_mm.toFixed(1)} mm</div></div>
+            <p className="text-[9px] text-slate-400">{r.referencia}. La Tabla V proviene de un ajuste a transmisiones Monte Carlo de banda ancha (Simpkin); diferencias de ±10 % con un Geant4 de geometría distinta son esperables.</p>
           </div>
         )}
-        <div className="text-[8px] text-slate-400 mt-1"><p>Docker: Geant4/GATE API REST — tRPC endpoint planificado</p><p>Refs: G4-Med (2020) Med Phys 48(1):19-56 | NCRP 151 Sec. B.1</p></div>
       </DialogContent>
     </Dialog>
   );
