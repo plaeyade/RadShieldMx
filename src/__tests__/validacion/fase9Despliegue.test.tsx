@@ -33,8 +33,9 @@ describe('GitHub Pages', () => {
     const ci = leer('.github/workflows/ci.yml');
     expect(ci).toMatch(/VITE_BASE_PATH: \/RadShieldMx\//);
     expect(ci).toMatch(/node scripts\/verificar-base-pages\.mjs dist \/RadShieldMx\//);
-    // Pages sigue tras la variable del repositorio; no se activa aquí.
-    expect(ci).toMatch(/vars\.PAGES_HABILITADO == 'true'/);
+    // Pages publica en cada push a main (no en PR); la variable PAGES_HABILITADO=false sólo lo pausa.
+    expect(ci).toMatch(/if: github\.ref == 'refs\/heads\/main' && github\.event_name != 'pull_request' && vars\.PAGES_HABILITADO != 'false'/);
+    expect(ci).not.toMatch(/vars\.PAGES_HABILITADO == 'true'/);
   });
 
   it('sin rutas absolutas a public/ en el código que se ejecuta en el navegador', () => {
