@@ -19,6 +19,9 @@ describe('Proyección con decaimiento', () => {
     // Sin decaimiento apreciable equivale a tasa × horas × años.
     const q = proyeccionDecaimiento({ actividad0: 1, T12_anios: 1e9, tasa0_uSv_h: 1, anios: 5, horasPorAnio: 2000 });
     expect(q[1].dosisAcumulada_mSv).toBeCloseTo(10, 6);
+    // Con λt ≪ 1 (1 − e^(−λt) se cancelaría a 0 en coma flotante) sigue dando tasa × horas × años.
+    const r = proyeccionDecaimiento({ actividad0: 1, T12_anios: 1e18, tasa0_uSv_h: 1, anios: 5, horasPorAnio: 2000 });
+    expect(r[1].dosisAcumulada_mSv).toBeCloseTo(10, 9);
   });
 
   it('las horas de permanencia escalan la dosis y el año 0 no acumula', () => {

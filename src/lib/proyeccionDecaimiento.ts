@@ -30,7 +30,8 @@ export function proyeccionDecaimiento(o: {
       anio: y,
       actividad: o.actividad0 * f,
       tasa_uSv_h: o.tasa0_uSv_h * f,
-      dosisAcumulada_mSv: (h * o.tasa0_uSv_h * (1 - f)) / lambda / 1000,
+      // −expm1(−λt) = 1 − e^(−λt) sin cancelación cuando λt ≪ 1 (semividas largas).
+      dosisAcumulada_mSv: (h * o.tasa0_uSv_h * -Math.expm1(-lambda * y)) / lambda / 1000,
     });
   }
   return puntos;

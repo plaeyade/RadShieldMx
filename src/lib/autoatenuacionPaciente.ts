@@ -28,8 +28,8 @@ export const FACTORES_AUTOATENUACION: Record<string, FactorAutoatenuacion> = {
   },
   PET_GA68: {
     modalidad: 'PET/CT — Ga-68', factor: PET, citado: true,
-    descripcion: '511 keV; misma absorción del paciente que F-18.',
-    referencia: 'AAPM TG-108 (2006), absorción del paciente 0.36',
+    descripcion: '511 keV; se extrapola la absorción de F-18 (TG-108 sólo trata F-18; ignora los fotones de 1077 keV, 3 %).',
+    referencia: 'AAPM TG-108 (2006), 0.36 de F-18 extrapolado a Ga-68',
   },
   CT: {
     modalidad: 'TC (cabeza o cuerpo)', factor: 1, citado: false,
