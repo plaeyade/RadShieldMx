@@ -25,33 +25,15 @@ interface CheckItemState {
   notes: string;
 }
 
-const CERTIFICATIONS = [
-  { id: 'cert-cnsns', name: 'CNSNS Mexico — Authorized User License', authority: 'Comision Nacional de Seguridad Nuclear y Salvaguardias', country: 'Mexico', status: 'active',
-    requirements: ['Memoria analitica completa', 'Licencia vigente', 'Programa ALARA', 'Dosimetria personal', 'Reporte anual'],
-    renewalPeriod: 'Annual', lastRenewal: '2026-01-15', nextRenewal: '2027-01-15', 
-    documents: ['Memoria Analitica', 'Licencia CNSNS', 'Reporte Anual 2026', 'Dosimetria Q1-Q2 2026'],
-  },
-  { id: 'cert-fda', name: 'FDA 510(k) — Radiation Therapy Device', authority: 'U.S. Food and Drug Administration', country: 'USA', status: 'active',
-    requirements: ['Substantial equivalence', 'Performance testing', 'Radiation safety report', 'Quality system regulation'],
-    renewalPeriod: '5 years', lastRenewal: '2024-03-10', nextRenewal: '2029-03-10',
-    documents: ['510(k) Summary', 'Predicate Device Comparison', 'Performance Testing Report'],
-  },
-  { id: 'cert-ce', name: 'CE Marking — Medical Device Directive 93/42/EEC', authority: 'Notified Body (e.g., TUV SUD, BSI)', country: 'EU', status: 'active',
-    requirements: ['Essential requirements met', 'Risk analysis', 'Clinical evaluation', 'Quality system audit'],
-    renewalPeriod: '5 years', lastRenewal: '2023-08-22', nextRenewal: '2028-08-22',
-    documents: ['Technical File', 'Declaration of Conformity', 'Clinical Evaluation Report'],
-  },
-  { id: 'cert-iso9001', name: 'ISO 9001:2015 — Quality Management', authority: 'ISO/Certification Body', country: 'International', status: 'active',
-    requirements: ['Quality manual', 'Management review', 'Internal audit', 'Corrective actions'],
-    renewalPeriod: '3 years', lastRenewal: '2025-06-01', nextRenewal: '2028-06-01',
-    documents: ['Quality Manual', 'Management Review 2026', 'Internal Audit Report 2026'],
-  },
-  { id: 'cert-iso27001', name: 'ISO 27001:2022 — Information Security', authority: 'ISO/Certification Body', country: 'International', status: 'under_review',
-    requirements: ['Risk assessment', 'Security controls', 'Incident management', 'Business continuity'],
-    renewalPeriod: '3 years', lastRenewal: '2024-11-15', nextRenewal: '2027-11-15',
-    documents: ['ISMS Scope', 'Risk Assessment 2026', 'Security Policy'],
-  },
-];
+interface Certificacion {
+  id: string; name: string; authority: string; country: string; status: 'active' | 'under_review';
+  requirements: string[]; renewalPeriod: string; lastRenewal: string; nextRenewal: string; documents: string[];
+}
+
+// Fase 8b: antes esta lista presentaba como «activas» certificaciones que RadShield-MX no tiene (marcado CE 93/42/EEC,
+// FDA 510(k), ISO 9001, ISO 27001) y una licencia CNSNS con fechas inventadas. No hay ninguna certificación que
+// mostrar: la pestaña queda vacía hasta que se registren las de la instalación desde una fuente real.
+const CERTIFICATIONS: Certificacion[] = [];
 
 export default function ComplianceCertificationDialog({ open, onOpenChange }: Props) {
   const [activeTab, setActiveTab] = useState('checklist');
@@ -120,7 +102,7 @@ export default function ComplianceCertificationDialog({ open, onOpenChange }: Pr
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="grid grid-cols-3 w-full shrink-0">
             <TabsTrigger value="checklist" className="text-xs gap-1"><ClipboardCheck className="w-3.5 h-3.5" />Checklists</TabsTrigger>
-            <TabsTrigger value="certifications" className="text-xs gap-1"><Award className="w-3.5 h-3.5" />Certifications</TabsTrigger>
+            <TabsTrigger value="certifications" className="text-xs gap-1"><Award className="w-3.5 h-3.5" />Certificaciones</TabsTrigger>
             <TabsTrigger value="dashboard" className="text-xs gap-1"><Shield className="w-3.5 h-3.5" />Dashboard</TabsTrigger>
           </TabsList>
 
@@ -171,6 +153,12 @@ export default function ComplianceCertificationDialog({ open, onOpenChange }: Pr
           <TabsContent value="certifications" className="flex-1 min-h-0 mt-2">
             <ScrollArea className="h-full">
               <div className="space-y-3 pr-2">
+                {CERTIFICATIONS.length === 0 && (
+                  <p className="text-xs text-slate-600 p-3 border rounded" data-testid="cert-vacio">
+                    No hay certificaciones registradas. RadShield-MX no cuenta con marcado CE, FDA 510(k) ni certificaciones ISO;
+                    las licencias de la instalación (p. ej. CNSNS) deben consultarse en el expediente del permisionario.
+                  </p>
+                )}
                 {CERTIFICATIONS.map(cert => {
                   const isExpiringSoon = new Date(cert.nextRenewal) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
                   return (
@@ -237,7 +225,7 @@ export default function ComplianceCertificationDialog({ open, onOpenChange }: Pr
                 })}
 
                 <Card className="bg-amber-50 border-amber-200">
-                  <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-600" />Upcoming Renewals</CardTitle></CardHeader>
+                  <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-600" />Próximas renovaciones</CardTitle></CardHeader>
                   <CardContent className="space-y-1 text-xs">
                     {CERTIFICATIONS.filter(c => new Date(c.nextRenewal) < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)).map(cert => (
                       <div key={cert.id} className="flex items-center gap-2">

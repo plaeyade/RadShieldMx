@@ -1,7 +1,7 @@
 // Fase 6: 3D Viewer — Visualizar geometria GEANT4 generada desde plano 2D
 import { Suspense, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid, Text, Box } from '@react-three/drei';
+import { OrbitControls, Grid, Html, Box } from '@react-three/drei';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Download, RotateCcw } from 'lucide-react';
@@ -58,9 +58,8 @@ function SourceMarker({ x, y, scale, name }: { x: number; y: number; scale: numb
         <sphereGeometry args={[0.15, 16, 16]} />
         <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
       </mesh>
-      <Text position={[0, 0.4, 0]} fontSize={0.15} color="#000000" anchorX="center">
-        {name}
-      </Text>
+      {/* <Html> en lugar de <Text>: troika descargaba la fuente de un CDN (falla sin red). */}
+      <Html position={[0, 0.4, 0]} center><span style={{ color: '#000', fontSize: 11, whiteSpace: 'nowrap' }}>{name}</span></Html>
       {/* Radiation beam indicator */}
       <mesh position={[0, 0, 0]}>
         <sphereGeometry args={[0.5, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />

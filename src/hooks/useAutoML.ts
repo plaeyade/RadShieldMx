@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useEffect } from "react";
+import { espesorReferenciaNCRP151 } from '@/lib/ml/trainingData';
 import {
   trainModel,
   predictThickness,
@@ -65,20 +66,10 @@ export function useAutoML() {
     material: number,
     materialName: string
   ): Promise<MLPrediction> => {
-    // Calculate NCRP 151 benchmark
-    const tvlTable: Record<string, Record<number, number>> = {
-      concrete: { 4: 29, 6: 37, 10: 37, 15: 44, 18: 45, 20: 46, 24: 48 },
-      barite: { 4: 18, 6: 21, 10: 24, 15: 28, 18: 30, 20: 32, 24: 35 },
-      steel: { 4: 7, 6: 10, 10: 11, 15: 11, 18: 11, 20: 11, 24: 11 },
-      lead: { 4: 4, 6: 5.7, 10: 5.7, 15: 5.7, 18: 5.7, 20: 5.7, 24: 5.7 },
-    };
-
+    // Benchmark NCRP 151 (Fase 8a: `barreraMV`; antes mezclaba mSv con Gy, ≈ 3 TVL de menos)
     const matNames = ["concrete", "barite", "steel", "lead"];
     const mat = matNames[material] || "concrete";
-    const tvl = tvlTable[mat]?.[Math.round(energy)] || 37;
-    const B = Math.max(1e-10, (goalDose * distance * distance) / (workload * useFactor * occupancy));
-    const n = Math.max(0, -Math.log10(B));
-    const benchmarkCm = Math.round(n * tvl * 10) / 10;
+    const benchmarkCm = Math.round(espesorReferenciaNCRP151(energy, distance, workload, occupancy, goalDose, useFactor, mat) * 10) / 10;
 
     let mlResult: Pick<MLPrediction, "predictedCm" | "confidence"> = {
       predictedCm: benchmarkCm,

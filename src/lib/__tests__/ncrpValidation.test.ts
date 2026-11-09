@@ -1,71 +1,41 @@
 /**
- * Tests NCRPValidationSuite — VV-01
- * Umbral: 5ms por test individual (entorno CI/VM).
- * Batch: 1000x en <100ms.
+ * Tests NCRPValidationSuite (Fase 8b): cada caso llama al motor real y se compara con un ejemplo publicado.
  */
 import { describe, it, expect } from 'vitest';
-import { runValidation, summarize, toCSV, complianceText, CASES } from '../validation/NCRPValidationSuite';
-
-const t = (fn: () => void): number => { const t0 = performance.now(); fn(); return performance.now() - t0; };
+import { runValidation, summarize, toCSV, complianceText, CASES, type ValCase } from '../validation/NCRPValidationSuite';
 
 describe('NCRPValidationSuite', () => {
-  it('24 casos — todos pasan', () => {
+  it('todos los casos reproducen el valor publicado dentro de su tolerancia', () => {
     const results = runValidation(CASES);
-    expect(results).toHaveLength(24);
-    expect(results.every(r => r.passed)).toBe(true);
+    expect(results).toHaveLength(CASES.length);
+    for (const r of results) expect(r.passed, r.details).toBe(true);
   });
 
-  it('24 casos en <5ms', () => {
-    const ms = t(() => runValidation(CASES));
-    console.log(`  runValidation(24): ${ms.toFixed(3)}ms`);
-    expect(ms).toBeLessThan(5);
+  it('ningún caso devuelve el valor esperado sin calcular (calc ≠ () => expected)', () => {
+    for (const c of CASES) expect(c.calc.toString()).not.toMatch(/=>\s*expected\b/);
+    // El motor da valores propios: al menos la mitad difiere del publicado (redondeos del informe).
+    const distintos = runValidation(CASES).filter((r) => r.diffPercent > 0).length;
+    expect(distintos).toBeGreaterThan(CASES.length / 2);
   });
 
-  it('summarize correcto', () => {
+  it('un motor que se desvía hace fallar la suite', () => {
+    const roto: ValCase[] = CASES.map((c) => ({ ...c, calc: () => c.calc() * 1.2 }));
+    const s = summarize(runValidation(roto));
+    expect(s.allPassed).toBe(false);
+    expect(complianceText(s)).toContain('fallaron');
+  });
+
+  it('cubre NCRP 147, NCRP 151 y TG-108', () => {
+    const cats = new Set(CASES.map((c) => c.category));
+    expect([...cats].sort()).toEqual(['NCRP147', 'NCRP151', 'TG108']);
+  });
+
+  it('summarize, toCSV y complianceText', () => {
     const results = runValidation(CASES);
     const s = summarize(results);
-    expect(s.total).toBe(24);
-    expect(s.passed).toBe(24);
-    expect(s.failed).toBe(0);
+    expect(s.total).toBe(CASES.length);
     expect(s.allPassed).toBe(true);
-    expect(s.maxDiff).toBeLessThan(5);
-  });
-
-  it('summarize en <2ms', () => {
-    const results = runValidation(CASES);
-    const ms = t(() => summarize(results));
-    console.log(`  summarize(24): ${ms.toFixed(3)}ms`);
-    expect(ms).toBeLessThan(2);
-  });
-
-  it('toCSV genera formato correcto', () => {
-    const csv = toCSV(runValidation(CASES));
-    expect(csv).toContain('CaseID,Nombre,Diff%,Estado');
-    expect(csv.split('\n').length).toBe(25);
-  });
-
-  it('complianceText para suite pasada', () => {
-    const s = summarize(runValidation(CASES));
+    expect(toCSV(results).split('\n')).toHaveLength(CASES.length + 1);
     expect(complianceText(s)).toContain('validado');
-  });
-
-  it('caso 147-TVL-01: Pb 100kVp = 0.25mm', () => {
-    const r = runValidation(CASES).find(c => c.caseId === '147-TVL-01');
-    expect(r).toBeDefined();
-    expect(r!.passed).toBe(true);
-    expect(r!.diffPercent).toBe(0);
-  });
-
-  it('caso 147-ARCH-01: Archer 1mmPb 120kVp', () => {
-    const r = runValidation(CASES).find(c => c.caseId === '147-ARCH-01');
-    expect(r).toBeDefined();
-    expect(r!.passed).toBe(true);
-    expect(r!.diffPercent).toBeLessThan(5);
-  });
-
-  it('rendimiento: 1000x en <100ms', () => {
-    const ms = t(() => { for (let i = 0; i < 1000; i++) runValidation(CASES); });
-    console.log(`  1000x runValidation: ${ms.toFixed(3)}ms (${(ms / 1000).toFixed(4)}ms/call)`);
-    expect(ms).toBeLessThan(100);
   });
 });

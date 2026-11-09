@@ -38,12 +38,12 @@ export default function NCRPValidationDialog({ onClose }: { onClose: () => void 
 
   if (!results) {
     return (
-      <DialogShell title="NCRP Validation Suite" subtitle="24 casos vs tablas oficiales NCRP 147/151" gradientFrom="from-emerald-600" gradientTo="to-green-700" onClose={onClose}>
+      <DialogShell title="NCRP Validation Suite" subtitle={`${CASES.length} ejemplos publicados (NCRP 147 §5, NCRP 151 §7.1, TG-108) recalculados con el motor`} gradientFrom="from-emerald-600" gradientTo="to-green-700" onClose={onClose}>
         <div className="text-center py-8">
           <button onClick={run} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">
             <Play className="w-5 h-5" />Ejecutar Validacion
           </button>
-          <p className="mt-3 text-sm text-slate-500">24 casos: TVL, Scatter, Archer, Leakage, CT</p>
+          <p className="mt-3 text-sm text-slate-500">Cada caso llama al motor y lo compara con el valor publicado; falla si no lo reproduce.</p>
         </div>
       </DialogShell>
     );

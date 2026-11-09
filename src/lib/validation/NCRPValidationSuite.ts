@@ -1,17 +1,18 @@
 /**
- * NCRPValidationSuite — VV-01
- * Funciones puras, inmutables, composables.
- * Principios SOLID: SRP (una funcion = un calculo), OCP (casos extensibles),
- * ISP (tipos granulares), DIP (motor inyectable).
+ * NCRPValidationSuite — suite de validación del motor (diálogo «NCRP Validation Suite»).
+ *
+ * Fase 8b: antes cada caso era `calc: () => expected` (devolvía el valor esperado sin calcular) y la suite informaba
+ * siempre «24/24, motor validado»; además los «TVL» de NCRP 147 eran HVL. Ahora cada caso llama al motor real
+ * (`normativeBarrierEngine`, `ncrp147`, `ncrp151`, `calculadorasNormativas`, `tg108`) y lo compara con un valor
+ * PUBLICADO de un ejemplo resuelto: NCRP 147 §5 (pp. 72–83), NCRP 151 §7.1 (pp. 105–115) y AAPM TG-108 (Ejemplos 1–2,
+ * Tablas IV–V). Si el motor deja de reproducir el valor dentro de la tolerancia, el caso falla.
  */
-// Archer inline — NCRP 147 Eq.4.1: B(x)=[(1+β/α)·exp(αγx/cosθ)−β/α]^(−1/γ)
-const archerB = (alpha: number, beta: number, gamma: number, xMm: number, cosTheta: number = 1): number => {
-  const x = xMm / 10; // mm → cm
-  const exp = (alpha * gamma * x) / Math.max(0.01, cosTheta);
-  const inner = (1 + beta / alpha) * Math.exp(exp) - beta / alpha;
-  if (inner <= 0) return 0;
-  return inner ** (-1 / gamma);
-};
+import { calcularBarreraNormativa } from '../normativeBarrierEngine';
+import { barreraPrimaria } from '../ncrp147';
+import { cargaFuga, combinarDosFuentes, dispersion, fuga, primaria } from '../ncrp151';
+import { blindajePET, transmisionPET } from '../calculadorasNormativas';
+import { dosisSemanalTG108 } from '../tg108';
+import { MATERIALS, MODALITIES, type Barrier, type Modality, type RadiationSource } from '@/types/radshield';
 
 // ─── Tipos granulares (ISP) ───
 export interface ValCase {
@@ -78,42 +79,57 @@ const toCSV = (results: readonly ValResult[]): string =>
 
 // ─── Funcion pura: compliance text (SRP) ───
 const complianceText = (s: SuiteSummary): string =>
-  [`NCRP Validation: ${s.passed}/${s.total} OK`, `maxDiff=${s.maxDiff.toFixed(2)}% avgDiff=${s.avgDiff.toFixed(2)}%`, s.allPassed ? '✓ Motor validado' : `⚠ ${s.failed} casos fallaron`].join('\n');
+  [`NCRP Validation: ${s.passed}/${s.total} OK`, `maxDiff=${s.maxDiff.toFixed(2)}% avgDiff=${s.avgDiff.toFixed(2)}%`, s.allPassed ? '✓ El motor reproduce los ejemplos publicados (validado)' : `⚠ ${s.failed} casos fallaron`].join('\n');
 
-// ─── Casos de validacion (OCP: extensibles sin modificar) ───
-const TVL = (expected: number, id: string, name: string, source: string, cat: string): ValCase =>
-  ({ id, name, source, expected, tolerance: 5, category: cat, calc: () => expected });
+// ─── Casos: valor publicado frente al motor ───
+const modalidad = (id: string): Modality =>
+  MODALITIES.find((m) => m.id === id) ?? { id, name: id, description: id, category: 'diagnostic', standard: 'NCRP147', unit: 'mGy/paciente' };
+const fuente = (id: string, N: number): RadiationSource => ({
+  id: `s-${id}`, x: 0, y: 0, name: id, modality: modalidad(id), workloadValue: N, workloadUnit: 'pacientes/semana', isocenterHeight_m: 0, useFactor: 1,
+});
+const barrera = (d: number, extra: Partial<Barrier> = {}): Barrier => ({
+  id: 'b', x1: d / 2, y1: -2, x2: d / 2, y2: 2, name: 'barrera', barrierType: 'secondary', useFactor: 1,
+  occupancyFactor: 1, designGoal_mSv_per_wk: 0.02, materialCode: 'PB', ...extra,
+});
+/** Motor normativo del diseñador: fuente en (0, 0), punto en (d, 0), escala 1 m/px. */
+const motor = (mod: string, N: number, d: number, extra: Partial<Barrier> = {}) => {
+  const r = calcularBarreraNormativa(barrera(d, extra), [fuente(mod, N)], [{ x: d, y: 0 }], 1, MATERIALS);
+  if (!r) throw new Error('el motor no devolvió resultado');
+  return r;
+};
+const caso = (id: string, name: string, source: string, expected: number, tolerance: number, category: string, calc: () => number): ValCase =>
+  ({ id, name, source, expected, tolerance, category, calc });
+const f18 = { energia: 18 as const, W_Gy_semana: 450 };
+const f6 = { energia: 6 as const, W_Gy_semana: 225 };
+const nc = { P_Sv_semana: 20e-6, T: 0.025 };
+const tg = { nuclido: 'F18' as const, A0_MBq: 555, pacientesSemana: 40, tU_h: 1, tI_h: 0.5 };
 
 const CASES: readonly ValCase[] = [
-  // NCRP 147 Table A.2
-  TVL(0.25, '147-TVL-01', 'Pb TVL 100kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(0.27, '147-TVL-02', 'Pb TVL 125kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(0.29, '147-TVL-03', 'Pb TVL 150kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(20,   '147-TVL-04', 'Concrete TVL 100kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(26,   '147-TVL-05', 'Concrete TVL 125kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(30,   '147-TVL-06', 'Concrete TVL 150kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(4.2,  '147-TVL-07', 'Steel TVL 100kVp', 'NCRP 147 A.2', 'NCRP147'),
-  TVL(50,   '147-TVL-08', 'Gypsum TVL 100kVp', 'NCRP 147 A.2', 'NCRP147'),
-  // Scatter
-  TVL(0.0015, '147-SC-01', 'Scatter 100kVp 90°', 'NCRP 147 A.3', 'NCRP147'),
-  TVL(0.0018, '147-SC-02', 'Scatter 125kVp 90°', 'NCRP 147 A.3', 'NCRP147'),
-  TVL(0.0022, '147-SC-03', 'Scatter 150kVp 90°', 'NCRP 147 A.3', 'NCRP147'),
-  // Archer
-  { id: '147-ARCH-01', name: 'Archer B 1mmPb 120kVp', source: 'NCRP 147 Eq.4.1', expected: 0.453, tolerance: 5, category: 'NCRP147', calc: () => archerB(2.246, 7.08, 0.547, 1.0) },
-  // NCRP 151 Table B.1-B.6
-  TVL(370, '151-P-01', 'Concrete 6MV pri', 'NCRP 151 B.1', 'NCRP151'),
-  TVL(410, '151-P-02', 'Concrete 10MV pri', 'NCRP 151 B.1', 'NCRP151'),
-  TVL(440, '151-P-03', 'Concrete 15MV pri', 'NCRP 151 B.1', 'NCRP151'),
-  TVL(450, '151-P-04', 'Concrete 18MV pri', 'NCRP 151 B.1', 'NCRP151'),
-  TVL(280, '151-S-01', 'Concrete 6MV scat', 'NCRP 151 B.2', 'NCRP151'),
-  TVL(310, '151-S-02', 'Concrete 10MV scat', 'NCRP 151 B.2', 'NCRP151'),
-  TVL(340, '151-L-01', 'Concrete 6MV leak', 'NCRP 151 B.5', 'NCRP151'),
-  TVL(370, '151-L-02', 'Concrete 10MV leak', 'NCRP 151 B.5', 'NCRP151'),
-  TVL(10,  '151-L-03', 'Lead 6MV leak', 'NCRP 151 B.6', 'NCRP151'),
-  TVL(11,  '151-L-04', 'Lead 10MV leak', 'NCRP 151 B.6', 'NCRP151'),
-  // BIR 2012
-  { id: 'BIR-CT-01', name: 'CTDIvol→DLP', source: 'BIR 2012 Ch.3', expected: 1050, tolerance: 5, category: 'BIR', calc: () => 15 * 70 },
-  { id: 'BIR-CT-02', name: 'Weekly kerma CT', source: 'BIR 2012 Ch.4', expected: 2.0, tolerance: 15, category: 'BIR', calc: () => 800 * 250 * 9e-5 / 9 },
+  // NCRP 147 §5 (tolerancias del informe: kerma ±4 %, espesor ±5 % por lectura de figuras/redondeo)
+  caso('147-5.1-K', 'Angiografía cardiaca: K_sec = 5.9 mGy/sem', 'NCRP 147 §5.1 p. 72', 5.9, 4, 'NCRP147', () => motor('angio-cardiac', 25, 4).kermaMax_mSv_semana),
+  caso('147-5.1-Pb', 'Angiografía cardiaca: 1.3 mm Pb', 'NCRP 147 §5.1 p. 72', 1.3, 5, 'NCRP147', () => motor('angio-cardiac', 25, 4).espesores_mm.PB),
+  caso('147-5.2-K', 'Tórax dedicado, primaria: K_P = 40 mGy/sem', 'NCRP 147 §5.2 p. 73', 40, 4, 'NCRP147', () => motor('rad-chest', 300, 3, { barrierType: 'primary' }).kermaMax_mSv_semana),
+  caso('147-5.2-Pb', 'Tórax dedicado, primaria: 2.2 mm Pb', 'NCRP 147 §5.2 p. 73', 2.2, 5, 'NCRP147', () => motor('rad-chest', 300, 3, { barrierType: 'primary' }).espesores_mm.PB),
+  caso('147-5.3.1.1-K', 'Piso bajo la mesa: K = 39 mGy/sem', 'NCRP 147 §5.3.1.1 p. 76', 39, 4, 'NCRP147', () => motor('rad-abdomen', 125, 4.1, { barrierType: 'primary', materialCode: 'CONCRETE235' }).kermaMax_mSv_semana),
+  caso('147-5.3.1.1-C', 'Piso bajo la mesa: 107 mm de concreto', 'NCRP 147 §5.3.1.1 p. 76', 107, 5, 'NCRP147', () => motor('rad-abdomen', 125, 4.1, { barrierType: 'primary', materialCode: 'CONCRETE235' }).espesores_mm.CONCRETE235),
+  caso('147-5.3.3.1', 'Muro del receptor de tórax: 1.3 mm Pb', 'NCRP 147 §5.3.3.1 p. 79', 1.3, 5, 'NCRP147', () => barreraPrimaria({
+    distribucion: 'rad_room_chest_bucky', material: 'lead', P_mGy_semana: 0.02, T: 0.2, U: 1, N_pacientes_semana: 125, dP_m: 2.5,
+  }).espesor_total_mm),
+  // NCRP 151 §7.1 (doble energía 18/6 MV; espesor ±1.5 %)
+  caso('151-7.1.1', 'Primaria en C (18 MV): 149.6 cm', 'NCRP 151 §7.1.1 p. 107', 149.6, 1.5, 'NCRP151', () => primaria(f18, { ...nc, U: 0.25, d_m: 7.2 }).espesor_cm),
+  caso('151-7.1.5-S18', 'Dispersión a 30° (18 MV): 46.1 cm', 'NCRP 151 §7.1.5 p. 114', 46.1, 1.5, 'NCRP151', () => dispersion(f18, { ...nc, U: 0.25, dsec_m: 7.2, theta_deg: 30 }).espesor_cm),
+  caso('151-7.1.5-L18', 'Fuga (18 MV): 37.3 cm', 'NCRP 151 §7.1.5 p. 114', 37.3, 1.5, 'NCRP151', () => fuga(f18, { ...nc, dL_m: 7.2 }).espesor_cm),
+  caso('151-7.1.5-T', 'Secundaria en A, total: 66.4 cm', 'NCRP 151 §7.1.5 p. 115', 66.4, 1.5, 'NCRP151', () => combinarDosFuentes([
+    { espesor_cm: combinarDosFuentes([dispersion(f18, { ...nc, U: 0.25, dsec_m: 7.2, theta_deg: 30 }), dispersion(f6, { ...nc, U: 0.25, dsec_m: 7.2, theta_deg: 30 })]), tvl_cm: 32, nombre: 'dispersión' },
+    { espesor_cm: combinarDosFuentes([fuga(f18, { ...nc, dL_m: 7.2 }), fuga(f6, { ...nc, dL_m: 7.2 })]), tvl_cm: 36, nombre: 'fuga' },
+  ])),
+  caso('151-7.1.4', 'IMRT: W_L(6 MV) = 945 Gy/sem', 'NCRP 151 §7.1.4 p. 112', 945, 0.1, 'NCRP151', () => cargaFuga({ ...f6, fraccionIMRT: 0.8, factorIMRT: 5 })),
+  // AAPM TG-108
+  caso('TG108-E1-B', 'Ejemplo 1 (captación, 4 m): B = 0.189', 'AAPM TG-108 Ejemplo 1', 0.189, 2, 'TG108', () => blindajePET({ ...tg, sala: 'captacion', d_m: 4, P_mSv_semana: 0.02, T: 1 }).B_requerida),
+  caso('TG108-E2-D', 'Ejemplo 2 (imagen, 3 m): 59.7 μSv/sem', 'AAPM TG-108 Ejemplo 2', 59.7, 2, 'TG108', () => dosisSemanalTG108({ ...tg, sala: 'imagen', d_m: 3 })),
+  caso('TG108-IV-Pb', 'Tabla V vs Tabla IV: 10 mm Pb, B = 0.2485', 'AAPM TG-108 Tablas IV–V', 0.2485, 5, 'TG108', () => transmisionPET('lead', 10)),
+  caso('TG108-IV-C', 'Tabla V vs Tabla IV: 10 cm concreto, B = 0.3987', 'AAPM TG-108 Tablas IV–V', 0.3987, 5, 'TG108', () => transmisionPET('concrete', 100)),
+  caso('TG108-IV-Fe', 'Tabla V vs Tabla IV: 5 cm hierro, B = 0.1479', 'AAPM TG-108 Tablas IV–V', 0.1479, 5, 'TG108', () => transmisionPET('iron', 50)),
 ];
 
 // ─── API publica: pipeline funcional ───

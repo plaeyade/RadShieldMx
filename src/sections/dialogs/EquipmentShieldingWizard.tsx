@@ -14,6 +14,7 @@ import {
   type CommercialEquipment
 } from '@/types/equipmentDB';
 import { MATERIALS_DB } from '@/lib/materialDatabase';
+import { blindajeEquipo } from '@/lib/blindajeEquipo';
 import {
   Wand2, ChevronRight, ChevronLeft, Download, Calculator, Ruler,
   Shield, FileText, Crosshair,
@@ -103,93 +104,14 @@ const STEPS = [
   { num: 5, label: 'Resultados', icon: FileText },
 ];
 
+// Fase 8a: el cálculo vive en `lib/blindajeEquipo` (NCRP 151 con `barreraMV`); ver su cabecera.
 function calculateShielding(state: WizardState): CalcResult[] {
-  const results: CalcResult[] = [];
-  const eq = state.equipment;
-  if (!eq) return results;
-
-  const W = state.workload_Gy_week;
-  const C1 = TECHNIQUE_C1[state.technique]?.C1 || 1.0;
-  const W_L = W * C1; // Modified workload per NCRP 151
-  const P = state.prefactor_P; // Design goal mSv/week
-  const d = state.distance_m;
-  const d0 = 1.0; // SAD = 1m
-
-  // Get TVL for selected material
-  const material = MATERIALS_DB.find(m => m.id === state.materialId);
-  if (!material) return results;
-
-  // Determine TVL based on equipment category
-  let tvl = 37; // Default concrete 6MV TVL in cm
-  if (eq.category === 'LINAC') {
-    const energyNum = parseFloat(state.energy_MeV.toString());
-    tvl = energyNum >= 10 ? 41 : energyNum >= 15 ? 44 : energyNum >= 18 ? 48 : 37;
-  } else if (eq.category === 'GammaKnife') {
-    tvl = material.TVL_primary_cm?.['1.25'] || 21; // Co-60
-  } else if (eq.category === 'HDR') {
-    tvl = material.TVL_primary_cm?.['0.38'] || 16; // Ir-192
-  } else if (eq.category === 'PET-CT') {
-    tvl = material.TVL_primary_cm?.['0.511'] || 56; // Annihilation photons
-  } else if (eq.category === 'SPECT') {
-    tvl = material.TVL_primary_cm?.['0.14'] || 21; // Tc-99m
-  } else if (eq.category === 'CT') {
-    tvl = material.TVL_primary_cm?.['0.14'] || 28; // ~140 kV equivalent
-  }
-
-  // Primary barrier (NCRP 151 Eq. 4.1)
-  const B_pri = (P * d * d) / (W_L * state.useFactor * d0 * d0);
-  if (B_pri > 0 && B_pri < 1) {
-    const n_pri = Math.log10(1 / B_pri);
-    const t_pri = n_pri * tvl;
-    results.push({
-      barrier: 'Barrera Primaria',
-      type: 'primary',
-      thickness_cm: t_pri,
-      thickness_mm: t_pri * 10,
-      transmission: B_pri,
-      dose_mSv_week: P,
-      meetsLimit: true,
-    });
-  }
-
-  // Secondary barrier — Leakage (NCRP 151 Eq. 4.4)
-  const leakagePercent = eq.leakagePercent || 0.1;
-  const B_leak = (P * d * d * 100) / (W_L * leakagePercent * state.occupancyFactor);
-  if (B_leak > 0 && B_leak < 1) {
-    const tvlLeak = tvl * 0.9; // Slightly lower for leakage
-    const n_leak = Math.log10(1 / B_leak);
-    const t_leak = n_leak * tvlLeak;
-    results.push({
-      barrier: 'Barrera Secundaria — Fuga',
-      type: 'leakage',
-      thickness_cm: t_leak,
-      thickness_mm: t_leak * 10,
-      transmission: B_leak,
-      dose_mSv_week: P * state.occupancyFactor,
-      meetsLimit: B_leak > 0,
-    });
-  }
-
-  // Secondary barrier — Scatter (NCRP 151 Eq. 4.5)
-  const alpha = 0.0005; // Scatter fraction for 400 cm²
-  const F = 400; // Field area cm²
-  const B_scat = (P * d * d * d0 * d0) / (alpha * W_L * F * state.occupancyFactor);
-  if (B_scat > 0 && B_scat < 1) {
-    const tvlScat = tvl * 0.85;
-    const n_scat = Math.log10(1 / B_scat);
-    const t_scat = n_scat * tvlScat;
-    results.push({
-      barrier: 'Barrera Secundaria — Dispersión',
-      type: 'scatter',
-      thickness_cm: t_scat,
-      thickness_mm: t_scat * 10,
-      transmission: B_scat,
-      dose_mSv_week: P * state.occupancyFactor,
-      meetsLimit: B_scat > 0,
-    });
-  }
-
-  return results;
+  if (!state.equipment) return [];
+  return blindajeEquipo({
+    categoria: state.equipment.category, energia_MeV: Number(state.energy_MeV), C1: TECHNIQUE_C1[state.technique]?.C1 || 1.0,
+    W_Gy_semana: state.workload_Gy_week, U: state.useFactor, T: state.occupancyFactor, P_mSv_semana: state.prefactor_P,
+    d_m: state.distance_m, materialId: state.materialId,
+  });
 }
 
 export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) {
@@ -204,7 +126,7 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
     occupancyFactor: 0.2,
     prefactor_P: 0.02,
     distance_m: 4,
-    materialId: 'concrete-ordinary',
+    materialId: 'concrete-normal-235',
     tvl_primary_cm: 37,
     tvl_secondary_cm: 33,
     results: null,
@@ -643,6 +565,9 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
+                  {state.results.length === 0 && (
+                    <p className="text-xs text-slate-600" data-testid="esw-no-aplica">Este asistente calcula aceleradores y Gamma Knife (NCRP 151). Para PET use «Espesor PET (TG-108)», para SPECT IPEM 109 y para TC el diseñador (NCRP 147 §5.6).</p>
+                  )}
                   {state.results.map((r, i) => (
                     <div key={i} className={`p-3 border-l-4 rounded ${r.meetsLimit ? 'border-l-green-500 bg-green-50' : 'border-l-red-500 bg-red-50'}`}>
                       <div className="flex items-center justify-between">

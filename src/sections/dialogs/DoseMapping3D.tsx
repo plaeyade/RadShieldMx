@@ -8,7 +8,7 @@
 // =============================================================================
 import { Suspense, useMemo, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Text, Instances, Instance } from '@react-three/drei';
+import { OrbitControls, Grid, Html, Instances, Instance } from '@react-three/drei';
 import { BoxGeometry } from 'three';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -120,7 +120,8 @@ function Scene({ mesh, showZones }: { mesh: DetectorMesh | MergedMapping; showZo
             <sphereGeometry args={[0.25, 16, 16]} />
             <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={1} />
           </mesh>
-          <Text position={[0, 0.6, 0]} fontSize={0.2} color="#f00">SOURCE</Text>
+          {/* Fase 8: <Text> de drei (troika) descarga la fuente de un CDN y fallaba sin red («Failed to fetch»). */}
+          <Html position={[0, 0.6, 0]} center><span style={{ color: '#f00', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>FUENTE</span></Html>
         </group>
       )}
 

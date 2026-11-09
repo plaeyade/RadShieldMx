@@ -13,8 +13,9 @@ let model: tf.LayersModel | null = null;
 let norms: FeatureNorms | null = null;
 let isTraining = false;
 
-const MODEL_KEY = "radshield-thickness-model";
-const NORMS_KEY = "radshield-thickness-norms";
+// Fase 8a: nueva clave para descartar modelos entrenados con los datos erróneos anteriores.
+const MODEL_KEY = "radshield-thickness-model-v2";
+const NORMS_KEY = "radshield-thickness-norms-v2";
 
 // ─── Build neural network ───
 function buildModel(): tf.LayersModel {
