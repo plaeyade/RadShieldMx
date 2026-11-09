@@ -18,35 +18,37 @@ const PYTHON_EXAMPLES = [
     code: `import numpy as np
 import math
 
-# NCRP 151 Shielding Calculation
+# NCRP 151 Shielding Calculation (primaria, Ec. 2.1 y 2.3)
+# Fase 9: P en Sv/semana y W en Gy/semana (antes P en mSv contra W en cGy) y TVL1/TVLe de la Tabla B.2
+# (antes un solo TVL para todo el espesor).
 def calculate_barrier_thickness(
-    workload_cGy_week=1000,
+    workload_Gy_week=500.0,
     use_factor=0.25,
     occupancy_factor=1.0,
     distance_m=5.0,
     design_goal_mSv_week=0.02,
-    tvl_cm=37.0  # TVL for concrete @ 6 MV
+    tvl1_cm=37.0,  # NCRP 151 Tabla B.2: concreto, 6 MV, primer TVL
+    tvle_cm=33.0,  # NCRP 151 Tabla B.2: concreto, 6 MV, TVL de equilibrio
 ):
-    """Calculate required barrier thickness (cm) per NCRP 151."""
-    B = (design_goal_mSv_week * distance_m**2) / (workload_cGy_week * use_factor * occupancy_factor)
-    n = -math.log10(B) if B > 0 else 10
-    thickness = n * tvl_cm
+    """Espesor de barrera primaria (cm) según NCRP 151 Ec. 2.1 (B) y Ec. 2.3 (t)."""
+    P_Sv_week = design_goal_mSv_week * 1e-3
+    B = (P_Sv_week * distance_m**2) / (workload_Gy_week * use_factor * occupancy_factor)
+    n = -math.log10(B) if 0 < B < 1 else 0.0
+    thickness = n * tvl1_cm if n <= 1 else tvl1_cm + (n - 1) * tvle_cm
     return {
         'transmission': B,
         'n_tvl': n,
         'thickness_cm': thickness,
         'thickness_mm': thickness * 10,
-        'standard_block': math.ceil(thickness / 20)  # 20 cm standard blocks
     }
 
 # Example: Primary barrier for LINAC 6 MV
 result = calculate_barrier_thickness(
-    workload_cGy_week=500,
+    workload_Gy_week=500.0,
     use_factor=0.25,
     occupancy_factor=0.2,
     distance_m=4.5,
     design_goal_mSv_week=0.02,
-    tvl_cm=37.0
 )
 
 for key, value in result.items():

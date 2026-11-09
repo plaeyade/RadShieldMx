@@ -185,9 +185,9 @@ function generateTallies(tallyTypes: string[]): string {
 
   if (tallyTypes.includes('f6')) {
     cards += 'c --- F6: Energy deposition (dose) ---\n';
-    cards += 'c  Multiply by 1.602e-10 MeV/J / (1.602e-13 Gy/J) = 1e3 to get Gy\n';
+    cards += 'c  F6 da MeV/g por particula: x 1.602e-10 (Gy por MeV/g) para obtener Gy por particula\n';
     cards += 'F6:p  1 20 30 10 11 12 13  $ Dose in all cells (MeV/g per source particle)\n';
-    cards += '*F6:p 1 20 30               $ Dose in units of jerks/g (1 jerk = 1 Gy for 1 MeV/g)\n';
+    cards += '*F6:p 1 20 30               $ Energia depositada en jerks/g (1 jerk/g = 1e9 J/g = 1e12 Gy)\n';
     cards += 'c\n';
   }
 

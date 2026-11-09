@@ -18,7 +18,8 @@ interface MaterialCost {
 }
 
 const DEFAULT_COSTS: MaterialCost[] = [
-  { code: 'CONCRETE235', name: 'Concreto normal 235 kg/cm2', pricePerM3_USD: 120, laborFactor: 1.0 },
+  // Fase 9: 235 kg/cm² es la resistencia f'c, no la densidad (concreto ordinario ≈ 2350 kg/m³).
+  { code: 'CONCRETE235', name: "Concreto normal (f'c 235 kg/cm², ρ ≈ 2350 kg/m³)", pricePerM3_USD: 120, laborFactor: 1.0 },
   { code: 'CONCRETE340', name: 'Concreto pesado 340 kg/cm2', pricePerM3_USD: 180, laborFactor: 1.2 },
   { code: 'HEAVY_BARYTE', name: 'Concreto pesado barita', pricePerM3_USD: 350, laborFactor: 1.3 },
   { code: 'HEAVY_IRON', name: 'Concreto pesado hierro', pricePerM3_USD: 420, laborFactor: 1.4 },

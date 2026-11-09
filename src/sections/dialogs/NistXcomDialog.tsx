@@ -73,7 +73,7 @@ export default function NistXcomDialog() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
             <Database className="w-4 h-4 text-emerald-500" />
-            NIST XCOM — Coeficientes de Atenuacion (v100)
+            NIST XCOM — Coeficientes de atenuación (haz estrecho, sin acumulación)
             <Badge variant="outline" className="text-[9px]">NIST Standard Reference Database 8</Badge>
           </DialogTitle>
         </DialogHeader>
