@@ -24,10 +24,10 @@ export default function CNSNSDigitalSubmission({ open, onOpenChange }: Props) {
   const errorFields = campos.filter((f) => f.status === 'error').length;
 
   const exportar = () => {
-    const datos = { proyecto: floorPlan.name, generado: new Date().toISOString(), aviso: 'Borrador generado por RadShield-MX a partir del proyecto; revisar, completar y firmar por el responsable.', secciones };
+    const datos = { borrador: true, documentoOficial: false, proyecto: floorPlan.name, generado: new Date().toISOString(), aviso: 'Borrador generado por RadShield-MX a partir del proyecto; revisar, completar y firmar por el responsable.', secciones };
     const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `formulario_cnsns_${floorPlan.id}.json`; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = `BORRADOR_no_oficial_formulario_cnsns_${floorPlan.id}.json`; a.click();
     URL.revokeObjectURL(url);
     toast.success('Formulario exportado (borrador)');
   };

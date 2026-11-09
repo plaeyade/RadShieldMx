@@ -50,11 +50,11 @@ describe('useServiceWorker static mode', () => {
 
   it('unregisters legacy RadShield service workers and clears owned caches', async () => {
     const unregister = vi.fn().mockResolvedValue(true);
-    const getRegistrations = vi.fn().mockResolvedValue([{ unregister }]);
+    const getRegistrations = vi.fn().mockResolvedValue([{ unregister, scope: `${window.location.origin}/` }]);
     const deleteCache = vi.fn().mockResolvedValue(true);
     setServiceWorkerMock({ getRegistrations });
     setCachesMock({
-      keys: vi.fn().mockResolvedValue(['radshield-v50', 'radshield-calcs-v50', 'vendor-cache']),
+      keys: vi.fn().mockResolvedValue(['radshield-v50', 'radshield-calcs-v50', 'radshield-/:v50', 'vendor-cache']),
       delete: deleteCache,
     });
 
@@ -63,7 +63,31 @@ describe('useServiceWorker static mode', () => {
     expect(unregister).toHaveBeenCalledTimes(1);
     expect(deleteCache).toHaveBeenCalledWith('radshield-v50');
     expect(deleteCache).toHaveBeenCalledWith('radshield-calcs-v50');
+    expect(deleteCache).toHaveBeenCalledWith('radshield-/:v50');
     expect(deleteCache).not.toHaveBeenCalledWith('vendor-cache');
+  });
+
+  it('Fase 9 (GitHub Pages): con base /RadShieldMx/ no toca registros ni cachés de otras rutas del mismo origen', async () => {
+    const propio = vi.fn().mockResolvedValue(true);
+    const ajeno = vi.fn().mockResolvedValue(true);
+    const o = window.location.origin;
+    const getRegistrations = vi.fn().mockResolvedValue([
+      { unregister: propio, scope: `${o}/RadShieldMx/` },
+      { unregister: ajeno, scope: `${o}/OtroSitio/` },
+    ]);
+    const deleteCache = vi.fn().mockResolvedValue(true);
+    setServiceWorkerMock({ getRegistrations });
+    setCachesMock({
+      keys: vi.fn().mockResolvedValue(['radshield-/RadShieldMx/:v50', 'radshield-/OtroSitio/:v50', 'radshield-v50', 'otro-cache']),
+      delete: deleteCache,
+    });
+
+    await clearRadShieldServiceWorkerState('/RadShieldMx/');
+
+    expect(propio).toHaveBeenCalledTimes(1);
+    expect(ajeno).not.toHaveBeenCalled();
+    expect(deleteCache).toHaveBeenCalledTimes(1);
+    expect(deleteCache).toHaveBeenCalledWith('radshield-/RadShieldMx/:v50');
   });
 
   it('keeps requestSync as a no-op when disabled', async () => {

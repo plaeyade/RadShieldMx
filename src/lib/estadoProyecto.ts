@@ -8,7 +8,24 @@
  * devuelve vacío o «Por completar».
  */
 import type { Barrier, FloorPlan, ModalityCategory } from '@/types/radshield';
-import { verificarBarrera, verificarPlano, type EstadoVerificacion, type FilaVerificacion } from './verificacionBlindaje';
+import { verificarBarrera as verificarBarreraBase, type EstadoVerificacion, type FilaVerificacion } from './verificacionBlindaje';
+
+/**
+ * Verificación para los diálogos del proyecto: sólo cuenta como «requerido» el espesor que dejó el motor normativo
+ * (`calculationTrace`). Un `requiredThickness_mm` sin traza (p. ej. tecleado en el editor de barreras, o 0 por un campo
+ * vacío) no es un resultado validado: la barrera queda «sin cálculo» y no se muestra esa cifra.
+ */
+export function verificarBarrera(b: Barrier): FilaVerificacion {
+  const v = verificarBarreraBase(b);
+  if (b.calculationTrace || v.requerido_mm === null) return v;
+  return { ...v, requerido_mm: null, margen_mm: null, dosisEstimada_mSv_sem: null, estado: 'SIN_CALCULO', nota: 'El espesor requerido no tiene traza del motor: ejecutar el cálculo.' };
+}
+
+export function verificarPlano(plano: FloorPlan) {
+  const filas = plano.barriers.map((b) => verificarBarrera(b));
+  const cuenta = (e: EstadoVerificacion) => filas.filter((f) => f.estado === e).length;
+  return { filas, resumen: { total: filas.length, cumple: cuenta('CUMPLE'), noCumple: cuenta('NO_CUMPLE'), pendientes: filas.length - cuenta('CUMPLE') - cuenta('NO_CUMPLE') } };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bitácora derivada del plano (sin servidor no hay registro de usuarios ni sesiones).
@@ -157,6 +174,8 @@ export interface SeccionFormulario { title: string; fields: CampoFormulario[] }
 
 const POR_COMPLETAR = 'Por completar';
 const mm = (v: number | null) => (v === null ? '—' : `${v.toFixed(0)} mm`);
+/** El requerido se redondea hacia arriba: mostrarlo redondeado hacia abajo invitaría a instalar de menos. */
+const mmReq = (v: number | null) => (v === null ? '—' : `${Math.ceil(v - 1e-9)} mm`);
 
 export function formularioCNSNS(plano: FloorPlan): SeccionFormulario[] {
   const pendiente = (label: string): CampoFormulario => ({ label, value: POR_COMPLETAR, status: 'pending' });
@@ -171,7 +190,7 @@ export function formularioCNSNS(plano: FloorPlan): SeccionFormulario[] {
     ? plano.barriers.map((b) => {
       const v = verificarBarrera(b);
       const status: EstadoCampo = v.estado === 'CUMPLE' ? 'complete' : v.estado === 'NO_CUMPLE' ? 'error' : 'pending';
-      return { label: b.name || b.id, value: `${b.materialCode} · requerido ${mm(v.requerido_mm)} · instalado ${mm(v.instalado_mm)} · ${v.estado.replace('_', ' ')}`, status };
+      return { label: b.name || b.id, value: `${b.materialCode} · requerido ${mmReq(v.requerido_mm)} · instalado ${mm(v.instalado_mm)} · ${v.estado.replace('_', ' ')}`, status };
     })
     : [{ label: 'Barreras', value: 'Sin barreras en el plano', status: 'error' }];
   const normas = Array.from(new Set(plano.barriers.map((b) => b.calculationTrace?.standard).filter((s): s is string => !!s)));
@@ -231,10 +250,12 @@ function dif(a: number | null | undefined, b: number | null | undefined): number
 }
 
 export const mmEntero = (v: number | null | undefined) => (typeof v === 'number' ? v.toFixed(0) : '—');
+/** Espesor requerido en mm enteros, redondeado hacia arriba (nunca por debajo de lo que pide el motor). */
+export const mmRequerido = (v: number | null | undefined) => (typeof v === 'number' ? String(Math.ceil(v - 1e-9)) : '—');
 export const deltaMm = (v: number | null) => (v === null ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(0)}`);
 
 export function comparacionCSV(c: ComparacionPlanos, nombreA: string, nombreB: string): string {
   const h = ['Barrera', `Requerido_${nombreA}_mm`, `Requerido_${nombreB}_mm`, 'Delta_requerido_mm', `Instalado_${nombreA}_mm`, `Instalado_${nombreB}_mm`, 'Delta_instalado_mm', `Estado_${nombreA}`, `Estado_${nombreB}`];
-  const filas = c.filas.map((f) => [f.barrera, mmEntero(f.a?.requerido_mm), mmEntero(f.b?.requerido_mm), deltaMm(f.deltaRequerido_mm), mmEntero(f.a?.instalado_mm), mmEntero(f.b?.instalado_mm), deltaMm(f.deltaInstalado_mm), f.a?.estado ?? '', f.b?.estado ?? '']);
+  const filas = c.filas.map((f) => [f.barrera, mmRequerido(f.a?.requerido_mm), mmRequerido(f.b?.requerido_mm), deltaMm(f.deltaRequerido_mm), mmEntero(f.a?.instalado_mm), mmEntero(f.b?.instalado_mm), deltaMm(f.deltaInstalado_mm), f.a?.estado ?? '', f.b?.estado ?? '']);
   return [h, ...filas].map((r) => r.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n');
 }

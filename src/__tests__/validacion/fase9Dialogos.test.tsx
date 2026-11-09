@@ -67,6 +67,26 @@ describe('lib/estadoProyecto: el estado del proyecto sale del plano y de la veri
     expect(m.find((x) => x.clave === 'sin_calculo')).toMatchObject({ barreras: 1, pendientes: 1, requeridoMax_mm: null });
   });
 
+  it('revisión: un requerido sin traza del motor (tecleado o 0) no cuenta como cálculo y nunca da «cumple»', () => {
+    const plano: FloorPlan = { ...structuredClone(PLANO), barriers: [
+      barrera('Manual', { requiredThickness_mm: 0, thickness_mm: 10 }),
+      barrera('Tecleado', { requiredThickness_mm: { concrete: 50 }, thickness_mm: 400 }),
+    ] };
+    expect(resumenProyecto(plano)).toMatchObject({ calculadas: 0, cumplen: 0, noCumplen: 0, pendientes: 2, requeridoMax_mm: null });
+    expect(requeridoContraInstalado(plano).map((f) => [f.estado, f.requerido_mm])).toEqual([['SIN_CALCULO', null], ['SIN_CALCULO', null]]);
+    expect(formularioCNSNS(plano)[2].fields.every((f) => f.status === 'pending' && !/CUMPLE/.test(f.value.replace('SIN CALCULO', '')))).toBe(true);
+  });
+
+  it('revisión: el requerido se muestra redondeado hacia arriba; instalado < requerido nunca cumple', () => {
+    const plano: FloorPlan = { ...structuredClone(PLANO), barriers: [
+      barrera('Justa', { requiredThickness_mm: { concrete: 1000.4 }, thickness_mm: 1000.2, calculationTrace: traza('NCRP151') }),
+    ] };
+    const campo = formularioCNSNS(plano)[2].fields[0];
+    expect(campo.value).toContain('requerido 1001 mm');
+    expect(campo.status).toBe('error');
+    expect(requeridoContraInstalado(plano)[0].estado).toBe('NO_CUMPLE');
+  });
+
   it('requerido contra instalado: diferencia relativa al requerido', () => {
     const f = requeridoContraInstalado(PLANO);
     expect(f.map((x) => x.estado)).toEqual(['CUMPLE', 'NO_CUMPLE', 'SIN_CALCULO']);

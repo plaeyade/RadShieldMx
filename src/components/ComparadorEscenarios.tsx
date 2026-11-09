@@ -11,7 +11,7 @@ import { ArrowRight, Save, Trash2 } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useEscenariosStore } from '@/stores/escenariosStore';
 import { ACTUAL } from '@/hooks/useComparacionEscenarios';
-import { deltaMm as delta, mmEntero as mm, type ComparacionPlanos } from '@/lib/estadoProyecto';
+import { deltaMm as delta, mmEntero as mm, mmRequerido as mmReq, type ComparacionPlanos } from '@/lib/estadoProyecto';
 import type { FilaVerificacion } from '@/lib/verificacionBlindaje';
 
 const ESTADO_CLASE: Record<string, string> = { CUMPLE: 'text-emerald-700', NO_CUMPLE: 'text-red-700' };
@@ -98,8 +98,8 @@ export function TablaComparacion({ c, nombreA, nombreB }: { c: ComparacionPlanos
             {c.filas.map((f, i) => (
               <tr key={`${f.barrera}-${i}`} className="border-t">
                 <td className="px-2 py-1 font-medium">{f.barrera}</td>
-                <td className="px-2 py-1 text-right font-mono">{mm(f.a?.requerido_mm)}</td>
-                <td className="px-2 py-1 text-right font-mono">{mm(f.b?.requerido_mm)}</td>
+                <td className="px-2 py-1 text-right font-mono">{mmReq(f.a?.requerido_mm)}</td>
+                <td className="px-2 py-1 text-right font-mono">{mmReq(f.b?.requerido_mm)}</td>
                 <td className="px-2 py-1 text-right font-mono">{delta(f.deltaRequerido_mm)}</td>
                 <td className="px-2 py-1 text-right font-mono">{mm(f.a?.instalado_mm)}</td>
                 <td className="px-2 py-1 text-right font-mono">{mm(f.b?.instalado_mm)}</td>

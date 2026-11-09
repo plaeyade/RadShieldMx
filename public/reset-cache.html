@@ -64,13 +64,20 @@
         status.textContent = 'Cleaning service workers and caches...';
         if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
           var registrations = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(registrations.map(function (registration) { return registration.unregister(); }));
+          // Sólo los registros dentro de la carpeta de esta página (en GitHub Pages el origen es compartido).
+          var basePath = new URL('./', window.location.href).pathname;
+          await Promise.all(registrations
+            .filter(function (registration) { return new URL(registration.scope).pathname.indexOf(basePath) === 0; })
+            .map(function (registration) { return registration.unregister(); }));
         }
         if ('caches' in window) {
           var names = await caches.keys();
           await Promise.all(
             names
-              .filter(function (name) { return name.indexOf('radshield-') === 0; })
+              .filter(function (name) {
+                var bp = new URL('./', window.location.href).pathname;
+                return name.indexOf('radshield-' + bp + ':') === 0 || (bp === '/' && /^radshield-(calcs-)?v\d+$/.test(name));
+              })
               .map(function (name) { return caches.delete(name); })
           );
         }

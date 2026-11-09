@@ -27,6 +27,8 @@ const statusConfig = {
   fail: { label: 'NO CUMPLE', color: 'bg-red-100 text-red-700 border-red-300', icon: AlertTriangle },
 };
 const mm = (v: number | null) => (v === null ? '—' : v.toFixed(1));
+// El requerido se redondea hacia arriba (a 0.1 mm): nunca se muestra menos de lo que pide el motor.
+const mmReq = (v: number | null) => (v === null ? '—' : (Math.ceil(v * 10 - 1e-9) / 10).toFixed(1));
 
 export default function LogFileAnalysisDialog({ open, onOpenChange }: LogFileAnalysisDialogProps) {
   const floorPlan = useCanvasStore((s) => s.floorPlan);
@@ -108,7 +110,7 @@ export default function LogFileAnalysisDialog({ open, onOpenChange }: LogFileAna
                             <TableCell><Badge className={`${cfg.color} text-[9px] h-5 px-1.5 gap-1`}><Icon className="w-3 h-3" />{cfg.label}</Badge></TableCell>
                             <TableCell className="text-xs font-medium">{f.barrera}</TableCell>
                             <TableCell className="text-xs">{f.material}</TableCell>
-                            <TableCell className="text-xs text-right font-mono">{mm(f.requerido_mm)}</TableCell>
+                            <TableCell className="text-xs text-right font-mono">{mmReq(f.requerido_mm)}</TableCell>
                             <TableCell className="text-xs text-right font-mono">{mm(f.instalado_mm)}</TableCell>
                             <TableCell className="text-xs text-right font-mono">
                               {f.diferencia_pct === null ? '—' : <span className={f.diferencia_pct < 0 ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}>{f.diferencia_pct > 0 ? '+' : ''}{f.diferencia_pct.toFixed(1)}%</span>}

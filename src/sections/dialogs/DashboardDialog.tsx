@@ -34,7 +34,7 @@ function DashboardContent({ onOpenChange }: { onOpenChange: (open: boolean) => v
     { title: 'Fuentes', value: String(resumen.fuentes), subtitle: `${resumen.barreras} barreras en el plano`, status: resumen.fuentes > 0 ? 'ok' : 'warning', icon: Activity, color: 'blue' },
     { title: 'Barreras calculadas', value: `${resumen.calculadas}/${resumen.barreras}`, subtitle: 'Con espesor requerido del motor', status: resumen.barreras > 0 && resumen.calculadas === resumen.barreras ? 'ok' : 'warning', icon: Shield, color: 'emerald' },
     { title: 'No cumplen', value: String(resumen.noCumplen), subtitle: `${resumen.pendientes} pendientes (sin cálculo o sin espesor)`, status: resumen.noCumplen > 0 ? 'critical' : resumen.pendientes > 0 ? 'warning' : 'ok', icon: AlertTriangle, color: 'amber' },
-    { title: 'Espesor requerido máx.', value: resumen.requeridoMax_mm === null ? '—' : `${(resumen.requeridoMax_mm / 10).toFixed(1)} cm`, subtitle: resumen.objetivoMax_mSv_semana === null ? 'Sin objetivo P' : `P máx. ${resumen.objetivoMax_mSv_semana} mSv/semana`, status: 'ok', icon: TrendingUp, color: 'violet' },
+    { title: 'Espesor requerido máx.', value: resumen.requeridoMax_mm === null ? '—' : `${(Math.ceil(resumen.requeridoMax_mm - 1e-9) / 10).toFixed(1)} cm`, subtitle: resumen.objetivoMax_mSv_semana === null ? 'Sin objetivo P' : `P máx. ${resumen.objetivoMax_mSv_semana} mSv/semana`, status: 'ok', icon: TrendingUp, color: 'violet' },
   ];
   const COL: Record<string, string> = {
     blue: 'bg-blue-50 border-blue-200 text-blue-700',
@@ -107,7 +107,7 @@ function DashboardContent({ onOpenChange }: { onOpenChange: (open: boolean) => v
                             <td className="px-3 py-2 text-center">{completo(m) ? <CheckCircle className="mx-auto h-4 w-4 text-green-500" /> : <div className="mx-auto h-4 w-4 rounded-full border-2 border-amber-400" />}</td>
                             <td className="px-3 py-2 text-center text-xs">{m.barreras}</td>
                             <td className="px-3 py-2 text-center font-mono text-xs">{m.cumplen} / {m.noCumplen} / {m.pendientes}</td>
-                            <td className="px-3 py-2 text-center font-mono text-xs">{m.requeridoMax_mm === null ? '—' : m.requeridoMax_mm.toFixed(0)}</td>
+                            <td className="px-3 py-2 text-center font-mono text-xs">{m.requeridoMax_mm === null ? '—' : Math.ceil(m.requeridoMax_mm - 1e-9)}</td>
                             <td className="px-3 py-2 text-xs">{m.normas.join(', ') || '—'}</td>
                           </tr>
                         ))}

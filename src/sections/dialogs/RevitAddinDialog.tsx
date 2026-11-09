@@ -45,7 +45,9 @@ namespace RadShieldRevitAddin
           wall.LookupParameter("RS_ShieldingType")?.Set(barrier.barrierType);
           wall.LookupParameter("RS_DesignGoal_mSv")?.Set(barrier.designGoal);
           wall.LookupParameter("RS_MaterialCode")?.Set(barrier.materialCode);
-          wall.LookupParameter("RS_RequiredThickness_mm")?.Set(barrier.thickness_mm);
+          // Requerido = espesor del motor (null si la barrera no se calculó); instalado = espesor declarado del muro.
+          if (barrier.requiredThickness_mm.HasValue) wall.LookupParameter("RS_RequiredThickness_mm")?.Set(barrier.requiredThickness_mm.Value);
+          wall.LookupParameter("RS_ActualThickness_mm")?.Set(barrier.thickness_mm);
           // Estado de la verificacion exportado por RadShield (instalado >= requerido); sin dato no se marca PASS.
           wall.LookupParameter("RS_PassFail")?.Set(barrier.verificacion ?? "SIN VERIFICAR");
         }

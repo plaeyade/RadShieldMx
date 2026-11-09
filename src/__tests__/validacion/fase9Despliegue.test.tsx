@@ -51,6 +51,11 @@ describe('GitHub Pages', () => {
     const sw = leer('public/sw-v50.js');
     expect(sw).toMatch(/self\.registration \? self\.registration\.scope/);
     expect(sw).not.toMatch(/'\/index\.html'/);
+    // Revisión: origen compartido en <usuario>.github.io — cachés con la base en el nombre, sin caches.match global
+    // (que buscaría en cachés de otras rutas) y sin interceptar fuera de la base.
+    expect(sw).toMatch(/const PREFIJO = 'radshield-' \+ BASE/);
+    expect(sw).not.toMatch(/caches\.match\(/);
+    expect(sw).toMatch(/!url\.pathname\.startsWith\(BASE\)\) return;/);
   });
 
   it('carga diferida: CanvasArea sale de la entrada (lazy) y se redimensiona al montarse', () => {

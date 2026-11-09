@@ -150,6 +150,11 @@ Pruebas en `src/__tests__/validacion/fase9Dialogos.test.tsx` y `fase9Despliegue.
   pasan por `lib/rutaPublica` (WASM, service worker, imágenes de equipos y guías, Unity, bienvenida); el manifest y el
   service worker usan rutas relativas al alcance. `CanvasArea` y sus módulos de QA se cargan diferidos: la entrada baja
   de 1 399.9 kB a ≈ 850 kB (Babylon intacto tras `VISOR_3D_BABYLON`).
+- **Revisión independiente (Fase 9):** los diálogos del proyecto sólo aceptan como «requerido» el espesor con traza del
+  motor (`calculationTrace`; un valor tecleado o 0 queda «sin cálculo») y lo muestran redondeado hacia arriba; el
+  service worker y la limpieza de cachés quedan acotados a la base (origen compartido en `<usuario>.github.io`); el
+  add-in de Revit escribe el requerido real en `RS_RequiredThickness_mm` (antes el instalado); el borrador CNSNS se
+  exporta como `BORRADOR_no_oficial_…` con `documentoOficial: false`.
 
 ## Tabla completa
 
