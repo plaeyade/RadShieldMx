@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 execFileSync(process.execPath, ['scripts/f331-f338-static-release-close.mjs'], { stdio: 'pipe' });
 
@@ -15,7 +16,7 @@ const update = read('src/sections/dialogs/UpdateAppDialog.tsx');
 const changelog = read('CHANGELOG.md');
 const versions = read('MANUAL_VERSIONES_v50.md');
 const manual = read('MANUAL_USUARIO_v99.md');
-const dialog = read('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const dialog = readMedical3DDialogSource();
 
 expect('manifest exists', Boolean(manifest));
 if (manifest) {

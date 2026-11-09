@@ -19,7 +19,7 @@ describe('funciones de menú sin implementación', () => {
 
   it('ningún diálogo del menú es un Stub que devuelve null', () => {
     const dir = 'src/sections/dialogs';
-    const stubs = readdirSync(dir).filter((f) => /export default function Stub\(/.test(readFileSync(`${dir}/${f}`, 'utf8')));
+    const stubs = readdirSync(dir).filter((f) => /\.tsx?$/.test(f)).filter((f) => /export default function Stub\(/.test(readFileSync(`${dir}/${f}`, 'utf8')));
     expect(stubs).toEqual([]);
   });
 });

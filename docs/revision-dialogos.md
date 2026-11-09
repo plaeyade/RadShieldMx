@@ -29,10 +29,10 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 |---|---|
 | Diálogos revisados | 202 |
 | Estado OK / riesgo / error | 111 / 90 / 1 |
-| Prioridad alta / media / baja / sin acción | 0 / 1 / 109 / 92 |
+| Prioridad alta / media / baja / sin acción | 0 / 0 / 109 / 93 |
 | Calculadoras migradas al motor (Fase 7 + Fase 8a + MultiEnergySpectra) | 10 + 13 + 1 |
 | Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
-| Fase 8c: diálogos de prioridad media atendidos | 66 de 67 (queda la división de MedicalFloorPlan3D) |
+| Fase 8c + 8d: diálogos de prioridad media atendidos | 67 de 67 (8d: división de MedicalFloorPlan3D) |
 
 ### Hallazgos transversales (de la revisión de la Fase 7; los cuatro primeros se corrigieron en la Fase 8)
 
@@ -99,9 +99,21 @@ Pruebas en `src/__tests__/validacion/fase8c.test.tsx` (21 casos).
   equipo a la fuente seleccionada (`lib/equipoAFuente`); CategoryTools enruta diagnóstico, PET, SPECT y radiofármacos a
   sus calculadoras; MaterialLibrary y ReportManager en la barra lateral; Revit/IFC declara su escala (0.01 m/px);
   ShieldingDesignAgent ya estaba en la barra de herramientas.
-- **Pendiente:** dividir `MedicalFloorPlan3DDialog` (3 122 líneas; se cambió PCFSoftShadowMap por PCFShadowMap; el aviso
-  THREE.Clock viene de @react-three/fiber). Los diálogos sólo rotulados bajan a prioridad baja: falta conectarlos a datos
-  reales.
+- Los diálogos sólo rotulados bajan a prioridad baja: falta conectarlos a datos reales.
+
+### Fase 8d (último ítem de prioridad media)
+
+- `MedicalFloorPlan3DDialog` (3 122 líneas) queda en 66 líneas que componen `src/sections/dialogs/medical3d/`: estado y
+  escena (`useMedical3DEstado`, `useImportacionCadBim`), contratos visuales (`useContratosMedical3D`), exportaciones
+  (`useExportacionesMedical3D`), paneles de la barra lateral (`PanelFlujoVisual`, `PanelesIntegracion`, `PanelMotor3D`,
+  `ControlesVisuales`, `PanelesInspeccion`), visor (`VisorMedical3D`) y escena R3F (`escena/`: materiales, elementos,
+  capas, cámaras, `RoomScene`). Babylon sigue en `BabylonRuntimeSmokePreview` tras `VISOR_3D_BABYLON` (apagada).
+- Sin cambio de comportamiento: `src/__tests__/dialogs/MedicalFloorPlan3DDialog.test.tsx` (15 casos: render, presets,
+  modo dosis y componentes, ayudas, interruptores, estaciones F147, captura, base PBR, 12 exportaciones e instantáneas
+  del texto, del JSON de revisión, del OBJ y del tour) se escribió antes de dividir y pasa igual después.
+- Los dos `setState` dentro de efectos (mouse-look al salir del recorrido, estado del embebido Unity) pasan a ajuste
+  durante el render; los guardianes de contrato de `scripts/` leen el diálogo y sus módulos
+  (`scripts/medical3d-dialog-source.mjs`).
 
 ## Tabla completa
 
@@ -109,7 +121,6 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 
 | Diálogo | Función | Fuente de datos | Motor / cálculo | Estado | Hallazgo | Propuesta | Prioridad | Esfuerzo | Navegador |
 |---|---|---|---|---|---|---|---|---|---|
-| `MedicalFloorPlan3DDialog` | Plano médico 3D | plano del proyecto (useCanvasStore/props) | doseFieldEngine + sceneBuilder (r3f; Babylon tras bandera) | riesgo | Fase 8c: PCFSoftShadowMap → PCFShadowMap. Sigue con 3 122 líneas y la rama Babylon (bandera en false); el aviso THREE.Clock viene de @react-three/fiber. | Dividir el archivo. | media | alto | abre (app); calcula al pulsar «Entrada / vista general»; 2 aviso(s)/error(es) de consola |
 | `AIAssistantDialog` | Asistente IA/RAG | backend tRPC (opcional) o respuestas locales | ninguno (informativo) | riesgo | Sin backend responde con plantillas locales; no calcula. Correcto como orientación. | Indicar en la cabecera cuándo está en modo sin conexión. | baja | bajo | abre (app); consola sin errores |
 | `AdaptiveSamplingDialog` | Configuración de muestreo adaptativo | entrada del usuario | fórmula local (posiciones 0–1) | riesgo | Genera posiciones a lo largo de una barrera genérica; no se conecta con `generateSamplePoints` del motor ni con el plano. Textos en inglés. | Conectar con el muestreo del motor o retirar; traducir. | baja | medio | abre (app); consola sin errores |
 | `AirKermaOverlay` | Curva de kerma a lo largo de la barrera | props (distribuciones calculadas) | ninguno (gráfica) | riesgo | Sólo dibuja lo que recibe; textos en inglés («Design Goal», «Position Along Barrier»). | Traducir. | baja | bajo | no se monta aislado (le faltan props/proveedores que la app sí pasa); consola sin errores |
@@ -265,6 +276,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `MaterialComparisonDialog` | Comparación de materiales (XCOM) | entrada del usuario | ComparadorMateriales + XCOM (informativo) | OK | Fase 8c: comparador normativo arriba; la tabla de haz estrecho queda rotulada como no apta para dimensionar. | — | — | — | abre (app); consola sin errores |
 | `MaterialLibraryDialog` | Biblioteca de materiales | backend (props) | ninguno (informativo) | OK | Fase 8c: accesible desde la barra lateral (herramientas). | — | — | — | abre (app); consola sin errores |
 | `MazeCalculatorDialog` | Laberinto y puerta (NCRP 151 §2.4) | entrada del usuario | ncrp151Laberinto | OK | Validado con §7.1 (Fase 4). | — | — | — | abre (app); consola sin errores |
+| `MedicalFloorPlan3DDialog` | Plano médico 3D | plano del proyecto (useCanvasStore/props) | doseFieldEngine + sceneBuilder (r3f; Babylon tras bandera) | OK | Fase 8d: dividido en `medical3d/` (hooks de estado, contratos y exportaciones; paneles; escena R3F) con pruebas de no-regresión previas. Babylon sigue tras su bandera (false); el aviso THREE.Clock viene de @react-three/fiber. | Validar visualmente antes de activar Babylon. | sin acción | — | abre (app); calcula al pulsar «Entrada / vista general»; 2 aviso(s)/error(es) de consola |
 | `MemoriaAIWizard` | Asistente de memoria IA | plano del proyecto (useCanvasStore/props) | analyticMemoryEvidence + f* | OK | Fase 8c: TVL de los perfiles corregidos (Co-60 B.2, 511 keV TG-108, Tc-99m e Ir-192 con TVL y no HVL). | — | — | — | abre (montado aislado); calcula al pulsar «Calcular blindaje»; consola sin errores |
 | `ModelingToolboxDialog` | Calculadoras rápidas | entrada del usuario | fórmulas locales | OK | Fase 8c: skyshine con la Ec. 5.1 de NCRP 151; textos en español. | — | — | — | abre (app); calcula al pulsar «Quick Calculators»; consola sin errores |
 | `MultiEnergySpectraDialog` | Blindaje con espectros polienergéticos (NCRP 147) | entrada del usuario | espesorRequeridoHaz (Archer B.1/C.1) + blindajeTC (§5.6.1, Figs. A.2/A.3) | OK | Fase 8: el espectro entra por los ajustes de Archer de cada distribución de carga y, en TC, por el método DLP; se quitaron los TVL «TASMIP» sin fuente (0.30 mm Pb a 120 kVp). Reproduce §5.3.3.1 (1.3 mm Pb), §5.3.1.1 (107 mm) y §5.6.1 (1.5 mm Pb). HVL sólo informativos. | — | — | — | abre (app); consola sin errores |

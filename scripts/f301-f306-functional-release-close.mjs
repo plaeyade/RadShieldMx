@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
 const outDir = path.join(root, 'outputs', 'f301_f306_functional_release_close');
@@ -29,7 +30,7 @@ const f294 = readJson('outputs/f294_real_guided_smoke/f294_real_guided_smoke.jso
 const f200 = readJson('outputs/f200_static_frontend_release_gate/f200_static_frontend_release_gate.json');
 const canvasArea = read('src/sections/CanvasArea.tsx');
 const sidebar = read('src/sections/Sidebar.tsx');
-const medical3d = read('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const medical3d = readMedical3DDialogSource();
 const memoria = read('src/sections/dialogs/MemoriaAIWizard.tsx');
 const evidence = read('src/sections/dialogs/EvidencePackDialog.tsx');
 const packageJson = JSON.parse(read('package.json'));

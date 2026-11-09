@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
 const outDir = path.join(root, 'outputs', 'f296_f300_canvas_3d_workbench');
@@ -29,7 +30,7 @@ function sha256Text(text) {
 const sidebar = read('src/sections/Sidebar.tsx');
 const canvasArea = read('src/sections/CanvasArea.tsx');
 const quickSidebar = read('src/sections/CanvasQuickActionsSidebar.tsx');
-const medical3d = read('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const medical3d = readMedical3DDialogSource();
 const toolbar = read('src/sections/Toolbar.tsx');
 const f295 = readJson('outputs/f295_canvas_redesign_smoke/f295_canvas_redesign_smoke.json');
 const commitSha = git(['rev-parse', 'HEAD']);
