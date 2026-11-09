@@ -15,12 +15,17 @@ export interface TherapyNuclide {
   roomClass: 'L' | 'M' | 'H'; // Low, Medium, High energy classification
 }
 
+/**
+ * Revisión independiente de la Fase 8c: la TVL de plomo de I-131 (3 mm) y Lu-177 (0.7 mm) eran ≈ HVL.
+ * I-131: 11 mm (Delacroix et al., 2002). Lu-177: 2.1 mm plomo y 79 mm concreto = TVL de haz estrecho de XCOM a 208 keV.
+ * Pendiente de validar: Ac-225, Pb-212 (Tl-208 de 2.6 MeV en la cadena) y Ra-223, cuyas TVL parecen bajas.
+ */
 export const THERAPY_NUCLIDES: TherapyNuclide[] = [
-  { name: 'Lutetium-177', symbol: 'Lu-177', halfLife_h: 161.5, gammaConstant_uSvm2perGBqh: 0.0058, tenthValueLead_mm: 0.7, tenthValueConcrete_mm: 55, maxBetaEnergy_MeV: 0.497, meanBetaEnergy_MeV: 0.133, maxRangePb_mm: 0.4, patientDoseRate_1m_uSvh_perGBq: 0.46, roomClass: 'L' },
+  { name: 'Lutetium-177', symbol: 'Lu-177', halfLife_h: 161.5, gammaConstant_uSvm2perGBqh: 0.0058, tenthValueLead_mm: 2.1, tenthValueConcrete_mm: 79, maxBetaEnergy_MeV: 0.497, meanBetaEnergy_MeV: 0.133, maxRangePb_mm: 0.4, patientDoseRate_1m_uSvh_perGBq: 0.46, roomClass: 'L' },
   { name: 'Yttrium-90', symbol: 'Y-90', halfLife_h: 64.1, gammaConstant_uSvm2perGBqh: 0.0085, tenthValueLead_mm: 6.0, tenthValueConcrete_mm: 280, maxBetaEnergy_MeV: 2.28, meanBetaEnergy_MeV: 0.934, maxRangePb_mm: 4.0, patientDoseRate_1m_uSvh_perGBq: 0.15, roomClass: 'M' },
   { name: 'Actinium-225', symbol: 'Ac-225', halfLife_h: 238.8, gammaConstant_uSvm2perGBqh: 0.065, tenthValueLead_mm: 1.5, tenthValueConcrete_mm: 120, maxBetaEnergy_MeV: 0.05, meanBetaEnergy_MeV: 0.02, maxRangePb_mm: 0.05, patientDoseRate_1m_uSvh_perGBq: 2.5, roomClass: 'H' },
   { name: 'Lead-212', symbol: 'Pb-212', halfLife_h: 10.6, gammaConstant_uSvm2perGBqh: 0.028, tenthValueLead_mm: 2.0, tenthValueConcrete_mm: 150, maxBetaEnergy_MeV: 0.34, meanBetaEnergy_MeV: 0.10, maxRangePb_mm: 0.5, patientDoseRate_1m_uSvh_perGBq: 1.8, roomClass: 'H' },
-  { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 3.0, tenthValueConcrete_mm: 170, maxBetaEnergy_MeV: 0.606, meanBetaEnergy_MeV: 0.192, maxRangePb_mm: 1.5, patientDoseRate_1m_uSvh_perGBq: 2.3, roomClass: 'M' },
+  { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 11, tenthValueConcrete_mm: 170, maxBetaEnergy_MeV: 0.606, meanBetaEnergy_MeV: 0.192, maxRangePb_mm: 1.5, patientDoseRate_1m_uSvh_perGBq: 2.3, roomClass: 'M' },
   { name: 'Radium-223', symbol: 'Ra-223', halfLife_h: 274.2, gammaConstant_uSvm2perGBqh: 0.016, tenthValueLead_mm: 5.0, tenthValueConcrete_mm: 250, maxBetaEnergy_MeV: 0.05, meanBetaEnergy_MeV: 0.02, maxRangePb_mm: 0.05, patientDoseRate_1m_uSvh_perGBq: 0.6, roomClass: 'H' },
 ];
 

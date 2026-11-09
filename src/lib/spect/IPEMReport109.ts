@@ -12,14 +12,23 @@ export interface SPECTRadionuclide {
   tenthValueLead_mm: number; tenthValueConcrete_mm: number;
 }
 
+/**
+ * TVL (mm). Revisión independiente de la Fase 8c: varias TVL eran en realidad HVL o menores (no conservador).
+ * - Plomo: TVL de Delacroix et al. (2002), Radionuclide and Radiation Protection Data Handbook, recogidas en las
+ *   fichas de isótopos de la Universidad de Cincinnati: I-123 2 mm, I-131 11 mm, In-111 3 mm, Ga-67 6 mm.
+ *   Tl-201: 1.3 mm = TVL de haz estrecho (XCOM) a 167 keV, la línea más penetrante (10 %), que domina tras 1–2 TVL.
+ * - Concreto (2.35 g/cm³): TVL de haz estrecho de XCOM a la línea más penetrante relevante (Tc-99m 140 keV → 66 mm,
+ *   Tl-201 167 keV → 72, I-123 159 keV → 70, Ga-67 300 keV → 92, In-111 245 keV → 85, Sm-153 103 keV → 58).
+ *   Sin acumulación siguen siendo un mínimo: en concreto la TVL de banda ancha es mayor.
+ */
 export const SPECT_RADIONUCLIDES: SPECTRadionuclide[] = [
-  { name: 'Technetium-99m', symbol: 'Tc-99m', halfLife_h: 6.01, gamma_MeV: 0.140, photonYield: 0.885, gammaConstant_uSvm2perGBqh: 0.0593, tenthValueLead_mm: 0.83, tenthValueConcrete_mm: 22 },
-  { name: 'Thallium-201', symbol: 'Tl-201', halfLife_h: 73.1, gamma_MeV: 0.135, photonYield: 0.53, gammaConstant_uSvm2perGBqh: 0.0364, tenthValueLead_mm: 0.70, tenthValueConcrete_mm: 18 },
-  { name: 'Iodine-123', symbol: 'I-123', halfLife_h: 13.2, gamma_MeV: 0.159, photonYield: 0.83, gammaConstant_uSvm2perGBqh: 0.0583, tenthValueLead_mm: 0.50, tenthValueConcrete_mm: 42 },
-  { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gamma_MeV: 0.364, photonYield: 0.81, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 3.0, tenthValueConcrete_mm: 170 },
-  { name: 'Gallium-67', symbol: 'Ga-67', halfLife_h: 78.3, gamma_MeV: 0.093, photonYield: 0.65, gammaConstant_uSvm2perGBqh: 0.0215, tenthValueLead_mm: 0.80, tenthValueConcrete_mm: 65 },
-  { name: 'Indium-111', symbol: 'In-111', halfLife_h: 67.3, gamma_MeV: 0.171, photonYield: 0.90, gammaConstant_uSvm2perGBqh: 0.0479, tenthValueLead_mm: 0.95, tenthValueConcrete_mm: 78 },
-  { name: 'Samarium-153', symbol: 'Sm-153', halfLife_h: 46.3, gamma_MeV: 0.103, photonYield: 0.28, gammaConstant_uSvm2perGBqh: 0.0092, tenthValueLead_mm: 0.55, tenthValueConcrete_mm: 45 },
+  { name: 'Technetium-99m', symbol: 'Tc-99m', halfLife_h: 6.01, gamma_MeV: 0.140, photonYield: 0.885, gammaConstant_uSvm2perGBqh: 0.0593, tenthValueLead_mm: 0.83, tenthValueConcrete_mm: 66 },
+  { name: 'Thallium-201', symbol: 'Tl-201', halfLife_h: 73.1, gamma_MeV: 0.135, photonYield: 0.53, gammaConstant_uSvm2perGBqh: 0.0364, tenthValueLead_mm: 1.3, tenthValueConcrete_mm: 72 },
+  { name: 'Iodine-123', symbol: 'I-123', halfLife_h: 13.2, gamma_MeV: 0.159, photonYield: 0.83, gammaConstant_uSvm2perGBqh: 0.0583, tenthValueLead_mm: 2.0, tenthValueConcrete_mm: 70 },
+  { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gamma_MeV: 0.364, photonYield: 0.81, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 11, tenthValueConcrete_mm: 170 },
+  { name: 'Gallium-67', symbol: 'Ga-67', halfLife_h: 78.3, gamma_MeV: 0.093, photonYield: 0.65, gammaConstant_uSvm2perGBqh: 0.0215, tenthValueLead_mm: 6.0, tenthValueConcrete_mm: 92 },
+  { name: 'Indium-111', symbol: 'In-111', halfLife_h: 67.3, gamma_MeV: 0.171, photonYield: 0.90, gammaConstant_uSvm2perGBqh: 0.0479, tenthValueLead_mm: 3.0, tenthValueConcrete_mm: 85 },
+  { name: 'Samarium-153', symbol: 'Sm-153', halfLife_h: 46.3, gamma_MeV: 0.103, photonYield: 0.28, gammaConstant_uSvm2perGBqh: 0.0092, tenthValueLead_mm: 0.55, tenthValueConcrete_mm: 58 },
 ];
 
 // IPEM 109 — Scatter factors per procedure type (kerma scatter per patient at 1m, uGy)

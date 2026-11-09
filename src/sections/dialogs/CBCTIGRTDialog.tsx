@@ -44,13 +44,22 @@ function CBCTContent({ onOpenChange }: { onOpenChange: (open: boolean) => void }
   // DLP de NCRP 147 §5.6.1 (K¹ = 1.2·3×10⁻⁴·DLP por estudio) y la transmisión de secundaria de TC (Figs. A.2/A.3).
   const calculate = useCallback(() => {
     const kvp: 120 | 140 = Number(kVp) <= 120 ? 120 : 140;
-    const r = blindajeTC({
-      N_cuerpo: Number(patientsPerWeek), DLP_cuerpo_mGy_cm: Number(dlp), N_cabeza: 0, DLP_cabeza_mGy_cm: 0,
-      factorContraste: Number(scansPerPatient), kvp, d_m: Number(distanceM), P_mSv_semana: Number(P), T: Number(T),
-    });
+    let r: ReturnType<typeof blindajeTC>;
+    try {
+      r = blindajeTC({
+        N_cuerpo: Number(patientsPerWeek), DLP_cuerpo_mGy_cm: Number(dlp), N_cabeza: 0, DLP_cabeza_mGy_cm: 0,
+        factorContraste: Number(scansPerPatient), kvp, d_m: Number(distanceM), P_mSv_semana: Number(P), T: Number(T),
+      });
+    } catch (e) {
+      // Sin esto la excepción dejaba visible el resultado anterior (posiblemente «basta») con entradas inválidas.
+      setResult(null); setRecommendation(null);
+      toast.error((e as Error).message);
+      return;
+    }
     const B_existente = transmisionTC(Number(shieldingMm), 'concrete', kvp);
     const dosis = Number(T) * r.K_mGy_semana * B_existente;
-    setResult({ K: r.K_mGy_semana, B_existente, dosis, cumple: dosis <= Number(P), plomo: r.espesores_mm.lead, concreto: r.espesores_mm.concrete });
+    // NaN (entradas no numéricas) no cumple: la comparación con NaN es falsa.
+    setResult({ K: r.K_mGy_semana, B_existente, dosis, cumple: Number.isFinite(dosis) && dosis <= Number(P), plomo: r.espesores_mm.lead, concreto: r.espesores_mm.concrete });
     setRecommendation(getCBCTShieldingRecommendation({
       kVp: Number(kVp), hasMaze: true, distance_to_control_m: Number(distanceM),
     }));

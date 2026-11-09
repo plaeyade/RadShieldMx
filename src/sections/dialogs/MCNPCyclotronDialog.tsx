@@ -123,7 +123,9 @@ export default function MCNPCyclotronDialog({ open, onOpenChange }: MCNPCyclotro
     const tvla_cm = mat.tvla;
     const nTVL = B_required < 1 ? -Math.log10(B_required) : 0;
     const thickness_cm = nTVL * tvla_cm;
-    return { Q_n_simplified, H_1m, B_required, thickness_cm, tvla_cm, nTVL, P };
+    // Sin coeficiente de conversión o con datos no finitos no hay estimación: el estado no puede ser «CUMPLE».
+    const valido = h_Sv_cm2 > 0 && Number.isFinite(H_1m) && Number.isFinite(thickness_cm);
+    return { Q_n_simplified, H_1m, B_required, thickness_cm, tvla_cm, nTVL, P, valido };
   }, [selectedCyc, shieldMaterial, workload_h_week, h_Sv_cm2]);
 
   // Generate MCNP input
@@ -373,10 +375,11 @@ PRINT   40 110 120
                 <tbody>
                   {[
                     ['Wall thickness (cm)', selectedCyc.bunkerWall_m * 100, Math.max(0, neutronCalcs.thickness_cm)],
-                    ['Roof thickness (cm)', selectedCyc.roofThickness_m * 100, Math.max(0, neutronCalcs.thickness_cm * 0.7)],
+                    // Techo: mismo estimado que el muro (antes × 0.7 sin referencia, que daba «CUMPLE» con el 70 % del espesor).
+                    ['Roof thickness (cm)', selectedCyc.roofThickness_m * 100, Math.max(0, neutronCalcs.thickness_cm)],
                                       ].map(([label, design, calc], i) => {
                     // Cumple si el diseño es al menos el estimado (antes el estado estaba invertido: «PASS» si lo calculado superaba al diseño).
-                    const status = (design as number) >= (calc as number) ? 'CUMPLE' : 'INSUFICIENTE';
+                    const status = !neutronCalcs.valido ? 'SIN DATOS' : (design as number) >= (calc as number) ? 'CUMPLE' : 'INSUFICIENTE';
                     const color = status === 'CUMPLE' ? 'text-emerald-600' : 'text-amber-600';
                     return (
                       <tr key={i} className="border-b border-slate-100">
