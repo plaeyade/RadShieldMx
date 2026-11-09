@@ -2,6 +2,7 @@
 // Basado en datos extraidos de Memoria Analitica HAHS Pedregal + Informe Anual 2024
 
 import CalculadoraCo60 from './CalculadoraCo60';
+import { OBJETIVO_GAMMA_KNIFE, blindajeCo60 } from '@/lib/calculadorasNormativas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +16,12 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
+/** Ejemplo S1a: kerma semanal sin blindaje (μSv) con las tasas del fabricante a 2.5 m (0.42 × 60 h + 1.2 × 96 h). */
+const S1A_D_ACUM_uSv = 0.42 * 60 + 1.2 * 96;
+
 export default function GammaKnifeDialog({ open, onOpenChange }: Props) {
+  const P_uSv = OBJETIVO_GAMMA_KNIFE.P_mSv_semana * 1000;
+  const s1a = blindajeCo60(S1A_D_ACUM_uSv / 1000, OBJETIVO_GAMMA_KNIFE.P_mSv_semana, 1, 1);
   const handleExport = () => {
     const lines: string[] = [];
     lines.push('GAMMA KNIFE — Datos Tecnicos y de Blindaje (Elekta Esprit/Perfexion)');
@@ -191,11 +197,12 @@ export default function GammaKnifeDialog({ open, onOpenChange }: Props) {
               </div>
 
               <h3 className="text-sm font-semibold text-gray-800 mt-4 flex items-center gap-2"><Shield className="w-4 h-4 text-cyan-600" /> Resultados del expediente — Memoria HAHS Pedregal (transcritos, no recalculados)</h3>
+              <div className="text-[10px] text-amber-700">* S1a: el expediente usa P = 400 μSv/semana; el objetivo de NCRP 147/151 para área controlada es 100 μSv/semana (ver «Calculo»).</div>
               <div className="overflow-auto">
                 <table className="w-full text-[10px] border-collapse">
                   <thead><tr className="bg-gray-100"><th className="p-1 border">Punto</th><th className="p-1 border">Colindancia</th><th className="p-1 border">Tipo</th><th className="p-1 border">P (uSv/sem)</th><th className="p-1 border">T</th><th className="p-1 border">Concreto (cm)</th><th className="p-1 border">Plomo (mm)</th></tr></thead>
                   <tbody>
-                    <tr><td className="p-1 border">S1a</td><td className="p-1 border">Cuarto control</td><td className="p-1 border">Controlada</td><td className="p-1 border text-center">400</td><td className="p-1 border text-center">1</td><td className="p-1 border text-center font-bold">11.47</td><td className="p-1 border text-center">29.16</td></tr>
+                    <tr><td className="p-1 border">S1a</td><td className="p-1 border">Cuarto control</td><td className="p-1 border">Controlada</td><td className="p-1 border text-center" title={`Criterio del expediente; ${OBJETIVO_GAMMA_KNIFE.fuente}`}>400*</td><td className="p-1 border text-center">1</td><td className="p-1 border text-center font-bold">11.47</td><td className="p-1 border text-center">29.16</td></tr>
                     <tr className="bg-gray-50"><td className="p-1 border">S1b</td><td className="p-1 border">Patio</td><td className="p-1 border">Supervisada</td><td className="p-1 border text-center">10</td><td className="p-1 border text-center">1/20</td><td className="p-1 border text-center">3.36</td><td className="p-1 border text-center">8.55</td></tr>
                     <tr><td className="p-1 border">S2a-c</td><td className="p-1 border">Terreno natural</td><td className="p-1 border">Supervisada</td><td className="p-1 border text-center">20</td><td className="p-1 border text-center">0</td><td className="p-1 border text-center">0</td><td className="p-1 border text-center">0</td></tr>
                     <tr className="bg-gray-50"><td className="p-1 border">S3a</td><td className="p-1 border">Terreno natural</td><td className="p-1 border">Supervisada</td><td className="p-1 border text-center">20</td><td className="p-1 border text-center">0</td><td className="p-1 border text-center">0</td><td className="p-1 border text-center">0</td></tr>
@@ -266,7 +273,7 @@ export default function GammaKnifeDialog({ open, onOpenChange }: Props) {
                 Kerma semanal sin blindaje en el punto a partir de las tasas del fabricante (haz encendido y apagado) y las horas por semana.
                 Valores iniciales: punto S1a del ejemplo (cuarto de control). Todos editables.
               </div>
-              <CalculadoraCo60 inicial={{ modo: 'tasa', tasaOn_uSv_h: 0.42, horasOn: 60, tasaOff_uSv_h: 1.2, horasOff: 96, P_mSv: 0.1, T: 1 }} />
+              <CalculadoraCo60 inicial={{ modo: 'tasa', tasaOn_uSv_h: 0.42, horasOn: 60, tasaOff_uSv_h: 1.2, horasOff: 96, P_mSv: OBJETIVO_GAMMA_KNIFE.P_mSv_semana, T: 1 }} />
 
               <div className="bg-gray-50 rounded-md p-3 border border-gray-100">
                 <div className="text-xs font-medium text-gray-700">Ejemplo practico — S1a (Cuarto de control)</div>
@@ -276,9 +283,13 @@ export default function GammaKnifeDialog({ open, onOpenChange }: Props) {
                   <p>D<sub>acum,on</sub> = 0.42 × 60 = 25.2 uSv/sem</p>
                   <p>D<sub>acum,off</sub> = 1.2 × 96 = 115.2 uSv/sem</p>
                   <p>D<sub>acum,total</sub> = 25.2 + 115.2 = <strong>140.4 uSv/sem</strong></p>
-                  <p>P = 400 μSv/semana (criterio del expediente), T = 1, U = 1</p>
-                  <p>B = P/(T·U·D<sub>acum</sub>) = 400/140.4 = 2.85 &gt; 1: <strong>no se requiere blindaje adicional</strong> en S1a con estas tasas.
-                    (La versión anterior invertía el cociente y daba 9.4 cm de concreto.)</p>
+                  <p data-testid="gk-p">P = {P_uSv.toFixed(0)} μSv/semana ({OBJETIVO_GAMMA_KNIFE.fuente}), T = 1, U = 1.
+                    El expediente usaba {(OBJETIVO_GAMMA_KNIFE.P_expediente_mSv_semana * 1000).toFixed(0)} μSv/semana, cuatro veces ese objetivo.</p>
+                  <p>B = P/(T·U·D<sub>acum</sub>) = {P_uSv.toFixed(0)}/{S1A_D_ACUM_uSv.toFixed(1)} = <span data-testid="gk-b">{s1a.B_requerida.toFixed(3)}</span>
+                    {s1a.B_requerida < 1
+                      ? <> → <strong data-testid="gk-t">{s1a.espesores_cm.concrete.toFixed(1)} cm de concreto o {(s1a.espesores_cm.lead * 10).toFixed(0)} mm de plomo</strong> (NCRP 151 Tabla B.2, Co-60) adicionales en S1a.</>
+                      : <>: <strong>no se requiere blindaje adicional</strong> en S1a con estas tasas.</>}
+                    {' '}(Una versión anterior invertía el cociente y daba 9.4 cm de concreto.)</p>
                   <p className="text-gray-500 italic">Nota: Los valores reales de la memoria pueden variar segun tasas exactas del fabricante y distancias especificas del proyecto.</p>
                 </div>
               </div>

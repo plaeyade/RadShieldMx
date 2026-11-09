@@ -34,9 +34,9 @@
  * sin blindaje y en una esquina entrante se elimina el solape (sin doble crédito).
  *
  * Incidencia oblicua:
- * - Primaria y fuga NCRP 151: espesor oblicuo, con la corrección del §2.2 (p. 24: θ > 45°, ≈ 1 HVL en alta
- *   energía y ≈ 2 HVL en baja energía, concreto; `correccionOblicuidad`, aplicada si B < 10⁻³) y sin crédito
- *   adicional más allá de 70° (tope conservador del motor).
+ * - Primaria y fuga NCRP 151: espesor oblicuo t/cos θ hasta 45°; para θ > 45° la transmisión a incidencia
+ *   normal (`correccionOblicuidad`, §2.2 p. 24 y NCRP 147: nunca menos conservadora que el espesor perpendicular,
+ *   para cualquier B y material).
  * - Dispersión del paciente: espesor normal, sin crédito por oblicuidad. NCRP 151 no da un criterio único
  *   (sus ejemplos se contradicen) y los TVL de la Tabla B.5a ya son de haz ancho: conservador.
  * - Diagnóstico y resto: espesor oblicuo con crédito limitado a θ ≤ 60° (como en la Fase 1).
@@ -120,7 +120,7 @@ export interface CruceBarrera {
   factorOblicuidad: number;
   capas: CapaCruzada[];
   transmision: number;
-  /** HVL descontados por la corrección de oblicuidad de NCRP 151 §2.2, p. 24 (0, 1 o 2). */
+  /** HVL restituidos por la corrección de oblicuidad (θ > 45° → incidencia normal): log₂(B_normal/B_oblicua). */
   hvlDescontados: number;
 }
 
@@ -528,7 +528,7 @@ function transmitirTVL151(
     return { ...capa, recorrido_mm: rec, transmision: bo, metodo };
   });
   const theta = Math.acos(Math.min(1, g.cosTheta)) / RAD;
-  const c = correccionOblicuidad(Bo, Bn, theta, e);
+  const c = correccionOblicuidad(Bo, Bn, theta);
   return cruce(g, recorrido, capas, clampTransmission(c.transmision), c.hvlDescontados);
 }
 

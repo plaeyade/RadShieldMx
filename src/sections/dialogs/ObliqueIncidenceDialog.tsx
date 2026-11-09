@@ -3,7 +3,7 @@
  *
  * Antes: t_eff = t/cos θ sin límite, que para θ > 45° sobrestima la atenuación (no conservador). Ahora usa
  * `incidenciaOblicua` (recorrido t/cos θ con tope de 70°, TVL₁/TVLₑ de NCRP 151 Tabla B.2 y la corrección de §2.2:
- * para θ > 45° y B < 10⁻³ se descuenta ≈ 1 HVL en rayos X de MV y ≈ 2 HVL en Co-60).
+ * para θ > 45° se usa la transmisión a incidencia normal, nunca menos conservadora que el espesor perpendicular).
  */
 import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -34,8 +34,8 @@ export default function ObliqueIncidenceDialog({ open, onClose }: Props) {
             <Badge variant="outline" className="text-[10px]">NCRP 151 §2.2</Badge>
           </DialogTitle>
           <DialogDescription className="text-[11px]">
-            Recorrido t/cos θ (tope 70°) con la corrección de NCRP 151 §2.2 para θ &gt; 45°: el espesor oblicuo sobrestima
-            la atenuación porque la radiación dispersada en la barrera sale por un camino más corto.
+            Recorrido t/cos θ (tope 70°) hasta 45°. Para θ &gt; 45° el espesor oblicuo sobrestima la atenuación (NCRP 151 §2.2)
+            y se usa la transmisión a incidencia normal (NCRP 147), nunca menos conservadora.
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +65,8 @@ export default function ObliqueIncidenceDialog({ open, onClose }: Props) {
         </div>
         {r.hvlDescontados > 0 && (
           <div className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded p-2" data-testid="obl-aviso">
-            θ &gt; 45° y B &lt; 10⁻³: se descuenta{r.hvlDescontados === 2 ? 'n 2 HVL (Co-60)' : ' 1 HVL (rayos X de MV)'} a la atenuación oblicua.
+            θ &gt; 45°: el espesor oblicuo sobrestima la atenuación (NCRP 151 §2.2); se usa la transmisión a incidencia normal
+            (NCRP 147), {r.hvlDescontados.toFixed(1)} HVL por encima de la oblicua.
           </div>
         )}
         {angleDeg > 70 && <div className="text-[11px] text-slate-500">Por encima de 70° no se acredita recorrido adicional (criterio conservador del motor).</div>}

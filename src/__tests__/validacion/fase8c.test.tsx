@@ -53,15 +53,17 @@ describe('Modelos locales → motores normativos (NCRP 151)', () => {
     dentro(valor('sky-h-10') / valor('sky-h-20'), 4, 0.01);
   });
 
-  it('incidencia oblicua (§2.2): ≤ 45° sólo t/cos θ; > 45° con B < 10⁻³ descuenta 1 HVL (MV) o 2 HVL (Co-60)', () => {
+  it('incidencia oblicua (§2.2): ≤ 45° sólo t/cos θ; > 45° transmisión a incidencia normal (≥ oblicua con 1 o 2 HVL)', () => {
     const a30 = incidenciaOblicua(18, 'concrete', 150, 30);
     expect(a30.hvlDescontados).toBe(0);
     dentro(a30.recorrido_cm, 150 / Math.cos(Math.PI / 6), 1e-9);
     const a60 = incidenciaOblicua(18, 'concrete', 150, 60);
-    expect(a60.hvlDescontados).toBe(1);
-    dentro(a60.B_corregida, 2 * a60.B_oblicua, 1e-9);
+    expect(a60.hvlDescontados).toBeGreaterThan(1);
+    dentro(a60.B_corregida, a60.B_normal, 1e-9);
+    expect(a60.B_corregida).toBeGreaterThanOrEqual(2 * a60.B_oblicua);
     const co = incidenciaOblicua('Co60', 'concrete', 100, 60);
-    dentro(co.B_corregida, 4 * co.B_oblicua, 1e-9);
+    dentro(co.B_corregida, co.B_normal, 1e-9);
+    expect(co.B_corregida).toBeGreaterThanOrEqual(4 * co.B_oblicua);
     // Tope de 70°: 85° no acredita más recorrido que 70°.
     expect(incidenciaOblicua(6, 'concrete', 100, 85).recorrido_cm).toBeCloseTo(incidenciaOblicua(6, 'concrete', 100, 70).recorrido_cm, 9);
   });
@@ -83,7 +85,7 @@ describe('Modelos locales → motores normativos (NCRP 151)', () => {
     dentro(b.B_requerida, 0.0195, 0.01);
   });
 
-  it('Gamma Knife: la fórmula ya no invierte el cociente; S1a (140.4 μSv/semana, P = 400) no requiere blindaje', () => {
+  it('Gamma Knife: la fórmula ya no invierte el cociente; con el P = 400 del expediente S1a (140.4 μSv/semana) no requeriría blindaje', () => {
     const r = blindajeCo60(0.1404, 0.4, 1);
     expect(r.espesores_cm.concrete).toBe(0);
     render(<GammaKnifeDialog open onOpenChange={() => {}} />);

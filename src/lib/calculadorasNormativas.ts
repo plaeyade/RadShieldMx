@@ -35,6 +35,18 @@ export const OBJETIVOS_DISENO = [
   { id: 'no_controlada', P_mSv_semana: NCRP_DESIGN_GOALS.uncontrolled, etiqueta: 'Área no controlada / público (0.02 mSv/semana)' },
 ] as const;
 
+/**
+ * Objetivo de diseño para el ejemplo Gamma Knife (S1a, cuarto de control; pendiente de la revisión 8c). El expediente
+ * usaba P = 400 μSv/semana, cuatro veces el objetivo de NCRP 147 §1.3 / NCRP 151 §1.2 para área controlada
+ * (0.1 mSv/semana); el de área no controlada es 0.02 mSv/semana. Se adopta el de NCRP salvo que el criterio de la
+ * CNSNS aplicable a la licencia sea más estricto: en ese caso cámbielo aquí o en el selector «Objetivo P».
+ */
+export const OBJETIVO_GAMMA_KNIFE = {
+  P_mSv_semana: NCRP_DESIGN_GOALS.controlled as number,
+  P_expediente_mSv_semana: 0.4,
+  fuente: 'NCRP 147 §1.3 / NCRP 151 §1.2: 0.1 mSv/semana en área controlada (verifique el criterio de la CNSNS de la licencia)',
+};
+
 /** Densidades nominales (g/cm³) de los materiales con datos normativos. Yeso: placa de yeso de NCRP 147 (0.705). */
 export const DENSIDAD_G_CM3: Record<string, number> = { lead: 11.35, concrete: 2.35, steel: 7.87, iron: 7.87, gypsum: 0.705 };
 export const NOMBRE_MATERIAL: Record<string, string> = {
@@ -363,8 +375,8 @@ export interface ResultadoOblicuo {
 }
 
 /**
- * Incidencia oblicua sobre una barrera de t cm: recorrido t/cos θ (tope 70°), corrección de NCRP 151 §2.2 para θ > 45°
- * y B < 10⁻³ (`correccionOblicuidad`), y el espesor a incidencia normal que da la misma transmisión.
+ * Incidencia oblicua sobre una barrera de t cm: recorrido t/cos θ (tope 70°); para θ > 45° la transmisión a incidencia
+ * normal (`correccionOblicuidad`, NCRP 151 §2.2 / NCRP 147), y el espesor a incidencia normal que da la misma transmisión.
  */
 export function incidenciaOblicua(e: EnergiaMV, material: MaterialNCRP151, t_cm: number, theta_deg: number): ResultadoOblicuo {
   const tvl = tvlPrimaria(e, material);
@@ -372,7 +384,7 @@ export function incidenciaOblicua(e: EnergiaMV, material: MaterialNCRP151, t_cm:
   const recorrido_cm = t_cm / Math.cos((th * Math.PI) / 180);
   const B_normal = transmisionTVL(t_cm, tvl);
   const B_oblicua = transmisionTVL(recorrido_cm, tvl);
-  const c = correccionOblicuidad(B_oblicua, B_normal, theta_deg, e);
+  const c = correccionOblicuidad(B_oblicua, B_normal, theta_deg);
   return { B_normal, B_oblicua, B_corregida: c.transmision, hvlDescontados: c.hvlDescontados, recorrido_cm, espesorEquivalenteNormal_cm: espesorTVL(c.transmision, tvl) };
 }
 
