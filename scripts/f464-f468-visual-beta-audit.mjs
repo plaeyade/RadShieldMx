@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const checks = [
   ['src/lib/medical3D/f464F468VisualBeta.ts', 'radshield-mx.medical3d.visual-beta.f464-f468.v1'],
@@ -21,7 +22,7 @@ const failures = [];
 for (const [file, marker] of checks) {
   let text = '';
   try {
-    text = readFileSync(file, 'utf8');
+    text = file === 'src/sections/dialogs/MedicalFloorPlan3DDialog.tsx' ? readMedical3DDialogSource() : readFileSync(file, 'utf8');
   } catch {
     failures.push(`${file}: missing file`);
     continue;

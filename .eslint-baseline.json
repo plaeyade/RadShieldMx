@@ -1,5 +1,5 @@
 {
- "total": 154,
+ "total": 143,
  "errores": {
   "api/ai-router.ts::@typescript-eslint/no-unused-vars": 1,
   "api/project-router.ts::@typescript-eslint/no-unused-vars": 1,
@@ -28,11 +28,10 @@
   "src/hooks/useWebGPU.ts::@typescript-eslint/no-unused-vars": 1,
   "src/hooks/useWebGPUHeatmap.ts::@typescript-eslint/no-unused-vars": 1,
   "src/hooks/useWebWorker.ts::react-hooks/set-state-in-effect": 1,
-  "src/pages/ShieldingDesigner.tsx::@typescript-eslint/no-unused-vars": 30,
+  "src/pages/ShieldingDesigner.tsx::@typescript-eslint/no-unused-vars": 28,
   "src/providers/trpc.tsx::react-refresh/only-export-components": 4,
   "src/sections/CanvasArea.tsx::@typescript-eslint/no-unused-vars": 2,
   "src/sections/CanvasArea.tsx::react-hooks/set-state-in-effect": 1,
-  "src/sections/Sidebar.tsx::@typescript-eslint/no-unused-vars": 2,
   "src/sections/StatusBar.tsx::@typescript-eslint/no-unused-vars": 1,
   "src/sections/Toolbar.tsx::@typescript-eslint/no-unused-vars": 31,
   "src/sections/WelcomeScreen.tsx::@typescript-eslint/no-unused-vars": 3,
@@ -47,21 +46,16 @@
   "src/sections/dialogs/DoseMapDialog.tsx::react-hooks/immutability": 2,
   "src/sections/dialogs/EvidencePackDialog.tsx::react-hooks/set-state-in-effect": 1,
   "src/sections/dialogs/GammaIndexAnalyzer.tsx::@typescript-eslint/no-unused-expressions": 2,
-  "src/sections/dialogs/IsodosisViewer.tsx::react-hooks/set-state-in-effect": 1,
   "src/sections/dialogs/MCCloudDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/MCCloudDialog.tsx::react-hooks/set-state-in-effect": 1,
   "src/sections/dialogs/MCResultsDialog.tsx::react-hooks/rules-of-hooks": 2,
-  "src/sections/dialogs/MedicalFloorPlan3DDialog.tsx::react-hooks/immutability": 3,
-  "src/sections/dialogs/MedicalFloorPlan3DDialog.tsx::react-hooks/set-state-in-effect": 2,
-  "src/sections/dialogs/MultiLayerShieldDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/NativeMCDialog.tsx::react-hooks/set-state-in-effect": 1,
-  "src/sections/dialogs/NeutronMazeDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/PACSRealDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/Parametric3DDialog.tsx::@typescript-eslint/no-unused-expressions": 2,
   "src/sections/dialogs/PerformanceDashboardDialog.tsx::react-hooks/purity": 3,
   "src/sections/dialogs/RealTime3DDialog.tsx::react-hooks/immutability": 1,
   "src/sections/dialogs/RegulatoryReportDialog.tsx::react-hooks/purity": 1,
   "src/sections/dialogs/ShapesReconstructionDialog.tsx::react-hooks/set-state-in-effect": 1,
-  "src/sections/dialogs/SpatialDoseMapDialog.tsx::react-hooks/set-state-in-render": 2
+  "src/sections/dialogs/medical3d/escena/camaras.tsx::react-hooks/immutability": 3
  }
 }

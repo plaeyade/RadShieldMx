@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
 const outDir = path.join(root, 'outputs', 'f331_f338_static_release_close');
@@ -39,7 +40,7 @@ const f200 = readJson('outputs/f200_static_frontend_release_gate/f200_static_fro
 const f229 = readJson('outputs/f229_canvas_cad_e2e_harness/f229_canvas_cad_e2e_harness.json');
 const f231F236 = readJson('outputs/f231_f236_canvas_release_coverage/f231_f236_canvas_release_coverage.json');
 const f325F330 = readJson('outputs/f325_f330_medical_3d_photoreal/f325_f330_medical_3d_photoreal.json');
-const medical3DDialog = readText('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const medical3DDialog = readMedical3DDialogSource();
 const materialDialog = readText('src/sections/dialogs/MaterialComparisonDialog.tsx');
 const memoriaDialog = readText('src/sections/dialogs/MemoriaAIWizard.tsx');
 const evidencePack = readText('src/sections/dialogs/EvidencePackDialog.tsx');

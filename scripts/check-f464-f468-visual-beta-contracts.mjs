@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const contract = readFileSync('src/lib/medical3D/f464F468VisualBeta.ts', 'utf8');
-const dialog = readFileSync('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx', 'utf8');
+const dialog = readMedical3DDialogSource();
 
 const requiredContractTokens = [
   'F464F468VisualBetaContract',

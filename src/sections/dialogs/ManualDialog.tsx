@@ -337,21 +337,17 @@ Para blindaje, el HVL efectivo depende del espectro completo, no solo del kVp:
 
 **Aplicación:** Selección de HVL/TVL correctos para cada modalidad. Los valores TASMIP en RadShield-MX cubren 14 configuraciones: radiografía (50–150 kVp), fluoroscopía (60–110 kVp), CT (100–140 kVp), y mamografía (25–35 kVp).` },
 
-  { id:'B.9', t:'calc', title:'B.9 Patient Self-Shielding Factors', content:`**Recomendación B.9 — Factores de auto-atenuación del paciente**
+  { id:'B.9', t:'calc', title:'B.9 Autoatenuación del paciente', content:`**Recomendación B.9 — Autoatenuación del paciente**
 
-**Fundamento científico:** AAPM TG 108 (2010). "PET/CT Shielding Requirements." *Medical Physics*, 37(1): 290-291. Cherry, Sorenson & Phelps (2012). *Physics in Nuclear Medicine*. 4th ed. Saunders. Ch. 17 — Attenuation and Scatter.
+**Fundamento:** AAPM TG-108 (Madsen et al., 2006). *PET and PET/CT Shielding Requirements*. Med. Phys. 33(1):4-15.
 
-**Física:** El paciente atenúa parte de la radiación dispersada antes de que llegue a las paredes. La atenuación siguye la ley exponencial: I = I₀ × exp(−μ×x) donde μ = coeficiente de atenuación lineal, x = trayectoria a través del paciente.
+**PET (511 keV):** el cuerpo del paciente absorbe 0.36 de la radiación; la tasa a distancia se calcula con 0.64·Γ (para F-18, Γ_paciente = 0.092 μSv·m²/(MBq·h)). Las calculadoras PET de RadShield-MX ya lo incluyen; no se aplica dos veces.
 
-**Factores por modalidad (TG 108 Table 3):**
-- CT Head (adulto, ~15 cm): factor 0.65 (35% reducción)
-- CT Body (adulto, ~35 cm): factor 0.60 (40% reducción)
-- CT Pediátrico (~20 cm): factor 0.75 (25% reducción)
-- PET/CT F-18 (511 keV): factor 0.70 (30% reducción)
-- SPECT Tc-99m (140 keV): factor 0.55 (45% reducción)
-- SPECT I-131 (364 keV): factor 0.50 (50% reducción)
+**TC:** NCRP 147 §5.6 da el kerma de dispersión por DLP medido con fantoma; no corresponde una reducción adicional.
 
-**Restricción IMPORTANTE:** El factor de auto-atenuación aplica SOLO a barreras secundarias (scatter). Las barreras primarias (haz directo) deben dimensionarse con la carga de trabajo completa. Aplicar este factor al primario resultaría en sub-blindaje peligroso.` },
+**SPECT:** no hay factor normativo; se diseña con la fuente sin reducción (conservador).
+
+(Fase 8d: se retiraron los factores 0.50–0.75 atribuidos a una «Tabla 3» de TG-108 que no existe.)` },
 
   // ── SECCIÓN C: MEJORAS CÓDIGO (10 recomendaciones) ──
   { id:'C.9', t:'admin', title:'C.9 Error Boundaries (Límites de Error)', content:`**Recomendación C.9 — React Error Boundaries**

@@ -28,11 +28,11 @@ automática de la Fase 6: no quedan filas «no revisado a fondo».
 | | Cantidad |
 |---|---|
 | Diálogos revisados | 202 |
-| Estado OK / riesgo / error | 111 / 90 / 1 |
-| Prioridad alta / media / baja / sin acción | 0 / 1 / 109 / 92 |
+| Estado OK / riesgo / error | 118 / 83 / 1 |
+| Prioridad alta / media / baja / sin acción | 0 / 0 / 103 / 99 |
 | Calculadoras migradas al motor (Fase 7 + Fase 8a + MultiEnergySpectra) | 10 + 13 + 1 |
 | Diálogos con datos falsos retirados (Fase 8b) | 4 (suite NCRP, reporte CNSNS, certificaciones, alertas) |
-| Fase 8c: diálogos de prioridad media atendidos | 66 de 67 (queda la división de MedicalFloorPlan3D) |
+| Fase 8c + 8d: diálogos de prioridad media atendidos | 67 de 67 (8d: división de MedicalFloorPlan3D) |
 
 ### Hallazgos transversales (de la revisión de la Fase 7; los cuatro primeros se corrigieron en la Fase 8)
 
@@ -99,9 +99,31 @@ Pruebas en `src/__tests__/validacion/fase8c.test.tsx` (21 casos).
   equipo a la fuente seleccionada (`lib/equipoAFuente`); CategoryTools enruta diagnóstico, PET, SPECT y radiofármacos a
   sus calculadoras; MaterialLibrary y ReportManager en la barra lateral; Revit/IFC declara su escala (0.01 m/px);
   ShieldingDesignAgent ya estaba en la barra de herramientas.
-- **Pendiente:** dividir `MedicalFloorPlan3DDialog` (3 122 líneas; se cambió PCFSoftShadowMap por PCFShadowMap; el aviso
-  THREE.Clock viene de @react-three/fiber). Los diálogos sólo rotulados bajan a prioridad baja: falta conectarlos a datos
-  reales.
+- Los diálogos sólo rotulados bajan a prioridad baja: falta conectarlos a datos reales.
+
+### Fase 8d (último ítem de prioridad media)
+
+- `MedicalFloorPlan3DDialog` (3 122 líneas) queda en 66 líneas que componen `src/sections/dialogs/medical3d/`: estado y
+  escena (`useMedical3DEstado`, `useImportacionCadBim`), contratos visuales (`useContratosMedical3D`), exportaciones
+  (`useExportacionesMedical3D`), paneles de la barra lateral (`PanelFlujoVisual`, `PanelesIntegracion`, `PanelMotor3D`,
+  `ControlesVisuales`, `PanelesInspeccion`), visor (`VisorMedical3D`) y escena R3F (`escena/`: materiales, elementos,
+  capas, cámaras, `RoomScene`). Babylon sigue en `BabylonRuntimeSmokePreview` tras `VISOR_3D_BABYLON` (apagada).
+- Sin cambio de comportamiento: `src/__tests__/dialogs/MedicalFloorPlan3DDialog.test.tsx` (15 casos: render, presets,
+  modo dosis y componentes, ayudas, interruptores, estaciones F147, captura, base PBR, 12 exportaciones e instantáneas
+  del texto, del JSON de revisión, del OBJ y del tour) se escribió antes de dividir y pasa igual después.
+- Los dos `setState` dentro de efectos (mouse-look al salir del recorrido, estado del embebido Unity) pasan a ajuste
+  durante el render; los guardianes de contrato de `scripts/` leen el diálogo y sus módulos
+  (`scripts/medical3d-dialog-source.mjs`).
+- **Prioridad baja que afectaba cálculos o datos mostrados** (pruebas en `src/__tests__/validacion/fase8d*.test.ts*`):
+  - *Factores y criterios normativos:* autoatenuación del paciente con TG-108 (PET 0.64; TC y SPECT sin reducción,
+    `lib/autoatenuacionPaciente`); Eₙ de ISO 13528 con ambas incertidumbres y referencias de NCRP 151 Tabla B.2
+    (`lib/numeroEn`); límites del asistente de ejemplos desde `lib/limitesDosis`.
+  - *Geometría del plano:* el mapeo CAD compara palabras completas y prioriza el material específico
+    (`lib/cadMaterialMapping`); el validador toma el área del polígono cerrado de barreras que encierra cada fuente
+    (fórmula de Gauss; en planos con varias salas el rectángulo de todas las barreras no es conservador) y, sin
+    contorno cerrado, pide capturarla a mano (`lib/areaPlano`).
+  - *Supuestos fijos:* la proyección de tasa con decaimiento integra la dosis y deja editable la permanencia,
+    limitada a 0–8760 h/año con aviso (`lib/proyeccionDecaimiento`).
 
 ## Tabla completa
 
@@ -109,7 +131,6 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 
 | Diálogo | Función | Fuente de datos | Motor / cálculo | Estado | Hallazgo | Propuesta | Prioridad | Esfuerzo | Navegador |
 |---|---|---|---|---|---|---|---|---|---|
-| `MedicalFloorPlan3DDialog` | Plano médico 3D | plano del proyecto (useCanvasStore/props) | doseFieldEngine + sceneBuilder (r3f; Babylon tras bandera) | riesgo | Fase 8c: PCFSoftShadowMap → PCFShadowMap. Sigue con 3 122 líneas y la rama Babylon (bandera en false); el aviso THREE.Clock viene de @react-three/fiber. | Dividir el archivo. | media | alto | abre (app); calcula al pulsar «Entrada / vista general»; 2 aviso(s)/error(es) de consola |
 | `AIAssistantDialog` | Asistente IA/RAG | backend tRPC (opcional) o respuestas locales | ninguno (informativo) | riesgo | Sin backend responde con plantillas locales; no calcula. Correcto como orientación. | Indicar en la cabecera cuándo está en modo sin conexión. | baja | bajo | abre (app); consola sin errores |
 | `AdaptiveSamplingDialog` | Configuración de muestreo adaptativo | entrada del usuario | fórmula local (posiciones 0–1) | riesgo | Genera posiciones a lo largo de una barrera genérica; no se conecta con `generateSamplePoints` del motor ni con el plano. Textos en inglés. | Conectar con el muestreo del motor o retirar; traducir. | baja | medio | abre (app); consola sin errores |
 | `AirKermaOverlay` | Curva de kerma a lo largo de la barrera | props (distribuciones calculadas) | ninguno (gráfica) | riesgo | Sólo dibuja lo que recibe; textos en inglés («Design Goal», «Position Along Barrier»). | Traducir. | baja | bajo | no se monta aislado (le faltan props/proveedores que la app sí pasa); consola sin errores |
@@ -128,7 +149,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `BatchImportDialog` | Importación CSV/Excel | archivo del usuario | useBatchImport | OK | Importa barreras al plano. | Prueba de componente. | baja | bajo | abre (app); consola sin errores |
 | `BatemanDecayDialog` | Solucionador de Bateman | lib/batemanSolver | lib/batemanSolver | riesgo | Error de consola por clave React duplicada (dos entradas «Rb-82») — *corregido aquí*; textos en inglés. | Desambiguar el símbolo de «Rb-82 (generador)» en la biblioteca; traducir. | baja | bajo | abre (app); calcula al pulsar «Solve»; consola sin errores |
 | `BuildupFactorDialog` | Factor de acumulación multicapa | tabla local de buildup | fórmula local | riesgo | Fase 8c: aviso de tabla sin referencia y físicamente inconsistente; materiales sin datos ya no toman los del concreto. | Sustituir por ANS-6.4.3 (GP) citada o retirar. | baja | medio | abre (app); consola sin errores |
-| `CADAssemblyMapper` | Asignación de materiales a ensamblajes CAD | archivo del usuario | reglas regex | riesgo | Patrones como /w/ y /al/ coinciden con «wall»; textos en inglés. | Anclar los patrones a palabras completas; traducir. | baja | bajo | abre (montado aislado); consola sin errores |
+| `CADAssemblyMapper` | Asignación de materiales a ensamblajes CAD | archivo del usuario | lib/cadMaterialMapping | OK | Fase 8d: asignación por palabras completas con el material específico antes que «muro» (antes «Water» salía tungsteno, «Hall» aluminio, «Concrete» aire y «Wall_Steel» concreto). Textos en inglés. | — | — | — | abre (montado aislado); consola sin errores |
 | `CADImportDialog` | Importar geometrías CAD | archivo del usuario | ninguno (informativo) | riesgo | Varios formatos marcados «future». | Ocultar los no disponibles. | baja | bajo | abre (app); consola sin errores |
 | `CADToMCImport` | CAD → geometría Monte Carlo | archivo del usuario | generador de texto | riesgo | Genera cajas envolventes; textos en inglés; sin DialogTitle. | Traducir y añadir título. | baja | bajo | abre (montado aislado); consola sin errores |
 | `CBCTIGRTDialog` | Blindaje adicional CBCT/IGRT | entrada del usuario | blindajeTC (NCRP 147 §5.6.1) + transmisionTC | OK | Fase 8c: CBCT como TC de cuerpo por DLP; dosis tras el concreto existente con Figs. A.2/A.3 (antes fórmula empírica sin K¹). | Tomar el DLP por estudio del fabricante. | baja | bajo | abre (app); calcula al pulsar «Calcular Dosis CBCT»; consola sin errores |
@@ -160,9 +181,9 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `EquipmentManagerDialog` | Gestor de equipos | tabla fija en el diálogo | barreraMV (primaria NCRP 151) | OK | Fase 8c: calculadora rápida con TVL₁/TVLₑ de la Tabla B.2 (Co-60 para Gamma Knife); tabla de TVL desde ncrp151. | Traducir textos restantes. | baja | bajo | abre (app); consola sin errores |
 | `EquipmentShieldingWizard` | Asistente de blindaje por equipo | entrada del usuario | lib/blindajeEquipo → barreraMV | OK | Fase 8a: primaria/fuga/dispersión NCRP 151, IMRT en la fuga, material por omisión válido; PET/SPECT/TC remiten a sus diálogos. | Añadir título accesible. | baja | bajo | abre (app); consola sin errores |
 | `EvidencePackDialog` | Paquete de evidencia | plano del proyecto (useCanvasStore/props) | lib/evidencePack + f* | OK | Con pruebas; sin DialogTitle. | Título accesible. | baja | bajo | abre (montado aislado); consola sin errores |
-| `ExampleWizardDialog` | Asistente de ejemplos | tabla fija en el diálogo | ninguno (informativo) | riesgo | «Público < 5 mSv/año (NOM-008)» choca con 1 mSv/año de otros diálogos. | Unificar límites. | baja | bajo | abre (app); consola sin errores |
-| `ExperimentalValidationDialog` | Validación con medición | entrada del usuario | fórmula local | riesgo | Usa \|Δ\|/U_med sin combinar la incertidumbre del cálculo (Eₙ). | Eₙ = \|Δ\|/√(U₁² + U₂²). | baja | bajo | abre (app); consola sin errores |
-| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | fórmula local | riesgo | Dosis de 5 años con ocupación 8760 h/año fija; título en inglés. | Hacer editable la ocupación; traducir. | baja | bajo | abre (app); consola sin errores |
+| `ExampleWizardDialog` | Asistente de ejemplos | tabla fija en el diálogo | lib/limitesDosis | OK | Fase 8d: límites de `lib/limitesDosis` (público 1 mSv/año, ICRP 103; RGSR 1988 como histórico) y PET remite a TG-108 en lugar de espesores fijos de 1–3 mm Pb. | — | — | — | abre (app); consola sin errores |
+| `ExperimentalValidationDialog` | Validación con medición | entrada del usuario | lib/numeroEn (ISO 13528) | OK | Fase 8d: Eₙ = Δ/√(U_x² + U_X²), concordante si \|Eₙ\| ≤ 1 (antes \|Δ\| ≤ 2u sólo con la medición); referencias de NCRP 151 Tabla B.2 en lugar de publicaciones sin verificar; en español. | — | — | — | abre (app); consola sin errores |
+| `ExposureRateProjectionDialog` | Proyección de tasa vs tiempo | entrada del usuario | lib/proyeccionDecaimiento | OK | Fase 8d: dosis acumulada por integración exacta del decaimiento (antes tasa del inicio de cada tramo de 5 años; el año 0 ya acumulaba) con horas de permanencia editables (8760 h por omisión, máximo 8760 h/año con aviso); título en español. | — | — | — | abre (app); consola sin errores |
 | `ExternalConnectorDialog` | Conectores externos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Catálogo; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
 | `FLUKAInputGenerator` | Generador de entrada FLUKA | entrada del usuario | generador de texto | riesgo | Textos en inglés; no validado con FLUKA. | Traducir; prueba de sintaxis. | baja | bajo | abre (montado aislado); consola sin errores |
 | `GATESimulationDialog` | Macros GATE PET/SPECT | entrada del usuario | generador de texto (nuclearMedicine) | riesgo | Generador; textos en inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
@@ -203,14 +224,14 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `Parametric3DDialog` | Primitivas 3D | estado local | ninguno (informativo) | error | Inaccesible (nada lo abre); 2 errores ESLint no-unused-expressions. | Enlazar o retirar. | baja | bajo | abre (app); consola sin errores |
 | `ParametricBunkerDesigner` | Diseñador paramétrico de búnker | entrada del usuario | lib/bunkerParametrico | OK | Fase 8c: «Generar» crea el plano (4 barreras a escala y la fuente) sin espera simulada. | Añadir el laberinto al plano generado. | baja | medio | abre (app); consola sin errores |
 | `PerformanceDashboardDialog` | Tablero de rendimiento | valores aleatorios | ninguno (informativo) | riesgo | Fase 8c: Rotulado con DatosEjemploBanner (datos de ejemplo). | Medir con `performance` o retirar. | baja | medio | abre (app); consola sin errores |
-| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales | riesgo | Supone un lienzo de 1200×800 px para el área. | Usar el tamaño real del plano. | baja | bajo | abre (app); calcula al pulsar «Validar»; consola sin errores |
+| `PlanValidatorDialog` | Validador de planos | plano del proyecto (useCanvasStore/props) | reglas locales + lib/areaPlano | OK | Fase 8d: el área sale del polígono cerrado de barreras que encierra cada fuente (fórmula de Gauss, uniones en T y tolerancia de 5 cm), no de un lienzo fijo de 1200×800 px ni del rectángulo de todas las barreras; sin contorno cerrado avisa y exige captura manual; el mensaje indica el origen. | — | — | — | abre (app); calcula al pulsar «Validar»; consola sin errores |
 | `PointCloudImportDialog` | Importar nube de puntos | tabla fija en el diálogo | ninguno (informativo) | riesgo | Sólo información; inglés. | Traducir u ocultar. | baja | bajo | abre (app); consola sin errores |
 | `PythonIntegrationDialog` | Python (Pyodide) | entrada del usuario | código de ejemplo | riesgo | El ejemplo usa P(mSv)/W(cGy) con un solo TVL. | Corregir el ejemplo. | baja | bajo | abre (app); calcula al pulsar «Code Runner»; consola sin errores |
 | `RealTime3DDialog` | Exploración 3D | plano del proyecto (useCanvasStore/props) | realTime3DEngine (three) | riesgo | Usa un plano de demostración si no hay barreras; advertencia de GPU en consola. | Mostrar vacío en lugar de demo. | baja | bajo | abre (app); consola sin errores |
 | `RegulatoryAlertsDialog` | Alertas regulatorias | ninguna fuente oficial | ninguno (informativo) | OK | Fase 8b: se quitaron las alertas inventadas; estado vacío que remite a DOF y CNSNS. | Conectar a una fuente oficial si se desea. | baja | medio | abre (app); consola sin errores |
 | `RegulatoryComparisonDialog` | Comparación regulatoria | lib/internationalRegulations | ninguno (informativo) | riesgo | Inglés. | Traducir. | baja | bajo | abre (app); consola sin errores |
 | `RevitAddinDialog` | Plantillas add-in Revit | tabla fija en el diálogo | ninguno (informativo) | riesgo | El C# divide coordenadas de lienzo (px) entre 304.8 como si fueran mm. | Convertir con la escala del plano. | baja | bajo | abre (app); consola sin errores |
-| `SelfShieldingDialog` | Autoblindaje del paciente | tabla fija en el diálogo | ninguno (informativo) | riesgo | Factores propios (PET F-18 0.70) en vez de 1 − 0.36 de TG-108. | Usar `ABSORCION_PACIENTE`. | baja | bajo | abre (app); consola sin errores |
+| `SelfShieldingDialog` | Autoblindaje del paciente | tabla fija en el diálogo | lib/autoatenuacionPaciente (TG-108) | OK | Fase 8d: PET con 1 − 0.36 de TG-108 (`ABSORCION_PACIENTE`); TC y SPECT sin reducción (no hay factor normativo); se retiraron los factores de una «Tabla 3» de TG-108 inexistente; manual B.9 y menú corregidos. | — | — | — | abre (app); consola sin errores |
 | `ShapesReconstructionDialog` | Reconstrucción de formas | datos sintéticos | fórmula local | riesgo | Fase 8c: Rotulado con DatosEjemploBanner (datos de ejemplo). | Usar RTSTRUCT real. | baja | medio | abre (app); consola sin errores |
 | `SourceLibraryDialog` | Biblioteca de fuentes | tabla fija en el diálogo | fuente puntual A·Γ/d² | riesgo | Fase 8c: Γ en μGy·m²/(MBq·h) con distancia; Co-60 corregido (0.306); sólo calcula con Γ verificadas. | Verificar el resto de Γ y las geometrías integradas. | baja | medio | abre (app); consola sin errores |
 | `SpecialCasesDialog` | Casos especiales | lib/specialCases | fórmula local (Γ·A/d²) | riesgo | Sin DialogTitle. | Título accesible. | baja | bajo | abre (app); calcula al pulsar «PDF»; consola sin errores |
@@ -265,6 +286,7 @@ Orden: prioridad y nombre. Esfuerzo: bajo ≤ 2 h, medio ≤ 1 día, alto > 1 d�
 | `MaterialComparisonDialog` | Comparación de materiales (XCOM) | entrada del usuario | ComparadorMateriales + XCOM (informativo) | OK | Fase 8c: comparador normativo arriba; la tabla de haz estrecho queda rotulada como no apta para dimensionar. | — | — | — | abre (app); consola sin errores |
 | `MaterialLibraryDialog` | Biblioteca de materiales | backend (props) | ninguno (informativo) | OK | Fase 8c: accesible desde la barra lateral (herramientas). | — | — | — | abre (app); consola sin errores |
 | `MazeCalculatorDialog` | Laberinto y puerta (NCRP 151 §2.4) | entrada del usuario | ncrp151Laberinto | OK | Validado con §7.1 (Fase 4). | — | — | — | abre (app); consola sin errores |
+| `MedicalFloorPlan3DDialog` | Plano médico 3D | plano del proyecto (useCanvasStore/props) | doseFieldEngine + sceneBuilder (r3f; Babylon tras bandera) | OK | Fase 8d: dividido en `medical3d/` (hooks de estado, contratos y exportaciones; paneles; escena R3F) con pruebas de no-regresión previas. Babylon sigue tras su bandera (false); el aviso THREE.Clock viene de @react-three/fiber. | Validar visualmente antes de activar Babylon. | — | — | abre (app); calcula al pulsar «Entrada / vista general»; 2 aviso(s)/error(es) de consola |
 | `MemoriaAIWizard` | Asistente de memoria IA | plano del proyecto (useCanvasStore/props) | analyticMemoryEvidence + f* | OK | Fase 8c: TVL de los perfiles corregidos (Co-60 B.2, 511 keV TG-108, Tc-99m e Ir-192 con TVL y no HVL). | — | — | — | abre (montado aislado); calcula al pulsar «Calcular blindaje»; consola sin errores |
 | `ModelingToolboxDialog` | Calculadoras rápidas | entrada del usuario | fórmulas locales | OK | Fase 8c: skyshine con la Ec. 5.1 de NCRP 151; textos en español. | — | — | — | abre (app); calcula al pulsar «Quick Calculators»; consola sin errores |
 | `MultiEnergySpectraDialog` | Blindaje con espectros polienergéticos (NCRP 147) | entrada del usuario | espesorRequeridoHaz (Archer B.1/C.1) + blindajeTC (§5.6.1, Figs. A.2/A.3) | OK | Fase 8: el espectro entra por los ajustes de Archer de cada distribución de carga y, en TC, por el método DLP; se quitaron los TVL «TASMIP» sin fuente (0.30 mm Pb a 120 kVp). Reproduce §5.3.3.1 (1.3 mm Pb), §5.3.1.1 (107 mm) y §5.6.1 (1.5 mm Pb). HVL sólo informativos. | — | — | — | abre (app); consola sin errores |

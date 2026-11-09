@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
-const dialog = fs.readFileSync(path.join(root, 'src', 'sections', 'dialogs', 'MedicalFloorPlan3DDialog.tsx'), 'utf8');
+const dialog = readMedical3DDialogSource(root);
 const contract = fs.readFileSync(path.join(root, 'src', 'lib', 'medical3D', 'babylonRuntimeSmoke.ts'), 'utf8');
 
 const markers = [

@@ -15,6 +15,7 @@ import {
   Box, Upload, Layers, ArrowRight, CheckCircle, Download,
   FileText, Database, Info
 } from 'lucide-react';
+import { mapearNombrePieza } from '@/lib/cadMaterialMapping';
 
 interface Props { open: boolean; onClose: () => void; }
 
@@ -44,28 +45,9 @@ const MATERIAL_LIBRARY: Record<string, { name: string; density: number; mcnpId: 
   'M013': { name: 'Lead Glass', density: 4.8, mcnpId: 13 },
 };
 
-// Auto-mapping rules based on part names (Attila4MC-style)
-const AUTO_MAP_RULES: Array<{ pattern: RegExp; material: string }> = [
-  { pattern: /wall|pared|muro|bunker|shield/i, material: 'M002' },
-  { pattern: /lead|plomo|pb/i, material: 'M004' },
-  { pattern: /steel|acero|fe|door.*iron/i, material: 'M005' },
-  { pattern: /tungsten|wolfram|w/i, material: 'M006' },
-  { pattern: /poly|polyethylene|pe/i, material: 'M007' },
-  { pattern: /borat|bpe/i, material: 'M008' },
-  { pattern: /water|agua|phantom/i, material: 'M009' },
-  { pattern: /alumin|al/i, material: 'M010' },
-  { pattern: /copper|cobre|cu/i, material: 'M011' },
-  { pattern: /brass|laton/i, material: 'M012' },
-  { pattern: /glass.*lead|lead.*glass|vidrio.*plomo/i, material: 'M013' },
-  { pattern: /concrete.*barite|barite/i, material: 'M003' },
-  { pattern: /air|aire|void|cavity/i, material: 'M001' },
-];
-
+// Asignación por palabras completas (Fase 8d): ver lib/cadMaterialMapping.
 function autoMapPartName(name: string): string {
-  for (const rule of AUTO_MAP_RULES) {
-    if (rule.pattern.test(name)) return rule.material;
-  }
-  return 'M001'; // Default to air
+  return mapearNombrePieza(name);
 }
 
 // Demo assembly data (European Spallation Source-style)

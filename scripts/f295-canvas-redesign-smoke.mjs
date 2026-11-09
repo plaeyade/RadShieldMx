@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
 const outDir = path.join(root, 'outputs', 'f295_canvas_redesign_smoke');
@@ -30,7 +31,7 @@ const toolbar = read('src/sections/Toolbar.tsx');
 const canvasArea = read('src/sections/CanvasArea.tsx');
 const quickSidebar = read('src/sections/CanvasQuickActionsSidebar.tsx');
 const sidebar = read('src/sections/Sidebar.tsx');
-const medical3d = read('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const medical3d = readMedical3DDialogSource();
 const f294 = readJson('outputs/f294_real_guided_smoke/f294_real_guided_smoke.json');
 const commitSha = git(['rev-parse', 'HEAD']);
 const gitStatus = git(['status', '--short']);

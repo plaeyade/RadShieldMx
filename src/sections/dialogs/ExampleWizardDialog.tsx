@@ -6,6 +6,7 @@ import '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Wand2, ChevronRight, ChevronLeft, CheckCircle2, Zap, CircleDot, Layers, BookOpen } from 'lucide-react';
+import { LIMITES_DOSIS } from '@/lib/limitesDosis';
 
 interface WizardStep {
   title: string;
@@ -25,8 +26,8 @@ const EXAMPLES: Record<string, WizardStep[]> = {
   pet_ct: [
     { title: 'Paso 1: Fuente PET-CT', description: 'Configurar F-18 FDG', content: ['Radionuclido: F-18 (Fluor-18)', 'Actividad por paciente: 370 MBq (10 mCi)', 'Pacientes por dia: 8', 'Dias por semana: 5', 'Energia gamma: 511 keV (aniquilacion)'], tip: 'Para Ga-68 DOTATATE: usar 150 MBq/paciente, misma energia 511 keV' },
     { title: 'Paso 2: Areas del Servicio', description: 'Definir areas de medicina nuclear', content: ['Sala de inyeccion: blindaje principal', 'Sala de espera: pacientes post-inyeccion', 'Sala de escaneo PET-CT', 'Sala de preparacion de radiofarmacos', 'Area de desecho'], tip: 'La sala de inyeccion requiere el mayor blindaje. El area de desecho tambien requiere atencion especial' },
-    { title: 'Paso 3: Blindaje por Area', description: 'Calcular por separado', content: ['Sala inyeccion: 2.0 mm Pb en paredes', 'Sala espera: 1.5 mm Pb', 'Escaneo PET: 1.0 mm Pb (el paciente es la fuente)', 'Preparacion: 3.0 mm Pb + campana de flujo laminar', 'Desecho: 2.5 mm Pb'], tip: 'Use la tabla B.7 (Medicina Nuclear) para valores de HVL/TVL' },
-    { title: 'Paso 4: Verificar Dosis', description: 'Comprobar limites', content: ['Personal: < 20 mSv/ano (NOM-008)', 'Publico: < 5 mSv/ano (NOM-008 Mexico)', 'Embarazadas: < 2 mSv post-concepcion', 'Use el Nuclide Data Viewer para DCFs'], tip: 'Mexico permite 5 mSv/ano para publico vs 1 mSv/ano en USA. Factor 5x diferencia' },
+    { title: 'Paso 3: Blindaje por Area', description: 'Calcular por separado', content: ['Calcule cada area con la calculadora PET (AAPM TG-108): captacion, espera, escaneo, preparacion y desecho', 'El paciente es la fuente: Γ_paciente = 0.64·Γ (absorcion 0.36) y decaimiento durante la estancia', 'A 511 keV la TVL del plomo es ≈ 16.5 mm (TG-108 Tabla V): espesores de 1–3 mm Pb no bastan como regla general'], tip: 'No use espesores fijos: dependen de actividad, pacientes, tiempos, distancia y ocupacion (TG-108)' },
+    { title: 'Paso 4: Verificar Dosis', description: 'Comprobar limites', content: [`Personal ocupacionalmente expuesto: ${LIMITES_DOSIS.icrp103.poe_mSv_anio} mSv/ano promediado en 5 anos (${LIMITES_DOSIS.icrp103.referencia})`, `Publico: ${LIMITES_DOSIS.icrp103.publico_mSv_anio} mSv/ano (${LIMITES_DOSIS.icrp103.referencia})`, `Diseno: ${LIMITES_DOSIS.objetivosDiseno.controlada_mSv_semana} mSv/semana en area controlada y ${LIMITES_DOSIS.objetivosDiseno.noControlada_mSv_semana} mSv/semana en no controlada (${LIMITES_DOSIS.objetivosDiseno.referencia})`, 'Use el Nuclide Data Viewer para DCFs'], tip: `El RGSR de 1988 fijaba ${LIMITES_DOSIS.rgsr1988.publico_mSv_anio} mSv/ano para el publico (valor historico): verifique la norma mexicana vigente` },
   ],
   gamma_knife: [
     { title: 'Paso 1: Fuente Co-60', description: 'Configurar Gamma Knife', content: ['192 fuentes de Co-60', 'Actividad total: ~222 TBq (6000 Ci)', 'Energia promedio: 1.25 MeV', 'Factor de uso (U): 0.05-0.1', 'Carga de trabajo: tipicamente baja'], tip: 'El Gamma Knife Perfexion usa collimadores variables de 4-16 mm' },

@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { readMedical3DDialogSource } from './medical3d-dialog-source.mjs';
 
 const root = process.cwd();
 const outDir = path.join(root, 'outputs', 'f310_real_operator_trial_three_r3f');
@@ -27,7 +28,7 @@ function sha256Text(text) {
 }
 
 const strategy = read('src/lib/medical3D/renderStrategy.ts');
-const dialog = read('src/sections/dialogs/MedicalFloorPlan3DDialog.tsx');
+const dialog = readMedical3DDialogSource();
 const f200 = readJson('outputs/f200_static_frontend_release_gate/f200_static_frontend_release_gate.json');
 const f294 = readJson('outputs/f294_real_guided_smoke/f294_real_guided_smoke.json');
 const f307 = readJson('outputs/f307_f309_3d_engine_release/f307_f309_3d_engine_release.json');
