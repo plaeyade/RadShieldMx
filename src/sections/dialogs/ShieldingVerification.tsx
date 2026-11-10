@@ -1,7 +1,9 @@
 /** Verificación de blindaje: espesor instalado frente al requerido, barrera por barrera. */
 import { useMemo } from 'react';
 import DialogShell from '@/components/DialogShell';
-import { verificarPlano, type EstadoVerificacion } from '@/lib/verificacionBlindaje';
+import type { EstadoVerificacion } from '@/lib/verificacionBlindaje';
+// Fase 11: sólo cuenta el requerido con traza del motor (un espesor tecleado no «cumple»).
+import { verificarPlano } from '@/lib/estadoProyecto';
 import type { FloorPlan } from '@/types/radshield';
 
 const COLOR: Record<EstadoVerificacion, string> = {

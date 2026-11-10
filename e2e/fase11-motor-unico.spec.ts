@@ -123,6 +123,8 @@ test.describe('Fase 11 motor único', () => {
     const estados = primera[1].resultados.map((r) => r.estado);
     expect(estados).toContain('NO_CUMPLE');
     expect(estados).toContain('CUMPLE');
+    // Revisión Fase 11: un muro calculado que no necesita blindaje no queda «sin cálculo» (no requiere blindaje adicional).
+    expect(estados).not.toContain('SIN_CALCULO');
     for (const [nombre, foto] of resto) {
       expect.soft(foto, `${nombre} = ${primera[0]}`).toEqual(primera[1]);
     }

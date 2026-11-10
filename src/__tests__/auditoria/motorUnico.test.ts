@@ -171,3 +171,65 @@ describe('Fase 11 — herramientas del agente con las tablas de NCRP 151', () =>
     expect(v.actualTVL).toBe(tvlPrimaria(6, 'concrete').tvl1_cm);
   });
 });
+
+/**
+ * Revisión Fase 11: la ruta de la interfaz (`calcularProyectoAsync`, la que ejecutan barra superior, «Guíame», lateral,
+ * F5, lienzo y DXF) contra los valores PUBLICADOS, no sólo contra otra ruta. El muro se coloca 0.3 m antes del punto de
+ * cálculo publicado (el motor muestrea 0.3 m detrás de la cara del muro, sin espesor instalado).
+ */
+describe('Fase 11 — la ruta de la interfaz reproduce los valores publicados', () => {
+  const rel = (calc: number, pub: number) => Math.abs(calc - pub) / pub;
+  const una = async (plan: FloorPlan) => (await calcularProyectoAsync(plan)).barriers[0];
+
+  it('NCRP 147 §5.1 (p. 72): angiografía cardiaca, 25 pacientes/semana, d = 4 m → K = 5.9 mGy/semana, 1.3 mm Pb', async () => {
+    const b = await una(plano('pub-147-5.1', [muro('b', 3.7)], [diag('angio-cardiac', 25)]));
+    expect(rel(b.maxKerma!, 5.9)).toBeLessThanOrEqual(0.04);
+    expect(rel((b.requiredThickness_mm as Record<string, number>).PB, 1.3)).toBeLessThanOrEqual(0.05);
+    expect(b.calculationTrace?.standard).toBe('NCRP147');
+  });
+
+  it('NCRP 147 §5.2 (pp. 73–74): tórax, primaria, 300 pacientes/semana, d = 3 m → K_P = 40 mGy/semana, 2.2 mm Pb', async () => {
+    const b = await una(plano('pub-147-5.2', [muro('b', 2.7, { barrierType: 'primary' })], [diag('rad-chest', 300)]));
+    expect(rel(b.maxKerma!, 40)).toBeLessThanOrEqual(0.04);
+    expect(rel((b.requiredThickness_mm as Record<string, number>).PB, 2.2)).toBeLessThanOrEqual(0.05);
+  });
+
+  it('NCRP 151 §7.1.1: primaria 18 MV en C (T = 1/40, d = 7.2 m) → 149.6 cm de concreto', async () => {
+    const b = await una(plano('pub-151-7.1.1', [muro('b', 6.9, { barrierType: 'primary', occupancyFactor: 0.025, useFactor: 0.25, materialCode: 'CONCRETE235' })], [linac(18)]));
+    expect(rel((b.requiredThickness_mm as Record<string, number>).CONCRETE235 / 10, 149.6)).toBeLessThanOrEqual(0.015);
+    expect(b.calculationTrace?.standard).toBe('NCRP151');
+  });
+
+  it('NCRP 151 §7.1.5: secundaria en A, 18 + 6 MV (T = 1/40, θ = 30°, d = 7.2 m) → 66.4 cm de concreto', async () => {
+    const b = await una(plano('pub-151-7.1.5', [muro('b', 6.9, { occupancyFactor: 0.025, useFactor: 0.25, materialCode: 'CONCRETE235', scatterAngle_deg: 30 })], [linac(18), linac(6)]));
+    expect(rel((b.requiredThickness_mm as Record<string, number>).CONCRETE235 / 10, 66.4)).toBeLessThanOrEqual(0.015);
+  });
+
+  it('TG-108 (ejemplo de «Guíame», muro norte de captación): 18.9 mm Pb y 200 mm de concreto a mano (Ec. 2–3, 9–10)', async () => {
+    const r = await calcularProyectoAsync(planoEjemploCompleto());
+    const t = r.barriers.find((b) => b.id === 'eg-captacion-norte')!.requiredThickness_mm as Record<string, number>;
+    expect(t.PB).toBeCloseTo(18.85, 1);
+    expect(t.CONCRETE235).toBeCloseTo(199.9, 0);
+  });
+
+  it('una barrera que no necesita blindaje dice «no requiere blindaje adicional», no «sin cálculo»', async () => {
+    // Tórax a 30 m: K_P = 40·(3/30)² = 0.4 mGy/semana; con T = 1/40, K·T = 0.01 < P = 0.02.
+    const b = await una(plano('lejos', [muro('b', 29.7, { barrierType: 'primary', occupancyFactor: 0.025 })], [diag('rad-chest', 300)], 0.1));
+    expect(b.calculationTrace).toBeTruthy();
+    expect(b.maxKerma! * 0.025).toBeLessThanOrEqual(0.02);
+    const v = verificarBarrera(b);
+    expect(v.estado).toBe('CUMPLE');
+    expect(v.requerido_mm).toBe(0);
+    expect(v.nota).toMatch(/No requiere blindaje adicional/);
+    expect(resultadoDeBarrera(b).estado).toBe('CUMPLE');
+  });
+
+  it('ningún archivo de la interfaz importa los motores retirados o sin uso (TVL fijos)', async () => {
+    const { execSync } = await import('node:child_process');
+    const hits = execSync(
+      "grep -rlE \"^import.*(AsyncShieldingEngine|lib/engine/|workers/shieldingWorker|lib/shieldingEngine'|hooks/useSmartBarrier|hooks/useWorkerCalculation|hooks/useWASM)\" src --include=*.ts --include=*.tsx || true",
+      { encoding: 'utf8' },
+    ).split('\n').filter((f) => f && !/__tests__|\.test\.tsx?$|^src\/hooks\/use(SmartBarrier|WorkerCalculation|WASM)\.ts$|^src\/lib\/motorProyecto\.ts$/.test(f));
+    expect(hits).toEqual([]);
+  });
+});

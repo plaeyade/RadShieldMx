@@ -24,7 +24,11 @@ export function verificarBarrera(b: Barrier): FilaVerificacion {
 export function verificarPlano(plano: FloorPlan) {
   const filas = plano.barriers.map((b) => verificarBarrera(b));
   const cuenta = (e: EstadoVerificacion) => filas.filter((f) => f.estado === e).length;
-  return { filas, resumen: { total: filas.length, cumple: cuenta('CUMPLE'), noCumple: cuenta('NO_CUMPLE'), pendientes: filas.length - cuenta('CUMPLE') - cuenta('NO_CUMPLE') } };
+  return {
+    filas,
+    resumen: { total: filas.length, cumple: cuenta('CUMPLE'), noCumple: cuenta('NO_CUMPLE'), pendientes: filas.length - cuenta('CUMPLE') - cuenta('NO_CUMPLE') },
+    apto: filas.length > 0 && filas.every((f) => f.estado === 'CUMPLE'),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

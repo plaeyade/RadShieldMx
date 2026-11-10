@@ -47,7 +47,30 @@ export function espesorInstalado(b: Barrier): { mm: number | null; mixto: boolea
   return { mm: typeof b.thickness_mm === 'number' && b.thickness_mm > 0 ? b.thickness_mm : null, mixto: false };
 }
 
+/**
+ * Fase 11: el motor calculó la barrera (traza y kerma) y no publicó espesor porque kerma·T ≤ P: no requiere blindaje
+ * adicional. No aplica a ciclotrón (el motor no publica espesor por otra razón) ni a un cálculo sin traza.
+ */
+export function noRequiereBlindaje(b: Barrier): boolean {
+  if (!b.calculationTrace || b.calculationTrace.modalityCategory === 'cyclotron') return false;
+  if (typeof b.maxKerma !== 'number' || !Number.isFinite(b.maxKerma) || b.maxKerma < 0) return false;
+  const r = b.requiredThickness_mm;
+  const hayEspesor = typeof r === 'number' ? r > 0 : Boolean(r && Object.values(r).some((v) => typeof v === 'number' && v > 0));
+  if (hayEspesor) return false;
+  const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 && b.occupancyFactor <= 1 ? b.occupancyFactor : 1;
+  return b.maxKerma * T <= b.designGoal_mSv_per_wk;
+}
+
+export const NOTA_NO_REQUIERE = 'No requiere blindaje adicional (kerma·T ≤ P sin barrera).';
+
 export function verificarBarrera(b: Barrier, tvl_mm?: (material: string) => number | null): FilaVerificacion {
+  if (noRequiereBlindaje(b)) {
+    const { mm } = espesorInstalado(b);
+    return {
+      barreraId: b.id, barrera: b.name, material: b.materialCode, requerido_mm: 0, instalado_mm: mm,
+      margen_mm: mm, dosisEstimada_mSv_sem: null, objetivo_mSv_sem: b.designGoal_mSv_per_wk, estado: 'CUMPLE', nota: NOTA_NO_REQUIERE,
+    };
+  }
   const req = espesorRequerido(b);
   const { mm: inst, mixto } = espesorInstalado(b);
   const base = {

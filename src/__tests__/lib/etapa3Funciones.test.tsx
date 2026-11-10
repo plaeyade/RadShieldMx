@@ -57,11 +57,20 @@ describe('verificación de blindaje', () => {
   });
 
   it('el plano es apto sólo si todas cumplen, y el diálogo lo muestra', () => {
-    const plano = { barriers: [barrera({ requiredThickness_mm: 10, thickness_mm: 20 }), barrera({ id: 'b2', requiredThickness_mm: 30, thickness_mm: 20 })] } as unknown as FloorPlan;
+    // Fase 11: el diálogo usa la verificación del proyecto, que sólo cuenta requeridos con traza del motor.
+    const traza = { calculationTrace: { standard: 'NCRP147' } } as unknown as Partial<Barrier>;
+    const plano = { barriers: [barrera({ requiredThickness_mm: 10, thickness_mm: 20, ...traza }), barrera({ id: 'b2', requiredThickness_mm: 30, thickness_mm: 20, ...traza })] } as unknown as FloorPlan;
     const r = verificarPlano(plano);
     expect(r.apto).toBe(false);
     expect(r.resumen).toEqual({ total: 2, cumple: 1, noCumple: 1, pendientes: 0 });
     expect(renderToStaticMarkup(<ShieldingVerification open floorPlan={plano} />)).toContain('NO CUMPLE');
+  });
+
+  it('un requerido tecleado sin traza del motor no «cumple» en el diálogo (Fase 11)', () => {
+    const plano = { barriers: [barrera({ requiredThickness_mm: 10, thickness_mm: 20 })] } as unknown as FloorPlan;
+    const html = renderToStaticMarkup(<ShieldingVerification open floorPlan={plano} />);
+    expect(html).toContain('SIN CALCULO');
+    expect(html).toContain('0/1 cumplen');
   });
 });
 

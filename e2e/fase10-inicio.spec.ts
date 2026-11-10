@@ -88,8 +88,8 @@ test.describe('Fase 10 inicio vacío', () => {
     await page.getByTestId('guia-siguiente').click();
     await expect(page.getByTestId('guia-paso-a-paso')).toHaveCount(0);
     await page.getByTestId('f295-primary-file-dropdown').click();
-    // El menú Archivo es más alto que la ventana de 720 px: el elemento queda fuera de la vista en Desktop Chrome.
-    await page.getByTestId('f10-help-guia-reiniciar').dispatchEvent('click');
+    // El menú Archivo es más alto que 720 px pero se desplaza (max-h de Radix, 78c7e09): clic real, como el usuario.
+    await page.getByTestId('f10-help-guia-reiniciar').click();
     await expect(titulo).toHaveText('Crear el proyecto');
     expect(errores).toEqual([]);
   });

@@ -4,7 +4,9 @@
  */
 import { useState } from 'react';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
-import { verificarBarrera } from '@/lib/verificacionBlindaje';
+// Fase 11: sólo cuenta el requerido con traza del motor (un espesor tecleado no «cumple»).
+import { verificarBarrera } from '@/lib/estadoProyecto';
+import { NOTA_NO_REQUIERE } from '@/lib/verificacionBlindaje';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +50,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
       return {
         name: b.name, type: b.barrierType, material: b.materialCode,
         useFactor: b.useFactor, occupancyFactor: b.occupancyFactor,
-        designGoal: b.designGoal_mSv_per_wk, status: ESTADO[v.estado] ?? v.estado,
+        designGoal: b.designGoal_mSv_per_wk, status: v.nota === NOTA_NO_REQUIERE ? 'NO REQUIERE BLINDAJE ADICIONAL' : ESTADO[v.estado] ?? v.estado,
         requerido_mm: v.requerido_mm, instalado_mm: v.instalado_mm,
       };
     });
