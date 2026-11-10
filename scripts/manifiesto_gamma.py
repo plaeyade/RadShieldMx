@@ -5,6 +5,9 @@ consume la evidencia citada (src/lib/gammaEvidence.ts).
 Uso: python scripts/manifiesto_gamma.py  (desde la raíz del repo; sólo stdlib)
 Verificar con GAMMA: gamma ecosistema validar gamma-ingesta.json --raiz-productor .
 Un PDF sin entrada en CATALOGO falla.
+Sólo la NOM (DOF, pública) está en git; NCRP 151/147, AAPM TG-108 y la presentación de room shielding
+son ejemplares con licencia del propietario que viven en su data/pdf/ local (fuera de git,
+docs/fuentes-locales.md). El manifiesto lista lo que haya en la carpeta local.
 """
 
 import datetime
@@ -40,9 +43,9 @@ CATALOGO = {
         "INT",
     ),
     "nom_008_ener.pdf": (
-        "NOM-008-ENER: eficiencia energética en edificaciones",
-        "edificacion/normas",
-        "SENER",
+        "NOM-008-NUCL-2011: Control de la contaminación radiactiva (DOF 26-10-2011)",
+        "radioproteccion/normas",
+        "SENER/CNSNS",
         "es",
         "MX",
     ),
