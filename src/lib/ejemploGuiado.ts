@@ -73,19 +73,24 @@ function modalidadPET() {
   return m;
 }
 
-/** Paso «fuentes y carga de trabajo»: paciente en captación y paciente en el equipo PET/CT (TG-108). */
+/**
+ * Paso «fuentes y carga de trabajo»: paciente en captación y paciente en el equipo PET/CT (TG-108).
+ * `isocenterHeight_m = 0`: el motor suma esa altura como desnivel fuente–receptor; TG-108 toma la distancia
+ * horizontal del paciente al punto 0.3 m más allá del muro (paciente y receptor a la misma altura). Con 1 m el
+ * kerma del muro norte de captación bajaba ~23 % (d = 2.06 m en vez de 1.8 m) y el espesor ~1.9 mm de Pb.
+ */
 export function muestraFuentes(): RadiationSource[] {
   const modality = modalidadPET();
   const comun = { A0_MBq: 370, pacientesSemana: 30, tU_h: 1, tI_h: 0.5 };
   return [
     {
       id: 'eg-fuente-captacion', name: 'Paciente en captación (F-18 FDG)', x: 175, y: 175, modality,
-      workloadValue: 370, workloadUnit: 'MBq', isocenterHeight_m: 1.0, useFactor: 1,
+      workloadValue: 370, workloadUnit: 'MBq', isocenterHeight_m: 0, useFactor: 1,
       tg108: { ...comun, sala: 'captacion' },
     },
     {
       id: 'eg-fuente-petct', name: 'Paciente en el PET/CT (F-18 FDG)', x: 375, y: 200, modality,
-      workloadValue: 370, workloadUnit: 'MBq', isocenterHeight_m: 1.0, useFactor: 1,
+      workloadValue: 370, workloadUnit: 'MBq', isocenterHeight_m: 0, useFactor: 1,
       tg108: { ...comun, sala: 'imagen' },
     },
   ];

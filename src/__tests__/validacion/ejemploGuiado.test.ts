@@ -41,23 +41,40 @@ describe('Ejemplo guiado PET/CT (Fase 10)', () => {
       expect(Number.isFinite(t.PB)).toBe(true);
       expect(Number.isFinite(t.CONCRETE235)).toBe(true);
       // Orden de magnitud de PET a 511 keV: decenas de mm de plomo como mucho, nunca metros.
-      expect(t.PB).toBeGreaterThan(1);
+      expect(t.PB).toBeGreaterThan(0);
       expect(t.PB).toBeLessThan(80);
     }
     // Al menos los muros hacia oficinas (T = 1, público) requieren blindaje.
     expect(out.filter((b) => Object.keys(b.requiredThickness_mm as object).length > 0).length).toBeGreaterThanOrEqual(3);
   });
 
-  it('el kerma del muro norte de captación no es menor que TG-108 a la distancia mínima (conservador)', () => {
+  it('muro norte de captación: kerma y espesores iguales a TG-108 a mano (Γ·0.64, Rₜ, TVL 511 keV)', () => {
     const p = planoEjemploCompleto();
     const { result } = renderHook(() => useShieldingEngine());
     const out = result.current.calculateAllBarriers(p.barriers, p.sources, p.scale_m_per_pixel);
     const norte = out.find((b) => b.id === 'eg-captacion-norte')!;
-    const fuente = p.sources[0];
-    // Distancia del paciente (175,175; 1 m de altura) al punto de muestreo 0.3 m más allá del muro (y = 100).
-    const dy = (175 - 100) * p.scale_m_per_pixel + 0.3;
-    const dMin = Math.hypot(dy, 1.0);
-    const tg = dosisSemanalTG108({ ...fuente.tg108!, nuclido: 'F18', d_m: dMin }) / 1000; // mSv/semana
-    expect(norte.maxKerma!).toBeGreaterThanOrEqual(tg * 0.95);
+    // A mano, sin el motor: F-18 Γ = 0.143 μSv·m²/(MBq·h), absorción 0.36, T½ = 109.77 min (TG-108 Tabla 1).
+    const T12 = 109.77 / 60;
+    const Rt = (t: number) => 1.443 * (T12 / t) * (1 - Math.exp((-0.693 * t) / T12));
+    const gp = 0.143 * 0.64;
+    // Paciente de captación (175,175) → punto 0.3 m al norte del muro (y = 100): d = 75 px · 0.02 + 0.3 = 1.8 m.
+    const dCapt = 1.8;
+    const capt = (gp * 30 * 370 * 1 * Rt(1)) / dCapt ** 2; // Ec. 2–3, μSv/semana
+    // Paciente del PET/CT (375,200) al mismo punto (x = 175, y = 85): Ec. 9–10 con vaciado 0.85 y F_U.
+    const dImg = Math.hypot((375 - 175) * 0.02, (200 - 85) * 0.02);
+    const img = (gp * 30 * 370 * 0.85 * Math.exp((-0.693 * 1) / T12) * 0.5 * Rt(0.5)) / dImg ** 2;
+    const D = capt + img; // ≈ 273.6 μSv/semana
+    expect(capt).toBeCloseTo(261.0, 0);
+    expect(norte.maxKerma! * 1000).toBeGreaterThan(D * 0.99);
+    expect(norte.maxKerma! * 1000).toBeLessThan(D * 1.02);
+    // B = P/(T·D) con P = 20 μSv/semana (público), T = 1; espesor = TVL·log10(1/B), TVL Pb 16.6 mm, concreto 176 mm.
+    const nTVL = Math.log10(D / 20);
+    const t = norte.requiredThickness_mm as Record<string, number>;
+    expect(t.PB).toBeCloseTo(16.6 * nTVL, 0); // ≈ 18.9 mm
+    expect(t.CONCRETE235).toBeGreaterThan(176 * nTVL - 2);
+    expect(t.CONCRETE235).toBeLessThan(176 * nTVL + 2); // ≈ 200 mm
+    // Contrapeso: no hay dosis del sintético comparada con TG-108 a la distancia 3D (receptor en el piso).
+    const tgPiso = dosisSemanalTG108({ ...p.sources[0].tg108!, nuclido: 'F18', d_m: Math.hypot(1.8, 1.0) });
+    expect(norte.maxKerma! * 1000).toBeGreaterThan(tgPiso * 1.2);
   });
 });

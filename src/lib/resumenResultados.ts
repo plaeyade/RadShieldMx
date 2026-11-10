@@ -25,7 +25,10 @@ export function filasResultados(plan: Pick<FloorPlan, 'barriers'> | null | undef
     const espesor = typeof req === 'number' ? req : (req && typeof req[codigo] === 'number' ? req[codigo] : null);
     const kerma = typeof b.maxKerma === 'number' && Number.isFinite(b.maxKerma) ? b.maxKerma : null;
     const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 ? b.occupancyFactor : 1;
-    const estado: EstadoBarrera = kerma === null ? 'sin-calculo' : kerma * T <= b.designGoal_mSv_per_wk ? 'no-requiere' : 'requiere';
+    // «No requiere» sólo si el motor no publicó espesores Y el kerma·T queda bajo P (conservador: un ciclotrón
+    // sin espesor publicado, o un espesor del motor normativo con kerma·T ≤ P, cuentan como «requiere»).
+    const hayEspesor = typeof req === 'number' ? req > 0 : Boolean(req && Object.values(req).some((v) => typeof v === 'number' && v > 0));
+    const estado: EstadoBarrera = kerma === null ? 'sin-calculo' : !hayEspesor && kerma * T <= b.designGoal_mSv_per_wk ? 'no-requiere' : 'requiere';
     return { id: b.id, nombre: b.name, material: codigo, espesor_mm: espesor !== null && Number.isFinite(espesor) ? espesor : null, kerma_mSv_semana: kerma, T, P_mSv_semana: b.designGoal_mSv_per_wk, estado };
   });
 }

@@ -56,3 +56,23 @@ describe('estado vacío (Fase 10)', () => {
     expect(screen.getAllByTestId('f10-aviso-proyecto-vacio').length).toBeGreaterThanOrEqual(3);
   });
 });
+
+describe('ningún «cumple» sin cálculo (revisión Fase 10)', () => {
+  it('filasResultados: sin espesor publicado y kerma·T > P es «requiere»; con espesor publicado nunca «no requiere»', async () => {
+    const { filasResultados } = await import('@/lib/resumenResultados');
+    const base = planoEjemploCompleto().barriers[1];
+    const [a, b, c] = filasResultados({ barriers: [
+      { ...base, id: 'a', maxKerma: 0.5, requiredThickness_mm: {} },
+      { ...base, id: 'b', maxKerma: 0.001, requiredThickness_mm: { CONCRETE235: 12 } },
+      { ...base, id: 'c', maxKerma: 0.001, requiredThickness_mm: {} },
+    ] });
+    expect(a.estado).toBe('requiere');
+    expect(b.estado).toBe('requiere');
+    expect(c.estado).toBe('no-requiere');
+  });
+
+  it('tablero CNSNS vacío: ningún semáforo VERDE', () => {
+    render(<CNSNSDashboardDialog open onOpenChange={nada} floorPlan={planoVacio()} />);
+    expect(screen.queryByText('VERDE')).toBeNull();
+  });
+});
