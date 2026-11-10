@@ -3,6 +3,8 @@
  * Generates NOM-008/NOM-040/CNSNS compliant reports
  */
 import { useState } from 'react';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
+import { verificarBarrera } from '@/lib/verificacionBlindaje';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,12 +40,16 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
 
   const generateReport = () => {
     const now = new Date().toLocaleDateString('es-MX');
+    // Fase 10 (revisión): antes cualquier barrera con P > 0 salía «CUMPLE» sin cálculo ni espesor instalado.
+    // El estado sale de `verificarBarrera` (instalado ≥ requerido), igual que el tablero y el cálculo por lotes.
+    const ESTADO: Record<string, string> = { CUMPLE: 'CUMPLE', NO_CUMPLE: 'NO CUMPLE', SIN_CALCULO: 'SIN CÁLCULO', SIN_ESPESOR: 'SIN ESPESOR INSTALADO', REVISAR_MATERIAL: 'REVISAR MATERIAL' };
     const barriers = floorPlan.barriers.map(b => {
-      const passes = b.designGoal_mSv_per_wk > 0;
+      const v = verificarBarrera(b);
       return {
         name: b.name, type: b.barrierType, material: b.materialCode,
         useFactor: b.useFactor, occupancyFactor: b.occupancyFactor,
-        designGoal: b.designGoal_mSv_per_wk, status: passes ? 'CUMPLE' : 'NO CUMPLE',
+        designGoal: b.designGoal_mSv_per_wk, status: ESTADO[v.estado] ?? v.estado,
+        requerido_mm: v.requerido_mm, instalado_mm: v.instalado_mm,
       };
     });
 
@@ -63,6 +69,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
           cobertura_presets_f86_pct: evidenceSnapshot.presetCoveragePct,
           barreras_cumplen: barriers.filter(b => b.status === 'CUMPLE').length,
           barreras_no_cumplen: barriers.filter(b => b.status === 'NO CUMPLE').length,
+          barreras_pendientes: barriers.filter(b => b.status !== 'CUMPLE' && b.status !== 'NO CUMPLE').length,
         },
         evidencia_canvas_f76: {
           snapshot: evidenceSnapshot,
@@ -103,6 +110,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
             <Badge variant="outline" className="text-[9px]">NOM-008/040</Badge>
           </DialogTitle>
         </DialogHeader>
+        <AvisoProyectoVacio floorPlan={floorPlan} className="mb-2" />
         <div className="space-y-2 mb-3">
           <div className="flex items-center gap-2"><Building2 className="w-3 h-3 text-slate-400" /><input value={facilityName} onChange={e => setFacilityName(e.target.value)} className="text-[11px] border rounded px-2 py-1 flex-1" placeholder="Nombre de la instalacion" /></div>
           <div className="flex items-center gap-2"><Shield className="w-3 h-3 text-slate-400" /><input value={facilityAddress} onChange={e => setFacilityAddress(e.target.value)} className="text-[11px] border rounded px-2 py-1 flex-1" placeholder="Direccion" /></div>

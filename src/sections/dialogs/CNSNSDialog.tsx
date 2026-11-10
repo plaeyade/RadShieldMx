@@ -1,4 +1,6 @@
+import type { FloorPlan } from '@/types/radshield';
 import { Button } from '@/components/ui/button';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,14 +19,17 @@ interface CNSNSDialogProps {
   meta: CNSNSMeta;
   setMeta: React.Dispatch<React.SetStateAction<CNSNSMeta>>;
   onGenerate: () => void;
+  /** Fase 10: para avisar si el proyecto está vacío o sin calcular. */
+  floorPlan?: Pick<FloorPlan, 'barriers' | 'sources'>;
 }
 
-export default function CNSNSDialog({ open, onOpenChange, meta, setMeta, onGenerate }: CNSNSDialogProps) {
+export default function CNSNSDialog({ open, onOpenChange, meta, setMeta, onGenerate, floorPlan }: CNSNSDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Generar Memoria Analitica CNSNS</DialogTitle></DialogHeader>
         <div className="space-y-3 py-3">
+          {floorPlan && <AvisoProyectoVacio floorPlan={floorPlan} />}
           <p className="text-sm text-gray-600">
             Genere el documento Word de memoria analitica listo para tramite ante la CNSNS. Incluye portada, tabla de resultados, metodologia, referencias normativas y espacios para firmas.
           </p>

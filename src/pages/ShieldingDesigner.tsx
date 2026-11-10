@@ -29,7 +29,7 @@ import {
   canvasQAExportToCsv,
   SHIELDING_PRESETS,
 } from '@/lib/canvasF85Workflow';
-import { suggestOccupancyProfile, NCRP_DESIGN_GOALS, formatOccupancy } from '@/lib/ncrpOccupancy';
+import { suggestOccupancyProfile, NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
 // v50: Motor optimizado con spatial hashing + async WebWorker
 import '@/lib/shieldingEngine';
 import { AsyncShieldingEngine } from '@/lib/engine/AsyncShieldingEngine';
@@ -95,6 +95,10 @@ import type { F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPre
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import StatusBar from '@/sections/StatusBar';
 import WelcomeScreen from '@/sections/WelcomeScreen';
+import { useCanvasStore } from '@/stores/canvasStore';
+import GuiaPasoAPaso, { type AccionesGuia } from '@/components/GuiaPasoAPaso';
+import { guardarProgreso, leerProgreso, reducirGuia, type AccionGuia, type ProgresoGuia } from '@/lib/guiaPasos';
+import { NOMBRE_EJEMPLO_GUIADO, aplicarOcupacion, muestraFuentes, muestraParedes, muestraRegiones, planoTieneContenido, planoVacio } from '@/lib/ejemploGuiado';
 
 const SmartSearchDICOMDialog = lazy(() => import('@/sections/dialogs/SmartSearchDICOMDialog'));
 const LogFileAnalysisDialog = lazy(() => import('@/sections/dialogs/LogFileAnalysisDialog'));
@@ -350,6 +354,9 @@ const FloorCeilingDialog = lazy(() => import('@/sections/dialogs/FloorCeilingDia
 const ICRU57Dialog = lazy(() => import('@/sections/dialogs/ICRU57Dialog'));
 const ICRU96Dialog = lazy(() => import('@/sections/dialogs/ICRU96Dialog'));
 const TutorialDialog = lazy(() => import('@/sections/dialogs/TutorialDialog'));
+
+/** Fase 10: nombre de archivo seguro (el ejemplo «PET/CT» llevaba «/» y el navegador descartaba el nombre). */
+const nombreArchivo = (nombre: string) => (nombre || 'proyecto').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -839,11 +846,7 @@ export default function ShieldingDesigner() {
   // v50: Async engine + profiler (instanciados una sola vez)
   const asyncEngineRef = useRef(new AsyncShieldingEngine());
   const profilerRef = useRef(createProfiler());
-  const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([
-    { id: 'cp-1', name: 'Control Desk', x: 150, y: 150, designGoal_mSv_per_wk: 0.02, occupancyFactor: 1.0, notes: 'Main control room' },
-    { id: 'cp-2', name: 'Patient Waiting', x: 500, y: 100, designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.2, notes: 'Public area' },
-    { id: 'cp-3', name: 'Staff Corridor', x: 350, y: 450, designGoal_mSv_per_wk: 0.02, occupancyFactor: 0.1, notes: 'Staff only' },
-  ]);
+  const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([]);
 
   // ═══ Keyboard Shortcuts (Recomendacion #8) ═══
   useEffect(() => {
@@ -878,46 +881,8 @@ export default function ShieldingDesigner() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Auto-load demo data when welcome screen is dismissed
-  useEffect(() => {
-    if (!showWelcomeScreen && floorPlan.barriers.length === 0 && floorPlan.sources.length === 0) {
-      // v98: Apply NCRP 147 occupancy factors to demo barriers and regions
-      const controlProfile = suggestOccupancyProfile('Control Room');
-      const corridorProfile = suggestOccupancyProfile('Corridor');
-      const southProfile = suggestOccupancyProfile('Patient Waiting');
-      // Load a demo R&F room configuration similar to RadShield paper (DeLorenzo et al. 2016, Fig. 6)
-      setFloorPlan(prev => ({
-        ...prev,
-        name: 'Demo - R&F Room (RadShield Fig.6)',
-        scale_m_per_pixel: 0.01,
-        sources: [
-          { id: 'source-chest', x: 300, y: 200, name: 'Chest X-ray', modality: { id: 'xr_chest', name: 'Chest Radiography', energies: [120], typicalDose_mGy: 0.2, workloadDefault: 150, unit: 'exams/week', description: 'Chest radiography, standing patient, wall Bucky' }, workloadValue: 150, workloadUnit: 'exams/week', isocenterHeight_m: 1.5, useFactor: 0.25, workloadHoursPerWeek: 40 },
-          { id: 'source-table', x: 350, y: 350, name: 'Table Top X-ray', modality: { id: 'xr_table', name: 'Table Top Radiography', energies: [90], typicalDose_mGy: 1.5, workloadDefault: 80, unit: 'exams/week', description: 'Table top radiography, supine patient' }, workloadValue: 80, workloadUnit: 'exams/week', isocenterHeight_m: 1.0, useFactor: 1.0, workloadHoursPerWeek: 40 },
-          { id: 'source-fluoro', x: 400, y: 300, name: 'Fluoroscopy', modality: { id: 'xr_fluoro', name: 'Fluoroscopy', energies: [110], typicalDose_mGy: 15, workloadDefault: 20, unit: 'hours/week', description: 'Continuous fluoroscopy for procedures' }, workloadValue: 20, workloadUnit: 'hours/week', isocenterHeight_m: 1.1, useFactor: 0.083, workloadHoursPerWeek: 20 },
-        ],
-        barriers: [
-          { id: 'wall-north', x1: 100, y1: 100, x2: 600, y2: 100, name: 'Wall 1 (North)', barrierType: 'primary', useFactor: 1.0, occupancyFactor: controlProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.controlled, materialCode: 'CONCRETE235' },
-          { id: 'wall-east', x1: 600, y1: 100, x2: 600, y2: 500, name: 'Wall 2 (East)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: corridorProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235' },
-          { id: 'wall-south', x1: 100, y1: 500, x2: 600, y2: 500, name: 'Wall 3 (South)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: southProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235' },
-          { id: 'wall-west', x1: 100, y1: 100, x2: 100, y2: 500, name: 'Wall 4 (West)', barrierType: 'secondary', useFactor: 0.25, occupancyFactor: corridorProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, materialCode: 'CONCRETE235' },
-          { id: 'wall-divider', x1: 350, y1: 100, x2: 350, y2: 300, name: 'Wall 5 (Divider)', barrierType: 'primary', useFactor: 1.0, occupancyFactor: controlProfile.occupancyFactor, designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.controlled, materialCode: 'CONCRETE235' },
-        ],
-        occupiedRegions: [
-          { id: 'region-control', name: 'Control Room', designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.controlled, occupancyFactor: controlProfile.occupancyFactor, points: [{ x: 110, y: 110 }, { x: 340, y: 110 }, { x: 340, y: 290 }, { x: 110, y: 290 }] },
-          { id: 'region-corridor', name: 'Corridor', designGoal_mSv_per_wk: NCRP_DESIGN_GOALS.public, occupancyFactor: corridorProfile.occupancyFactor, points: [{ x: 360, y: 110 }, { x: 590, y: 110 }, { x: 590, y: 490 }, { x: 360, y: 490 }] },
-        ],
-      }));
-      // v98: Informative toast with NCRP occupancy tutorial
-      toast.success('Tutorial: R&F Room cargado — RadShield Fig.6 (DeLorenzo et al. 2016)', {
-        duration: 8000,
-        description: `3 fuentes (Chest X-ray, Table Top, Fluoro) | 5 barreras | 2 regiones
-Factores NCRP 147 aplicados:
-• Control Room: T=${formatOccupancy(controlProfile.occupancyFactor)}, P=${NCRP_DESIGN_GOALS.controlled} mSv/sem
-• Corridor: T=${formatOccupancy(corridorProfile.occupancyFactor)}, P=${NCRP_DESIGN_GOALS.public} mSv/sem
-Objetivo: 0.1 mSv/sem (controlado) | 0.02 mSv/sem (publico)`,
-      });
-    }
-  }, [showWelcomeScreen]);
+  // Fase 10: ya no se carga un plano de ejemplo al arrancar. La app abre con el proyecto vacío y el
+  // asistente «Guíame» ofrece el ejemplo PET/CT sólo si el usuario lo pide.
 
   // v98: OpenCV wall/room detection with NCRP occupancy factors
   const handleOpenCVDetect = useCallback(async () => {
@@ -984,7 +949,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       const blob = new Blob([JSON.stringify(floorPlan, null, 2)], { type: 'application/json' });
       if ('showSaveFilePicker' in window) {
         const handle = await (window as any).showSaveFilePicker({
-          suggestedName: `${floorPlan.name || 'proyecto'}.radshield`,
+          suggestedName: `${nombreArchivo(floorPlan.name)}.radshield`,
           types: [{ description: 'RadShield-MX Project', accept: { 'application/json': ['.radshield', '.json'] } }],
         });
         const writable = await handle.createWritable();
@@ -994,7 +959,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       } else {
         // Fallback: download
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `${floorPlan.name || 'proyecto'}.radshield`; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = `${nombreArchivo(floorPlan.name)}.radshield`; a.click();
         URL.revokeObjectURL(url);
         toast.success('Proyecto descargado');
       }
@@ -1986,13 +1951,13 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       return [b.id,b.name,b.barrierType,length_m.toFixed(2),(b.maxKerma||0).toFixed(4),t1?.mat?.name||'',(t1?.t||0).toFixed(2),roundThickness(t1?.t||0,t1?.code||'').toFixed(2),t2?.mat?.name||'',(t2?.t||0).toFixed(2),t3?.mat?.name||'',(t3?.t||0).toFixed(2),floorPlan.sources.map(s=>s.name).join('; '),floorPlan.sources.map(s=>s.modality.name).join('; '),floorPlan.sources.reduce((sum,s)=>sum+s.workloadValue,0).toString(),b.designGoal_mSv_per_wk.toString()];
     });
     const csv = [headers.join(','),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.csv`; a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${nombreArchivo(floorPlan.name)}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('CSV exportado'); useAppStore.getState().close('export');
   }, [floorPlan, roundThickness]);
 
   const exportJSON = useCallback(() => {
     const data={project:floorPlan.name,date:new Date().toISOString(),software:'RadShield-MX v1.2',scale_m_per_pixel:floorPlan.scale_m_per_pixel,numSources:floorPlan.sources.length,numBarriers:floorPlan.barriers.length,sources:floorPlan.sources.map(s=>({id:s.id,name:s.name,modality:s.modality.name,category:s.modality.category,workload:s.workloadValue})),barriers:floorPlan.barriers.map(b=>({id:b.id,name:b.name,type:b.barrierType,length_m:Math.sqrt((b.x2-b.x1)**2+(b.y2-b.y1)**2)*floorPlan.scale_m_per_pixel,maxKerma_mSv_wk:b.maxKerma||0,requiredThickness_mm:b.requiredThickness_mm||{}}))};
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.json`; a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${nombreArchivo(floorPlan.name)}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('JSON exportado');
   }, [floorPlan]);
 
@@ -2029,14 +1994,14 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
 
   const generateReport = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${floorPlan.name.replace(/\s+/g,'_')}.docx`; a.click(); URL.revokeObjectURL(url); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
+    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${nombreArchivo(floorPlan.name)}.docx`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
   }, [floorPlan, reportMeta, canvasRef, barrierResults, sampleLines]);
 
   const generateMCMacro = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
     try { const { generateGEANT4Macro, generateGATEMacro, generateValidationInstructions } = await import('@/hooks/useMCBridge'); const macroG4=generateGEANT4Macro(floorPlan,mcConfig,''); const macroGate=generateGATEMacro(floorPlan,mcConfig,''); const instructions=generateValidationInstructions(floorPlan,mcConfig);
       const dl=(content:string,fn:string)=>{const blob=new Blob([content],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();URL.revokeObjectURL(url);};
-      dl(macroG4,`${floorPlan.name.replace(/\s+/g,'_')}_geant4.mac`); dl(macroGate,`${floorPlan.name.replace(/\s+/g,'_')}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${floorPlan.name.replace(/\s+/g,'_')}.txt`);
+      dl(macroG4,`${nombreArchivo(floorPlan.name)}_geant4.mac`); dl(macroGate,`${nombreArchivo(floorPlan.name)}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${nombreArchivo(floorPlan.name)}.txt`);
       toast.success('Macros MC descargados'); useAppStore.getState().close('mc');
     } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'MC Macro Generation', format: mcConfig.format }); }
   }, [floorPlan, mcConfig]);
@@ -2049,7 +2014,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     const { generatePDFReport } = await import('@/hooks/usePDFGenerator');
     const blob = generatePDFReport(floorPlan, { ...reportMeta, date: new Date().toLocaleDateString('es-MX'), barrierResults, sampleLines });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${floorPlan.name.replace(/\s+/g, '_')}.pdf`; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${nombreArchivo(floorPlan.name)}.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('PDF generado y descargado');
   }, [floorPlan, reportMeta, barrierResults, sampleLines]);
 
@@ -2149,6 +2114,88 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
   };
   const paletteActions = DEFAULT_COMMANDS(commandHandlers);
 
+  // ═══ Fase 10: asistente «Guíame» ═══
+  const [ajustarVista, setAjustarVista] = useState(false);
+  const [progresoGuia, setProgresoGuia] = useState<ProgresoGuia>(() => {
+    const p = leerProgreso(typeof window !== 'undefined' ? window.localStorage : null);
+    // Un recorrido activo al recargar se ofrece en pausa (no tapa la app sin que el usuario lo pida).
+    return p.estado === 'activo' ? { ...p, estado: 'pausado' } : p;
+  });
+  const despacharGuia = useCallback((a: AccionGuia) => {
+    setProgresoGuia((prev) => {
+      const next = reducirGuia(prev, a);
+      guardarProgreso(typeof window !== 'undefined' ? window.localStorage : null, next);
+      return next;
+    });
+  }, []);
+  const abrirGuia = useCallback(() => { setShowWelcomeScreen(false); despacharGuia({ tipo: 'reanudar' }); }, [despacharGuia]);
+  const reiniciarGuia = useCallback(() => { setShowWelcomeScreen(false); despacharGuia({ tipo: 'iniciar' }); }, [despacharGuia]);
+  const accionesGuia: AccionesGuia = {
+    crearProyecto: () => {
+      resetFloorPlan(planoVacio('Proyecto nuevo'));
+      setCanvasState(prev => ({ ...prev, selectedId: null, mode: 'select' }));
+      if (typeof smartBarrier !== 'undefined') smartBarrier.clearResult();
+      setBarrierResults([]);
+      setSampleLines([]);
+      toast.success('Proyecto vacío creado');
+    },
+    abrirProyecto: () => useAppStore.getState().open('projects'),
+    importarDXF: () => useAppStore.getState().open('dxfViewer'),
+    cargarImagen: () => { const el = document.getElementById('floorplan-upload'); if (el) (el as HTMLInputElement).click(); },
+    herramienta: (t) => { setActiveTool(t); toast.info(t === 'barrier' ? 'Herramienta Barrera: arrastra en el lienzo para trazar un muro' : t === 'source' ? 'Herramienta Fuente: haz clic donde va la fuente' : 'Herramienta Región: dibuja el contorno del área ocupada'); },
+    ejemploParedes: () => {
+      const { scale_m_per_pixel, barriers } = muestraParedes();
+      setFloorPlan(prev => ({ ...prev, name: prev.barriers.length || prev.sources.length ? prev.name : NOMBRE_EJEMPLO_GUIADO, scale_m_per_pixel, barriers: [...prev.barriers.filter(b => !b.id.startsWith('eg-')), ...barriers] }));
+      setAjustarVista(true);
+      toast.success('Plano de ejemplo PET/CT cargado (7 muros, 2 cm/px)');
+    },
+    ejemploFuentes: () => {
+      setFloorPlan(prev => ({ ...prev, sources: [...prev.sources.filter(s => !s.id.startsWith('eg-')), ...muestraFuentes()] }));
+      toast.success('Fuentes del ejemplo: 2 pacientes F-18 FDG (TG-108)');
+    },
+    ejemploOcupacion: () => {
+      setFloorPlan(prev => ({ ...prev, barriers: aplicarOcupacion(prev.barriers), occupiedRegions: [...prev.occupiedRegions.filter(r => !r.id.startsWith('eg-')), ...muestraRegiones()] }));
+      toast.success('Ocupación del ejemplo aplicada (NCRP 147)');
+    },
+    calcular: runCalculations,
+    validarPlano: () => useAppStore.getState().open('planValidator'),
+    exportarPDF: () => { void handleGeneratePDF(); },
+    exportarCSV: exportCSV,
+  };
+  const proyectoVacio = !planoTieneContenido(floorPlan);
+  // Fase 10: los diálogos que leen `useCanvasStore` (lote, mapas de dosis, auditoría, escenarios, envío CNSNS)
+  // nunca recibían el plano del diseñador y siempre veían un proyecto vacío; se sincroniza aquí.
+  // Revisión Fase 10: en ambos sentidos. «Aplicar al plano» del cálculo por lotes escribe en el store; sin la
+  // vuelta, el diseñador no lo veía y el siguiente cambio del lienzo lo pisaba. El ref evita el eco.
+  const planoSincronizadoRef = useRef<FloorPlan | null>(null);
+  useEffect(() => {
+    planoSincronizadoRef.current = floorPlan;
+    if (useCanvasStore.getState().floorPlan !== floorPlan) useCanvasStore.setState({ floorPlan });
+  }, [floorPlan]);
+  useEffect(() => useCanvasStore.subscribe((s) => {
+    if (s.floorPlan === planoSincronizadoRef.current) return;
+    planoSincronizadoRef.current = s.floorPlan;
+    setFloorPlan(s.floorPlan);
+  }), [setFloorPlan]);
+  useEffect(() => {
+    if (!ajustarVista || floorPlan.barriers.length === 0) return;
+    setAjustarVista(false);
+    zoomToFit();
+  }, [ajustarVista, floorPlan.barriers.length, zoomToFit]);
+
+  // Pruebas E2E (sólo con la bandera local `radshield-e2e-controls`): abrir/cerrar diálogos del store.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem('radshield-e2e-controls') !== 'true') return;
+      const s = useAppStore.getState();
+      (window as unknown as { __radshieldE2E?: unknown }).__radshieldE2E = {
+        dialogos: () => Object.keys(useAppStore.getState().dialogs),
+        abrir: (n: string) => useAppStore.getState().open(n),
+        cerrarTodo: () => s.closeAll(),
+      };
+    } catch { /* sin almacenamiento: sin gancho */ }
+  }, []);
+
   return (
     <>
       <SkipToContent />
@@ -2182,6 +2229,9 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onUndo={undo}
           onRedo={redo}
           onCommandPalette={() => setShowCommandPalette(true)}
+          onGuiame={abrirGuia}
+          onReiniciarGuia={reiniciarGuia}
+          guiaEnCurso={progresoGuia.estado === 'pausado'}
           onOnboardingTour={() => {
             try {
               window.localStorage.removeItem('radshield-tour-completed');
@@ -2324,6 +2374,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       <Suspense fallback={null}>
         <OnboardingTour key={onboardingTourKey} />
       </Suspense>
+      <GuiaPasoAPaso progreso={progresoGuia} despachar={despacharGuia} floorPlan={floorPlan} acciones={accionesGuia} />
       <div className="flex-1 flex overflow-hidden">
         {showWelcomeScreen ? (
           <div className="welcome-panel flex-1">
@@ -2347,7 +2398,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             </div>
             {/* Canvas Panel */}
             <div className="flex-1 min-w-0 flex flex-col">
-              <div className="flex flex-col h-full main-canvas-area">
+              <div className="relative flex flex-col h-full main-canvas-area">
                 {/* Hidden file input for floor plan import */}
                 <input
                   id="floorplan-upload"
@@ -2356,6 +2407,22 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   className="hidden"
                   onChange={handleImageUpload}
                 />
+                {/* Fase 10: estado vacío útil (el lienzo sigue activo alrededor de la tarjeta). */}
+                {proyectoVacio && activeTool === 'select' && (
+                  <div className="pointer-events-none absolute inset-x-0 top-16 z-20 flex justify-center px-4">
+                    <section data-testid="f10-estado-vacio" aria-label="Proyecto vacío" className="pointer-events-auto w-full max-w-md rounded-xl border border-slate-200 bg-white/95 p-4 text-slate-800 shadow-lg backdrop-blur">
+                      <h2 className="text-sm font-semibold">Aún no hay plano en este proyecto</h2>
+                      <p className="mt-1 text-xs text-slate-500">Importa un plano, dibuja los muros o deja que el asistente te lleve paso a paso. Los cálculos, reportes y visores se activan cuando hay barreras y fuentes.</p>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        <button type="button" data-testid="f10-vacio-guiame" onClick={abrirGuia} className="rounded-md bg-orange-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-orange-600">Guíame paso a paso</button>
+                        <button type="button" data-testid="f10-vacio-dxf" onClick={() => useAppStore.getState().open('dxfViewer')} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs hover:bg-slate-50">Importar DXF</button>
+                        <button type="button" data-testid="f10-vacio-imagen" onClick={() => { const el = document.getElementById('floorplan-upload'); if (el) (el as HTMLInputElement).click(); }} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs hover:bg-slate-50">Cargar imagen</button>
+                        <button type="button" data-testid="f10-vacio-dibujar" onClick={() => setActiveTool('barrier')} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs hover:bg-slate-50">Dibujar muros</button>
+                        <button type="button" data-testid="f10-vacio-abrir" onClick={() => useAppStore.getState().open('projects')} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs hover:bg-slate-50">Abrir proyecto</button>
+                      </div>
+                    </section>
+                  </div>
+                )}
                 <Suspense fallback={<div data-testid="canvas-cargando" className="flex flex-1 items-center justify-center text-xs text-slate-400">Cargando lienzo…</div>}>
                 <CanvasArea
                   canvasRef={canvasRef} canvasState={canvasState} setCanvasState={setCanvasState}
@@ -2506,8 +2573,8 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         </div>
       )}
       <Suspense fallback={<DialogFallback />}>
-        <LazyDialog name="export" component={ExportDialog} onExportCSV={exportCSV} onExportJSON={exportJSON} onExportExcel={exportExcel} />
-        <LazyDialog name="cnsns" component={CNSNSDialog} meta={reportMeta} setMeta={setReportMeta} onGenerate={generateReport} />
+        <LazyDialog name="export" component={ExportDialog} floorPlan={floorPlan} onExportCSV={exportCSV} onExportJSON={exportJSON} onExportExcel={exportExcel} />
+        <LazyDialog name="cnsns" component={CNSNSDialog} floorPlan={floorPlan} meta={reportMeta} setMeta={setReportMeta} onGenerate={generateReport} />
         <LazyDialog name="mc" component={MCDialog} config={mcConfig} setConfig={setMcConfig} onGenerate={generateMCMacro} />
         <LazyDialog name="projects" component={ProjectManagerDialog} projects={projects} cloudProjects={cloudProjectsQuery.data || []} currentProjectName={floorPlan.name} onSave={handleSaveProject} onLoad={handleLoadProject} onDelete={handleDeleteProject} onRename={renameProject} onExport={exportProjectJSON} onImport={importProjectJSON} isLoggedIn={!!user?.unionId} />
         <LazyDialog name="materialLibrary" component={MaterialLibraryDialog} builtinMaterials={backendMaterials.builtinMaterials} customMaterials={backendMaterials.customMaterials} onCreateMaterial={backendMaterials.createMaterial} onDeleteMaterial={backendMaterials.deleteMaterial} isLoading={backendMaterials.isLoading} />
