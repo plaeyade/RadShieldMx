@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from
 import { useI18n } from '@/hooks/useI18n';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import {
-  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Globe, Cloud, FileDown, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Wind, ClipboardList, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Bell, Code, Hexagon, FlaskConical, Crosshair, Calculator, Layers, FileCheck, Wand2, Cpu, Scan, GitBranch, Ruler, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, Search, FileBarChart, Star, Clock, Palette, Radio, Users, Video, Factory, ScanLine, FileBox, HelpCircle, Scale, Stethoscope, Save, Printer, Plus, Siren, PenTool, MapPin, Building2, Languages, Grid3X3, Pill, Target, Contrast, Radiation, Award, Info, LineChart, Bug, FileSearch, SearchCode, Timer, MemoryStick, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
+  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Globe, Cloud, FileDown, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Wind, ClipboardList, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Bell, Code, Hexagon, FlaskConical, Crosshair, Calculator, Layers, FileCheck, Wand2, Cpu, Scan, GitBranch, Ruler, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, Search, FileBarChart, Star, Clock, Palette, Radio, Users, Video, Factory, ScanLine, FileBox, HelpCircle, Compass, Scale, Stethoscope, Save, Printer, Plus, Siren, PenTool, MapPin, Building2, Languages, Grid3X3, Pill, Target, Contrast, Radiation, Award, Info, LineChart, Bug, FileSearch, SearchCode, Timer, MemoryStick, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
@@ -101,6 +101,8 @@ interface ToolbarProps {
   onEquipmentLibrary: () => void; onEquipmentManager: () => void;
   onPACSReal: () => void; onElectronApplicator: () => void;
   onOnboardingTour: () => void; onManual: () => void;
+  /** Fase 10: asistente «Guíame» (reanuda donde se quedó) y reinicio desde el paso 1. */
+  onGuiame?: () => void; onReiniciarGuia?: () => void; guiaEnCurso?: boolean;
   onRadiationLegends: () => void;
   onUndoRedoHistory: () => void; onCommandPalette: () => void;
   onSmartSearchDICOM: () => void;
@@ -254,6 +256,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     onEquipmentLibrary, onEquipmentManager,
     onPACSReal, onElectronApplicator,
     onOnboardingTour, onManual, onRadiationLegends, onAbout, onGlossary,
+    onGuiame, onReiniciarGuia, guiaEnCurso,
     onUndoRedoHistory, onCommandPalette, onSmartSearchDICOM,
     onKeyboardShortcuts, onToggleSnap, onProjects, onCompareMode,
     onNistLibrary, onNeutronConfig, onBraquiHDR, onMemoriaAnalitica,
@@ -494,6 +497,8 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
               <SmartItem testId="f404-file-log-analysis" icon={FileBarChart} iconColor={c.file} label={t('file.logAnalysis')} onClick={invoke(onLogFileAnalysis, 'logFileAnalysis')} desc="Diagnostico de eventos" />
               <DropdownMenuSeparator />
               <SectionLabel label="Ayuda" color="text-slate-400" />
+              {onGuiame && <SmartItem testId="f10-help-guiame" icon={Compass} iconColor="bg-sky-500" label={guiaEnCurso ? 'Guíame (reanudar)' : 'Guíame'} onClick={onGuiame} desc="Asistente paso a paso, con ejemplo PET/CT opcional" />}
+              {onReiniciarGuia && <SmartItem testId="f10-help-guia-reiniciar" icon={RefreshCw} iconColor="bg-sky-500" label="Reiniciar la guía" onClick={onReiniciarGuia} desc="Volver al paso 1 del asistente" />}
               <SmartItem testId="f404-file-glossary" icon={BookOpen} iconColor={c.file} label="Glosario" onClick={invoke(onGlossary, 'glossary')} desc="Terminologia de blindaje" />
               <SmartItem testId="f404-file-about" icon={Info} iconColor={c.file} label="Acerca de" onClick={invoke(onAbout, 'about')} desc="Version y creditos" />
             </DropdownMenuContent>
@@ -1018,6 +1023,11 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             <Tooltip><TooltipTrigger asChild>
               <Button aria-label="Command Palette" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onCommandPalette, 'commandPalette')}><Keyboard className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Cmd Palette</TooltipContent></Tooltip>
+            {onGuiame && (
+              <Button data-testid="f10-toolbar-guiame" aria-label="Guíame: asistente paso a paso" variant="ghost" size="sm" className="h-8 px-2 gap-1 text-[11px] font-semibold text-sky-700 hover:text-sky-800 hover:bg-sky-50" onClick={onGuiame}>
+                <Compass className="w-4 h-4" /> Guíame
+              </Button>
+            )}
             <Tooltip><TooltipTrigger asChild>
               <Button aria-label="Tour" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onOnboardingTour, 'onboardingTour')}><HelpCircle className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Tour</TooltipContent></Tooltip>

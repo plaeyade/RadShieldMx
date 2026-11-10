@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export default function CNSNSDashboardDialog({ open, onOpenChange, floorPlan }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>Dashboard CNSNS — Cumplimiento Normativo</DialogTitle></DialogHeader>
+        <AvisoProyectoVacio floorPlan={floorPlan} />
         <div className="grid grid-cols-2 gap-2">
           <Card className={`${semaforo(metrics.allCompliant)} text-white`}><CardContent className="p-2 text-center">
             <div className="text-lg font-bold">{semaforoText(metrics.allCompliant)}</div>

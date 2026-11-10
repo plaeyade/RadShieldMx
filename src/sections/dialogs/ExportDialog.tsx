@@ -1,4 +1,6 @@
+import type { FloorPlan } from '@/types/radshield';
 import { Button } from '@/components/ui/button';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Download, FileSpreadsheet } from 'lucide-react';
 
@@ -8,14 +10,17 @@ interface ExportDialogProps {
   onExportCSV: () => void;
   onExportJSON: () => void;
   onExportExcel?: () => void;
+  /** Fase 10: para avisar si el proyecto está vacío o sin calcular. */
+  floorPlan?: Pick<FloorPlan, 'barriers' | 'sources'>;
 }
 
-export default function ExportDialog({ open, onOpenChange, onExportCSV, onExportJSON, onExportExcel }: ExportDialogProps) {
+export default function ExportDialog({ open, onOpenChange, onExportCSV, onExportJSON, onExportExcel, floorPlan }: ExportDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>Exportar Resultados</DialogTitle></DialogHeader>
         <div className="space-y-3 py-3">
+          {floorPlan && <AvisoProyectoVacio floorPlan={floorPlan} />}
           <p className="text-sm text-gray-600">
             Exporte resultados para importar a Excel (hoja IMPORT_RADSHIELD_MX) o usar en memoria analitica.
           </p>

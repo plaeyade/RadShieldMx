@@ -3,6 +3,7 @@
  * Generates NOM-008/NOM-040/CNSNS compliant reports
  */
 import { useState } from 'react';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -103,6 +104,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
             <Badge variant="outline" className="text-[9px]">NOM-008/040</Badge>
           </DialogTitle>
         </DialogHeader>
+        <AvisoProyectoVacio floorPlan={floorPlan} className="mb-2" />
         <div className="space-y-2 mb-3">
           <div className="flex items-center gap-2"><Building2 className="w-3 h-3 text-slate-400" /><input value={facilityName} onChange={e => setFacilityName(e.target.value)} className="text-[11px] border rounded px-2 py-1 flex-1" placeholder="Nombre de la instalacion" /></div>
           <div className="flex items-center gap-2"><Shield className="w-3 h-3 text-slate-400" /><input value={facilityAddress} onChange={e => setFacilityAddress(e.target.value)} className="text-[11px] border rounded px-2 py-1 flex-1" placeholder="Direccion" /></div>

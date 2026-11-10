@@ -1,5 +1,6 @@
 // Fase 2: DashboardCalcDialog -- Replica de DASHBOARD_ING del Excel
 import { verificarPlano } from '@/lib/verificacionBlindaje';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +54,7 @@ export default function DashboardCalcDialog({ open, onOpenChange, floorPlan }: P
 
         <ScrollArea className="flex-1 pr-2">
           <div className="space-y-4">
+            <AvisoProyectoVacio floorPlan={floorPlan} />
             {/* KPIs Row */}
             <div className="grid grid-cols-4 gap-3">
               <KpiCard
