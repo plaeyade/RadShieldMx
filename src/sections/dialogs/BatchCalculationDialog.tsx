@@ -14,7 +14,7 @@ import { Layers, Play, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCanvasStore } from '@/stores/canvasStore';
 import { useShieldingEngine } from '@/hooks/useShieldingEngine';
-import { verificarBarrera, type FilaVerificacion } from '@/lib/verificacionBlindaje';
+import { NOTA_NO_REQUIERE, verificarBarrera, type FilaVerificacion } from '@/lib/verificacionBlindaje';
 import type { Barrier } from '@/types/radshield';
 
 interface BatchCalculationDialogProps { open: boolean; onOpenChange: (v: boolean) => void }
@@ -99,7 +99,7 @@ export default function BatchCalculationDialog({ open, onOpenChange }: BatchCalc
                       <TableCell className="text-xs text-right font-mono">{f?.v.instalado_mm != null ? f.v.instalado_mm.toFixed(1) : (b.thickness_mm ?? '—')}</TableCell>
                       <TableCell className="text-xs text-right font-mono">{f?.b.maxKerma != null ? f.b.maxKerma.toExponential(2) : '—'}</TableCell>
                       <TableCell className="text-xs">{f?.b.calculationTrace?.standard ?? '—'}</TableCell>
-                      <TableCell className="text-xs">{f ? <Badge variant={f.v.estado === 'CUMPLE' ? 'default' : f.v.estado === 'NO_CUMPLE' ? 'destructive' : 'outline'}>{ETIQUETA_ESTADO[f.v.estado]}</Badge> : 'Pendiente'}</TableCell>
+                      <TableCell className="text-xs">{f ? <Badge variant={f.v.estado === 'CUMPLE' ? 'default' : f.v.estado === 'NO_CUMPLE' ? 'destructive' : 'outline'}>{f.v.nota === NOTA_NO_REQUIERE ? 'No requiere blindaje adicional' : ETIQUETA_ESTADO[f.v.estado]}</Badge> : 'Pendiente'}</TableCell>
                     </TableRow>
                   );
                 })}

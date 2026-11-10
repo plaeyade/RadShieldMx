@@ -19,10 +19,9 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { MATERIALS_DB, getMaterialById } from '@/lib/materialDatabase';
-import {
-  calculateLINACPrimaryBarrier, calculateLINACSecondaryBarrier,
-  C1_IMRT_FACTORS
-} from '@/lib/uaqProtocol';
+import { C1_IMRT_FACTORS } from '@/lib/uaqProtocol';
+import { barreraMV, energiaTabuladaMV } from '@/lib/calculadorasNormativas';
+import type { MaterialNCRP151 } from '@/lib/ncrp151';
 import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
@@ -102,30 +101,38 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
   const W_L = parseFloat(memoria.cargaSemanal_Gy || '0') * C1;
 
   // ─── Cálculo automático ───
+  // Fase 11: el cálculo usa `barreraMV` (NCRP 151, el mismo motor que el diseñador y las calculadoras validadas).
+  // Antes usaba `calculateLINACPrimaryBarrier/SecondaryBarrier` del protocolo UAQ: concreto siempre (aunque se eligiera
+  // plomo o acero), carga de la primaria multiplicada por C₁ de IMRT y una sola componente en la secundaria.
   const calcularBarrera = useCallback((areaIdx: number) => {
     const area = memoria.areasAdyacentes[areaIdx];
     if (!area || !material) return null;
     const energy = parseInt(memoria.energia_MV);
+    const W = parseFloat(memoria.cargaSemanal_Gy);
+    if (!Number.isFinite(energy) || !Number.isFinite(W) || W <= 0) return null;
     // Fase 8c: P según el área (antes 0.02 fijo para todas): controlada 0.1, no controlada 0.02 mSv/semana (NCRP 151 §1.2).
     const P = area.tipo === 'control' || area.tipo === 'controlada' ? 0.1 : 0.02;
-    
-    if (area.barrera === 'primaria') {
-      return calculateLINACPrimaryBarrier({
-        energy_MeV: energy, W_Gy_per_wk: parseFloat(memoria.cargaSemanal_Gy),
-        technique: memoria.tecnica, P_mSv_per_wk: P,
-        d_pri_m: area.d, U: area.U, T: area.T,
-        F_conv_fraction: 0.3, F_IMRT_fraction: 0.7,
-        materialCode: 'concrete235', // proxy
-      });
-    } else {
-      return calculateLINACSecondaryBarrier({
-        energy_MeV: energy, W_Gy_per_wk: parseFloat(memoria.cargaSemanal_Gy),
-        technique: memoria.tecnica, P_mSv_per_wk: P,
-        barrierType: 'scatter', materialCode: 'concrete235', T: area.T,
-        d_L_m: area.d, d_sca_m: 1.0, d_sec_m: area.d, alpha_m2: 7.12e-4, F_cm2: 400,
-      });
-    }
-  }, [memoria, material]);
+    // NCRP 151 tabula concreto, acero y plomo. Otros materiales: concreto 2.35 por equivalencia másica si son menos
+    // densos (más espesor) y espesor de concreto si son más densos (conservador).
+    const mat: MaterialNCRP151 = material.category === 'lead' ? 'lead' : material.category === 'steel' ? 'steel' : 'concrete';
+    const escala = mat === 'concrete' && material.density_g_cm3 > 0 && material.density_g_cm3 < 2.35 ? 2.35 / material.density_g_cm3 : 1;
+    const r = barreraMV({
+      tipo: area.barrera === 'primaria' ? 'primaria' : 'secundaria',
+      haces: [{ energia: energiaTabuladaMV(energy), W_Gy_semana: W, fraccionIMRT: C1 > 1 ? 0.7 : 0, factorIMRT: C1 }],
+      material: mat, P_mSv_semana: P, T: area.T, U: area.U, d_m: area.d, campo_cm2: 400,
+    });
+    const dominante = r.componentes.reduce((m, c) => (c.espesor_cm > m.espesor_cm ? c : m), r.componentes[0]);
+    const B = dominante?.B_requerida ?? 1;
+    return {
+      thickness_cm: r.espesor_cm * escala,
+      B,
+      n: B >= 1 ? 0 : Math.log10(1 / B),
+      C1: area.barrera === 'primaria' || C1 <= 1 ? undefined : C1,
+      W_modified: W * C1,
+      cumple: r.cumple,
+      referencia: r.referencia,
+    };
+  }, [memoria, material, C1]);
 
   // ─── Exportar memoria como texto ───
   const exportMemoria = useCallback(() => {
@@ -357,7 +364,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
               </div>
               {C1 > 1 && (
                 <Card className="bg-amber-50 border-amber-200"><CardContent className="p-3 text-xs text-amber-800">
-                  <strong>Factor C₁ aplicado ({C1}):</strong> Para {memoria.tecnica}, la carga de trabajo modificada es <strong>{W_L.toFixed(0)} Gy/sem eq.</strong> (NCRP 151 §4.8.5, Protocolo UAQ §4.8.5)
+                  <strong>Factor C₁ aplicado ({C1}):</strong> Para {memoria.tecnica}, la carga de fuga modificada es <strong>{W_L.toFixed(0)} Gy/sem eq.</strong> (NCRP 151 §4.8.5, Protocolo UAQ §4.8.5)
                 </CardContent></Card>
               )}
             </div>

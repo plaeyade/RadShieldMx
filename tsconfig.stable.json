@@ -9,7 +9,7 @@
     "src/providers/**/*.tsx",
     "src/components/ui/**/*.tsx",
     "src/lib/shieldingMath.ts",
-    "src/lib/shieldingEngine.ts",
+    "src/lib/motorProyecto.ts",
     "src/lib/tvlInterpolation.ts",
     "src/lib/excelDataTables.ts",
     "src/lib/equipmentDatabase.ts",

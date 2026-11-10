@@ -194,7 +194,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
                         <td className="border p-1 text-center">{f.material}</td>
                         <td className="border p-1 text-center">{f.kerma_mSv_semana === null ? '—' : f.kerma_mSv_semana.toPrecision(3)}</td>
                         <td className="border p-1 text-center">{f.T.toFixed(3)} · {f.P_mSv_semana}</td>
-                        <td className="border p-1 text-center">{f.estado === 'sin-calculo' ? 'sin cálculo' : f.estado === 'no-requiere' ? 'no requiere' : f.espesor_mm === null ? '—' : f.espesor_mm.toFixed(1)}</td>
+                        <td className="border p-1 text-center">{f.estado === 'sin-calculo' ? 'sin cálculo' : f.estado === 'no-requiere' ? 'no requiere blindaje adicional' : f.espesor_mm === null ? '—' : f.espesor_mm.toFixed(1)}</td>
                       </tr>
                     ))}
                   </tbody>

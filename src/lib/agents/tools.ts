@@ -6,38 +6,13 @@
 
 import type { AgentTool } from "./types";
 import { barreraMV, energiaTabuladaMV } from "../calculadorasNormativas";
-import type { MaterialNCRP151 } from "../ncrp151";
+import { transmisionTVL, tvlPrimaria, type MaterialNCRP151 } from "../ncrp151";
 
 // Fase 8a: las herramientas de barrera usan `barreraMV` (NCRP 151). Antes la primaria hacía
 // B = P(mSv)·d²/W(Gy) sin el factor 10⁻³ (≈ 3 TVL de menos). La barita se dimensiona con el TVL del concreto 2.35
 // (conservador: NCRP 151 no tabula concreto baritado).
 const materialMV = (m?: string): MaterialNCRP151 => (m === "lead" ? "lead" : m === "steel" ? "steel" : "concrete");
 const energiaMV = (e: number) => (e > 1 && e < 1.5 ? "Co60" as const : energiaTabuladaMV(e));
-
-// TVL database from NCRP 151 Table B.1
-const TVL_DB: Record<string, Record<string, { tvl1: number; tvle: number }>> = {
-  concrete: {
-    "Co-60": { tvl1: 21, tvle: 21 }, "4": { tvl1: 29, tvle: 26 },
-    "6": { tvl1: 37, tvle: 33 }, "10": { tvl1: 37, tvle: 37 },
-    "15": { tvl1: 44, tvle: 41 }, "18": { tvl1: 45, tvle: 43 },
-    "20": { tvl1: 46, tvle: 44 }, "24": { tvl1: 48, tvle: 46 },
-  },
-  barite: {
-    "Co-60": { tvl1: 15, tvle: 15 }, "4": { tvl1: 18, tvle: 16 },
-    "6": { tvl1: 21, tvle: 19 }, "10": { tvl1: 24, tvle: 22 },
-    "15": { tvl1: 28, tvle: 26 }, "18": { tvl1: 30, tvle: 28 },
-  },
-  steel: {
-    "Co-60": { tvl1: 7.0, tvle: 7.0 }, "4": { tvl1: 7.0, tvle: 7.0 },
-    "6": { tvl1: 10, tvle: 10 }, "10": { tvl1: 11, tvle: 11 },
-    "15": { tvl1: 11, tvle: 11 }, "18": { tvl1: 11, tvle: 11 },
-  },
-  lead: {
-    "Co-60": { tvl1: 4.0, tvle: 4.0 }, "4": { tvl1: 4.0, tvle: 4.0 },
-    "6": { tvl1: 5.7, tvle: 5.7 }, "10": { tvl1: 5.7, tvle: 5.7 },
-    "15": { tvl1: 5.7, tvle: 5.7 }, "18": { tvl1: 5.7, tvle: 5.7 },
-  },
-};
 
 const MATERIAL_DENSITY: Record<string, number> = {
   concrete: 2.35, barite: 3.35, steel: 7.8, lead: 11.3, "borated-polyethylene": 1.0,
@@ -173,14 +148,14 @@ export const AGENT_TOOLS: AgentTool[] = [
       claimedTVL: { type: "number", description: "claimed TVL in cm" },
     },
     execute: async (p) => {
-      const eKey = String(Math.round(p.energy));
-      const actual = TVL_DB[p.material]?.[eKey];
-      if (!actual) return { valid: false, error: "Energy/material not in NCRP 151" };
-      const diff = Math.abs(p.claimedTVL - actual.tvl1) / actual.tvl1;
+      // Fase 11: TVL₁ primario de NCRP 151 Tabla B.2 (`ncrp151`); la barita no está tabulada.
+      if (!["concrete", "steel", "lead"].includes(p.material)) return { valid: false, error: "Energy/material not in NCRP 151" };
+      const actual = tvlPrimaria(energiaMV(p.energy), materialMV(p.material)).tvl1_cm;
+      const diff = Math.abs(p.claimedTVL - actual) / actual;
       return {
-        valid: diff < 0.1, actualTVL: actual.tvl1, claimedTVL: p.claimedTVL,
+        valid: diff < 0.1, actualTVL: actual, claimedTVL: p.claimedTVL,
         difference: `${(diff * 100).toFixed(1)}%`,
-        reference: "NCRP 151 Table B.1",
+        reference: "NCRP 151 Table B.2",
       };
     },
   },
@@ -213,9 +188,10 @@ export const AGENT_TOOLS: AgentTool[] = [
       hasOverhang: { type: "boolean", description: "roof extends beyond walls" },
     },
     execute: async (p) => {
-      const tvl = TVL_DB.concrete[String(Math.round(p.energy))] || { tvl1: 37 };
-      const n = p.roofThicknessCm / tvl.tvl1;
-      const B = Math.pow(10, -n);
+      // Fase 11: TVL primario de concreto de NCRP 151 Tabla B.2 (`ncrp151`), con TVL₁/TVLₑ; antes tabla propia y sólo TVL₁.
+      const tvl = tvlPrimaria(energiaMV(p.energy), "concrete");
+      const B = transmisionTVL(p.roofThicknessCm, tvl);
+      const n = -Math.log10(B);
       return {
         transmissionFactor: Math.round(B * 1000) / 1000,
         nTVLs: Math.round(n * 100) / 100,
@@ -252,13 +228,10 @@ export const AGENT_TOOLS: AgentTool[] = [
       targetThicknessCm: { type: "number", description: "target in cm" },
     },
     execute: async (p) => {
-      const results = Object.entries(TVL_DB).map(([mat, energies]) => {
-        const tvl = energies[String(Math.round(p.energy))];
-        if (!tvl) return null;
-        const n = p.targetThicknessCm <= tvl.tvl1
-          ? p.targetThicknessCm / tvl.tvl1
-          : 1 + (p.targetThicknessCm - tvl.tvl1) / tvl.tvle;
-        const B = Math.pow(10, -n);
+      // Fase 11: transmisión primaria de NCRP 151 Tabla B.2 (`ncrp151`). La barita no está tabulada: se compara con el
+      // TVL del concreto 2.35 (conservador), como en las herramientas de barrera.
+      const results = (["concrete", "barite", "steel", "lead"] as const).map((mat) => {
+        const B = transmisionTVL(p.targetThicknessCm, tvlPrimaria(energiaMV(p.energy), materialMV(mat)));
         return {
           material: mat, thicknessCm: p.targetThicknessCm,
           transmission: B, weightKg: Math.round(p.targetThicknessCm / 100 * (MATERIAL_DENSITY[mat] || 2.35) * 1000),

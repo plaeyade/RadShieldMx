@@ -1,5 +1,5 @@
 // Fase 2: DashboardCalcDialog -- Replica de DASHBOARD_ING del Excel
-import { verificarPlano } from '@/lib/verificacionBlindaje';
+import { verificarPlano } from '@/lib/estadoProyecto';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
