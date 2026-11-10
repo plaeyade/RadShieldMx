@@ -355,6 +355,9 @@ const ICRU57Dialog = lazy(() => import('@/sections/dialogs/ICRU57Dialog'));
 const ICRU96Dialog = lazy(() => import('@/sections/dialogs/ICRU96Dialog'));
 const TutorialDialog = lazy(() => import('@/sections/dialogs/TutorialDialog'));
 
+/** Fase 10: nombre de archivo seguro (el ejemplo «PET/CT» llevaba «/» y el navegador descartaba el nombre). */
+const nombreArchivo = (nombre: string) => (nombre || 'proyecto').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
+
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
 const defaultFloorPlan: FloorPlan = {
@@ -946,7 +949,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       const blob = new Blob([JSON.stringify(floorPlan, null, 2)], { type: 'application/json' });
       if ('showSaveFilePicker' in window) {
         const handle = await (window as any).showSaveFilePicker({
-          suggestedName: `${floorPlan.name || 'proyecto'}.radshield`,
+          suggestedName: `${nombreArchivo(floorPlan.name)}.radshield`,
           types: [{ description: 'RadShield-MX Project', accept: { 'application/json': ['.radshield', '.json'] } }],
         });
         const writable = await handle.createWritable();
@@ -956,7 +959,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
       } else {
         // Fallback: download
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `${floorPlan.name || 'proyecto'}.radshield`; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = `${nombreArchivo(floorPlan.name)}.radshield`; a.click();
         URL.revokeObjectURL(url);
         toast.success('Proyecto descargado');
       }
@@ -1948,13 +1951,13 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       return [b.id,b.name,b.barrierType,length_m.toFixed(2),(b.maxKerma||0).toFixed(4),t1?.mat?.name||'',(t1?.t||0).toFixed(2),roundThickness(t1?.t||0,t1?.code||'').toFixed(2),t2?.mat?.name||'',(t2?.t||0).toFixed(2),t3?.mat?.name||'',(t3?.t||0).toFixed(2),floorPlan.sources.map(s=>s.name).join('; '),floorPlan.sources.map(s=>s.modality.name).join('; '),floorPlan.sources.reduce((sum,s)=>sum+s.workloadValue,0).toString(),b.designGoal_mSv_per_wk.toString()];
     });
     const csv = [headers.join(','),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.csv`; a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${nombreArchivo(floorPlan.name)}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('CSV exportado'); useAppStore.getState().close('export');
   }, [floorPlan, roundThickness]);
 
   const exportJSON = useCallback(() => {
     const data={project:floorPlan.name,date:new Date().toISOString(),software:'RadShield-MX v1.2',scale_m_per_pixel:floorPlan.scale_m_per_pixel,numSources:floorPlan.sources.length,numBarriers:floorPlan.barriers.length,sources:floorPlan.sources.map(s=>({id:s.id,name:s.name,modality:s.modality.name,category:s.modality.category,workload:s.workloadValue})),barriers:floorPlan.barriers.map(b=>({id:b.id,name:b.name,type:b.barrierType,length_m:Math.sqrt((b.x2-b.x1)**2+(b.y2-b.y1)**2)*floorPlan.scale_m_per_pixel,maxKerma_mSv_wk:b.maxKerma||0,requiredThickness_mm:b.requiredThickness_mm||{}}))};
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${floorPlan.name.replace(/\s+/g,'_')}.json`; a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`RadShield_MX_${nombreArchivo(floorPlan.name)}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('JSON exportado');
   }, [floorPlan]);
 
@@ -1991,14 +1994,14 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
 
   const generateReport = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${floorPlan.name.replace(/\s+/g,'_')}.docx`; a.click(); URL.revokeObjectURL(url); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
+    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${nombreArchivo(floorPlan.name)}.docx`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
   }, [floorPlan, reportMeta, canvasRef, barrierResults, sampleLines]);
 
   const generateMCMacro = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
     try { const { generateGEANT4Macro, generateGATEMacro, generateValidationInstructions } = await import('@/hooks/useMCBridge'); const macroG4=generateGEANT4Macro(floorPlan,mcConfig,''); const macroGate=generateGATEMacro(floorPlan,mcConfig,''); const instructions=generateValidationInstructions(floorPlan,mcConfig);
       const dl=(content:string,fn:string)=>{const blob=new Blob([content],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn;a.click();URL.revokeObjectURL(url);};
-      dl(macroG4,`${floorPlan.name.replace(/\s+/g,'_')}_geant4.mac`); dl(macroGate,`${floorPlan.name.replace(/\s+/g,'_')}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${floorPlan.name.replace(/\s+/g,'_')}.txt`);
+      dl(macroG4,`${nombreArchivo(floorPlan.name)}_geant4.mac`); dl(macroGate,`${nombreArchivo(floorPlan.name)}_gate.mac`); dl(instructions,`Instrucciones_Validacion_MC_${nombreArchivo(floorPlan.name)}.txt`);
       toast.success('Macros MC descargados'); useAppStore.getState().close('mc');
     } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'MC Macro Generation', format: mcConfig.format }); }
   }, [floorPlan, mcConfig]);
@@ -2011,7 +2014,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     const { generatePDFReport } = await import('@/hooks/usePDFGenerator');
     const blob = generatePDFReport(floorPlan, { ...reportMeta, date: new Date().toLocaleDateString('es-MX'), barrierResults, sampleLines });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${floorPlan.name.replace(/\s+/g, '_')}.pdf`; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${nombreArchivo(floorPlan.name)}.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('PDF generado y descargado');
   }, [floorPlan, reportMeta, barrierResults, sampleLines]);
 
