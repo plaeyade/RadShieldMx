@@ -1,161 +1,19 @@
 import { useCallback } from 'react';
-import {
-  type Barrier,
-  type RadiationSource,
-  MATERIALS,
-} from '@/types/radshield';
+import { type RadiationSource, type Barrier, MATERIALS } from '@/types/radshield';
 import { type CTIsodosisProfile } from '@/types/ctIsodosis';
-import {
-  inverseArcher,
-  tvlThickness,
-  exponentialThickness,
-  generateSamplePoints,
-  roundThickness,
-  buildCalculationTrace,
-  buildCalculationUnitSnapshot,
-  buildConservativeCalculationComparison,
-  getCalculationAuditWarnings,
-  getShieldingEnergyKey,
-} from '@/lib/shieldingMath';
-import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
-import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
-import { calcularMallaDosis, codigoCatalogo, dosisEnPunto } from '@/lib/doseFieldEngine';
+import { roundThickness } from '@/lib/shieldingMath';
+import { calcularMallaDosis } from '@/lib/doseFieldEngine';
+import { calcularBarrerasValidadas } from '@/lib/motorProyecto';
 
 export function useShieldingEngine() {
 
+  // Fase 11: el cálculo por barrera vive en `motorProyecto` (motor único de todas las rutas de cálculo).
   const calculateAllBarriers = useCallback((
     barriers: Barrier[],
     sources: RadiationSource[],
     scale_m_per_pixel: number,
     ctIsodosisProfile?: CTIsodosisProfile
-  ): Barrier[] => {
-    if (!sources.length) return barriers;
-    return barriers.map(b => {
-      const points = generateSamplePoints(b, scale_m_per_pixel, sources);
-      if (!points.length) return b;
-
-      let maxKerma = 0;
-      let minSourceDistance_m = Infinity;
-      for (const p of points) {
-        for (const s of sources) {
-          const dx = (p.x - s.x) * scale_m_per_pixel;
-          const dy = (p.y - s.y) * scale_m_per_pixel;
-          const dz = s.isocenterHeight_m || 0;
-          minSourceDistance_m = Math.min(minSourceDistance_m, Math.sqrt(dx * dx + dy * dy + dz * dz));
-        }
-        // Fase 2: el kerma sin blindaje en los puntos de muestreo sale del motor de campo (mismas
-        // componentes que el mapa; la barrera sólo clasifica primaria/secundaria, no atenúa aquí).
-        const d = dosisEnPunto(sources, p.x, p.y, scale_m_per_pixel, { barriers: [b], ctIsodosisProfile, materials: MATERIALS });
-        maxKerma = Math.max(maxKerma, d.kermaSinBlindaje_mSv_semana);
-      }
-
-      const requiredThickness: Record<string, number> = {};
-      const energy_MeV = sources[0]?.modality.energy_MeV || 6;
-      const energyKey = getShieldingEnergyKey(sources[0]) || String(Math.round(energy_MeV));
-
-      // Ciclotrón: el motor genérico (Γ·A/d² con TVL gamma) subestima ~100× la fuente de neutrones y
-      // usa TVL de fotones: no se publica espesor; el aviso de auditoría remite al módulo de ciclotrón/MC.
-      const esCiclotron = sources[0]?.modality.category === 'cyclotron';
-      // NCRP 147/151: B = P / (K·T). T fuera de (0, 1] → T = 1 (conservador; la auditoría lo marca).
-      const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 && b.occupancyFactor <= 1 ? b.occupancyFactor : 1;
-      const metaEfectiva = b.designGoal_mSv_per_wk / T;
-      for (const mat of esCiclotron ? [] : MATERIALS) {
-        let thickness = 0;
-        if (sources[0]?.modality.category === 'diagnostic') {
-          const B = Math.max(1e-10, metaEfectiva / (maxKerma || 1));
-          thickness = inverseArcher(B, mat);
-        } else if (sources[0]?.modality.category === 'therapy') {
-          thickness = tvlThickness(maxKerma, metaEfectiva, mat, energyKey);
-        } else {
-          thickness = exponentialThickness(maxKerma, metaEfectiva, mat, energyKey);
-        }
-        if (thickness > 0) requiredThickness[mat.code] = thickness;
-      }
-      // NCRP 147 (diagnóstico) y NCRP 151 (teleterapia MV) sustituyen al punto-kernel cuando aplican.
-      const normativo = esCiclotron ? null : calcularBarreraNormativa(b, sources, points, scale_m_per_pixel, MATERIALS, ctIsodosisProfile);
-      if (normativo) {
-        for (const k of Object.keys(requiredThickness)) delete requiredThickness[k];
-        Object.assign(requiredThickness, normativo.espesores_mm);
-        maxKerma = normativo.kermaMax_mSv_semana;
-      }
-
-      const calculationTrace = buildCalculationTrace({
-        barrier: b,
-        sources,
-        scale_m_per_pixel,
-        maxKerma_mSv_per_wk: maxKerma,
-        requiredThickness_mm: requiredThickness,
-        samplePointCount: points.length,
-      });
-      if (normativo) {
-        calculationTrace.formulaId = normativo.metodo === 'NCRP147' ? 'NCRP147_TABLES_4.5_4.7_B1_C1' : 'NCRP151_PRIMARY_LEAKAGE_SCATTER';
-        calculationTrace.standard = normativo.metodo;
-        calculationTrace.assumptions = [...calculationTrace.assumptions, ...normativo.notas];
-      }
-      const calculationWarnings = getCalculationAuditWarnings({
-        barrier: b,
-        sources,
-        scale_m_per_pixel,
-        maxKerma_mSv_per_wk: maxKerma,
-        materialCount: Object.keys(requiredThickness).length,
-        samplePointCount: points.length,
-        materials: MATERIALS,
-        energyKey,
-        minSourceDistance_m,
-      });
-      // Códigos del importador CAD («concreto», «plomo»…) → catálogo (Fase 4).
-      const codigo = codigoCatalogo(b.materialCode);
-      const selectedMaterial = MATERIALS.find((mat) => mat.code === codigo) ?? MATERIALS[0];
-      const selectedThickness = typeof requiredThickness[codigo] === 'number'
-        ? requiredThickness[codigo]
-        : Math.max(0, ...Object.values(requiredThickness).filter(Number.isFinite));
-      const unitSnapshot = buildCalculationUnitSnapshot({
-        barrier: b,
-        sources,
-        material: selectedMaterial,
-        scale_m_per_pixel,
-        maxKerma_mSv_per_wk: maxKerma,
-        selectedThickness_mm: selectedThickness,
-        minSourceDistance_m,
-      });
-      const calculationComparison = buildConservativeCalculationComparison({
-        baseThickness_mm: selectedThickness,
-        maxKerma_mSv_per_wk: maxKerma,
-        designGoal_mSv_per_wk: metaEfectiva,
-        material: selectedMaterial,
-        energyKey,
-      });
-      const calculationUnitSnapshot = {
-        scale_m_per_pixel: unitSnapshot.length.scale_m_per_pixel,
-        barrierLength_m: unitSnapshot.length.barrierLength_m,
-        sampleOffset_m: unitSnapshot.length.sampleOffset_m,
-        minSourceDistance_m: unitSnapshot.length.minSourceDistance_m,
-        maxKerma_mSv_per_wk: unitSnapshot.dose.maxKerma_mSv_per_wk,
-        maxKerma_uSv_per_h_40h: unitSnapshot.dose.maxKerma_uSv_per_h_40h,
-        selectedThickness_mm: unitSnapshot.material.selectedThickness_mm,
-        selectedThickness_cm: unitSnapshot.material.selectedThickness_cm,
-        density_g_cm3: unitSnapshot.material.density_g_cm3,
-        density_kg_m3: unitSnapshot.material.density_kg_m3,
-        mass_kg_per_m2: unitSnapshot.material.mass_kg_per_m2,
-        cost_per_m2: unitSnapshot.material.cost_per_m2,
-        structuralLoad_kPa: unitSnapshot.material.structuralLoad_kPa,
-      };
-      const calculationCacheKey = buildCalculationCacheKey({
-        id: `calc-${b.id}`,
-        name: 'calculation-barrier',
-        imageUrl: '',
-        width_pixels: 0,
-        height_pixels: 0,
-        scale_m_per_pixel,
-        barriers: [b],
-        sources,
-        occupiedRegions: [],
-        criticalPoints: [],
-      });
-
-      return { ...b, maxKerma, requiredThickness_mm: requiredThickness, calculationTrace, calculationWarnings, calculationComparison, calculationUnitSnapshot, calculationCacheKey };
-    });
-  }, []);
+  ): Barrier[] => calcularBarrerasValidadas(barriers, sources, scale_m_per_pixel, ctIsodosisProfile), []);
 
   const calculateHeatmap = useCallback((
     sources: RadiationSource[],

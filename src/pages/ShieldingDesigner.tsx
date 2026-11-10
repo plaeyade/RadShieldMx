@@ -9,12 +9,8 @@ import { useCanvas } from '@/hooks/useCanvas';
 import { useControlledAreas } from '@/hooks/useControlledAreas';
 import { useFileSystemAccess } from '@/hooks/useFileSystemAccess';
 import { useBroadcastChannel } from '@/hooks/useBroadcastChannel';
-import { useWebWorker } from '@/hooks/useWebWorker';
 import { useIndexedDB } from '@/hooks/useIndexedDB';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
-import { useWASM } from '@/hooks/useWASM';
-import { useCalculationCache } from '@/hooks/useCalculationCache';
-import { useWorkerCalculation } from '@/hooks/useWorkerCalculation';
 import { useHighContrast } from '@/hooks/useHighContrast';
 import type { WebGPUHeatmapApi } from '@/hooks/WebGPUHeatmapBridge';
 import { useCanvasKeyboardNav } from '@/hooks/useCanvasKeyboardNav';
@@ -30,9 +26,8 @@ import {
   SHIELDING_PRESETS,
 } from '@/lib/canvasF85Workflow';
 import { suggestOccupancyProfile, NCRP_DESIGN_GOALS } from '@/lib/ncrpOccupancy';
-// v50: Motor optimizado con spatial hashing + async WebWorker
-import '@/lib/shieldingEngine';
-import { AsyncShieldingEngine } from '@/lib/engine/AsyncShieldingEngine';
+// Fase 11: motor único de cálculo (sustituye a AsyncShieldingEngine y ShieldingEngine).
+import { calcularProyectoAsync } from '@/lib/motorProyecto';
 import { createProfiler } from '@/lib/performance/Profiler';
 // Fase 1.1: ErrorBoundary para cada dialog
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -87,7 +82,6 @@ const WebGPUHeatmapBridge = lazy(() => import('@/hooks/WebGPUHeatmapBridge'));
 const RoomTemplatePanel = lazy(() => import('@/sections/RoomTemplatePanel'));
 import { useRoomTemplates } from '@/hooks/useRoomTemplates';
 // v85: SmartBarrier AI + SourceSelector
-import { useSmartBarrier } from '@/hooks/useSmartBarrier';
 import SourceSelector from '@/sections/SourceSelector';
 import type { SourceItem } from '@/sections/SourceSelector';
 import type { F525F529Modality } from '@/lib/f525F529ClinicalPlacementPack';
@@ -387,7 +381,6 @@ export default function ShieldingDesigner() {
   // v85: SourceSelector + SmartBarrier AI
   
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
-  const smartBarrier = useSmartBarrier();
   // [ZUSTAND] Replaced: const [showExportDialog, setShowExportDialog] = useState(false);
   // [ZUSTAND] Replaced: const [showCNSNSDialog, setShowCNSNSDialog] = useState(false);
   // [ZUSTAND] Replaced: const [showMCDialog, setShowMCDialog] = useState(false);
@@ -824,13 +817,10 @@ export default function ShieldingDesigner() {
   }, [floorPlan.scale_m_per_pixel, roomTemplates, setFloorPlan]);
   const fileSystem = useFileSystemAccess();
   const broadcastChannel = useBroadcastChannel();
-  const webWorker = useWebWorker();
   const indexedDB = useIndexedDB();
   const serviceWorker = useServiceWorker();
-  const wasm = useWASM();
   // v47: Real API integrations — Fase 1.3, 1.4, 3.13
-  const calculationCache = useCalculationCache();
-  const workerCalculation = useWorkerCalculation();
+  // Fase 11: sin caché de resultados en IndexedDB: guardaba los del motor retirado y no los espesores del plano.
   const highContrast = useHighContrast();
   // v48: WebGPU heatmap
   const webgpuHeatmapRef = useRef<WebGPUHeatmapApi | null>(null);
@@ -843,14 +833,16 @@ export default function ShieldingDesigner() {
   const openCV = useOpenCV();
   // v50.1: Responsive layout
   const responsive = useResponsiveLayout();
-  // v50: Async engine + profiler (instanciados una sola vez)
-  const asyncEngineRef = useRef(new AsyncShieldingEngine());
+  // v50: profiler (instanciado una sola vez). Fase 11: AsyncShieldingEngine retirado (motor único: motorProyecto).
   const profilerRef = useRef(createProfiler());
   const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([]);
 
   // ═══ Keyboard Shortcuts (Recomendacion #8) ═══
+  // Fase 11: el oyente se registra una vez y llama al manejador del último render (antes, con `[]`, F5 ejecutaba el
+  // cálculo del primer render —plano vacío— y Ctrl+Z/Ctrl+S usaban también funciones obsoletas).
+  const atajosRef = useRef<(e: KeyboardEvent) => void>(() => {});
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    atajosRef.current = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const key = e.key.toLowerCase();
       const ctrl = e.ctrlKey || e.metaKey;
@@ -877,6 +869,9 @@ export default function ShieldingDesigner() {
         }
       }
     };
+  });
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => atajosRef.current(e);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -1052,7 +1047,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     numParticles: 1_000_000, physicsList: 'QGSP_BIC_EMY', cutValue_mm: 0.1, useVarianceReduction: true
   });
 
-  const { calculateAllBarriers, calculateHeatmap, roundThickness } = useShieldingEngine();
+  const { calculateHeatmap, roundThickness } = useShieldingEngine();
 
   // RadShield floor-plan driven state
   const [sampleLines, setSampleLines] = useState<import('@/hooks/useCanvas').CanvasSampleLine[]>([]);
@@ -1140,15 +1135,15 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }));
 
     try {
-      const engine = asyncEngineRef.current;
-      const { results, sampleLines } = await engine.calculate(
-        plan.barriers,
-        plan.sources,
-        plan.scale_m_per_pixel || 0.01,
-        (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }),
-      );
-      setBarrierResults(results as any);
-      setSampleLines(sampleLines as any);
+      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
+      const r = await calcularProyectoAsync(plan, {
+        ctIsodosisProfile: ctProfile,
+        onProgress: (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }),
+      });
+      const results = r.barrierResults;
+      setBarrierResults(results);
+      setSampleLines(r.sampleLines);
+      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
       setCalculationStatus('success');
       setFloorPlan(prev => ({
         ...prev,
@@ -1182,7 +1177,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
         sources: plan.sources.length,
       });
     }
-  }, [setFloorPlan]);
+  }, [setFloorPlan, isodosisProfiles, selectedIsodosisId]);
 
   const handlePlaceDxfClinicalSources = useCallback(() => {
     if (!floorPlan.importMetadata || floorPlan.barriers.length === 0) {
@@ -1750,159 +1745,63 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
   }, [deleteProject, user, cloudProjectsQuery.data, deleteProjectMutation, utils]);
 
-  // v15: Enhanced calculation with progress toast and Pass/Fail status
-  const runCalculations = useCallback(() => {
+  // Fase 11: UN solo cálculo para todas las rutas (barra superior, «Guíame», «Calc» de la barra lateral, F5, botones
+  // del lienzo, paleta de comandos). Antes la barra lateral, F5 y el lienzo usaban AsyncShieldingEngine (TVL fijo de
+  // plomo, sin modalidad, energía ni TG-108). Ahora todas llaman a `calcularProyectoAsync` (motorProyecto → NCRP 147,
+  // NCRP 151, TG-108), guardan los espesores en el plano y el estado de cumplimiento es el de `verificarBarrera`.
+  const runCalculations = useCallback(async () => {
     if (!floorPlan.sources.length) { toast.error('Agregue al menos una fuente de radiacion'); return; }
     if (!floorPlan.barriers.length) { toast.error('Agregue al menos una barrera'); return; }
     setCalculationStatus('running');
     const toastId = toast.loading('Calculando blindajes...', {
-      description: `Procesando ${floorPlan.barriers.length} barreras con ${floorPlan.sources.length} fuentes`,
+      description: `Procesando ${floorPlan.barriers.length} barreras con ${floorPlan.sources.length} fuentes (NCRP 147 / NCRP 151 / TG-108)`,
     });
-    // Simulate progressive calculation with setTimeout for UX
-    setTimeout(async () => {
-      try {
-        const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
-        const updatedBarriers = calculateAllBarriers(floorPlan.barriers, floorPlan.sources, floorPlan.scale_m_per_pixel, ctProfile);
-        // Calculate Pass/Fail stats
-        const pass = updatedBarriers.filter(b => (b.maxKerma || 0) <= (b.designGoal_mSv_per_wk || 0.02)).length;
-        const warn = updatedBarriers.filter(b => {
-          const k = b.maxKerma || 0; const g = b.designGoal_mSv_per_wk || 0.02;
-          return k > g && k <= g * 1.5;
-        }).length;
-        const fail = updatedBarriers.filter(b => {
-          const k = b.maxKerma || 0; const g = b.designGoal_mSv_per_wk || 0.02;
-          return k > g * 1.5;
-        }).length;
-        setFloorPlan(prev => ({ ...prev, barriers: updatedBarriers }));
-        // v48.3: WebGPU heatmap acceleration
-        if (heatmapEnabled) {
-          await computeCurrentHeatmap();
-        }
-        setCalculationStatus(fail > 0 ? 'error' : warn > 0 ? 'success' : 'success');
-        setIsDirty(true);
-        // Dismiss loading and show enriched result toast
-        toast.dismiss(toastId);
-        if (fail > 0) {
-          toast.error(`Calculo completado: ${fail} barrera(s) FAIL`, {
-            description: `${pass} PASS, ${warn} WARN, ${fail} FAIL — Revise el panel Pass/Fail`,
-            duration: 6000,
-          });
-        } else if (warn > 0) {
-          toast.success(`Calculo completado con advertencias`, {
-            description: `${pass} PASS, ${warn} WARN — ${updatedBarriers.length} barreras calculadas`,
-            duration: 4000,
-          });
-        } else {
-          toast.success(`Todas las barreras PASS`, {
-            description: `${pass}/${updatedBarriers.length} barreras dentro del limite de diseno`,
-            duration: 4000,
-          });
-        }
-      } catch (err) {
-        setCalculationStatus('error');
-        toast.dismiss(toastId);
-        toast.error('Error en el calculo: ' + (err as Error).message);
-        captureException(err as Error, { 
-          context: 'Barrier Calculator (NCRP-151)', 
-          barriers: floorPlan.barriers.length, 
-          sources: floorPlan.sources.length 
-        });
-      }
-    }, 300);
-  }, [floorPlan, calculateAllBarriers, setFloorPlan, heatmapEnabled, isodosisProfiles, selectedIsodosisId, computeCurrentHeatmap]);
-
-  // ===== RadShield Floor-Plan Driven Calculation =====
-  // FIXED v42: Now delegates to shieldingMath.ts (no more inline duplication)
-  // Uses proper TVL-based material conversion instead of hardcoded 120x factor
-  // Integrates McGinley scatter-primary ratios per angle (Table 2-1)
-  // v50: Motor optimizado con spatial hashing
-  // v50: Motor async optimizado con WebWorker + spatial hashing + profiler
-  const runRadShieldCalculations = useCallback(async () => {
-    if (floorPlan.barriers.length === 0 || floorPlan.sources.length === 0) {
-      toast.error('Se requieren barreras y fuentes para calcular');
-      return;
-    }
-
-    // Check cache first
-    const cached = await calculationCache.getCached(floorPlan);
-    if (cached) {
-      setSampleLines(cached.sampleLines as any);
-      setBarrierResults(cached.barrierResults as any);
+    await wakeLock.request();
+    try {
+      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
+      const r = await profilerRef.current.run('motorProyecto', () => calcularProyectoAsync(floorPlan, {
+        ctIsodosisProfile: ctProfile,
+        onProgress: (pct) => toast.loading(`Calculando blindajes: ${pct}%`, { id: toastId }),
+      }));
+      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
+      setBarrierResults(r.barrierResults);
+      setSampleLines(r.sampleLines);
       if (heatmapEnabled) {
         await computeCurrentHeatmap();
       }
-      announce(`${cached.barrierResults.length} barreras desde cache`, 'polite');
-      return;
-    }
-
-    // D.1: Request screen wake lock during calculation
-    await wakeLock.request();
-
-    const p = profilerRef.current;
-    const toastId = toast.loading('Calculando blindajes...', {
-      description: `${floorPlan.barriers.length} barreras x ${floorPlan.sources.length} fuentes | AsyncEngine | WebWorker${wakeLock.supported ? ' | WakeLock ON' : ''}`,
-    });
-
-    try {
-      const engine = asyncEngineRef.current;
-
-      const { results, sampleLines } = await p.run('engine.calculate', () =>
-        engine.calculate(
-          floorPlan.barriers,
-          floorPlan.sources,
-          floorPlan.scale_m_per_pixel || 0.01,
-          (pct) => toast.loading(`Progreso: ${pct}%`, { id: toastId })
-        )
-      );
-
-      p.run('state_update', () => {
-        setBarrierResults(results as any);
-        setSampleLines(sampleLines as any);
-      });
-      if (heatmapEnabled) {
-        await p.run('heatmap.f89', () => computeCurrentHeatmap());
-      }
-
-      await calculationCache.setCached(floorPlan, results as any, sampleLines as any);
-
-      broadcastChannel.broadcast('calculation-result', {
-        barrierCount: results.length,
-        timestamp: Date.now(),
-      });
-
+      setCalculationStatus(r.resumen.noCumple > 0 ? 'error' : 'success');
+      setIsDirty(true);
+      broadcastChannel.broadcast('calculation-result', { barrierCount: r.barriers.length, timestamp: Date.now() });
       // v89: Persist calculation results to backend (non-blocking)
-      persistCalculationResults({
-        name: floorPlan.name,
-        barriers: floorPlan.barriers as any,
-        sources: floorPlan.sources,
-      });
-
-      console.log(p.export());
-      p.report().forEach(r => console.log(`${r.name}: ${r.avgMs.toFixed(1)}ms avg (${r.calls} calls)`));
-
-      const failing = results.filter((r: any) => !r.pass).length;
-      announce(`${results.length} barreras calculadas. ${failing > 0 ? failing + ' requieren atencion.' : 'Todas cumplen.'}`, 'polite');
-
+      persistCalculationResults({ name: floorPlan.name, barriers: r.barriers as any, sources: floorPlan.sources });
+      const { total, cumple, noCumple, pendientes } = r.resumen;
+      const detalle = `${cumple} cumplen, ${noCumple} no cumplen, ${pendientes} pendientes (sin espesor instalado o sin cálculo) de ${total}`;
+      announce(`${total} barreras calculadas. ${noCumple > 0 ? noCumple + ' no cumplen.' : pendientes > 0 ? pendientes + ' pendientes.' : 'Todas cumplen.'}`, 'polite');
       toast.dismiss(toastId);
-      toast.success(`Calculo completado - ${results.length} barreras`, {
-        description: failing > 0 ? `${failing} barreras no cumplen` : 'Todas cumplen',
-        duration: 4000,
-      });
+      if (noCumple > 0) {
+        toast.error(`Calculo completado: ${noCumple} barrera(s) no cumplen`, { description: `${detalle} — Revise el panel de verificación`, duration: 6000 });
+      } else if (pendientes > 0) {
+        toast.success('Calculo completado', { description: detalle, duration: 4000 });
+      } else {
+        toast.success('Todas las barreras cumplen', { description: detalle, duration: 4000 });
+      }
     } catch (err) {
+      setCalculationStatus('error');
       toast.dismiss(toastId);
-      toast.error('Error: ' + (err as Error).message);
+      toast.error('Error en el calculo: ' + (err as Error).message);
       announce('Error en calculo', 'assertive');
-      captureException(err as Error, { 
-        context: 'RadShield AsyncEngine', 
-        barriers: floorPlan.barriers.length, 
+      captureException(err as Error, {
+        context: 'motorProyecto (NCRP 147/151, TG-108)',
+        barriers: floorPlan.barriers.length,
         sources: floorPlan.sources.length,
-        engine: 'WebWorker + SpatialHashing'
       });
     } finally {
-      // D.1: Release screen wake lock
       await wakeLock.release();
     }
-  }, [floorPlan, calculationCache, broadcastChannel, wakeLock, persistCalculationResults, heatmapEnabled, computeCurrentHeatmap]);
+  }, [floorPlan, setFloorPlan, heatmapEnabled, isodosisProfiles, selectedIsodosisId, computeCurrentHeatmap, wakeLock, broadcastChannel, persistCalculationResults]);
+
+  // Barra lateral «Calc», F5 y botones del lienzo: el mismo cálculo que la barra superior.
+  const runRadShieldCalculations = runCalculations;
 
   const selectedSource = floorPlan.sources.find(s => s.id === canvasState.selectedId) || null;
   const selectedBarrier = floorPlan.barriers.find(b => b.id === canvasState.selectedId) || null;
@@ -2134,7 +2033,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     crearProyecto: () => {
       resetFloorPlan(planoVacio('Proyecto nuevo'));
       setCanvasState(prev => ({ ...prev, selectedId: null, mode: 'select' }));
-      if (typeof smartBarrier !== 'undefined') smartBarrier.clearResult();
       setBarrierResults([]);
       setSampleLines([]);
       toast.success('Proyecto vacío creado');
@@ -2172,7 +2070,10 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     zoomToFit();
   }, [ajustarVista, floorPlan.barriers.length, zoomToFit]);
 
-  // Pruebas E2E (sólo con la bandera local `radshield-e2e-controls`): abrir/cerrar diálogos del store.
+  // Pruebas E2E (sólo con la bandera local `radshield-e2e-controls`): abrir/cerrar diálogos del store y, desde la
+  // Fase 11, leer el plano y los resultados del cálculo para comparar las rutas (barra superior, lateral, F5).
+  const e2eRef = useRef({ setFloorPlan, barrierResults });
+  useEffect(() => { e2eRef.current = { setFloorPlan, barrierResults }; }, [setFloorPlan, barrierResults]);
   useEffect(() => {
     try {
       if (window.localStorage.getItem('radshield-e2e-controls') !== 'true') return;
@@ -2181,6 +2082,13 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         dialogos: () => Object.keys(useAppStore.getState().dialogs),
         abrir: (n: string) => useAppStore.getState().open(n),
         cerrarTodo: () => s.closeAll(),
+        plano: () => useCanvasStore.getState().floorPlan,
+        resultados: () => e2eRef.current.barrierResults,
+        limpiarCalculo: (instalado: Record<string, number> = {}) => e2eRef.current.setFloorPlan(p => ({
+          ...p,
+          barriers: p.barriers.map(({ maxKerma: _k, requiredThickness_mm: _r, calculationTrace: _t, ...b }) =>
+            (b.id in instalado ? { ...b, thickness_mm: instalado[b.id], shieldingLayers: undefined } : b)),
+        })),
       };
     } catch { /* sin almacenamiento: sin gancho */ }
   }, []);
@@ -2194,7 +2102,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       <Toolbar floorPlan={floorPlan} onCalculate={runCalculations} onNewProject={() => {
             resetFloorPlan({...defaultFloorPlan, name: 'Nuevo Proyecto', barriers: [], sources: [], regions: [], imageUrl: null });
             setCanvasState(prev => ({...prev, selectedId: null, selectedIds: [], mode: 'select'}));
-            if (typeof smartBarrier !== 'undefined') smartBarrier.clearResult();
             setShowWelcomeScreen(false);
             toast.success('Nuevo proyecto listo');
           }} onSaveProject={() => handleSaveProject(floorPlan.name)} onExport={() => useAppStore.getState().open('export')} onShare={handleShare} onCNSNS={() => useAppStore.getState().open('cnsns')} onMC={() => useAppStore.getState().open('mc')} onProjects={() => { useAppStore.getState().open('projects'); setShowWelcomeScreen(false); }} on3D={()=>useAppStore.getState().open('viewer3d')} onMaze={()=>useAppStore.getState().open('maze')} onQuick={()=>useAppStore.getState().open('quickBarrier')} onEquipment={()=>useAppStore.getState().open('equipmentDB')} onPDF={handleGeneratePDF} onMCCloud={()=>useAppStore.getState().open('mcConfig')} onFloorCeiling={()=>useAppStore.getState().open('floorCeiling')} onBatchImport={()=>useAppStore.getState().open('batchImport')} onCostOptimizer={()=>useAppStore.getState().open('costOptimizer')} onNeutron={()=>useAppStore.getState().open('neutron')} onSeasonal={()=>useAppStore.getState().open('seasonal')} onUncertainty={()=>useAppStore.getState().open('uncertainty')} onVentilation={()=>useAppStore.getState().open('ventilation')} onDICOM={()=>useAppStore.getState().open('dicom')} onTechSpecs={()=>useAppStore.getState().open('techSpecs')} onCNSNSDashboard={()=>useAppStore.getState().open('cnsnsDashboard')} onAuditTrail={()=>useAppStore.getState().open('auditTrail')} onDashboardCalc={()=>useAppStore.getState().open('dashboardCalc')} onCostEstimator={()=>useAppStore.getState().open('costEstimator')} onCostDashboard={()=>useAppStore.getState().open('costEstimator')} onCNSNSChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onCNSNSReport={()=>useAppStore.getState().open('cnsns')} onCNSNSReportChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onBarrierCalculator={()=>useAppStore.getState().open('barrierCalculator')} onEPA={()=>useAppStore.getState().open('epaGuidance')} onEPAGuidance={()=>useAppStore.getState().open('epaGuidance')} onShleien={()=>useAppStore.getState().open('shleien')} onGammaKnife={()=>useAppStore.getState().open('gammaKnife')} onBraquiCo60={()=>useAppStore.getState().open('braquiCo60')} onVersaHD={()=>useAppStore.getState().open('versaHD')} onICRU57={()=>useAppStore.getState().open('icru57')} onICRU96={()=>useAppStore.getState().open('icru96')} onEquipmentLibrary={()=>useAppStore.getState().open('equipmentLibrary')} onReferenceLibrary={()=>useAppStore.getState().open('referenceLibrary')} onNCRP151Tables={()=>useAppStore.getState().open('ncrp151Tables')} onNCRP151Detail={()=>useAppStore.getState().open('ncrp151Tables')} onShieldingCalculator={()=>useAppStore.getState().open('shieldingCalculator')} onCompareScenarios={()=>useAppStore.getState().open('compareScenarios')} onTornadoSensitivity={()=>useAppStore.getState().open('tornadoSensitivity')} onNCRPValidation={()=>useAppStore.getState().open('ncrpValidation')} onDXFViewer={()=>useAppStore.getState().open('dxfViewer')} onMemoriaWizard={()=>useAppStore.getState().open('memoriaWizard')} onPlanValidator={()=>useAppStore.getState().open('planValidator')} onEquipmentShieldingWizard={()=>useAppStore.getState().open('equipmentShieldingWizard')} onMonteCarloSim={()=>useAppStore.getState().open('monteCarloSim')} onCycloneKIUBE={()=>useAppStore.getState().open('cycloneKIUBE')} onTutorial={()=>useAppStore.getState().open('tutorial')} onCBCTIGRT={()=>useAppStore.getState().open('cbctIgrt')} onLayoutBunker={()=>useAppStore.getState().open('layoutBunker')} onMaintenanceLog={()=>useAppStore.getState().open('maintenanceLog')} onScenarioAnalysis={()=>useAppStore.getState().open('scenarioAnalysis')} onDashboard={()=>useAppStore.getState().open('dashboard')} onChecklistCNSNS={()=>useAppStore.getState().open('checklistCNSNS')} onSpecialCases={()=>useAppStore.getState().open('specialCases')} onBibliography={()=>useAppStore.getState().open('bibliography')} onBibliografia={()=>useAppStore.getState().open('bibliography')} onEvidencePack={()=>useAppStore.getState().open('evidencePack')} isDarkMode={isDarkMode} onDarkModeToggle={toggleDarkMode} onKeyboardShortcuts={()=>useAppStore.getState().open('keyboardShortcuts')} onSmartSearchDICOM={()=>useAppStore.getState().open('smartSearchDICOM')} onLogFileAnalysis={()=>useAppStore.getState().open('logFileAnalysis')}
@@ -2203,7 +2110,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onClearCanvas={() => {
             resetFloorPlan({...defaultFloorPlan, name: 'Nuevo Proyecto', barriers: [], sources: [], regions: [], imageUrl: null });
             setCanvasState(prev => ({...prev, selectedId: null, mode: 'select'}));
-            if (typeof smartBarrier !== 'undefined') smartBarrier.clearResult();
             toast.success('Mapa borrado — lienzo limpio');
           }}
           onNewMap={() => {
@@ -2370,7 +2276,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             <WelcomeScreen onNewProject={()=>{
               resetFloorPlan({...defaultFloorPlan, name: 'Nuevo Proyecto', barriers: [], sources: [], regions: [], imageUrl: null });
               setCanvasState(prev => ({...prev, selectedId: null, mode: 'select'}));
-              if (typeof smartBarrier !== 'undefined') smartBarrier.clearResult();
               setShowWelcomeScreen(false);
               toast.success('Nuevo proyecto creado — lienzo limpio');
             }} onOpenProject={()=>{useAppStore.getState().open('projects'); setShowWelcomeScreen(false);}} onImportDXF={()=>{useAppStore.getState().open('dxfViewer'); setShowWelcomeScreen(false);}} onImportFloorPlan={()=>{const el=document.getElementById('floorplan-upload');if(el){(el as HTMLInputElement).click();}setShowWelcomeScreen(false);}} onLoadTemplate={(id)=>{toast.success(`Template cargado: ${id}`); setShowWelcomeScreen(false);}} onLoadRecent={(id)=>{handleLoadProject(id); setShowWelcomeScreen(false);}} onTutorial={()=>useAppStore.getState().open('tutorial')} onManual={()=>useAppStore.getState().open('manual')} onDismiss={()=>{setShowWelcomeScreen(false);}} onOpenTool={(toolId)=>{handleOpenTool(toolId);}} />
@@ -2950,40 +2855,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             selectedId={selectedSourceId}
           />
         )}
-        {/* v85: SmartBarrier AI result overlay */}
-        {smartBarrier.lastResult && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-lg px-4 py-3 text-[11px] border border-orange-200 shadow-lg z-40 max-w-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${smartBarrier.lastResult.is_primary ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-                {smartBarrier.lastResult.is_primary ? 'BARRERA PRIMARIA' : 'BARRERA SECUNDARIA'}
-              </span>
-              <span className="text-[10px] text-slate-400">{smartBarrier.lastResult.standard}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-slate-600 text-[11px]">
-              <span>Espesor: <strong className="text-slate-800">{smartBarrier.lastResult.recommended_thickness_display}</strong></span>
-              <span>Distancia: <strong className="text-slate-800">{smartBarrier.lastResult.distance_from_source_m} m</strong></span>
-              <span>TVL: <strong className="text-slate-800">{smartBarrier.lastResult.tvl_cm} cm</strong></span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1 italic">{smartBarrier.lastResult.ai_reasoning}</p>
-            {smartBarrier.lastResult.warnings.length > 0 && (
-              <div className="mt-1 space-y-0.5">
-                {smartBarrier.lastResult.warnings.map((w, i) => (
-                  <p key={i} className="text-[10px] text-amber-600">⚠️ {w}</p>
-                ))}
-              </div>
-            )}
-            <button className="text-[10px] text-slate-400 hover:text-slate-600 mt-1 underline" onClick={() => smartBarrier.clearResult()}>Cerrar</button>
-          </div>
-        )}
-        {/* v85: SmartBarrier calculating indicator */}
-        {smartBarrier.isCalculating && (
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 rounded-lg px-4 py-3 border border-orange-200 shadow-lg z-50">
-                      <div className="flex items-center gap-2 text-orange-600">
-              <div className="w-4 h-4 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin" />
-              <span className="text-xs font-medium">IA calculando blindaje...</span>
-            </div>
-          </div>
-        )}
+        {/* Fase 11: retirado el aviso «SmartBarrier» (TVL fijos y d < 6 m = primaria; nunca se invocaba). */}
       </Suspense>
     </div>
     </>

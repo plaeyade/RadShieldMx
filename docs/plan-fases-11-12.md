@@ -20,6 +20,63 @@ Hay **dos botones «Calcular» con motores distintos**:
 Prioridad 1 de la fase: que todos los accesos usen el motor validado (o que el worker ejecute exactamente
 `calculateAllBarriers`) y una prueba que compare ambos caminos barrera por barrera.
 
+**Estado (Fase 11, etapa 1, rama `fase11-motor-unico`): resuelto.** Todas las rutas (barra superior, «Guíame»,
+paleta de comandos, barra lateral «Calc», F5, botones del lienzo, cálculo preliminar del DXF confirmado y cálculo por
+lotes) llaman a `src/lib/motorProyecto.ts` (`calcularProyecto` / `calcularProyectoAsync` /
+`calcularBarrerasValidadas`), que es el cuerpo que antes tenía `useShieldingEngine().calculateAllBarriers`. La
+asincronía del worker (no bloquear la interfaz, progreso) la da `calcularProyectoAsync`, que cede el hilo entre
+barreras y ejecuta la misma función por barrera. Se retiraron `AsyncShieldingEngine`, `ShieldingEngine`
+(`lib/shieldingEngine.ts`), `workers/shieldingWorker.ts` + `useWebWorker` (worker creado al montar y nunca usado) y la
+caché de resultados en IndexedDB del camino lateral (guardaba los resultados del motor retirado y no los espesores del
+plano). El estado de cumplimiento es en todas las rutas el de `verificarBarrera` (instalado ≥ requerido, sólo con
+traza del motor); el aviso de la barra superior que comparaba kerma sin blindaje con P ya no se usa.
+
+Otros defectos encontrados en el camino:
+
+- **F5 ejecutaba el cálculo del primer render** (oyente de teclado con dependencias `[]`: plano vacío → «Agregue al
+  menos una fuente»); Ctrl+Z/Ctrl+Y/Ctrl+S usaban también funciones obsoletas. Ahora el oyente llama al manejador del
+  último render.
+- La tabla «Resultados — Máximos por barrera» del lienzo, el PDF, el reporte CNSNS y el paquete de evidencia leían
+  `thicknessLead_mm`/`maxBarrierThickness_mm`, que el motor retirado no producía (mostraba «N/A» o el plomo de un TVL
+  fijo de 16.6 mm). Ahora salen de la barrera calculada (`resultadoDeBarrera`).
+
+Pruebas: `src/__tests__/auditoria/motorUnico.test.ts` (NCRP 147 §5.1 y §5.2, NCRP 151 §7.1.1 y §7.1.5, TG-108 F-18 del
+ejemplo guiado, Tc-99m e I-131: mismas cifras y estados en las rutas y, en NCRP 147/151, igualdad exacta con
+`calcularBarreraNormativa` sobre los mismos puntos) y `e2e/fase11-motor-unico.spec.ts` (barra superior, barra lateral,
+F5 y botón del lienzo sobre el proyecto PET/CT, con una barrera corta y el resto sobradas).
+
+### Inventario de cálculos paralelos (grep de `Math.pow(10`, `10 **`, `Math.exp(`, `Math.log10(` y tablas TVL/HVL fuera del motor)
+
+Motor validado (referencia): `shieldingMath`, `normativeBarrierEngine`, `doseFieldEngine`, `ncrp147`, `ncrp151`,
+`ncrp151Laberinto`, `tg108`, `mallaNuclear`, `calculadorasNormativas`, `motorProyecto`. `verificacionBlindaje` sólo
+estima la dosis tras el margen (P·10^(−margen/TVL)); `types/ctIsodosis` interpola el perfil de TC que consume el motor.
+
+| Archivo | Qué calcula | Dónde se ve | Estado |
+|---|---|---|---|
+| `lib/engine/AsyncShieldingEngine.ts` | Espesor con TVL fijo de Pb 16.6 mm | Barra lateral, F5, lienzo, DXF | **Retirado** (Fase 11) |
+| `lib/shieldingEngine.ts` (`ShieldingEngine`) | Igual, en el hilo principal | Nadie (importación sin uso) | **Retirado** |
+| `workers/shieldingWorker.ts`, `hooks/useWebWorker.ts` | Archer/TVL propios en un worker | Nadie (worker creado al montar) | **Retirado** |
+| `hooks/useSmartBarrier.ts` | TVL fijos; «primaria» si d < 6 m | Aviso flotante del diseñador (nunca se invocaba) | **Retirado del diseñador**; el gancho queda sólo con sus pruebas |
+| `hooks/useWASM.ts`, `hooks/useWorkerCalculation.ts` | Archer/TVL y kerma propios | Nadie (instanciados sin uso) | **Retirados del diseñador**; archivos con pruebas propias, sin uso en la interfaz |
+| `hooks/useCostOptimizer.ts`, `lib/skyshine/ChiltonSkyshine.ts`, `lib/ct/CTScatterDatabase.ts`, `lib/mcginleyData.ts` | n = log₁₀(K/P), skyshine, dispersión TC | Nadie (sin importadores) | Código muerto: borrar en la Fase 12 |
+| `sections/dialogs/MemoriaAnaliticaWizard.tsx` (vía `uaqProtocol`) | Primaria/secundaria LINAC | Asistente de memoria (texto y PDF) | **Corregido**: `barreraMV` (NCRP 151); antes concreto aunque se eligiera plomo/acero, C₁ de IMRT aplicado a la primaria y una sola componente secundaria |
+| `lib/agents/tools.ts` (`checkSkyshine`, `compareMaterials`, `validateTVL`) | Transmisión con tabla TVL propia | Diálogo del agente de diseño | **Corregido**: Tabla B.2 de `ncrp151` (TVL₁/TVLₑ); las barreras ya usaban `barreraMV` (Fase 8a) |
+| `lib/uaqProtocol.ts` vía `controlledZoneCalculationAdapter` | LINAC, PET/CT, Gamma Knife, HDR (preliminar F55) | `LayoutBunkerDialog` | **Pendiente**: migrar a `barreraMV`/`tg108`; también lo usa `f149NormativeNumericQa` como contrato |
+| `lib/materialDatabase.ts` (`getRecommendedMaterial`) | Espesor equivalente por TVL de catálogo | Asistentes de equipo/memoria (lista de materiales) | Pendiente de contrastar con Tabla B.2 |
+| `lib/nuclearMedicine.ts` | n TVL con Γ·A·t/d² | `NuclearMedicineAdvanced`, herramientas por categoría, GATE | Revisado en 8c (β+ por TG-108 Tabla V); el resto de radionúclidos, pendiente de contraste |
+| `lib/therapy/TherapeuticRadionuclideShielding.ts`, `lib/spect/IPEMReport109.ts` | TVL por radionúclido (I-131, Lu-177, SPECT) | Diálogos de terapia e IPEM 109 | Revisados en 8c (TVL que eran HVL); pendientes de caso publicado |
+| `lib/bimRAD.ts` | Transmisión por capas BIM | Diálogo BIM-RAD | Revisado en 8c (β+); pendiente de caso publicado |
+| `sections/dialogs/BuildupFactorDialog`, `NeutronRemovalDialog`, `MaterialPropertyCalculator`, `ConcreteActivationDialog`, `lib/phyXData`, `lib/xcomAttenuation`, `lib/electronEngine` | µ, buildup, remoción de neutrones, activación | Diálogos de física de materiales | Física de apoyo (no dimensionan la barrera del plano); los de 8c llevan aviso de resultado sintético |
+| `VersaHD15MVDialog`, `ElectronApplicatorDialog`, `CrossValidationDialog`, `ModelingToolboxDialog` | Barreras MV | Diálogos | Ya delegan en `calculadorasNormativas`/`ncrp151` (Fase 8a/8c) |
+| `CycloneKIUBEWizard`, `MCNPCyclotronDialog` | Término fuente de ciclotrón | Diálogos de ciclotrón | Fuera del motor por diseño (el motor no publica espesor de ciclotrón); contraste con MC en esta fase |
+| `DoseMapDialog`, `SpatialDoseMapDialog`, `lib/doseMapEngine`, `lib/visoresDosis`, `lib/medical3D/sceneBuilder`, `Isosurface3DDialog` | Escala logarítmica de color | Mapas y visores | Sólo visualización (el campo sale de `doseFieldEngine`); visores tras `VISORES_EN_REVISION` |
+| `batemanSolver`, `decay/DecayChains`, `proyeccionDecaimiento`, `ventilacionBunker`, `gumUncertainty`, `GammaIndexAnalyzer`, `DVHAnalyzer`, `Attila4MCVarianceReduction`, `MonteCarlo*`, `nativeMCEngine`, `monteCarloEngine`, `DCHAINActivationCalculator`, `PythonIntegrationDialog` | Decaimiento, incertidumbre, índice gamma, MC | Diálogos de investigación | No son cálculo de barrera |
+| `f149NormativeNumericQa`, `f484F490NormativeQa`, `f519NormativeQaExpansion`, `f581F585ExpandedNormativeNumericQa`, `validationEngine` | Casos de QA numérico | Paneles de QA y actualización | Contratos de QA; revisar que comparen contra el motor y no contra fórmulas propias |
+
+Limitación conocida: el cálculo por lotes no recibe el perfil de isodosis de TC seleccionado en el diseñador (sólo
+afecta a TC con perfil cargado). Y una barrera que no necesita blindaje (kerma·T ≤ P) queda con `requiredThickness_mm`
+vacío y `verificarBarrera` la marca «sin cálculo»: corregir en la etapa 2 (requerido = 0, salvo ciclotrón).
+
 ### Alcance y referencias
 
 | Motor / módulo | Referencia | Casos de prueba |
