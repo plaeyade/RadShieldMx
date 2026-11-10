@@ -55,6 +55,8 @@ analítica para la CNSNS con cada número citado.
 - **Beta de ingeniería**, publicada en GitHub Pages en cada push a `main`
   (pausable con la variable de repositorio `PAGES_HABILITADO=false`).
 - Sin validación regulatoria: cada memoria debe revisarla y firmarla el físico médico.
+- La app abre con un proyecto vacío. **Ayuda → Guíame** recorre el flujo completo (proyecto, plano,
+  fuentes, ocupación, cálculo, cumplimiento y reporte) y ofrece, sólo si se pide, un ejemplo PET/CT sintético.
 - Siguiente: beta con el equipo de física médica sobre planos reales, laberinto y puerta para
   ≥ 10 MV (NCRP 151 §2.4–2.5), importación BIM (IFC) y recorrido WebXR con el mapa de dosis.
 

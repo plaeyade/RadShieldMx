@@ -16,6 +16,8 @@ import { buildF208CanvasReportingLayer } from '@/lib/f208CanvasReportingLayer';
 import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import type { FloorPlan } from '@/types/radshield';
+import { filasResultados } from '@/lib/resumenResultados';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { FileText, Download, BookOpen } from 'lucide-react';
 
 const TEMPLATES = [
@@ -45,6 +47,10 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
   const evidenceSection = buildAnalyticMemoryEvidenceSection(floorPlan);
   const f117Handoff = buildF117ModalityHandoff();
   const f146MaterialAppendix = buildF146MaterialReportAppendix(floorPlan);
+  // Fase 10: la tabla de resultados sale del proyecto (antes eran dos filas fijas «Pared A/B: cumple»).
+  const filas = filasResultados(floorPlan);
+  const requieren = filas.filter((f) => f.estado === 'requiere').length;
+  const sinCalculo = filas.filter((f) => f.estado === 'sin-calculo').length;
   const f146AppendixText = formatF146MaterialAppendixText(f146MaterialAppendix);
   const f149NormativeQa = buildF149NormativeNumericQa();
   const f149bFastradUtility = buildF149bFastradClinicalUtility();
@@ -81,6 +87,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
       licensee,
       date,
       generated: new Date().toISOString(),
+      resultados_barreras: filas,
       evidencia_canvas_f76: {
         snapshot: evidenceSnapshot,
         apendice_memoria: evidenceSection,
@@ -175,15 +182,32 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
               <p className="font-semibold text-slate-700 mt-2">2. Metodologia</p>
               <p className="text-slate-600">Metodo de TVL (Tenth-Value Layer) con formula B = Pd²/(WUT) para barreras primarias y metodo de suma aritmetica para secundarias.</p>
               <p className="font-semibold text-slate-700 mt-2">3. Resultados</p>
-              <table className="w-full text-[9px] border-collapse">
-                <tbody>
-                  <tr className="bg-slate-100"><th className="border p-1 text-left">Barrera</th><th className="border p-1">Material</th><th className="border p-1">Espesor (mm)</th><th className="border p-1">Cumple</th></tr>
-                  <tr><td className="border p-1">Pared A (Primaria)</td><td className="border p-1 text-center">Pb + Concrete</td><td className="border p-1 text-center">2.0 + 200</td><td className="border p-1 text-center text-green-600">SI</td></tr>
-                  <tr><td className="border p-1">Pared B (Secundaria)</td><td className="border p-1 text-center">Concrete</td><td className="border p-1 text-center">150</td><td className="border p-1 text-center text-green-600">SI</td></tr>
-                </tbody>
-              </table>
+              {filas.length === 0 ? (
+                <AvisoProyectoVacio floorPlan={floorPlan} exige="plano" />
+              ) : (
+                <table className="w-full text-[9px] border-collapse" data-testid="pdf-report-resultados">
+                  <tbody>
+                    <tr className="bg-slate-100"><th className="border p-1 text-left">Barrera</th><th className="border p-1">Material</th><th className="border p-1">Kerma sin blindaje (mSv/sem)</th><th className="border p-1">T · P (mSv/sem)</th><th className="border p-1">Espesor requerido (mm)</th></tr>
+                    {filas.map((f) => (
+                      <tr key={f.id}>
+                        <td className="border p-1">{f.nombre}</td>
+                        <td className="border p-1 text-center">{f.material}</td>
+                        <td className="border p-1 text-center">{f.kerma_mSv_semana === null ? '—' : f.kerma_mSv_semana.toPrecision(3)}</td>
+                        <td className="border p-1 text-center">{f.T.toFixed(3)} · {f.P_mSv_semana}</td>
+                        <td className="border p-1 text-center">{f.estado === 'sin-calculo' ? 'sin cálculo' : f.estado === 'no-requiere' ? 'no requiere' : f.espesor_mm === null ? '—' : f.espesor_mm.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
               <p className="font-semibold text-slate-700 mt-2">4. Conclusion</p>
-              <p className="text-slate-600">Los espesores de blindaje calculados cumplen con la meta de dosis de diseno P = 0.02 mSv/semana para todas las barreras evaluadas.</p>
+              <p className="text-slate-600" data-testid="pdf-report-conclusion">
+                {filas.length === 0
+                  ? 'Sin barreras en el proyecto: no hay conclusión que reportar.'
+                  : sinCalculo > 0
+                    ? `${sinCalculo} de ${filas.length} barrera(s) sin cálculo: ejecute el cálculo antes de emitir la memoria.`
+                    : `${requieren} de ${filas.length} barrera(s) requieren blindaje para cumplir su objetivo P (espesor requerido arriba); el resto cumple sin blindaje adicional. Resultado preliminar: requiere revisión del responsable.`}
+              </p>
               <p className="font-semibold text-slate-700 mt-2" data-testid="pdf-report-evidence-f76">5. Evidencia F76</p>
               <p className="text-slate-600">
                 Canvas: {evidenceSnapshot.barriers} barreras, {evidenceSnapshot.sources} fuentes,

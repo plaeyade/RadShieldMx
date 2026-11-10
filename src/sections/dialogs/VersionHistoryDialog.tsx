@@ -6,18 +6,14 @@ import { toast } from 'sonner';
 
 interface Version { id: string; name: string; date: string; time: string; size: string; changes: string[]; author: string; }
 
-const DEMO_VERSIONS: Version[] = [
-  { id: 'v1', name: 'Initial Setup', date: '2026-05-28', time: '09:15', size: '12 KB', changes: ['Created project', 'Added floor plan', 'Placed 3 sources'], author: 'Dr. Martinez' },
-  { id: 'v2', name: 'Barrier Design v1', date: '2026-05-28', time: '11:30', size: '18 KB', changes: ['Added 5 barriers', 'Set occupancy factors', 'Calculated shielding'], author: 'Dr. Martinez' },
-  { id: 'v3', name: 'Material Update', date: '2026-05-29', time: '14:20', size: '21 KB', changes: ['Changed Wall-3 to heavy concrete', 'Updated NCRP 151 parameters'], author: 'Ing. Lopez' },
-  { id: 'v4', name: 'MC Simulation', date: '2026-05-30', time: '16:45', size: '156 KB', changes: ['Ran PHITS simulation', 'Dose map generated', 'Results validated'], author: 'Dr. Martinez' },
-  { id: 'v5', name: 'Current (Auto-save)', date: '2026-06-03', time: '10:00', size: '203 KB', changes: ['Barrier-2 thickness adjusted', 'Cost estimate updated'], author: 'Auto-save' },
-];
+// Fase 10: se retiraron cinco versiones inventadas (autores y fechas ficticios) que aparecían en cualquier
+// proyecto. Aún no hay almacén de versiones: el diálogo muestra el estado vacío y remite a guardar el proyecto.
+const VERSIONES_GUARDADAS: Version[] = [];
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; onRestore?: (version: Version) => void; }
 
 export default function VersionHistoryDialog({ open, onOpenChange, onRestore }: Props) {
-  const [versions] = useState<Version[]>(DEMO_VERSIONS);
+  const [versions] = useState<Version[]>(VERSIONES_GUARDADAS);
   const [selected, setSelected] = useState<string | null>(null);
 
   if (!open) return null;
@@ -46,6 +42,12 @@ export default function VersionHistoryDialog({ open, onOpenChange, onRestore }: 
           </div>
         </div>
         <div className="max-h-[58vh] overflow-auto p-4">
+          {versions.length === 0 && (
+            <p data-testid="f10-version-history-vacio" className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+              Aún no hay versiones guardadas de este proyecto. Use Archivo → Guardar para conservar el estado actual;
+              los cambios de la sesión se deshacen con Ctrl+Z.
+            </p>
+          )}
           <div className="space-y-2">
             {versions.map((v, i) => (
               <div key={v.id} className={`cursor-pointer rounded-lg border p-3 transition-all ${selected === v.id ? 'border-[#f97316] bg-[#fff7ed]' : 'border-slate-200 hover:border-slate-300'}`} onClick={() => setSelected(v.id)}>

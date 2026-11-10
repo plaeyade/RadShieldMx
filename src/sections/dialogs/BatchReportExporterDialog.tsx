@@ -3,6 +3,7 @@
  * Export all barriers, sources, and calculations to JSON/CSV
  */
 import { useState } from 'react';
+import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +72,7 @@ export default function BatchReportExporterDialog() {
             <Badge variant="outline" className="text-[9px]">JSON/CSV</Badge>
           </DialogTitle>
         </DialogHeader>
+        <AvisoProyectoVacio floorPlan={floorPlan} exige="plano" className="mb-2" />
         <div className="bg-slate-50 rounded-md p-3 mb-3 text-[10px] space-y-1">
           <div className="flex justify-between"><span className="text-slate-500">Proyecto:</span><span className="font-medium">{floorPlan.name || 'Sin nombre'}</span></div>
           <div className="flex justify-between"><span className="text-slate-500">Barreras:</span><span className="font-medium">{floorPlan.barriers.length}</span></div>
