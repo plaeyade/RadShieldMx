@@ -2063,7 +2063,18 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
   const proyectoVacio = !planoTieneContenido(floorPlan);
   // Fase 10: los diálogos que leen `useCanvasStore` (lote, mapas de dosis, auditoría, escenarios, envío CNSNS)
   // nunca recibían el plano del diseñador y siempre veían un proyecto vacío; se sincroniza aquí.
-  useEffect(() => { useCanvasStore.setState({ floorPlan }); }, [floorPlan]);
+  // Revisión Fase 10: en ambos sentidos. «Aplicar al plano» del cálculo por lotes escribe en el store; sin la
+  // vuelta, el diseñador no lo veía y el siguiente cambio del lienzo lo pisaba. El ref evita el eco.
+  const planoSincronizadoRef = useRef<FloorPlan | null>(null);
+  useEffect(() => {
+    planoSincronizadoRef.current = floorPlan;
+    if (useCanvasStore.getState().floorPlan !== floorPlan) useCanvasStore.setState({ floorPlan });
+  }, [floorPlan]);
+  useEffect(() => useCanvasStore.subscribe((s) => {
+    if (s.floorPlan === planoSincronizadoRef.current) return;
+    planoSincronizadoRef.current = s.floorPlan;
+    setFloorPlan(s.floorPlan);
+  }), [setFloorPlan]);
   useEffect(() => {
     if (!ajustarVista || floorPlan.barriers.length === 0) return;
     setAjustarVista(false);

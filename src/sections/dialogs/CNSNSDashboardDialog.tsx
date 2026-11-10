@@ -34,8 +34,8 @@ export default function CNSNSDashboardDialog({ open, onOpenChange, floorPlan }: 
             <div className="text-lg font-bold">{semaforoText(metrics.allCompliant)}</div>
             <div className="text-[10px]">Cumplimiento barreras</div>
           </CardContent></Card>
-          <Card className={`${semaforo(metrics.maxKerma <= 0.1)} text-white`}><CardContent className="p-2 text-center">
-            <div className="text-lg font-bold">{semaforoText(metrics.maxKerma <= 0.1)}</div>
+          <Card className={`${semaforo((metrics.hasResults && metrics.maxKerma <= 0.1))} text-white`}><CardContent className="p-2 text-center">
+            <div className="text-lg font-bold">{semaforoText((metrics.hasResults && metrics.maxKerma <= 0.1))}</div>
             <div className="text-[10px]">Kerma max ≤ 0.1 mSv/sem</div>
           </CardContent></Card>
           <Card className={`${semaforo(metrics.hasResults)} text-white`}><CardContent className="p-2 text-center">
@@ -51,7 +51,7 @@ export default function CNSNSDashboardDialog({ open, onOpenChange, floorPlan }: 
           <div className="flex justify-between"><span>Equipos terapia (LINAC/GK):</span><Badge>{metrics.linacCount}</Badge></div>
           <div className="flex justify-between"><span>Medicina nuclear:</span><Badge>{metrics.nuclearCount}</Badge></div>
           <div className="flex justify-between"><span>Ciclotron:</span><Badge>{metrics.cyclotronCount}</Badge></div>
-          <div className="flex justify-between"><span>Kerma maxima:</span><Badge variant={metrics.maxKerma <= 0.1 ? 'default' : 'destructive'}>{metrics.maxKerma.toFixed(4)} mSv/sem</Badge></div>
+          <div className="flex justify-between"><span>Kerma maxima:</span><Badge variant={(metrics.hasResults && metrics.maxKerma <= 0.1) ? 'default' : 'destructive'}>{metrics.maxKerma.toFixed(4)} mSv/sem</Badge></div>
         </div>
         <p className="text-[10px] text-gray-400">Semforo: Verde = Cumple | Rojo = Revisar. Actualizado en tiempo real.</p>
       </DialogContent>

@@ -4,6 +4,7 @@
  */
 import { useState } from 'react';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
+import { verificarBarrera } from '@/lib/verificacionBlindaje';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,12 +40,16 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
 
   const generateReport = () => {
     const now = new Date().toLocaleDateString('es-MX');
+    // Fase 10 (revisión): antes cualquier barrera con P > 0 salía «CUMPLE» sin cálculo ni espesor instalado.
+    // El estado sale de `verificarBarrera` (instalado ≥ requerido), igual que el tablero y el cálculo por lotes.
+    const ESTADO: Record<string, string> = { CUMPLE: 'CUMPLE', NO_CUMPLE: 'NO CUMPLE', SIN_CALCULO: 'SIN CÁLCULO', SIN_ESPESOR: 'SIN ESPESOR INSTALADO', REVISAR_MATERIAL: 'REVISAR MATERIAL' };
     const barriers = floorPlan.barriers.map(b => {
-      const passes = b.designGoal_mSv_per_wk > 0;
+      const v = verificarBarrera(b);
       return {
         name: b.name, type: b.barrierType, material: b.materialCode,
         useFactor: b.useFactor, occupancyFactor: b.occupancyFactor,
-        designGoal: b.designGoal_mSv_per_wk, status: passes ? 'CUMPLE' : 'NO CUMPLE',
+        designGoal: b.designGoal_mSv_per_wk, status: ESTADO[v.estado] ?? v.estado,
+        requerido_mm: v.requerido_mm, instalado_mm: v.instalado_mm,
       };
     });
 
@@ -64,6 +69,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
           cobertura_presets_f86_pct: evidenceSnapshot.presetCoveragePct,
           barreras_cumplen: barriers.filter(b => b.status === 'CUMPLE').length,
           barreras_no_cumplen: barriers.filter(b => b.status === 'NO CUMPLE').length,
+          barreras_pendientes: barriers.filter(b => b.status !== 'CUMPLE' && b.status !== 'NO CUMPLE').length,
         },
         evidencia_canvas_f76: {
           snapshot: evidenceSnapshot,
