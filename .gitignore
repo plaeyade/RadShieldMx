@@ -52,3 +52,6 @@ test-results/
 data/pdf/ncrp_151.pdf
 data/pdf/ncrp_151_en.pdf
 data/pdf/ncrp_147.pdf
+# Retirados de git (derechos de terceros; docs/fuentes-locales.md)
+data/pdf/tg108_pet_shielding.pdf
+data/pdf/room_shield_design.pdf
