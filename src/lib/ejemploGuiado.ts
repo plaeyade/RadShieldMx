@@ -144,3 +144,16 @@ export function planoTieneContenido(p: Pick<FloorPlan, 'barriers' | 'sources' | 
   if (!p) return false;
   return Boolean(p.imageUrl) || (p.barriers?.length ?? 0) > 0 || (p.sources?.length ?? 0) > 0 || (p.occupiedRegions?.length ?? 0) > 0;
 }
+
+/**
+ * Fase 10 (arranque en Pages): plano demo R&F (DeLorenzo 2016, Fig. 6) que las versiones anteriores a la Fase 10
+ * cargaban solas al cerrar la bienvenida y autoguardaban en `sessionStorage`. No es un proyecto del usuario: al
+ * restaurar la sesión se descarta para que la app arranque en el estado vacío.
+ */
+const FUENTES_DEMO_ANTIGUO = new Set(['source-chest', 'source-table', 'source-fluoro']);
+export function esPlanoDemoAntiguo(p: Pick<FloorPlan, 'name' | 'sources'> | null | undefined): boolean {
+  if (!p) return false;
+  if (/^Demo - R&F Room/i.test(p.name ?? '')) return true;
+  const fuentes = p.sources ?? [];
+  return fuentes.length > 0 && fuentes.every((s) => FUENTES_DEMO_ANTIGUO.has(s.id));
+}

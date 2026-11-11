@@ -83,6 +83,10 @@ jobs:
       - name: Verify GitHub Pages base path
         run: node scripts/verificar-base-pages.mjs dist /RadShieldMx/
 
+      # Fase 10: el sitio publicado dice de qué commit sale (https://<usuario>.github.io/RadShieldMx/version.json).
+      - name: Stamp deployed commit
+        run: printf '{"commit":"%s","ref":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_REF" "$GITHUB_RUN_ID" > dist/version.json
+
       - name: Report bundle size
         run: |
           echo "=== Bundle Size Report ==="
@@ -106,6 +110,35 @@ jobs:
           name: bundle-stats
           path: dist/assets/
           retention-days: 7
+
+  arranque-pages:
+    name: Arranque en Pages (datos y SW de la versión anterior)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Bloqueante: estado vacío y «Guíame» visible a 1366×768 y 1280×720, también con autoguardado/SW antiguos.
+      - name: Pages startup e2e (Playwright, Chrome)
+        env:
+          VITE_BASE_PATH: /RadShieldMx/
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
+        run: npx playwright test e2e/fase10-pages-arranque.spec.ts --project=chromium
 
   e2e:
     name: Playwright E2E Tests
@@ -188,21 +221,42 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    # Fase 10: un despliegue a la vez. El 2026-11-10 el run de 9f90d8a terminó después que el de 23eb3d2 y Pages quedó
+    # en el commit anterior; además se publica sólo si este commit sigue siendo la punta de main.
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
     steps:
+      - name: Check this commit is still the tip of main
+        id: punta
+        run: |
+          punta=$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/main | cut -f1)
+          echo "main=$punta run=$GITHUB_SHA"
+          if [ "$punta" = "$GITHUB_SHA" ]; then
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::main ya avanzó a $punta; no se publica $GITHUB_SHA (lo publicará el run de la punta)."
+          fi
+
       - name: Download build artifacts
+        if: steps.punta.outputs.publicar == 'true'
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Setup Pages
+        if: steps.punta.outputs.publicar == 'true'
         uses: actions/configure-pages@v5
 
       - name: Upload to GitHub Pages
+        if: steps.punta.outputs.publicar == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
       - name: Deploy to GitHub Pages
+        if: steps.punta.outputs.publicar == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
