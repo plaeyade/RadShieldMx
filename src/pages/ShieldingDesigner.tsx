@@ -92,7 +92,7 @@ import WelcomeScreen from '@/sections/WelcomeScreen';
 import { useCanvasStore } from '@/stores/canvasStore';
 import GuiaPasoAPaso, { type AccionesGuia } from '@/components/GuiaPasoAPaso';
 import { guardarProgreso, leerProgreso, reducirGuia, type AccionGuia, type ProgresoGuia } from '@/lib/guiaPasos';
-import { NOMBRE_EJEMPLO_GUIADO, aplicarOcupacion, muestraFuentes, muestraParedes, muestraRegiones, planoTieneContenido, planoVacio } from '@/lib/ejemploGuiado';
+import { NOMBRE_EJEMPLO_GUIADO, aplicarOcupacion, esPlanoDemoAntiguo, muestraFuentes, muestraParedes, muestraRegiones, planoTieneContenido, planoVacio } from '@/lib/ejemploGuiado';
 
 const SmartSearchDICOMDialog = lazy(() => import('@/sections/dialogs/SmartSearchDICOMDialog'));
 const LogFileAnalysisDialog = lazy(() => import('@/sections/dialogs/LogFileAnalysisDialog'));
@@ -1543,6 +1543,11 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   // Try to restore from session on first load
   useEffect(() => {
     const saved = loadCurrent();
+    // Fase 10 (arranque en Pages): el demo R&F autoguardado por versiones anteriores no se restaura (estado vacío).
+    if (esPlanoDemoAntiguo(saved)) {
+      try { sessionStorage.removeItem('radshield_mx_current'); } catch { /* sin almacenamiento */ }
+      return;
+    }
     if (saved && saved.sources.length > 0) { resetFloorPlan(saved); toast.info('Proyecto restaurado de la sesion anterior'); }
   }, []);  
 

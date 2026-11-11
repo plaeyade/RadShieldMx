@@ -460,6 +460,14 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             </div>
           </div>
 
+          {/* Fase 10 (arranque en Pages): «Guíame» junto al logo. Al final de la barra quedaba fuera de la ventana a
+              1280–1366 px, porque los menús visibles desde xl empujaban el grupo derecho más allá del borde. */}
+          {onGuiame && (
+            <Button data-testid="f10-toolbar-guiame" aria-label="Guíame: asistente paso a paso" variant="ghost" size="sm" className="h-8 px-2 gap-1 shrink-0 text-[11px] font-semibold text-sky-700 bg-sky-50 hover:text-sky-800 hover:bg-sky-100 border border-sky-100" onClick={onGuiame}>
+              <Compass className="w-4 h-4" /> Guíame
+            </Button>
+          )}
+
           <Separator orientation="vertical" className="h-5 bg-slate-200" />
 
           <DropdownMenu>
@@ -1023,11 +1031,6 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
             <Tooltip><TooltipTrigger asChild>
               <Button aria-label="Command Palette" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onCommandPalette, 'commandPalette')}><Keyboard className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Cmd Palette</TooltipContent></Tooltip>
-            {onGuiame && (
-              <Button data-testid="f10-toolbar-guiame" aria-label="Guíame: asistente paso a paso" variant="ghost" size="sm" className="h-8 px-2 gap-1 text-[11px] font-semibold text-sky-700 hover:text-sky-800 hover:bg-sky-50" onClick={onGuiame}>
-                <Compass className="w-4 h-4" /> Guíame
-              </Button>
-            )}
             <Tooltip><TooltipTrigger asChild>
               <Button aria-label="Tour" variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#f97316] hover:bg-[#fff7ed]" onClick={invoke(onOnboardingTour, 'onboardingTour')}><HelpCircle className="w-4 h-4" /></Button>
             </TooltipTrigger><TooltipContent>Tour</TooltipContent></Tooltip>
