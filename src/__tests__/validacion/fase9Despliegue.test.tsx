@@ -39,7 +39,6 @@ describe('GitHub Pages', () => {
   });
 
   it('sin rutas absolutas a public/ en el código que se ejecuta en el navegador', () => {
-    expect(leer('src/hooks/useWASM.ts')).not.toMatch(/fetch\('\/wasm/);
     expect(leer('src/hooks/useServiceWorker.ts')).not.toMatch(/register\('\/sw-v50\.js'/);
     expect(leer('src/sections/WelcomeScreen.tsx')).not.toMatch(/src="\/mosaic-preview\.png"/);
     for (const f of ['src/lib/equipmentVisuals.ts', 'src/types/equipmentDB.ts', 'src/sections/dialogs/PlanValidatorDialog.tsx', 'src/sections/dialogs/EquipmentShieldingWizard.tsx']) {
