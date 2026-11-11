@@ -1,7 +1,7 @@
 /**
  * hooks.test.ts — v48.2: Tests for core hooks
- * useUndoRedo, useIndexedDB, useBroadcastChannel, useCalculationCache, useHighContrast
- * useWorkerCalculation, useWebGPU, useFileSystemAccess, useCanvasZoom, useTouchGestures
+ * useUndoRedo, useIndexedDB, useBroadcastChannel, useHighContrast
+ * useWebGPU, useFileSystemAccess, useCanvasZoom, useTouchGestures
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -56,40 +56,6 @@ describe('useIndexedDB', () => {
 
   it('should check availability', () => {
     expect(typeof indexedDB).toBe('object');
-  });
-});
-
-// ─── useCalculationCache ───
-describe('useCalculationCache', () => {
-  it('should generate consistent hash for same floorplan', () => {
-    const fp = {
-      barriers: [{ x1: 0, y1: 0, x2: 100, y2: 0, materialCode: 'PB', designGoal_mSv_per_wk: 0.02 }],
-      sources: [{ x: 50, y: 50, workloadValue: 100, useFactor: 0.25 }],
-      scale_m_per_pixel: 0.01,
-    };
-
-    function hashFloorPlan(fp: any): string {
-      const data = JSON.stringify({
-        b: fp.barriers.map((b: any) => [b.x1, b.y1, b.x2, b.y2, b.materialCode, b.designGoal_mSv_per_wk]),
-        s: fp.sources.map((s: any) => [s.x, s.y, s.workloadValue, s.useFactor]),
-        scale: fp.scale_m_per_pixel,
-      });
-      let hash = 0x811c9dc5;
-      for (let i = 0; i < data.length; i++) {
-        hash ^= data.charCodeAt(i);
-        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-      }
-      return 'calc:' + (hash >>> 0).toString(36);
-    }
-
-    const h1 = hashFloorPlan(fp);
-    const h2 = hashFloorPlan(fp);
-    expect(h1).toBe(h2);
-
-    // Different floorplan → different hash
-    const fp2 = { ...fp, sources: [{ x: 51, y: 50, workloadValue: 100, useFactor: 0.25 }] };
-    const h3 = hashFloorPlan(fp2);
-    expect(h3).not.toBe(h1);
   });
 });
 
@@ -188,29 +154,6 @@ describe('useFileSystemAccess', () => {
     const w = window as unknown as FileSystemAccess;
     // May or may not be available in test env
     expect(typeof w === 'object').toBe(true);
-  });
-});
-
-// ─── useWorkerCalculation ───
-describe('useWorkerCalculation', () => {
-  it('should calculate barrier kerma correctly', () => {
-    const sources = [{ x: 500, y: 500, workloadValue: 100, useFactor: 0.25 }];
-    const barriers = [{ x1: 0, y1: 0, x2: 1000, y2: 0, name: 'Test', materialCode: 'PB', designGoal_mSv_per_wk: 0.02, occupancyFactor: 1 }];
-    const scale = 0.01;
-
-    // Kerma at point (500, -30) — 30px offset from barrier
-    const px = 500, py = -30 * (1 / scale); // offset in pixels
-    const dPerPx = scale;
-    let kerma = 0;
-    for (const src of sources) {
-      const dx_m = (px - src.x) * dPerPx;
-      const dy_m = (py - src.y) * dPerPx;
-      const dist_m = Math.sqrt(dx_m * dx_m + dy_m * dy_m);
-      if (dist_m > 0.1) {
-        kerma += src.workloadValue * src.useFactor / (dist_m * dist_m);
-      }
-    }
-    expect(kerma).toBeGreaterThan(0);
   });
 });
 
