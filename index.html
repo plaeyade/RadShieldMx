@@ -9,18 +9,35 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://www.kimi.com https://statics.moonshot.cn; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self' blob:; base-uri 'self'; form-action 'self';">
     <title>RadShield-MX</title>
     <script>
+      // Fase 9/10: la app estática no usa service worker. Se retiran los de versiones anteriores y sus cachés, pero
+      // sólo los de ESTA app (en <usuario>.github.io el origen lo comparten otros sitios). Si uno controlaba la página
+      // —y pudo servir un index.html viejo— se recarga una vez para traer el bundle actual.
       (function () {
         var keepServiceWorker = location.search.indexOf('enable-sw=1') !== -1;
         if (keepServiceWorker || !('serviceWorker' in navigator)) return;
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          registrations.forEach(function (registration) { registration.unregister(); });
-        }).catch(function () {});
+        var base = new URL('./', location.href).pathname;
+        var controlada = Boolean(navigator.serviceWorker.controller);
+        var tareas = [];
+        tareas.push(navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          return Promise.all(registrations
+            .filter(function (r) { return new URL(r.scope).pathname.indexOf(base) === 0; })
+            .map(function (r) { return r.unregister(); }));
+        }));
         if ('caches' in window) {
-          caches.keys().then(function (names) {
-            names.filter(function (name) { return name.indexOf('radshield-') === 0; })
-              .forEach(function (name) { caches.delete(name); });
-          }).catch(function () {});
+          tareas.push(caches.keys().then(function (names) {
+            return Promise.all(names.filter(function (name) {
+              return name.indexOf('radshield-' + base + ':') === 0 || /^radshield-(calcs-)?v\d+$/.test(name);
+            }).map(function (name) { return caches.delete(name); }));
+          }));
         }
+        Promise.all(tareas).then(function () {
+          if (!controlada) return;
+          try {
+            if (sessionStorage.getItem('radshield-sw-retirado') === '1') return;
+            sessionStorage.setItem('radshield-sw-retirado', '1');
+          } catch (e) { return; }
+          location.reload();
+        }).catch(function () {});
       })();
     </script>
   </head>
