@@ -2,13 +2,9 @@
 // controlledZoneCalculationAdapter.ts - F55 packet to shielding/memoria preflight
 // =============================================================================
 
-import {
-  calculateGammaKnifeBarrier,
-  calculateHDRBrachyBarrier,
-  calculateLINACPrimaryBarrier,
-  calculateLINACSecondaryBarrier,
-  calculatePETCTBarrier,
-} from './uaqProtocol';
+// Fase 11, etapa 8: las cuatro familias usan las funciones del motor validado (ver zonaControladaMotor.ts),
+// no las fórmulas propias de uaqProtocol.
+import { espesorGammaKnifeZona, espesorHDRZona, espesorLinacZona, espesorPETZona } from './zonaControladaMotor';
 import type {
   ControlledZoneFeasibilityOption,
   ControlledZoneProfile,
@@ -27,8 +23,12 @@ export interface ControlledZoneCalculationAssumptions {
   petGammaConstant_uSv_m2_GBq_h: number;
   gammaKnifeDose_Gy_per_fraction: number;
   hdrActivity_Ci: number;
+  /** Ya no se usa en el cálculo (Γδ de Ir-192 del catálogo); se conserva por compatibilidad del JSON exportado. */
   hdrGammaConstant_R_m2_Ci_h: number;
   workDaysPerWeek: number;
+  /** Fracción IMRT y factor C_I de la fuga (NCRP 151 Ec. 3.6). Por omisión: 0.5 y 5 con IMRT/VMAT/SBRT; 0 sin IMRT. */
+  linacImrtFraction?: number;
+  linacImrtFactor?: number;
 }
 
 export interface ControlledZoneBarrierCalculation {
@@ -226,85 +226,73 @@ function calculateSeed(
 
   if (seed.calculationFamily === 'NCRP151') {
     const isPrimary = seed.barrier === 'Norte' || seed.barrier === 'Sur';
-    if (isPrimary) {
-      const result = calculateLINACPrimaryBarrier({
-        energy_MeV: assumptions.linacEnergy_MeV,
-        W_Gy_per_wk: assumptions.linacWorkload_Gy_per_wk,
-        technique: assumptions.linacTechnique,
-        P_mSv_per_wk: P,
-        d_pri_m: d,
-        U: 0.25,
-        T,
-        F_conv_fraction: 0.25,
-        F_IMRT_fraction: 0.75,
-        materialCode,
-      });
-      return buildCalculation(seed, 'NCRP151-primary', result.thickness_mm, estimateUnshieldedFromTransmission(P, result.B), materialCode, [
-        'Supuesto preliminar: barrera Norte/Sur tratada como primaria.',
-        `Carga LINAC usada: ${assumptions.linacWorkload_Gy_per_wk} Gy/semana, ${assumptions.linacTechnique}.`,
-      ]);
-    }
-
-    const result = calculateLINACSecondaryBarrier({
-      energy_MeV: assumptions.linacEnergy_MeV,
-      W_Gy_per_wk: assumptions.linacWorkload_Gy_per_wk,
-      technique: assumptions.linacTechnique,
-      P_mSv_per_wk: P,
-      barrierType: 'twosource',
-      d_sca_m: 1,
-      d_sec_m: d,
-      d_L_m: d,
-      materialCode,
+    const conImrt = /IMRT|VMAT|SBRT/i.test(assumptions.linacTechnique);
+    const result = espesorLinacZona({
+      tipo: isPrimary ? 'primaria' : 'secundaria',
+      haces: [{ energia_MV: assumptions.linacEnergy_MeV, W_Gy_semana: assumptions.linacWorkload_Gy_per_wk }],
+      fraccionIMRT: assumptions.linacImrtFraction ?? (conImrt ? 0.5 : 0),
+      factorIMRT: assumptions.linacImrtFactor ?? 5,
+      P_mSv_semana: P,
       T,
+      U: 0.25,
+      d_m: d,
+      materialCodigo: materialCode,
     });
-    return buildCalculation(seed, 'NCRP151-secondary', result.t_required_cm * 10, result.H_unshielded_mSv, materialCode, [
-      'Supuesto preliminar: barrera tratada como secundaria por dispersion/fuga.',
-      'Requiere confirmar direccion de haz, uso U y geometria de paciente.',
-    ]);
+    return buildCalculation(seed, isPrimary ? 'NCRP151-primary' : 'NCRP151-secondary', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, isPrimary
+      ? [
+        'Supuesto preliminar: barrera Norte/Sur tratada como primaria (U = 0.25).',
+        `Carga LINAC usada: ${assumptions.linacWorkload_Gy_per_wk} Gy/semana, ${assumptions.linacTechnique}. ${result.referencia}.`,
+      ]
+      : [
+        'Supuesto preliminar: barrera secundaria por fuga y dispersion del paciente a 30 grados (U = 0.25).',
+        `Requiere confirmar direccion de haz, uso U y geometria de paciente. ${result.referencia}.`,
+      ]);
   }
 
   if (seed.calculationFamily === 'TG108') {
-    const result = calculatePETCTBarrier(
-      assumptions.petActivity_MBQ_per_injection,
-      Math.max(1, profile.targetThroughputPerDay * assumptions.workDaysPerWeek),
-      assumptions.petGammaConstant_uSv_m2_GBq_h,
-      1,
-      d,
-      P,
-      materialCode,
-    );
-    return buildCalculation(seed, 'TG108-PETCT', result.thickness_mm, result.K_unshielded_mSv, materialCode, [
-      'Supuesto preliminar TG-108: una hora efectiva por paciente para punto de barrera.',
-      'Requiere separar uptake, inyeccion, espera y escaneo en memoria final.',
+    const result = espesorPETZona({
+      nuclido: 'F18',
+      A0_MBq: assumptions.petActivity_MBQ_per_injection,
+      pacientesSemana: Math.max(1, profile.targetThroughputPerDay * assumptions.workDaysPerWeek),
+      tU_h: 1,
+      d_m: d,
+      P_mSv_semana: P,
+      T,
+      materialCodigo: materialCode,
+    });
+    return buildCalculation(seed, 'TG108-PETCT', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, [
+      'Supuesto preliminar TG-108: sala de captacion, F-18, una hora de captacion por paciente.',
+      `Requiere separar uptake, inyeccion, espera y escaneo en memoria final. ${result.referencia}.`,
     ]);
   }
 
   if (seed.calculationFamily === 'GammaKnife') {
-    const result = calculateGammaKnifeBarrier(
-      Math.max(1, profile.targetThroughputPerDay * assumptions.workDaysPerWeek),
-      assumptions.gammaKnifeDose_Gy_per_fraction,
-      d,
-      P,
-      materialCode,
-    );
-    return buildCalculation(seed, 'GammaKnife', result.thickness_mm, result.K_unshielded_mSv, materialCode, [
-      'Supuesto preliminar: fracciones semanales estimadas desde pacientes/dia.',
-      'Requiere separar condiciones beam-on/beam-off y puerta/laberinto.',
+    const result = espesorGammaKnifeZona({
+      fraccionesSemana: Math.max(1, profile.targetThroughputPerDay * assumptions.workDaysPerWeek),
+      dosisFraccion_Gy: assumptions.gammaKnifeDose_Gy_per_fraction,
+      d_m: d,
+      P_mSv_semana: P,
+      T,
+      materialCodigo: materialCode,
+    });
+    return buildCalculation(seed, 'GammaKnife', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, [
+      'Supuesto preliminar: fracciones semanales estimadas desde pacientes/dia; sin autoblindaje del equipo.',
+      `Requiere separar condiciones beam-on/beam-off y puerta/laberinto. ${result.referencia}.`,
     ]);
   }
 
   if (seed.calculationFamily === 'HDR') {
-    const result = calculateHDRBrachyBarrier(
-      assumptions.hdrActivity_Ci,
-      assumptions.hdrGammaConstant_R_m2_Ci_h,
-      Math.max(1, profile.targetThroughputPerDay * 0.5),
-      d,
-      P,
-      materialCode,
-    );
-    return buildCalculation(seed, 'HDR', result.thickness_mm, result.K_unshielded_mSv, materialCode, [
+    const result = espesorHDRZona({
+      actividad_Ci: assumptions.hdrActivity_Ci,
+      horasSemana: Math.max(1, profile.targetThroughputPerDay * 0.5),
+      d_m: d,
+      P_mSv_semana: P,
+      T,
+      materialCodigo: materialCode,
+    });
+    return buildCalculation(seed, 'HDR', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, [
       'Supuesto preliminar HDR: tiempo semanal proporcional a pacientes/dia.',
-      'Requiere dwell times, actividad actual y posicion extrema de fuente.',
+      `Requiere dwell times, actividad actual y posicion extrema de fuente. ${result.referencia}.`,
     ]);
   }
 
@@ -397,11 +385,6 @@ function buildMissingInputs(option: ControlledZoneFeasibilityOption): string[] {
     return [...base, 'Actividad actual de fuente, dwell times y posiciones extremas.', 'Escenario de emergencia fuente no retraida.'];
   }
   return base;
-}
-
-function estimateUnshieldedFromTransmission(P_mSvWeek: number, B: number): number {
-  if (!Number.isFinite(B) || B <= 0) return 0;
-  return P_mSvWeek / B;
 }
 
 function round(value: number, digits: number): number {

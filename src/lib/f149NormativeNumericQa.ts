@@ -1,11 +1,9 @@
 import { CASES, runValidation, summarize } from './validation/NCRPValidationSuite';
 import { NCRP151_TVL_CM, TG108_GAMMA_CONSTANTS } from './validationEngine';
-import {
-  calculateGammaKnifeBarrier,
-  calculateHDRBrachyBarrier,
-  calculateLINACPrimaryBarrier,
-  calculatePETCTBarrier,
-} from './uaqProtocol';
+// Fase 11, etapa 8: los casos LINAC, PET, Gamma Knife y HDR ejercen las funciones del motor validado que usa el
+// diálogo «Layout de búnker» (zonaControladaMotor), no las fórmulas propias de uaqProtocol.
+import { espesorGammaKnifeZona, espesorHDRZona, espesorLinacZona, espesorPETZona, GAMMA_IR192_uGy_m2_MBq_h, materialCatalogo } from './zonaControladaMotor';
+import { dosisSemanalTG108 } from './tg108';
 
 export type F149NormativeFamily = 'NCRP147' | 'NCRP151' | 'AAPM_TG108' | 'IAEA_SRS47' | 'UAQ_PROTOCOL';
 export type F149CaseStatus = 'pass' | 'review' | 'fail';
@@ -111,52 +109,27 @@ export function buildF149NormativeNumericQa(): F149NormativeNumericQaSummary {
   const suiteResults = runValidation(CASES);
   const suite = summarize(suiteResults);
 
-  const linacInput = {
-    energy_MeV: 6,
-    W_Gy_per_wk: 500,
-    technique: '3D-CRT',
-    P_mSv_per_wk: 0.02,
-    d_pri_m: 6,
-    U: 0.25,
-    T: 1,
-    F_conv_fraction: 1,
-    F_IMRT_fraction: 0,
-    materialCode: 'concrete235',
-  };
-  const linac = calculateLINACPrimaryBarrier(linacInput);
-  const linacB = (linacInput.P_mSv_per_wk * linacInput.d_pri_m ** 2) /
-    (linacInput.W_Gy_per_wk * 1000 * linacInput.U * linacInput.T);
-  const linacExpected = Math.log10(1 / linacB) * NCRP151_TVL_CM.concrete['6MV'];
+  // NCRP 151 §7.1.1: primaria 18 MV, W = 450 Gy/semana, U = 1/4, T = 1/40, d = 7.2 m, P = 0.02 mSv/semana → 149.6 cm.
+  const linac = espesorLinacZona({
+    tipo: 'primaria', haces: [{ energia_MV: 18, W_Gy_semana: 450 }], fraccionIMRT: 0,
+    P_mSv_semana: 0.02, T: 0.025, U: 0.25, d_m: 7.2, materialCodigo: 'CONCRETE235',
+  });
+  const linacExpected = 149.6;
 
-  const petInput = {
-    activity_MBQ_per_injection: 370,
-    patients_per_week: 60,
-    gamma_constant_uSv_m2_per_GBq_h: TG108_GAMMA_CONSTANTS['F-18'],
-    hours_per_week: 1,
-    d_m: 2,
-    P_mSv_per_wk: 0.02,
-    materialCode: 'concrete235',
-  };
-  const pet = calculatePETCTBarrier(
-    petInput.activity_MBQ_per_injection,
-    petInput.patients_per_week,
-    petInput.gamma_constant_uSv_m2_per_GBq_h,
-    petInput.hours_per_week,
-    petInput.d_m,
-    petInput.P_mSv_per_wk,
-    petInput.materialCode,
-  );
-  const petUnshielded = (petInput.gamma_constant_uSv_m2_per_GBq_h * (petInput.activity_MBQ_per_injection / 1000) *
-    petInput.patients_per_week * petInput.hours_per_week) / (petInput.d_m ** 2) / 1000;
-  const petExpectedMm = expectedTvlThickness(petUnshielded, petInput.P_mSv_per_wk, NCRP151_TVL_CM.concrete['6MV']) * 10;
+  // TG-108 sala de captación F-18: 370 MBq, 60 pacientes/semana, tU = 1 h, d = 2 m, P = 0.02, T = 1.
+  const concreto = materialCatalogo('CONCRETE235');
+  const petInput = { A0_MBq: 370, pacientesSemana: 60, tU_h: 1, d_m: 2, P_mSv_semana: 0.02, T: 1, materialCodigo: 'CONCRETE235' };
+  const pet = espesorPETZona(petInput);
+  const petUnshielded = dosisSemanalTG108({ nuclido: 'F18', A0_MBq: 370, pacientesSemana: 60, tU_h: 1, tI_h: 0, sala: 'captacion', d_m: 2 }) / 1000;
+  const petExpectedMm = expectedTvlThickness(petUnshielded, petInput.P_mSv_semana, concreto.TVL_mm!['511keV'] / 10) * 10;
 
-  const gammaKnife = calculateGammaKnifeBarrier(20, 12, 4, 0.02, 'concrete235');
+  const gammaKnife = espesorGammaKnifeZona({ fraccionesSemana: 20, dosisFraccion_Gy: 12, d_m: 4, P_mSv_semana: 0.02, T: 1, materialCodigo: 'CONCRETE235' });
   const gammaKnifeUnshielded = (12 * 20 * 1000) / (4 ** 2);
-  const gammaKnifeExpectedMm = expectedTvlThickness(gammaKnifeUnshielded, 0.02, NCRP151_TVL_CM.concrete.Co60) * 10;
+  const gammaKnifeExpectedMm = expectedTvlThickness(gammaKnifeUnshielded, 0.02, concreto.TVL_mm!.Co60 / 10) * 10;
 
-  const hdr = calculateHDRBrachyBarrier(10, 0.48, 4, 3, 0.02, 'concrete235');
-  const hdrUnshielded = ((0.48 * 10 * 4) / (3 ** 2)) * 0.00876;
-  const hdrExpectedMm = expectedTvlThickness(hdrUnshielded, 0.02, 11) * 10;
+  const hdr = espesorHDRZona({ actividad_Ci: 10, horasSemana: 4, d_m: 3, P_mSv_semana: 0.02, T: 1, materialCodigo: 'CONCRETE235' });
+  const hdrUnshielded = (GAMMA_IR192_uGy_m2_MBq_h * 10 * 3.7e4 * 4) / (3 ** 2) / 1000;
+  const hdrExpectedMm = expectedTvlThickness(hdrUnshielded, 0.02, concreto.TVL_mm!.Ir192 / 10) * 10;
 
   const cases: F149NumericQaCase[] = [
     buildCase({
@@ -201,37 +174,37 @@ export function buildF149NormativeNumericQa(): F149NormativeNumericQaSummary {
     buildCase({
       id: 'F149-NCRP151-LINAC-PRIMARY',
       family: 'NCRP151',
-      label: 'LINAC 6 MV barrera primaria',
-      source: 'NCRP 151 Eq. 4.1-4.3 / UAQ protocol adapter',
-      formula: 'B=P*d^2/(W*1000*U*T); t=n*TVL; n=log10(1/B)',
+      label: 'LINAC 18 MV barrera primaria (NCRP 151 §7.1.1)',
+      source: 'NCRP 151 §7.1.1 / barreraMV (motor validado, Layout de búnker)',
+      formula: 'B=P*d^2/(W*U*T); t=TVL1+(n-1)*TVLe; n=log10(1/B)',
       expected: linacExpected,
-      actual: linac.thickness_cm,
+      actual: Math.round(linac.espesor_mm) / 10,
       unit: 'cm',
-      tolerancePercent: 0.1,
-      evidenceStrength: 'engine-cross-check',
-      notes: 'Cross-checks the implemented primary barrier path against an independent closed-form calculation.',
+      tolerancePercent: 1.5,
+      evidenceStrength: 'canonical-reference',
+      notes: 'Published NCRP 151 worked example (149.6 cm concrete); same functions as motorProyecto.',
     }),
     buildCase({
       id: 'F149-TG108-PET-F18',
       family: 'AAPM_TG108',
-      label: 'PET/CT F-18 blindaje simplificado',
-      source: 'AAPM TG-108 / PET-CT calculation path',
-      formula: 'K=Gamma*A*N*t/d^2; B=P/K; t=log10(1/B)*TVL',
+      label: 'PET/CT F-18 sala de captacion',
+      source: 'AAPM TG-108 Ec. 2-3 / dosisSemanalTG108 + TVL 511 keV (motor validado)',
+      formula: 'K=0.64*Gamma*A0*N*tU*Rt/d^2; B=P/(T*K); t=log10(1/B)*TVL(511 keV)',
       expected: petExpectedMm,
-      actual: pet.thickness_mm,
+      actual: pet.espesor_mm,
       unit: 'mm',
       tolerancePercent: 0.1,
       evidenceStrength: 'engine-cross-check',
-      notes: 'Uses the current concrete TVL proxy; final release should add PET 511 keV material-specific TVLs from source-governed documents.',
+      notes: 'Before Fase 11 etapa 8 this path used the 6 MV concrete TVL (37 cm) for 511 keV; now the 511 keV catalog TVL.',
     }),
     buildCase({
       id: 'F149-UAQ-GAMMA-KNIFE-CO60',
       family: 'UAQ_PROTOCOL',
       label: 'Gamma Knife Co-60 barrera',
-      source: 'UAQ protocol / NCRP 151 Co-60 TVL pathway',
-      formula: 'K=D*f/d^2; B=P/K; t=log10(1/B)*TVL(Co-60)',
+      source: 'NCRP 151 Co-60 TVL / tvlThickness (motor validado)',
+      formula: 'K=D*f/d^2; B=P/(T*K); t=log10(1/B)*TVL(Co-60)',
       expected: gammaKnifeExpectedMm,
-      actual: gammaKnife.thickness_mm,
+      actual: gammaKnife.espesor_mm,
       unit: 'mm',
       tolerancePercent: 0.1,
       evidenceStrength: 'protocol-internal',
@@ -241,10 +214,10 @@ export function buildF149NormativeNumericQa(): F149NormativeNumericQaSummary {
       id: 'F149-IAEA-HDR-CO60-IR192',
       family: 'IAEA_SRS47',
       label: 'HDR braquiterapia blindaje simplificado',
-      source: 'IAEA SRS-47 / UAQ HDR approximation',
-      formula: 'K=Gamma*A*t/d^2; B=P/K; t=log10(1/B)*TVL',
+      source: 'IAEA SRS-47 / Gamma-delta Ir-192 + tvlThickness (motor validado)',
+      formula: 'K=Gamma_delta*A*t/d^2; B=P/(T*K); t=log10(1/B)*TVL(Ir-192)',
       expected: hdrExpectedMm,
-      actual: hdr.thickness_mm,
+      actual: hdr.espesor_mm,
       unit: 'mm',
       tolerancePercent: 0.1,
       evidenceStrength: 'engine-cross-check',
