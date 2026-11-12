@@ -182,7 +182,8 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | 1 | fusionada (#43) |
 | 2 | fusionada (#45) |
 | 3 | lote 1: PR `depuracion-etapa-3` (ver medidas abajo); lote 2 pendiente |
-| 4–7 | pendientes |
+| 4 | PR `depuracion-etapa-4` (4a completa, 4b parcial; ver medidas abajo) |
+| 5–7 | pendientes |
 | 8 | fusionada (#46; ver abajo) |
 | 9–10 | pendientes |
 
@@ -277,6 +278,49 @@ bloqueante en el job «Humo».
 **Lote 2 (pendiente)**: que `UpdateAppDialog.tsx` deje de listar fases (hoy importa 89 `lib/f…` sólo para sus
 tarjetas; al quitarlas esos módulos quedan sin importadores y se borran por lotes de ≤ 20), las 3 specs de arriba con
 sus cadenas de scripts y los scripts que leen salidas de lo ya borrado (`f293`, `f294`, `f301`).
+
+### Medidas de la etapa 4
+
+Medido en contenedor (2 núcleos, `CI=true`, `VITE_BASE_PATH=/RadShieldMx/`, `NODE_OPTIONS=--max-old-space-size=4096`),
+`main` 9de7fb4 (#49) frente a la rama:
+
+| Verificación | Antes (main) | Después (etapa 4) |
+|---|---|---|
+| `tsc -p tsconfig.app.json` / `tsconfig.server.json` | 0 / 0 errores (job del CI) | 0 / 0 errores |
+| Build | OK | OK |
+| JS de `dist/assets` | 7 460 085 B (303 archivos) | 7 434 857 B (302; −25 228 B: el `lazy()` sin uso de `ShieldingDesignAgentDialog` ya no genera su chunk, que nunca se montaba) |
+| Vitest | 84 archivos, 708 pruebas (+3 todo) | 85 archivos, 711 pruebas (+3 todo): +`useBroadcastChannel.test.ts` (3) |
+| ESLint (trinquete) | 121 errores, 276 avisos | **25** errores, 275 avisos; línea base actualizada (`lint:ci --update`) |
+| Humo «Guíame» | 17.96 mm Pb / 213.77 mm concreto | job «Humo» del CI |
+
+**4a (mecánico, 85 errores → 0).** `no-unused-vars` (75 + 6 que aparecieron al quitar sus únicos usos),
+`no-unused-expressions` (5 `i === 0 ? moveTo : lineTo` → `if/else`), `no-empty` (3: comentario en el `catch`) y
+`no-case-declarations` (2: llaves en el `case 'Tab'`). Criterio: una llamada a hook con efectos se conserva y sólo se
+quita la variable (`useCanvasKeyboardNav`, `useServiceWorker`, `useIndexedDB`, `useFileSystemAccess`,
+`useResponsiveLayout`, `useControlledAreas`, `useI18n`); un `useState` sin lectura conserva su setter si alguien lo
+llama (`setDraggedShape`, `setShowStickyNotesPanel`); se borran `useState`/`useCallback`/`useRef` sin ningún uso
+(`handleIsodosisUpload` y `addActionHistory` no los llamaba nadie; la carga de perfiles de isodosis en el diseñador
+es tema de la etapa 9) y las props desestructuradas sin uso de `Toolbar`, `WelcomeScreen`, `StatusBar` y `CanvasArea`
+(los tipos de las props no cambian).
+
+**4b (react-hooks, 11 errores → 0 en estos archivos), sin tocar arreglos de dependencias ni el orden de los efectos.**
+`react-hooks/immutability` «accedida antes de declararse»: se reordenan declaraciones dentro del componente —
+`DoseMapDialog` (`handleCalculate` tras `render3D`/`drawLegend`), `CloudSyncDialog` (`checkHealth`/`loadProjects` antes de
+`checkAuth`), `MCCloudDialog` (`generateReport`), `PACSRealDialog` (`loadStudies`), `RealTime3DDialog`
+(`loadBunkerIntoScene`, declaración de función ya elevada). Los cierres leen el mismo valor que antes; ningún
+`useEffect` se mueve. `useBroadcastChannel` (`purity` ×2, `refs` ×2): el `tabId` se calcula con un inicializador perezoso de
+`useState` (antes `Date.now()`/`Math.random()` en cada render, descartados) y el hook devuelve ese valor; prueba
+nueva (estable entre renders, el mismo en el `ping` y en `broadcast()`, distinto por instancia).
+
+**Quedan fuera (25), con motivo:**
+
+| Regla | Archivos | Motivo |
+|---|---|---|
+| `react-refresh/only-export-components` (10) | `A11yAnnouncer`, `SyntheticResultBanner`, `ui/badge`, `ui/button`, `useDarkMode`, `useI18n`, `providers/trpc` (4) | Sólo afecta al HMR de desarrollo; arreglarlo es mover exportaciones a archivos nuevos y cambiar importadores (PR propio) |
+| `react-hooks/set-state-in-effect` (7) | `CanvasSearch`, `useWakeLock`, `CanvasArea`, `WelcomeScreen`, `CloudSyncDialog`, `EvidencePackDialog`, `MCCloudDialog` | Cambia cuándo se fija el estado (render vs. efecto) y los renders; exige prueba del componente por archivo |
+| `react-hooks/immutability` (4) | `useCanvas` (`draw` antes de declararse), `medical3d/escena/camaras.tsx` (3) | `useCanvas`: el arreglo exige mover el efecto de la imagen de fondo detrás de `draw` (cambia el orden de los efectos) o añadir `draw` a sus dependencias; `camaras`: muta la cámara de Babylon/three que devuelve un hook (visor detrás de banderas) |
+| `react-hooks/purity` (3) | `ComplianceCertificationDialog` (2), `RegulatoryReportDialog` | `Date.now()` en render: fijarlo al montar cambia qué certificados se marcan «por vencer» si el diálogo queda abierto |
+| `react-hooks/refs` (1) | `AutoBarrierDetectionDialog` | `useState(() => renderPreview())` dibuja en el canvas durante el render; pasarlo a un efecto cambia cuándo se pinta (con prueba, PR propio) |
 
 ### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»
 
