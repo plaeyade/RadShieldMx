@@ -133,21 +133,11 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
   { id:'8.5', t:'admin', title:'8.5 Atajos de Teclado', content:`B=Barrera, F=Fuente, S=Seleccionar, M=Medir, H=Pan, R=Región, G=Grid. Ctrl+S=Guardar, Ctrl+O=Abrir, Ctrl+N=Nuevo, Ctrl+Z=Undo, Ctrl+Y=Redo, Ctrl+B=Cálculo, F5=Ejecutar.` },
 
   // ── SECCIÓN 9: WEBASSEMBLY (v45) ──
-  { id:'9.0', t:'perf', title:'9.0 WebAssembly Acceleration (v45)', content:`**Módulo:** shielding_math.wasm (547 bytes, custom bytecode). Compilado manualmente vía Python bytecode para máxima eficiencia sin dependencias de Rust/Emscripten.
+  { id:'9.0', t:'perf', title:'9.0 WebAssembly (retirado)', content:`**Estado actual:** la aplicación ya no usa WebAssembly para el cálculo. El módulo shielding_math.wasm de la v45 (Archer inverso, TVL, fuente puntual e índice gamma) y su hook useWASM() se desconectaron en la Fase 11 y se borraron en la depuración del código (etapas 1 y 2); la carpeta wasm/ ya no se publica.
 
-**Funciones exportadas:**
-- **inverse_archer(B, α, β, γ):** Resuelve la ecuación de Archer B = [(1+β/α)·exp(αγx) − β/α]^(-1/γ) para x dado B. Usado en cálculo de espesor de barreras primarias NCRP 147.
-- **tvl_thickness(K, P, TVL):** Calcula espesor = −TVL × log₁₀(P/K). Usado en NCRP 151 para barreras de megavoltaje.
-- **dose_from_source(sx, sy, activity, px, py, Γ):** Dosis punto fuente: Γ×A/d². Usado en dose grids PET/SPECT.
-- **gamma_index(refDose, evalDose, dd%, maxDose, DTAmm, distMm):** Índice gamma √(DD² + DTA²). Usado en QA de perfiles de dosis.
+**Cálculo:** todas las barreras se calculan en JavaScript con el motor único del proyecto (lib/motorProyecto: NCRP 147, NCRP 151 y AAPM TG-108), el mismo en el diseñador, el cálculo por lotes y los reportes. No hay una ruta alternativa con resultados distintos.
 
-**Importaciones JS:** Math.log, Math.exp, Math.pow, Math.sqrt — zero overhead callout.
-
-**Integración:** Hook useWASM() detecta soporte WebAssembly, carga el módulo vía WebAssembly.instantiateStreaming(), y expone interfaz WASMInterface. Fallback automático a implementaciones JS puras si WASM no está disponible.
-
-**Rendimiento:** ~2x speedup en cálculos punto-por-punto (200 puntos × N barreras). En benchmarks internos: 50 barreras × 200 puntos = 10,000 puntos calculados en <50 ms (WASM) vs <100 ms (JS) en laptop 8 cores.
-
-**Compatibilidad:** Chrome 57+, Firefox 52+, Safari 11+, Edge 16+. Fallback JS: 100% funcional en todos los navegadores.` },
+**Compatibilidad:** cualquier navegador moderno con JavaScript; no se requiere soporte de WebAssembly para calcular.` },
 
   // ── SECCIÓN 9b: SENSITIVITY ANALYSIS (v45) ──
   { id:'9.1', t:'perf', title:'9.1 Sensitivity Analysis (v45)', content:`Análisis de sensibilidad de parámetros de blindaje con tornado chart y tabla de resultados. Identifica qué parámetros tienen mayor impacto en el espesor requerido.
@@ -451,7 +441,7 @@ Para blindaje, el HVL efectivo depende del espectro completo, no solo del kVp:
 
 **v44** (Attila4MC GUI Completo + Rendimiento): MCNP Input Deck Generator (GUI → heavily commented .inp), CAD Assembly Material Mapper (STEP/IGES → MCNP regions por nombre), 3D Solution Field Visualizer (slice planes + isocontours animados), OffscreenCanvas (render en Worker), Canvas Layers (3 capas: bg/static/dynamic), VirtualList (listas >50 items). Bibliografía 44 referencias. 19/20 recomendaciones implementadas (95%).
 
-**v45** (WebAssembly + Sensitivity Analysis): Módulo WASM custom 547 bytes con 4 funciones. ~2x speedup. Sensitivity Analysis con tornado chart. 20/20 recomendaciones de rendimiento implementadas (100%).
+**v45** (WebAssembly + Sensitivity Analysis): Módulo WASM custom 547 bytes con 4 funciones (retirado en la Fase 11; ver 9.0). Sensitivity Analysis con tornado chart. 20/20 recomendaciones de rendimiento implementadas (100%).
 
 **v46** (TODAS las Recomendaciones A–E): 
 **A. GUI (7/12):** Mouse-centered zoom (useCanvasZoom), Touch gestures (useTouchGestures), Dynamic color legends, Live barrier preview, Visual undo feedback, Customizable grid, Presentation mode.

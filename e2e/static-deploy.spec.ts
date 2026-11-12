@@ -27,7 +27,6 @@ test.describe('Static deploy smoke', () => {
     const artifactPaths = [
       'manifest.json',
       'manual_usuario.html',
-      'wasm/shielding_math.wasm',
     ];
 
     for (const artifactPath of artifactPaths) {

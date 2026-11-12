@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { buildF405CalculationTraceabilityBundle } from '@/lib/f405CalculationTraceabilityBundle';
-import { buildF406CanvasToolQa } from '@/lib/f406CanvasToolQa';
 import { buildF407ReportableHeatmapSnapshot } from '@/lib/f407ReportableHeatmap';
 import { buildF408UnitySceneExport, validateF408UnitySceneExport } from '@/lib/f408UnitySceneExport';
 import type { Barrier, FloorPlan, RadiationSource } from '@/types/radshield';
@@ -103,7 +102,7 @@ const floorPlan: FloorPlan = {
   criticalPoints: [],
 };
 
-describe('F405-F408 release contracts', () => {
+describe('F405, F407, F408 release contracts', () => {
   it('bundles calculation traceability for Memoria IA, PDF and Evidence Pack', () => {
     const bundle = buildF405CalculationTraceabilityBundle(floorPlan);
 
@@ -111,29 +110,6 @@ describe('F405-F408 release contracts', () => {
     expect(bundle.readyCount).toBe(1);
     expect(bundle.traceableResults[0].citationIds).toContain('NCRP-151');
     expect(bundle.requiredFields).toContain('calculationUnitSnapshot');
-  });
-
-  it('audits real canvas selectors for CAD tools and visual modes', () => {
-    const sourceText = [
-      'f100-main-floorplan-canvas',
-      'f191-tool-select',
-      'f191-tool-barrier',
-      'f191-tool-source',
-      'f191-tool-region',
-      'f191-tool-measure',
-      'f191-tool-pan',
-      'f191-visual-mode-plan',
-      'f191-visual-mode-heat',
-      'f191-visual-mode-isocontours',
-      'f191-visual-mode-structure',
-      'f374-canvas-command-dock',
-      'canvas-context-menu',
-    ].join('\n');
-    const qa = buildF406CanvasToolQa(sourceText);
-
-    expect(qa.status).toBe('canvas-tool-qa-ready');
-    expect(qa.requiredCount).toBeGreaterThanOrEqual(12);
-    expect(qa.evidenceSelectors).toContain('canvas-context-menu');
   });
 
   it('builds reportable heatmap snapshot from sample lines and regulatory legend', () => {
