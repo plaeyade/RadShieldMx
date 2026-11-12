@@ -293,7 +293,7 @@ Medido en contenedor (2 núcleos, `CI=true`, `VITE_BASE_PATH=/RadShieldMx/`, `NO
 | ESLint (trinquete) | 121 errores, 276 avisos | **25** errores, 275 avisos; línea base actualizada (`lint:ci --update`) |
 | Humo «Guíame» | 17.96 mm Pb / 213.77 mm concreto | job «Humo» del CI |
 
-**4a (mecánico, 85 errores → 0).** `no-unused-vars` (75 + 6 que aparecieron al quitar sus únicos usos),
+**4a (mecánico, 85 errores → 0).** `no-unused-vars` (75, más 5 que aparecieron al quitar sus únicos usos),
 `no-unused-expressions` (5 `i === 0 ? moveTo : lineTo` → `if/else`), `no-empty` (3: comentario en el `catch`) y
 `no-case-declarations` (2: llaves en el `case 'Tab'`). Criterio: una llamada a hook con efectos se conserva y sólo se
 quita la variable (`useCanvasKeyboardNav`, `useServiceWorker`, `useIndexedDB`, `useFileSystemAccess`,
