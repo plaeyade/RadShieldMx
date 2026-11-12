@@ -157,7 +157,7 @@ describe('Etapa 8 — zona controlada con el motor validado', () => {
         let z;
         if (seed.calculationFamily === 'NCRP151') {
           z = espesorLinacZona({
-            ...base, tipo: seed.barrier === 'Norte' || seed.barrier === 'Sur' ? 'primaria' : 'secundaria',
+            ...base, tipo: ['Norte', 'Sur', 'Techo'].includes(seed.barrier) ? 'primaria' : 'secundaria',
             haces: [{ energia_MV: a.linacEnergy_MeV, W_Gy_semana: a.linacWorkload_Gy_per_wk }], fraccionIMRT: 0.5, factorIMRT: 5, U: 0.25,
           });
         } else if (seed.calculationFamily === 'TG108') z = espesorPETZona({ ...base, A0_MBq: a.petActivity_MBQ_per_injection, pacientesSemana: N, tU_h: 1 });
@@ -169,6 +169,32 @@ describe('Etapa 8 — zona controlada con el motor validado', () => {
       });
     }
     expect(familias.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('revisión: techo LINAC primario y valores independientes de HDR/PET/Gamma Knife (perfil por omisión)', () => {
+    const profile = buildDefaultControlledZoneProfile({});
+    const a = buildDefaultControlledZoneCalculationAssumptions();
+    const porFamilia = (f: string) => {
+      const option = generateControlledZoneFeasibility(profile).find((o) => o.shieldingSeeds[0].calculationFamily === f)!;
+      return calculateControlledZoneShieldingPlan(option, profile, a).calculations;
+    };
+    const lg = Math.log10;
+    // LINAC 15 MV, techo a 3 m, T = 1, P = 0.02: primaria NCRP 151 Ec. 2.1/2.3 con TVL₁ 44 / TVLₑ 41 cm → 242.5 cm.
+    const techo = porFamilia('NCRP151').find((c) => c.barrier === 'Techo')!;
+    expect(techo.method).toBe('NCRP151-primary');
+    const nT = lg((500e3 * 0.25) / 9 / 0.02);
+    expect(techo.requiredThickness_cm).toBeCloseTo(44 + (nT - 1) * 41, 0);
+    // HDR 10 Ci, 12 h/semana, techo a 3 m: K = 0.111·370 000·12/9/1000 = 54.8 mGy; TVL de concreto Ir-192 152 mm (IAEA SRS-47).
+    const hdr = porFamilia('HDR').find((c) => c.barrier === 'Techo')!;
+    expect(hdr.unshielded_mSvWeek).toBeCloseTo(54.76, 1);
+    expect(hdr.requiredThickness_mm).toBeCloseTo(lg(54.76 / 0.02) * 152, 0);
+    // PET F-18 TG-108: 0.143 × (1 − 0.36) × 120 × 370 MBq × Rt(1 h) / 3² → 0.376 mSv; TVL 176 mm → 224 mm.
+    const pet = porFamilia('TG108').find((c) => c.barrier === 'Techo')!;
+    expect(pet.unshielded_mSvWeek).toBeCloseTo(0.376, 3);
+    expect(pet.requiredThickness_mm).toBeCloseTo(224.2, 0);
+    // Gamma Knife: B = P/(T·K) con T (Este, T = 0.25): K = 15 Gy × 120 / 36 m² = 50 Gy; TVL Co-60 210 mm.
+    const gk = porFamilia('GammaKnife').find((c) => c.barrier === 'Este')!;
+    expect(gk.requiredThickness_mm).toBeCloseTo(lg((0.25 * 50000) / 0.1) * 210, 0);
   });
 
   it('el adaptador y el diálogo ya no usan las fórmulas propias de uaqProtocol', () => {

@@ -239,15 +239,20 @@ usa `uaqProtocol`. El nuevo `lib/zonaControladaMotor.ts` usa las mismas funcione
 | Gamma Knife | B = P/K **sin T** | B = P/(T·K) con TVL de Co-60 del catálogo (`tvlThickness`) |
 | HDR Ir-192 | Γ = 4.69 «R·m²/(Ci·h)» y R → mSv × 0.00876 (≈ 100× menos kerma) | Γδ = 0.111 μGy·m²/(MBq·h) del catálogo y TVL de Ir-192 (`tvlThickness`) |
 
-Cambian los resultados del plan preliminar de zona controlada (PET, HDR y Gamma Knife suben mucho; LINAC cambia
-poco). `f149NormativeNumericQa` conserva sus IDs de caso, pero sus casos LINAC/PET/Gamma Knife/HDR apuntan ahora al
+Cambian los resultados del plan preliminar de zona controlada (perfil por omisión, concreto): HDR sube mucho
+(≈ 100× más kerma); PET baja (TVL de 511 keV en lugar del de 6 MV, decaimiento y absorción del paciente); Gamma Knife
+baja un poco donde T < 1; LINAC baja 7–16 % (la carga IMRT ya no multiplica la primaria).
+
+Revisión independiente (cálculo propio contra NCRP 151, TG-108 e IAEA SRS-47): el techo del búnker LINAC pasa a
+barrera primaria (plano de giro Norte–Sur; antes secundaria: 143 cm en vez de 242 cm de concreto) y el TVL de Ir-192
+del catálogo sube a 152 mm en concreto y 43 mm en acero (IAEA SRS-47; antes 110 y 28 mm, no conservadores). Nuevo E2E
+`e2e/fase11-zona-controlada-motor.spec.ts`: abre el diálogo, «Enviar a calculo» y compara los espesores (Gamma Knife). `f149NormativeNumericQa` conserva sus IDs de caso, pero sus casos LINAC/PET/Gamma Knife/HDR apuntan ahora al
 motor: el LINAC es el caso publicado NCRP 151 §7.1.1 (149.6 cm, `canonical-reference`); 8/8 casos pasan.
 Prueba: `src/__tests__/auditoria/zonaControladaMotor.test.ts` (NCRP 151 §7.1.1 → 149.6 cm y §7.1.5 → 66.4 cm, ±1.5 %;
 mismo espesor que `motorProyecto` en §7.1.1, §7.1.5, plomo/acero, «Guíame» captación norte con una fuente, Gamma Knife
 y HDR; todas las barreras de todas las opciones del perfil por omisión del diálogo). De `uaqProtocol` sólo queda
 la tabla `C1_IMRT_FACTORS` que lee `MemoriaAnaliticaWizard` (su cálculo ya es `barreraMV`); ninguna ruta de
-cálculo usa sus fórmulas. Falta el E2E que abre el diálogo: el
-selector de vista es un Select de Radix y no hay navegador local para escribirlo con garantías.
+cálculo usa sus fórmulas. El E2E que abre el diálogo se añadió en la revisión (job «Humo» de CI).
 
 Medidas (mismo entorno que la etapa 2, rama apilada sobre la etapa 2): `tsc` 0/0; Vitest 80 archivos / 680 pruebas
 (+1 archivo y +8 pruebas sobre la etapa 2); lint 121 sin nuevos; JS de `dist/assets` 7 456 245 → 7 453 897 B

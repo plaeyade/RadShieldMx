@@ -225,7 +225,9 @@ function calculateSeed(
   const materialCode = assumptions.materialCode;
 
   if (seed.calculationFamily === 'NCRP151') {
-    const isPrimary = seed.barrier === 'Norte' || seed.barrier === 'Sur';
+    // Plano de giro del gantry Norte–Sur: el haz primario incide en Norte, Sur y Techo (NCRP 151 §1.4, Fig. 1.1); el techo
+    // de un búnker isocéntrico es barrera primaria. Antes el techo se trataba como secundaria (≈ 1 m menos de concreto).
+    const isPrimary = seed.barrier === 'Norte' || seed.barrier === 'Sur' || seed.barrier === 'Techo';
     const conImrt = /IMRT|VMAT|SBRT/i.test(assumptions.linacTechnique);
     const result = espesorLinacZona({
       tipo: isPrimary ? 'primaria' : 'secundaria',
@@ -240,7 +242,7 @@ function calculateSeed(
     });
     return buildCalculation(seed, isPrimary ? 'NCRP151-primary' : 'NCRP151-secondary', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, isPrimary
       ? [
-        'Supuesto preliminar: barrera Norte/Sur tratada como primaria (U = 0.25).',
+        'Supuesto preliminar: barrera Norte/Sur/Techo tratada como primaria (U = 0.25).',
         `Carga LINAC usada: ${assumptions.linacWorkload_Gy_per_wk} Gy/semana, ${assumptions.linacTechnique}. ${result.referencia}.`,
       ]
       : [
