@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FloorPlan } from '@/types/radshield';
+import { P_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; floorPlan: FloorPlan; }
 
@@ -34,9 +35,9 @@ export default function CNSNSDashboardDialog({ open, onOpenChange, floorPlan }: 
             <div className="text-lg font-bold">{semaforoText(metrics.allCompliant)}</div>
             <div className="text-[10px]">Cumplimiento barreras</div>
           </CardContent></Card>
-          <Card className={`${semaforo((metrics.hasResults && metrics.maxKerma <= 0.1))} text-white`}><CardContent className="p-2 text-center">
-            <div className="text-lg font-bold">{semaforoText((metrics.hasResults && metrics.maxKerma <= 0.1))}</div>
-            <div className="text-[10px]">Kerma max ≤ 0.1 mSv/sem</div>
+          <Card className={`${semaforo((metrics.hasResults && metrics.maxKerma <= P_CONTROLADA_mSv_semana))} text-white`}><CardContent className="p-2 text-center">
+            <div className="text-lg font-bold">{semaforoText((metrics.hasResults && metrics.maxKerma <= P_CONTROLADA_mSv_semana))}</div>
+            <div className="text-[10px]">Kerma max ≤ {P_CONTROLADA_mSv_semana} mSv/sem</div>
           </CardContent></Card>
           <Card className={`${semaforo(metrics.hasResults)} text-white`}><CardContent className="p-2 text-center">
             <div className="text-lg font-bold">{semaforoText(metrics.hasResults)}</div>

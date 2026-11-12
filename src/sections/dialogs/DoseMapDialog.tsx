@@ -35,6 +35,7 @@ import { useCanvasStore } from '@/stores/canvasStore';
 import { componentesPresentes, type ComponenteCampo } from '@/lib/doseFieldEngine';
 import { NIVELES_ISODOSIS, mallaDoseMap } from '@/lib/visoresDosis';
 import { SelectorComponentesDosis } from './SelectorComponentesDosis';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -360,7 +361,7 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
                     <div><Label className="text-[10px]">Factor ocupación (T)</Label><Input value={occupancyFactor} onChange={e => setOccupancyFactor(e.target.value)} type="number" step="0.05" className="h-7 text-xs" /></div>
                     <div><Label className="text-[10px]">Objetivo de diseño P (mSv/sem): isodosis P/T</Label><Input value={designDose} onChange={e => setDesignDose(e.target.value)} type="number" step="0.01" className="h-7 text-xs" /></div>
                     <div className="text-[9px] text-amber-600">
-                      NCRP 151: 0.02 mSv/sem (público), 0.4 mSv/sem (personal controlado)
+                      NCRP 147/151: {P_NO_CONTROLADA_mSv_semana} mSv/sem (no controlada / público), {P_CONTROLADA_mSv_semana} mSv/sem (controlada)
                     </div>
                   </div>
                 </div>

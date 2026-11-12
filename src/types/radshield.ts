@@ -1,3 +1,4 @@
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '../lib/limitesDosis';
 // RadShield-MX Unified Shielding Types
 // Supports: NCRP 147 (Diagnostic X-ray), NCRP 151 (Therapy LINAC), Nuclear (PET, HDR, GK, Cyclotron)
 
@@ -337,8 +338,8 @@ export const OCCUPANCY_FACTORS = [
 
 export const DESIGN_GOALS = [
   { name: "ALARA (0.001 mSv/sem = 0.05 mSv/año)", value: 0.001, description: "Límite ALARA — objetivo más allá de lo regulatorio" },
-  { name: "Controlled area (0.1 mSv/sem)", value: 0.1, description: "Área controlada" },
-  { name: "Public area (0.02 mSv/sem)", value: 0.02, description: "Área pública" },
+  { name: `Controlled area (${P_CONTROLADA_mSv_semana} mSv/sem)`, value: P_CONTROLADA_mSv_semana, description: "Área controlada" },
+  { name: `Public area (${P_NO_CONTROLADA_mSv_semana} mSv/sem)`, value: P_NO_CONTROLADA_mSv_semana, description: "Área pública" },
   { name: "Very low (0.01 mSv/sem)", value: 0.01, description: "Área muy restringida" },
   { name: "Custom", value: 0.05, description: "Valor personalizado" }
 ];

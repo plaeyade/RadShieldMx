@@ -1,4 +1,5 @@
 import { F113_MODALITY_PROFILES, type F113ModalityProfile, type F113ModalityProfileId } from './f113ModalityProfiles';
+import { NOM_008_NUCL } from './normativaMx';
 
 export const F117_ACTIVE_PROFILE_KEY = 'radshield:f113:active-modality-profile';
 
@@ -54,7 +55,7 @@ const defaultsByProfile: Record<F113ModalityProfileId, Omit<F117ModalityHandoff,
     },
     evidenceDefaults: {
       objective: 'Sustentar memoria diagnostica con NCRP 147, IPEM 109, workload, ocupacion y evidencia del plano.',
-      priorityDocuments: ['NCRP 147', 'IPEM 109', 'NOM-008-NUCL', 'manual fabricante RX/CT'],
+      priorityDocuments: ['NCRP 147', 'IPEM 109', NOM_008_NUCL.clave, 'manual fabricante RX/CT'],
       ragQueries: ['NCRP 147 diagnostic workload barrier shielding', 'IPEM 109 SPECT CT shielding room design', 'occupancy factor diagnostic radiology shielding'],
       citationTags: ['DX', 'diagnostico', 'NCRP147', 'IPEM109'],
     },

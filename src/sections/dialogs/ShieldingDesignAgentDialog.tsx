@@ -21,6 +21,7 @@ import {
   Bot, Play, Shield, AlertTriangle, CheckCircle2, Loader2,
   FileText, Zap,
 } from "lucide-react";
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
@@ -53,8 +54,8 @@ export default function ShieldingDesignAgentDialog({ open, onOpenChange }: Props
         roomDimensions: { width: parseFloat(roomW), length: parseFloat(roomL), height: parseFloat(roomH) },
         distances: { North: parseFloat(distN), South: parseFloat(distS), East: parseFloat(distE), West: parseFloat(distW) },
         materials: ["concrete"],
-        goalDoseControlled: 0.1, // NCRP 151 §1.3: 0.1 mSv/semana en área controlada
-        goalDoseUncontrolled: 0.02,
+        goalDoseControlled: P_CONTROLADA_mSv_semana, // NCRP 147/151 (limitesDosis.ts)
+        goalDoseUncontrolled: P_NO_CONTROLADA_mSv_semana,
         occupancy: { North: 0.2, South: 1.0, East: 0.5, West: 0.125 },
         useFactor: 0.25,
         specialConsiderations: parseFloat(energy) > 10 ? ["neutrons"] : [],

@@ -3,6 +3,7 @@
  * progreso persistente (saltar, pausar, reanudar y reiniciar).
  */
 import type { FloorPlan } from '@/types/radshield';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 export type IdPaso = 'proyecto' | 'plano' | 'fuentes' | 'ocupacion' | 'calculo' | 'cumplimiento' | 'reporte';
 
@@ -36,7 +37,7 @@ export const PASOS_GUIA: readonly PasoGuia[] = [
   },
   {
     id: 'ocupacion', titulo: 'Ocupación y uso de las áreas',
-    explicacion: 'Para cada muro, el factor de ocupación T del lado protegido y el objetivo de diseño P: 0.1 mSv/semana en zona controlada, 0.02 mSv/semana en zona pública (NCRP 147).',
+    explicacion: `Para cada muro, el factor de ocupación T del lado protegido y el objetivo de diseño P: ${P_CONTROLADA_mSv_semana} mSv/semana en zona controlada, ${P_NO_CONTROLADA_mSv_semana} mSv/semana en zona pública (NCRP 147).`,
     comoHacerlo: 'Selecciona cada barrera y ajusta T y P en el panel lateral, o dibuja regiones ocupadas con la herramienta «Región».',
     ejemplo: 'Oficinas al norte (T = 1, público), pasillo al sur (T = 1/5), exterior al oeste (T = 1/40) y control (T = 1, controlada).',
   },
