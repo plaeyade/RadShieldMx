@@ -43,7 +43,8 @@ test('Layout de búnker: «Enviar a calculo» muestra los espesores del motor (G
   await expect(panel).toBeVisible();
 
   await panel.getByRole('button', { name: /Enviar a calculo/ }).click();
-  const filas = panel.locator('table tbody tr');
+  // Tabla del plan preliminar (el panel tiene además una tabla de semillas por opción).
+  const filas = panel.getByTestId('zona-plan-calculos').locator('tbody tr');
   await expect(filas).toHaveCount(esperado.length);
 
   for (const [i, [barrera, d, T, P]] of esperado.entries()) {

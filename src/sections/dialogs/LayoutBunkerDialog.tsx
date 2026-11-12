@@ -532,7 +532,7 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
                     </div>
                   )}
                   <div className="mt-3 overflow-x-auto">
-                    <table className="w-full text-[11px]">
+                    <table className="w-full text-[11px]" data-testid="zona-plan-calculos">
                       <thead className="text-blue-900"><tr><th className="text-left">Barrera</th><th>Metodo</th><th>Zona</th><th>K0</th><th>Espesor</th><th>Estado</th></tr></thead>
                       <tbody>
                         {shieldingPlan.calculations.map((calc) => (
