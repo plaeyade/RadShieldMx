@@ -38,10 +38,10 @@ test.describe('Evidence Pack', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await bootWorkspace(page);
 
-    await page.getByRole('button', { name: /Reportes/i }).click();
-    await page.getByText('Evidence Pack', { exact: true }).click();
+    await page.getByTestId('f109-migrated-reports-dropdown').click();
+    await page.getByRole('menuitem', { name: /Evidence Pack bridge/ }).click();
 
-    await expect(page.getByRole('heading', { name: 'Evidence Pack' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Evidence Pack' }).first()).toBeVisible();
     await expect(page.getByText('FSB queda como navegador supervisado externo')).toBeVisible();
     await expect(page.getByText('Browserbase queda como motor externo')).toBeVisible();
     await expect(page.getByText('Revit/Autodesk queda como integracion BIM externa')).toBeVisible();

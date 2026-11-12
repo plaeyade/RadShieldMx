@@ -28,3 +28,18 @@ export async function bootWorkspace(page: Page) {
   await closeSplashIfVisible(page);
   await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
 }
+
+/** Carga el ejemplo «Guíame» (PET/CT) desde el menú Archivo; desde la Fase 10 la app arranca sin plano. */
+export async function cargarEjemploGuiame(page: Page) {
+  await page.getByTestId('f295-primary-file-dropdown').click();
+  await page.getByTestId('f10-help-guiame').click();
+  await page.getByTestId('guia-crear-proyecto').click();
+  await page.getByTestId('guia-siguiente').click();
+  await page.getByTestId('guia-ejemplo-plano').click();
+  await page.getByTestId('guia-siguiente').click();
+  await page.getByTestId('guia-ejemplo-fuentes').click();
+  await page.getByTestId('guia-siguiente').click();
+  await page.getByTestId('guia-ejemplo-ocupacion').click();
+  await page.getByTestId('guia-cerrar').click();
+  await expect(page.getByTestId('guia-paso-a-paso')).toHaveCount(0);
+}
