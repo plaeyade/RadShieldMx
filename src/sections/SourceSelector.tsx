@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { X, Radiation, Zap, Brain, Atom, Scan, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check, Maximize2, Minimize2, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { NOM_008_NUCL } from '@/lib/normativaMx';
+import { NOM_008_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
 
 export interface SourceItem {
   id: string;
@@ -34,9 +34,9 @@ const CATALOG: SourceItem[] = [
   { id: 'cobalt_60', name: 'Cobalto-60 (Theratron)', category: 'therapy', energy: '1.17 + 1.33 MeV', standard: 'NCRP-151', ncrp_report: '151', aapm_tg: 'TG51', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 20, description: 'Unidad de Cobalto-60. TVL concreto = 19.6cm.' },
   { id: 'gamma_knife', name: 'Gamma Knife (Leksell)', category: 'radiosurgery', energy: 'Co-60 (1.25 MeV avg)', standard: 'AAPM-TG108', ncrp_report: null, aapm_tg: 'TG108', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 50, description: 'Gamma Knife Perfexion/Icon. 201 fuentes Co-60.' },
   { id: 'cyberknife', name: 'CyberKnife', category: 'radiosurgery', energy: '6 MV', standard: 'AAPM-TG108', ncrp_report: null, aapm_tg: 'TG108', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 30, description: 'CyberKnife M6/S7. LINAC en brazo robotico.' },
-  { id: 'pet_f18', name: 'PET/CT — F-18 FDG', category: 'nuclear_medicine', energy: '511 keV', standard: 'AAPM-TG108', ncrp_report: '155', aapm_tg: 'TG108', iaea_ref: 'RS-G-1.7', cnsns_ref: 'NOM-040-NUCL', workload_default: 150, description: 'PET/CT con F-18 FDG. Concreto baritado 150-200mm.' },
-  { id: 'spect_tc99m', name: 'SPECT — Tc-99m', category: 'nuclear_medicine', energy: '140 keV', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: null, iaea_ref: 'RS-G-1.7', cnsns_ref: 'NOM-040-NUCL', workload_default: 100, description: 'Gamma camera con Tc-99m. Blindaje moderado con plomo.' },
-  { id: 'i131_therapy', name: 'I-131 Terapia', category: 'nuclear_medicine', energy: '364 keV', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: null, iaea_ref: 'RS-G-1.7', cnsns_ref: 'NOM-040-NUCL', workload_default: 50, description: 'Terapia con I-131 (tiroides). Paciente como fuente ambulatoria.' },
+  { id: 'pet_f18', name: 'PET/CT — F-18 FDG', category: 'nuclear_medicine', energy: '511 keV', standard: 'AAPM-TG108', ncrp_report: '155', aapm_tg: 'TG108', iaea_ref: 'RS-G-1.7', cnsns_ref: NOM_040_NUCL.clave, workload_default: 150, description: 'PET/CT con F-18 FDG. Concreto baritado 150-200mm.' },
+  { id: 'spect_tc99m', name: 'SPECT — Tc-99m', category: 'nuclear_medicine', energy: '140 keV', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: null, iaea_ref: 'RS-G-1.7', cnsns_ref: NOM_040_NUCL.clave, workload_default: 100, description: 'Gamma camera con Tc-99m. Blindaje moderado con plomo.' },
+  { id: 'i131_therapy', name: 'I-131 Terapia', category: 'nuclear_medicine', energy: '364 keV', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: null, iaea_ref: 'RS-G-1.7', cnsns_ref: NOM_040_NUCL.clave, workload_default: 50, description: 'Terapia con I-131 (tiroides). Paciente como fuente ambulatoria.' },
   { id: 'hdr_ir192', name: 'HDR — Ir-192', category: 'brachytherapy', energy: '380 keV avg', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: 'TG56', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 40, description: 'HDR braquiterapia con Ir-192. Bunker concreto 600-800mm.' },
   { id: 'hdr_co60', name: 'HDR — Co-60', category: 'brachytherapy', energy: '1.25 MeV', standard: 'NCRP-155', ncrp_report: '155', aapm_tg: 'TG56', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 40, description: 'HDR braquiterapia con Co-60. Bunker pesado.' },
   { id: 'cyclotron', name: 'Ciclotron (FDG)', category: 'cyclotron', energy: 'Variable (hasta 18 MeV)', standard: 'NCRP-144', ncrp_report: '144', aapm_tg: null, iaea_ref: 'TRS-314', cnsns_ref: 'LA-007/01', workload_default: 500, description: 'Ciclotron para FDG. Blindaje para neutrones y activacion.' },

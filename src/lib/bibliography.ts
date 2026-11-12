@@ -4,7 +4,7 @@
 // Total: 40+ referencias indexadas
 // =============================================================================
 
-import { NOM_008_NUCL } from './normativaMx';
+import { NOM_008_NUCL, NOM_040_NUCL } from './normativaMx';
 
 export interface BibEntry {
   id: string;
@@ -113,7 +113,7 @@ export const EXISTING_REFERENCES: BibEntry[] = [
   { id: 'REF021', type: 'ICRU', year: 2023, citation: 'ICRU Report 96. Dosimetry-guided Radiopharmaceutical Therapy. 2023.', notes: 'Dosimetría guiada terapia radionuclídica.' },
   { id: 'REF022', type: 'EPA', year: 2017, citation: 'EPA Federal Guidance Report No. 14. Radiation Quality Factors. 2017.', notes: 'Factores de calidad radiación EPA.' },
   { id: 'REF023', type: 'NOM', year: NOM_008_NUCL.anio, citation: NOM_008_NUCL.cita, url: NOM_008_NUCL.urlDof, notes: NOM_008_NUCL.alcance },
-  { id: 'REF024', type: 'NOM', year: 2016, citation: 'NOM-040-NUCL-2016. Instalaciones de Radioterapia. CNSNS.', notes: 'Norma mexicana para instalaciones de radioterapia.' },
+  { id: 'REF024', type: 'NOM', year: NOM_040_NUCL.anio, citation: NOM_040_NUCL.cita, url: NOM_040_NUCL.urlDof, notes: NOM_040_NUCL.alcance },
   { id: 'REF025', type: 'PeerReviewed', year: 2022, citation: 'González Aguilar JA. Protocolo de Blindaje para Aceleradores Lineales de Uso Médico. Tesis UAQ IGLIN-280880. 2023.', notes: 'Protocolo UAQ con 33 ecuaciones y caso estudio Elekta.' },
   { id: 'REF026', type: 'NIST', year: 2004, citation: 'NIST XCOM: Photon Cross Sections Database. NIST Standard Reference Database 8 (XGAM).', url: 'https://physics.nist.gov/PhysRefData/Xcom/html/xcom1.html', notes: 'Secciones eficaces de interacción fotón-materia.' },
   { id: 'REF027', type: 'PeerReviewed', year: 2022, citation: 'PMC9084580. Shielding design for modern radiation therapy facilities.', pmid: '35600000', notes: 'Diseño de blindajes para instalaciones modernas de radioterapia.' },

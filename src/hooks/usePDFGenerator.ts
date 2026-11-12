@@ -118,7 +118,7 @@ export function generatePDFReport(
     'AAPM TG 108 (2010) - PET and PET/CT Shielding Requirements',
     'IAEA SRS No. 47 (2006) - Radiation Protection for PET/CT',
     'NOM-008-NUCL-2024 - Limites de contaminacion radiactiva y criterios para su control (DOF 24-05-2024)',
-    'NOM-040-NUCL-2016 - Instalaciones de radioterapia (CNSNS)',
+    'NOM-040-NUCL-2016 - Seguridad radiologica en medicina nuclear (CNSNS)',
   ];
   for (const r of refs) { doc.text(`• ${r}`, 20, y); y += 5; }
 
