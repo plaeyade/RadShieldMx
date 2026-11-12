@@ -4,6 +4,7 @@
  * Generates multi-sheet Excel workbooks
  * ═══════════════════════════════════════════════════════════
  */
+import { NOM_008_NUCL, NOM_033_NUCL, RGSR_1988 } from './normativaMx';
 
 export interface ExcelSheet {
   name: string;
@@ -107,6 +108,8 @@ export function exportShieldingReport(data: {
     maxDose: number;
     compliance: string;
   };
+  /** Normas mexicanas del proyecto (normasMxAplicables). Por omisión, las del búnker de linac (NCRP 151). */
+  normasMexico?: string[];
 }): void {
   const workbook = {
     sheets: [
@@ -135,7 +138,7 @@ export function exportShieldingReport(data: {
           ["Dosis máxima calculada (mSv/s)", data.summary.maxDose],
           ["Estado de cumplimiento", data.summary.compliance],
           ["Norma aplicada", "NCRP 151 (2005)"],
-          ["Norma México", "NOM-040-NUCL-2016 / NOM-008-NUCL-2024"],
+          ["Norma México", (data.normasMexico ?? [RGSR_1988, NOM_008_NUCL.clave, NOM_033_NUCL.clave]).join(" / ")],
           ["Fecha", new Date().toLocaleDateString("es-MX")],
         ],
       },

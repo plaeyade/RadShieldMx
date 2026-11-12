@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import '@/types/floorPlan';
+import { NOM_040_NUCL } from '@/lib/normativaMx';
 
 export interface RoomTemplate {
   id: string;
@@ -35,7 +36,16 @@ export interface RoomTemplate {
     doseConstraint_mSv_week?: number;
     isLithotripsy?: boolean;
   };
+  /**
+   * Recintos y equipos que exige la norma de la práctica (medicina nuclear: NOM-040-NUCL-2016 §5.1/§6.1.1). Son
+   * requisitos de proyecto que se listan en el panel; NO se convierten en áreas ocupadas ni cambian barreras al aplicar
+   * la plantilla (los proyectos guardados no guardan la plantilla, sólo sus barreras y regiones).
+   */
+  recintosNormativos?: ReadonlyArray<{ id: string; nombre: string; numeral: string; cuandoAplica: string | null }>;
 }
+
+/** Recintos de la NOM-040-NUCL-2016 para las plantillas de medicina nuclear, con la clave y el numeral. */
+const RECINTOS_NOM_040 = NOM_040_NUCL.recintos.map((r) => ({ ...r, numeral: `${NOM_040_NUCL.clave} ${r.numeral}` }));
 
 const ROOM_TEMPLATES: RoomTemplate[] = [
   {
@@ -85,6 +95,7 @@ const ROOM_TEMPLATES: RoomTemplate[] = [
     ],
     occupancyFactors: { controlRoom: 1.0, hotLab: 1.0, uptakeRoom: 0.5, corridor: 0.2, outdoor: 0.025 },
     designCriteria: { weeklyWorkload_hrs: 50, patientThroughput_perWeek: 100, doseConstraint_mSv_week: 0.02 },
+    recintosNormativos: RECINTOS_NOM_040,
   },
   {
     id: 'linac-varian-truebeam',
@@ -228,6 +239,7 @@ const ROOM_TEMPLATES: RoomTemplate[] = [
     ],
     occupancyFactors: { controlRoom: 1.0, injectionArea: 0.5, corridor: 0.2, outdoor: 0.025 },
     designCriteria: { weeklyWorkload_hrs: 40, patientThroughput_perWeek: 125, doseConstraint_mSv_week: 0.02 },
+    recintosNormativos: RECINTOS_NOM_040,
   },
   {
     id: 'shielded-wall-pb',

@@ -39,7 +39,7 @@
 | 4 | IAEA SSG-46 | PENDIENTE |
 | 5 | IPEM Report 75 | PENDIENTE |
 | 6 | ICRP Publication 33 | PENDIENTE |
-| 7 | NOM-013-ENER | PENDIENTE |
+| 7 | NOM-013-NUCL-2009 (egreso de pacientes; ficha en src/lib/normativaMx.ts) | PENDIENTE |
 | 8 | NOM-021-ENER | PENDIENTE |
 
 ### Prioridad MEDIA (v60-v70)

@@ -3,6 +3,7 @@ import type { CanvasBarrierResult, CanvasSampleLine } from '@/hooks/useCanvas';
 import { buildAnalyticMemoryEvidenceSection } from '@/lib/analyticMemoryEvidence';
 import type { FloorPlan } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
+import { citasMxAplicables } from '@/lib/normativaMx';
 import { extractControlledZoneReportContext } from '@/lib/controlledZoneReportAdapter';
 import { seccionEvidenciaMemoria, verificarPaqueteGamma, type PaqueteVerificado } from '@/lib/gammaCliente';
 import paqueteEvidenciaMemoria from '@/data/gamma-evidencia-memoria.json';
@@ -384,9 +385,9 @@ export async function generateCNSNSReport(data: CNSNSReportData): Promise<Blob> 
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• NCRP Report No. 151 (2005). Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities.', size: 22 })] }),
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• AAPM TG 108 (2006). PET and PET/CT Shielding Requirements.', size: 22 })] }),
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• IAEA Safety Reports Series No. 47 (2006). Radiation Protection for PET/CT Facilities.', size: 22 })] }),
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• NOM-008-NUCL-2024. Límites de contaminación radiactiva y criterios para su control (DOF 24-05-2024).', size: 22 })] }),
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• NOM-040-NUCL-2016. Requisitos de seguridad radiológica para la práctica de medicina nuclear (aplica solo a medicina nuclear).', size: 22 })] }),
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• NOM-041-NUCL-2013. Criterios radiologicos para la liberacion de pacientes con radionuclidos.', size: 22 })] }),
+    // Normas mexicanas según las modalidades del proyecto: NOM-040/NOM-013 sólo en medicina nuclear, NOM-033 en linac.
+    ...citasMxAplicables(floorPlan.sources.map((s) => s.modality)).map((cita) =>
+      new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: `• ${cita}`, size: 22 })] })),
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: '• DeLorenzo et al. (2016). RadShield: Semiautomated shielding design using a floor plan driven GUI. JACMP 17(3):167-182.', size: 22 })] })
   ];
 

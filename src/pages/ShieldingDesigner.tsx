@@ -1854,7 +1854,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
 
   // E.1: Excel Export — Multi-sheet workbook
   const exportExcel = useCallback(() => {
-    import('@/lib/excelExport').then(({ exportShieldingReport }) => {
+    Promise.all([import('@/lib/excelExport'), import('@/lib/normativaMx')]).then(([{ exportShieldingReport }, { normasMxAplicables }]) => {
       const barriers = floorPlan.barriers.map(b => {
         const sortedMats = Object.entries(b.requiredThickness_mm || {}).map(([code, t]) => ({ code, t: t as number, mat: MATERIALS.find(m => m.code === code) })).filter(x => x.mat).sort((a, b) => a.t - b.t);
         const t1 = sortedMats[0];
@@ -1878,6 +1878,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           maxDose: Math.max(...floorPlan.barriers.map(b => b.maxKerma || 0)),
           compliance: floorPlan.barriers.every(b => (b.maxKerma || 0) <= b.designGoal_mSv_per_wk) ? 'CUMPLE NCRP 151' : 'REVISION REQUERIDA',
         },
+        normasMexico: normasMxAplicables(floorPlan.sources.map(s => s.modality)),
       });
       toast.success('Excel exportado — Multi-hoja');
     });

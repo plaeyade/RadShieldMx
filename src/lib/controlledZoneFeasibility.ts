@@ -3,6 +3,8 @@
 // =============================================================================
 
 import { CONTROLLED_ZONE_CONTRACTS } from './controlledZoneContracts';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
+import { NOM_040_NUCL } from './normativaMx';
 
 export type MedicalLayoutModality = 'LINAC' | 'PET-CT' | 'Gamma Knife' | 'HDR' | 'Radiofarmacia';
 
@@ -27,6 +29,15 @@ export interface ControlledZoneRoom {
   width_m: number;
   length_m: number;
   shieldingPriority: 'primary' | 'secondary' | 'low';
+  /** Objetivo de diseño P del recinto (limitesDosis.ts): 0.1 mSv/semana si es zona controlada; 0.02 si no. */
+  designGoal_mSvWeek: number;
+  /** Numeral de la NOM-040-NUCL-2016 que exige el recinto (sólo plantillas de medicina nuclear). */
+  numeralNorma?: string;
+}
+
+/** Objetivo de diseño de un recinto según su zona (NCRP 147 §1.3 / NCRP 151 §1.2; limitesDosis.ts). */
+export function objetivoDisenoRecinto(zone: ControlledZoneRoom['zone']): number {
+  return zone === 'controlada' ? P_CONTROLADA_mSv_semana : P_NO_CONTROLADA_mSv_semana;
 }
 
 export interface ShieldingSeedPoint {
@@ -67,8 +78,16 @@ interface Template {
   baseCost_mxn: number;
   requiresMaze: boolean;
   calculationFamily: ShieldingSeedPoint['calculationFamily'];
-  rooms: Omit<ControlledZoneRoom, 'x_m' | 'y_m'>[];
+  rooms: Omit<ControlledZoneRoom, 'x_m' | 'y_m' | 'designGoal_mSvWeek'>[];
+  /** Acciones adicionales propias de la plantilla (p. ej. requisitos condicionales de la NOM-040). */
+  extraActions?: string[];
 }
+
+const recintoNom040 = (id: (typeof NOM_040_NUCL.recintos)[number]['id']) => {
+  const r = NOM_040_NUCL.recintos.find((x) => x.id === id);
+  if (!r) throw new Error(`Recinto NOM-040 desconocido: ${id}`);
+  return r;
+};
 
 export const TESTFIT_ADAPTED_CAPABILITIES = [
   'Generar alternativas desde limites de sitio y restricciones',
@@ -110,8 +129,16 @@ const TEMPLATES: Template[] = [
       { id: 'scanner', name: 'Sala PET-CT', zone: 'controlada', width_m: 5.5, length_m: 6, shieldingPriority: 'secondary' },
       { id: 'uptake-a', name: 'Uptake 1', zone: 'controlada', width_m: 3, length_m: 3.5, shieldingPriority: 'secondary' },
       { id: 'uptake-b', name: 'Uptake 2', zone: 'controlada', width_m: 3, length_m: 3.5, shieldingPriority: 'secondary' },
-      { id: 'hotlab', name: 'HOT lab', zone: 'controlada', width_m: 4.5, length_m: 4, shieldingPriority: 'primary' },
-      { id: 'control', name: 'Consola', zone: 'supervisada', width_m: 4, length_m: 3, shieldingPriority: 'low' },
+      { id: 'hotlab', name: 'HOT lab', zone: 'controlada', width_m: 4.5, length_m: 4, shieldingPriority: 'primary', numeralNorma: 'NOM-040-NUCL-2016 §5.1.1' },
+      // NOM-040-NUCL-2016 §5.1.7.3: el área de control es parte de la sala de estudios, dentro de la zona controlada.
+      { id: 'control', name: 'Consola', zone: 'controlada', width_m: 4, length_m: 3, shieldingPriority: 'low', numeralNorma: 'NOM-040-NUCL-2016 §5.1.7.3' },
+      { id: 'waste', name: recintoNom040('almacen-desechos').nombre, zone: 'controlada', width_m: 2.5, length_m: 2, shieldingPriority: 'secondary', numeralNorma: `NOM-040-NUCL-2016 ${recintoNom040('almacen-desechos').numeral}` },
+      { id: 'decon', name: recintoNom040('descontaminacion').nombre, zone: 'controlada', width_m: 2, length_m: 2, shieldingPriority: 'low', numeralNorma: `NOM-040-NUCL-2016 ${recintoNom040('descontaminacion').numeral}` },
+      { id: 'wc-inyectados', name: recintoNom040('sanitario-inyectados').nombre, zone: 'controlada', width_m: 2, length_m: 2.5, shieldingPriority: 'low', numeralNorma: `NOM-040-NUCL-2016 ${recintoNom040('sanitario-inyectados').numeral}` },
+    ],
+    extraActions: [
+      `Si habrá pacientes que no cumplan el egreso (p. ej. I-131): ${recintoNom040('hospitalizacion-i131').nombre} (NOM-040-NUCL-2016 ${recintoNom040('hospitalizacion-i131').numeral}).`,
+      `${recintoNom040('detector-alarma').nombre} (NOM-040-NUCL-2016 ${recintoNom040('detector-alarma').numeral}).`,
     ],
   },
   {
@@ -203,6 +230,7 @@ export function generateControlledZoneFeasibility(profile: ControlledZoneProfile
         'Confirmar colindancias reales y ocupacion por barrera',
         'Enviar puntos semilla al calculador NCRP/TG correspondiente',
         'Generar memoria analitica preliminar con supuestos trazables',
+        ...(template.extraActions ?? []),
       ],
       exportTargets: DEFAULT_EXPORT_TARGETS,
     };
@@ -248,16 +276,20 @@ export function buildControlledZoneCalculationPacket(
 function placeRooms(template: Template, profile: ControlledZoneProfile): ControlledZoneRoom[] {
   const offsetX = Math.max(0.5, (profile.controlledZoneWidth_m - template.width_m) / 2);
   const offsetY = Math.max(0.5, (profile.controlledZoneLength_m - template.length_m) / 2);
+  // Hasta 6 recintos en 2 columnas (como antes); con más (PET-CT con los recintos de la NOM-040) en 3 columnas.
+  const cols = template.rooms.length > 6 ? 3 : 2;
+  const colStep = cols === 2 ? 0.48 : 0.32;
   return template.rooms.map((room, index) => ({
     ...room,
-    x_m: Number((offsetX + (index % 2) * (template.width_m * 0.48)).toFixed(1)),
-    y_m: Number((offsetY + Math.floor(index / 2) * (template.length_m * 0.38)).toFixed(1)),
+    designGoal_mSvWeek: objetivoDisenoRecinto(room.zone),
+    x_m: Number((offsetX + (index % cols) * (template.width_m * colStep)).toFixed(1)),
+    y_m: Number((offsetY + Math.floor(index / cols) * (template.length_m * 0.38)).toFixed(1)),
   }));
 }
 
 function buildShieldingSeeds(template: Template, profile: ControlledZoneProfile): ShieldingSeedPoint[] {
-  const publicGoal = 0.02;
-  const controlledGoal = 0.1;
+  const publicGoal = P_NO_CONTROLADA_mSv_semana;
+  const controlledGoal = P_CONTROLADA_mSv_semana;
   return [
     {
       id: `${template.id}-north`,

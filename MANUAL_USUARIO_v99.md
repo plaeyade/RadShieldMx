@@ -3906,7 +3906,6 @@ Formula: **D = (A x Γ) / d²**
 ### Referencias regulatorias Mexico
 - LAERA (Ley Federal de Riesgos Ambientales)
 - RETECO (Reglamento de Transporte de Combustibles)
-- NOM-013-NUCL-2013 (Transporte de materiales radiactivos)
 - CNSNS-L-010-2015 (Autorizaciones de transporte)
 
 ---
@@ -4210,12 +4209,14 @@ t = n × TVL (cm)
 
 **Boton**: Toolbar → Rep (icono FileText)
 
-Generador de Memoria Analitica conforme a normativa mexicana.
+Generador de Memoria Analitica conforme a normativa mexicana. La lista de normas depende de las modalidades del proyecto: la NOM-040 y la NOM-013 solo aparecen con fuentes de medicina nuclear, y la NOM-033 con aceleradores lineales.
 
 ### Normativa incluida
+- **RGSR (1988)**: limites de dosis (siempre)
 - **NOM-008-NUCL-2024** (DOF 24-05-2024): Límites de contaminación radiactiva y criterios para su control; sustituye a la NOM-008-NUCL-2011. No fija limites de dosis (RGSR 1988)
+- **NOM-033-NUCL-2016** (DOF 04-08-2016): Especificaciones tecnicas para la operacion de unidades de teleterapia: aceleradores lineales (solo linac; no fija blindajes)
 - **NOM-040-NUCL-2016**: Requisitos de seguridad radiologica para la practica de medicina nuclear (DOF 04-08-2016; solo medicina nuclear)
-- **NOM-013-NUCL-2013**: Transporte de materiales radiactivos
+- **NOM-013-NUCL-2009** (DOF 20-10-2009): Requerimientos de seguridad radiologica para egresar a pacientes a quienes se les ha administrado material radiactivo (solo medicina nuclear)
 - **CNSNS-L-010-2015**: Licencia de operacion
 
 ### Datos del reporte
@@ -4425,7 +4426,7 @@ El factor kappa varia 82% entre marcas. Usar el modelo especifico mejora la prec
 - **Geant4 Medical**: G4-Med (2020). Med Phys 48(1):19-56
 - **TOPAS**: https://topasmc.org — Monte Carlo proton therapy
 - **PyMedPhys**: https://docs.pymedphys.com — Gamma index, DICOM, QA
-- **Regulatorias MX**: NOM-008-NUCL-2024, NOM-040-NUCL-2016 (medicina nuclear), NOM-013-NUCL-2013, CNSNS-L-010-2015, LAERA
+- **Regulatorias MX**: RGSR (1988), NOM-008-NUCL-2024, NOM-033-NUCL-2016 (aceleradores lineales), NOM-040-NUCL-2016 y NOM-013-NUCL-2009 (medicina nuclear), CNSNS-L-010-2015, LAERA
 - **GMP**: WHO TRS 1025 Annex 2, EMA CHMP/QWP/363827/2025, EANM cGRPP 2021
 - **BIM**: buildingSMART International, IFC2X3/IFC4 ISO 16739
 - **Autodesk**: Revit API Developer Guide 2024

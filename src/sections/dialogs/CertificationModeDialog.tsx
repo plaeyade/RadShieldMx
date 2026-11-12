@@ -1,9 +1,11 @@
 /**
  * CertificationModeDialog — E.7: Certification mode for CNSNS license
  * Guided process for CNSNS license application with checklists
- * NOM-008-NUCL-2024, NOM-040-NUCL-2016, CNSNS LA-007/01
+ * RGSR (1988), NOM-008-NUCL-2024, NOM-033-NUCL-2016 (aceleradores lineales), CNSNS LA-007/01.
+ * La NOM-040-NUCL-2016 es exclusiva de medicina nuclear (§2): no se cita en este checklist de búnker.
  */
 import { useState } from 'react';
+import { NOM_008_NUCL, NOM_033_NUCL, RGSR_1988 } from '@/lib/normativaMx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,14 +31,16 @@ const CNSNS_CHECKLIST: ChecklistItem[] = [
   { id: 'c8', label: 'Cálculo de laberinto para neutrones (E>10 MV)', norm: 'NCRP 151 §5.3', checked: false, category: 'Cálculos' },
   { id: 'c9', label: 'Evaluación de skyshine (techo parcial)', norm: 'McGinley Ch.8', checked: false, category: 'Cálculos' },
   // Verificación
-  { id: 'c10', label: 'Inspección visual de barreras instaladas', norm: 'NOM-040-NUCL-2016 §6.1', checked: false, category: 'Verificación' },
+  { id: 'c10', label: 'Inspección visual de barreras instaladas', norm: RGSR_1988, checked: false, category: 'Verificación' },
+  { id: 'c19', label: 'Interruptor de seguridad de la puerta y monitores de área funcionales (linac)', norm: `${NOM_033_NUCL.clave} Apéndice A (A7, A12)`, checked: false, category: 'Verificación' },
+  { id: 'c20', label: 'Detector de neutrones instalado (linac ≥ 10 MeV)', norm: `${NOM_033_NUCL.clave} §5.3`, checked: false, category: 'Verificación' },
   { id: 'c11', label: 'Medición de espesores con ultrasonido', norm: 'NCRP 151 Appendix A', checked: false, category: 'Verificación' },
   { id: 'c12', label: 'Medición de dosis de fondo post-instalación', norm: 'CNSNS LA-007/01', checked: false, category: 'Verificación' },
   { id: 'c13', label: 'Prueba de hermeticidad de puerta (if applicable)', norm: 'NCRP 151 §5.4', checked: false, category: 'Verificación' },
   // Programas
   { id: 'c14', label: 'Programa de protección radiológica autorizado', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
   { id: 'c15', label: 'Designación de físico médico responsable', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
-  { id: 'c16', label: 'Programa de garantía de calidad del blindaje', norm: 'NOM-040-NUCL-2016 §5', checked: false, category: 'Programas' },
+  { id: 'c16', label: 'Programa de garantía de calidad del blindaje', norm: RGSR_1988, checked: false, category: 'Programas' },
   { id: 'c17', label: 'Plan de contingencias para blindaje', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
   { id: 'c18', label: 'Registro de bitácora de blindaje', norm: 'CNSNS LA-007/01 §5', checked: false, category: 'Programas' },
 ];
@@ -79,7 +83,7 @@ export default function CertificationModeDialog({ open, onClose }: Props) {
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-[11px] text-amber-700 mb-3">
           <b>Checklist LA-007/01 — Licencia CNSNS:</b> Proceso guiado para solicitud de
           licencia de instalación de blindaje radiológico ante la CNSNS.
-          Cumplimiento de NOM-040-NUCL-2016, NOM-008-NUCL-2024 y CNSNS LA-007/01.
+          Cumplimiento de {RGSR_1988}, {NOM_008_NUCL.clave}, {NOM_033_NUCL.clave} (aceleradores lineales) y CNSNS LA-007/01.
         </div>
 
         <div className="mb-3">
