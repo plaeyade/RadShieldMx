@@ -144,6 +144,7 @@ jobs:
     name: Playwright E2E Tests
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -156,19 +157,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
-      - name: Run E2E tests
-        run: npx playwright test
-        continue-on-error: true
+      # Bloqueante desde la depuración etapa 3 (antes corría con continue-on-error y sin dist/, así que no probaba nada).
+      # Las specs de Humo y de Arranque se corren en sus jobs. Pendientes del lote 2 (docs/DEPURACION.md, etapa 3):
+      # f134-release-candidate, f342-centro-neuro-visual-smoke y canvas-cad-e2e-harness (F229), que fallan contra la
+      # interfaz actual y alimentan cadenas de scripts prepare:/test: (f151, f154, f229, f342) que se retiran juntas.
+      - name: E2E (Playwright, Chrome)
+        env:
+          VITE_BASE_PATH: /RadShieldMx/
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
+        run: |
+          specs=$(ls e2e/*.spec.ts | grep -vE '/(humo-calculo-referencia|fase10-inicio|fase10-pages-arranque|fase11-motor-unico|fase11-zona-controlada-motor|static-deploy|f134-release-candidate|f342-centro-neuro-visual-smoke|canvas-cad-e2e-harness)\.spec\.ts$')
+          npx playwright test $specs --project=chromium
 
-      - name: Upload Playwright report
-        if: always()
+      - name: Upload E2E report
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: e2e-report
+          path: test-results/
           retention-days: 7
 
   humo:
@@ -200,14 +212,13 @@ jobs:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
         run: npx playwright test e2e/humo-calculo-referencia.spec.ts --project=chromium
 
-      # Bloqueante desde la depuración etapa 2: el job «e2e» general no llega a correr pruebas (no descarga dist/),
-      # así que las specs de las Fases 10/11 se corren aquí contra el build de Pages. static-deploy.spec.ts queda para la
-      # etapa 3: falla antes de llegar a wasm/ porque «manifest.json» no responde 200 (pendiente de diagnóstico).
-      - name: E2E Fases 10/11 (Playwright, Chrome)
+      # Bloqueante: specs de las Fases 10/11 y static-deploy.spec.ts (desde la etapa 3: el 404 de manifest.json venía de
+      # que Playwright reescribe PLAYWRIGHT_TEST_BASE_URL sin /RadShieldMx/; ver playwright.config.ts).
+      - name: E2E Fases 10/11 y despliegue estático (Playwright, Chrome)
         env:
           VITE_BASE_PATH: /RadShieldMx/
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
-        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/fase11-zona-controlada-motor.spec.ts --project=chromium
+        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/fase11-zona-controlada-motor.spec.ts e2e/static-deploy.spec.ts --project=chromium
 
       - name: Upload smoke report
         if: failure()
@@ -220,7 +231,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: [build, humo]
+    needs: [build, humo, e2e]
     # Repo público (autorizado por el propietario el 2026-11-09): publica en cada push a main.
     # Para pausar el despliegue sin tocar el workflow: variable de repositorio PAGES_HABILITADO=false.
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_HABILITADO != 'false'

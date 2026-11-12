@@ -180,9 +180,10 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 |---|---|
 | 0 | PR `fase10-pages-arranque` (independiente de esta rama) |
 | 1 | fusionada (#43) |
-| 2 | PR `depuracion-etapa-2` (ver medidas abajo) |
-| 3–7 | pendientes |
-| 8 | PR `fase11-etapa8-uaq`, apilada sobre la etapa 2 (ver abajo); requiere revisión del propietario |
+| 2 | fusionada (#45) |
+| 3 | lote 1: PR `depuracion-etapa-3` (ver medidas abajo); lote 2 pendiente |
+| 4–7 | pendientes |
+| 8 | fusionada (#46; ver abajo) |
 | 9–10 | pendientes |
 
 ### Medidas de la etapa 1
@@ -226,6 +227,56 @@ Borrado: `lib/skyshine/ChiltonSkyshine.ts`, `lib/ct/CTScatterDatabase.ts`,
 multi-fuente ya no cita `lib/multiSourceDetector`. Despliegue: sin `location /wasm/` en `nginx.conf` y sin
 `wasm/shielding_math.wasm` en `e2e/static-deploy.spec.ts`; el ejemplo de `rutaPublica` ya no usa una ruta wasm.
 La CSP de `index.html` conserva `'wasm-unsafe-eval'` (Babylon puede cargar decodificadores WASM).
+
+### Medidas de la etapa 3 (lote 1)
+
+Medido en contenedor (2 núcleos, `CI=true`, `VITE_BASE_PATH=/RadShieldMx/`) y en el CI del PR, `main` 4a44305 frente
+a la rama:
+
+| Verificación | Antes (main) | Después (etapa 3, lote 1) |
+|---|---|---|
+| `tsc -p tsconfig.app.json` / `tsconfig.server.json` | 0 / 0 errores | 0 / 0 errores |
+| Build | OK | OK |
+| JS de `dist/assets` | 7 456 245 B | 7 456 245 B (lo borrado no era alcanzable desde `src/main.tsx`) |
+| Vitest | 79 archivos, 672 pruebas (+3 todo) | 79 archivos, 672 pruebas (+3 todo): ninguna prueba leía lo borrado |
+| ESLint (trinquete) | 121 errores | 121 |
+| Humo «Guíame» | muro norte 18.85 mm Pb (17.96 mm Pb / 213.77 mm concreto tras #46) | igual que main (job «Humo») |
+| Job `e2e` | `continue-on-error` y sin `dist/` (no probaba nada) | **bloqueante**, contra el build de Pages en `/RadShieldMx/` |
+
+**Recorrido de importaciones** desde `src/main.tsx` (estático, `import()` y `@/`): de los 179 `src/lib/f[0-9]*.ts`, 173
+son alcanzables (`UpdateAppDialog.tsx` importa 89 de ellos para pintar las tarjetas de fases y `CanvasArea.tsx` 72;
+se solapan). Sólo 6 no lo eran y se borran en este lote: `f197OutputIntegrationQa`, `f265RealAppTestingProtocol`,
+`f266RealCaseEvidenceKit`, `f267RealCaseSmokeExecution`, `f292RealProjectFloorplanQa`, `f378FullscreenDialogPolicy`,
+más `sections/CanvasQuickActionsSidebar.tsx`. Con ellos, los 15 scripts que los leían (`check-f197-menu-canvas-contracts`,
+`f265…`/`f266…`/`f267…`/`f292…` y sus `check-…`, `check-f379…`–`check-f382…`, `f295-canvas-redesign-smoke`,
+`f296-f300-canvas-3d-workbench`) y sus entradas `prepare:`/`test:` en `package.json`. Los scripts de fases posteriores que
+leen las salidas JSON de esos (`f293`, `f294`, `f301` leen `outputs/…`, que no se versiona) ya no las encuentran; no los
+corre el CI y se retiran con el lote 2.
+
+**`static-deploy.spec.ts`**: el 404 de `manifest.json` no era del build. Con `webServer.port`, Playwright reescribe
+`PLAYWRIGHT_TEST_BASE_URL` en los workers a `http://localhost:4174` (sin `/RadShieldMx/`), así que `helpers.BASE` y el
+`baseURL` del proyecto apuntaban a la raíz del preview (que sirve `index.html` como respaldo SPA, por eso la app cargaba)
+y `/manifest.json` no existe ahí. `playwright.config.ts` y `e2e/helpers.ts` arman ahora la URL con `VITE_BASE_PATH`
+cuando el servidor es el propio: **todas** las specs corren en `/RadShieldMx/`, como el sitio publicado. La spec queda
+bloqueante en el job «Humo».
+
+**Inventario E2E** (Chrome, sin reintentos, contra el build de Pages): de 70 specs, 50 pasaban, 5 se saltan solas
+(Babylon y DWG/DXF pesado, detrás de banderas o fixtures opcionales) y 15 fallaban.
+
+| Spec que fallaba | Causa | Acción |
+|---|---|---|
+| `evidence-pack` | «Reportes» ambiguo (3 botones) y título duplicado | reparada (`f109-migrated-reports-dropdown`, «Evidence Pack bridge») |
+| `menu-archivo` | el estado vacío de la Fase 10 también dice «Abrir proyecto» | reparada (búsqueda dentro del menú) |
+| `dxf-import-to-canvas` | sin fuentes de ejemplo el siguiente paso es «Coloque o confirme fuentes» | reparada |
+| `medical-3d` | sin plano de ejemplo el JSON no trae barreras; dos botones «JSON» | reparada (carga «Guíame»); la prueba DXF queda `fixme`: el visor clínico lee las 4 entidades en «Capas: 1» y «Mapeadas: 0» (posible defecto del importador del visor; PR propio) |
+| `nuclear-medicine-idac` | ya no hay botón «Med. Nuclear» | reparada (menú «Equipos», F97) |
+| `radshield` | splash/bienvenida y demo R&F retirados en la Fase 10; menús renombrados en F97–F110 | reparada (7 pruebas); la del demo R&F se sustituye por el estado vacío |
+| `canvas-cad-like` (F100), `f189`, `f371-f372`, `f376`, `f535-f539`, `f556-f560` | paneles o flujos de fases retirados | borradas con sus `test:f…` |
+| `f134-release-candidate`, `f342-centro-neuro-visual-smoke`, `canvas-cad-e2e-harness` (F229) | paneles retirados / `outputs/` sin versionar | **lote 2**: las usan cadenas de scripts (`f151`, `f154`, `check-f229`, `check-f342`); fuera del job hasta entonces |
+
+**Lote 2 (pendiente)**: que `UpdateAppDialog.tsx` deje de listar fases (hoy importa 89 `lib/f…` sólo para sus
+tarjetas; al quitarlas esos módulos quedan sin importadores y se borran por lotes de ≤ 20), las 3 specs de arriba con
+sus cadenas de scripts y los scripts que leen salidas de lo ya borrado (`f293`, `f294`, `f301`).
 
 ### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»
 

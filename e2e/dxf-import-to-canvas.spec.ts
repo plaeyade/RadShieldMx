@@ -63,7 +63,8 @@ test.describe('DXF import to canvas - dxf-import-to-canvas', () => {
     await expect(page.getByTestId('dxf-import-review-panel')).toBeVisible();
     await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Cargar/);
     await expect(page.getByTestId('dxf-review-workflow-steps')).toContainText(/Confirmar/);
-    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Confirme geometria/i);
+    // Fase 10: el proyecto arranca vacío (sin fuentes de ejemplo), así que el siguiente paso es colocar fuentes.
+    await expect(page.getByTestId('dxf-review-next-action')).toContainText(/Coloque o confirme fuentes/i);
     await expect(page.getByTestId('dxf-review-calculate')).toBeDisabled();
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/ev-dxf-import-review/);
     await expect(page.getByTestId('dxf-review-evidence-source')).toContainText(/draft/);
