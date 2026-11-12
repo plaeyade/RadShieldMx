@@ -605,7 +605,8 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
                         {option.rooms.map((room) => (
                           <div key={room.id} className="rounded border bg-white px-2 py-1 text-[11px]">
                             <div className="font-semibold text-slate-800">{room.name}</div>
-                            <div className="text-slate-500">{room.zone} | {room.width_m} x {room.length_m} m</div>
+                            <div className="text-slate-500">{room.zone} | {room.width_m} x {room.length_m} m | P {room.designGoal_mSvWeek} mSv/sem</div>
+                            {room.numeralNorma && <div className="text-[10px] text-slate-400">{room.numeralNorma}</div>}
                           </div>
                         ))}
                       </div>

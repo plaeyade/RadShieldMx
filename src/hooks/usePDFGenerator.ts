@@ -5,6 +5,7 @@ import { buildAnalyticMemoryEvidenceSection } from '@/lib/analyticMemoryEvidence
 import { buildF125CalculationEvidenceGate } from '@/lib/f125CalculationEvidenceGate';
 import type { FloorPlan } from '@/types/radshield';
 import { MATERIALS } from '@/types/radshield';
+import { citasMxAplicables } from '@/lib/normativaMx';
 import { stampNotForSignature } from '@/components/SyntheticResultBanner';
 
 export function generatePDFReport(
@@ -117,8 +118,8 @@ export function generatePDFReport(
     'NCRP Report No. 147 (2004) - Structural Shielding Design for Medical X-Ray Imaging Facilities',
     'AAPM TG 108 (2010) - PET and PET/CT Shielding Requirements',
     'IAEA SRS No. 47 (2006) - Radiation Protection for PET/CT',
-    'NOM-008-NUCL-2024 - Limites de contaminacion radiactiva y criterios para su control (DOF 24-05-2024)',
-    'NOM-040-NUCL-2016 - Seguridad radiologica en medicina nuclear (CNSNS)',
+    // Normas mexicanas según las modalidades del proyecto (NOM-040/NOM-013 sólo en medicina nuclear, NOM-033 en linac).
+    ...citasMxAplicables(floorPlan.sources.map((s) => s.modality)),
   ];
   for (const r of refs) { doc.text(`• ${r}`, 20, y); y += 5; }
 

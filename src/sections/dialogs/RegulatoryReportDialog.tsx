@@ -1,12 +1,14 @@
 /**
  * v110: Automated Regulatory Report Generator
- * Generates NOM-040-NUCL-2016/NOM-008-NUCL-2024/CNSNS compliant reports
+ * Genera la memoria con las normas mexicanas de las modalidades del proyecto (normasMxAplicables): NOM-040 y NOM-013
+ * sólo en medicina nuclear; NOM-033 en aceleradores lineales.
  */
 import { useState } from 'react';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 // Fase 11: sólo cuenta el requerido con traza del motor (un espesor tecleado no «cumple»).
 import { verificarBarrera } from '@/lib/estadoProyecto';
 import { NOTA_NO_REQUIERE } from '@/lib/verificacionBlindaje';
+import { normasMxAplicables } from '@/lib/normativaMx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +64,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
         fecha: now,
         instalacion: { nombre: facilityName, direccion: facilityAddress },
         responsable: { nombre: physicistName, cedula: licenseNumber },
-        normativa: ['NOM-008-NUCL-2024', 'NOM-040-NUCL-2016', 'NOM-013-NUCL-2013', 'CNSNS-L-010-2015'],
+        normativa: [...normasMxAplicables(floorPlan.sources.map((s) => s.modality)), 'CNSNS-L-010-2015'],
         resumen: {
           total_barreras: floorPlan.barriers.length,
           total_fuentes: floorPlan.sources.length,
@@ -128,7 +130,7 @@ export default function RegulatoryReportDialog({ open: controlledOpen, onOpenCha
           <div className="flex justify-between"><span className="text-slate-500">Evidencia F76:</span><span className="font-medium">{evidenceSnapshot.standards.join(', ') || 'canvas local'}</span></div>
         </div>
         <div className="text-[9px] text-slate-500 bg-amber-50 rounded-md p-2 mb-3">
-          Normativa incluida: NOM-008-NUCL-2024 | NOM-040-NUCL-2016 | NOM-013-NUCL-2013 | CNSNS-L-010-2015
+          Normativa incluida: {[...normasMxAplicables(floorPlan.sources.map((s) => s.modality)), 'CNSNS-L-010-2015'].join(' | ')}
         </div>
         <Button onClick={generateReport} className="w-full h-8 text-[11px] bg-amber-600 hover:bg-amber-700">
           {exported ? <><CheckCircle className="w-3 h-3 mr-1" />Exportado</> : <><Download className="w-3 h-3 mr-1" />Generar Memoria Analitica JSON</>}

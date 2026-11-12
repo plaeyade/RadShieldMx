@@ -50,6 +50,15 @@ const DEFAULT_CHECKLIST: CheckItem[] = [
   { id: '040-3', category: NOM_040_NUCL.clave, requirement: 'Senalizacion de accesos a zona controlada', norm: 'NOM-040-NUCL-2016 §5.2.8', status: 'pending', notes: '' },
   { id: '040-4', category: NOM_040_NUCL.clave, requirement: 'Encargado de Seguridad Radiologica designado', norm: 'NOM-040-NUCL-2016 §7.1.1', status: 'pending', notes: '' },
   { id: '040-5', category: NOM_040_NUCL.clave, requirement: 'Detector de area en puerta del almacen (y con alarma en cuarto de hospitalizacion)', norm: 'NOM-040-NUCL-2016 §6.1.1', status: 'pending', notes: '' },
+  // Recintos de la NOM-040 que las plantillas no tenían (ids estables 040-r-<recinto>; el checklist no se guarda en el proyecto).
+  ...NOM_040_NUCL.recintos.map((r): CheckItem => ({
+    id: `040-r-${r.id}`,
+    category: NOM_040_NUCL.clave,
+    requirement: r.cuandoAplica ? `${r.nombre} (cuando aplique: ${r.cuandoAplica})` : r.nombre,
+    norm: `${NOM_040_NUCL.clave} ${r.numeral}`,
+    status: 'pending',
+    notes: '',
+  })),
 
   // NCRP 151
   { id: '151-1', category: 'NCRP 151', requirement: 'Workload IMRT = 2x convencional', norm: 'NCRP 151 §7.2', status: 'pending', notes: '' },

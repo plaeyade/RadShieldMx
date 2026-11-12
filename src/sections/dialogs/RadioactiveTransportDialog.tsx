@@ -191,7 +191,6 @@ export default function RadioactiveTransportDialog({ open, onOpenChange }: Props
                 <ul className="space-y-1 list-disc list-inside text-slate-600">
                   <li><strong>LAERA</strong> — Ley de Energia Atomica, Radiacion y Materiales Nucleares</li>
                   <li><strong>RETECO</strong> — Reglamento de Transporte de Energeticos y Combustibles (Secretaria de Energia)</li>
-                  <li><strong>Norma Oficial Mexicana NOM-013-NUCL-2013</strong> — Transporte de materiales y residuos radioactivos</li>
                   <li><strong>Lineamientos CNSNS-L-010-2015</strong> — Autorizacion de transporte de material radiactivo</li>
                   <li><strong>IAEA SSR-6 Rev.1 (2018)</strong> — Reglamento para el Transporte Seguro de Materiales Radiactivos</li>
                   <li><strong>IAEA SSG-26 Rev.1 (2018)</strong> — Advisory Material for the IAEA Regulations for the Safe Transport of Radioactive Material</li>

@@ -81,4 +81,102 @@ export const NOM_040_NUCL = {
     { seccion: '§6.1.1', texto: 'Monitoreo: detector de área permanente en el exterior de la puerta del almacén, detector portátil, detector de contaminación y, con pacientes hospitalizados, detector de área con alarma en la puerta del cuarto de hospitalización (NOM-012-NUCL-2002).' },
     { seccion: '§8.2.1 / §8.3', texto: 'El material que entra a la zona controlada no transita por zonas no controladas (condiciona la circulación del proyecto); desechos según NOM-028-NUCL-2009.' },
   ],
+  /**
+   * Recintos y equipos que las plantillas y checklists de medicina nuclear deben listar (con su numeral). Antes las
+   * plantillas no tenían almacén de desechos, descontaminación con regadera, sanitario de pacientes inyectados ni cuarto
+   * de hospitalización, y nada pedía el detector con alarma. `cuandoAplica` = sólo si la instalación lo requiere.
+   */
+  recintos: [
+    { id: 'almacen-desechos', nombre: 'Almacén de desechos radiactivos y objetos contaminados', numeral: '§5.1.3 / §5.3.2', cuandoAplica: null },
+    { id: 'descontaminacion', nombre: 'Área de descontaminación personal con regadera de emergencia, adyacente a preparación', numeral: '§5.1.4 / §5.3.3', cuandoAplica: null },
+    { id: 'sanitario-inyectados', nombre: 'Sanitario exclusivo para pacientes inyectados', numeral: '§5.1.8', cuandoAplica: null },
+    { id: 'hospitalizacion-i131', nombre: 'Cuarto de hospitalización (p. ej. I-131) con baño exclusivo', numeral: '§5.1.9 / §5.3.7', cuandoAplica: 'pacientes que no cumplan el criterio de egreso de la NOM-013-NUCL-2009 (p. ej. terapia con I-131)' },
+    { id: 'detector-alarma', nombre: 'Detector de área con alarma en la puerta del cuarto de hospitalización (y detector de área fijo en la puerta del almacén)', numeral: '§6.1.1.1 / §6.1.1.4', cuandoAplica: 'con pacientes hospitalizados (§6.1.1.4); el del almacén siempre (§6.1.1.1)' },
+  ],
 } as const;
+
+export type RecintoNom040 = (typeof NOM_040_NUCL.recintos)[number];
+
+/**
+ * Ficha única de la NOM-013-NUCL-2009. Antes se citaba como «NOM-013-NUCL-2013» (edición inexistente) y como norma de
+ * transporte; en la memoria Word aparecía además una «NOM-041-NUCL-2013» para la liberación de pacientes. La NOM-040
+ * §5.1.9 remite a esta norma («o la que la sustituya»).
+ *
+ * NOM-013-NUCL-2009, «Requerimientos de seguridad radiológica para egresar a pacientes a quienes se les ha administrado
+ * material radiactivo» (SENER/CNSNS), DOF 20-10-2009, en vigor el 20-12-2009. Vigente según PLATIICA (Secretaría de
+ * Economía); revisión sistemática del 06-12-2024 con resultado «Modificación», sin norma sustituta publicada.
+ */
+export const NOM_013_NUCL = {
+  clave: 'NOM-013-NUCL-2009',
+  titulo: 'Requerimientos de seguridad radiológica para egresar a pacientes a quienes se les ha administrado material radiactivo',
+  emisor: 'SENER/CNSNS',
+  anio: 2009,
+  publicacionDof: '2009-10-20',
+  entradaEnVigor: '2009-12-20',
+  urlDof: 'https://www.dof.gob.mx/nota_detalle.php?codigo=5114948&fecha=20/10/2009',
+  urlPdf: 'https://platiica.economia.gob.mx/normalizacion/wp-content/uploads/sites/2/PDF_Normas_Publicas/013nucl2009.pdf',
+  cita: 'NOM-013-NUCL-2009. Requerimientos de seguridad radiológica para egresar a pacientes a quienes se les ha administrado material radiactivo. SENER/CNSNS. Diario Oficial de la Federación, 20 de octubre de 2009.',
+  alcance: 'Criterios para el egreso de pacientes con material radiactivo administrado (medicina nuclear). No regula transporte ni blindaje.',
+} as const;
+
+/**
+ * Ficha única de la NOM-033-NUCL-2016, la norma mexicana vigente de radioterapia con aceleradores lineales. Sustituye a la
+ * NOM-040-NUCL-2016 en los reportes de búnker de linac (la NOM-040 es exclusiva de medicina nuclear).
+ *
+ * NOM-033-NUCL-2016, «Especificaciones técnicas para la operación de unidades de teleterapia: aceleradores lineales»
+ * (SENER/CNSNS), DOF 04-08-2016, en vigor el 03-10-2016; sustituye a la NOM-033-NUCL-1999. Vigente según PLATIICA;
+ * revisión sistemática del 18-08-2026 con resultado «Confirmación». Alcance (§2): sólo aceleradores lineales de uso médico
+ * (no Co-60, Gamma Knife ni HDR). Regula operación, verificaciones y mantenimiento: NO fija blindajes ni objetivos de
+ * diseño (los límites de dosis siguen siendo los del RGSR; el cálculo, NCRP 151).
+ */
+export const NOM_033_NUCL = {
+  clave: 'NOM-033-NUCL-2016',
+  titulo: 'Especificaciones técnicas para la operación de unidades de teleterapia: aceleradores lineales',
+  emisor: 'SENER/CNSNS',
+  anio: 2016,
+  publicacionDof: '2016-08-04',
+  entradaEnVigor: '2016-10-03',
+  sustituyeA: 'NOM-033-NUCL-1999 (DOF 05-07-1999)',
+  urlDof: 'https://www.dof.gob.mx/nota_detalle.php?codigo=5446806&fecha=04/08/2016',
+  urlPdf: 'https://platiica.economia.gob.mx/normalizacion/wp-content/uploads/sites/2/PDF_Normas_Publicas/033nucl2016.pdf',
+  cita: 'NOM-033-NUCL-2016. Especificaciones técnicas para la operación de unidades de teleterapia: aceleradores lineales. SENER/CNSNS. Diario Oficial de la Federación, 4 de agosto de 2016.',
+  alcance: 'Operación, pruebas de aceptación, verificaciones y mantenimiento de aceleradores lineales médicos. No fija blindajes ni objetivos de diseño.',
+  /** Requisitos de instalación que sí tocan al búnker. */
+  requisitosInstalacion: [
+    { seccion: '§5.2', texto: 'Paros de emergencia y dispositivos de seguridad verificados cada seis meses.' },
+    { seccion: '§5.3', texto: 'Detector de neutrones en instalaciones con aceleradores de 10 MeV o más.' },
+    { seccion: 'Apéndice A (A7, A12)', texto: 'Verificación diaria del interruptor de seguridad de la puerta de la sala de tratamiento y de los monitores de área.' },
+  ],
+} as const;
+
+/** Rótulo del RGSR, la base de límites de dosis en México (véase limitesDosis.ts). */
+export const RGSR_1988 = 'RGSR (1988)';
+
+type ModalidadNormas = { id?: string; category?: string } | null | undefined;
+
+/**
+ * Normas mexicanas que corresponden a las modalidades del proyecto, para que los reportes no citen la NOM-040 en un
+ * búnker de linac ni la NOM-033 en medicina nuclear. Siempre: RGSR y NOM-008-NUCL-2024. Medicina nuclear: NOM-040 y
+ * NOM-013. Aceleradores lineales: NOM-033.
+ */
+export function normasMxAplicables(modalidades: ReadonlyArray<ModalidadNormas>): string[] {
+  const normas: string[] = [RGSR_1988, NOM_008_NUCL.clave];
+  const hayMN = modalidades.some((m) => m?.category === 'nuclear');
+  const hayLinac = modalidades.some((m) => /^linac/i.test(m?.id ?? ''));
+  if (hayLinac) normas.push(NOM_033_NUCL.clave);
+  if (hayMN) normas.push(NOM_040_NUCL.clave, NOM_013_NUCL.clave);
+  return normas;
+}
+
+const CITAS_MX: Record<string, string> = {
+  [RGSR_1988]: 'Reglamento General de Seguridad Radiológica (RGSR), SENER, 1988 (límites de dosis).',
+  [NOM_008_NUCL.clave]: NOM_008_NUCL.cita,
+  [NOM_033_NUCL.clave]: NOM_033_NUCL.cita,
+  [NOM_040_NUCL.clave]: NOM_040_NUCL.cita,
+  [NOM_013_NUCL.clave]: NOM_013_NUCL.cita,
+};
+
+/** Las referencias completas de `normasMxAplicables`, para listas de bibliografía de los reportes. */
+export function citasMxAplicables(modalidades: ReadonlyArray<ModalidadNormas>): string[] {
+  return normasMxAplicables(modalidades).map((clave) => CITAS_MX[clave] ?? clave);
+}

@@ -186,6 +186,20 @@ export default function RoomTemplatePanel({ templates, categories, activeTemplat
                   </div>
                 </div>
 
+                {/* Recintos exigidos por la norma (NOM-040-NUCL-2016 en medicina nuclear) */}
+                {template.recintosNormativos && template.recintosNormativos.length > 0 && (
+                  <div>
+                    <p className="text-[9px] text-slate-400 uppercase tracking-wide mb-1">Recintos requeridos por la norma</p>
+                    <ul className="space-y-0.5">
+                      {template.recintosNormativos.map((r) => (
+                        <li key={r.id} className="text-[9px] text-slate-600">
+                          {r.nombre} <span className="text-slate-400">— {r.numeral}{r.cuandoAplica ? ` (cuando aplique: ${r.cuandoAplica})` : ''}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Design criteria */}
                 {template.designCriteria && (
                   <div className="flex gap-2 flex-wrap">

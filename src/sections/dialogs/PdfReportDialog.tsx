@@ -17,6 +17,7 @@ import { buildF218ReportHandoff } from '@/lib/f218ReportHandoff';
 import { buildF367F370ReleaseIntegration } from '@/lib/f367F370ReleaseIntegration';
 import type { FloorPlan } from '@/types/radshield';
 import { filasResultados } from '@/lib/resumenResultados';
+import { normasMxAplicables } from '@/lib/normativaMx';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
 import { FileText, Download, BookOpen } from 'lucide-react';
 
@@ -328,7 +329,7 @@ export default function PdfReportDialog({ open: controlledOpen, onOpenChange, fl
           <Button onClick={generatePDF} disabled={generating} className="w-full bg-[#d97706] hover:bg-[#b45309] text-white gap-2">
             <Download className="w-4 h-4" /> {generating ? 'Generando...' : 'Descargar Reporte JSON'}
           </Button>
-          <div className="text-[9px] text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Ref: CNSNS LA-007/01 | NOM-040-NUCL-2016 | NCRP 147/151</div>
+          <div className="text-[9px] text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Ref: CNSNS LA-007/01 | {normasMxAplicables(floorPlan.sources.map((s) => s.modality)).join(' | ')} | NCRP 147/151</div>
         </div>
       </DialogContent>
     </Dialog>
