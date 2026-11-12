@@ -333,6 +333,8 @@ Para blindaje, el HVL efectivo depende del espectro completo, no solo del kVp:
 
 **PET (511 keV):** el cuerpo del paciente absorbe 0.36 de la radiación; la tasa a distancia se calcula con 0.64·Γ (para F-18, Γ_paciente = 0.092 μSv·m²/(MBq·h)). Las calculadoras PET de RadShield-MX ya lo incluyen; no se aplica dos veces.
 
+**Espesor PET (511 keV):** el diseñador («Calcular Blindaje», «Guíame») y el plan de zona controlada de «Layout de búnker» usan la curva de transmisión de banda ancha de TG-108 (Tabla V, ajuste de Archer: plomo α = 1.543 cm⁻¹, β = −0.4408 cm⁻¹, γ = 2.136; concreto 0.1539, −0.1161, 2.0752; hierro 0.5704, −0.3063, 0.6326) invertida numéricamente, no un TVL único. Con atenuaciones pequeñas (B ≈ 0.4) la curva pide ≈ 3 cm más de concreto que el TVL de 176 mm. Otros materiales: concreto equivalente por densidad (conservador).
+
 **TC:** NCRP 147 §5.6 da el kerma de dispersión por DLP medido con fantoma; no corresponde una reducción adicional.
 
 **SPECT:** no hay factor normativo; se diseña con la fuente sin reducción (conservador).

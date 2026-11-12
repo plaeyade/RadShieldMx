@@ -104,8 +104,9 @@ export const MATERIALS: ShieldingMaterial[] = [
     code: "CONCRETE235",
     density: 2.35,
     archerAlpha: 0.0383, archerBeta: 0.0141, archerGamma: 1.099,
-    // TVL₁ de NCRP 151 Tabla B.2 (p. 161) para MV y Co-60; 511 keV de TG-108 (TVL 17.6 cm). Resto: provisional.
-    TVL_mm: { "6MV": 370, "10MV": 410, "15MV": 440, "18MV": 450, "Co60": 210, "Ir192": 110, "511keV": 176, "140keV": 45, "364keV": 140 },
+    // TVL₁ de NCRP 151 Tabla B.2 (p. 161) para MV y Co-60; 511 keV de TG-108 (TVL 17.6 cm); Ir-192 de IAEA SRS-47
+    // (152 mm; antes 110 mm, por debajo del TVL de haz ancho: subestimaba el espesor de HDR ≈ 28 %). Resto: provisional.
+    TVL_mm: { "6MV": 370, "10MV": 410, "15MV": 440, "18MV": 450, "Co60": 210, "Ir192": 152, "511keV": 176, "140keV": 45, "364keV": 140 },
     cost_per_m3: 180, cost_per_kg: 0.08,
     color: "#9CA3AF",
     category: "Convencional"
@@ -145,8 +146,9 @@ export const MATERIALS: ShieldingMaterial[] = [
     name: "Acero (placas estructurales)",
     code: "STEEL",
     density: 7.87,
-    // NCRP 151 Tabla B.2 (acero 7.87 g/cm³): 10 cm a 6 MV, 11 cm ≥10 MV, 7.0 cm Co-60; 511 keV: TG-108 (6.5 cm).
-    TVL_mm: { "6MV": 100, "10MV": 110, "15MV": 110, "18MV": 110, "Co60": 70, "Ir192": 28, "511keV": 65 },
+    // NCRP 151 Tabla B.2 (acero 7.87 g/cm³): 10 cm a 6 MV, 11 cm ≥10 MV, 7.0 cm Co-60; 511 keV: TG-108 (6.5 cm);
+    // Ir-192: IAEA SRS-47 (43 mm; antes 28 mm, menor que el TVL de haz estrecho).
+    TVL_mm: { "6MV": 100, "10MV": 110, "15MV": 110, "18MV": 110, "Co60": 70, "Ir192": 43, "511keV": 65 },
     cost_per_m3: 3200, cost_per_kg: 0.41,
     color: "#1F2937",
     category: "Convencional"

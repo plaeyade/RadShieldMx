@@ -22,7 +22,10 @@ import {
 } from '@/lib/controlledZoneFeasibility';
 import {
   buildControlledZoneDbPersistenceDraft,
+  buildDefaultControlledZoneCalculationAssumptions,
   exportControlledZoneDbPersistenceDraft,
+  HDR_DIAS_SEMANA_POR_OMISION,
+  HDR_HORAS_TRATAMIENTO_POR_OMISION,
   calculateControlledZoneShieldingPlan,
   exportControlledZoneShieldingPlan,
   parseControlledZoneShieldingPlanJson,
@@ -305,6 +308,11 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
   const [dbPersistenceMessage, setDbPersistenceMessage] = useState('');
   const planImportInputRef = useRef<HTMLInputElement | null>(null);
   const controlledZonePersistence = useControlledZonePersistence();
+  // Carga de trabajo HDR explícita: días por semana (por omisión 5, conservador), h por tratamiento y, opcional,
+  // tratamientos por semana en lugar de pacientes/día × días/semana.
+  const [hdrDaysPerWeek, setHdrDaysPerWeek] = useState(String(HDR_DIAS_SEMANA_POR_OMISION));
+  const [hdrHoursPerTreatment, setHdrHoursPerTreatment] = useState(String(HDR_HORAS_TRATAMIENTO_POR_OMISION));
+  const [hdrTreatmentsPerWeek, setHdrTreatmentsPerWeek] = useState('');
 
   const exportBestOption = () => {
     if (!bestOption) return;
@@ -320,7 +328,12 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
 
   const sendBestOptionToCalculation = () => {
     if (!bestOption) return;
-    setShieldingPlan(calculateControlledZoneShieldingPlan(bestOption, profile));
+    const tratamientosSemana = Number(hdrTreatmentsPerWeek);
+    setShieldingPlan(calculateControlledZoneShieldingPlan(bestOption, profile, buildDefaultControlledZoneCalculationAssumptions({
+      hdrDaysPerWeek: Math.min(7, parsePositive(hdrDaysPerWeek, HDR_DIAS_SEMANA_POR_OMISION)),
+      hdrHoursPerTreatment_h: parsePositive(hdrHoursPerTreatment, HDR_HORAS_TRATAMIENTO_POR_OMISION),
+      hdrTreatmentsPerWeek: Number.isFinite(tratamientosSemana) && tratamientosSemana > 0 ? tratamientosSemana : undefined,
+    })));
     setPlanExchangeMessage('Plan preliminar generado desde la mejor opcion de factibilidad.');
   };
 
@@ -429,6 +442,18 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
               <NumberField label="Pacientes/dia" value={targetThroughput} onChange={setTargetThroughput} />
             </div>
 
+            <div className="space-y-1" data-testid="hdr-workload-fields">
+              <div className="text-[11px] font-semibold text-slate-600">Carga de trabajo HDR</div>
+              <div className="grid grid-cols-3 gap-2">
+                <NumberField label="Dias/semana" value={hdrDaysPerWeek} onChange={setHdrDaysPerWeek} />
+                <NumberField label="h/tratamiento" value={hdrHoursPerTreatment} onChange={setHdrHoursPerTreatment} />
+                <NumberField label="Trat./semana (opc.)" value={hdrTreatmentsPerWeek} onChange={setHdrTreatmentsPerWeek} />
+              </div>
+              <div className="text-[10px] text-slate-500">
+                h/semana = pacientes/dia x h/tratamiento x dias/semana (o trat./semana x h/tratamiento). Por omision 5 dias y 0.5 h.
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-2">
               <SideSelect label="Acceso publico" value={publicAccessSide} onChange={setPublicAccessSide} />
               <SideSelect label="Acceso controlado" value={controlledAccessSide} onChange={setControlledAccessSide} />
@@ -507,7 +532,7 @@ function ControlledZoneFeasibilityPanel(props: ControlledZoneFeasibilityPanelPro
                     </div>
                   )}
                   <div className="mt-3 overflow-x-auto">
-                    <table className="w-full text-[11px]">
+                    <table className="w-full text-[11px]" data-testid="zona-plan-calculos">
                       <thead className="text-blue-900"><tr><th className="text-left">Barrera</th><th>Metodo</th><th>Zona</th><th>K0</th><th>Espesor</th><th>Estado</th></tr></thead>
                       <tbody>
                         {shieldingPlan.calculations.map((calc) => (

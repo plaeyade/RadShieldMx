@@ -10,9 +10,11 @@ import {
   type OccupiedRegion,
   type RadiationSource,
 } from '@/types/radshield';
-import type {
-  ControlledZoneBarrierCalculation,
-  ControlledZoneShieldingPlan,
+import {
+  horasSemanaHDR,
+  migrarPlanZonaControlada,
+  type ControlledZoneBarrierCalculation,
+  type ControlledZoneShieldingPlan,
 } from './controlledZoneCalculationAdapter';
 import { CONTROLLED_ZONE_CONTRACTS } from './controlledZoneContracts';
 
@@ -60,7 +62,7 @@ export function loadControlledZoneShieldingPlanSnapshot(
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    return isControlledZoneShieldingPlan(parsed) ? parsed : null;
+    return isControlledZoneShieldingPlan(parsed) ? migrarPlanZonaControlada(parsed) : null;
   } catch {
     return null;
   }
@@ -208,7 +210,10 @@ function buildSource(prefix: string, plan: ControlledZoneShieldingPlan, x: numbe
     workloadUnit: modality.unit,
     isocenterHeight_m: modality.isocenterHeightDefault_m || 1.2,
     useFactor: plan.modality === 'LINAC' ? 0.25 : 1,
-    workloadHoursPerWeek: plan.modality === 'PET-CT' ? plan.profile.targetThroughputPerDay * 5 : undefined,
+    // HDR: las mismas horas de irradiación por semana que el plan (días/semana explícitos); antes el motor tomaba 40 h.
+    workloadHoursPerWeek: plan.modality === 'PET-CT'
+      ? plan.profile.targetThroughputPerDay * 5
+      : plan.modality === 'HDR' ? horasSemanaHDR(plan.profile, migrarPlanZonaControlada(plan).assumptions) : undefined,
     nuclearActivity_GBq: plan.modality === 'PET-CT' ? plan.assumptions.petActivity_MBQ_per_injection / 1000 : undefined,
   };
 }
