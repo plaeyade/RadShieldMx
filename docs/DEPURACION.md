@@ -183,7 +183,8 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | 2 | fusionada (#45) |
 | 3 | lote 1: PR `depuracion-etapa-3` (ver medidas abajo); lote 2 pendiente |
 | 4 | PR `depuracion-etapa-4` (4a completa, 4b parcial; ver medidas abajo) |
-| 5–7 | pendientes |
+| 5 | PR `depuracion-etapa-5` (`strict` en `src/lib/`; ver medidas abajo) |
+| 6–7 | pendientes |
 | 8 | fusionada (#46; ver abajo) |
 | 9–10 | pendientes |
 
@@ -321,6 +322,41 @@ nueva (estable entre renders, el mismo en el `ping` y en `broadcast()`, distinto
 | `react-hooks/immutability` (4) | `useCanvas` (`draw` antes de declararse), `medical3d/escena/camaras.tsx` (3) | `useCanvas`: el arreglo exige mover el efecto de la imagen de fondo detrás de `draw` (cambia el orden de los efectos) o añadir `draw` a sus dependencias; `camaras`: muta la cámara de Babylon/three que devuelve un hook (visor detrás de banderas) |
 | `react-hooks/purity` (3) | `ComplianceCertificationDialog` (2), `RegulatoryReportDialog` | `Date.now()` en render: fijarlo al montar cambia qué certificados se marcan «por vencer» si el diálogo queda abierto |
 | `react-hooks/refs` (1) | `AutoBarrierDetectionDialog` | `useState(() => renderPreview())` dibuja en el canvas durante el render; pasarlo a un efecto cambia cuándo se pinta (con prueba, PR propio) |
+
+### Medidas de la etapa 5
+
+`strict` gradual por carpetas con `tsconfig.strict.json` (hereda de `tsconfig.app.json` y sólo activa `strict`). Carpeta 1:
+**`src/lib/**/*.ts`** (motor de cálculo: `motorProyecto`, `zonaControladaMotor`, `transmisionTG108`, `shieldingMath`,
+`normativeBarrierEngine`, `doseFieldEngine`, `ncrp147`/`ncrp151`/`tg108`, `calculadorasNormativas`… y el resto de `lib/`); `tsc`
+revisa en strict también lo que esos archivos importan (315 archivos de `src/`, entre ellos `types/` y `hooks/useCanvas.ts`).
+`npm run check:strict` y dentro de `npm run check` (job «TypeScript Check» del CI, bloqueante). Las demás carpetas se añaden
+al `include` cuando queden limpias (siguientes: `src/stores/`, `src/hooks/`).
+
+Medido sobre `main` 3cab5b1: `strict` en `src/lib/` daba **9 errores** en 6 archivos (el cierre del motor de cálculo sólo 2).
+Arreglos sin cambio de comportamiento (mismo valor en ejecución en todos los casos, incluido `undefined`) y sin que crezca
+el bundle (una primera versión con `?? NaN`/`?? 0` añadía 31 B; se dejaron las formas que no añaden bytes):
+
+| Archivo | Error | Arreglo |
+|---|---|---|
+| `lib/shieldingMath.ts` (`calculateUnshieldedKerma`, diagnóstico) | `K1` posiblemente `undefined` (×2) | `(…) as number` con nota: sin K¹ el resultado sigue siendo `NaN` (`undefined / 3`), igual que antes |
+| `lib/bunkerParametrico.ts`, `lib/equipoAFuente.ts` | `doseRateConstant` posiblemente `undefined` (×4) | `const k = doseRateConstant ?? 0; k > 0 ? W / k : W` (`undefined > 0` ya era `false`) |
+| `lib/medical3D/babylonAdapter.ts` | `requiredThickness_mm` posiblemente `undefined` | `(… as number) > 0` (`undefined > 0` es `false`) |
+| `lib/stepImporter.ts` (simulacro de OpenCascade) | `GetType` sin inicializar | `GetType!:`: sigue siendo una declaración sin valor (defecto latente del simulacro, que nunca define `GetType`; no se corrige aquí porque cambiaría su comportamiento) |
+| `hooks/useCanvas.ts` (fuente nueva) | `isocenterHeightDefault_m` posiblemente `undefined` | `!`: la primera modalidad del catálogo lo define (1.2 m) |
+
+`any`: además, `shieldingOptimizer` (`objectives` `as const`, sin `as any`) y `sentry` (`Record<string, unknown>`). Conteo
+(`: any`, `as any`, `<any>`, `any[]`, `Record<…, any>`, `Promise<any>` fuera de pruebas): `src/` 229 → **225**, `src/lib/` 52 → **48**.
+El cierre del motor de cálculo ya no tenía ningún `any`. Los 15 de `stepImporter.ts` son los manejadores de OpenCascade (WASM sin
+tipos): se dejan hasta tipar esa API.
+
+| Verificación | Antes (main 3cab5b1) | Después (etapa 5) |
+|---|---|---|
+| `tsc -p tsconfig.app.json` / `tsconfig.server.json` | 0 / 0 | 0 / 0 |
+| `tsc -p tsconfig.strict.json` (`src/lib/`) | 9 errores | **0** |
+| Vitest | sin pruebas tocadas | 86 archivos, 730 pruebas (+3 todo), todas en verde |
+| ESLint (trinquete) | 25 errores | 25, ninguno nuevo |
+| JS de `dist/assets` | 7 446 557 B (302 archivos) | 7 446 553 B (302; −4 B). JS inicial (`index.html`) 1 078 579 → 1 078 575 B |
+| Humo «Guíame» / e2e | 17.96 mm Pb / 213.77 mm concreto | jobs «Humo» y «e2e» del CI |
 
 ### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»
 

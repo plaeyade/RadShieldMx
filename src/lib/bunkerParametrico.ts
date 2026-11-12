@@ -21,7 +21,8 @@ const MODALIDAD_POR_PLANTILLA: Record<string, string> = {
 /** En terapia la fuente lleva fracciones/semana (W = fracciones × Gy/fracción); el diseñador da W en Gy/semana. */
 function cargaFuente(m: (typeof MODALITIES)[number], W?: number): number {
   if (W === undefined) return m.workloadDefault ?? 0;
-  return m.category === 'therapy' && m.doseRateConstant > 0 ? W / m.doseRateConstant : W;
+  const k = m.doseRateConstant ?? 0; // sin dato: 0 > 0 es falso, como antes `undefined > 0`
+  return m.category === 'therapy' && k > 0 ? W / k : W;
 }
 
 export function generarBunker(c: ConfigBunker, scale_m_per_pixel: number): { barriers: Barrier[]; sources: RadiationSource[]; ancho_px: number; alto_px: number } {

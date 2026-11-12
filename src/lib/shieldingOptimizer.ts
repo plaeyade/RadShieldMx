@@ -383,9 +383,9 @@ export function runShieldingOptimization(config: OptimizerConfig): OptimizationR
 
   // Best by objective
   const bestByObjective: Record<string, Solution> = {};
-  const objectives = ['totalCost_USD', 'totalWeight_kg', 'totalThickness_mm', 'maxComplexity'];
+  const objectives = ['totalCost_USD', 'totalWeight_kg', 'totalThickness_mm', 'maxComplexity'] as const;
   for (let i = 0; i < 4; i++) {
-    const best = [...paretoFront].sort((a, b) => (a as any)[objectives[i]] - (b as any)[objectives[i]])[0];
+    const best = [...paretoFront].sort((a, b) => a[objectives[i]] - b[objectives[i]])[0];
     if (best) bestByObjective[objectives[i]] = best;
   }
 

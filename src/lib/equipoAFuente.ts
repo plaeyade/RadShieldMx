@@ -20,7 +20,8 @@ export function aplicarEquipoAFuente(f: RadiationSource, e: EquipoCatalogo): Rad
   const m = MODALITIES.find(x => x.id === id);
   if (!m) return f;
   // En terapia la fuente lleva fracciones/semana: W (Gy/semana) / Gy por fracción de la modalidad.
-  const workloadValue = m.category === 'therapy' && e.workload_Gy_week > 0 && m.doseRateConstant > 0
-    ? e.workload_Gy_week / m.doseRateConstant : f.workloadValue;
+  const k = m.doseRateConstant ?? 0; // sin dato: 0 > 0 es falso, como antes `undefined > 0`
+  const workloadValue = m.category === 'therapy' && e.workload_Gy_week > 0 && k > 0
+    ? e.workload_Gy_week / k : f.workloadValue;
   return { ...f, name: e.name, modality: m, workloadUnit: m.unit, workloadValue, isocenterHeight_m: e.isoHeight_m || f.isocenterHeight_m };
 }

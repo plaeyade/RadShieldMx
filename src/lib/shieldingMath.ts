@@ -531,7 +531,8 @@ export function calculateUnshieldedKerma(
 
   if (mod.category === 'diagnostic') {
     const wl = WORKLOAD_DISTRIBUTIONS.find(w => w.name === mod.workloadDistribution);
-    const K1 = wl ? wl.K1 : mod.doseRateConstant;
+    // Sin K¹ de la modalidad el resultado es NaN (undefined/3, undefined·N): mismo valor que antes de strict (etapa 5).
+    const K1 = (wl ? wl.K1 : mod.doseRateConstant) as number;
     const N = source.workloadValue;
     if (mod.id.includes('fluoro') && source.workloadHoursPerWeek) {
       const kermaRate = K1 / 3;

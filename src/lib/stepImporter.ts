@@ -175,7 +175,8 @@ function createMockOC(): any {
     },
     // Mock surface
     BRepAdaptor_Surface: class MockAdaptor {
-      GetType: () => 0;
+      // Declaración sin valor, como antes (el simulacro no define GetType); `!` sólo para strict (etapa 5).
+      GetType!: () => 0;
     },
     GeomAbs_SurfaceType: {
       GeomAbs_Plane: 0,
