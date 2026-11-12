@@ -71,6 +71,37 @@ export default function MCCloudDialog({ open, onOpenChange, projectId, format, p
     }
   }, [jobsQuery.data]);
 
+  const generateReport = (jobId: number, particles: number, format: string, result: any) => {
+    const isRoot = format === 'root' || format === 'both';
+    return `# RadShield-MX — REPORTE DE SIMULACION MC
+Job ID: ${jobId}
+Formato: ${format.toUpperCase()}
+Particulas: ${particles.toLocaleString()}
+Estado: SIMULACION DEMOSTRATIVA CLIENTE-SIDE
+${isRoot ? '\nNOTA: El archivo .root requiere analisis offline con ROOT 6.30+ o PyROOT.\nInstrucciones: root -l RadShieldMX_Sim.root' : ''}
+
+ADVERTENCIA REGULATORIA:
+Este reporte fue generado con un simulador de demostracion interno.
+Los valores son pseudoaleatorios y NO representan una simulacion Monte Carlo real.
+Para cumplimiento CNSNS, ejecute GEANT4 o GATE con los macros del modulo Fase 4.
+
+RESULTADOS DEMO:
+- Dosis antes blindaje: ${result.doseBefore.toFixed(4)} mSv/sem
+- Dosis despues blindaje: ${result.doseAfter.toFixed(6)} mSv/sem
+- Discrepancia analitico vs MC (demo): ${result.discrepancy.toFixed(2)}%
+- Criterio CNSNS (±20%): ${result.discrepancy <= 20 ? 'CUMPLE (en demo)' : 'NO CUMPLE (en demo)'}
+- Criterio ALARA (<10%): ${result.discrepancy <= 10 ? 'EXCELENTE (en demo)' : result.discrepancy <= 20 ? 'ACEPTABLE (en demo)' : 'REVISAR (en demo)'}
+
+${isRoot ? 'FORMATO ROOT:\n- Archivo .root generado (placeholder)\n- TTree: Shielding con branches Edep_MeV, X_mm, Y_mm, Z_mm, MaterialID\n- Analisis sugerido: Shielding->Draw("Edep_MeV"); Shielding->Draw("Y_mm:X_mm","colz");' : 'FORMATO CSV:\n- Archivo CSV comprimido con event-by-event data\n- Columnas: Edep_MeV, X_mm, Y_mm, Z_mm, MaterialID, EventID\n- Analisis: pandas.read_csv() o numpy.loadtxt()' }
+
+Para simulacion REAL:
+1. Genere macros con el modulo "Macro GEANT4" (Fase 4)
+2. Ejecute en cluster HPC con GEANT4 11.2 + G4EmLivermorePhysics
+3. Seleccione formato CSV (default) o ROOT (opt-in) segun necesidad
+4. Suba resultados al modulo "Validacion MC" para comparacion analitica
+`;
+  };
+
   const handleRun = useCallback(async () => {
     if (!user?.unionId) { toast.error('Inicia sesión para ejecutar MC'); return; }
     setIsRunning(true); setProgress(0);
@@ -125,37 +156,6 @@ export default function MCCloudDialog({ open, onOpenChange, projectId, format, p
     toast.success(`Simulación #${jobId} completada (${format.toUpperCase()})`);
     utils.simulation.list.invalidate({ projectId });
   }, [user, projectId, format, particles, jobName, updateStatus, utils]);
-
-  const generateReport = (jobId: number, particles: number, format: string, result: any) => {
-    const isRoot = format === 'root' || format === 'both';
-    return `# RadShield-MX — REPORTE DE SIMULACION MC
-Job ID: ${jobId}
-Formato: ${format.toUpperCase()}
-Particulas: ${particles.toLocaleString()}
-Estado: SIMULACION DEMOSTRATIVA CLIENTE-SIDE
-${isRoot ? '\nNOTA: El archivo .root requiere analisis offline con ROOT 6.30+ o PyROOT.\nInstrucciones: root -l RadShieldMX_Sim.root' : ''}
-
-ADVERTENCIA REGULATORIA:
-Este reporte fue generado con un simulador de demostracion interno.
-Los valores son pseudoaleatorios y NO representan una simulacion Monte Carlo real.
-Para cumplimiento CNSNS, ejecute GEANT4 o GATE con los macros del modulo Fase 4.
-
-RESULTADOS DEMO:
-- Dosis antes blindaje: ${result.doseBefore.toFixed(4)} mSv/sem
-- Dosis despues blindaje: ${result.doseAfter.toFixed(6)} mSv/sem
-- Discrepancia analitico vs MC (demo): ${result.discrepancy.toFixed(2)}%
-- Criterio CNSNS (±20%): ${result.discrepancy <= 20 ? 'CUMPLE (en demo)' : 'NO CUMPLE (en demo)'}
-- Criterio ALARA (<10%): ${result.discrepancy <= 10 ? 'EXCELENTE (en demo)' : result.discrepancy <= 20 ? 'ACEPTABLE (en demo)' : 'REVISAR (en demo)'}
-
-${isRoot ? 'FORMATO ROOT:\n- Archivo .root generado (placeholder)\n- TTree: Shielding con branches Edep_MeV, X_mm, Y_mm, Z_mm, MaterialID\n- Analisis sugerido: Shielding->Draw("Edep_MeV"); Shielding->Draw("Y_mm:X_mm","colz");' : 'FORMATO CSV:\n- Archivo CSV comprimido con event-by-event data\n- Columnas: Edep_MeV, X_mm, Y_mm, Z_mm, MaterialID, EventID\n- Analisis: pandas.read_csv() o numpy.loadtxt()' }
-
-Para simulacion REAL:
-1. Genere macros con el modulo "Macro GEANT4" (Fase 4)
-2. Ejecute en cluster HPC con GEANT4 11.2 + G4EmLivermorePhysics
-3. Seleccione formato CSV (default) o ROOT (opt-in) segun necesidad
-4. Suba resultados al modulo "Validacion MC" para comparacion analitica
-`;
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

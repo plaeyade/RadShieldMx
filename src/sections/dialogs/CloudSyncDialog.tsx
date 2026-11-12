@@ -44,14 +44,6 @@ export default function CloudSyncDialog({ open, onOpenChange }: Props) {
   const [regInstitution, setRegInstitution] = useState('');
   const [showRegister, setShowRegister] = useState(false);
 
-  const checkAuth = useCallback(async () => {
-    const u = await apiGetCurrentUser();
-    setUser(u);
-    if (u) { setTab('projects'); loadProjects(); }
-  }, []);
-
-  useEffect(() => { if (open) { checkHealth(); checkAuth(); } }, [open, checkAuth]);
-
   const checkHealth = async () => {
     const h = await apiHealthCheck();
     setServerStatus(h.status === 'ok' ? 'online' : 'offline');
@@ -67,6 +59,14 @@ export default function CloudSyncDialog({ open, onOpenChange }: Props) {
       toast.error(err.message || 'Failed to load');
     } finally { setIsLoading(false); }
   };
+
+  const checkAuth = useCallback(async () => {
+    const u = await apiGetCurrentUser();
+    setUser(u);
+    if (u) { setTab('projects'); loadProjects(); }
+  }, []);
+
+  useEffect(() => { if (open) { checkHealth(); checkAuth(); } }, [open, checkAuth]);
 
   const handleLogin = async () => {
     setIsLoading(true);

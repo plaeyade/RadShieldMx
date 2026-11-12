@@ -205,7 +205,7 @@ function DVHCanvas({ dvhs, showDifferential }: { dvhs: DVHData[]; showDifferenti
         dvh.doses_Gy.forEach((d, i) => {
           const x = toX(d);
           const y = toY(dvh.volumes_pct[i]);
-          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
         ctx.stroke();
       });

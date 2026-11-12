@@ -33,14 +33,14 @@ interface Props {
   onOpenTool?: (toolId: string) => void;
 }
 
-export default function WelcomeScreen({ onNewProject, onOpenProject, onImportDXF, onImportFloorPlan, onLoadTemplate, onTutorial, onManual, onDismiss, onOpenTool }: Props) {
+export default function WelcomeScreen({ onNewProject, onImportDXF, onImportFloorPlan, onLoadTemplate, onManual, onDismiss }: Props) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(true);
   const [activePill, setActivePill] = useState('ct');
 
-  useEffect(() => { try { if (localStorage.getItem('radshield_mosaic')) setVisible(false); } catch {} }, []);
+  useEffect(() => { try { if (localStorage.getItem('radshield_mosaic')) setVisible(false); } catch { /* almacenamiento no disponible */ } }, []);
   if (!visible) return null;
-  const dismiss = () => { setVisible(false); try { localStorage.setItem('radshield_mosaic', '1'); } catch {} onDismiss(); };
+  const dismiss = () => { setVisible(false); try { localStorage.setItem('radshield_mosaic', '1'); } catch { /* almacenamiento no disponible */ } onDismiss(); };
 
   const MODALITY_PILLS = [
     { id: 'ct', label: 'CT Rooms', icon: ScanLine },

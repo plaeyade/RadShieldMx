@@ -44,7 +44,6 @@ describe('useUndoRedo', () => {
 describe('useIndexedDB', () => {
   beforeEach(() => {
     // Mock IndexedDB
-    const stores: Record<string, any> = {};
     global.indexedDB = {
       open: () => ({
         set onsuccess(cb: any) { cb({ target: { result: { objectStoreNames: { contains: () => true }, createObjectStore: () => ({ createIndex: () => {} }), transaction: () => ({ objectStore: () => ({ put: () => ({}) }) }) } } }); },

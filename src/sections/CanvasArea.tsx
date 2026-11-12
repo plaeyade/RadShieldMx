@@ -320,11 +320,10 @@ export default function CanvasArea({
   stickyNotes = [],
   onStickyNoteUpdate,
   onStickyNoteDelete,
-  onAddStickyNote,
   freehandEnabled = false,
   activeLayer = 'shielding',
 }: CanvasAreaProps) {
-  const { t } = useI18n();
+  useI18n();
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [legendCollapsed, setLegendCollapsed] = useState(false);
   const [panelVisibility, setPanelVisibility] = useState(loadF188PanelVisibility);

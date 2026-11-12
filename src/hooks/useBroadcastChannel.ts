@@ -20,7 +20,9 @@ export function useBroadcastChannel() {
   const [isConnected, setIsConnected] = useState(false);
   const [peerCount, setPeerCount] = useState(0);
   const channelRef = useRef<BroadcastChannel | null>(null);
-  const tabIdRef = useRef(`tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  // Identificador fijo de esta pestaña: inicializador perezoso (se calcula una sola vez, no en cada render).
+  const [tabId] = useState(() => `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const tabIdRef = useRef(tabId);
   const peersRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export function useBroadcastChannel() {
   return {
     isConnected,
     peerCount,
-    tabId: tabIdRef.current,
+    tabId,
     broadcast,
   };
 }

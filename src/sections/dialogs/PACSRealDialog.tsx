@@ -47,6 +47,10 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<PACSStudy | null>(null);
 
+  const loadStudies = useCallback(async () => {
+    // Real implementation would query /studies endpoint
+  }, [serverUrl]);
+
   const handleConnect = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -88,10 +92,6 @@ export default function PACSRealDialog({ open, onOpenChange }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [serverUrl]);
-
-  const loadStudies = useCallback(async () => {
-    // Real implementation would query /studies endpoint
   }, [serverUrl]);
 
   const handleSearch = useCallback(() => {

@@ -819,7 +819,6 @@ export function useCanvas(
 
     // A.6: Ghost barrier preview (before first click — shows where barrier will be placed)
     if (ghostPos && activeTool === 'barrier' && !drawingState.isDrawing) {
-      const sp = worldToScreen(ghostPos.x, ghostPos.y);
       const snapX = canvasState.snapToGrid ? snap(ghostPos.x, GRID_STEP_PX) : ghostPos.x;
       const snapY = canvasState.snapToGrid ? snap(ghostPos.y, GRID_STEP_PX) : ghostPos.y;
       const ssp = worldToScreen(snapX, snapY);

@@ -62,89 +62,6 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
   const [showSources] = useState(true);
   const [showBarriers] = useState(true);
 
-  // ─── Calculate dose map ───
-  const handleCalculate = useCallback(() => {
-    setIsCalculating(true);
-    const t0 = performance.now();
-
-    const w = parseInt(gridRes) || 80;
-    const T = parseFloat(occupancyFactor) || 1;
-    const P = parseFloat(designDose) || 0.02;
-    const malla = mallaDoseMap(floorPlan, w, componentes);
-    if (!malla) {
-      toast.error('El plano no tiene fuentes: agrega una fuente en el lienzo.');
-      setIsCalculating(false);
-      return;
-    }
-    const h = malla.ny;
-    const rect = { x0: malla.x0_px, y0: malla.y0_px, ancho: malla.nx * malla.paso_px, alto: malla.ny * malla.paso_px };
-    const niveles = Array.from(new Set([P / T, ...NIVELES_ISODOSIS])).sort((x, y) => x - y);
-
-    try {
-      const res = resultadoDesdeMalla(malla, niveles, performance.now() - t0);
-      const vista = resultadoLogaritmico(res);
-      setResult(res);
-      setStats(calculateDoseStats(res));
-
-      // Render 2D
-      if (canvas2DRef.current) {
-        const ctx = canvas2DRef.current.getContext('2d');
-        if (ctx) {
-          canvas2DRef.current.width = canvas2DRef.current.clientWidth;
-          canvas2DRef.current.height = canvas2DRef.current.clientHeight;
-          // Draw room outline
-          ctx.fillStyle = '#1a1a2e';
-          ctx.fillRect(0, 0, canvas2DRef.current.width, canvas2DRef.current.height);
-          renderDoseHeatmap(ctx, vista, canvas2DRef.current.width, canvas2DRef.current.height, colorMap, showContours);
-          const cw = canvas2DRef.current.width, ch = canvas2DRef.current.height;
-          const aX = (x: number) => ((x - rect.x0) / rect.ancho) * cw;
-          const aY = (y: number) => ((y - rect.y0) / rect.alto) * ch;
-
-          // Draw source
-          if (showSources) for (const fuente of floorPlan.sources) {
-            const sx = aX(fuente.x);
-            const sy = aY(fuente.y);
-            ctx.fillStyle = '#ff3300';
-            ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif';
-            ctx.fillText('FUENTE', sx - 18, sy - 14);
-          }
-
-          // Draw barriers
-          if (showBarriers) {
-            for (const b of floorPlan.barriers) {
-              const bx1 = aX(b.x1);
-              const by1 = aY(b.y1);
-              const bx2 = aX(b.x2);
-              const by2 = aY(b.y2);
-              ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-              ctx.lineWidth = 4;
-              ctx.setLineDash([5, 3]);
-              ctx.beginPath(); ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2); ctx.stroke();
-              ctx.setLineDash([]);
-            }
-          }
-
-          // Legend
-          drawLegend(ctx, canvas2DRef.current.width, canvas2DRef.current.height, vista, colorMap);
-        }
-      }
-
-      // Render 3D
-      render3D(vista);
-
-      const dt = performance.now() - t0;
-      toast.success(`Dose map calculado: ${w}×${h} = ${w * h} celdas en ${dt.toFixed(0)} ms`);
-    } catch (e) {
-      toast.error('Error: ' + (e as Error).message);
-    } finally {
-      setIsCalculating(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- render3D sólo depende de colorMap (ya listado)
-  }, [colorMap, showContours, gridRes, occupancyFactor, designDose, floorPlan, componentes, showSources, showBarriers]);
-
   // ─── 3D rendering ───
   const render3D = useCallback((res: DoseGridResult) => {
     if (!canvas3DRef.current) return;
@@ -242,6 +159,89 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
     ctx.fillText(Math.pow(10, res.minDose).toExponential(1), lx, ly + 18);
     ctx.fillText(Math.pow(10, res.maxDose).toExponential(1), lx + lw - 34, ly + 18);
   }
+
+  // ─── Calculate dose map ───
+  const handleCalculate = useCallback(() => {
+    setIsCalculating(true);
+    const t0 = performance.now();
+
+    const w = parseInt(gridRes) || 80;
+    const T = parseFloat(occupancyFactor) || 1;
+    const P = parseFloat(designDose) || 0.02;
+    const malla = mallaDoseMap(floorPlan, w, componentes);
+    if (!malla) {
+      toast.error('El plano no tiene fuentes: agrega una fuente en el lienzo.');
+      setIsCalculating(false);
+      return;
+    }
+    const h = malla.ny;
+    const rect = { x0: malla.x0_px, y0: malla.y0_px, ancho: malla.nx * malla.paso_px, alto: malla.ny * malla.paso_px };
+    const niveles = Array.from(new Set([P / T, ...NIVELES_ISODOSIS])).sort((x, y) => x - y);
+
+    try {
+      const res = resultadoDesdeMalla(malla, niveles, performance.now() - t0);
+      const vista = resultadoLogaritmico(res);
+      setResult(res);
+      setStats(calculateDoseStats(res));
+
+      // Render 2D
+      if (canvas2DRef.current) {
+        const ctx = canvas2DRef.current.getContext('2d');
+        if (ctx) {
+          canvas2DRef.current.width = canvas2DRef.current.clientWidth;
+          canvas2DRef.current.height = canvas2DRef.current.clientHeight;
+          // Draw room outline
+          ctx.fillStyle = '#1a1a2e';
+          ctx.fillRect(0, 0, canvas2DRef.current.width, canvas2DRef.current.height);
+          renderDoseHeatmap(ctx, vista, canvas2DRef.current.width, canvas2DRef.current.height, colorMap, showContours);
+          const cw = canvas2DRef.current.width, ch = canvas2DRef.current.height;
+          const aX = (x: number) => ((x - rect.x0) / rect.ancho) * cw;
+          const aY = (y: number) => ((y - rect.y0) / rect.alto) * ch;
+
+          // Draw source
+          if (showSources) for (const fuente of floorPlan.sources) {
+            const sx = aX(fuente.x);
+            const sy = aY(fuente.y);
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif';
+            ctx.fillText('FUENTE', sx - 18, sy - 14);
+          }
+
+          // Draw barriers
+          if (showBarriers) {
+            for (const b of floorPlan.barriers) {
+              const bx1 = aX(b.x1);
+              const by1 = aY(b.y1);
+              const bx2 = aX(b.x2);
+              const by2 = aY(b.y2);
+              ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+              ctx.lineWidth = 4;
+              ctx.setLineDash([5, 3]);
+              ctx.beginPath(); ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2); ctx.stroke();
+              ctx.setLineDash([]);
+            }
+          }
+
+          // Legend
+          drawLegend(ctx, canvas2DRef.current.width, canvas2DRef.current.height, vista, colorMap);
+        }
+      }
+
+      // Render 3D
+      render3D(vista);
+
+      const dt = performance.now() - t0;
+      toast.success(`Dose map calculado: ${w}×${h} = ${w * h} celdas en ${dt.toFixed(0)} ms`);
+    } catch (e) {
+      toast.error('Error: ' + (e as Error).message);
+    } finally {
+      setIsCalculating(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- render3D sólo depende de colorMap (ya listado)
+  }, [colorMap, showContours, gridRes, occupancyFactor, designDose, floorPlan, componentes, showSources, showBarriers]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from
 import { useI18n } from '@/hooks/useI18n';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import {
-  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Globe, Cloud, FileDown, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Wind, ClipboardList, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Bell, Code, Hexagon, FlaskConical, Crosshair, Calculator, Layers, FileCheck, Wand2, Cpu, Scan, GitBranch, Ruler, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, Search, FileBarChart, Star, Clock, Palette, Radio, Users, Video, Factory, ScanLine, FileBox, HelpCircle, Compass, Scale, Stethoscope, Save, Printer, Plus, Siren, PenTool, MapPin, Building2, Languages, Grid3X3, Pill, Target, Contrast, Radiation, Award, Info, LineChart, Bug, FileSearch, SearchCode, Timer, MemoryStick, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
+  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Globe, Cloud, FileDown, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Wind, ClipboardList, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Bell, Code, Hexagon, FlaskConical, Crosshair, Calculator, Layers, FileCheck, Wand2, Cpu, Scan, GitBranch, Ruler, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, Search, FileBarChart, Star, Clock, Radio, Users, Video, Factory, ScanLine, FileBox, HelpCircle, Compass, Scale, Stethoscope, Save, Printer, Plus, Siren, PenTool, MapPin, Building2, Languages, Grid3X3, Pill, Target, Contrast, Radiation, Award, Info, LineChart, Bug, FileSearch, SearchCode, Timer, MemoryStick, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
@@ -229,17 +229,17 @@ const F113_PROFILE_CHIPS: Record<F113ModalityProfileId, string> = {
 
 export default function Toolbar(props: ToolbarRuntimeProps) {
   const {
-    onNewProject, onOpenProject, onSaveProject, onSaveAs,
+    onNewProject, onSaveProject,
     floorPlan, barrierResults, heatmapEnabled,
-    onExport, onPDF, onShare, onCNSNS, onImportImage, onBatchImport, onDXFViewer, onSTEPImporter,
-    onToggleTheme, isDarkMode, onUndo, onRedo,
+    onExport, onPDF, onShare, onCNSNS, onBatchImport, onDXFViewer, onSTEPImporter,
+    onUndo, onRedo,
     onTechSpecs, onAuditTrail, onLogFileAnalysis,
-    onCalculate, onShieldingCalculator, onCompareScenarios, onTornadoSensitivity, onEquipmentShieldingWizard, onQuick, onMazeCalculator,
+    onCalculate, onShieldingCalculator, onCompareScenarios, onTornadoSensitivity, onEquipmentShieldingWizard, onQuick,
     onFloorCeiling, onShieldingOptimizer, onCostOptimizer, onCostEstimator,
-    onUncertainty, onGUMUncertainty, onUAQ, onMemoriaAI,
-    on3D, on3DModels, onMedicalFloorPlan3D, onPointCloud, onAutoBarrier,
-    onRealTime3D, onBIMRAD, onLayoutBunker, onBIMConnector, onShapesReconstruction,
-    onMonteCarlo, onMonteCarloSim, onMC, onMCCloud, onMultiSource,
+    onUncertainty, onGUMUncertainty, onMemoriaAI,
+    on3D, onMedicalFloorPlan3D, onPointCloud, onAutoBarrier,
+    onRealTime3D, onShapesReconstruction,
+    onMonteCarlo, onMonteCarloSim, onMCCloud, onMultiSource,
     onNativeMC, onNeutronShielding, onElectronTransport, onVoxelPhantom,
     onMCNPCyclotron, onDoseMap, onGATEPET, onMaterialProps, onCyclotronSim,
     onNuclearMedicine, onGMPCertification, onAAPMTG108PET, onIPEM109, onChiltonSkyshine, onTherapyShielding, onDecayChains, onBatemanDecay, onGammaKnife, onBraquiCo60,
@@ -254,13 +254,11 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     onCloudSync, onCollaborationHub, onExternalSoftware,
     onIndustrialRadiation, onPythonTools, onAnimatedDoseMaps, onVentilation,
     onEquipmentLibrary, onEquipmentManager,
-    onPACSReal, onElectronApplicator,
-    onOnboardingTour, onManual, onRadiationLegends, onAbout, onGlossary,
+    onOnboardingTour, onManual, onAbout, onGlossary,
     onGuiame, onReiniciarGuia, guiaEnCurso,
-    onUndoRedoHistory, onCommandPalette, onSmartSearchDICOM,
-    onKeyboardShortcuts, onToggleSnap, onProjects, onCompareMode,
-    onNistLibrary, onNeutronConfig, onBraquiHDR, onMemoriaAnalitica,
-    onCNSNSCompliance, onCycloneKIUBE,
+    onCommandPalette,
+    onProjects,
+    onCycloneKIUBE,
     onVoxelPhantom: _vpDup,
     onMCNPCyclotron: _mcnpDup,
     onShapesReconstruction: _shapesDup,
@@ -316,18 +314,11 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     // v79: Update Center
     onUpdate,
     onFloorPlanFeatures,
-    // v96: Transport + OpenCV + Pan
-    onTransport,
-    onOpenCVDetect,
-    onPanMode,
-    isPanMode,
     // v80: Smart Rooms
     onToggleRoomTemplates,
     // v83: Canvas clear + new map
     onClearCanvas,
     onNewMap,
-    // v85: SourceSelector
-    onSourceTool,
     // v92: Auth
     user,
     onLogin,

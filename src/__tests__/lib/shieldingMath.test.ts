@@ -44,17 +44,6 @@ const LEAD: ShieldingMaterial = {
   category: 'Convencional',
 };
 
-const STEEL: ShieldingMaterial = {
-  name: 'Acero',
-  code: 'STEEL',
-  density: 7.87,
-  TVL_mm: { '6MV': 85, '10MV': 90 },
-  cost_per_m3: 3200,
-  cost_per_kg: 0.41,
-  color: '#1F2937',
-  category: 'Convencional',
-};
-
 describe('shieldingMath — NCRP 147 Archer Equation', () => {
   it('archerTransmission(0) = 1.0 (no shielding)', () => {
     expect(archerTransmission(0, CONCRETE_235)).toBe(1.0);

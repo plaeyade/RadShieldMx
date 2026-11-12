@@ -86,7 +86,7 @@ export function useCanvasKeyboardNav({
         break;
 
       // Tab through elements
-      case 'Tab':
+      case 'Tab': {
         e.preventDefault();
         const elements = allElementsRef.current;
         if (elements.length === 0) return;
@@ -97,6 +97,7 @@ export function useCanvasKeyboardNav({
         onSelect(el.id);
         onFocusElement(el.x, el.y);
         break;
+      }
 
       // Delete selected
       case 'Delete':

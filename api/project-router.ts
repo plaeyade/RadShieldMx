@@ -9,7 +9,7 @@ import { TRPCError } from "@trpc/server";
 export const projectRouter = createRouter({
   list: authedQuery
     .input(z.object({ userId: z.string().optional() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       const db = getDb();
       // Always filter by authenticated user's unionId, ignore input userId
       return db.select().from(projects).where(eq(projects.userId, ctx.user.unionId)).orderBy(desc(projects.updatedAt));
