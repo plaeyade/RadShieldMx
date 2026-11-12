@@ -135,7 +135,7 @@ export function parseDICOMFile(file: File): Promise<DICOMMetadata | null> {
           offset = valueOffset + valueLength;
           if (offset % 2 !== 0) offset++; // padding to even
         }
-      } catch (err) {
+      } catch {
         // If parsing fails mid-way, return whatever we extracted
       }
 

@@ -44,12 +44,6 @@ export function useWebGPUHeatmap() {
       }
     }
 
-    // Build source data: [x_px, y_px, workload*useFactor/scale²]
-    const srcData = sources.flatMap(s => [
-      s.x, s.y,
-      s.workloadValue * (s.useFactor || 0.25) / (scale_m_per_pixel * scale_m_per_pixel),
-    ]);
-
     // Run GPU computation
     const gpuDoses = await webgpu.computeHeatmapGPU(
       sources.map(s => ({

@@ -16,7 +16,6 @@ interface Props {
 
 export default function Minimap({ floorPlan, viewport, onViewportChange, width = 150, height = 100 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isDragging = useRef(false);
 
   // Compute world bounds
   const bounds = (() => {

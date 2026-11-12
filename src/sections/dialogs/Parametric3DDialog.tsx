@@ -47,7 +47,7 @@ function drawCylinder(ctx: CanvasRenderingContext2D, p: Primitive, rx: number, r
     for (let i = 0; i <= segments; i++) {
       const a = (i / segments) * Math.PI * 2;
       const pt = project3D(Math.cos(a) * r + p.x, y + p.y, Math.sin(a) * r + p.z, rx, ry, sc, cx, cy);
-      i === 0 ? ctx.moveTo(pt.sx, pt.sy) : ctx.lineTo(pt.sx, pt.sy);
+      if (i === 0) ctx.moveTo(pt.sx, pt.sy); else ctx.lineTo(pt.sx, pt.sy);
     }
     ctx.strokeStyle = p.color + (ring === 0 || ring === 8 ? 'cc' : '66');
     ctx.lineWidth = 0.5;
@@ -64,7 +64,7 @@ function drawSphere(ctx: CanvasRenderingContext2D, p: Primitive, rx: number, ry:
     for (let i = 0; i <= 32; i++) {
       const theta = (i / 32) * Math.PI * 2;
       const pt = project3D(Math.cos(theta) * ringR + p.x, y + p.y, Math.sin(theta) * ringR + p.z, rx, ry, sc, cx, cy);
-      i === 0 ? ctx.moveTo(pt.sx, pt.sy) : ctx.lineTo(pt.sx, pt.sy);
+      if (i === 0) ctx.moveTo(pt.sx, pt.sy); else ctx.lineTo(pt.sx, pt.sy);
     }
     ctx.strokeStyle = p.color + '55';
     ctx.lineWidth = 0.5;

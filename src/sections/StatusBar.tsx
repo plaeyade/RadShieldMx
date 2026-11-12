@@ -22,7 +22,7 @@ interface StatusBarProps {
 }
 
 export default function StatusBar({
-  projectName, lastSaved, isCalculating, calculationStatus,
+  projectName, lastSaved, calculationStatus,
   numSources, numBarriers, numBarriersCalculated, version, isDirty, userName,
   importStatus, importMode, importCalculationStatus, onConfirmImport, onOpenImportReview,
 }: StatusBarProps) {

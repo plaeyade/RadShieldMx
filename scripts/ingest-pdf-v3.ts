@@ -6,7 +6,7 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-import { insertChunk, countChunks, deleteAllChunks } from "../api/lib/vectorStore";
+import { insertChunk, countChunks } from "../api/lib/vectorStore";
 // Objetivos de diseño P: fuente única src/lib/limitesDosis.ts (NCRP 147 §1.3 / NCRP 151 §1.2).
 import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from "../src/lib/limitesDosis";
 
@@ -173,7 +173,7 @@ async function main() {
       await insertChunk(c);
       success++;
       process.stdout.write("OK\n");
-    } catch (err) {
+    } catch {
       failed++;
       process.stdout.write(`FAIL\n`);
     }

@@ -54,6 +54,55 @@ export default function RealTime3DDialog({ open, onOpenChange, floorPlan }: Prop
   const [isPreviewReady, setIsPreviewReady] = useState(false);
   const [selectedConnector, setSelectedConnector] = useState<string>('unreal');
 
+  function loadBunkerIntoScene(scene: any) {
+    const opts: ExportOptions = {
+      format: 'glb',
+      includeDoseOverlay: false,
+      includeSources,
+      includeLabels: false,
+      unitScale: 0.5,
+      wallThickness_m: parseFloat(wallThickness) || 0.3,
+      ceilingHeight_m: parseFloat(ceilingHeight) || 3.0,
+    };
+
+    const mesh = generateBunkerMesh(floorPlan || ({ barriers: [], sources: [{ id: 'src1', x: 2, y: 0, type: 'linac', energy: 6 }]} as any), opts);
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(Array.from(mesh.vertices), 3));
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(Array.from(mesh.normals), 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(Array.from(mesh.colors), 4));
+    geometry.setIndex(Array.from(mesh.indices));
+
+    const material = new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.7,
+      metalness: 0.1,
+      side: THREE.DoubleSide,
+    });
+    const threeMesh = new THREE.Mesh(geometry, material);
+    (threeMesh as any).userData = { isBunker: true };
+    threeMesh.castShadow = true;
+    threeMesh.receiveShadow = true;
+    scene.add(threeMesh);
+
+    // Source glow spheres
+    if (opts.includeSources) {
+      (floorPlan?.sources || [{ x: 2, y: 0 }]).forEach((src) => {
+        const sg = new THREE.SphereGeometry(0.15, 16, 16);
+        const sm = new THREE.MeshBasicMaterial({ color: 0xff3300, transparent: true, opacity: 0.85 });
+        const sp = new THREE.Mesh(sg, sm);
+        sp.position.set((src.x || 2) * opts.unitScale, opts.ceilingHeight_m * opts.unitScale / 2, (src.y || 0) * opts.unitScale);
+        (sp as any).userData = { isBunker: true };
+        scene.add(sp);
+
+        // Point light at source
+        const pl = new THREE.PointLight(0xff3300, 2, 5);
+        pl.position.copy(sp.position);
+        scene.add(pl);
+      });
+    }
+  }
+
   // ─── 3D Preview ───
   const init3D = useCallback(() => {
     if (!canvasRef.current) return;
@@ -140,55 +189,6 @@ export default function RealTime3DDialog({ open, onOpenChange, floorPlan }: Prop
     toRemove.forEach(c => sceneRef.current?.remove(c));
     loadBunkerIntoScene(sceneRef.current);
   }, [isPreviewReady, includeSources, wallThickness, ceilingHeight, floorPlan]);
-
-  function loadBunkerIntoScene(scene: any) {
-    const opts: ExportOptions = {
-      format: 'glb',
-      includeDoseOverlay: false,
-      includeSources,
-      includeLabels: false,
-      unitScale: 0.5,
-      wallThickness_m: parseFloat(wallThickness) || 0.3,
-      ceilingHeight_m: parseFloat(ceilingHeight) || 3.0,
-    };
-
-    const mesh = generateBunkerMesh(floorPlan || ({ barriers: [], sources: [{ id: 'src1', x: 2, y: 0, type: 'linac', energy: 6 }]} as any), opts);
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(Array.from(mesh.vertices), 3));
-    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(Array.from(mesh.normals), 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(Array.from(mesh.colors), 4));
-    geometry.setIndex(Array.from(mesh.indices));
-
-    const material = new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      roughness: 0.7,
-      metalness: 0.1,
-      side: THREE.DoubleSide,
-    });
-    const threeMesh = new THREE.Mesh(geometry, material);
-    (threeMesh as any).userData = { isBunker: true };
-    threeMesh.castShadow = true;
-    threeMesh.receiveShadow = true;
-    scene.add(threeMesh);
-
-    // Source glow spheres
-    if (opts.includeSources) {
-      (floorPlan?.sources || [{ x: 2, y: 0 }]).forEach((src) => {
-        const sg = new THREE.SphereGeometry(0.15, 16, 16);
-        const sm = new THREE.MeshBasicMaterial({ color: 0xff3300, transparent: true, opacity: 0.85 });
-        const sp = new THREE.Mesh(sg, sm);
-        sp.position.set((src.x || 2) * opts.unitScale, opts.ceilingHeight_m * opts.unitScale / 2, (src.y || 0) * opts.unitScale);
-        (sp as any).userData = { isBunker: true };
-        scene.add(sp);
-
-        // Point light at source
-        const pl = new THREE.PointLight(0xff3300, 2, 5);
-        pl.position.copy(sp.position);
-        scene.add(pl);
-      });
-    }
-  }
 
   // ─── Export handler ───
   const handleExport = useCallback(() => {

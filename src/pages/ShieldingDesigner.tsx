@@ -50,7 +50,7 @@ import { useOpenCV } from '@/hooks/useOpenCV';
 import { captureException } from '@/lib/sentry';
 import { buildKimiOAuthUrl } from '@/lib/authConfig';
 import { trpc } from '@/providers/trpc';
-import { type CTIsodosisProfile, parseIsodosisFile } from '@/types/ctIsodosis';
+import type { CTIsodosisProfile } from '@/types/ctIsodosis';
 // Fase 6: docx (≈690 kB) y jspdf (≈340 kB) se cargan bajo demanda al generar el reporte.
 import type { CNSNSReportData } from '@/hooks/useCNSNSReport';
 import type { MCConfig } from '@/hooks/useMCBridge';
@@ -146,7 +146,6 @@ const ExternalConnectorDialog = lazy(() => import('@/sections/dialogs/ExternalCo
 const BIMRADDialog = lazy(() => import('@/sections/dialogs/BIMRADDialog'));
 const CollaborationHub = lazy(() => import('@/sections/dialogs/CollaborationHub'));
 const GATESimulationDialog = lazy(() => import('@/sections/dialogs/GATESimulationDialog'));
-const ShieldingDesignAgentDialog = lazy(() => import('@/sections/dialogs/ShieldingDesignAgentDialog'));
 const MonteCarloIntegrationDialog = lazy(() => import('@/sections/dialogs/MonteCarloIntegrationDialog'));
 const UncertaintyQuantificationDialog = lazy(() => import('@/sections/dialogs/UncertaintyQuantificationDialog'));
 const ExperimentalValidationDialog = lazy(() => import('@/sections/dialogs/ExperimentalValidationDialog'));
@@ -377,7 +376,6 @@ function DialogFallback() {
 export default function ShieldingDesigner() {
   const { state: floorPlan, setState: setFloorPlan, undo, redo, canUndo, canRedo, reset: resetFloorPlan } = useUndoRedo<FloorPlan>(defaultFloorPlan, { maxHistory: 50 });
   const [activeTool, setActiveTool] = useState<Tool>('select');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // v85: SourceSelector + SmartBarrier AI
   
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
@@ -394,9 +392,7 @@ export default function ShieldingDesigner() {
   // [ZUSTAND] equipmentDB
   // const [showEquipmentDialog, setShowEquipmentDialog] = useState(false);
   // [ZUSTAND] mcCloud
-  const [showMCCloudDialog, setShowMCCloudDialog] = useState(false);
   // [ZUSTAND] mcConfig
-  const [showMCConfigDialog, setShowMCConfigDialog] = useState(false);
   
   // [ZUSTAND] floorCeiling
   
@@ -409,7 +405,7 @@ export default function ShieldingDesigner() {
   // MC dual-output config state
   const [mcJobConfig, setMcJobConfig] = useState<{ jobId: number; format: string; particles: number; jobName: string } | null>(null);
   // [ZUSTAND] mcResults — managed via calculationStore
-  const [lastMCResult, setLastMCResult] = useState<string | null>(null);
+  const [lastMCResult] = useState<string | null>(null);
   // [ZUSTAND] barrierCalculator
   // const [showBarrierCalculatorDialog, setShowBarrierCalculatorDialog] = useState(false);
   // Dark mode
@@ -448,9 +444,7 @@ export default function ShieldingDesigner() {
   // [ZUSTAND] versaHD
   // const [showVersaHDDialog, setShowVersaHDDialog] = useState(false);
   // [ZUSTAND] icru57
-  const [showICRU57Dialog, setShowICRU57Dialog] = useState(false);
   // [ZUSTAND] icru96
-  const [showICRU96Dialog, setShowICRU96Dialog] = useState(false);
   // v13.2: Consolidated library dialogs
   // [ZUSTAND] equipmentLibrary
   // const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(false);
@@ -502,11 +496,11 @@ export default function ShieldingDesigner() {
   
   // v15: Undo/Redo History Panel
   
-  const [actionHistory, setActionHistory] = useState<Array<{id: number; timestamp: number; action: string; description: string; type: string}>>([]);
+  const [actionHistory] = useState<Array<{id: number; timestamp: number; action: string; description: string; type: string}>>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   // v15: Contextual Help Panel
   
-  const [helpContext, setHelpContext] = useState('default');
+  const [helpContext] = useState('default');
   // v15: Visualization dialogs
   
   
@@ -675,19 +669,19 @@ export default function ShieldingDesigner() {
   // v82: Canvas panel visibility states
 
   const [showShapeLibrary, setShowShapeLibrary] = useState(false);
-  const [showStickyNotesPanel, setShowStickyNotesPanel] = useState(false);
+  const [, setShowStickyNotesPanel] = useState(false);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showRoomTemplates, setShowRoomTemplates] = useState(false);
   const [showDxfImportReview, setShowDxfImportReview] = useState(false);
-  const [draggedShape, setDraggedShape] = useState<ShapeItem | null>(null);
+  const [, setDraggedShape] = useState<ShapeItem | null>(null);
   // v80: Smart Rooms
 
   // v82: Update Center dialog
 
   // v89: Backend integration
-  const { persistCalculationResults, materials: backendMaterials, reports: backendReports, projects: backendProjects } = useBackend();
+  const { persistCalculationResults, materials: backendMaterials, reports: backendReports } = useBackend();
   // v42: Controlled areas hook
-  const controlledAreas = useControlledAreas();
+  useControlledAreas();
   // v82: Canvas enhancements hooks
   const canvasLayers = useCanvasLayers();
   const stickyNotes = useStickyNotes();
@@ -815,10 +809,10 @@ export default function ShieldingDesigner() {
     setActiveTool('select');
     toast.success(`Plantilla aplicada al plano: ${barriers.length} barreras, ${sources.length} fuentes, ${occupiedRegions.length} zonas`);
   }, [floorPlan.scale_m_per_pixel, roomTemplates, setFloorPlan]);
-  const fileSystem = useFileSystemAccess();
+  useFileSystemAccess();
   const broadcastChannel = useBroadcastChannel();
-  const indexedDB = useIndexedDB();
-  const serviceWorker = useServiceWorker();
+  useIndexedDB();
+  useServiceWorker();
   // v47: Real API integrations — Fase 1.3, 1.4, 3.13
   // Fase 11: sin caché de resultados en IndexedDB: guardaba los del motor retirado y no los espesores del plano.
   const highContrast = useHighContrast();
@@ -832,7 +826,7 @@ export default function ShieldingDesigner() {
   // v97: OpenCV.js wall/room detection
   const openCV = useOpenCV();
   // v50.1: Responsive layout
-  const responsive = useResponsiveLayout();
+  useResponsiveLayout();
   // v50: profiler (instanciado una sola vez). Fase 11: AsyncShieldingEngine retirado (motor único: motorProyecto).
   const profilerRef = useRef(createProfiler());
   const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([]);
@@ -1037,8 +1031,8 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
   };
   const [heatmapData, setHeatmapData] = useState<{ x: number; y: number; kerma: number }[]>([]);
-  const [isodosisProfiles, setIsodosisProfiles] = useState<CTIsodosisProfile[]>([]);
-  const [selectedIsodosisId, setSelectedIsodosisId] = useState<string | null>(null);
+  const [isodosisProfiles] = useState<CTIsodosisProfile[]>([]);
+  const [selectedIsodosisId] = useState<string | null>(null);
 
   const [reportMeta, setReportMeta] = useState({
     preparerName: '', reviewerName: '', institution: '', licenseNumber: ''
@@ -1056,7 +1050,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const [showSamplePoints, setShowSamplePoints] = useState(true);
   const [showMaxima, setShowMaxima] = useState(true);
 
-  const { canvasRef, canvasState, setCanvasState, hoverInfo, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
+  const { canvasRef, canvasState, setCanvasState, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
 
   useEffect(() => {
     const handleDxfImported = (event: Event) => {
@@ -1499,7 +1493,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   }, [barrierResults, exportPNG, floorPlan, heatmapData, sampleLines]);
 
   // v48.4: Canvas keyboard navigation (must be after useCanvas for canvasRef)
-  const canvasKeyboardNav = useCanvasKeyboardNav({
+  useCanvasKeyboardNav({
     canvasRef,
     floorPlan,
     state: { offsetX: canvasState.offsetX, offsetY: canvasState.offsetY, scale: canvasState.scale, selectedId: canvasState.selectedId },
@@ -1812,13 +1806,6 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const selectedBarrier = floorPlan.barriers.find(b => b.id === canvasState.selectedId) || null;
   const selectedCriticalPoint = floorPlan.criticalPoints?.find(point => point.id === canvasState.selectedId) || null;
 
-  const handleIsodosisUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => { const profile = parseIsodosisFile(ev.target?.result as string, file.name); if (profile) { setIsodosisProfiles(prev => [...prev, profile]); setSelectedIsodosisId(profile.id); toast.success(`Curva isodosis cargada: ${profile.name}`); } else toast.error('Formato no reconocido'); };
-    reader.readAsText(file);
-  }, []);
-
   const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     const reader = new FileReader();
@@ -1921,16 +1908,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${nombreArchivo(floorPlan.name)}.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('PDF generado y descargado');
   }, [floorPlan, reportMeta, barrierResults, sampleLines]);
-
-  // v15: Action history tracking
-  const addActionHistory = useCallback((action: string, description: string, type: string = 'other') => {
-    setActionHistory(prev => {
-      const next = [...prev, { id: prev.length, timestamp: Date.now(), action, description, type }];
-      if (next.length > 100) next.shift();
-      return next;
-    });
-    setHistoryIndex(prev => prev + 1);
-  }, []);
 
   // v15: Command Palette handlers
   const commandHandlers: Record<string, () => void> = {

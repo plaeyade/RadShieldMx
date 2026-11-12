@@ -99,7 +99,7 @@ export function useWebGPU() {
       setInitialized(true);
       toast.success(`WebGPU activado: ${adapter.info?.vendor || 'GPU'}`);
       return true;
-    } catch (err) {
+    } catch {
       toast.info('WebGPU no disponible — cálculos en CPU');
       return false;
     }

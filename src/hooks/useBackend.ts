@@ -11,17 +11,8 @@
 
 import { useCallback } from "react";
 import { trpc } from "@/providers/trpc";
-import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import type { ControlledZoneDbPersistenceDraft } from "@/lib/controlledZoneCalculationAdapter";
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// User ID helper — uses Kimi OAuth when authenticated, falls back to anonymous
-// ═══════════════════════════════════════════════════════════════════════════════
-function useUserId(): string {
-  const { user } = useAuth();
-  return user?.unionId || localStorage.getItem("radshield_user_id") || "anonymous";
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. CALCULATIONS — Historial de calculos NCRP

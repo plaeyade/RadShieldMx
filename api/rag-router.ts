@@ -20,7 +20,6 @@ import { chatCompletion } from "@/lib/llm/client";
 import { buildChatMessages } from "@/lib/llm/prompts";
 import { getDb } from "./queries/connection";
 import { chatMessages } from "@db/schema";
-import { eq } from "drizzle-orm";
 
 export const ragRouter = createRouter({
   // ─── Vector Search (retrieve chunks) ───

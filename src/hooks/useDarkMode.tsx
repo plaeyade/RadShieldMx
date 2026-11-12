@@ -15,7 +15,7 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isDark) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
-    try { localStorage.setItem('radshield_dark', isDark ? '1' : '0'); } catch {}
+    try { localStorage.setItem('radshield_dark', isDark ? '1' : '0'); } catch { /* almacenamiento no disponible */ }
   }, [isDark]);
 
   const toggle = useCallback(() => setIsDark(d => !d), []);

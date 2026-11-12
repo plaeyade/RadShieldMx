@@ -11,7 +11,7 @@ import { chatCompletion, generateEmbedding, checkLLMHealth } from "@/lib/llm/cli
 import { buildChatMessages } from "@/lib/llm/prompts";
 import { getDb } from "./queries/connection";
 import { chatMessages } from "@db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const aiRouter = createRouter({
   // ─── Chat Completion (non-streaming) ───

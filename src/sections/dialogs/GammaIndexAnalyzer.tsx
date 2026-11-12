@@ -192,7 +192,7 @@ function GammaCanvas({
       points.forEach((p, i) => {
         const x = toX(p.x);
         const y = toY(p.doseRef);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       });
       ctx.stroke();
 
@@ -204,7 +204,7 @@ function GammaCanvas({
       points.forEach((p, i) => {
         const x = toX(p.x);
         const y = toY(p.doseEval);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       });
       ctx.stroke();
       ctx.setLineDash([]);
