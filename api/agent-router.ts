@@ -9,6 +9,7 @@ import { z } from "zod";
 import { authedQuery, createRouter } from "./middleware";
 import { getDb } from "./queries/connection";
 import { calculations } from "@db/schema";
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 export const agentRouter = createRouter({
   // ─── Run shielding design agent ───
@@ -20,8 +21,8 @@ export const agentRouter = createRouter({
         workload: z.number().min(1).max(5000),
         distances: z.record(z.string(), z.number()),
         occupancy: z.record(z.string(), z.number()),
-        goalDoseControlled: z.number().default(0.4),
-        goalDoseUncontrolled: z.number().default(0.02),
+        goalDoseControlled: z.number().default(P_CONTROLADA_mSv_semana),
+        goalDoseUncontrolled: z.number().default(P_NO_CONTROLADA_mSv_semana),
         useFactor: z.number().default(0.25),
         material: z.string().default("concrete"),
         specialConsiderations: z.array(z.string()).optional(),

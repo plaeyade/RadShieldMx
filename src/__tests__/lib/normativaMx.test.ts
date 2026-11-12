@@ -43,4 +43,13 @@ describe('NOM-008-NUCL-2024 (sustituye a la NOM-008-NUCL-2011)', () => {
       .map((p) => relative(SRC, p));
     expect(conReferenciaVieja).toEqual([]);
   });
+
+  it('ningún archivo de src cita «NOM-008-NUCL» sin año: se usa NOM_008_NUCL.clave', () => {
+    const sinAnio = /NOM-008-NUCL(?!-\d{4})(?![\w-])/;
+    const conCitaSinAnio = archivos(SRC)
+      .filter((p) => !p.endsWith('normativaMx.ts'))
+      .filter((p) => readFileSync(p, 'utf-8').split('\n').some((l) => sinAnio.test(l)))
+      .map((p) => relative(SRC, p));
+    expect(conCitaSinAnio).toEqual([]);
+  });
 });

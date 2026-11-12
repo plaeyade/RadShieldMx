@@ -9,6 +9,8 @@
  */
 
 import { insertChunk, countChunks, deleteAllChunks } from "../api/lib/vectorStore";
+// Objetivos de diseño P: fuente única src/lib/limitesDosis.ts (NCRP 147 §1.3 / NCRP 151 §1.2).
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from "../src/lib/limitesDosis";
 
 // ─── NCRP 151 Table B.1 — TVL Values for Concrete ───
 const NCRP151_TVL_CONCRETE = [
@@ -99,7 +101,7 @@ const TG108_SECTIONS = [
   },
   {
     section: "Section 4 — Dose Limits and Calculations",
-    content: `For PET/CT facilities, calculate dose at 30 cm beyond each barrier. Design goal for uncontrolled areas: 0.02 mSv/week (1 mSv/year). For controlled areas: 0.4 mSv/week (20 mSv/year). Account for decay of F-18 (T½ = 109.8 min) between injection and imaging. Typical administered activity: 370-555 MBq (10-15 mCi) per patient.`,
+    content: `For PET/CT facilities, calculate dose at 30 cm beyond each barrier. Design goal for uncontrolled areas: ${P_NO_CONTROLADA_mSv_semana} mSv/week (1 mSv/year). For controlled areas: ${P_CONTROLADA_mSv_semana} mSv/week (5 mSv/year; NCRP 147 §1.3 / NCRP 151 §1.2). Account for decay of F-18 (T½ = 109.8 min) between injection and imaging. Typical administered activity: 370-555 MBq (10-15 mCi) per patient.`,
     tags: ["PET/CT", "dose limits", "F-18", "decay", "TG 108"],
   },
 ];
@@ -108,7 +110,7 @@ const TG108_SECTIONS = [
 const CNSNS_SECTIONS = [
   {
     section: "Mexico — Dose limits and design goals (ICRP 103 / RGSR)",
-    content: `Dose limits applied for Mexico (ICRP 103; the RGSR 1988 lists 50 mSv/y occupational and 5 mSv/y public as historic values; NOM-008-NUCL-2024 does not set dose limits): Occupational exposure (controlled areas): 20 mSv/year averaged over 5 years, not exceeding 50 mSv in any single year. Public exposure (uncontrolled areas): 1 mSv/year. For shielding design, the weekly design goals are: P = 0.4 mSv/week for controlled areas and P = 0.02 mSv/week for public/uncontrolled areas. These are consistent with ICRP 103 recommendations.`,
+    content: `Dose limits applied for Mexico (ICRP 103; the RGSR 1988 lists 50 mSv/y occupational and 5 mSv/y public as historic values; NOM-008-NUCL-2024 does not set dose limits): Occupational exposure (controlled areas): 20 mSv/year averaged over 5 years, not exceeding 50 mSv in any single year. Public exposure (uncontrolled areas): 1 mSv/year. For shielding design, the weekly design goals are: P = ${P_CONTROLADA_mSv_semana} mSv/week for controlled areas and P = ${P_NO_CONTROLADA_mSv_semana} mSv/week for public/uncontrolled areas (NCRP 147 §1.3 / NCRP 151 §1.2). These are consistent with ICRP 103 recommendations.`,
     tags: ["Mexico", "RGSR", "dose limits", "CNSNS"],
   },
   {

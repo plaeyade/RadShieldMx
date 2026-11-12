@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Search, ChevronRight } from 'lucide-react';
 import FullscreenShell from '@/components/FullscreenShell';
+import { TEXTO_OBJETIVOS_DISENO } from '@/lib/limitesDosis';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -80,7 +81,7 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
 **Zoom:** Rueda del ratón. Grid snapping: cuadrícula 10 cm con snap automático.
 
 **v43 ResizeObserver:** El canvas se redimensiona automáticamente cuando cambia el tamaño de la ventana o del panel lateral. Usa devicePixelRatio para nítidez en HiDPI.` },
-  { id:'2.2', t:'canvas', title:'2.2 Áreas Controladas (v42)', content:`Polígonos con clasificación de riesgo radiológico (criterio de la herramienta; la NOM-008-NUCL-2024 define zona de radiación > 0.05 mSv/h y de alta radiación > 1 mSv/h): Área Controlada (rojo, >20 μSv/h), Supervisada (ámbar, 7.5–20 μSv/h), Pública (verde, <7.5 μSv/semana), Restringida (púrpura, >100 μSv/h). Herramienta R para dibujar, doble clic para cerrar polígono.` },
+  { id:'2.2', t:'canvas', title:'2.2 Áreas Controladas (v42)', content:`Polígonos con clasificación de riesgo radiológico (criterio de la herramienta; la NOM-008-NUCL-2024 define zona de radiación > 0.05 mSv/h y de alta radiación > 1 mSv/h): Área Controlada (rojo, >20 μSv/h), Supervisada (ámbar, 7.5–20 μSv/h), Pública (verde, <7.5 μSv/h), Restringida (púrpura, >100 μSv/h). Herramienta R para dibujar, doble clic para cerrar polígono.` },
   { id:'2.3', t:'canvas', title:'2.3 Sample Lines y Cálculo RadShield', content:`Líneas de muestreo a 0.3 m más allá de cada barrera (NCRP 147, DeLorenzo et al. 2016). 200 puntos por barrera. Cálculo de kerma por ley del inverso del cuadrado + scatter-primary ratio de McGinley. Espesor por inverseArcher() (NCRP 147) o tvlThickness() (NCRP 151). Conversión concreto-plomo basada en TVLs reales (corregido en v42).` },
 
   // ── SECCIÓN 3: CÁLCULOS ──
@@ -114,7 +115,7 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
   // ── SECCIÓN 5: HERRAMIENTAS ──
   { id:'5.1', t:'tools', title:'5.1 Gamma Index Analyzer (v41)', content:`Análisis gamma 2D/3D inspirado en TopasGraphSim. Criterios DTA+DD: 2mm/2%, 3mm/3%, 1mm/1%. PDD, perfiles laterales, mapa de calor gamma 2D. Pass rate, mean γ, max γ. Low et al. (1998), TG-218.` },
   { id:'5.2', t:'tools', title:'5.2 DVH Analyzer (v41)', content:`Dose-Volume Histograms inspirado en matRad. Planes: Próstata IMRT, Pulmón SBRT, H&N IMRT. Métricas: D95, D50, D2, D98, HI, CI. ICRU 83/91.` },
-  { id:'5.3', t:'tools', title:'5.3 Nuclear Dose Grid (v41)', content:`Grid PET/SPECT (F-18, Ga-68, Tc-99m, I-131, Y-90, Lu-177). Modelo punto fuente: H = Γ×A/d². Límites CNSNS: 20 μSv/h controlado, 7.5 μSv/semana público.` },
+  { id:'5.3', t:'tools', title:'5.3 Nuclear Dose Grid (v41)', content:`Grid PET/SPECT (F-18, Ga-68, Tc-99m, I-131, Y-90, Lu-177). Modelo punto fuente: H = Γ×A/d². Umbrales de la cuadrícula (tasa): 20 μSv/h y 7.5 μSv/h. Objetivos de diseño semanales: ${TEXTO_OBJETIVOS_DISENO}.` },
   { id:'5.4', t:'tools', title:'5.4 Monte Carlo Dose Engine (v41)', content:`MC simplificado con fantomas ICRP 110 (adulto M/F, pediátricos 15/10/5/0 años). CTDI, DLP, dosis por órgano. IEC 60601-2-44.` },
   { id:'5.5', t:'tools', title:'5.5 Performance & Optimization (v42)', content:`24 recomendaciones de rendimiento en 5 categorías: Motores (3/6 implementadas), Canvas (2/6), Memoria (2/4), Red (0/3), UX (2/2). Total: 9 implementadas (38%), 11 pendientes (46%), 4 futuras (16%).` },
 

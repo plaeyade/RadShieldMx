@@ -6,6 +6,7 @@
  * ═══════════════════════════════════════════════════════════
  */
 import { barreraMV, energiaTabuladaMV } from "../calculadorasNormativas";
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '../limitesDosis';
 
 export interface ShieldingDataPoint {
   energy: number;      // MV (4, 6, 10, 15, 18, 20, 24)
@@ -48,7 +49,7 @@ export function generateTrainingDataset(size: number = 2000): ShieldingDataPoint
     const distance = 1.5 + Math.random() * 6.5; // 1.5 to 8.0 m
     const workload = 50 + Math.random() * 950;   // 50 to 1000 Gy/wk
     const occupancy = [1.0, 0.5, 0.2, 0.125, 0.05, 0.025][Math.floor(Math.random() * 6)];
-    const goalDose = Math.random() > 0.5 ? 0.1 : 0.02; // controlada (NCRP 151 §1.3) vs no controlada
+    const goalDose = Math.random() > 0.5 ? P_CONTROLADA_mSv_semana : P_NO_CONTROLADA_mSv_semana; // controlada (NCRP 151 §1.3) vs no controlada
     const useFactor = Math.random() > 0.5 ? 1.0 : 0.25; // floor vs wall
     const materialIdx = Math.floor(Math.random() * 4);  // 0-3
 

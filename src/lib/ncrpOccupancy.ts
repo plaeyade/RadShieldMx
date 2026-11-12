@@ -5,6 +5,8 @@
  * ═══════════════════════════════════════════════════════════
  */
 
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
+
 export interface OccupancyProfile {
   id: string;
   name: string;
@@ -140,18 +142,18 @@ export const NCRP_OCCUPANCY_PROFILES: OccupancyProfile[] = [
   }
 ];
 
-/** Design goals (P) in mSv/week per NCRP 147 / 151 */
+/** Design goals (P) in mSv/week per NCRP 147 / 151. Derivados de la fuente única `limitesDosis.ts`. */
 export const NCRP_DESIGN_GOALS = {
-  /** Controlled areas — 0.1 mSv/week (5 mSv/year / 50 weeks) */
-  controlled: 0.1,
-  /** Uncontrolled areas — 0.02 mSv/week (1 mSv/year / 50 weeks) */
-  uncontrolled: 0.02,
-  /** Public areas — 0.02 mSv/week */
-  public: 0.02,
-  /** Staff areas — 0.1 mSv/week */
-  staff: 0.1,
-  /** Shielded console area — 0.02 mSv/week */
-  console: 0.02,
+  /** Controlled areas (P_CONTROLADA_mSv_semana) */
+  controlled: P_CONTROLADA_mSv_semana,
+  /** Uncontrolled areas (P_NO_CONTROLADA_mSv_semana) */
+  uncontrolled: P_NO_CONTROLADA_mSv_semana,
+  /** Public areas: objetivo de área no controlada */
+  public: P_NO_CONTROLADA_mSv_semana,
+  /** Staff areas: objetivo de área controlada */
+  staff: P_CONTROLADA_mSv_semana,
+  /** Shielded console area: objetivo de área no controlada (criterio conservador de la herramienta) */
+  console: P_NO_CONTROLADA_mSv_semana,
 } as const;
 
 /** Suggest occupancy profile based on region/barrier name keywords */

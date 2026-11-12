@@ -7,6 +7,8 @@
  */
 
 import { insertChunk, countChunks, deleteAllChunks } from "../api/lib/vectorStore";
+// Objetivos de diseño P: fuente única src/lib/limitesDosis.ts (NCRP 147 §1.3 / NCRP 151 §1.2).
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from "../src/lib/limitesDosis";
 
 // ─── NCRP 151 Table B.1 — Complete TVL Data ───
 const NCRP151_TVL = [
@@ -66,7 +68,7 @@ The primary barrier is any wall, ceiling, or floor that the useful (primary) bea
 B_pri = (P * d_pri^2) / (W * U * T)
 
 Where:
-- P = shielding design goal (Sv/week or mSv/week). Typical: 0.02 mSv/wk for uncontrolled, 0.4 mSv/wk for controlled.
+- P = shielding design goal (Sv/week or mSv/week). Typical: ${P_NO_CONTROLADA_mSv_semana} mSv/wk for uncontrolled, ${P_CONTROLADA_mSv_semana} mSv/wk for controlled (NCRP 151 §1.2).
 - d_pri = distance from x-ray target to measurement point (meters)
 - W = workload (Gy/week at 1m)
 - U = use factor (fraction of time beam is directed at the barrier). U=1 for floor (isocentric), U=0.25 for walls (gantry rotates over 4 walls).
@@ -223,14 +225,14 @@ TVL1=44 cm, TVLe=41 cm (concrete).
 t = 44 + (3.15-1)*41 = 44 + 88.2 = 132.2 cm concrete.
 Actual floor: 150 cm concrete. PASS.
 
-Barrier B (wall, controlled): P=0.4 mSv/wk, d=5.5m, U=0.25, T=1.
-B = 0.4 * 5.5^2 / (500 * 0.25 * 1) = 0.0968.
-n = -log10(0.0968) = 1.01 TVLs.
-t = 44 + (1.01-1)*41 = 44 + 0.4 = 44.4 cm concrete.
+Barrier B (wall, controlled): P=${P_CONTROLADA_mSv_semana} mSv/wk, d=5.5m, U=0.25, T=1.
+B = 0.1 * 5.5^2 / (500 * 0.25 * 1) = 0.0242.
+n = -log10(0.0242) = 1.62 TVLs.
+t = 44 + (1.62-1)*41 = 44 + 25.3 = 69.3 cm concrete.
 Actual wall: 120 cm concrete. PASS.
 
 Neutron check at maze door: For 15 MV, single-leg maze, door distance 8m from isocenter.
-Neutron dose calculated: 0.15 mSv/wk. Limit: 0.4 mSv/wk (controlled). PASS with BPE 3 cm + Pb 2 mm.`,
+Neutron dose calculated without door shielding: 0.15 mSv/wk, above P = ${P_CONTROLADA_mSv_semana} mSv/wk (controlled). Add BPE + Pb to the door (e.g., 3 cm BPE + 2 mm Pb) and recalculate until H <= P.`,
     tags: ["example calculation", "15 MV", "concrete", "maze", "neutron", "NCRP 151"],
     energyMin: 15, energyMax: 15,
   },
@@ -325,8 +327,8 @@ Dose Limits (Límites de dosis):
 - Public (población general): 1 mSv/year.
 
 Shielding Design Goals (Metas de diseño de blindaje):
-- Controlled areas (áreas controladas): P = 0.4 mSv/week (= 20 mSv/year / 50 weeks)
-- Uncontrolled areas (áreas no controladas): P = 0.02 mSv/week (= 1 mSv/year / 50 weeks)
+- Controlled areas (áreas controladas): P = ${P_CONTROLADA_mSv_semana} mSv/week (= 5 mSv/year / 50 weeks; NCRP 147 §1.3 / NCRP 151 §1.2)
+- Uncontrolled areas (áreas no controladas): P = ${P_NO_CONTROLADA_mSv_semana} mSv/week (= 1 mSv/year / 50 weeks)
 - These values are consistent with NCRP 151 recommendations and ICRP 103.
 
 The CNSNS (Comisión Nacional de Seguridad Nuclear y Salvaguardias) requires:
@@ -384,7 +386,7 @@ const CALCULATION_EXAMPLES = [
 LINAC: Varian Clinac iX, 6 MV
 Workload: 300 Gy/week (3D CRT + IMRT mix)
 Bunker: Basement, concrete walls 116-151 cm thick
-Design goals: Uncontrolled = 0.02 mSv/wk, Controlled = 0.4 mSv/wk
+Design goals: Uncontrolled = ${P_NO_CONTROLADA_mSv_semana} mSv/wk; Controlled = the report's own criterion, which is not the NCRP 147/151 goal (RadShield uses P = ${P_CONTROLADA_mSv_semana} mSv/wk for controlled areas; recheck Point B with it)
 
 Results:
 - Point A (uncontrolled, wall): 61.9" concrete needed, 116" present → PASS

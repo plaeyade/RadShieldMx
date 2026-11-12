@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Gauge, AlertTriangle, CheckCircle, TrendingUp, Shield, Activity, BarChart3 } from 'lucide-react';
 import type { FloorPlan } from '@/types/radshield';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 interface Props {
   open: boolean;
@@ -96,7 +97,7 @@ export default function DashboardCalcDialog({ open, onOpenChange, floorPlan }: P
                   {stats.numBarriers > 0 && stats.barriersOK === stats.numBarriers ? 'Todas las barreras cumplen (instalado ≥ requerido)' : `${stats.numBarriers - stats.barriersOK} barrera(s) sin cumplir o pendientes`}
                 </div>
                 <div className="text-xs text-gray-500">
-                  Objetivos de diseño NCRP 147/151: área controlada 0.1 mSv/semana; no controlada 0.02 mSv/semana. {stats.pendientes} barrera(s) sin cálculo o sin espesor declarado.
+                  Objetivos de diseño NCRP 147/151: área controlada {P_CONTROLADA_mSv_semana} mSv/semana; no controlada {P_NO_CONTROLADA_mSv_semana} mSv/semana. {stats.pendientes} barrera(s) sin cálculo o sin espesor declarado.
                 </div>
               </div>
             </div>

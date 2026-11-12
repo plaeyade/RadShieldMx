@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Atom, Shield, Activity, Stethoscope, FileText, Download, Calculator, Clock, Users } from 'lucide-react';
+import { P_CONTROLADA_uSv_semana } from '@/lib/limitesDosis';
 
 interface Props {
   open: boolean;
@@ -197,7 +198,7 @@ export default function GammaKnifeDialog({ open, onOpenChange }: Props) {
               </div>
 
               <h3 className="text-sm font-semibold text-gray-800 mt-4 flex items-center gap-2"><Shield className="w-4 h-4 text-cyan-600" /> Resultados del expediente — Memoria HAHS Pedregal (transcritos, no recalculados)</h3>
-              <div className="text-[10px] text-amber-700">* S1a: el expediente usa P = 400 μSv/semana; el objetivo de NCRP 147/151 para área controlada es 100 μSv/semana (ver «Calculo»).</div>
+              <div className="text-[10px] text-amber-700">* S1a: el expediente usa P = 400 μSv/semana; el objetivo de NCRP 147/151 para área controlada es {P_CONTROLADA_uSv_semana} μSv/semana (ver «Calculo»).</div>
               <div className="overflow-auto">
                 <table className="w-full text-[10px] border-collapse">
                   <thead><tr className="bg-gray-100"><th className="p-1 border">Punto</th><th className="p-1 border">Colindancia</th><th className="p-1 border">Tipo</th><th className="p-1 border">P (uSv/sem)</th><th className="p-1 border">T</th><th className="p-1 border">Concreto (cm)</th><th className="p-1 border">Plomo (mm)</th></tr></thead>

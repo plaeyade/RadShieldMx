@@ -7,6 +7,8 @@
  */
 
 import { insertChunk, countChunks, deleteAllChunks } from "../api/lib/vectorStore";
+// Objetivos de diseño P: fuente única src/lib/limitesDosis.ts (NCRP 147 §1.3 / NCRP 151 §1.2).
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from "../src/lib/limitesDosis";
 
 const CHUNKS = [
   // ═══ NCRP 151 — ORIGINAL PDF EXTRACTS ═══
@@ -20,7 +22,7 @@ const CHUNKS = [
   {
     source: "NCRP 151 (Original PDF)",
     section: "Section 1.4 — Shielding Design Goals",
-    content: `In this Report, shielding design goals (P) are levels of dose equivalent (H) used in the design calculations and evaluation of barriers constructed for the protection of workers or members of the public. There are different shielding design goals for controlled and uncontrolled areas. For controlled areas: P = 0.4 mSv/week (20 mSv/year / 50 weeks). For uncontrolled areas: P = 0.02 mSv/week (1 mSv/year / 50 weeks). The approach for structural shielding design for radiotherapy facilities uses shielding design goals and the NCRP recommended effective dose (E) limits for workers and members of the public. It is not practical to base shielding design directly on E. Determination of E is complex, and depends on the attenuation of photons and neutrons in the body. For the purposes of this Report, the shielding design goals are stated in terms of H (in millisievert) at the point of nearest occupancy beyond the barrier. For example, the distance of closest approach to a wall bounding a radiotherapy room can be assumed to be not less than 0.3 m.`,
+    content: `In this Report, shielding design goals (P) are levels of dose equivalent (H) used in the design calculations and evaluation of barriers constructed for the protection of workers or members of the public. There are different shielding design goals for controlled and uncontrolled areas. For controlled areas: P = ${P_CONTROLADA_mSv_semana} mSv/week (5 mSv/year / 50 weeks). For uncontrolled areas: P = ${P_NO_CONTROLADA_mSv_semana} mSv/week (1 mSv/year / 50 weeks). The approach for structural shielding design for radiotherapy facilities uses shielding design goals and the NCRP recommended effective dose (E) limits for workers and members of the public. It is not practical to base shielding design directly on E. Determination of E is complex, and depends on the attenuation of photons and neutrons in the body. For the purposes of this Report, the shielding design goals are stated in terms of H (in millisievert) at the point of nearest occupancy beyond the barrier. For example, the distance of closest approach to a wall bounding a radiotherapy room can be assumed to be not less than 0.3 m.`,
     tags: ["NCRP 151", "design goals", "dose limits", "P value", "controlled", "uncontrolled"],
   },
   {
@@ -89,7 +91,7 @@ const CHUNKS = [
   {
     source: "NCRP 147 (Original PDF)",
     section: "Section 1.1 — Purpose and Scope",
-    content: `This Report addresses the structural shielding design for medical x-ray imaging facilities and supersedes the parts that address such facilities in NCRP Report No. 49 (1976). It covers radiographic installations, fluoroscopic installations, interventional facilities, dedicated chest installations, mammographic installations, computed tomography (CT) installations, mobile radiography, dental x-ray facilities, bone mineral measurement equipment, and veterinary x-ray facilities. The shielding design goals are: P = 0.4 mSv/week (controlled areas) and P = 0.02 mSv/week (uncontrolled areas), same as NCRP 151. For imaging facilities, the primary concern is scatter radiation from the patient and leakage from the x-ray tube housing. The use of Kerma (Ka) in air is the recommended quantity for shielding calculations, measured in gray (Gy).`,
+    content: `This Report addresses the structural shielding design for medical x-ray imaging facilities and supersedes the parts that address such facilities in NCRP Report No. 49 (1976). It covers radiographic installations, fluoroscopic installations, interventional facilities, dedicated chest installations, mammographic installations, computed tomography (CT) installations, mobile radiography, dental x-ray facilities, bone mineral measurement equipment, and veterinary x-ray facilities. The shielding design goals are: P = ${P_CONTROLADA_mSv_semana} mSv/week (controlled areas) and P = ${P_NO_CONTROLADA_mSv_semana} mSv/week (uncontrolled areas), same as NCRP 151. For imaging facilities, the primary concern is scatter radiation from the patient and leakage from the x-ray tube housing. The use of Kerma (Ka) in air is the recommended quantity for shielding calculations, measured in gray (Gy).`,
     tags: ["NCRP 147", "imaging", "diagnostic", "CT", "fluoroscopy", "mammography"],
   },
   {
@@ -107,7 +109,7 @@ const CHUNKS = [
   {
     source: "NCRP 147 (Original PDF)",
     section: "Section 4.1 — Shielding Design Goals and Occupancy",
-    content: `NCRP 147 shielding design goals: P = 0.4 mSv/week for controlled areas, P = 0.02 mSv/week for uncontrolled areas. Occupancy factors for imaging facilities: Full occupancy (T=1.0): offices, nurses stations, control rooms, patient wards. Partial occupancy (T=0.5): patient examination rooms. Occasional occupancy (T=0.2): corridors, waiting rooms, lounges. Rare occupancy (T=0.05): public toilets, storage, outdoor seating. Workload definition for imaging: W = total mA-minutes per week. Typical workloads: Chest room 50 mA-min/week, general radiography 300 mA-min/week, busy fluoroscopy 500-1000 mA-min/week. Use factor U = 1 for floor (overhead tube), U = 0.25 for each wall (tube rotation), U = 0.05 for ceiling (rarely used overhead).`,
+    content: `NCRP 147 shielding design goals: P = ${P_CONTROLADA_mSv_semana} mSv/week for controlled areas, P = ${P_NO_CONTROLADA_mSv_semana} mSv/week for uncontrolled areas. Occupancy factors for imaging facilities: Full occupancy (T=1.0): offices, nurses stations, control rooms, patient wards. Partial occupancy (T=0.5): patient examination rooms. Occasional occupancy (T=0.2): corridors, waiting rooms, lounges. Rare occupancy (T=0.05): public toilets, storage, outdoor seating. Workload definition for imaging: W = total mA-minutes per week. Typical workloads: Chest room 50 mA-min/week, general radiography 300 mA-min/week, busy fluoroscopy 500-1000 mA-min/week. Use factor U = 1 for floor (overhead tube), U = 0.25 for each wall (tube rotation), U = 0.05 for ceiling (rarely used overhead).`,
     tags: ["NCRP 147", "design goals", "occupancy", "workload", "use factor"],
   },
 
@@ -142,7 +144,7 @@ const CHUNKS = [
   {
     source: "Quick Reference Card",
     section: "NCRP 151 Formula Summary",
-    content: `QUICK REFERENCE — NCRP 151 Shielding Formulas:\n\nPRIMARY BARRIER:\nB = P * d^2 / (W * U * T)\nn = -log10(B)\nt = TVL1 + (n-1) * TVLe\n\nSECONDARY — SCATTER:\nK_sec = a * W * T / (d_scatter^2 * d_sec^2)\n\nSECONDARY — LEAKAGE:\nK_leak = 0.001 * W * T / d_leak^2\n\nMAZE (McGinley):\nD_n = 2.4E-15 * Phi * sqrt(S0) * (1.64*10^(-d1/5.4) + 10^(-d2/5.4))\n\nTVL VALUES (concrete, cm):\nCo-60: 21 | 4 MV: 29 | 6 MV: 37 | 10 MV: 37 | 15 MV: 44 | 18 MV: 45 | 20 MV: 46 | 24 MV: 48\n\nOCCUPANCY (T):\nFull: 1.0 | Patient exam: 0.5 | Corridor: 0.2 | Public toilet: 0.125 | Outdoor seating: 0.05 | Transient: 0.025\n\nDESIGN GOALS (P):\nControlled: 0.4 mSv/wk | Uncontrolled: 0.02 mSv/wk`,
+    content: `QUICK REFERENCE — NCRP 151 Shielding Formulas:\n\nPRIMARY BARRIER:\nB = P * d^2 / (W * U * T)\nn = -log10(B)\nt = TVL1 + (n-1) * TVLe\n\nSECONDARY — SCATTER:\nK_sec = a * W * T / (d_scatter^2 * d_sec^2)\n\nSECONDARY — LEAKAGE:\nK_leak = 0.001 * W * T / d_leak^2\n\nMAZE (McGinley):\nD_n = 2.4E-15 * Phi * sqrt(S0) * (1.64*10^(-d1/5.4) + 10^(-d2/5.4))\n\nTVL VALUES (concrete, cm):\nCo-60: 21 | 4 MV: 29 | 6 MV: 37 | 10 MV: 37 | 15 MV: 44 | 18 MV: 45 | 20 MV: 46 | 24 MV: 48\n\nOCCUPANCY (T):\nFull: 1.0 | Patient exam: 0.5 | Corridor: 0.2 | Public toilet: 0.125 | Outdoor seating: 0.05 | Transient: 0.025\n\nDESIGN GOALS (P):\nControlled: ${P_CONTROLADA_mSv_semana} mSv/wk | Uncontrolled: ${P_NO_CONTROLADA_mSv_semana} mSv/wk`,
     tags: ["quick reference", "formula", "NCRP 151", "summary", "cheatsheet"],
     energyMin: 1, energyMax: 24,
   },

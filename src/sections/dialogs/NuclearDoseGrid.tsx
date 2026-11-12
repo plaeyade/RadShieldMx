@@ -17,6 +17,7 @@ import {
   Grid3X3, Download, Activity, Map, BarChart3,
   CheckCircle, AlertTriangle, Info
 } from 'lucide-react';
+import { TEXTO_OBJETIVOS_DISENO_EN } from '@/lib/limitesDosis';
 
 // Fase 8a: los datos de nucleidos y el cálculo por punto están en `lib/mallaNuclear` (Γ por MBq y transmisión de
 // banda ancha de TG-108 a 511 keV). Antes Γ por MBq se multiplicaba por la actividad en GBq (1000× bajo) y la
@@ -359,7 +360,7 @@ export default function NuclearDoseGrid({ open, onClose }: NuclearDoseGridProps)
                   </div>
                   <div className="flex items-center justify-between bg-amber-50 rounded p-2 border border-amber-100">
                     <span className="text-xs text-amber-700 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> Points exceeding 7.5 μSv/wk (public limit)
+                      <AlertTriangle className="w-3 h-3" /> Points exceeding 7.5 μSv/h (public-area rate threshold)
                     </span>
                     <Badge className="bg-amber-500">{stats.exceeds7_5} / {stats.total}</Badge>
                   </div>
@@ -382,7 +383,8 @@ export default function NuclearDoseGrid({ open, onClose }: NuclearDoseGridProps)
                   <p><b>Reference Limits (Mexico CNSNS):</b></p>
                   <ul className="list-disc list-inside space-y-1 ml-2">
                     <li>Controlled area: 20 μSv/h (instantaneous)</li>
-                    <li>Public area: 7.5 μSv/week (0.375 mSv/yr ÷ 50 weeks)</li>
+                    <li>Public area: 7.5 μSv/h (rate threshold of this grid)</li>
+                      <li>Weekly design goals P: {TEXTO_OBJETIVOS_DISENO_EN}</li>
                     <li>Worker: 100 mSv/5-year averaging (20 mSv/yr)</li>
                   </ul>
                   <p className="text-slate-500 mt-2">Based on pyshield methodology (heydude1337/pyshield) with NCRP 147/151 dose constraints.</p>

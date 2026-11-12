@@ -7,6 +7,7 @@ import type { Medical3DMode, MedicalRoomPreset } from '@/lib/medical3D/sceneBuil
 import { SelectorComponentesDosis } from '../SelectorComponentesDosis';
 import { visualWorkflowPresets } from './constantes';
 import type { PanelMedical3DProps } from './tipos';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 /** Sala, modo (con componentes de dosis), flujo visual F364 y evidencia visual F365-F366. */
 export function PanelFlujoVisual({ estado, exportar }: PanelMedical3DProps) {
@@ -49,7 +50,7 @@ export function PanelFlujoVisual({ estado, exportar }: PanelMedical3DProps) {
         {mode === 'dose' && (
           <div className="space-y-1 rounded border border-slate-200 bg-white p-2" data-testid="medical3d-dosis-motor">
             <div className="text-[9px] text-slate-600">
-              Kerma semanal del motor de campo con las barreras del plano: rojo &gt; 0.1, ámbar &gt; 0.02 mSv/sem.
+              Kerma semanal del motor de campo con las barreras del plano: rojo &gt; {P_CONTROLADA_mSv_semana}, ámbar &gt; {P_NO_CONTROLADA_mSv_semana} mSv/sem.
             </div>
             <SelectorComponentesDosis disponibles={componentesDisponibles} seleccion={componentesDosis} onChange={setComponentesDosis} testId="medical3d-componentes" />
           </div>

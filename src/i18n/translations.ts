@@ -1,3 +1,4 @@
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '../lib/limitesDosis';
 export type Lang = 'es' | 'en';
 
 export const TRANSLATIONS: Record<Lang, Record<string, string>> = {
@@ -205,8 +206,8 @@ export const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     'barrier.nuclear': 'Nuclear',
 
     // ═══ DESIGN GOALS ═══
-    'design.controlled': 'Area controlada (0.1 mSv/sem)',
-    'design.public': 'Area publica (0.02 mSv/sem)',
+    'design.controlled': `Area controlada (${P_CONTROLADA_mSv_semana} mSv/sem)`,
+    'design.public': `Area publica (${P_NO_CONTROLADA_mSv_semana} mSv/sem)`,
     'design.alara': 'ALARA (0.001 mSv/sem)',
     'design.custom': 'Personalizado',
 
@@ -579,8 +580,8 @@ export const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     'barrier.nuclear': 'Nuclear',
 
     // ═══ DESIGN GOALS ═══
-    'design.controlled': 'Controlled area (0.1 mSv/wk)',
-    'design.public': 'Public area (0.02 mSv/wk)',
+    'design.controlled': `Controlled area (${P_CONTROLADA_mSv_semana} mSv/wk)`,
+    'design.public': `Public area (${P_NO_CONTROLADA_mSv_semana} mSv/wk)`,
     'design.alara': 'ALARA (0.001 mSv/wk)',
     'design.custom': 'Custom',
 

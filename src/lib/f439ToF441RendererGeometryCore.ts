@@ -2,6 +2,7 @@ import type { Barrier, FloorPlan, OccupiedRegion, RadiationSource } from '@/type
 import type { F426SurfaceRole, F426ToF430CalcRendererClosure } from '@/lib/f426ToF430CalcRendererClosure';
 import type { F436ToF438RendererV2Bridge } from '@/lib/f436ToF438RendererV2Bridge';
 import { getModalityEnergy_MeV } from '@/lib/shieldingMath';
+import { P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
 
 export type F439GeometryEntityType = 'barrier' | 'source' | 'region' | 'penetration' | 'overlay';
 
@@ -170,7 +171,7 @@ function sourceEntity(source: RadiationSource, scaleMPerPixel: number): F439Norm
 
 function regionEntity(region: OccupiedRegion): F439NormalizedGeometryEntity {
   const points = region.points.map((point) => ({ x: finiteNumber(point.x), y: finiteNumber(point.y) }));
-  const controlled = region.designGoal_mSv_per_wk <= 0.02 ? 'public-zone' : 'controlled-zone';
+  const controlled = region.designGoal_mSv_per_wk <= P_NO_CONTROLADA_mSv_semana ? 'public-zone' : 'controlled-zone';
   return {
     id: `region:${region.id}`,
     type: 'region',

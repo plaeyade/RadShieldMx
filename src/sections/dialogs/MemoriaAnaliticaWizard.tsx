@@ -23,6 +23,7 @@ import { C1_IMRT_FACTORS } from '@/lib/uaqProtocol';
 import { barreraMV, energiaTabuladaMV } from '@/lib/calculadorasNormativas';
 import type { MaterialNCRP151 } from '@/lib/ncrp151';
 import { stampNotForSignature } from '@/components/SyntheticResultBanner';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -111,7 +112,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
     const W = parseFloat(memoria.cargaSemanal_Gy);
     if (!Number.isFinite(energy) || !Number.isFinite(W) || W <= 0) return null;
     // Fase 8c: P según el área (antes 0.02 fijo para todas): controlada 0.1, no controlada 0.02 mSv/semana (NCRP 151 §1.2).
-    const P = area.tipo === 'control' || area.tipo === 'controlada' ? 0.1 : 0.02;
+    const P = area.tipo === 'control' || area.tipo === 'controlada' ? P_CONTROLADA_mSv_semana : P_NO_CONTROLADA_mSv_semana;
     // NCRP 151 tabula concreto, acero y plomo. Otros materiales: concreto 2.35 por equivalencia másica si son menos
     // densos (más espesor) y espesor de concreto si son más densos (conservador).
     const mat: MaterialNCRP151 = material.category === 'lead' ? 'lead' : material.category === 'steel' ? 'steel' : 'concrete';

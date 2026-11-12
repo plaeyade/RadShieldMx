@@ -7,6 +7,7 @@
  */
 
 import { NOM_008_NUCL } from './normativaMx';
+import { TEXTO_OBJETIVOS_DISENO_EN } from './limitesDosis';
 
 export interface Regulation {
   id: string;
@@ -148,7 +149,7 @@ export const REGULATIONS: Regulation[] = [
     scope: ['shielding_calculations', 'memoria_analitica', 'radiotherapy', 'nuclear_medicine'],
     applicability: 'national',
     summary: 'Mexican regulatory guide for radiation shielding calculation reports. Required for all new installations and modifications.',
-    keyRequirements: ['Memoria analitica with NCRP methodology', 'Reference dose limit: 0.02 mSv/wk for controlled areas', 'Annual review of calculations', 'Independent verification'],
+    keyRequirements: ['Memoria analitica with NCRP methodology', `Design goals P: ${TEXTO_OBJETIVOS_DISENO_EN}`, 'Annual review of calculations', 'Independent verification'],
     shieldingRequirements: ['NCRP 151/147 methodology mandatory', 'Mexican occupancy factors', 'Workload based on Mexican hospital data'],
     relatedRegulations: ['ncrp-151', 'ncrp-147', 'nom-008'],
   },

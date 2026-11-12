@@ -3,6 +3,7 @@
 // Incluye: Tablas B.1-B.10, Tabla 4.1 (Cargas de trabajo), Tabla B.2 (Ocupación)
 // =============================================================================
 
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
 export interface NCRPTable {
   id: string;
   title: string;
@@ -84,7 +85,7 @@ export const TABLE_B3_DOSE_LIMITS: NCRPTable = {
   notes: [
     'México: RGSR (1988)',
     'USA: NCRP 116 (1993), 10 CFR 20',
-    'Para laberintos: P = 0.02 mSv/semana (público) o 0.1 mSv/semana (POE)',
+    `Para laberintos: P = ${P_NO_CONTROLADA_mSv_semana} mSv/semana (público) o ${P_CONTROLADA_mSv_semana} mSv/semana (POE)`,
   ],
 };
 

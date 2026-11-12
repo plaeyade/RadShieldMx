@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
+import { TEXTO_OBJETIVOS_DISENO } from '@/lib/limitesDosis';
+import { NOM_008_NUCL } from '@/lib/normativaMx';
 
 const GLOSSARY = [
   // === v77: AI/ML/RAG (nuevos) ===
@@ -13,7 +15,7 @@ const GLOSSARY = [
   // === v77: Motores de calculo (nuevos) ===
   { term: 'TVL Interpolacion', def: 'Interpolacion log-lineal de Tenth-Value Layer para energias no tabuladas. v72 B.12. Reduce error de ~15% a <3%.' },
   { term: 'NCRP Cross-Validation', def: 'Validacion automatica NCRP-151 vs NCRP-147. v72 B.11. Detecta si LINAC/terapia usa NCRP-147 o CT usa NCRP-151 por error.' },
-  { term: 'CNSNS Limites', def: 'Limites regulatorios mexicanos: publico 0.02 mSv/semana, ocupacional 0.4 mSv/semana. Validacion post-calculo automatica. v72 B.17.' },
+  { term: 'CNSNS Limites', def: `Objetivos de diseño P usados en la validacion post-calculo: ${TEXTO_OBJETIVOS_DISENO}. Los limites de dosis (mSv/año) estan en la tabla de limites. v72 B.17.` },
   { term: 'Skyshine (Chilton)', def: 'Radiacion dispersa en atmosfera despues de salir por el techo. Calculo segun Chilton para instalaciones sin techo. v50.' },
   // === v77: Arquitectura/Code (nuevos) ===
   { term: 'Design Tokens', def: 'Sistema de tokens de diseno centralizado: colores, spacing, radius, animation. Reemplaza valores hardcodeados. v72 A.14.' },
@@ -74,7 +76,7 @@ const GLOSSARY = [
   { term: 'MIRD', def: 'Medical Internal Radiation Dose. Metodologia formal para dosis absorbida interna.' },
   { term: 'NCRP', def: 'National Council on Radiation Protection and Measurements (Reports 147, 151).' },
   { term: 'NIST', def: 'National Institute of Standards and Technology. XCOM database.' },
-  { term: 'NOM-008-NUCL', def: 'NOM-008-NUCL-2024 (DOF 24-05-2024): Limites de contaminacion radiactiva y criterios para su control. Define zonas controlada, contaminada, de radiacion (> 0.05 mSv/h) y de alta radiacion (> 1 mSv/h); no fija limites de dosis ni requisitos de blindaje. Sustituye a la NOM-008-NUCL-2011.' },
+  { term: NOM_008_NUCL.clave, def: 'NOM-008-NUCL-2024 (DOF 24-05-2024): Limites de contaminacion radiactiva y criterios para su control. Define zonas controlada, contaminada, de radiacion (> 0.05 mSv/h) y de alta radiacion (> 1 mSv/h); no fija limites de dosis ni requisitos de blindaje. Sustituye a la NOM-008-NUCL-2011.' },
   { term: 'NOM-040-NUCL', def: 'Norma Mexicana para instalaciones de radioterapia.' },
   { term: 'PET', def: 'Positron Emission Tomography. Usa F-18, Ga-68. Blindaje especifico (AAPM TG 108).' },
   { term: 'Radiofarmaco', def: 'Compuesto con radionuclido para diagnostico o terapia.' },

@@ -4,6 +4,7 @@
  * calculado) con la fuente en el centro; el cálculo lo hace después el motor sobre el plano.
  */
 import { MATERIALS, MODALITIES, type Barrier, type RadiationSource } from '@/types/radshield';
+import { P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
 
 export interface ConfigBunker {
   template: string;
@@ -36,7 +37,7 @@ export function generarBunker(c: ConfigBunker, scale_m_per_pixel: number): { bar
     barrierType: primaria ? 'primary' : 'secondary',
     useFactor: primaria ? 0.25 : 1,
     occupancyFactor: c.occupancy ?? 0.25,
-    designGoal_mSv_per_wk: c.designGoal ?? 0.02,
+    designGoal_mSv_per_wk: c.designGoal ?? P_NO_CONTROLADA_mSv_semana,
     materialCode: 'CONCRETE235',
     material: concreto?.name ?? 'Concreto',
   });

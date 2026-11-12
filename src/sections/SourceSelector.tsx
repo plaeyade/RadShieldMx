@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { X, Radiation, Zap, Brain, Atom, Scan, FlaskConical, Factory, ShieldCheck, Stethoscope, Activity, ChevronRight, BookOpen, Check, Maximize2, Minimize2, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NOM_008_NUCL } from '@/lib/normativaMx';
 
 export interface SourceItem {
   id: string;
@@ -20,12 +21,12 @@ export interface SourceItem {
 export type SourceCatalogItem = SourceItem;
 
 const CATALOG: SourceItem[] = [
-  { id: 'x_ray_diagnostic', name: 'Rayos X Diagnostico', category: 'diagnostic', energy: '100-150 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: 'NOM-008-NUCL', workload_default: 300, description: 'Sala de rayos X general. Barrera primaria concreto 100-150mm.' },
-  { id: 'mammography', name: 'Mamografia / DBT', category: 'diagnostic', energy: '25-35 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: 'TG240', iaea_ref: 'IAEA SSG-46', cnsns_ref: 'NOM-008-NUCL', workload_default: 100, description: 'Mamografia digital / tomosintesis. Barrera minima: plomo 0.3mm.' },
-  { id: 'fluoroscopy', name: 'Fluoroscopia / C-arm', category: 'diagnostic', energy: '75-125 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: 'NOM-008-NUCL', workload_default: 500, description: 'Fluoroscopia intervencionista. Alta carga de trabajo.' },
-  { id: 'ct_scanner', name: 'Tomografo CT / PET-CT', category: 'diagnostic', energy: '120-140 kVp / 511 keV', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: 'NOM-008-NUCL', workload_default: 250, description: 'CT multidetector o PET/CT. Blindaje para scatter isotropico.' },
-  { id: 'dental_cbct', name: 'Dental / CBCT', category: 'diagnostic', energy: '60-120 kVp', standard: 'NCRP-145', ncrp_report: '145', aapm_tg: null, iaea_ref: null, cnsns_ref: 'NOM-008-NUCL', workload_default: 50, description: 'Radiografia dental o CBCT. Blindaje minimo.' },
-  { id: 'mobile_xray', name: 'Rayos X Portatil', category: 'diagnostic', energy: '50-110 kVp', standard: 'NCRP-168', ncrp_report: '168', aapm_tg: null, iaea_ref: null, cnsns_ref: 'NOM-008-NUCL', workload_default: 100, description: 'Unidad movil de RX. Blindaje depende del uso.' },
+  { id: 'x_ray_diagnostic', name: 'Rayos X Diagnostico', category: 'diagnostic', energy: '100-150 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: NOM_008_NUCL.clave, workload_default: 300, description: 'Sala de rayos X general. Barrera primaria concreto 100-150mm.' },
+  { id: 'mammography', name: 'Mamografia / DBT', category: 'diagnostic', energy: '25-35 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: 'TG240', iaea_ref: 'IAEA SSG-46', cnsns_ref: NOM_008_NUCL.clave, workload_default: 100, description: 'Mamografia digital / tomosintesis. Barrera minima: plomo 0.3mm.' },
+  { id: 'fluoroscopy', name: 'Fluoroscopia / C-arm', category: 'diagnostic', energy: '75-125 kVp', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: NOM_008_NUCL.clave, workload_default: 500, description: 'Fluoroscopia intervencionista. Alta carga de trabajo.' },
+  { id: 'ct_scanner', name: 'Tomografo CT / PET-CT', category: 'diagnostic', energy: '120-140 kVp / 511 keV', standard: 'NCRP-147', ncrp_report: '147', aapm_tg: null, iaea_ref: 'IAEA SSG-46', cnsns_ref: NOM_008_NUCL.clave, workload_default: 250, description: 'CT multidetector o PET/CT. Blindaje para scatter isotropico.' },
+  { id: 'dental_cbct', name: 'Dental / CBCT', category: 'diagnostic', energy: '60-120 kVp', standard: 'NCRP-145', ncrp_report: '145', aapm_tg: null, iaea_ref: null, cnsns_ref: NOM_008_NUCL.clave, workload_default: 50, description: 'Radiografia dental o CBCT. Blindaje minimo.' },
+  { id: 'mobile_xray', name: 'Rayos X Portatil', category: 'diagnostic', energy: '50-110 kVp', standard: 'NCRP-168', ncrp_report: '168', aapm_tg: null, iaea_ref: null, cnsns_ref: NOM_008_NUCL.clave, workload_default: 100, description: 'Unidad movil de RX. Blindaje depende del uso.' },
   { id: 'linac_6mv', name: 'LINAC 6 MV', category: 'therapy', energy: '6 MV', standard: 'NCRP-151', ncrp_report: '151', aapm_tg: 'TG51', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 450, description: 'Acelerador lineal 6 MV. TVL concreto = 34cm.' },
   { id: 'linac_10mv', name: 'LINAC 10 MV', category: 'therapy', energy: '10 MV', standard: 'NCRP-151', ncrp_report: '151', aapm_tg: 'TG51', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 450, description: 'LINAC 10 MV. Inicio produccion de neutrones.' },
   { id: 'linac_15mv', name: 'LINAC 15 MV', category: 'therapy', energy: '15 MV', standard: 'NCRP-151', ncrp_report: '151', aapm_tg: 'TG51', iaea_ref: 'TRS-398', cnsns_ref: 'LA-007/01', workload_default: 450, description: 'LINAC 15 MV. TVL concreto = 43cm. Blindaje neutrones obligatorio.' },

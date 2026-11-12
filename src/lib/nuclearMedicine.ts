@@ -4,6 +4,8 @@
 // PET/CT, SPECT, Therapeutic radionuclides, MIRD dosimetry
 // =============================================================================
 
+import { P_CONTROLADA_uSv_semana, P_NO_CONTROLADA_uSv_semana } from './limitesDosis';
+
 // ── Radionuclide database with TG 108 constants ──
 export interface Radionuclide {
   symbol: string;
@@ -159,62 +161,62 @@ export const NM_ROOM_CONFIGS: RoomShieldingConfig[] = [
   {
     roomType: 'PET Injection Room', description: 'Hot lab for F-18/Ga-68 dose preparation',
     typicalDose_GBq: 7.4, patientsPerWeek: 30, occupancyFactor: 1.0,
-    distanceToBarrier_m: 2.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 2.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'PET Uptake Room', description: 'Patient waiting after tracer injection',
     typicalDose_GBq: 7.4, patientsPerWeek: 30, occupancyFactor: 0.25,
-    distanceToBarrier_m: 2.5, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 2.5, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'PET/CT Scanner Room', description: 'PET/CT imaging room',
     typicalDose_GBq: 7.4, patientsPerWeek: 30, occupancyFactor: 1.0,
-    distanceToBarrier_m: 3.5, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 3.5, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'SPECT Injection Room', description: 'Tc-99m dose preparation',
     typicalDose_GBq: 1.11, patientsPerWeek: 40, occupancyFactor: 1.0,
-    distanceToBarrier_m: 2.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 2.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'SPECT Imaging Room', description: 'Gamma camera room',
     typicalDose_GBq: 1.11, patientsPerWeek: 40, occupancyFactor: 1.0,
-    distanceToBarrier_m: 3.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 3.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'I-131 Therapy Room', description: 'I-131 oral dose administration',
     typicalDose_GBq: 7.4, patientsPerWeek: 4, occupancyFactor: 0.5,
-    distanceToBarrier_m: 3.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 3.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'I-131 Inpatient Ward', description: 'Patient hospitalization post-I-131',
     typicalDose_GBq: 7.4, patientsPerWeek: 4, occupancyFactor: 0.25,
-    distanceToBarrier_m: 4.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 4.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'Lu-177 Therapy Room', description: 'Lu-177 outpatient infusion',
     typicalDose_GBq: 7.4, patientsPerWeek: 8, occupancyFactor: 0.5,
-    distanceToBarrier_m: 3.0, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 3.0, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'Lu-177 Decay Storage', description: 'Waste decay-in-storage room',
     typicalDose_GBq: 50, patientsPerWeek: 0, occupancyFactor: 0.025,
-    distanceToBarrier_m: 5.0, designGoal_uSv_week: 25, recommendedMaterial: 'Concrete',
+    distanceToBarrier_m: 5.0, designGoal_uSv_week: P_NO_CONTROLADA_uSv_semana, recommendedMaterial: 'Concrete',
   },
   {
     roomType: 'Y-90 SIRT Procedure Room', description: 'Y-90 selective internal radiation therapy',
     typicalDose_GBq: 2.0, patientsPerWeek: 6, occupancyFactor: 1.0,
-    distanceToBarrier_m: 2.5, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 2.5, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'Hot Lab / Dose Prep', description: 'General radiopharmaceutical preparation',
     typicalDose_GBq: 20, patientsPerWeek: 50, occupancyFactor: 1.0,
-    distanceToBarrier_m: 1.5, designGoal_uSv_week: 100, recommendedMaterial: 'Lead (Pb)',
+    distanceToBarrier_m: 1.5, designGoal_uSv_week: P_CONTROLADA_uSv_semana, recommendedMaterial: 'Lead (Pb)',
   },
   {
     roomType: 'Waste Storage (general)', description: 'Short-lived waste decay storage',
     typicalDose_GBq: 100, patientsPerWeek: 0, occupancyFactor: 0.025,
-    distanceToBarrier_m: 4.0, designGoal_uSv_week: 25, recommendedMaterial: 'Concrete',
+    distanceToBarrier_m: 4.0, designGoal_uSv_week: P_NO_CONTROLADA_uSv_semana, recommendedMaterial: 'Concrete',
   },
 ];
 
