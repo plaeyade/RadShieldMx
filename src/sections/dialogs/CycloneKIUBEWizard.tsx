@@ -431,7 +431,7 @@ export default function CycloneKIUBEWizard({ open, onOpenChange }: Props) {
       '• IBA Cyclone KIUBE Site Requirement Guide — MID 55672 Rev G (2023)',
       '• NCRP 144 — Radiation Protection for Particle Accelerator Facilities',
       '• IAEA SRS 44 — Radiation Safety of Accelerator Facilities',
-      '• NOM-008-NUCL-2018 — Límites de dosis en México',
+      '• NOM-008-NUCL-2024 — Límites de contaminación radiactiva y criterios para su control',
       '═══════════════════════════════════════════════════════════════════',
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/plain' });

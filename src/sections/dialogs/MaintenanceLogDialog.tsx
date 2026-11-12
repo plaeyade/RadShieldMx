@@ -1,6 +1,6 @@
 // =============================================================================
 // MaintenanceLogDialog — Registro de mantenimiento post-construcción CNSNS (v14.3)
-// NOM-008-NUCL-2018, CNSNS-LA-001/2018
+// CNSNS-LA-001/2018
 // =============================================================================
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ function MaintenanceContent({ onOpenChange }: { onOpenChange: (open: boolean) =>
           <div className="bg-green-700 text-white p-2 rounded-lg"><CalendarDays className="w-5 h-5" /></div>
           <div>
             <h1 className="text-lg font-bold text-slate-900">Registro de Mantenimiento</h1>
-            <p className="text-xs text-slate-500">NOM-008-NUCL-2018 / CNSNS-LA-001/2018 — Programa de verificación post-construcción</p>
+            <p className="text-xs text-slate-500">CNSNS-LA-001/2018 — Programa de verificación post-construcción</p>
           </div>
         </div>
         <Button

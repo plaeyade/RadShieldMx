@@ -56,7 +56,7 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     TVL_secondary_cm: tvlNCRP('concrete', 'secondary'),
     TVL_neutron_cm: { TVL1: 31, TVLe: 21 },
     compressive_strength_MPa: 25,
-    normativa: ['NCRP 151', 'IAEA SRS 47', 'NOM-008-NUCL-2018'],
+    normativa: ['NCRP 151', 'IAEA SRS 47'],
     notes: 'Concreto convencional f\'c=250 kg/cm². Material de referencia NCRP 151 Tabla B.1.',
     isNCRP151: true,
   },
@@ -204,7 +204,7 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
     TVL_primary_cm: { '6MV': 25.0, '10MV': 26.5, '15MV': 29.5, '18MV': 32.5, '25MV': 37.0, 'Co60': 15.5 },
     TVL_secondary_cm: { '6MV': 20.0, '10MV': 22.0, '15MV': 24.5, '18MV': 27.0, '25MV': 31.0, 'Co60': 12.5 },
     thickness_mm_std: [50, 100, 150, 200, 250],
-    normativa: ['NCRP 151', 'NOM-008-NUCL-2018'],
+    normativa: ['NCRP 151'],
     notes: 'Bloques modulares de concreto barita V-250. Usados en paredes, puertas y techos.',
   },
   {

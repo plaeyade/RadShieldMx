@@ -43,7 +43,7 @@ const QUICK_PROMPTS = [
   { icon: Crosshair, text: "Fórmula barrera primaria NCRP 151", color: "text-emerald-500" },
   { icon: Activity, text: "Factor ocupación sala control", color: "text-violet-500" },
   { icon: Zap, text: "PET/CT F-18 blindaje", color: "text-rose-500" },
-  { icon: BookOpen, text: "NOM-008-ENER límites dosis", color: "text-cyan-500" },
+  { icon: BookOpen, text: "Límites de dosis en México (RGSR)", color: "text-cyan-500" },
 ];
 
 export default function AIAssistantDialog({ open, onOpenChange }: Props) {

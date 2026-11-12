@@ -1,7 +1,7 @@
 /**
  * CertificationModeDialog — E.7: Certification mode for CNSNS license
  * Guided process for CNSNS license application with checklists
- * NOM-008-NUCL-2018, NOM-040-NUCL-2016, CNSNS LA-007/01
+ * NOM-008-NUCL-2024, NOM-040-NUCL-2016, CNSNS LA-007/01
  */
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,7 +20,7 @@ const CNSNS_CHECKLIST: ChecklistItem[] = [
   // Documentación técnica
   { id: 'c1', label: 'Memoria descriptiva de blindaje (español)', norm: 'CNSNS LA-007/01 §4.1', checked: false, category: 'Documentación' },
   { id: 'c2', label: 'Planos arquitectónicos de la instalación', norm: 'CNSNS LA-007/01 §4.2', checked: false, category: 'Documentación' },
-  { id: 'c3', label: 'Reporte de cálculo de blindaje (NCRP 147/151)', norm: 'NOM-008-NUCL-2018 §5.2', checked: false, category: 'Documentación' },
+  { id: 'c3', label: 'Reporte de cálculo de blindaje (NCRP 147/151)', norm: 'CNSNS LA-007/01', checked: false, category: 'Documentación' },
   { id: 'c4', label: 'Curvas de transmisión del fabricante', norm: 'NCRP 147 §4.3', checked: false, category: 'Documentación' },
   { id: 'c5', label: 'Especificaciones técnicas de materiales de blindaje', norm: 'CNSNS LA-007/01 §4.3', checked: false, category: 'Documentación' },
   // Cálculos
@@ -31,13 +31,13 @@ const CNSNS_CHECKLIST: ChecklistItem[] = [
   // Verificación
   { id: 'c10', label: 'Inspección visual de barreras instaladas', norm: 'NOM-040-NUCL-2016 §6.1', checked: false, category: 'Verificación' },
   { id: 'c11', label: 'Medición de espesores con ultrasonido', norm: 'NCRP 151 Appendix A', checked: false, category: 'Verificación' },
-  { id: 'c12', label: 'Medición de dosis de fondo post-instalación', norm: 'NOM-008-NUCL-2018 §7.1', checked: false, category: 'Verificación' },
+  { id: 'c12', label: 'Medición de dosis de fondo post-instalación', norm: 'CNSNS LA-007/01', checked: false, category: 'Verificación' },
   { id: 'c13', label: 'Prueba de hermeticidad de puerta (if applicable)', norm: 'NCRP 151 §5.4', checked: false, category: 'Verificación' },
   // Programas
-  { id: 'c14', label: 'Programa de protección radiológica autorizado', norm: 'NOM-008-NUCL-2018 §4', checked: false, category: 'Programas' },
-  { id: 'c15', label: 'Designación de físico médico responsable', norm: 'NOM-008-NUCL-2018 §4.2', checked: false, category: 'Programas' },
+  { id: 'c14', label: 'Programa de protección radiológica autorizado', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
+  { id: 'c15', label: 'Designación de físico médico responsable', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
   { id: 'c16', label: 'Programa de garantía de calidad del blindaje', norm: 'NOM-040-NUCL-2016 §5', checked: false, category: 'Programas' },
-  { id: 'c17', label: 'Plan de contingencias para blindaje', norm: 'NOM-008-NUCL-2018 §8', checked: false, category: 'Programas' },
+  { id: 'c17', label: 'Plan de contingencias para blindaje', norm: 'RGSR (1988)', checked: false, category: 'Programas' },
   { id: 'c18', label: 'Registro de bitácora de blindaje', norm: 'CNSNS LA-007/01 §5', checked: false, category: 'Programas' },
 ];
 
@@ -79,7 +79,7 @@ export default function CertificationModeDialog({ open, onClose }: Props) {
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 text-[11px] text-amber-700 mb-3">
           <b>Checklist LA-007/01 — Licencia CNSNS:</b> Proceso guiado para solicitud de
           licencia de instalación de blindaje radiológico ante la CNSNS.
-          Cumplimiento de NOM-008-NUCL-2018 y NOM-040-NUCL-2016.
+          Cumplimiento de NOM-040-NUCL-2016, NOM-008-NUCL-2024 y CNSNS LA-007/01.
         </div>
 
         <div className="mb-3">

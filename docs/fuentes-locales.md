@@ -17,7 +17,23 @@ y su copia indexada en `GAMMA_Knowledge_RAGFlow\corpus\`.
 
 Se conservan en git, por ser públicos o propios:
 
-- `data/pdf/nom_008_ener.pdf`: NOM-008-NUCL-2011, *Control de la contaminación radiactiva* (DOF,
-  26-10-2011), SENER/CNSNS. Documento público del Diario Oficial (el nombre del archivo se mantiene por
-  compatibilidad; no es la NOM-008-ENER).
 - `public/Manual_Usuario_RadShieldMX_v28.pdf` y `_v32.pdf`: manuales propios.
+
+### NOM-008-NUCL-2024 (enlace oficial, sin PDF en git)
+
+La NOM-008-NUCL-2011, *Control de la contaminación radiactiva* (DOF 26-10-2011), que se guardaba como
+`data/pdf/nom_008_ener.pdf` (rótulo erróneo «ENER»), quedó derogada por la **NOM-008-NUCL-2024,
+*Límites de contaminación radiactiva y criterios para su control*** (SENER/CNSNS, DOF 24-05-2024; en vigor
+60 días naturales después de su publicación). El PDF 2011 se retiró del repositorio; la versión vigente se
+consulta en las fuentes oficiales:
+
+- DOF: https://www.dof.gob.mx/nota_detalle.php?codigo=5728406&fecha=24/05/2024
+- Catálogo de NOM de la Secretaría de Economía:
+  https://platiica.economia.gob.mx/wp-content/uploads/sites/2/PDF_Normas_Publicas/NOM-008-NUCL-2024.pdf
+
+Es una disposición oficial publicada en el DOF (texto no protegido, art. 14 fr. VIII de la Ley Federal del
+Derecho de Autor), así que puede versionarse: si se descarga, guárdese como `data/pdf/nom_008_nucl_2024.pdf`
+y regenérese `gamma-ingesta.json` con `scripts/manifiesto_gamma.py`. La ficha que cita la app está en
+`src/lib/normativaMx.ts`. La norma regula contaminación radiactiva y zonas (de radiación > 0.05 mSv/h o
+> 1 mSv en 5 días; de alta radiación > 1 mSv/h, sin cambio respecto a 2011); no fija límites de dosis ni
+objetivos de diseño de blindaje.

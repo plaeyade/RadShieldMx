@@ -1,6 +1,6 @@
 // =============================================================================
 // MemoriaAnaliticaWizard — Wizard paso a paso para crear memoria de blindaje
-// Basado en: NCRP 151, IAEA SRS 47, NOM-008-NUCL-2018, Protocolo RadSHIELD Mx
+// Basado en: NCRP 151, IAEA SRS 47, NOM-008-NUCL-2024, Protocolo RadSHIELD Mx
 // Autor: RadShield-MX v13.7
 // =============================================================================
 import { useState, useCallback } from 'react';
@@ -169,7 +169,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
       }),
       '',
       '5. NORMATIVA APLICABLE',
-      '   • NOM-008-NUCL-2018 — Seguridad Radiológica',
+      '   • NOM-008-NUCL-2024 — Límites de contaminación radiactiva y criterios para su control',
       '   • NCRP Report No. 151 — Structural Shielding Design',
       '   • IAEA Safety Reports Series No. 47',
       '   • Protocolo RadSHIELD Mx (basado en UAQ IGLIN-280880)',
@@ -249,7 +249,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
 
     // Sección 5: Normativa
     addLine('5. NORMATIVA APLICABLE', 13, true, [37, 99, 235]);
-    addLine('• NOM-008-NUCL-2018 — Seguridad Radiológica', 9);
+    addLine('• NOM-008-NUCL-2024 — Límites de contaminación radiactiva y criterios para su control', 9);
     addLine('• NCRP Report No. 151 — Structural Shielding Design', 9);
     addLine('• IAEA Safety Reports Series No. 47', 9);
     addLine('• Protocolo RadSHIELD Mx (UAQ IGLIN-280880)', 9);
@@ -276,7 +276,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
           <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center"><BookOpen className="w-5 h-5 text-white" /></div>
           <div>
             <h2 className="text-lg font-bold">Memoria Analítica de Blindaje</h2>
-            <p className="text-xs text-slate-500">Wizard paso a paso — NCRP 151 • IAEA SRS 47 • NOM-008-NUCL-2018 • Protocolo RadSHIELD Mx</p>
+            <p className="text-xs text-slate-500">Wizard paso a paso — NCRP 151 • IAEA SRS 47 • NOM-008-NUCL-2024 • Protocolo RadSHIELD Mx</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -515,7 +515,7 @@ function WizardContent({ onOpenChange: _onOpenChange }: { onOpenChange: (open: b
                   <Separator />
                   <div className="text-xs text-slate-500 space-y-1">
                     <div><strong>Normativa aplicable:</strong></div>
-                    <div>• NOM-008-NUCL-2018 — Seguridad Radiológica</div>
+                    <div>• NOM-008-NUCL-2024 — Límites de contaminación radiactiva y criterios para su control</div>
                     <div>• NCRP Report No. 151 (2005) — Structural Shielding Design</div>
                     <div>• IAEA Safety Reports Series No. 47 (2006)</div>
                     <div>• Protocolo RadSHIELD Mx — González Aguilar UAQ (2023)</div>

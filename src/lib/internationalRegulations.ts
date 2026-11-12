@@ -6,6 +6,8 @@
  * ANVS (Brazil), FANR (UAE), NRPA (Norway), RPII (Ireland), ONR (UK)
  */
 
+import { NOM_008_NUCL } from './normativaMx';
+
 export interface Regulation {
   id: string;
   code: string;
@@ -151,13 +153,13 @@ export const REGULATIONS: Regulation[] = [
     relatedRegulations: ['ncrp-151', 'ncrp-147', 'nom-008'],
   },
   {
-    id: 'nom-008', code: 'NOM-008-ENER', title: 'Limites maximos permisibles de exposicion a radiaciones ionizantes',
-    authority: 'SECRETARIA DE ENERGIA', country: 'Mexico', region: 'North America', category: 'legal_act', year: 2020, status: 'active',
-    scope: ['dose_limits', 'occupational_exposure', 'public_exposure'],
+    id: 'nom-008', code: NOM_008_NUCL.clave, title: NOM_008_NUCL.titulo,
+    authority: 'SENER / CNSNS', country: 'Mexico', region: 'North America', category: 'legal_act', year: NOM_008_NUCL.anio, status: 'active',
+    scope: ['radioactive_contamination', 'controlled_zones', 'radiation_zones'],
     applicability: 'national',
-    summary: 'Mexican standard for maximum permissible exposure to ionizing radiation. Adopts ICRP 103 recommendations with national specifics.',
-    keyRequirements: ['Occupational limit: 20 mSv/y averaged over 5 years', 'Public limit: 1 mSv/y', 'Pregnant worker: 1 mSv for remainder of pregnancy'],
-    doseLimits_mSv_yr: { public: 1, occupational: 20, pregnant_worker: 1, lens_of_eye: 20, skin_hands: 500 },
+    url: NOM_008_NUCL.urlDof,
+    summary: 'Mexican standard (DOF 2024-05-24, supersedes NOM-008-NUCL-2011) on derived limits of surface and airborne radioactive contamination and control criteria. It does not set dose limits or shielding design goals (Mexican dose limits: RGSR 1988).',
+    keyRequirements: ['Radiation zone: > 0.05 mSv/h or > 1 mSv in 5 consecutive days (§3.11)', 'High-radiation zone: > 1 mSv/h (§3.12)', 'Contamination: > 0.4 Bq/cm² beta-gamma, > 0.04 Bq/cm² alpha (§5.0)', 'Monthly evaluation of contamination-control effectiveness (§4.17)'],
     relatedRegulations: ['icrp-103', 'cnsns-la001'],
   },
   // === EUROPE ===

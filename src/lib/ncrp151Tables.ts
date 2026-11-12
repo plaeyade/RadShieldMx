@@ -76,13 +76,13 @@ export const TABLE_B3_DOSE_LIMITS: NCRPTable = {
   rows: {
     'POE USA': ['Personal Ocupacionalmente Expuesto (USA)', 5.0, 0.1, 'Sala de control, POE'],
     'Público USA': ['Público general (USA)', 1.0, 0.02, 'Áreas públicas'],
-    'POE MX': ['Personal Ocupacional (México NOM-008)', 20.0, 0.4, 'Sala de control'],
-    'Público MX': ['Público general (México NOM-008)', 5.0, 0.1, 'Áreas públicas'],
+    'POE MX': ['Personal Ocupacional (México RGSR)', 20.0, 0.4, 'Sala de control'],
+    'Público MX': ['Público general (México RGSR)', 5.0, 0.1, 'Áreas públicas'],
     'Embarazo USA': ['Mujer embarazada (USA)', 5.0, 0.1, 'Durante embarazo'],
     'Embarazo MX': ['Mujer embarazada (México)', 2.0, 0.04, 'Post-concepción'],
   },
   notes: [
-    'México: NOM-008-NUCL-2018, Art. 7-9',
+    'México: RGSR (1988)',
     'USA: NCRP 116 (1993), 10 CFR 20',
     'Para laberintos: P = 0.02 mSv/semana (público) o 0.1 mSv/semana (POE)',
   ],

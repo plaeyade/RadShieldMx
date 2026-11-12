@@ -484,7 +484,7 @@ export default function VersaHD15MVDialog({ open, onClose }: VersaHD15MVDialogPr
                   <li>Elekta (2024). <em>Versa HD User Guide: Radiation Safety and Shielding</em>. Ref. 1005122 Rev. 1.</li>
                   <li>IEC 60601-2-1 (2020). <em>Medical electrical equipment - Part 2-1: Electron accelerators 1-50 MeV</em>.</li>
                   <li>McGinley, P.H. (2002). <em>Shielding Techniques for Radiation Oncology Facilities</em>. 2nd ed. Medical Physics Publishing.</li>
-                  <li>NOM-008-NUCL-2011. <em>Limites de exposicion ocupacional y publico</em>.</li>
+                  <li>NOM-008-NUCL-2024. <em>Límites de contaminación radiactiva y criterios para su control</em>. DOF 24-05-2024.</li>
                   <li>NOM-030-NUCL-2011. <em>Requisitos de seguridad para unidades de teleterapia con AL</em>.</li>
                 </ol>
               </div>

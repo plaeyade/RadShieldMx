@@ -135,7 +135,7 @@ export function exportShieldingReport(data: {
           ["Dosis máxima calculada (mSv/s)", data.summary.maxDose],
           ["Estado de cumplimiento", data.summary.compliance],
           ["Norma aplicada", "NCRP 151 (2005)"],
-          ["Norma México", "NOM-008-ENER"],
+          ["Norma México", "NOM-040-NUCL-2016 / NOM-008-NUCL-2024"],
           ["Fecha", new Date().toLocaleDateString("es-MX")],
         ],
       },
