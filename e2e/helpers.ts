@@ -1,6 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 
-export const BASE = process.env.PLAYWRIGHT_TEST_BASE_URL || '/';
+// Igual que `baseURL` en playwright.config.ts: con el servidor propio, PLAYWRIGHT_TEST_BASE_URL llega reescrito a
+// http://localhost:<puerto> (sin /RadShieldMx/), así que la URL se arma con VITE_BASE_PATH.
+export const BASE = process.env.PLAYWRIGHT_NO_WEBSERVER === '1'
+  ? process.env.PLAYWRIGHT_TEST_BASE_URL || '/'
+  : `http://127.0.0.1:4174${process.env.VITE_BASE_PATH?.startsWith('/') ? process.env.VITE_BASE_PATH : '/'}`;
 
 export async function disableBlockingOnboarding(page: Page) {
   await page.addInitScript(() => {
