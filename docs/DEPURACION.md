@@ -179,8 +179,9 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | Etapa | Estado |
 |---|---|
 | 0 | PR `fase10-pages-arranque` (independiente de esta rama) |
-| 1 | PR `depuracion-etapa-1` (ver medidas abajo) |
-| 2–10 | pendientes |
+| 1 | fusionada (#43) |
+| 2 | PR `depuracion-etapa-2` (ver medidas abajo) |
+| 3–10 | pendientes |
 
 ### Medidas de la etapa 1
 
@@ -196,3 +197,30 @@ Medido en este contenedor (Node 20, `CI=true`, `VITE_BASE_PATH=/RadShieldMx/`), 
 | ESLint (trinquete) | 126 errores | 121 (−4 de `useWASM.ts`, −1 de `hooks.test.ts`); línea base actualizada |
 | Humo «Guíame» | 7 barreras; muro norte 18.85 mm Pb / 199.88 mm concreto | idénticas (tolerancia 0.01 mm) |
 | Dependencias | — | −`recharts`, −`pdfjs-dist` (≈ 37 MB menos en `node_modules`; 80 paquetes menos en el lock) |
+
+### Medidas de la etapa 2
+
+Medido en contenedor (Node 20, 2 núcleos, `CI=true`, `VITE_BASE_PATH=/RadShieldMx/`,
+`NODE_OPTIONS=--max-old-space-size=6144` como en el CI), `main` a7bafb1 frente a la rama:
+
+| Verificación | Antes (main) | Después (etapa 2) |
+|---|---|---|
+| `tsc -p tsconfig.app.json` / `tsconfig.server.json` | 0 / 0 errores | 0 / 0 errores |
+| Build | OK | OK |
+| `dist/` | 17 683 950 B (con `wasm/`) | 17 682 652 B (−1 298 B; sin `wasm/`) |
+| JS de `dist/assets` | 7 456 925 B | 7 456 245 B (−680 B: texto más corto de la sección 9.0 del manual; el código borrado ya no entraba en el bundle) |
+| Vitest | 85 archivos, 734 pruebas (+3 todo) | 79 archivos, 672 pruebas (+3 todo): −62, todas de código borrado (ver abajo) |
+| ESLint (trinquete) | 121 errores | 121 (los archivos borrados no tenían errores en la línea base) |
+| Humo «Guíame» | 7 barreras; muro norte 18.85 mm Pb | job «Humo» del CI (tolerancia 0.01 mm) |
+
+Borrado: `lib/skyshine/ChiltonSkyshine.ts`, `lib/ct/CTScatterDatabase.ts`,
+`lib/performance/{AlgorithmAnalyzer,BenchmarkSuite,CPUMemoryProfiler,FunctionProfiler}.ts` (se conserva
+`Profiler.ts`, que usa el diseñador), `components/UnavailableFeatureDialog.tsx`, `lib/f174aPredeployHardening.ts`,
+`lib/f406CanvasToolQa.ts`, `lib/multiSourceDetector.ts` y `public/wasm/shielding_math.wasm`. Pruebas retiradas:
+`benchmark.test.ts`, `algorithmAnalyzer.test.ts`, `chiltonSkyshine.test.ts`, `ctScatter.test.ts`,
+`UnavailableFeatureDialog.test.tsx`, `f174aPredeployHardening.test.ts` (57 en total en esos 6 archivos), los
+4 casos Skyshine/TC de `visual.test.ts` y el caso F406 de `f405ToF408ReleaseContracts.test.ts`. Texto: la sección
+9.0 del manual en la app dice que WebAssembly se retiró y que el cálculo es el motor único; el diálogo
+multi-fuente ya no cita `lib/multiSourceDetector`. Despliegue: sin `location /wasm/` en `nginx.conf` y sin
+`wasm/shielding_math.wasm` en `e2e/static-deploy.spec.ts`; el ejemplo de `rutaPublica` ya no usa una ruta wasm.
+La CSP de `index.html` conserva `'wasm-unsafe-eval'` (Babylon puede cargar decodificadores WASM).

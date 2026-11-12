@@ -19,7 +19,7 @@ afterEach(() => cleanup());
 
 describe('GitHub Pages', () => {
   it('rutaPublica respeta la base del despliegue', () => {
-    expect(rutaPublica('wasm/shielding_math.wasm', '/RadShieldMx/')).toBe('/RadShieldMx/wasm/shielding_math.wasm');
+    expect(rutaPublica('manual_usuario.html', '/RadShieldMx/')).toBe('/RadShieldMx/manual_usuario.html');
     expect(rutaPublica('/equipment-images/a.png', '/RadShieldMx/')).toBe('/RadShieldMx/equipment-images/a.png');
     expect(rutaPublica('icon-192.png', './')).toBe('./icon-192.png');
     expect(rutaPublica('x.png', '/RadShieldMx')).toBe('/RadShieldMx/x.png');
