@@ -314,11 +314,11 @@ The gamma constant for F-18 is typically measured at 1 m from a point source in 
   },
 ];
 
-// ─── NOM-008-ENER Mexico ───
+// ─── México: CNSNS / RGSR / NOM-008-NUCL-2024 (antes rotulado «NOM-008-ENER») ───
 const NOM008_SECTIONS = [
   {
-    section: "NOM-008-ENER — Dose Limits and Design Goals",
-    content: `NOM-008-ENER: Norma Oficial Mexicana para la proteccion radiologica. Dose limits and shielding design goals for Mexico.
+    section: "Mexico (CNSNS) — Dose Limits and Design Goals",
+    content: `Mexico (CNSNS): dose limits and shielding design goals. Dose limits follow ICRP 103 (RGSR 1988 historic values: 50 mSv/y POE, 5 mSv/y public); NOM-008-NUCL-2024 regulates radioactive contamination and does not set dose limits.
 
 Dose Limits (Límites de dosis):
 - Occupational (trabajadores expuestos): 20 mSv/year promedio en 5 años, no excediendo 50 mSv en ningún año.
@@ -342,11 +342,11 @@ Format CNSNS LA-007/01 requires:
 - Results table (Tabla de resultados)
 - Barrier diagrams (Planos de blindaje)
 - Regulatory compliance statement`,
-    tags: ["Mexico", "NOM-008-ENER", "dose limits", "CNSNS", "LA-007/01"],
+    tags: ["Mexico", "RGSR", "dose limits", "CNSNS", "LA-007/01"],
   },
   {
-    section: "NOM-008-ENER — Exemptions and Special Cases",
-    content: `NOM-008-ENER: Exemptions and Special Considerations for Mexico.
+    section: "Mexico (CNSNS) — Exemptions and Special Cases",
+    content: `Mexico (CNSNS): Exemptions and Special Considerations.
 
 Certain practices and sources may be exempted from regulatory controls if the radioactive material quantity or radiation level is such that risks do not represent a danger to the population or environment.
 
@@ -362,7 +362,16 @@ Training Requirements (Requisitos de entrenamiento):
 - Medical physicists must be registered with the CNSNS
 
 ALARA Principle: All shielding designs must demonstrate that doses are kept As Low As Reasonably Achievable, taking into account social and economic factors. This means design goals should typically be set below the regulatory limits.`,
-    tags: ["Mexico", "NOM-008-ENER", "exemptions", "training", "ALARA", "CNSNS"],
+    tags: ["Mexico", "CNSNS", "exemptions", "training", "ALARA"],
+  },
+  {
+    section: "NOM-008-NUCL-2024 — Radioactive contamination limits and zone criteria",
+    content: `NOM-008-NUCL-2024, "Límites de contaminación radiactiva y criterios para su control" (SENER/CNSNS, DOF 2024-05-24; in force 60 calendar days after publication). It supersedes NOM-008-NUCL-2011 "Control de la contaminación radiactiva" (DOF 2011-10-26). Scope: radioactive and nuclear facilities where radioactive contamination exists or may exist. It does NOT set dose limits or shielding design goals (those come from the RGSR 1988 and NCRP 147/151).
+
+Zone criteria (unchanged from 2011): radiation zone = whole-body dose equivalent could exceed 0.05 mSv in one hour or 1 mSv in any 5 consecutive days (§3.11); high-radiation zone = could exceed 1 mSv in one hour (§3.12); zones are delimited and signposted inside the controlled zone (§4.1).
+
+Contamination: presence above 0.4 Bq/cm² (beta-gamma) or 0.04 Bq/cm² (alpha) (§5.0); Appendix A beta-gamma limit 0.4 Bq/cm² removable and total (2011: 0.167 removable / 0.83 total). Airborne contamination is referred to NOM-041-NUCL-2013 (2011: NOM-005-NUCL-1994). Contamination-control effectiveness must be evaluated and documented at least monthly (§4.17; 2011: "periodically").`,
+    tags: ["Mexico", "NOM-008-NUCL-2024", "contamination", "radiation zone", "CNSNS"],
   },
 ];
 
@@ -516,7 +525,7 @@ async function buildAllChunks() {
   // NOM-008 sections
   for (const s of NOM008_SECTIONS) {
     chunks.push({
-      source: "NOM-008-ENER / CNSNS",
+      source: "CNSNS / RGSR / NOM-008-NUCL-2024",
       section: s.section,
       content: s.content,
       tags: s.tags,
@@ -573,7 +582,7 @@ async function main() {
   console.log(`\n═══════════════════════════════════════════════════`);
   console.log(`  Ingested: ${success} chunks  |  Failed: ${failed}`);
   console.log(`  Total DB: ${final} chunks`);
-  console.log(`  Sources: NCRP 151, AAPM TG 108, NOM-008-ENER`);
+  console.log(`  Sources: NCRP 151, AAPM TG 108, CNSNS / NOM-008-NUCL-2024`);
   console.log(`  Modalities: LINAC, PET/CT, Co-60, Gamma Knife, HDR`);
   console.log(`═══════════════════════════════════════════════════`);
 }

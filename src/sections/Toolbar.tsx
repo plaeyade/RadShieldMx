@@ -847,7 +847,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
                   <SectionLabel label="v49 — All Remaining" color="text-rose-500" />
                   <SmartItem icon={Layers} iconColor="bg-cyan-500" label="Secondary Barrier Albedo" onClick={onAlbedo} desc="NCRP 144 §4.3 — Multiple surface reflection" />
                   <SmartItem icon={Radiation} iconColor="bg-rose-500" label="Concrete Activation" onClick={onConcreteActivation} desc="IAEA SSG-98 §7.2 — Neutron activation" />
-                  <SmartItem icon={Award} iconColor="bg-amber-500" label="CNSNS Certification" onClick={onCertification} desc="NOM-008-NUCL-2018 — License checklist" />
+                  <SmartItem icon={Award} iconColor="bg-amber-500" label="CNSNS Certification" onClick={onCertification} desc="CNSNS — License checklist" />
                   <SmartItem icon={Users} iconColor="bg-blue-500" label="Community Templates" onClick={onCommunityTemplates} desc="8 pre-configured bunker templates" />
                   <SmartItem icon={ShieldCheck} iconColor="bg-emerald-500" label="Audit Log (fallback F110)" onClick={onAuditLog} desc="Regulatory inspection trail — ISO 27001" />
                   <SmartItem icon={BarChart3} iconColor="bg-indigo-500" label="Analytics" onClick={onAnalytics} desc="Usage analytics — GDPR opt-in" />

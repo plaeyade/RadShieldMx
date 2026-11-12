@@ -1,7 +1,7 @@
 // =============================================================================
 // RadSHIELD Mx Shielding Protocol — IGLIN-280880 (UAQ)
 // Ecuaciones de blindaje de búnkeres de teleterapia basadas en:
-//   NCRP 151, IAEA SRS 47, NOM-008-NUCL-2018
+//   NCRP 151, IAEA SRS 47, NOM-008-NUCL-2024
 // Autor: Fernando de Jesús González Aguilar (UAQ, 2023)
 // =============================================================================
 

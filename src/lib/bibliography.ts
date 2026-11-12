@@ -4,6 +4,8 @@
 // Total: 40+ referencias indexadas
 // =============================================================================
 
+import { NOM_008_NUCL } from './normativaMx';
+
 export interface BibEntry {
   id: string;
   citation: string;
@@ -43,7 +45,7 @@ export const USER_REFERENCES: BibEntry[] = [
     id: 'REF005', type: 'NRC', year: 2021,
     citation: 'US Nuclear Regulatory Commission (NRC). Section 20.1302 Compliance With Dose Limits for Individual Members of the Public. 10 CFR 20.1302. Updated March 24, 2021.',
     url: 'https://www.nrc.gov/reading-rm/doc-collections/cfr/part020/part020-1302.html',
-    notes: 'Límite dosis público USA: 1 mSv/año. Contrasta con México NOM-008: 5 mSv/año.',
+    notes: 'Límite dosis público USA: 1 mSv/año. Contrasta con México RGSR (1988): 5 mSv/año.',
   },
   {
     id: 'REF006', type: 'NCRP', year: 2005,
@@ -61,7 +63,7 @@ export const USER_REFERENCES: BibEntry[] = [
     id: 'REF008', type: 'NRC', year: 2021,
     citation: 'US Nuclear Regulatory Commission (NRC). Section 20.1208 Dose equivalent to an embryo/fetus. 10 CFR 20.1208. Updated March 24, 2021.',
     url: 'https://www.nrc.gov/reading-rm/doc-collections/cfr/part020/part020-1208.html',
-    notes: 'Límite dosis embrion/feto: 5 mSv durante embarazo (USA). México NOM-008: 2 mSv post-concepción.',
+    notes: 'Límite dosis embrion/feto: 5 mSv durante embarazo (USA). México: verificar RGSR (1988).',
   },
   {
     id: 'REF009', type: 'NRC', year: 2021,
@@ -110,7 +112,7 @@ export const EXISTING_REFERENCES: BibEntry[] = [
   { id: 'REF020', type: 'ICRU', year: 1998, citation: 'ICRU Report 57. Conversion Coefficients for use in Radiological Protection against External Radiation. 1998.', notes: 'Coeficientes de conversión protección radiológica.' },
   { id: 'REF021', type: 'ICRU', year: 2023, citation: 'ICRU Report 96. Dosimetry-guided Radiopharmaceutical Therapy. 2023.', notes: 'Dosimetría guiada terapia radionuclídica.' },
   { id: 'REF022', type: 'EPA', year: 2017, citation: 'EPA Federal Guidance Report No. 14. Radiation Quality Factors. 2017.', notes: 'Factores de calidad radiación EPA.' },
-  { id: 'REF023', type: 'NOM', year: 2018, citation: 'NOM-008-NUCL-2018. Criterios para el Control de la Radiación Ionizante. Diario Oficial de la Federación.', notes: 'Norma mexicana límites de exposición. POE: 20 mSv/año. Público: 5 mSv/año.' },
+  { id: 'REF023', type: 'NOM', year: NOM_008_NUCL.anio, citation: NOM_008_NUCL.cita, url: NOM_008_NUCL.urlDof, notes: NOM_008_NUCL.alcance },
   { id: 'REF024', type: 'NOM', year: 2016, citation: 'NOM-040-NUCL-2016. Instalaciones de Radioterapia. CNSNS.', notes: 'Norma mexicana para instalaciones de radioterapia.' },
   { id: 'REF025', type: 'PeerReviewed', year: 2022, citation: 'González Aguilar JA. Protocolo de Blindaje para Aceleradores Lineales de Uso Médico. Tesis UAQ IGLIN-280880. 2023.', notes: 'Protocolo UAQ con 33 ecuaciones y caso estudio Elekta.' },
   { id: 'REF026', type: 'NIST', year: 2004, citation: 'NIST XCOM: Photon Cross Sections Database. NIST Standard Reference Database 8 (XGAM).', url: 'https://physics.nist.gov/PhysRefData/Xcom/html/xcom1.html', notes: 'Secciones eficaces de interacción fotón-materia.' },

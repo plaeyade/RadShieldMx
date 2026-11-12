@@ -117,7 +117,7 @@ export function generatePDFReport(
     'NCRP Report No. 147 (2004) - Structural Shielding Design for Medical X-Ray Imaging Facilities',
     'AAPM TG 108 (2010) - PET and PET/CT Shielding Requirements',
     'IAEA SRS No. 47 (2006) - Radiation Protection for PET/CT',
-    'NOM-008-NUCL-2017 - Limites de exposicion a radiaciones ionizantes (CNSNS)',
+    'NOM-008-NUCL-2024 - Limites de contaminacion radiactiva y criterios para su control (DOF 24-05-2024)',
     'NOM-040-NUCL-2016 - Instalaciones de radioterapia (CNSNS)',
   ];
   for (const r of refs) { doc.text(`• ${r}`, 20, y); y += 5; }

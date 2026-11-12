@@ -37,7 +37,7 @@ export class ShieldingDesignAgent {
         "Neutron monitoring at maze entrance (rem meter)",
       ] : undefined,
       validationIssues,
-      references: result.citations.length > 0 ? result.citations : ["NCRP 151", "NOM-008-ENER"],
+      references: result.citations.length > 0 ? result.citations : ["NCRP 151", "CNSNS LA-007/01"],
     };
   }
 

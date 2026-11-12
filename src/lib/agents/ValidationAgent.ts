@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
  * ValidationAgent — Regulatory compliance checker
- * Reviews shielding designs against NCRP 151/147, NOM-008
+ * Reviews shielding designs against NCRP 151/147, CNSNS
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -77,10 +77,10 @@ export class ValidationAgent {
     if (country === "MX" || country === "Mexico") {
       issues.push({
         severity: "info",
-        rule: "NOM-008-ENER",
+        rule: "CNSNS LA-007/01",
         message: "Mexico: Verify CNSNS LA-007/01 format compliance",
         recommendation: "Include descriptive memory, methodology, and results table per CNSNS requirements",
-        reference: "NOM-008-ENER, CNSNS LA-007/01",
+        reference: "CNSNS LA-007/01",
       });
     }
 

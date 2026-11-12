@@ -227,7 +227,7 @@ export default function PlanValidatorDialog({ open, onOpenChange, floorPlan }: P
 
         <div className="px-6 pb-2">
           <p className="text-xs text-slate-500">
-            Verifica dimensiones, colindancias, clearances y sembrado de equipos conforme a NCRP 151/147, CNSNS y NOM-008-NUCL-2018
+            Verifica dimensiones, colindancias, clearances y sembrado de equipos conforme a NCRP 151/147 y CNSNS
           </p>
         </div>
 
