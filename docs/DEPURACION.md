@@ -242,8 +242,8 @@ a la rama:
 | Job `e2e` | `continue-on-error` y sin `dist/` (no probaba nada) | **bloqueante**, contra el build de Pages en `/RadShieldMx/` |
 
 **Recorrido de importaciones** desde `src/main.tsx` (estático, `import()` y `@/`): de los 179 `src/lib/f[0-9]*.ts`, 173
-son alcanzables (casi todos por `UpdateAppDialog.tsx`, que importa ~120 de ellos para pintar las tarjetas de fases, y por
-`CanvasArea.tsx`). Sólo 6 no lo eran y se borran en este lote: `f197OutputIntegrationQa`, `f265RealAppTestingProtocol`,
+son alcanzables (`UpdateAppDialog.tsx` importa 89 de ellos para pintar las tarjetas de fases y `CanvasArea.tsx` 72;
+se solapan). Sólo 6 no lo eran y se borran en este lote: `f197OutputIntegrationQa`, `f265RealAppTestingProtocol`,
 `f266RealCaseEvidenceKit`, `f267RealCaseSmokeExecution`, `f292RealProjectFloorplanQa`, `f378FullscreenDialogPolicy`,
 más `sections/CanvasQuickActionsSidebar.tsx`. Con ellos, los 15 scripts que los leían (`check-f197-menu-canvas-contracts`,
 `f265…`/`f266…`/`f267…`/`f292…` y sus `check-…`, `check-f379…`–`check-f382…`, `f295-canvas-redesign-smoke`,
@@ -272,6 +272,6 @@ bloqueante en el job «Humo».
 | `canvas-cad-like` (F100), `f189`, `f371-f372`, `f376`, `f535-f539`, `f556-f560` | paneles o flujos de fases retirados | borradas con sus `test:f…` |
 | `f134-release-candidate`, `f342-centro-neuro-visual-smoke`, `canvas-cad-e2e-harness` (F229) | paneles retirados / `outputs/` sin versionar | **lote 2**: las usan cadenas de scripts (`f151`, `f154`, `check-f229`, `check-f342`); fuera del job hasta entonces |
 
-**Lote 2 (pendiente)**: que `UpdateAppDialog.tsx` deje de listar fases (hoy importa ~120 `lib/f…` sólo para sus
+**Lote 2 (pendiente)**: que `UpdateAppDialog.tsx` deje de listar fases (hoy importa 89 `lib/f…` sólo para sus
 tarjetas; al quitarlas esos módulos quedan sin importadores y se borran por lotes de ≤ 20), las 3 specs de arriba con
 sus cadenas de scripts y los scripts que leen salidas de lo ya borrado (`f293`, `f294`, `f301`).
