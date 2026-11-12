@@ -1,6 +1,6 @@
 /**
  * useWebGPUHeatmap — v48.3: WebGPU acceleration for 2D heatmap dose grid
- * Integrates useWebGPU into calculateHeatmapGrid for parallel GPU computation.
+ * Integrates useWebGPU into the heat map grid (the field itself comes from `calcularMallaDosis`) for parallel GPU computation.
  * Fallback to CPU if WebGPU unavailable. Speedup: 10-50x for large grids.
  * Ref: WebGPU Compute Shaders (Chrome 113+, W3C Working Draft 2024)
  */

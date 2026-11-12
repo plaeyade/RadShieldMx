@@ -184,7 +184,8 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | 3 | lote 1: PR `depuracion-etapa-3` (ver medidas abajo); lote 2 pendiente |
 | 4 | PR `depuracion-etapa-4` (4a completa, 4b parcial; ver medidas abajo) |
 | 5 | PR `depuracion-etapa-5` (`strict` en `src/lib/`; ver medidas abajo) |
-| 6–7 | pendientes |
+| 6 | PR `depuracion-etapa-6`, apilada sobre la 5 (duplicados del motor; ver medidas abajo) |
+| 7 | pendiente |
 | 8 | fusionada (#46; ver abajo) |
 | 9–10 | pendientes |
 
@@ -356,6 +357,45 @@ tipos): se dejan hasta tipar esa API.
 | Vitest | sin pruebas tocadas | 86 archivos, 730 pruebas (+3 todo), todas en verde |
 | ESLint (trinquete) | 25 errores | 25, ninguno nuevo |
 | JS de `dist/assets` | 7 446 557 B (302 archivos) | 7 446 553 B (302; −4 B). JS inicial (`index.html`) 1 078 579 → 1 078 575 B |
+| Humo «Guíame» / e2e | 17.96 mm Pb / 213.77 mm concreto | jobs «Humo» y «e2e» del CI |
+
+### Medidas de la etapa 6 (duplicados del motor)
+
+**Inventario** (rama apilada sobre la etapa 5). De la lista del plan, cuatro ya delegaban en el motor y no se tocan:
+`useShieldingEngine` (barreras → `motorProyecto.calcularBarrerasValidadas`; heat map → `doseFieldEngine.calcularMallaDosis`),
+`normativeBarrierEngine` (lo usa el propio `motorProyecto`), `doseMapEngine` (sólo presentación: color, isodosis, estadísticas;
+el campo sale de `doseFieldEngine`) y `doseMappingEngine` (malla de detectores vía `doseFieldEngine`). Los duplicados reales
+estaban en las funciones físicas:
+
+| Duplicado | Antes | Ahora |
+|---|---|---|
+| Ecuación de Archer, B(x) = [(1 + β/α)·e^(αγx/cosθ) − β/α]^(−1/γ) | **3 copias**: `ncrp147.transmisionArcher`, `transmisionTG108.transmisionTG108` (x en cm) y `shieldingMath.archerTransmission` (catálogo, con oblicuidad) | Núcleo único `ncrp147.interiorArcher(x, {α, β, γ}, cosθ = 1)`; las tres llaman a él. Mismas operaciones en el mismo orden (con cosθ = 1 la división es exacta), así que el resultado es idéntico bit a bit. Se conservan las guardas propias de cada una (x ≤ 0, núcleo ≤ 0, `clampTransmission`, respaldo HVL del catálogo) |
+| Malla del heat map sin blindaje | `shieldingMath.calculateHeatmapGrid` / `heatmapGridPoints` (`@deprecated`, ±200 px, kerma sin barreras) | **Borradas**: ningún código de producción las usaba (sólo 4 pruebas de `shieldingMath.test.ts` y una comprobación de longitud en `doseFieldEngine.test.ts`, retiradas con ellas); el heat map es `doseFieldEngine.calcularMallaDosis` |
+
+No se consolidan (cambiarían resultados, aunque sea en el último dígito, o la semántica en casos límite):
+
+| Par | Motivo |
+|---|---|
+| `shieldingMath.inverseArcher` (bisección a 10⁻¹⁴, la usa `motorProyecto`) frente a `ncrp147.espesorArcher` (forma cerrada) | Algoritmos distintos (la bisección para en |B − B₀| < 10⁻¹⁴): difieren de 10⁻¹⁶ a 2·10⁻⁹ mm (plomo de NCRP 147, B = 0.5…10⁻⁶); unificarlos rompería la igualdad exacta con la referencia sin ganancia física |
+| `shieldingMath.tvlTransmission` frente a `ncrp151.transmisionUnTVL` | La misma 10^(−x/TVL), pero difieren con `x = NaN` (0 tras `clampTransmission` frente a 1) y en el respaldo por densidad |
+| `shieldingMath.tvlThickness` (n = log₁₀(K/P)) frente a `ncrp151.espesorTVL` (n = log₁₀(1/B), TVL₁/TVLₑ) | Modelos distintos (TVL único frente a TVL₁ + TVLₑ) y redondeo distinto de n |
+
+**Prueba de resultados idénticos**: `src/__tests__/auditoria/consolidacionMotor.test.ts` con la referencia
+`fixtures/motor-referencia-etapa6.json`, generada en `main` 3cab5b1 **antes** del cambio (y verificada también sobre la etapa 5)
+con `ESCRIBIR_REFERENCIA_ETAPA6=1`. Exige igualdad exacta (`toEqual` sobre el JSON, que guarda el double más corto que vuelve al
+mismo valor; `NaN`/`Infinity` como texto) en: humo «Guíame» (las 7 barreras de `calcularProyecto`, kerma y espesor en los 18
+materiales; muro norte 17.96 mm Pb / 213.77 mm concreto), los 8 casos de F149 (todos `pass`), NCRP 151 §7.1.1 (149.6 cm) y §7.1.5
+(66.4 cm) en la zona controlada y en `motorProyecto`, Gamma Knife, HDR, TG-108 (Ejemplo 1 de `blindajePET`, zona PET, Tabla V
+directa e inversa, espesor 511 keV de todo el catálogo), calculadoras MV/diagnóstico, y mallas densas de Archer (NCRP 147, catálogo
+con 4 ángulos, inversas) y TVL.
+
+| Verificación | Antes (etapa 5) | Después (etapa 6) |
+|---|---|---|
+| `tsc` app / server / strict `src/lib/` | 0 / 0 / 0 | 0 / 0 / 0 |
+| Vitest | 86 archivos, 730 pruebas (+3 todo) | 87 archivos, 732 pruebas (+3 todo): +6 de `consolidacionMotor.test.ts`, −4 de `calculateHeatmapGrid` (borrada) |
+| Referencia exacta (`consolidacionMotor.test.ts`) | 6/6 sobre `main` y sobre la etapa 5 | 6/6 |
+| ESLint (trinquete) | 25 errores | 25, ninguno nuevo |
+| JS de `dist/assets` | 7 446 553 B | 7 446 501 B (302; −52 B). JS inicial (`index.html`) 1 078 575 → 1 078 523 B |
 | Humo «Guíame» / e2e | 17.96 mm Pb / 213.77 mm concreto | jobs «Humo» y «e2e» del CI |
 
 ### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»

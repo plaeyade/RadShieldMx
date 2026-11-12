@@ -26,6 +26,7 @@
  * baritados o con hierro, vidrio plomado) la equivalencia con concreto sobrestima el espesor: conservador.
  */
 import type { ShieldingMaterial } from '@/types/radshield';
+import { interiorArcher } from './ncrp147';
 
 export interface AjusteArcher { alpha: number; beta: number; gamma: number }
 export type MaterialTG108 = 'lead' | 'concrete' | 'iron';
@@ -43,9 +44,8 @@ export const REFERENCIA_TG108_511 = 'AAPM TG-108 (Madsen et al. 2006), Tabla V: 
 export function transmisionTG108(material: MaterialTG108, x_mm: number): number {
   if (!(x_mm > 0)) return 1;
   const p = TG108_TABLA_V[material];
-  const x_cm = x_mm / 10;
-  const r = p.beta / p.alpha;
-  return Math.pow((1 + r) * Math.exp(p.alpha * p.gamma * x_cm) - r, -1 / p.gamma);
+  // α, β en cm⁻¹: x en cm. Núcleo de Archer único (`ncrp147.interiorArcher`, etapa 6).
+  return Math.pow(interiorArcher(x_mm / 10, p), -1 / p.gamma);
 }
 
 /**

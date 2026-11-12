@@ -15,7 +15,6 @@ import {
   calculateUnshieldedKerma,
   generateSamplePoints,
   roundThickness,
-  calculateHeatmapGrid,
   SAMPLING_DISTANCE_M,
   SAMPLING_SPACING_M,
 } from './shieldingMath';
@@ -417,36 +416,6 @@ describe('roundThickness() — Construction Standards', () => {
   it('never returns less than input (always rounds up)', () => {
     const t = 7.3;
     expect(roundThickness(t, 'CONCRETE235')).toBeGreaterThanOrEqual(t);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// HEATMAP GRID — IDW Interpolation
-// ═══════════════════════════════════════════════════════════════════
-describe('calculateHeatmapGrid() — IDW Interpolation', () => {
-  const source = mockSource(mockModalityXray, 100, 100);
-
-  it('returns empty for no sources', () => {
-    expect(calculateHeatmapGrid([], 0.01)).toEqual([]);
-  });
-
-  it('returns grid points', () => {
-    const grid = calculateHeatmapGrid([source], 0.01, 50);
-    expect(grid.length).toBeGreaterThan(0);
-  });
-
-  it('kerma is highest near source', () => {
-    const grid = calculateHeatmapGrid([source], 0.01, 25);
-    const nearSource = grid.filter(p => Math.abs(p.x - 100) < 30 && Math.abs(p.y - 100) < 30);
-    const farFromSource = grid.filter(p => Math.abs(p.x - 100) > 100 || Math.abs(p.y - 100) > 100);
-    const avgNear = nearSource.reduce((s, p) => s + p.kerma, 0) / nearSource.length;
-    const avgFar = farFromSource.reduce((s, p) => s + p.kerma, 0) / farFromSource.length;
-    expect(avgNear).toBeGreaterThan(avgFar);
-  });
-
-  it('all kerma values are non-negative', () => {
-    const grid = calculateHeatmapGrid([source], 0.01, 50);
-    expect(grid.every(p => p.kerma >= 0)).toBe(true);
   });
 });
 

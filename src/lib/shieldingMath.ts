@@ -17,6 +17,7 @@ import {
 } from '@/types/radshield';
 import { type CTIsodosisProfile, getCTIsodosisFactor } from '@/types/ctIsodosis';
 import { normalizeCalculationUnits, type NormalizedCalculationUnits } from './unitNormalization';
+import { interiorArcher } from './ncrp147';
 
 
 export const SAMPLING_DISTANCE_M = 0.3;
@@ -327,8 +328,8 @@ export function archerTransmission(
     return clampTransmission(Math.exp(-0.693 * (thickness_mm / hvl) / Math.max(0.01, Math.cos(theta_rad))));
   }
   const cos_theta = Math.max(0.01, Math.cos(theta_rad));
-  const exponent = (material.archerAlpha * material.archerGamma * thickness_mm) / cos_theta;
-  const inner = (1 + material.archerBeta / material.archerAlpha) * Math.exp(exponent) - material.archerBeta / material.archerAlpha;
+  // Núcleo de Archer único (`ncrp147.interiorArcher`, etapa 6): mismas operaciones, mismo resultado bit a bit.
+  const inner = interiorArcher(thickness_mm, { alpha: material.archerAlpha, beta: material.archerBeta, gamma: material.archerGamma }, cos_theta);
   if (inner <= 0) return 0;
   return clampTransmission(Math.pow(inner, -1 / material.archerGamma));
 }
@@ -627,48 +628,6 @@ export function roundThickness(thickness_mm: number, materialCode: string): numb
     return Math.ceil(thickness_mm / 0.5) * 0.5; // 0.5 mm increments
   }
   return Math.ceil(thickness_mm); // Default: round up to nearest mm
-}
-
-// ───────────────────────────────────────────────────────────────
-// Heatmap grid — malla de puntos (px) alrededor de las fuentes
-// ───────────────────────────────────────────────────────────────
-/** Puntos de la malla del heat map: ±200 px alrededor de las fuentes, paso `gridSize` px. */
-export function heatmapGridPoints(
-  sources: { x: number; y: number }[],
-  gridSize: number = 50,
-): { x: number; y: number }[] {
-  if (!sources.length || !(gridSize > 0)) return [];
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for (const s of sources) {
-    minX = Math.min(minX, s.x - 200);
-    minY = Math.min(minY, s.y - 200);
-    maxX = Math.max(maxX, s.x + 200);
-    maxY = Math.max(maxY, s.y + 200);
-  }
-  const points: { x: number; y: number }[] = [];
-  for (let gx = minX; gx <= maxX; gx += gridSize) {
-    for (let gy = minY; gy <= maxY; gy += gridSize) points.push({ x: gx, y: gy });
-  }
-  return points;
-}
-
-/**
- * Kerma sin blindaje en la malla del heat map.
- * @deprecated Usar `calcularMallaDosis` de `@/lib/doseFieldEngine`, que además atenúa por barreras.
- */
-export function calculateHeatmapGrid(
-  sources: RadiationSource[],
-  scale_m_per_pixel: number,
-  gridSize: number = 50,
-  ctIsodosisProfile?: CTIsodosisProfile
-): { x: number; y: number; kerma: number }[] {
-  return heatmapGridPoints(sources, gridSize).map(({ x, y }) => {
-    let totalKerma = 0;
-    for (const source of sources) {
-      totalKerma += calculateUnshieldedKerma(source, x, y, scale_m_per_pixel, ctIsodosisProfile);
-    }
-    return { x, y, kerma: totalKerma };
-  });
 }
 
 // ───────────────────────────────────────────────────────────────

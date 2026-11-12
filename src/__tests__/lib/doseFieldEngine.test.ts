@@ -9,7 +9,7 @@ import {
   type ComponenteCampo,
   type DosisEnPunto,
 } from '@/lib/doseFieldEngine';
-import { calculateHeatmapGrid, calculateUnshieldedKerma, tvlTransmission } from '@/lib/shieldingMath';
+import { calculateUnshieldedKerma, tvlTransmission } from '@/lib/shieldingMath';
 import { TABLA_B_2, TABLA_B_7, espesorTVL, transmisionTVL } from '@/lib/ncrp151';
 import { TABLA_C_1, transmisionArcher } from '@/lib/ncrp147';
 import { MATERIALS, MODALITIES, type Barrier, type RadiationSource } from '@/types/radshield';
@@ -59,9 +59,6 @@ describe('doseFieldEngine — sin barreras', () => {
       expect(Math.abs(p.kerma - ref)).toBeLessThanOrEqual(1e-6 * ref);
       expect(p.kermaSinBlindaje).toBe(p.kerma);
     });
-    // calculateHeatmapGrid (@deprecated) conserva su malla ±200 px; sus valores coinciden con el motor.
-    const previa = calculateHeatmapGrid(fuentes, 0.01, 40);
-    expect(previa.length).toBeGreaterThan(0);
   });
 });
 
