@@ -21,7 +21,7 @@ const TC: Record<string, string> = {
 
 const S = [
   // ── SECCIÓN 1: INTRODUCCIÓN ──
-  { id:'1.1', t:'intro', title:'1.1 Introducción a RadShield-MX v58', content:`RadShield-MX es una aplicación profesional de ingeniería de blindajes radiológicos desarrollada para el contexto mexicano, cumpliendo con la NOM-008-NUCL-2018, NOM-040-NUCL-2016, y las guías internacionales NCRP 147, NCRP 151, AAPM TG 108, IAEA SSG-98, ICRU 96, ICRP 128 y 140, McGinley (2002), y Wagner et al. (2014) FW-CADIS.
+  { id:'1.1', t:'intro', title:'1.1 Introducción a RadShield-MX v58', content:`RadShield-MX es una aplicación profesional de ingeniería de blindajes radiológicos desarrollada para el contexto mexicano, conforme a la normativa mexicana (NOM-008-NUCL-2024, NOM-040-NUCL-2016) y las guías internacionales NCRP 147, NCRP 151, AAPM TG 108, IAEA SSG-98, ICRU 96, ICRP 128 y 140, McGinley (2002), y Wagner et al. (2014) FW-CADIS.
 
 La aplicación integra más de 208 diálogos funcionales organizados en 8 menús, con soporte para 2 idiomas (español/inglés), modo oscuro, atajos de teclado, sistema de undo/redo (50 pasos), canvas interactivo para diseño de blindajes basado en planos de planta, 10+ APIs web modernas, WebAssembly acceleration, offline capability, y 5 capas de inteligencia artificial.
 
@@ -80,7 +80,7 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
 **Zoom:** Rueda del ratón. Grid snapping: cuadrícula 10 cm con snap automático.
 
 **v43 ResizeObserver:** El canvas se redimensiona automáticamente cuando cambia el tamaño de la ventana o del panel lateral. Usa devicePixelRatio para nítidez en HiDPI.` },
-  { id:'2.2', t:'canvas', title:'2.2 Áreas Controladas (v42)', content:`Polígonos con clasificación de riesgo radiológico (NOM-008-ENER): Área Controlada (rojo, >20 μSv/h), Supervisada (ámbar, 7.5–20 μSv/h), Pública (verde, <7.5 μSv/semana), Restringida (púrpura, >100 μSv/h). Herramienta R para dibujar, doble clic para cerrar polígono.` },
+  { id:'2.2', t:'canvas', title:'2.2 Áreas Controladas (v42)', content:`Polígonos con clasificación de riesgo radiológico (criterio de la herramienta; la NOM-008-NUCL-2024 define zona de radiación > 0.05 mSv/h y de alta radiación > 1 mSv/h): Área Controlada (rojo, >20 μSv/h), Supervisada (ámbar, 7.5–20 μSv/h), Pública (verde, <7.5 μSv/semana), Restringida (púrpura, >100 μSv/h). Herramienta R para dibujar, doble clic para cerrar polígono.` },
   { id:'2.3', t:'canvas', title:'2.3 Sample Lines y Cálculo RadShield', content:`Líneas de muestreo a 0.3 m más allá de cada barrera (NCRP 147, DeLorenzo et al. 2016). 200 puntos por barrera. Cálculo de kerma por ley del inverso del cuadrado + scatter-primary ratio de McGinley. Espesor por inverseArcher() (NCRP 147) o tvlThickness() (NCRP 151). Conversión concreto-plomo basada en TVLs reales (corregido en v42).` },
 
   // ── SECCIÓN 3: CÁLCULOS ──
@@ -247,11 +247,11 @@ La aplicación integra más de 208 diálogos funcionales organizados en 8 menús
 - Gamma captura: D_γ = Σᵢ f_captᵢ × D_nᵢ donde f_captᵢ = factor de captura del tramo i
 - Dosis total: D_total = D_n + D_γ
 
-**Aplicación:** Diseño de laberintos para bunkers de terapia con energías ≥10 MV. Verificación de cumplimiento CNSNS NOM-008-NUCL-2018 (0.02 mSv/sem en puerta).` },
+**Aplicación:** Diseño de laberintos para bunkers de terapia con energías ≥10 MV. Verificación del objetivo de diseño en puerta (0.02 mSv/sem, NCRP 151 §1.2).` },
 
   { id:'B.4', t:'calc', title:'B.4 Annual Dose Accumulation Report', content:`**Recomendación B.4 — Reporte acumulado de dosis anual**
 
-**Fundamento científico:** ICRP 103 (2007). *The 2007 Recommendations of the International Commission on Radiological Protection*. Annals of the ICRP, 37(2-4). Límite anual: 20 mSv promedio en 5 años, máximo 50 mSv en un año. NOM-008-NUCL-2018 adopta estos límites para México.
+**Fundamento científico:** ICRP 103 (2007). *The 2007 Recommendations of the International Commission on Radiological Protection*. Annals of the ICRP, 37(2-4). Límite anual: 20 mSv promedio en 5 años, máximo 50 mSv en un año. En México los límites de dosis los fija el RGSR (1988), no la NOM-008-NUCL-2024 (contaminación radiactiva).
 
 **Factores estacionales:** La carga de trabajo varía estacionalmente:
 - Invierno: aumento 10-15% (gripe, cirugías electivas post-vacaciones)
@@ -333,6 +333,8 @@ Para blindaje, el HVL efectivo depende del espectro completo, no solo del kVp:
 
 **PET (511 keV):** el cuerpo del paciente absorbe 0.36 de la radiación; la tasa a distancia se calcula con 0.64·Γ (para F-18, Γ_paciente = 0.092 μSv·m²/(MBq·h)). Las calculadoras PET de RadShield-MX ya lo incluyen; no se aplica dos veces.
 
+**Espesor PET (511 keV):** el diseñador («Calcular Blindaje», «Guíame») y el plan de zona controlada de «Layout de búnker» usan la curva de transmisión de banda ancha de TG-108 (Tabla V, ajuste de Archer: plomo α = 1.543 cm⁻¹, β = −0.4408 cm⁻¹, γ = 2.136; concreto 0.1539, −0.1161, 2.0752; hierro 0.5704, −0.3063, 0.6326) invertida numéricamente, no un TVL único. Con atenuaciones pequeñas (B ≈ 0.4) la curva pide ≈ 3 cm más de concreto que el TVL de 176 mm. Otros materiales: concreto equivalente por densidad (conservador).
+
 **TC:** NCRP 147 §5.6 da el kerma de dispersión por DLP medido con fantoma; no corresponde una reducción adicional.
 
 **SPECT:** no hay factor normativo; se diseña con la fuente sin reducción (conservador).
@@ -398,7 +400,7 @@ Para blindaje, el HVL efectivo depende del espectro completo, no solo del kVp:
   // ── SECCIÓN E: MEJORAS GENERALES (10 recomendaciones) ──
   { id:'E.1', t:'admin', title:'E.1 Complete i18n (Internacionalización)', content:`**Recomendación E.1 — Traducción completa ES/EN**
 
-**Fundamento:** ISO 17100:2015 — Translation Services. Las aplicaciones médicas requieren terminología precisa en el idioma local. NOM-008-NUCL-2018 usa términos específicos en español mexicano.
+**Fundamento:** ISO 17100:2015 — Translation Services. Las aplicaciones médicas requieren terminología precisa en el idioma local. Las NOM de la CNSNS (p. ej. NOM-008-NUCL-2024) usan términos específicos en español mexicano.
 
 **Estado actual:** ~85% traducido. Pendiente: términos técnicos avanzados (variance reduction, energy biasing, adjoint transport) y contenido de ayuda contextual.
 

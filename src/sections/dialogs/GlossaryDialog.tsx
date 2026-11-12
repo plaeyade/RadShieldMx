@@ -74,7 +74,7 @@ const GLOSSARY = [
   { term: 'MIRD', def: 'Medical Internal Radiation Dose. Metodologia formal para dosis absorbida interna.' },
   { term: 'NCRP', def: 'National Council on Radiation Protection and Measurements (Reports 147, 151).' },
   { term: 'NIST', def: 'National Institute of Standards and Technology. XCOM database.' },
-  { term: 'NOM-008-NUCL', def: 'Norma Mexicana de proteccion radiologica. Limites de dosis y requisitos de blindaje.' },
+  { term: 'NOM-008-NUCL', def: 'NOM-008-NUCL-2024 (DOF 24-05-2024): Limites de contaminacion radiactiva y criterios para su control. Define zonas controlada, contaminada, de radiacion (> 0.05 mSv/h) y de alta radiacion (> 1 mSv/h); no fija limites de dosis ni requisitos de blindaje. Sustituye a la NOM-008-NUCL-2011.' },
   { term: 'NOM-040-NUCL', def: 'Norma Mexicana para instalaciones de radioterapia.' },
   { term: 'PET', def: 'Positron Emission Tomography. Usa F-18, Ga-68. Blindaje especifico (AAPM TG 108).' },
   { term: 'Radiofarmaco', def: 'Compuesto con radionuclido para diagnostico o terapia.' },

@@ -1,3 +1,5 @@
+import { NOM_008_NUCL } from './normativaMx';
+
 export type F113ModalityProfileId = 'dx' | 'tx' | 'nm' | 'cy';
 
 export interface F113ModalityProfile {
@@ -18,7 +20,7 @@ export const F113_MODALITY_PROFILES: F113ModalityProfile[] = [
     label: 'DX',
     name: 'Diagnostico',
     category: 'diagnostic',
-    standards: ['NCRP 147', 'IPEM 109', 'NOM-008-NUCL'],
+    standards: ['NCRP 147', 'IPEM 109', NOM_008_NUCL.clave],
     equipment: ['RX', 'CT', 'Fluoroscopia', 'Mamografia'],
     calculations: ['Primaria', 'Dispersa', 'Fuga', 'Piso/techo'],
     memoriaSteps: ['layout', 'equipo', 'workload', 'barreras', 'citas NCRP 147'],
@@ -51,7 +53,7 @@ export const F113_MODALITY_PROFILES: F113ModalityProfile[] = [
     label: 'CY',
     name: 'Ciclotron',
     category: 'cyclotron',
-    standards: ['IAEA SRS-47', 'NCRP 151', 'NOM-008-NUCL'],
+    standards: ['IAEA SRS-47', 'NCRP 151', NOM_008_NUCL.clave],
     equipment: ['Cyclone/KIUBE', 'target cave', 'hot cells', 'radiofarmacia'],
     calculations: ['neutrones', 'activacion', 'skyshine', 'ventilacion', 'Monte Carlo'],
     memoriaSteps: ['energia protones', 'target', 'produccion', 'activacion', 'blindaje masivo'],

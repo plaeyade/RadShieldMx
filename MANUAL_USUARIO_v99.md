@@ -3802,7 +3802,7 @@ Para mejorar IA y ML se recomiendan memorias analiticas anonimizadas y revisadas
 
 ## 1. Introduccion
 
-RadShield-MX es un sistema profesional de calculo de blindajes radiologicos para Mexico, conforme a NOM-008-NUCL-2018, NOM-040-NUCL-2016, NCRP 147 (2004), NCRP 151 (2005) e IAEA SSR-6 (2018).
+RadShield-MX es un sistema profesional de calculo de blindajes radiologicos para Mexico, conforme a NOM-008-NUCL-2024, NOM-040-NUCL-2016, NCRP 147 (2004), NCRP 151 (2005) e IAEA SSR-6 (2018).
 
 **Stack**: React 19 + TypeScript + Vite + Tailwind CSS + shadcn/ui + tRPC + Drizzle ORM + MySQL
 **Version**: v99 | **Referencias**: 82+ | **Modulos**: 208+ dialogos y componentes
@@ -4213,7 +4213,7 @@ t = n × TVL (cm)
 Generador de Memoria Analitica conforme a normativa mexicana.
 
 ### Normativa incluida
-- **NOM-008-NUCL-2018**: Limites de dosis para occupacionales y publico
+- **NOM-008-NUCL-2024** (DOF 24-05-2024): Límites de contaminación radiactiva y criterios para su control; sustituye a la NOM-008-NUCL-2011. No fija limites de dosis (RGSR 1988)
 - **NOM-040-NUCL-2016**: Requisitos de blindaje para unidades medicas
 - **NOM-013-NUCL-2013**: Transporte de materiales radiactivos
 - **CNSNS-L-010-2015**: Licencia de operacion
@@ -4229,7 +4229,7 @@ Generador de Memoria Analitica conforme a normativa mexicana.
 - JSON estructurado para importacion a sistemas regulatorios
 
 ### Referencia
-- NOM-008-NUCL-2018, NOM-040-NUCL-2016
+- NOM-008-NUCL-2024, NOM-040-NUCL-2016
 - CNSNS: Comision Nacional de Seguridad Nuclear y Salvaguardias
 
 ---
@@ -4425,7 +4425,7 @@ El factor kappa varia 82% entre marcas. Usar el modelo especifico mejora la prec
 - **Geant4 Medical**: G4-Med (2020). Med Phys 48(1):19-56
 - **TOPAS**: https://topasmc.org — Monte Carlo proton therapy
 - **PyMedPhys**: https://docs.pymedphys.com — Gamma index, DICOM, QA
-- **Regulatorias MX**: NOM-008-ENER, NOM-040-NUCL, NOM-013-NUCL-2013, CNSNS-L-010-2015, LAERA
+- **Regulatorias MX**: NOM-008-NUCL-2024, NOM-040-NUCL, NOM-013-NUCL-2013, CNSNS-L-010-2015, LAERA
 - **GMP**: WHO TRS 1025 Annex 2, EMA CHMP/QWP/363827/2025, EANM cGRPP 2021
 - **BIM**: buildingSMART International, IFC2X3/IFC4 ISO 16739
 - **Autodesk**: Revit API Developer Guide 2024

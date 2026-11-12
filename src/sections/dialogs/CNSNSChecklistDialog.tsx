@@ -19,12 +19,12 @@ interface CheckItem {
 }
 
 const DEFAULT_CHECKLIST: CheckItem[] = [
-  // NOM-008-NUCL
-  { id: '008-1', category: 'NOM-008-NUCL', requirement: `Dosis POE ≤ ${LIMITES_DOSIS.icrp103.poe_mSv_anio} mSv/año (promedio 5 años; ≤ ${LIMITES_DOSIS.icrp103.poeMaxUnAnio_mSv} en un año)`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.poe_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
-  { id: '008-2', category: 'NOM-008-NUCL', requirement: `Dosis al público ≤ ${LIMITES_DOSIS.icrp103.publico_mSv_anio} mSv/año`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.publico_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
-  { id: '008-3', category: 'NOM-008-NUCL', requirement: 'Dosimetria personal obligatoria', norm: 'NOM-008 §7.1', status: 'pending', notes: '' },
-  { id: '008-4', category: 'NOM-008-NUCL', requirement: 'Area controlada delimitada', norm: 'NOM-008 §5.1', status: 'pending', notes: '' },
-  { id: '008-5', category: 'NOM-008-NUCL', requirement: 'Señalizacion radiologica', norm: 'NOM-008 §5.2', status: 'pending', notes: '' },
+  // Límites de dosis (ICRP 103 / RGSR) y control de zonas (NOM-008-NUCL-2024)
+  { id: '008-1', category: 'Límites de dosis', requirement: `Dosis POE ≤ ${LIMITES_DOSIS.icrp103.poe_mSv_anio} mSv/año (promedio 5 años; ≤ ${LIMITES_DOSIS.icrp103.poeMaxUnAnio_mSv} en un año)`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.poe_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
+  { id: '008-2', category: 'Límites de dosis', requirement: `Dosis al público ≤ ${LIMITES_DOSIS.icrp103.publico_mSv_anio} mSv/año`, norm: `${LIMITES_DOSIS.icrp103.referencia}; RGSR 1988: ${LIMITES_DOSIS.rgsr1988.publico_mSv_anio} mSv/año (verificar norma vigente)`, status: 'pending', notes: '' },
+  { id: '008-3', category: 'Límites de dosis', requirement: 'Dosimetria personal obligatoria', norm: 'RGSR (1988)', status: 'pending', notes: '' },
+  { id: '008-4', category: 'NOM-008-NUCL-2024', requirement: 'Area controlada delimitada', norm: 'NOM-008-NUCL-2024 §4.1', status: 'pending', notes: '' },
+  { id: '008-5', category: 'NOM-008-NUCL-2024', requirement: 'Señalizacion radiologica', norm: 'NOM-008-NUCL-2024 §4.1', status: 'pending', notes: '' },
 
   // NOM-020-NUCL
   { id: '020-1', category: 'NOM-020-NUCL', requirement: 'Inventario fuentes selladas', norm: 'NOM-020 §3.1', status: 'pending', notes: '' },

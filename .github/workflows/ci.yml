@@ -172,7 +172,7 @@ jobs:
           VITE_BASE_PATH: /RadShieldMx/
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
         run: |
-          specs=$(ls e2e/*.spec.ts | grep -vE '/(humo-calculo-referencia|fase10-inicio|fase10-pages-arranque|fase11-motor-unico|static-deploy|f134-release-candidate|f342-centro-neuro-visual-smoke|canvas-cad-e2e-harness)\.spec\.ts$')
+          specs=$(ls e2e/*.spec.ts | grep -vE '/(humo-calculo-referencia|fase10-inicio|fase10-pages-arranque|fase11-motor-unico|fase11-zona-controlada-motor|static-deploy|f134-release-candidate|f342-centro-neuro-visual-smoke|canvas-cad-e2e-harness)\.spec\.ts$')
           npx playwright test $specs --project=chromium
 
       - name: Upload E2E report
@@ -218,7 +218,7 @@ jobs:
         env:
           VITE_BASE_PATH: /RadShieldMx/
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
-        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/static-deploy.spec.ts --project=chromium
+        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/fase11-zona-controlada-motor.spec.ts e2e/static-deploy.spec.ts --project=chromium
 
       - name: Upload smoke report
         if: failure()

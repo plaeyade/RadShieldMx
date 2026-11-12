@@ -25,6 +25,7 @@ import {
 } from './ncrp147';
 import { NUCLIDOS_PET, dosisSemanalTG108, type EntradaTG108, type NuclidoPET } from './tg108';
 import { NCRP_DESIGN_GOALS } from './ncrpOccupancy';
+import { TG108_TABLA_V, espesorTG108, transmisionTG108 } from './transmisionTG108';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Objetivos de diseño (NCRP 147 §1.3 / NCRP 151 §1.2): 0.1 mSv/semana controlada, 0.02 no controlada.
@@ -264,24 +265,19 @@ export function referenciaHaz(c: CargaHaz): string {
 // Fuente PET — AAPM TG-108
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** TG-108 Tabla V: ajuste de Archer de la transmisión de banda ancha a 511 keV (α, β en cm⁻¹). */
-export const TG108_TABLA_V: Record<'lead' | 'concrete' | 'iron', Archer> = {
-  lead: { alpha: 1.543, beta: -0.4408, gamma: 2.136 },
-  concrete: { alpha: 0.1539, beta: -0.1161, gamma: 2.0752 },
-  iron: { alpha: 0.5704, beta: -0.3063, gamma: 0.6326 },
-};
+/** TG-108 Tabla V (α, β en cm⁻¹): definida en `transmisionTG108.ts`, la misma que usan el motor y la zona controlada. */
+export { TG108_TABLA_V };
 export const MATERIALES_PET = ['lead', 'concrete', 'iron'] as const;
 export type MaterialPET = (typeof MATERIALES_PET)[number];
 export const NUCLIDOS_PET_LISTA = Object.keys(NUCLIDOS_PET) as NuclidoPET[];
 
-const porMm = (a: Archer): Archer => ({ alpha: a.alpha / 10, beta: a.beta / 10, gamma: a.gamma });
-
 export function transmisionPET(material: MaterialPET, t_mm: number): number {
-  return transmisionArcher(t_mm, porMm(TG108_TABLA_V[material]));
+  return transmisionTG108(material, t_mm);
 }
 
+/** Inversión numérica de B(x) de TG-108 (`espesorTG108`). */
 export function espesorPET(material: MaterialPET, B: number): number {
-  return espesorArcher(B, porMm(TG108_TABLA_V[material]));
+  return espesorTG108(material, B);
 }
 
 export type EntradaPET = EntradaTG108 & { P_mSv_semana: number; T: number };

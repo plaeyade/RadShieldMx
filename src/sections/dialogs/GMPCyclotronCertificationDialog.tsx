@@ -71,7 +71,7 @@ const REQUIREMENTS: GMPRequirement[] = [
   { id: 'PRO-07', category: 'Producción y Procesos', text: 'Para radiofármacos con vida media ≤20 min, se dispone de validación de proceso que demuestra consistencia.', reference: 'EMA CHMP/QWP/363827/2025 §5.1.3', weight: 1 },
   { id: 'PRO-08', category: 'Producción y Procesos', text: 'Se establecen especificaciones y controles para materiales de partida, reactivos y solventes.', reference: 'EMA CHMP/QWP/363827/2025 §4 | WHO QAS/24.969 §9', weight: 1 },
   { id: 'PRO-09', category: 'Producción y Procesos', text: 'Los registros de producción (batch records) son completos, trazables y revisados antes de liberación.', reference: 'PIC/S Annex 3 §7.8 | WHO TRS 1025 Annex 2 §12 | EANM cGRPP (REF051)', weight: 1 },
-  { id: 'PRO-10', category: 'Producción y Procesos', text: 'Se dispone de procedimientos para manejo de desechos radiactivos con segregación por vida media.', reference: 'IAEA SSG-46 | IAEA TCS-88 §1.11 | NOM-008-NUCL-2018', weight: 2 },
+  { id: 'PRO-10', category: 'Producción y Procesos', text: 'Se dispone de procedimientos para manejo de desechos radiactivos con segregación por vida media.', reference: 'IAEA SSG-46 | IAEA TCS-88 §1.11 | NOM-008-NUCL-2024 §4.12–4.14', weight: 2 },
 
   // ── CONTROL DE CALIDAD ──
   { id: 'QC-01', category: 'Control de Calidad', text: 'Se realizan controles de calidad de materiales de partida antes de su uso en producción.', reference: 'WHO QAS/24.969 §9 | EMA CHMP/QWP/363827/2025 §4.1.4', weight: 1 },

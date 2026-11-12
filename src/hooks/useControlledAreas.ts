@@ -1,6 +1,6 @@
 /**
  * useControlledAreas — Polygon-based controlled area drawing for canvas
- * Implements: CNSNS NOM-008-ENER controlled/supervised/public zones
+ * Implements: controlled/supervised/public zones (criterio de la herramienta; NOM-008-NUCL-2024 §3.8–3.12 para zonas de radiación)
  * Colors: Red (controlled), Amber (supervised), Green (public)
  * McGinley Chapter 9: Room surveys and area classification
  */

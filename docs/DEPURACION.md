@@ -182,7 +182,9 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | 1 | fusionada (#43) |
 | 2 | fusionada (#45) |
 | 3 | lote 1: PR `depuracion-etapa-3` (ver medidas abajo); lote 2 pendiente |
-| 4–10 | pendientes (8 en `fase11-etapa8-uaq`) |
+| 4–7 | pendientes |
+| 8 | fusionada (#46; ver abajo) |
+| 9–10 | pendientes |
 
 ### Medidas de la etapa 1
 
@@ -238,7 +240,7 @@ a la rama:
 | JS de `dist/assets` | 7 456 245 B | 7 456 245 B (lo borrado no era alcanzable desde `src/main.tsx`) |
 | Vitest | 79 archivos, 672 pruebas (+3 todo) | 79 archivos, 672 pruebas (+3 todo): ninguna prueba leía lo borrado |
 | ESLint (trinquete) | 121 errores | 121 |
-| Humo «Guíame» | muro norte 18.85 mm Pb | igual (job «Humo») |
+| Humo «Guíame» | muro norte 18.85 mm Pb (17.96 mm Pb / 213.77 mm concreto tras #46) | igual que main (job «Humo») |
 | Job `e2e` | `continue-on-error` y sin `dist/` (no probaba nada) | **bloqueante**, contra el build de Pages en `/RadShieldMx/` |
 
 **Recorrido de importaciones** desde `src/main.tsx` (estático, `import()` y `@/`): de los 179 `src/lib/f[0-9]*.ts`, 173
@@ -275,3 +277,82 @@ bloqueante en el job «Humo».
 **Lote 2 (pendiente)**: que `UpdateAppDialog.tsx` deje de listar fases (hoy importa 89 `lib/f…` sólo para sus
 tarjetas; al quitarlas esos módulos quedan sin importadores y se borran por lotes de ≤ 20), las 3 specs de arriba con
 sus cadenas de scripts y los scripts que leen salidas de lo ya borrado (`f293`, `f294`, `f301`).
+
+### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»
+
+`controlledZoneCalculationAdapter` (lo llama «Enviar a calculo» del panel de factibilidad de `LayoutBunkerDialog`) ya no
+usa `uaqProtocol`. El nuevo `lib/zonaControladaMotor.ts` usa las mismas funciones que `motorProyecto`:
+
+| Familia | Antes (`uaqProtocol`) | Ahora |
+|---|---|---|
+| LINAC primaria/secundaria | TVL único; secundaria con modelo propio; IMRT 75 % | `barreraMV` (NCRP 151 Ec. 2.1, 2.3, 2.7, 2.8; TVL₁/TVLₑ; dos fuentes y suma directa); U = 0.25, θ = 30°, IMRT 50 % con C_I = 5 (los mismos valores por omisión que el motor) |
+| PET/CT | K = Γ·A·N·t/d² sin decaimiento ni absorción; **TVL de 6 MV** (37 cm de concreto) para 511 keV | `dosisSemanalTG108` (captación, F-18, tU = 1 h) y TVL de 511 keV del catálogo |
+| Gamma Knife | B = P/K **sin T** | B = P/(T·K) con TVL de Co-60 del catálogo (`tvlThickness`) |
+| HDR Ir-192 | Γ = 4.69 «R·m²/(Ci·h)» y R → mSv × 0.00876 (≈ 100× menos kerma) | Γδ = 0.111 μGy·m²/(MBq·h) del catálogo y TVL de Ir-192 (`tvlThickness`) |
+
+Cambian los resultados del plan preliminar de zona controlada (perfil por omisión, concreto): HDR sube mucho
+(≈ 100× más kerma); PET baja (TVL de 511 keV en lugar del de 6 MV, decaimiento y absorción del paciente); Gamma Knife
+baja un poco donde T < 1; LINAC baja 7–16 % (la carga IMRT ya no multiplica la primaria).
+
+Revisión independiente (cálculo propio contra NCRP 151, TG-108 e IAEA SRS-47): el techo del búnker LINAC pasa a
+barrera primaria (plano de giro Norte–Sur; antes secundaria: 143 cm en vez de 242 cm de concreto) y el TVL de Ir-192
+del catálogo sube a 152 mm en concreto y 43 mm en acero (IAEA SRS-47; antes 110 y 28 mm, no conservadores). Nuevo E2E
+`e2e/fase11-zona-controlada-motor.spec.ts`: abre el diálogo, «Enviar a calculo» y compara los espesores (Gamma Knife). `f149NormativeNumericQa` conserva sus IDs de caso, pero sus casos LINAC/PET/Gamma Knife/HDR apuntan ahora al
+motor: el LINAC es el caso publicado NCRP 151 §7.1.1 (149.6 cm, `canonical-reference`); 8/8 casos pasan.
+Prueba: `src/__tests__/auditoria/zonaControladaMotor.test.ts` (NCRP 151 §7.1.1 → 149.6 cm y §7.1.5 → 66.4 cm, ±1.5 %;
+mismo espesor que `motorProyecto` en §7.1.1, §7.1.5, plomo/acero, «Guíame» captación norte con una fuente, Gamma Knife
+y HDR; todas las barreras de todas las opciones del perfil por omisión del diálogo). De `uaqProtocol` sólo queda
+la tabla `C1_IMRT_FACTORS` que lee `MemoriaAnaliticaWizard` (su cálculo ya es `barreraMV`); ninguna ruta de
+cálculo usa sus fórmulas. El E2E que abre el diálogo se añadió en la revisión (job «Humo» de CI).
+
+Medidas (mismo entorno que la etapa 2, rama apilada sobre la etapa 2): `tsc` 0/0; Vitest 80 archivos / 680 pruebas
+(+1 archivo y +8 pruebas sobre la etapa 2); lint 121 sin nuevos; JS de `dist/assets` 7 456 245 → 7 453 897 B
+(−2 348 B respecto a la etapa 2).
+
+#### Etapa 8 — decisiones del propietario: curva de TG-108 (PET) y «días por semana» (HDR)
+
+**PET.** El TVL único de 511 keV (176 mm de concreto, 16.6 mm de plomo) se sustituye por la curva de transmisión de
+banda ancha de AAPM TG-108 (Madsen et al., *Med. Phys.* 33(1):4–15, 2006), **Tabla V**, ajuste de Archer
+B(x) = [(1 + β/α)·e^(αγx) − β/α]^(−1/γ): plomo α = 1.543 cm⁻¹, β = −0.4408 cm⁻¹, γ = 2.136; concreto (2.35 g/cm³)
+0.1539, −0.1161, 2.0752; hierro 0.5704, −0.3063, 0.6326 (verificados en el texto del informe; el impreso escribe el
+exponente como 1/γ, el signo correcto es −1/γ, el de su inversa y el que reproduce la Tabla IV). El espesor se
+resuelve por inversión numérica de B(x) (bisección, `lib/transmisionTG108.ts`: `espesorTG108`, `espesorPET511`) y se
+usa en `zonaControladaMotor.espesorPETZona` y en `motorProyecto` (fuentes con clave de energía `511keV`); las
+calculadoras de diálogo (`espesorPET`) llaman a la misma función. Plomo y acero usan su ajuste; el resto de materiales,
+concreto equivalente por densidad (conservador para Z alto). Pruebas (`transmisionTG108.test.ts`): Tabla V, Tabla IV
+(±6·10⁻⁵), inversa cerrada de TG-108 (10⁻⁶ mm), Ejemplos 1, 2, 4 y 5 de TG-108 (B = 0.189, 0.34, 0.17, 0.15 →
+12/8/13/13 mm de plomo y 15/11/17/17 cm de concreto, ±0.6 mm y ±1.2 cm) y el caso B ≈ 0.4 (Sur de PET).
+
+**HDR.** La carga del plan de zona controlada tenía horas/semana = pacientes/día × 0.5 h (la de un solo día). Ahora
+`hdrDaysPerWeek` es explícito: horas/semana = tratamientos/día × `hdrHoursPerTreatment_h` × `hdrDaysPerWeek`, o
+`hdrTreatmentsPerWeek` × h por tratamiento. Por omisión 5 días/semana (semana laboral completa, la cota alta de un
+servicio de HDR) y 0.5 h por tratamiento (10 Ci suelen irradiar 5–15 min). El diálogo los muestra en «Carga de trabajo
+HDR». Migración (`migrarPlanZonaControlada`, al importar el JSON y al recuperar el snapshot local): un plan guardado
+sin el campo toma el valor por omisión y se recalculan sus barreras HDR, con una nota en cada una. Al aplicar el plan
+al plano, la fuente HDR lleva esas horas/semana (antes el motor tomaba 40 h). Gamma Knife sigue sin autoblindaje.
+
+Cambios de resultados (mm de concreto 2.35 g/cm³ salvo donde se indica; «antes» = 789fefe):
+
+| Caso (d, T, P) | Antes | Después | Motivo |
+|---|---|---|---|
+| Zona PET Sur (8.33 m, 1, 0.02), B ≈ 0.41 | 68.0 | **97.8** | curva TG-108 (+3 cm a B ≈ 0.4) |
+| Zona PET Techo (3 m, 1, 0.02), B = 0.053 | 224.2 | **234.5** | curva TG-108 |
+| Zona PET Norte / Este / Oeste | 0 | 0 | K·T < P |
+| Zona HDR Norte (6.5 m, 0.5, 0.1) | 268.4 | **374.7** | 5 días/semana (+log₁₀5 × 152 mm) |
+| Zona HDR Sur (5.42 m, 1, 0.02) | 444.5 | **550.7** | ídem |
+| Zona HDR Este / Oeste (5 m, 0.25, 0.1) | 257.3 | **363.5** | ídem |
+| Zona HDR Techo (3 m, 1, 0.02) | 522.5 | **628.7** | ídem (60 h/semana: K = 273.8 mGy) |
+| «Guíame» captación norte (Pb / concreto) | 18.85 / 199.88 | **17.96 / 213.77** | curva TG-108 |
+| «Guíame» captación sur | 7.32 / 77.64 | **7.50 / 106.95** | ídem |
+| «Guíame» captación hacia PET | 13.12 / 139.07 | **12.79 / 161.64** | ídem |
+| «Guíame» PET norte | 15.73 / 166.82 | **15.16 / 185.52** | ídem |
+| «Guíame» PET sur | 0.50 / 5.27 | **0.61 / 15.24** | ídem |
+| «Guíame» captación oeste, PET control | 0 / 0 | 0 / 0 | K·T < P |
+| F149-TG108-PET-F18 (2 m, 60 pac.), B = 0.047 | 233.2 | **242.2** | curva TG-108 (esperado = inversa cerrada) |
+
+El concreto sube en todas las barreras PET (más a B grande); el plomo sube a B grande y baja hasta ≈ 0.9 mm a B
+pequeña (la pendiente de equilibrio de la curva es menor que el TVL de 16.6 mm del catálogo), y el acero baja
+(Guíame norte 73.8 → 64.2 mm): la curva de TG-108 es la referencia. La prueba de humo «Guíame»
+(`e2e/humo-calculo-referencia.spec.ts`) fija los valores nuevos; `fase11-zona-controlada-motor` (Gamma Knife) no cambia.
+Medidas: `tsc` 0; Vitest 82 archivos / 699 pruebas (+2 archivos); lint 121 sin nuevos; `npm run check` con
+`VITE_BASE_PATH=/RadShieldMx/`; JS de `dist/assets` 7 457 747 B.

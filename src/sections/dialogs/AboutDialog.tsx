@@ -5,7 +5,7 @@ const META = [
   { icon: Calendar, label: 'Inicio del proyecto', value: '2022 — Plataforma web para fisicos medicos mexicanos' },
   { icon: Users, label: 'Autor', value: 'C.E. Cardena et al.' },
   { icon: Code, label: 'Desarrollo', value: 'Codigo propietario, desarrollo independiente' },
-  { icon: Globe, label: 'Objetivo', value: 'Facilitar calculos de blindaje conforme a NOM-008-NUCL, NCRP 147/151, para instalaciones de radiologia y medicina nuclear en Mexico' },
+  { icon: Globe, label: 'Objetivo', value: 'Facilitar calculos de blindaje conforme a NCRP 147/151 y la normativa CNSNS, para instalaciones de radiologia y medicina nuclear en Mexico' },
   { icon: BookOpen, label: 'Referencias', value: '113 referencias bibliograficas indexadas (NCRP, ICRP, IAEA, AAPM, EANM, CNSNS)' },
 ] as const;
 

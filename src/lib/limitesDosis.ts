@@ -5,7 +5,7 @@
  * - Límites de dosis (ICRP 103, 2007): POE 20 mSv/año promediados en 5 años, sin superar 50 mSv en un año;
  *   público 1 mSv/año.
  * - Valores del Reglamento General de Seguridad Radiológica (1988): POE 50 mSv/año y público 5 mSv/año. Se citan como
- *   históricos: verifique la norma mexicana vigente (NOM-012-STPS, NOM-008-NUCL/NOM-030-NUCL y su actualización).
+ *   históricos: verifique la norma mexicana vigente (NOM-012-STPS y su actualización). La NOM-008-NUCL-2024 regula contaminación radiactiva, no límites de dosis.
  * - Objetivos de diseño de blindaje (NCRP 147 §1.3, NCRP 151 §1.2, AAPM TG-108): 0.1 mSv/semana en área controlada y
  *   0.02 mSv/semana en área no controlada.
  */

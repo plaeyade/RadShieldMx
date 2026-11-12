@@ -74,7 +74,7 @@ export default function AnnualDoseReport({ open, onClose }: Props) {
         </DialogHeader>
 
         <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-[11px] text-emerald-700">
-          <b>ICRP 103 / NOM-008-NUCL-2018:</b> Reporte acumulado de dosis anual con factores
+          <b>ICRP 103 / RGSR (1988):</b> Reporte acumulado de dosis anual con factores
           estacionales. El límite anual para trabajadores es 20 mSv promedio (ICRP 103) o
           50 mSv máximo individual. Se consideran semanas de vacaciones y mantenimiento.
         </div>

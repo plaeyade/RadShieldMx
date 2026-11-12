@@ -421,7 +421,7 @@ export default function ResultsPanel({ floorPlan, roundThickness }: ResultsPanel
                 <div className="text-[9px] text-slate-500 space-y-0.5">
                   <div>NCRP 151: Structural Shielding Design and Evaluation for Megavoltage X- and Gamma-Ray Radiotherapy Facilities</div>
                   <div>NCRP 147: Structural Shielding Design for Medical X-Ray Imaging Facilities</div>
-                  <div>NOM-008-ENER: Lineamientos para proteccion radiologica en instalaciones medicas (Mexico)</div>
+                  <div>NOM-008-NUCL-2024: Límites de contaminación radiactiva y criterios para su control (Mexico, DOF 24-05-2024)</div>
                   <div>IAEA Safety Standards Series No. 47: Radiation Protection in the Design of Radiotherapy Facilities</div>
                   <div>AAPM TG 108: PET and PET/CT Shielding Requirements</div>
                 </div>

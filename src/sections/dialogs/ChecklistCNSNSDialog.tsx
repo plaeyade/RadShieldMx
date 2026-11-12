@@ -15,8 +15,8 @@ interface CheckItem { id: string; category: string; item: string; reference: str
 const DEFAULT_ITEMS: CheckItem[] = [
   { id: '1', category: 'Datos Generales', item: 'Nombre de la institucion completo', reference: 'Portada', checked: false, required: true },
   { id: '2', category: 'Datos Generales', item: 'Direccion completa (calle, ciudad, estado, CP)', reference: 'Portada', checked: false, required: true },
-  { id: '3', category: 'Datos Generales', item: 'Licencia CNSNS vigente', reference: 'NOM-008', checked: false, required: true },
-  { id: '4', category: 'Datos Generales', item: 'Responsable de proteccion radiologica (nombre, licencia)', reference: 'NOM-008 sec. 5', checked: false, required: true },
+  { id: '3', category: 'Datos Generales', item: 'Licencia CNSNS vigente', reference: 'RGSR (1988)', checked: false, required: true },
+  { id: '4', category: 'Datos Generales', item: 'Responsable de proteccion radiologica (nombre, licencia)', reference: 'RGSR (1988)', checked: false, required: true },
   { id: '5', category: 'Equipo', item: 'Marca, modelo y numero de serie del equipo', reference: 'Condiciones Generales', checked: false, required: true },
   { id: '6', category: 'Equipo', item: 'Energia fotones (MV) confirmada', reference: 'Condiciones Generales', checked: false, required: true },
   { id: '7', category: 'Equipo', item: 'Energia electrones (MeV) si aplica', reference: 'Condiciones Generales', checked: false, required: false },
@@ -29,7 +29,7 @@ const DEFAULT_ITEMS: CheckItem[] = [
   { id: '14', category: 'Calculos', item: 'Barrera secundaria calculada (scatter + leakage)', reference: 'Barreras Secundarias', checked: false, required: true },
   { id: '15', category: 'Calculos', item: 'Laberinto calculado (si aplica > 10 MV o GK)', reference: 'DISENO_LABERINTO', checked: false, required: true },
   { id: '16', category: 'Calculos', item: 'Puerta del laberinto (neutrones si > 10 MV)', reference: 'Neutrones', checked: false, required: false },
-  { id: '17', category: 'Calculos', item: 'Verificacion TADR contra NOM-008', reference: 'NOM-008', checked: false, required: true },
+  { id: '17', category: 'Calculos', item: 'Verificacion TADR contra objetivos de diseno', reference: 'NCRP 147/151', checked: false, required: true },
   { id: '18', category: 'Calculos', item: 'Skyshine evaluado (fotones y neutrones)', reference: 'NCRP 151 sec. 5.3', checked: false, required: false },
   { id: '19', category: 'Materiales', item: 'Material de blindaje especificado con densidad', reference: 'MATERIALES_BLINDAJE', checked: false, required: true },
   { id: '20', category: 'Materiales', item: 'TVL confirmado para energia y material seleccionado', reference: 'NCRP 151 Tabla B.1', checked: false, required: true },
@@ -37,7 +37,7 @@ const DEFAULT_ITEMS: CheckItem[] = [
   { id: '22', category: 'QA', item: 'Memoria analitica completa y firmada', reference: 'MEMORIA_ANALITICA_*', checked: false, required: true },
   { id: '23', category: 'QA', item: 'Plan de contingencias', reference: 'MEMORIA_CONTING', checked: false, required: true },
   { id: '24', category: 'QA', item: 'Registro de mantenimiento programado', reference: 'REGISTRO_MANTENIMIENTO', checked: false, required: true },
-  { id: '25', category: 'Normativa', item: 'Cumplimiento NOM-008-NUCL-2018 (limites de exposicion)', reference: 'NOM-008', checked: false, required: true },
+  { id: '25', category: 'Normativa', item: 'Delimitacion y control de zonas (contaminacion/radiacion)', reference: 'NOM-008-NUCL-2024', checked: false, required: true },
   { id: '26', category: 'Normativa', item: 'Cumplimiento NOM-040-NUCL (instalaciones radioterapia)', reference: 'NOM-040', checked: false, required: true },
 ];
 

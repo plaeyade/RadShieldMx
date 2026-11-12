@@ -48,7 +48,7 @@ describe('Ejemplo guiado PET/CT (Fase 10)', () => {
     expect(out.filter((b) => Object.keys(b.requiredThickness_mm as object).length > 0).length).toBeGreaterThanOrEqual(3);
   });
 
-  it('muro norte de captación: kerma y espesores iguales a TG-108 a mano (Γ·0.64, Rₜ, TVL 511 keV)', () => {
+  it('muro norte de captación: kerma y espesores iguales a TG-108 a mano (Γ·0.64, Rₜ, curva de banda ancha de la Tabla V)', () => {
     const p = planoEjemploCompleto();
     const { result } = renderHook(() => useShieldingEngine());
     const out = result.current.calculateAllBarriers(p.barriers, p.sources, p.scale_m_per_pixel);
@@ -67,12 +67,13 @@ describe('Ejemplo guiado PET/CT (Fase 10)', () => {
     expect(capt).toBeCloseTo(261.0, 0);
     expect(norte.maxKerma! * 1000).toBeGreaterThan(D * 0.99);
     expect(norte.maxKerma! * 1000).toBeLessThan(D * 1.02);
-    // B = P/(T·D) con P = 20 μSv/semana (público), T = 1; espesor = TVL·log10(1/B), TVL Pb 16.6 mm, concreto 176 mm.
-    const nTVL = Math.log10(D / 20);
+    // B = P/(T·D) con P = 20 μSv/semana (público), T = 1; espesor de la curva de banda ancha de TG-108 (Tabla V, ajuste
+    // de Archer): x = ln{[B^−γ + β/α]/[1 + β/α]}/(αγ). Antes un TVL único (Pb 16.6 mm, concreto 176 mm: 18.9 y 200 mm).
+    const B = 20 / D;
+    const x_mm = (a: number, b: number, g: number) => (10 * Math.log((B ** -g + b / a) / (1 + b / a))) / (a * g);
     const t = norte.requiredThickness_mm as Record<string, number>;
-    expect(t.PB).toBeCloseTo(16.6 * nTVL, 0); // ≈ 18.9 mm
-    expect(t.CONCRETE235).toBeGreaterThan(176 * nTVL - 2);
-    expect(t.CONCRETE235).toBeLessThan(176 * nTVL + 2); // ≈ 200 mm
+    expect(Math.abs(t.PB - x_mm(1.543, -0.4408, 2.136))).toBeLessThan(0.2); // ≈ 18.0 mm
+    expect(Math.abs(t.CONCRETE235 - x_mm(0.1539, -0.1161, 2.0752))).toBeLessThan(2); // ≈ 216 mm
     // Contrapeso: no hay dosis del sintético comparada con TG-108 a la distancia 3D (receptor en el piso).
     const tgPiso = dosisSemanalTG108({ ...p.sources[0].tg108!, nuclido: 'F18', d_m: Math.hypot(1.8, 1.0) });
     expect(norte.maxKerma! * 1000).toBeGreaterThan(tgPiso * 1.2);

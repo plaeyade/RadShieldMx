@@ -62,7 +62,7 @@ export const OFTALMOLOGIA_INTERV: OftalmoIntervData = {
     'Dosimetría personal para cirujano y asistentes',
     'Monitor de área con alarma en sala',
     'Protocolo de desecho de placas usadas (residuo radioactivo)',
-    'NOM-008-NUCL-2018: Límites dosis personal',
+    'RGSR (1988): Límites dosis personal',
   ],
 };
 

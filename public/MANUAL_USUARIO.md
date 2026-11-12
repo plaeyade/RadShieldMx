@@ -294,7 +294,7 @@ Base de datos de 15 regulaciones internacionales:
 | NCRP 144 | NCRP | 2003 | Safety Standard |
 | 10 CFR 20 | NRC | 2023 | Legal Act |
 | CNSNS-LA-001 | CNSNS | 2018 | Regulatory Guide |
-| NOM-008-ENER | SENER | 2020 | Legal Act |
+| NOM-008-NUCL-2024 | SENER/CNSNS | 2024 | Legal Act |
 | Euratom 2013/59 | EU | 2013 | Legal Act |
 | IRMER 2017 | UK | 2017 | Legal Act |
 | StrlSchV 2018 | BfS | 2018 | Legal Act |
@@ -531,7 +531,7 @@ Paso 7: Analizar resultados
 3. ICRP Publication 103 (2007) — The 2007 Recommendations of the ICRP
 4. IAEA Safety Report Series No. 47 (2006) — Radiation Protection in the Design of Radiotherapy Facilities
 5. CNSNS-LA-001/2018 — Guia para la elaboracion de la memoria de calculo de blindajes
-6. NOM-008-ENER-2020 — Limites maximos permisibles de exposicion a radiaciones ionizantes
+6. NOM-008-NUCL-2024 — Limites de contaminacion radiactiva y criterios para su control (DOF 24-05-2024)
 7. Euratom Council Directive 2013/59/Euratom — Basic Safety Standards
 8. Archundia et al. (2004) — Measurements of TVLs for Co-60, 6, 10, 15, and 18 MV
 9. McGinley (1998) — Shielding Techniques for Radiation Oncology Facilities
