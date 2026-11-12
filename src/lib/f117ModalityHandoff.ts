@@ -1,5 +1,5 @@
-import { F113_MODALITY_PROFILES, type F113ModalityProfile, type F113ModalityProfileId } from './f113ModalityProfiles';
 import { NOM_008_NUCL } from './normativaMx';
+import { F113_MODALITY_PROFILES, type F113ModalityProfile, type F113ModalityProfileId } from './f113ModalityProfiles';
 
 export const F117_ACTIVE_PROFILE_KEY = 'radshield:f113:active-modality-profile';
 

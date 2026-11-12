@@ -12,21 +12,23 @@ test.describe('Menu Archivo - All 15 items', () => {
 
   test('Archivo menu opens and shows all items', async ({ page }) => {
     await page.getByRole('button', { name: /Archivo/i }).click();
-    await expect(page.locator('text=Nuevo Proyecto')).toBeVisible();
-    await expect(page.locator('text=Abrir Proyecto')).toBeVisible();
-    await expect(page.locator('text=Guardar')).toBeVisible();
-    await expect(page.locator('text=Importar CSV')).toBeVisible();
-    await expect(page.locator('text=Importar DXF')).toBeVisible();
-    await expect(page.locator('text=Importar STEP')).toBeVisible();
-    await expect(page.locator('text=Exportar CSV')).toBeVisible();
-    await expect(page.locator('text=Exportar PDF')).toBeVisible();
-    await expect(page.locator('text=Compartir')).toBeVisible();
-    await expect(page.locator('text=Reporte CNSNS')).toBeVisible();
-    await expect(page.locator('text=Especificaciones Tecnicas')).toBeVisible();
-    await expect(page.locator('text=Audit Trail')).toBeVisible();
-    await expect(page.locator('text=Analisis de Logs')).toBeVisible();
-    await expect(page.locator('text=Glosario')).toBeVisible();
-    await expect(page.locator('text=Acerca de')).toBeVisible();
+    // Fase 10: el estado vacío del lienzo también ofrece «Abrir proyecto»; se busca sólo dentro del menú.
+    const menu = page.getByRole('menu');
+    await expect(menu.locator('text=Nuevo Proyecto')).toBeVisible();
+    await expect(menu.locator('text=Abrir Proyecto')).toBeVisible();
+    await expect(menu.locator('text=Guardar')).toBeVisible();
+    await expect(menu.locator('text=Importar CSV')).toBeVisible();
+    await expect(menu.locator('text=Importar DXF')).toBeVisible();
+    await expect(menu.locator('text=Importar STEP')).toBeVisible();
+    await expect(menu.locator('text=Exportar CSV')).toBeVisible();
+    await expect(menu.locator('text=Exportar PDF')).toBeVisible();
+    await expect(menu.locator('text=Compartir')).toBeVisible();
+    await expect(menu.locator('text=Reporte CNSNS')).toBeVisible();
+    await expect(menu.getByText('Especificaciones Tecnicas', { exact: true })).toBeVisible();
+    await expect(menu.locator('text=Audit Trail')).toBeVisible();
+    await expect(menu.locator('text=Analisis de Logs')).toBeVisible();
+    await expect(menu.locator('text=Glosario')).toBeVisible();
+    await expect(menu.locator('text=Acerca de')).toBeVisible();
   });
 
   test('Exportar CSV opens Export dialog', async ({ page }) => {
@@ -55,8 +57,8 @@ test.describe('Menu Archivo - All 15 items', () => {
 
   test('Especificaciones Tecnicas opens dialog', async ({ page }) => {
     await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText('Especificaciones Tecnicas').click();
-    await expect(page.locator('text=Especificaciones Tecnicas')).toBeVisible({ timeout: 5000 });
+    await page.getByRole('menu').getByText('Especificaciones Tecnicas', { exact: true }).click();
+    await expect(page.getByRole('dialog')).toContainText(/Especificaciones T[eé]cnicas/i, { timeout: 5000 });
   });
 
   test('Audit Trail opens dialog', async ({ page }) => {

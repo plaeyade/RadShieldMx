@@ -18,42 +18,31 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
   test('SplashScreen se cierra al hacer clic en Continuar', async ({ page }) => {
     await page.goto(BASE);
     await closeSplashIfVisible(page);
-    await expect(page.getByRole('button', { name: /Nuevo Proyecto/i }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
   });
 
-  test('Welcome muestra opciones de inicio', async ({ page }) => {
-    await page.goto(BASE);
-    await closeSplashIfVisible(page);
-    await expect(page.getByRole('button', { name: /Nuevo Proyecto/i }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /Importar Plano/i }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /R&F Room/i })).toBeVisible();
-  });
-
-  test('Cargar demo data y verificar fuentes', async ({ page }) => {
+  // Fase 10: la pantalla de bienvenida y el demo R&F se retiraron; el lienzo vacío ofrece estas acciones
+  // (el arranque vacío completo lo cubren fase10-inicio.spec.ts y fase10-pages-arranque.spec.ts).
+  test('Estado vacío muestra opciones de inicio', async ({ page }) => {
     await bootWorkspace(page);
-    await expect(page.getByRole('textbox').first()).toHaveValue(/Demo - R&F Room/);
-    await expect(page.getByText('Fuentes:')).toBeVisible();
-    await expect(page.getByText('Barreras:')).toBeVisible();
-    await expect(page.locator('strong').filter({ hasText: '3' }).first()).toBeVisible();
-    await expect(page.locator('strong').filter({ hasText: '5' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Guíame paso a paso/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Importar DXF', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Abrir proyecto', exact: true })).toBeVisible();
   });
 
   test('Toolbar muestra todos los menus principales', async ({ page }) => {
     await bootWorkspace(page);
     await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Diseno|Diseño/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Calcular$/ }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: /Fisica|Física/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Med\. Nuclear/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Normativa/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Reportes/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Herramientas/i })).toBeVisible();
+    // Menús canónicos desde F97–F110 (Física, Med. Nuclear, Normativa y Herramientas quedaron como respaldo oculto).
+    for (const menu of ['Diseno', 'Equipos', 'Blindaje', 'Verificacion', 'Reportes', 'Evidencia', 'Integraciones']) {
+      await expect(page.getByRole('button', { name: menu, exact: true }).first()).toBeVisible();
+    }
   });
 
   test('Abrir Update Center desde menu', async ({ page }) => {
     await bootWorkspace(page);
-    await page.getByRole('button', { name: /Update/i }).click();
-    await expect(page.getByText('RadShield-MX Update Center')).toBeVisible();
+    await page.getByRole('button', { name: 'Update Center', exact: true }).click();
+    await expect(page.getByText('Centro de Actualizaciones').first()).toBeVisible();
   });
 
   test('Dark mode toggle funciona', async ({ page }) => {
@@ -71,8 +60,8 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
 
   test('AI Assistant responde en modo estatico/offline', async ({ page }) => {
     await bootWorkspace(page);
-    await page.getByRole('button', { name: /Herramientas/i }).click();
-    await page.getByText('AI Shielding Assistant').click();
+    await page.getByTestId('f110-migrated-evidence-dropdown').click();
+    await page.getByText('AI source review', { exact: true }).click();
     await expect(page.getByRole('heading', { name: /RadShield AI Assistant RAG/i })).toBeVisible();
     await page.getByPlaceholder(/Pregunta con RAG|Pregunta directa/i).fill('TVL concreto 6 MV');
     await page.getByRole('button', { name: /Enviar pregunta AI/i }).click();
@@ -80,9 +69,11 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
   });
 
   test('Cloud Sync abre en modo offline sin backend remoto', async ({ page }) => {
+    // Cloud Sync ya no tiene entrada visible en la barra (sólo el respaldo oculto); se abre con el gancho E2E del store.
+    await page.addInitScript(() => localStorage.setItem('radshield-e2e-controls', 'true'));
     await bootWorkspace(page);
-    await page.getByRole('button', { name: /Herramientas/i }).click();
-    await page.getByText('Cloud Sync').click();
+    await page.waitForFunction(() => Boolean((window as unknown as { __radshieldE2E?: unknown }).__radshieldE2E));
+    await page.evaluate(() => (window as unknown as { __radshieldE2E: { abrir: (n: string) => void } }).__radshieldE2E.abrir('cloudSync'));
     await expect(page.getByRole('heading', { name: /Cloud Sync & Backup/i })).toBeVisible();
     await expect(page.getByText('Server Offline')).toBeVisible();
     await expect(page.getByText('Not Connected')).toBeVisible();

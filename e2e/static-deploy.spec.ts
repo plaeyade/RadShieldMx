@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { BASE, disableBlockingOnboarding, closeSplashIfVisible } from './helpers';
+import { disableBlockingOnboarding, closeSplashIfVisible } from './helpers';
 
 test.describe('Static deploy smoke', () => {
-  test('loads app shell and required static artifacts without backend opt-ins', async ({ page, request }) => {
+  test('loads app shell and required static artifacts without backend opt-ins', async ({ page, request, baseURL }) => {
     const consoleErrors: string[] = [];
     const missingResponses: string[] = [];
 
@@ -19,7 +19,9 @@ test.describe('Static deploy smoke', () => {
       if (response.status() === 404) missingResponses.push(response.url());
     });
 
-    await page.goto(BASE);
+    // El baseURL del proyecto ya incluye la base de Pages (/RadShieldMx/ en el CI; ver playwright.config.ts).
+    const base = baseURL ?? 'http://127.0.0.1:4174/';
+    await page.goto('./', { waitUntil: 'networkidle' });
     await closeSplashIfVisible(page);
     await expect(page).toHaveTitle(/RadShield-MX/i);
     await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
@@ -30,8 +32,8 @@ test.describe('Static deploy smoke', () => {
     ];
 
     for (const artifactPath of artifactPaths) {
-      const response = await request.get(new URL(artifactPath, BASE).toString());
-      expect(response.ok(), `${artifactPath} should be served`).toBe(true);
+      const response = await request.get(new URL(artifactPath, base).toString());
+      expect(response.ok(), `${artifactPath} should be served (${response.status()} ${response.url()})`).toBe(true);
     }
 
     const backendCalls = missingResponses.filter((url) => url.includes('/api/') || url.includes('/api/trpc'));
