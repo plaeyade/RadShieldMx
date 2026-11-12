@@ -980,7 +980,7 @@ export function useCanvas(
         modality: MODALITIES[0],
         workloadValue: 50,
         workloadUnit: MODALITIES[0].unit,
-        isocenterHeight_m: MODALITIES[0].isocenterHeightDefault_m,
+        isocenterHeight_m: MODALITIES[0].isocenterHeightDefault_m!, // definido en el catálogo (1.2 m)
         useFactor: 0.25,
         workloadHoursPerWeek: 40,
         rotationDeg: 0,

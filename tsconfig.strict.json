@@ -1,0 +1,16 @@
+{
+  "//": "Depuración etapa 5: `strict` gradual por carpetas. Carpeta 1: src/lib/ (motor de cálculo y su cierre de importaciones, que tsc revisa también en strict). Añadir carpetas aquí cuando queden limpias.",
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.strict.tsbuildinfo",
+    "strict": true
+  },
+  "include": [
+    "src/lib/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
+}

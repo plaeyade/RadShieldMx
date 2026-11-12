@@ -49,7 +49,7 @@ export function initSentry(dsn?: string): void {
   }
 }
 
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, unknown>): void {
   if (!sentryInitialized) {
     if (isDev) console.error('[Sentry Stub]', error, context);
     return;
@@ -74,7 +74,7 @@ export function setUser(user: { id: string; email?: string; username?: string } 
   }
 }
 
-export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
+export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
   if (!sentryInitialized) return;
   Sentry.addBreadcrumb({ message, category, data, level: 'info' });
 }

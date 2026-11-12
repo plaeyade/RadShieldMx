@@ -36,7 +36,7 @@ export interface BabylonRuntimeStatus {
 }
 
 export function buildBabylonAdapterContract(scene: MedicalScene): BabylonAdapterContract {
-  const hasThicknessData = scene.walls.some((wall) => wall.requiredThickness_mm > 0 || wall.thickness_m > 0);
+  const hasThicknessData = scene.walls.some((wall) => (wall.requiredThickness_mm as number) > 0 /* undefined > 0 es falso */ || wall.thickness_m > 0);
   const hasControlledZones = scene.zones.some((zone) => zone.controlled);
 
   return {
