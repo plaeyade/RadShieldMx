@@ -128,10 +128,20 @@ export const PREBLINDAJE_MM = {
   sin_rejilla: { lead: 0.3, concrete: 30, steel: 2 },
 } as const;
 
+/**
+ * Núcleo único de la ecuación de Archer (NCRP 147 Ec. A.2; TG-108 Tabla V usa la misma forma):
+ * (1 + β/α)·e^(αγx/cosθ) − β/α. B(x) = núcleo^(−1/γ). Lo usan `transmisionArcher` (NCRP 147),
+ * `transmisionTG108` (511 keV) y `archerTransmission` (catálogo, con oblicuidad); antes cada uno tenía su copia
+ * (depuración, etapa 6). `x` en las unidades de α, β; con cosθ = 1 la división es exacta (mismo resultado bit a bit).
+ */
+export function interiorArcher(x: number, p: Archer, cosTheta = 1): number {
+  const r = p.beta / p.alpha;
+  return (1 + r) * Math.exp((p.alpha * p.gamma * x) / cosTheta) - r;
+}
+
 export function transmisionArcher(x_mm: number, p: Archer): number {
   if (x_mm <= 0) return 1;
-  const r = p.beta / p.alpha;
-  return Math.pow((1 + r) * Math.exp(p.alpha * p.gamma * x_mm) - r, -1 / p.gamma);
+  return Math.pow(interiorArcher(x_mm, p), -1 / p.gamma);
 }
 
 export function espesorArcher(B: number, p: Archer): number {
