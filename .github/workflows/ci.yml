@@ -83,6 +83,10 @@ jobs:
       - name: Verify GitHub Pages base path
         run: node scripts/verificar-base-pages.mjs dist /RadShieldMx/
 
+      # Depuración etapa 7: three/@react-three/tfjs fuera del arranque y de los diálogos que no los necesitan al abrir.
+      - name: Verify lazy loading of three / r3f / tfjs
+        run: node scripts/verificar-carga-diferida.mjs dist
+
       # Fase 10: el sitio publicado dice de qué commit sale (https://<usuario>.github.io/RadShieldMx/version.json).
       - name: Stamp deployed commit
         run: printf '{"commit":"%s","ref":"%s","run":"%s"}\n' "$GITHUB_SHA" "$GITHUB_REF" "$GITHUB_RUN_ID" > dist/version.json

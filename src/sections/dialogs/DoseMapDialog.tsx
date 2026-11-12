@@ -10,8 +10,9 @@
  */
 
 import { useState, useRef, useCallback, useMemo } from 'react';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// Depuración etapa 7: three se descarga sólo cuando se dibuja la vista 3D (import dinámico en `render3D`);
+// abrir el diálogo o usar el mapa 2D ya no lo baja.
+import type { WebGLRenderer } from 'three';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +43,8 @@ interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 export default function DoseMapDialog({ open, onOpenChange }: Props) {
   const canvas2DRef = useRef<HTMLCanvasElement>(null);
   const canvas3DRef = useRef<HTMLCanvasElement>(null);
-  const renderer3DRef = useRef<THREE.WebGLRenderer | null>(null);
+  const renderer3DRef = useRef<WebGLRenderer | null>(null);
+  const turno3DRef = useRef(0);
   const animRef = useRef<number>(0);
   const [activeTab, setActiveTab] = useState('2d');
   const [colorMap, setColorMap] = useState<ColorMap>('jet');
@@ -63,9 +65,16 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
   const [showBarriers] = useState(true);
 
   // ─── 3D rendering ───
-  const render3D = useCallback((res: DoseGridResult) => {
+  const render3D = useCallback(async (res: DoseGridResult) => {
     if (!canvas3DRef.current) return;
     const canvas = canvas3DRef.current;
+    const turno = ++turno3DRef.current;
+    const [THREE, { OrbitControls }] = await Promise.all([
+      import('three'),
+      import('three/examples/jsm/controls/OrbitControls.js'),
+    ]);
+    // Durante la descarga pudo llegar otro cálculo o desmontarse la pestaña 3D: sólo dibuja el último.
+    if (turno !== turno3DRef.current || canvas3DRef.current !== canvas) return;
 
     // Cleanup old renderer
     if (renderer3DRef.current) {
@@ -230,8 +239,8 @@ export default function DoseMapDialog({ open, onOpenChange }: Props) {
         }
       }
 
-      // Render 3D
-      render3D(vista);
+      // Render 3D (asíncrono por la carga diferida de three; sus errores siguen saliendo en el aviso)
+      render3D(vista).catch((e) => toast.error('Error: ' + (e as Error).message));
 
       const dt = performance.now() - t0;
       toast.success(`Dose map calculado: ${w}×${h} = ${w * h} celdas en ${dt.toFixed(0)} ms`);

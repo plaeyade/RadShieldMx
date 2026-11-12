@@ -68,8 +68,8 @@ tiene ≈ 250 scripts `prepare:f…`/`test:f…` y `e2e/` 53 specs `f…` que el
 | `recharts` | ninguna importación | quitar (etapa 1) |
 | `pdfjs-dist` 3.x | ninguna importación (sólo `scripts/f279…` mira si existe la carpeta); la 3.x tiene un aviso de seguridad conocido | quitar (etapa 1) |
 | `@babylonjs/gui` | ninguna importación | **se conserva** (regla «mantener Babylon»); decisión del propietario |
-| `three`, `@react-three/fiber`, `@react-three/drei`, `@types/three` | visores 3D (algunos detrás de `VISOR_*`) | etapa 7, sólo con decisión del propietario |
-| `@tensorflow/tfjs` | `lib/ml/models/shieldingThicknessModel.ts` | etapa 7: revisar si la ruta está viva |
+| `three`, `@react-three/fiber`, `@react-three/drei`, `@types/three` | visores 3D (algunos detrás de `VISOR_*`) | etapa 7: **carga diferida** (decisión del propietario), no se quitan |
+| `@tensorflow/tfjs` | `lib/ml/models/shieldingThicknessModel.ts` | etapa 7: **import dinámico** (la ruta está viva: diálogo «ML Prediction») |
 | `@types/three` | está en `dependencies` | mover a `devDependencies` (etapa 7) |
 
 **Tipos y lint**: 200 apariciones de `any` en 61 archivos de producción (más en `MemoriaAnaliticaWizard.tsx`
@@ -185,7 +185,7 @@ La reorganización de menús y diálogos duplicados es la Fase 12 (`docs/plan-fa
 | 4 | PR `depuracion-etapa-4` (4a completa, 4b parcial; ver medidas abajo) |
 | 5 | PR `depuracion-etapa-5` (`strict` en `src/lib/`; ver medidas abajo) |
 | 6 | PR `depuracion-etapa-6`, apilada sobre la 5 (duplicados del motor; ver medidas abajo) |
-| 7 | pendiente |
+| 7 | PR `depuracion-etapa-7`, apilada sobre la 6 (carga diferida de three / r3f / drei / tfjs; ver abajo) |
 | 8 | fusionada (#46; ver abajo) |
 | 9–10 | pendientes |
 
@@ -397,6 +397,56 @@ con 4 ángulos, inversas) y TVL.
 | ESLint (trinquete) | 25 errores | 25, ninguno nuevo |
 | JS de `dist/assets` | 7 446 553 B | 7 446 501 B (302; −52 B). JS inicial (`index.html`) 1 078 575 → 1 078 523 B |
 | Humo «Guíame» / e2e | 17.96 mm Pb / 213.77 mm concreto | jobs «Humo» y «e2e» del CI |
+
+### Etapa 7 — inventario y carga diferida (decisión del propietario: diferir, no eliminar)
+
+**Inventario** (`main` 3cab5b1; tamaños del build de Pages, minificado sin gzip). Babylon se mantiene (`VISOR_3D_BABYLON`
+apagada: con la bandera apagada no genera chunk); ninguna bandera se enciende.
+
+| Paquete | Chunk | Usado en | Cómo se abre | Bandera |
+|---|---|---|---|---|
+| `three` | `vendor-three` 751 531 B | `DoseMapDialog` (sólo la pestaña 3D), `RealTime3DDialog`, `Viewer3DDialog`, `DoseMapping3D`, `medical3d/VisorMedical3D` y `medical3d/escena/*` (`RoomScene`, `camaras`, `capas`, `elementos`, `materiales`) | todos con `lazy()` en `ShieldingDesigner` / `LazyDialog` | `DoseMapping3D` tras `VISOR_DOSE_MAPPING_3D` (`visorDisponible('dose3D')`, apagada: nunca se monta); el resto sin bandera |
+| `@react-three/fiber`, `@react-three/drei` (+ `three-stdlib`) | `vendor-r3f` 183 524 B | `Viewer3DDialog`, `DoseMapping3D`, `MedicalFloorPlan3DDialog` (visor y escena) | `lazy()` | ídem |
+| `@tensorflow/tfjs` | dentro de `MLPredictionDialog` (895 673 B el chunk) | `lib/ml/models/shieldingThicknessModel.ts` vía `hooks/useAutoML` | `lazy()` del diálogo; al montarse `loadModel()` | ninguna |
+| `@types/three` | — (sólo tipos) | — | — | estaba en `dependencies` |
+
+Medido sobre el build: el **arranque** (scripts de `index.html` y su cierre de imports estáticos) ya **no** descargaba ninguno
+de los cuatro: 1 078 579 B (`index` + `vendor-react`). Sí los descargaba la apertura de diálogos que no los necesitan para
+abrirse: `DoseMapDialog` bajaba `vendor-three` aunque el mapa 2D es la pestaña por omisión (la 3D sólo se dibuja si está
+visible: Radix desmonta la pestaña inactiva) y `MLPredictionDialog` traía tfjs entero aunque no haya modelo que cargar.
+
+**Cambios (sin eliminar nada):**
+
+- `shieldingThicknessModel`: `import type` + `import('@tensorflow/tfjs')` único y cacheado (`cargarTF`) al entrenar, predecir o
+  cargar un modelo guardado. `loadModel()` sin modelo guardado devuelve `false` sin descargar tfjs (comprueba la clave
+  `tensorflowjs_models/<modelo>/info` del almacén `localstorage://` de tfjs; antes `loadLayersModel` fallaba y también daba
+  `false`). El `import()` apunta a `lib/ml/tfDiferido.ts`, que re-exporta sólo lo usado (`sequential`, `layers`, `train`,
+  `tensor2d`, `loadLayersModel`): un `import()` del paquete entero perdía el tree-shaking (+227 kB). Sin `manualChunks` para
+  tfjs: con un chunk `vendor-tfjs` Rollup colgaba un import de efectos del diálogo y lo volvía a cargar al abrir. Prueba:
+  `src/__tests__/lib/cargaDiferidaTF.test.ts`.
+- `DoseMapDialog`: `render3D` importa `three` y `OrbitControls` con `import()` (sólo cuando la pestaña 3D está montada, como
+  antes); un contador descarta un dibujo viejo si llega otro cálculo durante la descarga; los errores siguen saliendo en el aviso.
+- Los visores que son 3D de principio a fin (`RealTime3DDialog`, `Viewer3DDialog`, `MedicalFloorPlan3DDialog`, `DoseMapping3D`)
+  ya eran `lazy()`: three/r3f sólo bajan al abrirlos, y `DoseMapping3D` (bandera apagada) nunca.
+- `@types/three` a `devDependencies`.
+- CI (job «Production Build»): `scripts/verificar-carga-diferida.mjs dist` falla si el arranque o la apertura de
+  `DoseMapDialog`/`MLPredictionDialog` descargan `vendor-three`, `vendor-r3f` o el chunk de tfjs (`tfDiferido`) (en `main` falla con 2 hallazgos).
+
+Medidas (mismo entorno que las etapas 5 y 6; «JS al abrir» = bytes nuevos que descarga abrir el diálogo, cierre de imports
+estáticos de su chunk fuera del arranque):
+
+| Verificación | Antes (`main` / etapa 6) | Después (etapa 7) |
+|---|---|---|
+| JS inicial del arranque (`index.html`) | 1 078 579 B / 1 078 523 B | **1 078 520 B** (ya no incluía three/r3f/tfjs) |
+| JS al abrir `DoseMapDialog` (mapa 2D) | 802 390 B (con `vendor-three`) | **51 196 B** (−751 kB; three sólo al dibujar la pestaña 3D) |
+| JS al abrir `MLPredictionDialog` | 903 889 B (con tfjs) | **23 972 B** (−880 kB; tfjs, 883 853 B, sólo al entrenar/predecir o con modelo guardado) |
+| JS al abrir `RealTime3DDialog` / `Viewer3DDialog` / `MedicalFloorPlan3DDialog` | 778 946 / 940 921 / 1 137 966 B | igual (+126 B de `vendor-three`): son visores 3D |
+| `DoseMapping3D` (`VISOR_DOSE_MAPPING_3D` apagada) | nunca se monta | igual |
+| JS total de `dist/assets` | 7 446 501 B (302) | 7 450 897 B (303; **+4 396 B, +0.06 %**: coste de partir tfjs y three en chunks aparte —nombres de exportación entre chunks—; el criterio común «no crece» queda a decisión del propietario frente a la bajada al abrir) |
+| `tsc` app / server / strict | 0 / 0 / 0 | 0 / 0 / 0 |
+| Vitest | 87 archivos, 732 pruebas | 88 archivos, 734 pruebas (+2 de `cargaDiferidaTF.test.ts`) |
+| ESLint (trinquete) | 25 | 25, ninguno nuevo |
+| Humo «Guíame» / e2e | 17.96 mm Pb / 213.77 mm | jobs «Humo» y «e2e» del CI |
 
 ### Etapa 8 — `uaqProtocol` fuera del diálogo «Layout de búnker»
 

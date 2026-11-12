@@ -5,11 +5,21 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-import * as tf from "@tensorflow/tfjs";
+// Depuración etapa 7: @tensorflow/tfjs se descarga sólo al entrenar, predecir o cargar un modelo guardado
+// (import dinámico); abrir el diálogo sin modelo guardado ya no lo baja.
+import type * as TF from "@tensorflow/tfjs";
 import { generateTrainingDataset, normalizeFeatures, type FeatureNorms } from "../trainingData";
 
+type Tf = typeof import("../tfDiferido");
+let tfCargando: Promise<Tf> | null = null;
+/** Carga diferida de TensorFlow.js (una sola vez, vía `tfDiferido`). */
+function cargarTF(): Promise<Tf> {
+  if (!tfCargando) tfCargando = import("../tfDiferido");
+  return tfCargando;
+}
+
 // Singleton model instance
-let model: tf.LayersModel | null = null;
+let model: TF.LayersModel | null = null;
 let norms: FeatureNorms | null = null;
 let isTraining = false;
 
@@ -18,7 +28,7 @@ const MODEL_KEY = "radshield-thickness-model-v2";
 const NORMS_KEY = "radshield-thickness-norms-v2";
 
 // ─── Build neural network ───
-function buildModel(): tf.LayersModel {
+function buildModel(tf: Tf): TF.LayersModel {
   const m = tf.sequential({
     layers: [
       tf.layers.dense({ inputShape: [8], units: 64, activation: "relu" }),
@@ -47,6 +57,7 @@ export async function trainModel(
   isTraining = true;
 
   try {
+    const tf = await cargarTF();
     // Generate and normalize data
     const rawData = generateTrainingDataset(3000);
     const { xs, ys, norms: n } = normalizeFeatures(rawData);
@@ -57,7 +68,7 @@ export async function trainModel(
     const yTensor = tf.tensor2d(ys, [ys.length, 1]);
 
     // Build or reset model
-    model = buildModel();
+    model = buildModel(tf);
 
     // Train
     const history = await model.fit(xTensor, yTensor, {
@@ -113,8 +124,9 @@ export async function predictThickness(
   const raw = [energy, distance, workload, occupancy, goalDose, useFactor, material, modality];
   const normalized = raw.map((v, i) => (v - min[i]) / (max[i] - min[i] + 1e-10));
 
+  const tf = await cargarTF();
   const input = tf.tensor2d([normalized]);
-  const prediction = model.predict(input) as tf.Tensor;
+  const prediction = model.predict(input) as TF.Tensor;
   const normalizedValue = (await prediction.data())[0];
 
   // Denormalize
@@ -168,6 +180,10 @@ async function saveModel(): Promise<void> {
 export async function loadModel(): Promise<boolean> {
   if (model) return true;
   try {
+    // Sin modelo guardado `loadLayersModel` falla y se devuelve false: se comprueba antes, sin descargar tfjs.
+    // (Clave del almacén `localstorage://` de tfjs: tensorflowjs_models/<ruta>/info.)
+    if (localStorage.getItem(`tensorflowjs_models/${MODEL_KEY}/info`) === null) return false;
+    const tf = await cargarTF();
     model = await tf.loadLayersModel(`localstorage://${MODEL_KEY}`);
     const normsStr = localStorage.getItem(NORMS_KEY);
     if (normsStr) norms = JSON.parse(normsStr);
