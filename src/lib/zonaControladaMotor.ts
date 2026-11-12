@@ -11,8 +11,9 @@
  * Ahora cada familia usa lo mismo que `motorProyecto`:
  * - LINAC: `barreraMV` (NCRP 151 Ec. 2.1, 2.3, 2.7, 2.8; Tablas B.2, B.4, B.5a, B.7; regla de dos fuentes y suma
  *   directa, el mayor), las mismas funciones de `ncrp151.ts` que usa `normativeBarrierEngine` para teleterapia.
- * - PET/CT: kerma de `dosisSemanalTG108` (AAPM TG-108 Ec. 2–3, sala de captación) y espesor de `exponentialThickness`
- *   con el TVL de 511 keV del catálogo, como el motor para fuentes PET con datos TG-108.
+ * - PET/CT: kerma de `dosisSemanalTG108` (AAPM TG-108 Ec. 2–3, sala de captación) y espesor de `espesorPET511`:
+ *   curva de transmisión de banda ancha de TG-108 a 511 keV (Tabla V, ajuste de Archer) invertida numéricamente, la
+ *   misma función que usa `motorProyecto` para las fuentes PET (antes un TVL único de 511 keV del catálogo).
  * - Gamma Knife y HDR Ir-192: el kerma de `calculateUnshieldedKerma` del motor (Gamma Knife: D·f·U/d²; HDR: Γδ de
  *   kerma en aire del catálogo, 0.111 μGy·m²/(MBq·h), por actividad y horas) y `tvlThickness` con el TVL de Co-60 o
  *   Ir-192 del catálogo, con B = P/(T·K), como `motorProyecto` para las modalidades `gamma-knife` y `hdr-192ir`.
@@ -24,7 +25,8 @@ import { MATERIALS, MODALITIES, type ShieldingMaterial } from '@/types/radshield
 import { barreraMV, energiaTabuladaMV, type HazMV } from '@/lib/calculadorasNormativas';
 import type { MaterialNCRP151 } from '@/lib/ncrp151';
 import { codigoCatalogo } from '@/lib/doseFieldEngine';
-import { exponentialThickness, tvlThickness } from '@/lib/shieldingMath';
+import { tvlThickness } from '@/lib/shieldingMath';
+import { REFERENCIA_TG108_511, ajusteTG108Catalogo, espesorPET511 } from '@/lib/transmisionTG108';
 import { dosisSemanalTG108, type NuclidoPET } from '@/lib/tg108';
 
 export interface ResultadoZona {
@@ -110,19 +112,22 @@ export interface EntradaPETZona {
   materialCodigo: string;
 }
 
-/** Sala de captación PET: kerma TG-108 (Ec. 2–3) y espesor con el TVL de 511 keV del catálogo (como el motor). */
+/** Sala de captación PET: kerma TG-108 (Ec. 2–3) y espesor con la curva de banda ancha de TG-108 a 511 keV (como el motor). */
 export function espesorPETZona(e: EntradaPETZona): ResultadoZona {
   const m = materialCatalogo(e.materialCodigo);
   const K = dosisSemanalTG108({
     nuclido: e.nuclido ?? 'F18', A0_MBq: e.A0_MBq, pacientesSemana: e.pacientesSemana,
     tU_h: e.tU_h ?? 1, tI_h: 0, sala: 'captacion', d_m: e.d_m,
   }) / 1000;
+  const notas = [`${e.nuclido ?? 'F18'}: Γ, decaimiento y absorción del paciente de TG-108; tU = ${e.tU_h ?? 1} h.`];
+  const { escala } = ajusteTG108Catalogo(m);
+  if (escala !== 1) notas.push(`${m.code}: espesor por equivalencia másica con el concreto de TG-108 (ρ = ${m.density} g/cm³).`);
   return {
-    espesor_mm: exponentialThickness(K, e.P_mSv_semana / tOcupacion(e.T), m, '511keV'),
+    espesor_mm: espesorPET511(K, e.P_mSv_semana / tOcupacion(e.T), m),
     K_sin_blindaje_mSv_semana: K,
     material: m.code,
-    referencia: 'AAPM TG-108 Ec. 2–3 (captación); TVL de 511 keV del catálogo de materiales',
-    notas: [`${e.nuclido ?? 'F18'}: Γ, decaimiento y absorción del paciente de TG-108; tU = ${e.tU_h ?? 1} h.`],
+    referencia: `AAPM TG-108 Ec. 2–3 (captación); ${REFERENCIA_TG108_511}`,
+    notas,
   };
 }
 

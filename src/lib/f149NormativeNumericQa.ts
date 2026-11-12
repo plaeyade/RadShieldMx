@@ -121,7 +121,11 @@ export function buildF149NormativeNumericQa(): F149NormativeNumericQaSummary {
   const petInput = { A0_MBq: 370, pacientesSemana: 60, tU_h: 1, d_m: 2, P_mSv_semana: 0.02, T: 1, materialCodigo: 'CONCRETE235' };
   const pet = espesorPETZona(petInput);
   const petUnshielded = dosisSemanalTG108({ nuclido: 'F18', A0_MBq: 370, pacientesSemana: 60, tU_h: 1, tI_h: 0, sala: 'captacion', d_m: 2 }) / 1000;
-  const petExpectedMm = expectedTvlThickness(petUnshielded, petInput.P_mSv_semana, concreto.TVL_mm!['511keV'] / 10) * 10;
+  // Inversa cerrada publicada en TG-108 con su Tabla V (concreto): x = ln{[B^−γ + β/α]/[1 + β/α]}/(αγ) cm; el motor
+  // invierte B(x) numéricamente.
+  const petB = petInput.P_mSv_semana / (petInput.T * petUnshielded);
+  const petR = -0.1161 / 0.1539;
+  const petExpectedMm = (10 * Math.log((petB ** -2.0752 + petR) / (1 + petR))) / (0.1539 * 2.0752);
 
   const gammaKnife = espesorGammaKnifeZona({ fraccionesSemana: 20, dosisFraccion_Gy: 12, d_m: 4, P_mSv_semana: 0.02, T: 1, materialCodigo: 'CONCRETE235' });
   const gammaKnifeUnshielded = (12 * 20 * 1000) / (4 ** 2);
@@ -188,14 +192,14 @@ export function buildF149NormativeNumericQa(): F149NormativeNumericQaSummary {
       id: 'F149-TG108-PET-F18',
       family: 'AAPM_TG108',
       label: 'PET/CT F-18 sala de captacion',
-      source: 'AAPM TG-108 Ec. 2-3 / dosisSemanalTG108 + TVL 511 keV (motor validado)',
-      formula: 'K=0.64*Gamma*A0*N*tU*Rt/d^2; B=P/(T*K); t=log10(1/B)*TVL(511 keV)',
+      source: 'AAPM TG-108 Ec. 2-3 y Tabla V / dosisSemanalTG108 + curva de banda ancha 511 keV (motor validado)',
+      formula: 'K=0.64*Gamma*A0*N*tU*Rt/d^2; B=P/(T*K); x=ln{[B^-g+b/a]/[1+b/a]}/(a*g) (TG-108 Tabla V)',
       expected: petExpectedMm,
       actual: pet.espesor_mm,
       unit: 'mm',
       tolerancePercent: 0.1,
       evidenceStrength: 'engine-cross-check',
-      notes: 'Before Fase 11 etapa 8 this path used the 6 MV concrete TVL (37 cm) for 511 keV; now the 511 keV catalog TVL.',
+      notes: 'Before Fase 11 etapa 8 this path used the 6 MV concrete TVL (37 cm) for 511 keV; now the TG-108 broad-beam curve (Table V).',
     }),
     buildCase({
       id: 'F149-UAQ-GAMMA-KNIFE-CO60',

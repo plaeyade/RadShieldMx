@@ -5,7 +5,7 @@
  * lateral, tecla F5, botones «Calcular» del lienzo, cálculo preliminar de un DXF confirmado, cálculo por lotes) pasa
  * por `calcularBarrerasValidadas`: puntos de muestreo de `shieldingMath`, kerma sin blindaje del motor de campo
  * (`doseFieldEngine`, TG-108 para PET), espesores de `normativeBarrierEngine` (NCRP 147 diagnóstico y TC, NCRP 151
- * teleterapia) y trazas de auditoría. El estado de cumplimiento es el de `verificarBarrera` (instalado ≥ requerido,
+ * teleterapia; PET con la curva de banda ancha de TG-108 a 511 keV, `espesorPET511`) y trazas de auditoría. El estado de cumplimiento es el de `verificarBarrera` (instalado ≥ requerido,
  * sólo con traza del motor).
  *
  * Sustituye a `AsyncShieldingEngine` (Fase 10, hallazgo crítico): aquel worker serializaba sólo posición, carga y
@@ -27,6 +27,7 @@ import {
   getShieldingEnergyKey,
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
+import { espesorPET511 } from '@/lib/transmisionTG108';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
 import { codigoCatalogo, dosisEnPunto } from '@/lib/doseFieldEngine';
 import { verificarBarrera, verificarPlano } from '@/lib/estadoProyecto';
@@ -113,6 +114,9 @@ function calcularUna(
       thickness = inverseArcher(B, mat);
     } else if (sources[0]?.modality.category === 'therapy') {
       thickness = tvlThickness(maxKerma, metaEfectiva, mat, energyKey);
+    } else if (energyKey === '511keV') {
+      // PET: curva de banda ancha de AAPM TG-108 (Tabla V) invertida numéricamente, no un TVL único (Fase 11, etapa 8).
+      thickness = espesorPET511(maxKerma, metaEfectiva, mat);
     } else {
       thickness = exponentialThickness(maxKerma, metaEfectiva, mat, energyKey);
     }

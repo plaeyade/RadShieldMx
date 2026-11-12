@@ -205,11 +205,12 @@ describe('Fase 11 — la ruta de la interfaz reproduce los valores publicados', 
     expect(rel((b.requiredThickness_mm as Record<string, number>).CONCRETE235 / 10, 66.4)).toBeLessThanOrEqual(0.015);
   });
 
-  it('TG-108 (ejemplo de «Guíame», muro norte de captación): 18.9 mm Pb y 200 mm de concreto a mano (Ec. 2–3, 9–10)', async () => {
+  it('TG-108 (ejemplo de «Guíame», muro norte de captación): 18.0 mm Pb y 214 mm de concreto a mano (Ec. 2–3, 9–10, Tabla V)', async () => {
     const r = await calcularProyectoAsync(planoEjemploCompleto());
     const t = r.barriers.find((b) => b.id === 'eg-captacion-norte')!.requiredThickness_mm as Record<string, number>;
-    expect(t.PB).toBeCloseTo(18.85, 1);
-    expect(t.CONCRETE235).toBeCloseTo(199.9, 0);
+    // Curva de banda ancha de TG-108 (antes TVL único: 18.85 mm Pb y 199.9 mm de concreto).
+    expect(t.PB).toBeCloseTo(17.96, 1);
+    expect(t.CONCRETE235).toBeCloseTo(213.8, 0);
   });
 
   it('una barrera que no necesita blindaje dice «no requiere blindaje adicional», no «sin cálculo»', async () => {

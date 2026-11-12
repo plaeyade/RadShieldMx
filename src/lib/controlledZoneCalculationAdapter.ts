@@ -26,6 +26,17 @@ export interface ControlledZoneCalculationAssumptions {
   /** Ya no se usa en el cálculo (Γδ de Ir-192 del catálogo); se conserva por compatibilidad del JSON exportado. */
   hdrGammaConstant_R_m2_Ci_h: number;
   workDaysPerWeek: number;
+  /**
+   * Carga de trabajo HDR: días de tratamiento por semana. Horas/semana = (tratamientos/día × h por tratamiento) ×
+   * días/semana, o tratamientos/semana × h por tratamiento si se da `hdrTreatmentsPerWeek`. Por omisión 5 días
+   * (semana laboral completa: la cota alta de un servicio de HDR, que suele tratar 2–5 días). Los planes guardados
+   * sin este campo se migran con este valor (`migrarPlanZonaControlada`).
+   */
+  hdrDaysPerWeek: number;
+  /** Tiempo de irradiación por tratamiento HDR (h). Por omisión 0.5 h (conservador: 10 Ci suelen irradiar 5–15 min). */
+  hdrHoursPerTreatment_h: number;
+  /** Tratamientos HDR por semana; si se da, sustituye a pacientes/día × días/semana. */
+  hdrTreatmentsPerWeek?: number;
   /** Fracción IMRT y factor C_I de la fuga (NCRP 151 Ec. 3.6). Por omisión: 0.5 y 5 con IMRT/VMAT/SBRT; 0 sin IMRT. */
   linacImrtFraction?: number;
   linacImrtFactor?: number;
@@ -100,7 +111,32 @@ const DEFAULT_ASSUMPTIONS: ControlledZoneCalculationAssumptions = {
   hdrActivity_Ci: 10,
   hdrGammaConstant_R_m2_Ci_h: 4.69,
   workDaysPerWeek: 5,
+  hdrDaysPerWeek: 5,
+  hdrHoursPerTreatment_h: 0.5,
 };
+
+/** Valores por omisión de la carga HDR (también los de la migración de planes guardados sin el campo). */
+export const HDR_DIAS_SEMANA_POR_OMISION = DEFAULT_ASSUMPTIONS.hdrDaysPerWeek;
+export const HDR_HORAS_TRATAMIENTO_POR_OMISION = DEFAULT_ASSUMPTIONS.hdrHoursPerTreatment_h;
+
+const positivo = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0;
+
+/**
+ * Horas de irradiación HDR por semana: tratamientos/semana × h por tratamiento, con tratamientos/semana =
+ * `hdrTreatmentsPerWeek` o pacientes/día × días/semana. Antes eran pacientes/día × 0.5 h, sin días por semana (la carga
+ * de un solo día). Mínimo 1 h/semana, como antes.
+ */
+export function horasSemanaHDR(
+  profile: Pick<ControlledZoneProfile, 'targetThroughputPerDay'>,
+  assumptions: Pick<ControlledZoneCalculationAssumptions, 'hdrDaysPerWeek' | 'hdrHoursPerTreatment_h' | 'hdrTreatmentsPerWeek'>,
+): number {
+  const h = positivo(assumptions.hdrHoursPerTreatment_h) ? assumptions.hdrHoursPerTreatment_h : HDR_HORAS_TRATAMIENTO_POR_OMISION;
+  const dias = positivo(assumptions.hdrDaysPerWeek) ? Math.min(7, assumptions.hdrDaysPerWeek) : HDR_DIAS_SEMANA_POR_OMISION;
+  const tratamientos = positivo(assumptions.hdrTreatmentsPerWeek)
+    ? assumptions.hdrTreatmentsPerWeek
+    : Math.max(0, profile.targetThroughputPerDay || 0) * dias;
+  return Math.max(1, tratamientos * h);
+}
 
 export function buildDefaultControlledZoneCalculationAssumptions(
   overrides: Partial<ControlledZoneCalculationAssumptions> = {},
@@ -161,7 +197,56 @@ export function parseControlledZoneShieldingPlanJson(raw: string): ControlledZon
     throw new Error('El JSON no corresponde a un ControlledZoneShieldingPlan v1.');
   }
 
-  return parsed;
+  return migrarPlanZonaControlada(parsed);
+}
+
+export const NOTA_MIGRACION_HDR = 'Plan guardado sin «dias por semana» HDR: se tomo el valor por omision conservador y se recalculo la barrera.';
+
+/**
+ * Migración de planes guardados (JSON exportado o snapshot local) anteriores al campo «días por semana» de HDR: rellena
+ * `hdrDaysPerWeek` y `hdrHoursPerTreatment_h` con los valores por omisión y recalcula las barreras HDR con la carga
+ * semanal nueva (la guardada era la de un solo día). Planes que ya traen el campo se devuelven sin cambios.
+ */
+export function migrarPlanZonaControlada(plan: ControlledZoneShieldingPlan): ControlledZoneShieldingPlan {
+  const a = (plan.assumptions ?? {}) as Partial<ControlledZoneCalculationAssumptions>;
+  if (positivo(a.hdrDaysPerWeek) && positivo(a.hdrHoursPerTreatment_h)) return plan;
+  const assumptions: ControlledZoneCalculationAssumptions = {
+    ...DEFAULT_ASSUMPTIONS,
+    ...a,
+    hdrDaysPerWeek: positivo(a.hdrDaysPerWeek) ? a.hdrDaysPerWeek : HDR_DIAS_SEMANA_POR_OMISION,
+    hdrHoursPerTreatment_h: positivo(a.hdrHoursPerTreatment_h) ? a.hdrHoursPerTreatment_h : HDR_HORAS_TRATAMIENTO_POR_OMISION,
+  };
+  const calculations = plan.calculations.map((calc) => {
+    if (calc.calculationFamily !== 'HDR') return calc;
+    const seed: ShieldingSeedPoint = {
+      id: calc.seedId,
+      barrier: calc.barrier,
+      adjacentZone: calc.adjacentZone,
+      distance_m: calc.distance_m,
+      occupancyFactor: calc.occupancyFactor,
+      designGoal_mSvWeek: calc.designGoal_mSvWeek,
+      calculationFamily: 'HDR',
+    };
+    const nuevo = calculateSeed(seed, { name: plan.optionName, modality: plan.modality }, plan.profile, { ...assumptions, materialCode: calc.materialCode || assumptions.materialCode });
+    return { ...nuevo, notes: [...nuevo.notes, NOTA_MIGRACION_HDR] };
+  });
+  const huboHDR = calculations.some((c) => c.calculationFamily === 'HDR');
+  return {
+    ...plan,
+    assumptions,
+    calculations,
+    summary: huboHDR
+      ? {
+        ...plan.summary,
+        maxThickness_mm: round(Math.max(...calculations.map((c) => c.requiredThickness_mm), 0), 1),
+        maxUnshielded_mSvWeek: round(Math.max(...calculations.map((c) => c.unshielded_mSvWeek), 0), 3),
+        reviewCount: calculations.filter((c) => c.status === 'review').length,
+      }
+      : plan.summary,
+    analyticMemoryDraft: huboHDR
+      ? buildAnalyticMemoryDraft({ name: plan.optionName, modality: plan.modality }, plan.profile, assumptions, calculations, plan.missingInputs)
+      : plan.analyticMemoryDraft,
+  };
 }
 
 export function buildControlledZoneDbPersistenceDraft(plan: ControlledZoneShieldingPlan): ControlledZoneDbPersistenceDraft {
@@ -215,7 +300,7 @@ function isControlledZoneShieldingPlanLike(value: unknown): value is ControlledZ
 
 function calculateSeed(
   seed: ShieldingSeedPoint,
-  option: ControlledZoneFeasibilityOption,
+  option: Pick<ControlledZoneFeasibilityOption, 'name' | 'modality'>,
   profile: ControlledZoneProfile,
   assumptions: ControlledZoneCalculationAssumptions,
 ): ControlledZoneBarrierCalculation {
@@ -284,16 +369,20 @@ function calculateSeed(
   }
 
   if (seed.calculationFamily === 'HDR') {
+    const horasSemana = horasSemanaHDR(profile, assumptions);
     const result = espesorHDRZona({
       actividad_Ci: assumptions.hdrActivity_Ci,
-      horasSemana: Math.max(1, profile.targetThroughputPerDay * 0.5),
+      horasSemana,
       d_m: d,
       P_mSv_semana: P,
       T,
       materialCodigo: materialCode,
     });
+    const carga = positivo(assumptions.hdrTreatmentsPerWeek)
+      ? `${assumptions.hdrTreatmentsPerWeek} tratamientos/semana`
+      : `${profile.targetThroughputPerDay} tratamientos/dia x ${assumptions.hdrDaysPerWeek} dias/semana`;
     return buildCalculation(seed, 'HDR', result.espesor_mm, result.K_sin_blindaje_mSv_semana, materialCode, [
-      'Supuesto preliminar HDR: tiempo semanal proporcional a pacientes/dia.',
+      `Supuesto preliminar HDR: ${carga} x ${assumptions.hdrHoursPerTreatment_h} h = ${round(horasSemana, 2)} h/semana de irradiacion.`,
       `Requiere dwell times, actividad actual y posicion extrema de fuente. ${result.referencia}.`,
     ]);
   }
@@ -332,7 +421,7 @@ function buildCalculation(
 }
 
 function buildAnalyticMemoryDraft(
-  option: ControlledZoneFeasibilityOption,
+  option: Pick<ControlledZoneFeasibilityOption, 'name' | 'modality'>,
   profile: ControlledZoneProfile,
   assumptions: ControlledZoneCalculationAssumptions,
   calculations: ControlledZoneBarrierCalculation[],
@@ -351,6 +440,9 @@ function buildAnalyticMemoryDraft(
     '',
     '## Supuestos base',
     `Material preliminar: ${assumptions.materialCode}.`,
+    ...(option.modality === 'HDR'
+      ? [`Carga HDR: ${round(horasSemanaHDR(profile, assumptions), 2)} h/semana de irradiacion (${assumptions.hdrTreatmentsPerWeek ? `${assumptions.hdrTreatmentsPerWeek} tratamientos/semana` : `${assumptions.hdrDaysPerWeek} dias/semana`}, ${assumptions.hdrHoursPerTreatment_h} h por tratamiento).`]
+      : []),
     `Pacientes por dia: ${profile.targetThroughputPerDay}. Presupuesto objetivo: ${profile.maxBudget_mxn} MXN.`,
     `Acceso publico: ${profile.publicAccessSide}. Acceso controlado: ${profile.controlledAccessSide}.`,
     '',
