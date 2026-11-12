@@ -31,7 +31,7 @@ test.describe('Static deploy smoke', () => {
 
     for (const artifactPath of artifactPaths) {
       const response = await request.get(new URL(artifactPath, BASE).toString());
-      expect(response.ok(), `${artifactPath} should be served`).toBe(true);
+      expect(response.ok(), `${artifactPath} should be served (${response.status()} ${response.url()})`).toBe(true);
     }
 
     const backendCalls = missingResponses.filter((url) => url.includes('/api/') || url.includes('/api/trpc'));
