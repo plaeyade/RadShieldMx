@@ -4214,7 +4214,7 @@ Generador de Memoria Analitica conforme a normativa mexicana.
 
 ### Normativa incluida
 - **NOM-008-NUCL-2024** (DOF 24-05-2024): Límites de contaminación radiactiva y criterios para su control; sustituye a la NOM-008-NUCL-2011. No fija limites de dosis (RGSR 1988)
-- **NOM-040-NUCL-2016**: Requisitos de blindaje para unidades medicas
+- **NOM-040-NUCL-2016**: Requisitos de seguridad radiologica para la practica de medicina nuclear (DOF 04-08-2016; solo medicina nuclear)
 - **NOM-013-NUCL-2013**: Transporte de materiales radiactivos
 - **CNSNS-L-010-2015**: Licencia de operacion
 
@@ -4425,7 +4425,7 @@ El factor kappa varia 82% entre marcas. Usar el modelo especifico mejora la prec
 - **Geant4 Medical**: G4-Med (2020). Med Phys 48(1):19-56
 - **TOPAS**: https://topasmc.org — Monte Carlo proton therapy
 - **PyMedPhys**: https://docs.pymedphys.com — Gamma index, DICOM, QA
-- **Regulatorias MX**: NOM-008-NUCL-2024, NOM-040-NUCL, NOM-013-NUCL-2013, CNSNS-L-010-2015, LAERA
+- **Regulatorias MX**: NOM-008-NUCL-2024, NOM-040-NUCL-2016 (medicina nuclear), NOM-013-NUCL-2013, CNSNS-L-010-2015, LAERA
 - **GMP**: WHO TRS 1025 Annex 2, EMA CHMP/QWP/363827/2025, EANM cGRPP 2021
 - **BIM**: buildingSMART International, IFC2X3/IFC4 ISO 16739
 - **Autodesk**: Revit API Developer Guide 2024

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import DialogShell from '@/components/DialogShell';
 import { TEXTO_OBJETIVOS_DISENO } from '@/lib/limitesDosis';
-import { NOM_008_NUCL } from '@/lib/normativaMx';
+import { NOM_008_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
 
 const GLOSSARY = [
   // === v77: AI/ML/RAG (nuevos) ===
@@ -77,7 +77,7 @@ const GLOSSARY = [
   { term: 'NCRP', def: 'National Council on Radiation Protection and Measurements (Reports 147, 151).' },
   { term: 'NIST', def: 'National Institute of Standards and Technology. XCOM database.' },
   { term: NOM_008_NUCL.clave, def: 'NOM-008-NUCL-2024 (DOF 24-05-2024): Limites de contaminacion radiactiva y criterios para su control. Define zonas controlada, contaminada, de radiacion (> 0.05 mSv/h) y de alta radiacion (> 1 mSv/h); no fija limites de dosis ni requisitos de blindaje. Sustituye a la NOM-008-NUCL-2011.' },
-  { term: 'NOM-040-NUCL', def: 'Norma Mexicana para instalaciones de radioterapia.' },
+  { term: NOM_040_NUCL.clave, def: 'NOM-040-NUCL-2016 (DOF 04-08-2016): Requisitos de seguridad radiologica para la practica de medicina nuclear. Zona controlada, cuarto caliente, almacenes de material y desechos, sala de espera y cuarto de hospitalizacion exclusivos, senalizacion y detectores de area. Exclusiva de medicina nuclear: no aplica a radioterapia.' },
   { term: 'PET', def: 'Positron Emission Tomography. Usa F-18, Ga-68. Blindaje especifico (AAPM TG 108).' },
   { term: 'Radiofarmaco', def: 'Compuesto con radionuclido para diagnostico o terapia.' },
   { term: 'SPECT', def: 'Single Photon Emission Computed Tomography. Usa Tc-99m, I-131, Ga-67.' },

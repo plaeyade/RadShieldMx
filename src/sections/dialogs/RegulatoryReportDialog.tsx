@@ -1,6 +1,6 @@
 /**
  * v110: Automated Regulatory Report Generator
- * Generates NOM-040/NOM-008-NUCL-2024/CNSNS compliant reports
+ * Generates NOM-040-NUCL-2016/NOM-008-NUCL-2024/CNSNS compliant reports
  */
 import { useState } from 'react';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';

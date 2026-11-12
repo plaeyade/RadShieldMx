@@ -34,3 +34,51 @@ export const NOM_008_NUCL = {
     umbralAlfa_Bq_cm2: 0.04,
   },
 } as const;
+
+/**
+ * Ficha única de la NOM-040-NUCL-2016 (medicina nuclear). Antes se citaba como «NOM-040-NUCL» sin año y, en varios
+ * diálogos, con el título equivocado «Instalaciones de radioterapia»: la norma es EXCLUSIVA de medicina nuclear (§2)
+ * y no aplica a búnkeres de linac, Co-60, Gamma Knife ni HDR.
+ *
+ * NOM-040-NUCL-2016, «Requisitos de seguridad radiológica para la práctica de medicina nuclear» (SENER/CNSNS),
+ * DOF 04-08-2016; entra en vigor 60 días naturales después de su publicación (§14). Vigente según el catálogo
+ * PLATIICA (Secretaría de Economía), con revisión sistemática del 20-08-2026 con resultado «Modificación» (todavía sin
+ * proyecto publicado). La NOM-042-NUCL-2026 (DOF 15-07-2026) trata de seguridad física en el transporte de material
+ * radiactivo y no la sustituye.
+ *
+ * No fija objetivos de diseño de blindaje: §5.2.1 exige que la memoria analítica (§4.8) demuestre que el POE no rebasa
+ * el límite anual del RGSR y §5.3.5.1 que fuera del área de cada paciente en la sala de espera no se rebase el límite de
+ * público del RGSR. Los objetivos 0.1/0.02 mSv/semana de RadShield (NCRP 147/151, TG-108; limitesDosis.ts) son más
+ * restrictivos y cumplen ambos requisitos.
+ */
+export const NOM_040_NUCL = {
+  clave: 'NOM-040-NUCL-2016',
+  titulo: 'Requisitos de seguridad radiológica para la práctica de medicina nuclear',
+  emisor: 'SENER/CNSNS',
+  anio: 2016,
+  publicacionDof: '2016-08-04',
+  entradaEnVigor: '60 días naturales después de su publicación en el DOF (§14)',
+  sustituyeA: null,
+  urlDof: 'https://www.dof.gob.mx/nota_detalle.php?codigo=5446807&fecha=04/08/2016',
+  urlPdf: 'https://platiica.economia.gob.mx/normalizacion/wp-content/uploads/sites/2/PDF_Normas_Publicas/040nucl2016.pdf',
+  /** Ficha de la fuente oficial en el repo (el PDF no se versiona: los .pdf van por Git LFS). */
+  fichaFuente: 'docs/normas/README.md',
+  cita: 'NOM-040-NUCL-2016. Requisitos de seguridad radiológica para la práctica de medicina nuclear. SENER/CNSNS. Diario Oficial de la Federación, 4 de agosto de 2016.',
+  alcance:
+    'Requisitos de la instalación de medicina nuclear (zona controlada, cuarto caliente, almacenes de material y de desechos, ' +
+    'descontaminación, sala de espera y sanitario exclusivos, cuarto de hospitalización), equipo de detección, personal y ' +
+    'registros. Exclusiva de medicina nuclear (§2): no aplica a radioterapia. No fija objetivos de diseño de blindaje.',
+  /** Requisitos de diseño/blindaje que el diseñador de la instalación debe reflejar en planos y memoria analítica. */
+  requisitosDiseno: [
+    { seccion: '§5.1', texto: 'Zona controlada con, cuando aplique: cuarto caliente (apertura de bultos y preparación), almacén de material radiactivo, almacén de desechos y objetos contaminados, área de descontaminación, área de administración, sala de espera y sanitario exclusivos para pacientes inyectados, sala de estudios (incluye su área de control) y cuarto de hospitalización.' },
+    { seccion: '§5.2.1', texto: 'Diseño, construcción y ubicación de las áreas: el POE no debe rebasar el límite anual del RGSR, demostrado con la memoria analítica (§4.8: cálculos de blindaje de las zonas controladas).' },
+    { seccion: '§5.2.2–5.2.7', texto: 'Paredes lisas con pintura lavable no porosa, pisos lisos impermeables sin juntas, curva sanitaria sellada, monitor de contaminación a la salida de la zona controlada, mobiliario mínimo y descontaminable.' },
+    { seccion: '§5.2.8', texto: 'Señalización de accesos: nombre del área, símbolo de radiación (NOM-026-STPS-2008) y «PELIGRO - ZONA CONTROLADA - MATERIAL RADIACTIVO – PROHIBIDO EL PASO A TODA PERSONA NO AUTORIZADA»; en sala de espera y cuarto de hospitalización, «ZONA CONTROLADA - PARA USO EXCLUSIVO DE PACIENTES A QUIENES SE LES HA ADMINISTRADO MATERIAL RADIACTIVO».' },
+    { seccion: '§5.3.1', texto: 'Cuarto caliente: puerta que abre desde dentro sin llave, superficie de trabajo que soporte el blindaje, lavamanos sin contacto, celda caliente o recinto blindado autorizado y campana de extracción si hay volátiles (Xe-133, I-131).' },
+    { seccion: '§5.3.2', texto: 'Almacenes de material y de desechos: puerta que abre desde dentro sin llave y paso al área de preparación por puerta o ventana de transferencia; si están en el cuarto caliente, área exclusiva con separación física entre material sin usar y desechos.' },
+    { seccion: '§5.3.3–5.3.6', texto: 'Descontaminación (regadera de emergencia) adyacente a preparación; administración adyacente a preparación o almacén; sala de espera con un área por paciente o mamparas que mantengan fuera de cada área el límite de público del RGSR, adjunta a la sala de estudios.' },
+    { seccion: '§5.3.7', texto: 'Cuarto de hospitalización (p. ej. I-131): un área por paciente o mamparas, baño completo exclusivo con apertura sin contacto, y prohibido usar cuartos externos a la instalación de medicina nuclear.' },
+    { seccion: '§6.1.1', texto: 'Monitoreo: detector de área permanente en el exterior de la puerta del almacén, detector portátil, detector de contaminación y, con pacientes hospitalizados, detector de área con alarma en la puerta del cuarto de hospitalización (NOM-012-NUCL-2002).' },
+    { seccion: '§8.2.1 / §8.3', texto: 'El material que entra a la zona controlada no transita por zonas no controladas (condiciona la circulación del proyecto); desechos según NOM-028-NUCL-2009.' },
+  ],
+} as const;

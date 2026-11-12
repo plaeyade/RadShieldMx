@@ -38,7 +38,7 @@ const DEFAULT_ITEMS: CheckItem[] = [
   { id: '23', category: 'QA', item: 'Plan de contingencias', reference: 'MEMORIA_CONTING', checked: false, required: true },
   { id: '24', category: 'QA', item: 'Registro de mantenimiento programado', reference: 'REGISTRO_MANTENIMIENTO', checked: false, required: true },
   { id: '25', category: 'Normativa', item: 'Delimitacion y control de zonas (contaminacion/radiacion)', reference: 'NOM-008-NUCL-2024', checked: false, required: true },
-  { id: '26', category: 'Normativa', item: 'Cumplimiento NOM-040-NUCL (instalaciones radioterapia)', reference: 'NOM-040', checked: false, required: true },
+  { id: '26', category: 'Normativa', item: 'Cumplimiento NOM-040-NUCL-2016 (solo si la instalacion es de medicina nuclear)', reference: 'NOM-040-NUCL-2016', checked: false, required: true },
 ];
 
 export default function ChecklistCNSNSDialog({ open, onOpenChange }: Props) {

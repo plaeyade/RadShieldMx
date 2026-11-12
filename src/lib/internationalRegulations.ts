@@ -6,7 +6,7 @@
  * ANVS (Brazil), FANR (UAE), NRPA (Norway), RPII (Ireland), ONR (UK)
  */
 
-import { NOM_008_NUCL } from './normativaMx';
+import { NOM_008_NUCL, NOM_040_NUCL } from './normativaMx';
 import { TEXTO_OBJETIVOS_DISENO_EN } from './limitesDosis';
 
 export interface Regulation {
@@ -162,6 +162,16 @@ export const REGULATIONS: Regulation[] = [
     summary: 'Mexican standard (DOF 2024-05-24, supersedes NOM-008-NUCL-2011) on derived limits of surface and airborne radioactive contamination and control criteria. It does not set dose limits or shielding design goals (Mexican dose limits: RGSR 1988).',
     keyRequirements: ['Radiation zone: > 0.05 mSv/h or > 1 mSv in 5 consecutive days (§3.11)', 'High-radiation zone: > 1 mSv/h (§3.12)', 'Contamination: > 0.4 Bq/cm² beta-gamma, > 0.04 Bq/cm² alpha (§5.0)', 'Monthly evaluation of contamination-control effectiveness (§4.17)'],
     relatedRegulations: ['icrp-103', 'cnsns-la001'],
+  },
+  {
+    id: 'nom-040', code: NOM_040_NUCL.clave, title: NOM_040_NUCL.titulo,
+    authority: 'SENER / CNSNS', country: 'Mexico', region: 'North America', category: 'legal_act', year: NOM_040_NUCL.anio, status: 'active',
+    scope: ['nuclear_medicine', 'controlled_zones', 'facility_design'],
+    applicability: 'national',
+    url: NOM_040_NUCL.urlDof,
+    summary: 'Mexican standard (DOF 2016-08-04) on radiation safety requirements for nuclear medicine facilities only (not radiotherapy). It does not set shielding design goals: the analytical report (memoria analítica) must show occupational doses below the RGSR annual limit (§5.2.1).',
+    keyRequirements: ['Controlled zone with hot lab, radioactive material and waste stores, exclusive waiting room and toilet (§5.1)', 'Shielding calculations in the memoria analítica (§4.8, §5.2.1)', 'Access signage (§5.2.8)', 'Hospitalization room for I-131 inside the NM facility with exclusive bathroom (§5.3.7)', 'Area monitors at store door and hospitalization room door with alarm (§6.1.1)'],
+    relatedRegulations: ['nom-008', 'cnsns-la001'],
   },
   // === EUROPE ===
   {

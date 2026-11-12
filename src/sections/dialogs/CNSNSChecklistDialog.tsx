@@ -1,5 +1,6 @@
 // Fase 2: CNSNSChecklistDialog -- Checklist interactivo con progreso visual para dictamen CNSNS
 import { LIMITES_DOSIS } from '@/lib/limitesDosis';
+import { NOM_040_NUCL } from '@/lib/normativaMx';
 import { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,10 +44,12 @@ const DEFAULT_CHECKLIST: CheckItem[] = [
   { id: '034-2', category: 'NOM-034-NUCL', requirement: 'Seguro obligatorio transporte', norm: 'NOM-034 §6.1', status: 'pending', notes: '' },
   { id: '034-3', category: 'NOM-034-NUCL', requirement: 'Documentacion transporte completa', norm: 'NOM-034 §8.1', status: 'pending', notes: '' },
 
-  // NOM-040-NUCL
-  { id: '040-1', category: 'NOM-040-NUCL', requirement: 'Licencia CNSNS vigente', norm: 'NOM-040 §3.1', status: 'pending', notes: '' },
-  { id: '040-2', category: 'NOM-040-NUCL', requirement: 'Responsable de RP designado', norm: 'NOM-040 §4.1', status: 'pending', notes: '' },
-  { id: '040-3', category: 'NOM-040-NUCL', requirement: 'Programa de proteccion radiologica', norm: 'NOM-040 §5.1', status: 'pending', notes: '' },
+  // NOM-040-NUCL-2016 (solo medicina nuclear)
+  { id: '040-1', category: NOM_040_NUCL.clave, requirement: 'Zona controlada con cuarto caliente, almacenes de material y desechos, sala de espera y sanitario exclusivos', norm: 'NOM-040-NUCL-2016 §5.1', status: 'pending', notes: '' },
+  { id: '040-2', category: NOM_040_NUCL.clave, requirement: 'Memoria analitica de blindaje de la zona controlada (POE bajo limite RGSR)', norm: 'NOM-040-NUCL-2016 §5.2.1', status: 'pending', notes: '' },
+  { id: '040-3', category: NOM_040_NUCL.clave, requirement: 'Senalizacion de accesos a zona controlada', norm: 'NOM-040-NUCL-2016 §5.2.8', status: 'pending', notes: '' },
+  { id: '040-4', category: NOM_040_NUCL.clave, requirement: 'Encargado de Seguridad Radiologica designado', norm: 'NOM-040-NUCL-2016 §7.1.1', status: 'pending', notes: '' },
+  { id: '040-5', category: NOM_040_NUCL.clave, requirement: 'Detector de area en puerta del almacen (y con alarma en cuarto de hospitalizacion)', norm: 'NOM-040-NUCL-2016 §6.1.1', status: 'pending', notes: '' },
 
   // NCRP 151
   { id: '151-1', category: 'NCRP 151', requirement: 'Workload IMRT = 2x convencional', norm: 'NCRP 151 §7.2', status: 'pending', notes: '' },
