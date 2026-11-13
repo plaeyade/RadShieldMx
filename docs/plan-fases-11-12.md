@@ -63,8 +63,8 @@ estima la dosis tras el margen (P·10^(−margen/TVL)); `types/ctIsodosis` inter
 | `lib/agents/tools.ts` (`checkSkyshine`, `compareMaterials`, `validateTVL`) | Transmisión con tabla TVL propia | Diálogo del agente de diseño | **Corregido**: Tabla B.2 de `ncrp151` (TVL₁/TVLₑ); las barreras ya usaban `barreraMV` (Fase 8a) |
 | `lib/uaqProtocol.ts` vía `controlledZoneCalculationAdapter` | LINAC, PET/CT, Gamma Knife, HDR (preliminar F55) | `LayoutBunkerDialog` | **Corregido** (depuración, etapa 8): `lib/zonaControladaMotor.ts` con `barreraMV`, `dosisSemanalTG108` y TVL del catálogo como `motorProyecto`; `f149NormativeNumericQa` apunta al motor |
 | `lib/materialDatabase.ts` (`getRecommendedMaterial`) | Espesor equivalente por TVL de catálogo | Asistentes de equipo/memoria (lista de materiales) | **Contrastado** (rama `fase11-terapia-gp`): concreto/acero/plomo = Tabla B.2/B.7; el resto con piso por masa (envolvente concreto/acero, tungsteno por plomo), `isNCRP151` sólo en los tres tabulados; `getRecommendedMaterial` devolvía el mismo espesor para todo material (corregido; sin importadores) |
-| `lib/nuclearMedicine.ts` | n TVL con Γ·A·t/d² | `NuclearMedicineAdvanced`, herramientas por categoría, GATE | Revisado en 8c (β+ por TG-108 Tabla V). **Fase 11 (`fase11-terapia-gp`)**: I-131 y Lu-177 por `terapiaEspectroGP`; TVL ≥ haz estrecho de la línea más penetrante (≥ 1 %): I-123 Pb 1.0 → 13.7 mm, Tl-201 0.5 → 1.4 mm, Zr-89 21.6 → 26.0 mm; Y-90, Ra-223 y Ac-225 alineados con la revisión 8c del módulo de terapia |
-| `lib/therapy/TherapeuticRadionuclideShielding.ts`, `lib/spect/IPEMReport109.ts` | TVL por radionúclido (I-131, Lu-177, SPECT) | Diálogos de terapia e IPEM 109 | Revisados en 8c (TVL que eran HVL). **Fase 11**: I-131 y Lu-177 de terapia por `terapiaEspectroGP` (casos: tablas GP/MC/Oumano). Pendiente: IPEM 109 I-123 (2 mm Pb frente a 13.7 mm del criterio de línea dura, 529 keV) y Y-90 (bremsstrahlung) sin caso publicado |
+| `lib/nuclearMedicine.ts` | n TVL con Γ·A·t/d² | `NuclearMedicineAdvanced`, herramientas por categoría, GATE | Revisado en 8c (β+ por TG-108 Tabla V). **Fase 11 (`fase11-terapia-gp`)**: I-131, Lu-177 e I-123 por `terapiaEspectroGP` (HVL/TVL mostradas = primer espesor de la regla: I-123 Pb 0.59/2.1 mm, concreto 83/164 mm); resto, TVL ≥ haz estrecho de la línea más penetrante (≥ 1 %): Tl-201 0.5 → 1.4 mm, Zr-89 21.6 → 26.0 mm; Y-90, Ra-223 y Ac-225 alineados con la revisión 8c del módulo de terapia |
+| `lib/therapy/TherapeuticRadionuclideShielding.ts`, `lib/spect/IPEMReport109.ts` | TVL por radionúclido (I-131, Lu-177, SPECT) | Diálogos de terapia e IPEM 109 | Revisados en 8c (TVL que eran HVL). **Fase 11**: I-131 y Lu-177 de terapia por `terapiaEspectroGP` (casos: tablas GP/MC/Oumano). IPEM 109 I-123 (2 mm Pb) coincide con la primera TVL del GP del espectro (2.1 mm). Pendiente: Y-90 (bremsstrahlung) sin caso publicado |
 | `lib/bimRAD.ts` | Transmisión por capas BIM | Diálogo BIM-RAD | Revisado en 8c (β+); pendiente de caso publicado |
 | `sections/dialogs/BuildupFactorDialog`, `NeutronRemovalDialog`, `MaterialPropertyCalculator`, `ConcreteActivationDialog`, `lib/phyXData`, `lib/xcomAttenuation`, `lib/electronEngine` | µ, buildup, remoción de neutrones, activación | Diálogos de física de materiales | Física de apoyo (no dimensionan la barrera del plano); los de 8c llevan aviso de resultado sintético |
 | `VersaHD15MVDialog`, `ElectronApplicatorDialog`, `CrossValidationDialog`, `ModelingToolboxDialog` | Barreras MV | Diálogos | Ya delegan en `calculadorasNormativas`/`ncrp151` (Fase 8a/8c) |
@@ -85,19 +85,22 @@ Motor validado: `motorProyecto` dimensiona las fuentes `radioiodine-i131` y `lu1
 modelo espectral; con I-131 presente rige I-131) con `src/lib/terapiaEspectroGP.ts`, en lugar del TVL único de 364 keV
 del catálogo (11 mm Pb, 140 mm de concreto):
 
-- (a) haz estrecho a la línea más energética (I-131 722.9 keV, lo que pide la CNSNS; Lu-177 208.4 keV), µ de NIST con
-  coherente;
-- (b) haz ancho del espectro completo (ENSDF, peso por kerma en aire) con buildup GP de ANSI/ANS-6.4.3 (ORNL/RSIC-49,
+- (a) haz estrecho a la línea más energética con Iγ ≥ 0.1 % (el mismo umbral que el espectro: I-131 722.9 keV, lo que
+  pide la CNSNS; Lu-177 321.3 keV, 0.2186 %), µ de NIST con coherente;
+- (b) haz ancho del espectro completo (ENSDF, líneas ≥ 0.1 %: I-131 9, Lu-177 5, peso por kerma en aire) con buildup GP de ANSI/ANS-6.4.3 (ORNL/RSIC-49,
   Tabla 5.1; µ sin coherente); en concreto, con el ajuste de Oumano et al. 2025 (sólo I-131), (b) = max(Oumano, 1.2·GP);
 - espesor = el mayor de (a) y (b); la traza (`ANS643_GP_ESPECTRO_MAX_HAZ_ESTRECHO`) dice cuál rige por material.
   Acero → Fe; el resto por equivalencia másica con concreto 2.35 (conservador para Z alto; sin GP de barita).
 
 Resultado: en plomo rige (a) (I-131: 1.26–4.2 veces el GP, que coincide ±2 % con el MC de losa); en concreto rige (b)
-(1.2·GP; el GP de medio infinito es 1.7–2.0 veces el MC de losa: cota superior). Lu-177: rige (b) en ambos (sin Oumano).
+(1.2·GP; el GP de medio infinito es 1.7–2.0 veces el MC de losa: cota superior). Lu-177 (revisión del PR #57: faltaban
+las líneas de 71.6, 249.7 y 321.3 keV, y el plomo salía corto con B pequeño): en plomo rige (a) a 321.3 keV (5.74 mm por
+TVL, ≈ 2× el GP del espectro, 5.43 mm a B = 0.01); en concreto rige (b). I-123 (diálogos): sólo (b), GP de sus 6 líneas
+≥ 0.1 %; el haz estrecho a 529 keV desde B = 1 sobrediseñaba el plomo a B ≥ 0.1 y quedaba corto en concreto.
 Pruebas: `src/__tests__/auditoria/terapiaEspectroGP.test.ts` (Tabla 3 de ORNL/RSIC-49, transmisión de Pb 2–35 mm y
 concreto 15–30 cm contra el cálculo independiente en Python, GP vs MC, Oumano, motor y diálogos),
 `materialDatabaseB2.test.ts` y `e2e/fase11-terapia-gp.spec.ts` (Medicina Nuclear, I-131 en plomo 27.2 mm; no se pudo
-ejecutar en local: sin navegador de Playwright). Citas en `docs/REFERENCIAS.md`.
+ejecutar en la primera versión; ejecutada en la revisión con el Chromium del sistema). Citas en `docs/REFERENCIAS.md`.
 
 ### Alcance y referencias
 
