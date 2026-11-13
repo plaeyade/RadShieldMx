@@ -10,6 +10,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { anguloSolidoCampo, skyshineFotones } from '@/lib/ncrp151';
 import { barreraMV, blindajeCo60, espesorPET, espesorRequeridoHaz, incidenciaOblicua, transmisionPET } from '@/lib/calculadorasNormativas';
 import { getRoomSummary, DEFAULT_THERAPY_TASKS } from '@/lib/therapy/TherapeuticRadionuclideShielding';
+import { espesorTerapiaGP, nuclidoTerapiaDeSimbolo } from '@/lib/terapiaEspectroGP';
 import { OPTIMIZATION_MATERIALS, requiredThickness, type OptimizationBarrier } from '@/lib/shieldingOptimizer';
 import { DEFAULT_SPECT_PROCEDURES, salaSPECT, SPECT_RADIONUCLIDES, tvlSPECT } from '@/lib/spect/IPEMReport109';
 import { generarBunker } from '@/lib/bunkerParametrico';
@@ -134,8 +135,11 @@ describe('Modelos locales → motores normativos (NCRP 147, TG-108)', () => {
   it('terapia con radiofármacos: la sala se compara con la meta una vez (antes meta × número de tareas)', () => {
     const r = getRoomSummary(DEFAULT_THERAPY_TASKS, 100);
     expect(r.withinLimits).toBe(r.totalWeekly_uSv <= 100);
-    const t = r.results.find(x => x.shieldingRequired)!;
+    // Fase 11: I-131 y Lu-177 por la regla espectral GP (`terapiaEspectroGP`); el resto, n·TVL.
+    const t = r.results.find(x => x.shieldingRequired && !nuclidoTerapiaDeSimbolo(x.nuclide.symbol))!;
     dentro(t.minLead_mm, -Math.log10(100 / t.weeklyDose_uSv) * t.nuclide.tenthValueLead_mm, 1e-9);
+    const lu = r.results.find(x => x.shieldingRequired && x.nuclide.symbol === 'Lu-177')!;
+    dentro(lu.minLead_mm, espesorTerapiaGP('Lu177', lu.weeklyDose_uSv, 100, { code: 'PB', density: 11.35 }).espesor_mm, 1e-9);
   });
 });
 

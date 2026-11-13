@@ -30,6 +30,7 @@ import {
   calculateWeeklyKerma,
   decayedActivity, estimateMIRDDose,
   canReleasePatient, bremsstrahlungShielding,
+  espesorRadionuclidoTerapia,
 } from '@/lib/nuclearMedicine';
 import {
   buildIdacDoseReadinessPack,
@@ -64,13 +65,13 @@ interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 const EMISORES_511 = new Set(['F-18', 'Ga-68', 'Cu-64']);
 
-/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+ en plomo/concreto; si no, n·TVL de biblioteca. */
+/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+; I-131 y Lu-177 por la regla espectral GP; si no, n·TVL. */
 function espesorNM(simbolo: string, material: string, B: number, tvl_mm: number): { mm: number; metodo: string } {
   if (B >= 1) return { mm: 0, metodo: '—' };
   if (EMISORES_511.has(simbolo) && (material === 'lead' || material === 'concrete')) {
     return { mm: espesorPET(material, B), metodo: 'AAPM TG-108 Tabla V (banda ancha, 511 keV)' };
   }
-  return { mm: -Math.log10(B) * tvl_mm, metodo: 'TVL de biblioteca (sin validar contra un informe)' };
+  return espesorRadionuclidoTerapia(simbolo, material === 'lead' ? 'lead' : 'concrete', B, tvl_mm);
 }
 
 function getCategoryColor(cat: string): string {
