@@ -52,7 +52,10 @@ export interface ShieldingMaterial {
  * el mayor entre el valor de la ficha y el piso por masa (`pisoMasa`):
  * - mezclas minerales (Ca, Si, Fe, Ba) y materiales ligeros: envolvente por masa de concreto y acero (`tvlDisenoHD`
  *   primaria, `tvlFugaHD` secundaria), el mismo criterio que los bloques HD;
- * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2.
+ * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `FACTOR_W_PB` = 1.054. Por masa el W atenúa menos
+ *   que el Pb en Co-60 y MV: (µ/ρ)_W/(µ/ρ)_Pb de NIST SRD 126 (Hubbell y Seltzer) = 0.949 a 1.25 MeV, 0.958 a 1.5,
+ *   0.962 a 2–4, 0.959 a 6, 0.955 a 10 y 0.950 a 20 MeV; se toma el mínimo (0.949 → factor 1/0.949 = 1.054) para
+ *   todas las energías, porque el espectro de MV incluye la región de 1.25 MeV.
  * Pendiente: el bario atenúa por masa algo menos que el concreto en Co-60 (Compton, Z/A 0.41 frente a ≈ 0.50); la
  * envolvente concreto/acero no lo cubre del todo en barita a Co-60: usar una medición o el µ/ρ de la mezcla.
  */
@@ -268,13 +271,15 @@ const RAW_DB: ShieldingMaterial[] = [
 ];
 
 const RHO_PB = 11.34;
+/** (µ/ρ)_Pb/(µ/ρ)_W máximo en 1.25–20 MeV (NIST SRD 126: 0.05876/0.05577 a 1.25 MeV). */
+export const FACTOR_W_PB = 1.054;
 type ClaveB2 = '6' | '10' | '15' | '18' | '25' | 'Co60';
 
 /** Piso por masa (cm) de un TVL que NCRP 151 no tabula; null si el material no se acota así (polietileno boratado). */
 export function pisoMasa(m: Pick<ShieldingMaterial, 'id' | 'density_g_cm3' | 'category'>, energia: keyof typeof ENERGIAS, tipo: 'primary' | 'secondary'): number | null {
   if (m.category === 'borated' || !(m.density_g_cm3 > 0)) return null;
   const e = ENERGIAS[energia] as ClaveB2;
-  if (m.id === 'tungsten') return +((TABLA_B_2.lead[e].tvl1_cm * RHO_PB) / m.density_g_cm3).toFixed(2);
+  if (m.id === 'tungsten') return +((TABLA_B_2.lead[e].tvl1_cm * RHO_PB * FACTOR_W_PB) / m.density_g_cm3).toFixed(2);
   return tipo === 'primary' ? tvlDisenoHD(m.density_g_cm3, e).tvl1_cm : tvlFugaHD(m.density_g_cm3, e);
 }
 

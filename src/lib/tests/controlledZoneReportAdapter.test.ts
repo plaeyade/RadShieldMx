@@ -36,6 +36,18 @@ describe('controlled zone report adapter', () => {
     expect(context.barriers.every((barrier) => barrier.thickness_mm > 0)).toBe(true);
   });
 
+  it('Fase 11 etapa 2: un requerido 0 del motor se reporta como 0, no como el espesor instalado', () => {
+    const barrera = (id: string, requiredThickness_mm: Record<string, number> | undefined) => ({
+      id, name: id, x1: 0, y1: 0, x2: 100, y2: 0, barrierType: 'secondary', useFactor: 1, occupancyFactor: 1,
+      designGoal_mSv_per_wk: 0.02, materialCode: 'PB', thickness_mm: 5, radshieldGenerated: true,
+      controlledZoneElement: 'wall', requiredThickness_mm,
+    });
+    const plan = { ...baseFloorPlan, barriers: [barrera('cz-a-barrier-0', { PB: 0 }), barrera('cz-a-barrier-1', undefined)] } as unknown as FloorPlan;
+    const [cero, sinCalculo] = extractControlledZoneReportContext(plan).barriers;
+    expect(cero.thickness_mm).toBe(0);
+    expect(sinCalculo.thickness_mm).toBe(5);
+  });
+
   it('returns an empty context for a normal floorPlan without generated barriers', () => {
     const context = extractControlledZoneReportContext(baseFloorPlan);
 
