@@ -123,7 +123,7 @@ function calcularUna(
     } else if (nuclidoGP) {
       const r = espesorTerapiaGP(nuclidoGP, maxKerma, metaEfectiva, mat);
       thickness = r.espesor_mm;
-      if (r.rige) rigeGP.push(`${mat.code}: ${r.rige}${r.mfpLineaPrincipal > 40 ? ' (fuera de 0.5–40 mfp del GP)' : ''}`);
+      if (r.rige) rigeGP.push(`${mat.code}: ${r.rige}${r.fueraRangoGP ? ` (línea con peso ≥ 1 % a ${r.mfpMaxLineas.toFixed(0)} mfp: fuera de 0.5–40 mfp del GP)` : ''}`);
     } else if (energyKey === '511keV') {
       // PET: curva de banda ancha de AAPM TG-108 (Tabla V) invertida numéricamente, no un TVL único (Fase 11, etapa 8).
       thickness = espesorPET511(maxKerma, metaEfectiva, mat);

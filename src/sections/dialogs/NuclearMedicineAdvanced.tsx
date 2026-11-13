@@ -65,7 +65,7 @@ interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 const EMISORES_511 = new Set(['F-18', 'Ga-68', 'Cu-64']);
 
-/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+; I-131 y Lu-177 por la regla espectral GP; si no, n·TVL. */
+/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+; I-131, Lu-177 e I-123 por la regla espectral GP; si no, n·TVL. */
 function espesorNM(simbolo: string, material: string, B: number, tvl_mm: number): { mm: number; metodo: string } {
   if (B >= 1) return { mm: 0, metodo: '—' };
   if (EMISORES_511.has(simbolo) && (material === 'lead' || material === 'concrete')) {

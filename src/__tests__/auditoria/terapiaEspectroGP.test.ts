@@ -7,12 +7,19 @@
  *   los coeficientes transcritos debe reproducirlos (≤ 3 %).
  * - Cálculo independiente en Python (`i131_espectro/gp_i131.py`, misma fórmula, xraydb/Elam y NIST), transmisión de
  *   kerma en aire de I-131 en Pb 2–35 mm y concreto 15–30 cm: (a) haz estrecho a 722.9 keV y (d) GP espectro (±0.5 %).
+ *   Lu-177 (5 líneas ENSDF, Kondev 2019) e I-123 (6 líneas, Chen 2021), regenerados con un script Python independiente
+ *   (xraydb 4.6.1/Elam para µ sin coherente, NIST SRD 126 para el haz estrecho y µ_en del aire, coeficientes de
+ *   `gp_ans643.json`): coinciden con este módulo a < 1e-5.
  * - Monte Carlo análogo propio de losa (N = 2×10⁶, `salida_N2e6.txt`): GP vs MC ±2 % en Pb.
  * - Oumano et al., JACMP 2025;26(5):e70084: ajuste de Archer de haz ancho (I-131, Pb y concreto).
  */
 import { describe, expect, it } from 'vitest';
 import {
   buildupGP,
+  buildupPorAtenuacion,
+  ESPECTROS_TERAPIA,
+  lineaEstrecha,
+  UMBRAL_LINEA_PCT,
   coeficientesGP,
   espesorTerapiaGP,
   fraccionesKerma,
@@ -41,6 +48,41 @@ describe('buildup GP: coeficientes transcritos frente a la Tabla 3 de ORNL/RSIC-
       for (const [E, x, B] of tabla3[mat]) expect(rel(buildupGP(coeficientesGP(mat, E), x), B)).toBeLessThan(0.03);
     });
   }
+  // Pb 0.1–0.2 MeV (Tabla 3, PDF p. 63), las filas que gobiernan Lu-177 en plomo.
+  const X = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 35, 40];
+  const pbBaja: Record<string, number[]> = {
+    '0.1': [1.52, 2.05, 3.44, 5.72, 9.9, 17.7, 32.2, 58.3, 102, 320, 6550, 1.55e5, 4.01e6, 1.09e8, 3.02e9, 8.51e10],
+    '0.15': [1.25, 1.41, 1.6, 1.72, 1.82, 1.9, 1.96, 2.03, 2.11, 2.27, 2.77, 3.36, 4.26, 5.71, 8.13, 12.2],
+    '0.2': [1.14, 1.19, 1.23, 1.25, 1.26, 1.28, 1.29, 1.31, 1.31, 1.34, 1.37, 1.4, 1.42, 1.44, 1.45, 1.47],
+  };
+  it('Pb 0.15 y 0.2 MeV: las 32 filas de 0.5–40 mfp ≤ 1.5 %', () => {
+    for (const E of ['0.15', '0.2']) X.forEach((x, i) => expect(rel(buildupGP(coeficientesGP('Pb', +E), x), pbBaja[E][i]), `${E} MeV ${x} mfp`).toBeLessThan(0.015));
+  });
+  it('Pb 0.1 MeV (encima del borde K): el ajuste GP publicado reproduce su tabla a ±11 % (calidad del ajuste, no de la transcripción)', () => {
+    const d = X.map((x, i) => buildupGP(coeficientesGP('Pb', 0.1), x) / pbBaja['0.1'][i] - 1);
+    for (const v of d) expect(Math.abs(v)).toBeLessThan(0.11);
+    expect(Math.min(...d)).toBeCloseTo(-0.106, 2); // 40 mfp
+    expect(Math.max(...d)).toBeCloseTo(0.101, 2); // 25 mfp
+  });
+
+  it('más allá de 40 mfp: K congelado en K(40), B creciente y B·e^(−x) finito (sin desbordamiento)', () => {
+    const p = coeficientesGP('Pb', 0.11295);
+    expect(buildupGP(p, 60)).toBeGreaterThan(buildupGP(p, 40));
+    const K40 = (buildupGP(p, 41) - 1) / (buildupGP(p, 40) - 1); // razón de la progresión ≈ K(40)
+    expect((buildupGP(p, 51) - 1) / (buildupGP(p, 50) - 1)).toBeCloseTo(K40, 3);
+    for (const x of [100, 1000, 5000]) {
+      const v = buildupPorAtenuacion(p, x);
+      expect(Number.isFinite(v)).toBe(true);
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
+    expect(buildupPorAtenuacion(p, 20)).toBeCloseTo(buildupGP(p, 20) * Math.exp(-20), 15);
+    // Espesor extremo: el motor no devuelve NaN y marca la línea fuera del rango del GP.
+    const r = espesorTerapiaGP('Lu177', 1, 1e-30, { code: 'PB', density: 11.35 });
+    expect(Number.isFinite(r.espesor_mm)).toBe(true);
+    expect(r.fueraRangoGP).toBe(true);
+    expect(espesorTerapiaGP('Lu177', 1, 1e-2, { code: 'PB', density: 11.35 }).fueraRangoGP).toBe(false);
+  });
+
   it('B(0) = 1 y B crece con el espesor', () => {
     const p = coeficientesGP('Concreto', 0.364);
     expect(buildupGP(p, 0)).toBe(1);
@@ -119,28 +161,79 @@ describe('I-131: espectro ENSDF ponderado por kerma en aire', () => {
   });
 });
 
-describe('Lu-177: líneas de 112.9 y 208.4 keV (ENSDF, Kondev 2019)', () => {
-  // Cálculo independiente en Python con gp_i131.py (B_at, NIST loglog): (a) 208.4 keV estrecho, (d) GP espectro.
+describe('Lu-177: 5 líneas ENSDF ≥ 0.1 % (Kondev 2019: 71.6, 112.9, 208.4, 249.7 y 321.3 keV)', () => {
+  it('espectro ENSDF e intensidades (NR = 0.1041; 208.4 keV es la línea de normalización)', () => {
+    const ls = ESPECTROS_TERAPIA.Lu177.lineas.map((l) => [l.E_keV, l.I_pct]);
+    expect(ls).toEqual([[71.6418, 0.164], [112.9498, 6.23], [208.3662, 10.41], [249.6742, 0.1997], [321.3159, 0.2186]]);
+    expect(ESPECTROS_TERAPIA.Lu177.lineas.every((l) => l.I_pct >= UMBRAL_LINEA_PCT)).toBe(true);
+  });
+  it('criterio (a): la línea más energética con Iγ ≥ 0.1 % (I-131 722.9 keV, Lu-177 321.3 keV; I-123 no aplica)', () => {
+    expect(UMBRAL_LINEA_PCT).toBe(0.1);
+    expect(lineaEstrecha('I131')).toBe(722.911);
+    expect(lineaEstrecha('Lu177')).toBe(321.3159);
+    expect(lineaEstrecha('I123')).toBeNull();
+  });
+  // Python independiente (xraydb/Elam, NIST, gp_ans643.json): (a) 321.3 keV estrecho, (d) GP espectro.
   const casos: [MaterialGP, number, number, number][] = [
-    ['Pb', 0.05, 0.5963, 0.60983],
-    ['Pb', 0.1, 0.355574, 0.364153],
-    ['Pb', 0.2, 0.126433, 0.139414],
-    ['Pb', 0.3, 0.0449563, 0.0540592],
-    ['Pb', 0.5, 0.00568396, 0.00806807],
-    ['Concreto', 5, 0.226999, 0.826682],
-    ['Concreto', 10, 0.0515285, 0.374422],
-    ['Concreto', 15, 0.0116969, 0.141356],
-    ['Concreto', 20, 0.00265519, 0.0488226],
+    ['Pb', 0.05, 0.818264, 0.617643],
+    ['Pb', 0.1, 0.669557, 0.376354],
+    ['Pb', 0.2, 0.448306, 0.152201],
+    ['Pb', 0.3, 0.300166, 0.0643709],
+    ['Pb', 0.5, 0.134566, 0.0134886],
+    ['Pb', 0.8, 0.0403923, 0.00228384],
+    ['Pb', 1.2, 0.00811798, 0.000430862],
+    ['Concreto', 5, 0.285295, 0.825978],
+    ['Concreto', 10, 0.0813933, 0.377283],
+    ['Concreto', 15, 0.0232211, 0.144059],
+    ['Concreto', 20, 0.00662487, 0.0504275],
   ];
-  it('haz estrecho y GP espectro (±0.5 %); sin Oumano: (b) = GP; rige el haz ancho', () => {
-    expect(fraccionesKerma('Lu177')[1]).toBeCloseTo(0.77744, 4);
+  it('haz estrecho y GP espectro (±0.5 %); sin Oumano: (b) = GP; Pb: rige el haz estrecho a 321 keV; concreto: el GP', () => {
+    const f = fraccionesKerma('Lu177');
+    expect(f[2]).toBeCloseTo(0.74070, 4);
+    expect(f[4]).toBeCloseTo(0.02576, 4);
     for (const [m, t, a, d] of casos) {
       expect(rel(transmisionEstrecha('Lu177', m, t), a)).toBeLessThan(0.005);
       expect(rel(transmisionEspectroGP('Lu177', m, t), d)).toBeLessThan(0.005);
       expect(transmisionOumano('Lu177', m, t)).toBeNull();
       expect(transmisionHazAncho('Lu177', m, t).criterio).toBe('GP espectro');
-      expect(transmisionRegla('Lu177', m, t)).toBe(transmisionEspectroGP('Lu177', m, t));
+      expect(transmisionRegla('Lu177', m, t)).toBe(m === 'Pb' ? transmisionEstrecha('Lu177', m, t) : transmisionEspectroGP('Lu177', m, t));
     }
+  });
+  it('espesores de plomo (Python): GP 2.48 / 5.43 / 9.86 / 15.96 mm a B = 1e-1…1e-4; rige el haz estrecho (5.74 mm por TVL)', () => {
+    const pb = { code: 'PB', density: 11.35 };
+    [[0.1, 2.482], [1e-2, 5.431], [1e-3, 9.856], [1e-4, 15.959]].forEach(([B, gp], i) => {
+      const r = espesorTerapiaGP('Lu177', 1, B, pb);
+      expect(r.porCriterio.hazAncho_mm).toBeCloseTo(gp, 2);
+      expect(r.porCriterio.estrecho_mm).toBeCloseTo(5.74 * (i + 1), 2);
+      expect(r.rige).toBe('haz estrecho');
+    });
+    const c = espesorTerapiaGP('Lu177', 1, 1e-2, { code: 'CONCRETE235', density: 2.35 });
+    expect(c.espesor_mm).toBeCloseTo(272.82, 1);
+    expect(c.rige).toBe('GP espectro');
+  });
+});
+
+describe('I-123 (diálogos): 6 líneas ENSDF ≥ 0.1 % (Chen 2021), sólo haz ancho GP', () => {
+  const casos: [MaterialGP, number, number][] = [
+    ['Pb', 0.05, 0.566964], ['Pb', 0.1, 0.29004], ['Pb', 0.2, 0.107706], ['Pb', 0.5, 0.0477467], ['Pb', 1, 0.0231124], ['Pb', 2, 0.00528922],
+    ['Concreto', 5, 0.834688], ['Concreto', 10, 0.366564], ['Concreto', 20, 0.0466987], ['Concreto', 30, 0.00571325],
+  ];
+  it('GP espectro (±0.5 % del Python); sin criterio (a)', () => {
+    expect(fraccionesKerma('I123')[0]).toBeCloseTo(0.90475, 4);
+    for (const [m, t, d] of casos) {
+      expect(rel(transmisionEspectroGP('I123', m, t), d)).toBeLessThan(0.005);
+      expect(transmisionEstrecha('I123', m, t)).toBe(0);
+      expect(transmisionRegla('I123', m, t)).toBe(transmisionEspectroGP('I123', m, t));
+    }
+  });
+  it('frente al haz estrecho a 529 keV desde B = 1: menos plomo a B ≥ 0.1, más plomo a B = 0.01 y más concreto siempre', () => {
+    const pb = (B: number) => espesorTerapiaGP('I123', 1, B, { code: 'PB', density: 11.35 });
+    const co = (B: number) => espesorTerapiaGP('I123', 1, B, { code: 'CONCRETE235', density: 2.35 });
+    expect(pb(0.1).espesor_mm).toBeCloseTo(2.115, 2); // estrecho 529 keV: 13.6 mm
+    expect(pb(0.01).espesor_mm).toBeCloseTo(15.704, 2); // estrecho: 27.2 mm; asintótico de 1 TVL a B = 0.1: 13.6
+    expect(co(0.1).espesor_mm).toBeCloseTo(164.21, 1); // estrecho: 112.6 mm
+    expect(co(0.01).espesor_mm).toBeCloseTo(272.79, 1); // estrecho: 225.3 mm
+    expect(pb(0.1).rige).toBe('GP espectro');
   });
 });
 
@@ -200,7 +293,20 @@ describe('bibliotecas de los diálogos: nuclearMedicine y TherapeuticRadionuclid
     return Math.exp(Math.log(v0) + (Math.log(E / e0) / Math.log(e1 / e0)) * Math.log(v1 / v0));
   };
   const tvl = (t: [number, number][], E: number, rho: number) => (10 * Math.log(10)) / (ll(t, E) * rho);
-  const lineaDura: Record<string, number> = { 'Tc-99m': 0.1405, 'I-123': 0.529, 'In-111': 0.2454, 'Tl-201': 0.1674, 'Lu-177': 0.2084, 'I-131': 0.7229, 'Zr-89': 0.909 };
+  const lineaDura: Record<string, number> = { 'Tc-99m': 0.1405, 'In-111': 0.2454, 'Tl-201': 0.1674, 'Zr-89': 0.909 };
+
+  it('I-131, Lu-177 e I-123: HVL y TVL de la tabla = primer espesor de la regla espectral (B = 0.5 y 0.1)', async () => {
+    const { RADIONUCLIDES } = await import('@/lib/nuclearMedicine');
+    const casos = [['I-131', 'I131'], ['I-131-NaI', 'I131'], ['Lu-177', 'Lu177'], ['I-123', 'I123']] as const;
+    for (const [sym, nuc] of casos) {
+      const r = RADIONUCLIDES.find((x) => x.symbol === sym)!;
+      const t = (B: number, code: string, density: number) => espesorTerapiaGP(nuc, 1, B, { code, density }).espesor_mm;
+      expect(Math.abs(r.HVL_lead_mm - t(0.5, 'PB', 11.35)), sym).toBeLessThanOrEqual(0.05);
+      expect(Math.abs(r.TVL_lead_mm - t(0.1, 'PB', 11.35)), sym).toBeLessThanOrEqual(0.05);
+      expect(Math.abs(r.HVL_concrete_mm - t(0.5, 'CONCRETE235', 2.35)), sym).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(r.TVL_concrete_mm - t(0.1, 'CONCRETE235', 2.35)), sym).toBeLessThanOrEqual(0.5);
+    }
+  });
 
   it('ninguna TVL de plomo ni de concreto por debajo de la de haz estrecho de la línea dura', async () => {
     const { RADIONUCLIDES } = await import('@/lib/nuclearMedicine');
@@ -234,5 +340,9 @@ describe('bibliotecas de los diálogos: nuclearMedicine y TherapeuticRadionuclid
     expect(r.minLead_mm).toBeCloseTo(espesorTerapiaGP('I131', 1, B, { code: 'PB', density: 11.35 }).espesor_mm, 9);
     expect(r.minConcrete_mm).toBeCloseTo(espesorTerapiaGP('I131', 1, B, { code: 'CONCRETE235', density: 2.35 }).espesor_mm, 9);
     expect(espesorRadionuclidoTerapia('Tc-99m', 'lead', 0.01, 0.9).mm).toBeCloseTo(1.8, 9);
+    // I-123 también por el GP del espectro (no n·TVL).
+    const i123 = espesorRadionuclidoTerapia('I-123', 'concrete', 0.01, 164);
+    expect(i123.mm).toBeCloseTo(espesorTerapiaGP('I123', 1, 0.01, { code: 'CONCRETE235', density: 2.35 }).espesor_mm, 9);
+    expect(i123.metodo).toMatch(/GP espectro/);
   });
 });
