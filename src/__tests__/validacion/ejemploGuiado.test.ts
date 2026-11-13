@@ -34,8 +34,9 @@ describe('Ejemplo guiado PET/CT (Fase 10)', () => {
       expect(b.maxKerma!).toBeGreaterThan(0);
       const t = b.requiredThickness_mm as Record<string, number>;
       if (b.maxKerma! * b.occupancyFactor <= b.designGoal_mSv_per_wk) {
-        // Sin blindaje necesario: el motor no publica espesores.
-        expect(Object.keys(t)).toHaveLength(0);
+        // Sin blindaje necesario: requerido 0 en todos los materiales (Fase 11, etapa 2; antes quedaba vacío).
+        expect(Object.keys(t).length).toBeGreaterThan(0);
+        expect(Object.values(t).every((v) => v === 0)).toBe(true);
         continue;
       }
       expect(Number.isFinite(t.PB)).toBe(true);
@@ -45,7 +46,7 @@ describe('Ejemplo guiado PET/CT (Fase 10)', () => {
       expect(t.PB).toBeLessThan(80);
     }
     // Al menos los muros hacia oficinas (T = 1, público) requieren blindaje.
-    expect(out.filter((b) => Object.keys(b.requiredThickness_mm as object).length > 0).length).toBeGreaterThanOrEqual(3);
+    expect(out.filter((b) => Object.values(b.requiredThickness_mm as Record<string, number>).some((v) => v > 0)).length).toBeGreaterThanOrEqual(3);
   });
 
   it('muro norte de captación: kerma y espesores iguales a TG-108 a mano (Γ·0.64, Rₜ, curva de banda ancha de la Tabla V)', () => {

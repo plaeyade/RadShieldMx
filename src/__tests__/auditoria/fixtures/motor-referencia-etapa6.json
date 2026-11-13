@@ -3,7 +3,26 @@
   {
    "id": "eg-captacion-oeste",
    "maxKerma": 0.2681601245794673,
-   "requerido": {}
+   "requerido": {
+    "CONCRETE235": 0,
+    "CONCRETEBARITE": 0,
+    "CONCRETEIRON": 0,
+    "PB": 0,
+    "STEEL": 0,
+    "BRICK": 0,
+    "LEADGLASS": 0,
+    "GYPSUM": 0,
+    "DRYWALL": 0,
+    "NELCO232": 0,
+    "NELCO320": 0,
+    "VERITAS450": 0,
+    "VERITAS500": 0,
+    "NIPOL350": 0,
+    "NIPOL400": 0,
+    "NIPOL500": 0,
+    "BPE": 0,
+    "PBPE": 0
+   }
   },
   {
    "id": "eg-captacion-norte",
@@ -128,7 +147,26 @@
   {
    "id": "eg-pet-control",
    "maxKerma": 0.052539372689880376,
-   "requerido": {}
+   "requerido": {
+    "CONCRETE235": 0,
+    "CONCRETEBARITE": 0,
+    "CONCRETEIRON": 0,
+    "PB": 0,
+    "STEEL": 0,
+    "BRICK": 0,
+    "LEADGLASS": 0,
+    "GYPSUM": 0,
+    "DRYWALL": 0,
+    "NELCO232": 0,
+    "NELCO320": 0,
+    "VERITAS450": 0,
+    "VERITAS500": 0,
+    "NIPOL350": 0,
+    "NIPOL400": 0,
+    "NIPOL500": 0,
+    "BPE": 0,
+    "PBPE": 0
+   }
   }
  ],
  "f149": [
