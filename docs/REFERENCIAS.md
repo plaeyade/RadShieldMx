@@ -16,6 +16,14 @@ Revisión: 2026-11-12.
 | `src/lib/ncrp147.ts` | K¹_P y W_norm (Tabla 4.5), K¹_sec (Tabla 4.7), mastografía (§5.5) | NCRP Report No. 147 (2004) | De pago (NCRP) |
 | `src/lib/ncrpOccupancy.ts` | Factores de ocupación T | NCRP 147 Tabla 4.1 y tabla de factores de ocupación de NCRP 151 (cotejar el número de tabla: el código la cita de dos formas) | De pago |
 | `src/lib/limitesDosis.ts` | POE 20 mSv/a (5 a), público 1 mSv/a; objetivos de diseño 0.1 y 0.02 mSv/semana | ICRP Publication 103 (2007); NCRP 147 §1.3; NCRP 151 §1.2; AAPM TG-108 | ICRP 103 abierto |
+| `src/lib/terapiaEspectroGP.ts` | Coeficientes GP de exposición (b, c, a, X_k, d) de Pb, Fe y concreto NBS, 0.06–1 MeV; fórmula GP; validez 0.5–40 mfp; µ sin coherente para contar mfp | Trubey DK. *New Gamma-Ray Buildup Factor Data for Point Kernel Calculations: ANS-6.4.3 Standard Reference Data*. ORNL/RSIC-49, Oak Ridge National Laboratory, 1988: Ap. II (borrador ANSI/ANS-6.4.3, base de ANSI/ANS-6.4.3-1991) sec. 2 (fórmula) y 4.1, Tabla 5.1 (coeficientes); verificación contra la Tabla 3 (37 valores, ≤ 2.2 %) | Informe ORNL (abierto) |
+| `src/lib/terapiaEspectroGP.ts` | Líneas γ de I-131 (9 líneas ≥ 0.1 %, sin rayos X de Xe) | Khazov Yu, Mitropolsky I, Rodionov A. Nuclear Data Sheets for A = 131. Nucl Data Sheets 2006;107:2715 (ENSDF/NNDC) | Abierto |
+| `src/lib/terapiaEspectroGP.ts` | Líneas γ de Lu-177 (112.95 keV 6.23 %, 208.37 keV 10.41 %) | Kondev FG. Nuclear Data Sheets for A = 177. Nucl Data Sheets 2019;159:1 (ENSDF/NNDC) | Abierto |
+| `src/lib/terapiaEspectroGP.ts` | µ/ρ con coherente (haz estrecho) de Pb, Fe y concreto ordinario; µ_en/ρ del aire (peso por kerma) | Hubbell JH, Seltzer SM. NIST SRD 126 (X-Ray Mass Attenuation Coefficients) | Abierto |
+| `src/lib/terapiaEspectroGP.ts` | µ/ρ sin coherente (fotoeléctrico + incoherente) por línea | Elam WT, Ravel BD, Sieber JR. Radiat Phys Chem 2002;63:121–128 (tablas de xraydb 4.6.1; = NIST ±1 %) | Artículo / tablas abiertas |
+| `src/lib/terapiaEspectroGP.ts` | Ajuste de Archer de haz ancho de I-131 (Pb α 0.1082, β 0.2072, γ 0.5385; concreto α 0.02062, β −0.01220, γ 0.4179; x en mm) | Oumano M et al. J Appl Clin Med Phys 2025;26(5):e70084 | Abierto (PMC) |
+| `src/lib/terapiaEspectroGP.ts` | Regla adoptada: espesor = mayor entre haz estrecho a la línea más energética (CNSNS) y haz ancho del espectro con GP; en concreto, max(Oumano, 1.2·GP) | Decisión del proyecto (análisis I-131 GP vs MC, 2026-11) | — |
+| `src/lib/materialDatabase.ts` | Piso por masa de las TVL no tabuladas (envolvente concreto/acero; tungsteno por plomo) | NCRP 151 Tablas B.2 y B.7 (equivalencia por masa) | De pago (NCRP) |
 | `src/lib/xcomAttenuation.ts` | µ/ρ y µ_en/ρ | Berger MJ et al. XCOM: Photon Cross Sections Database (NIST SRD 8); Hubbell JH, Seltzer SM, NIST SRD 126 | Abierto |
 | `src/lib/phyXData.ts` | Zeff, EABF, EBF, FNRCS | Şakar E et al. Phy-X/PSD. Radiat Phys Chem 2020;166:108496 | Artículo |
 | `src/lib/normativaMx.ts` | Zonas de radiación y contaminación | NOM-008-NUCL-2024 (DOF 24-05-2024) | Abierto (DOF) |
@@ -24,9 +32,9 @@ Revisión: 2026-11-12.
 | `src/lib/normativaMx.ts` | Teleterapia con aceleradores | NOM-033-NUCL-2016 (DOF 04-08-2016) | Abierto (DOF) |
 | Bloques HD (`docs/validacion-bloques-hd.md`) | Atenuación medida de bloques de alta densidad | ININ, informe técnico LSCD-589 (2024) | Informe de laboratorio |
 
-Datos de buildup para el método punto-kernel, si se añade: Trubey DK. *New Gamma-Ray Buildup Factor
-Data for Point Kernel Calculations: ANS-6.4.3 Standard Reference Data*. ORNL/RSIC-49, 1988 (la norma
-ANSI/ANS-6.4.3-1991 está retirada); Shimizu A, Onda T, Sakamoto Y. J Nucl Sci Technol 2004;41(4):413–424.
+Datos de buildup del método punto-kernel: Trubey DK, ORNL/RSIC-49, 1988 (en uso en `terapiaEspectroGP.ts`; la norma
+ANSI/ANS-6.4.3-1991 está retirada); Shimizu A, Onda T, Sakamoto Y. J Nucl Sci Technol 2004;41(4):413–424 (sin GP de
+barita ni de concreto pesado: queda abierto).
 
 ## 2. Guías de diseño citadas (no transcritas)
 
