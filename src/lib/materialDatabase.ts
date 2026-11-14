@@ -56,9 +56,10 @@ export interface ShieldingMaterial {
  * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `factorWPb(energía)`. Por masa el W atenúa menos
  *   que el Pb en Co-60 y MV, y la aleación (W-Ni-Fe/Cu, ASTM B777) aún menos, porque el aglutinante casi no produce
  *   pares. El factor es el máximo de (µ/ρ)_Pb/(µ/ρ)_aleación (NIST XCOM, log-log) en las energías que rigen el TVL de cada
- *   haz: Co-60 sus dos líneas, 1.1732 y 1.3325 MeV; MV de 1.25 MeV a la energía nominal (espectro endurecido); aleación
- *   del catálogo (17.0 g/cm³) = peor caso de la clase 1 de ASTM B777. Revisión del #58: Co-60 1.064, 6 MV 1.069, 18 MV
- *   1.098 (antes 1.059 / 1.054 con W puro: TVL de W ≈ 4 % corto en 6–20 MV). `src/lib/equivalenciaWPb.ts`.
+ *   haz: Co-60 sus dos líneas, 1.1732 y 1.3325 MeV; MV de 1.0 MeV a la energía nominal (2.ª revisión del #58, B2: antes
+ *   desde 1.25 MeV, con f(1 MeV) = 1.082 por encima de F(6 MV)); aleación del catálogo (17.0 g/cm³) = peor caso de la
+ *   clase 1 de ASTM B777. Revisión del #58: Co-60 1.064, 6 MV 1.082, 18 MV 1.098 (antes 1.059 / 1.054 con W puro: TVL
+ *   de W ≈ 4 % corto en 6–20 MV). `src/lib/equivalenciaWPb.ts`.
  * Pendiente: el bario atenúa por masa algo menos que el concreto en Co-60 (Compton, Z/A 0.41 frente a ≈ 0.50); la
  * envolvente concreto/acero no lo cubre del todo en barita a Co-60: usar una medición o el µ/ρ de la mezcla.
  */
@@ -299,7 +300,8 @@ export function cocientePbW(E: number): number {
 /**
  * Factor de masa W→Pb por haz para la ALEACIÓN de W del catálogo (17.0 g/cm³, ASTM B777 clase 1, peor caso Ni-Fe/Ni-Cu):
  * máximo de (µ/ρ)_Pb/(µ/ρ)_aleación (NIST XCOM) en las energías que rigen su TVL (`equivalenciaWPb`, revisión del #58).
- * Co-60 1.064, 6 MV 1.069, 10 MV 1.084, 15 MV 1.094, 18 MV 1.098, 25 MV 1.100. Antes, con W puro: 1.059 / 1.054.
+ * Co-60 1.064, 6 MV 1.082 (desde 1.0 MeV; 2.ª revisión del #58, B2), 10 MV 1.084, 15 MV 1.094, 18 MV 1.098, 25 MV 1.100.
+ * Antes, con W puro: 1.059 / 1.054.
  */
 export function factorWPb(e: ClaveB2): number {
   return factorWPbHaz(e);

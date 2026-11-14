@@ -6,10 +6,9 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import {
-  ALEACIONES_W, XCOM_MU_RHO_W_PB, espesorWDesdePb, factorPbAleacion, factorWPbHaz, factorWPbNuclido, muRhoAleacion,
-  muRhoElemento,
+  ALEACIONES_W, ENERGIAS_HAZ_W, XCOM_MU_RHO_W_PB, espesorWDesdePb, factorPbAleacion, factorWPbEnergias, factorWPbHaz,
+  muRhoAleacion, muRhoElemento,
 } from '@/lib/equivalenciaWPb';
-import { espesorTerapiaGP, transmisionRegla } from '@/lib/terapiaEspectroGP';
 
 const xcom = JSON.parse(readFileSync('scripts/fase11_xcom_mu_rho.json', 'utf8')) as { muRhoWPb: { filas: number[][] } };
 const puro = [ALEACIONES_W.puro];
@@ -33,11 +32,11 @@ describe('equivalencia W↔Pb por energía (NIST XCOM, ASTM B777)', () => {
     expect(factorPbAleacion(E)).toBeGreaterThan(factorPbAleacion(E, puro));
   });
 
-  it('6 y 18 MV (1.25 MeV–nominal): 1.069 y 1.098 (W puro 1.054: el factor único dejaba el TVL 1.5 % y 4 % corto)', () => {
-    expect(factorWPbHaz('6')).toBeCloseTo(1.0694, 3);
+  it('6 y 18 MV (1.0 MeV–nominal): 1.082 y 1.098 (W puro 1.073; el factor único 1.054 dejaba el TVL 2.7 % y 4 % corto)', () => {
+    expect(factorWPbHaz('6')).toBeCloseTo(1.0824, 3);
     expect(factorWPbHaz('18')).toBeCloseTo(1.0975, 3);
-    expect(factorWPbHaz('6', puro)).toBeCloseTo(1.0536, 3);
-    expect(factorWPbHaz('18', puro)).toBeCloseTo(1.0536, 3);
+    expect(factorWPbHaz('6', puro)).toBeCloseTo(1.0732, 3);
+    expect(factorWPbHaz('18', puro)).toBeCloseTo(1.0732, 3);
     // Más W en la aleación → factor menor (clase 4 entre la clase 1 y el W puro).
     const c4 = [ALEACIONES_W['B777-4-NiFe']];
     expect(factorWPbHaz('18', c4)).toBeLessThan(factorWPbHaz('18'));
@@ -49,24 +48,37 @@ describe('equivalencia W↔Pb por energía (NIST XCOM, ASTM B777)', () => {
     for (const E of [0.05, 0.1, 0.2, 0.5, 1, 2, 10]) expect(factorPbAleacion(E), String(E)).toBeGreaterThan(1);
   });
 
-  it('medicina nuclear: F = máximo sobre las líneas del espectro (Tc-99m 1.39, I-131 1.39, PET 1.21)', () => {
-    expect(factorWPbNuclido('Tc99m')).toBeCloseTo(1.3923, 3);
+  it('B2 (2.ª revisión del #58): F(MV) cubre f(E) en todo 1 MeV–nominal, es ≥ F(Co-60) y no decrece con la energía nominal', () => {
+    // f(1 MeV) = 1.082 > f(1.25 MeV) = 1.057: antes F(6 MV) = 1.069 quedaba por debajo de f(1 MeV).
+    expect(factorPbAleacion(1.0)).toBeCloseTo(1.0824, 3);
+    const mv = ['6', '10', '15', '18', '25'] as const;
+    const nominal = { '6': 6, '10': 10, '15': 15, '18': 18, '25': 20 } as const;
+    for (const e of mv) {
+      expect(ENERGIAS_HAZ_W[e][0], e).toBe(1.0);
+      expect(factorWPbHaz(e), e).toBeGreaterThanOrEqual(factorWPbHaz('Co60'));
+      // Malla fina de 1 MeV a la nominal: ningún f(E) por encima de F.
+      for (let i = 0; i <= 200; i++) {
+        const E = 1.0 * (nominal[e] / 1.0) ** (i / 200);
+        expect(factorPbAleacion(E), `${e} ${E}`).toBeLessThanOrEqual(factorWPbHaz(e) + 1e-12);
+      }
+    }
+    for (let i = 1; i < mv.length; i++) expect(factorWPbHaz(mv[i])).toBeGreaterThanOrEqual(factorWPbHaz(mv[i - 1]));
+    // Bajo el corte: f(0.8 MeV) sólo 3 % mayor y con ≈ 5 % del peso relativo tras 5.7 cm de Pb (efecto ≤ 0.2 %).
+    expect(factorPbAleacion(0.8) / factorPbAleacion(1.0)).toBeLessThan(1.04);
+    expect(Math.exp(-(muRhoElemento('Pb', 0.8) - muRhoElemento('Pb', 4)) * 11.35 * 5.7)).toBeLessThan(0.05);
+  });
+
+  it('medicina nuclear (referencia; el motor no la usa): F sobre las líneas (Tc-99m 1.39, PET 1.21)', () => {
+    expect(factorWPbEnergias([0.140511])).toBeCloseTo(1.3923, 3);
     expect(factorPbAleacion(0.511)).toBeCloseTo(1.2117, 3);
-    // I-131: la línea de 80 keV (2.6 %) cae entre bordes (f < 1); el máximo lo da 177–284 keV.
-    expect(factorWPbNuclido('I131')).toBeGreaterThan(factorPbAleacion(0.364489));
   });
 
   it('conservador: la aleación equivalente nunca transmite más que el Pb al que sustituye, línea por línea', () => {
     // Haz estrecho a cada energía de control: e^(−µ_W·ρ_W·t_W) ≤ e^(−µ_Pb·ρ_Pb·t_Pb) con t_W = t_Pb·ρ_Pb·F/ρ_W.
     const a = ALEACIONES_W['B777-1-NiFe'];
-    for (const [E, F] of [[0.140511, factorWPbNuclido('Tc99m')], [0.511, factorPbAleacion(0.511)], [1.25, factorWPbHaz('Co60')], [6, factorWPbHaz('6')], [18, factorWPbHaz('18')]] as const) {
+    for (const [E, F] of [[0.140511, factorWPbEnergias([0.140511])], [0.511, factorPbAleacion(0.511)], [1.25, factorWPbHaz('Co60')], [6, factorWPbHaz('6')], [18, factorWPbHaz('18')]] as const) {
       const tW = espesorWDesdePb(10, F, a.densidad) / 10;
       expect(muRhoAleacion(a, E) * a.densidad * tW, String(E)).toBeGreaterThanOrEqual(muRhoElemento('Pb', E) * 11.35 * 1 - 1e-12);
     }
-    // Espectro de I-131 con la regla GP del plomo: el espesor de aleación cubre la transmisión en cada línea dura.
-    const tPb = espesorTerapiaGP('I131', 1, 0.01, { code: 'PB', density: 11.35 }).espesor_mm;
-    const tW = espesorWDesdePb(tPb, factorWPbNuclido('I131'), 17.0);
-    expect(tW).toBeGreaterThan((tPb * 11.35) / 17.0);
-    expect(transmisionRegla('I131', 'Pb', tPb / 10)).toBeCloseTo(0.01, 6);
   });
 });

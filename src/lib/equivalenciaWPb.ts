@@ -5,7 +5,7 @@
  * Las piezas de blindaje son aleaciones pesadas de W (ASTM B777, W-Ni-Fe o W-Ni-Cu con 90–97 % de W, 16.85–18.85 g/cm³);
  * el aglutinante (Ni, Fe, Cu) atenúa por gramo mucho menos que el W fuera de la zona Compton, así que el factor crece:
  *   · MV (pares): 1.069 a 6 MeV, 1.084 a 10, 1.098 a 18 MeV (W puro: 1.043–1.052) → con el factor único el TVL de W
- *     quedaba ≈ 4 % corto en 6–20 MV;
+ *     quedaba ≈ 4 % corto en 6–20 MV; y 1.082 a 1 MeV, que fija el factor de 4 y 6 MV (ver «Energías de MV»);
  *   · medicina nuclear (fotoeléctrico): 1.21 a 511 keV, 1.39 a 140.5 keV (W puro 1.17 y 1.27);
  *   · entre los bordes K del W (69.525 keV) y del Pb (88.0045 keV) el W atenúa MÁS por gramo (factor 0.31–0.34): ahí la
  *     equivalencia por masa no es conservadora en sentido inverso (Pb por W), y se toma el máximo sobre el espectro.
@@ -13,8 +13,9 @@
  * Método: f(E) = (µ/ρ)_Pb(E) / (µ/ρ)_aleación(E), (µ/ρ)_aleación = Σ wᵢ (µ/ρ)ᵢ (regla de mezcla de Bragg), con µ/ρ total
  * (con coherente) de NIST XCOM 3.1 por elemento (`scripts/fase11_xcom_malla.py`, que reproduce SRD 126 a ±0.05 % en
  * 0.01–20 MeV), interpolado log-log. Espesor de aleación equivalente a t_Pb: t_W = t_Pb · ρ_Pb · F / ρ_aleación, con
- * F = máximo de f(E) sobre las energías que rigen: cada línea del espectro (Iγ ≥ 0.1 %) en medicina nuclear; en MV y Co-60,
- * de 1.25 MeV a la energía nominal (o las dos líneas de Co-60). Tomar el máximo garantiza que, en cada energía del haz,
+ * F = máximo de f(E) sobre las energías que rigen (`factorWPbEnergias`; p. ej. las líneas del espectro en medicina
+ * nuclear, aunque el motor de medicina nuclear no la usa: el W sigue ahí la equivalencia másica con concreto); en MV y Co-60,
+ * de 1.0 MeV a la energía nominal (o las dos líneas de Co-60). Tomar el máximo garantiza que, en cada energía del haz,
  * la masa de W que se pone atenúa al menos lo que la de Pb a la que sustituye (nunca menos espesor que el cálculo
  * físico a esa energía). El buildup del W y del Pb (Z 74 y 82) es del mismo orden; en el fotoeléctrico el del W es
  * algo mayor, pero el factor es ahí 1.2–1.4, muy por encima del efecto del buildup.
@@ -25,8 +26,6 @@
  * la densidad). Por omisión (`ALEACION_W_DEFECTO`) se toma el peor caso de la clase 1 (Ni-Fe o Ni-Cu en cada energía),
  * que es la del material «Tungsteno» de 17.0 g/cm³ del catálogo.
  */
-import { ESPECTROS_TERAPIA, type NuclidoTerapia } from '@/lib/terapiaEspectroGP';
-
 /** NIST XCOM 3.1, µ/ρ total con coherente (cm²/g): [E (MeV), Pb, W, Ni, Fe, Cu]; bordes K de W y Pb duplicados. */
 export const XCOM_MU_RHO_W_PB: readonly (readonly [number, number, number, number, number, number])[] = [
   [0.03, 30.317, 22.729, 10.344, 8.1764, 10.913], [0.04, 14.36, 10.669, 4.6001, 3.6292, 4.8617], [0.05, 8.0416, 5.9501, 2.4744, 1.9573, 2.6129],
@@ -100,25 +99,31 @@ export function factorWPbEnergias(E: readonly number[], aleaciones: readonly Ale
   return Math.max(...E.map((e) => factorPbAleacion(e, aleaciones)));
 }
 
-/** Energías (MeV) que rigen el TVL de cada haz: Co-60 sus dos líneas; MV de 1.25 MeV a la nominal. */
+/**
+ * Energías (MeV) que rigen el TVL de cada haz: Co-60 sus dos líneas; MV de 1.0 MeV a la nominal.
+ *
+ * Energías de MV (2.ª revisión del #58, B2): f(E) baja de 1.082 a 1 MeV a un mínimo de 1.042 hacia 2 MeV y vuelve a subir
+ * con los pares (1.069 a 6 MeV, 1.100 a 20 MeV). Con la lista anterior (desde 1.25 MeV) F(6 MV) = 1.069 < f(1 MeV) =
+ * 1.082, aunque el haz de 6 MV lleva fotones de 1 MeV, y F(MV) quedaba por debajo de un fotón de energía menor que la
+ * de Co-60. Desde 1.0 MeV: F(MV) ≥ F(Co-60) = 1.064 y ≥ f(E) en todo 1 MeV–nominal, y es no decreciente con la energía
+ * nominal (6 MV 1.082, 10 MV 1.084, 15 MV 1.094, 18 MV 1.098, 25 MV 1.100). Corte en 1.0 MeV: tras la primera TVL de Pb
+ * del haz de 6 MV (5.7 cm, NCRP 151 Tabla B.2) un fotón de 1 MeV conserva e^(−(µ(1)−µ(4))·ρ·5.7) ≈ 15 % del peso
+ * relativo que uno cerca del mínimo de µ del Pb (≈ 4 MeV), y debe contarse; uno de 0.8 MeV, ≈ 5 %, y uno de 0.6 MeV,
+ * < 1 %: con f(0.8) = 1.118 sólo 3 % mayor que f(1.0), su efecto en el espesor de W es ≤ 0.2 %.
+ */
 export const ENERGIAS_HAZ_W: Record<'Co60' | '6' | '10' | '15' | '18' | '25', readonly number[]> = {
   Co60: [1.1732, 1.3325],
-  '6': [1.25, 1.5, 2, 3, 4, 5, 6],
-  '10': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10],
-  '15': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15],
-  '18': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 18],
+  '6': [1.0, 1.25, 1.5, 2, 3, 4, 5, 6],
+  '10': [1.0, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10],
+  '15': [1.0, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15],
+  '18': [1.0, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 18],
   // 25 MV: la tabla llega a 20 MeV (el factor crece despacio: 1.0996 a 20 MeV).
-  '25': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 20],
+  '25': [1.0, 1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 20],
 };
 
 /** F de un haz MV o Co-60. */
 export function factorWPbHaz(e: keyof typeof ENERGIAS_HAZ_W, aleaciones: readonly AleacionW[] = ALEACION_W_DEFECTO): number {
   return factorWPbEnergias(ENERGIAS_HAZ_W[e], aleaciones);
-}
-
-/** F de un radionúclido: máximo sobre todas sus líneas con Iγ ≥ 0.1 % (PET: 511 keV con `factorPbAleacion(0.511)`). */
-export function factorWPbNuclido(nuc: NuclidoTerapia, aleaciones: readonly AleacionW[] = ALEACION_W_DEFECTO): number {
-  return factorWPbEnergias(ESPECTROS_TERAPIA[nuc].lineas.map((l) => l.E_keV / 1000), aleaciones);
 }
 
 /** Espesor de aleación (mm) equivalente a t_Pb (mm) de plomo con el factor F. */

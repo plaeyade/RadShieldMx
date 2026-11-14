@@ -61,7 +61,7 @@ describe('materialDatabase frente a NCRP 151 Tabla B.2', () => {
     expect(cocientePbW(1.3325)).toBeCloseTo(1.050374, 5);
     expect(cocientePbW(1)).toBeCloseTo(0.07102 / 0.06618, 9);
     // Aleación (peor caso 90W-7Ni-3Fe / 90W-6Ni-4Cu; Python con XCOM): mayor que con W puro en todos los haces.
-    const esperado = { Co60: 1.0639, '6': 1.0694, '10': 1.0844, '15': 1.0941, '18': 1.0975, '25': 1.0996 } as const;
+    const esperado = { Co60: 1.0639, '6': 1.0824, '10': 1.0844, '15': 1.0941, '18': 1.0975, '25': 1.0996 } as const;
     for (const [e, f] of Object.entries(esperado)) {
       expect(factorWPb(e as keyof typeof esperado), e).toBeCloseTo(f, 3);
       expect(factorWPb(e as keyof typeof esperado), e).toBeGreaterThan(e === 'Co60' ? 1.059124 : 1.053613);
