@@ -44,6 +44,13 @@ export interface ResultadoVentilacion {
   advertencias: string[];
 }
 
+/**
+ * Mínimo de renovaciones totales por hora para el aviso. ANSI/ASHRAE/ASHE Standard 170-2021,
+ * Tabla 8-1, fila «Cancer treatment area» (FGI 2.6-3.1): 6 renovaciones/h totales, 2 de aire
+ * exterior (p. 25). La norma no tiene fila para bóveda de ciclotrón; se aplica la misma referencia.
+ */
+export const RENOVACIONES_MIN_H = 6;
+
 export function calcularVentilacionAr41(e: EntradaVentilacion): ResultadoVentilacion {
   const advertencias: string[] = [];
   for (const [k, v] of Object.entries(e)) {
@@ -63,7 +70,8 @@ export function calcularVentilacionAr41(e: EntradaVentilacion): ResultadoVentila
   const caudal_m3_s = (e.renovaciones_h * e.volumenSala_m3) / 3600;
   const tBajoDAC = cFin > AR41.DAC_Bq_m3 ? Math.log(cFin / AR41.DAC_Bq_m3) / k / 60 : 0;
   if (e.renovaciones_h === 0) advertencias.push('Sin ventilación: el Ar-41 sólo decae (T½ 110 min).');
-  if (e.renovaciones_h > 0 && e.renovaciones_h < 3) advertencias.push('Menos de 3 renovaciones/h: revisar contra el diseño HVAC de la bóveda.');
+  if (e.renovaciones_h > 0 && e.renovaciones_h < RENOVACIONES_MIN_H)
+    advertencias.push(`Menos de ${RENOVACIONES_MIN_H} renovaciones/h (ASHRAE 170-2021, Tabla 8-1, «Cancer treatment area»): revisar contra el diseño HVAC de la bóveda.`);
   if (cEntrar > AR41.DAC_Bq_m3) advertencias.push('Al entrar se supera el DAC de Ar-41: alargar la espera o aumentar la ventilación.');
   if (cFin > AR41.efluente_Bq_m3) {
     advertencias.push('La concentración en la descarga supera el límite de efluentes en el punto de emisión: se requiere dilución o retardo antes de la chimenea, y verificar la autorización.');
