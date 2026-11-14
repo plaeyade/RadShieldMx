@@ -12,7 +12,7 @@ import { barreraMV, blindajeCo60, espesorPET, espesorRequeridoHaz, incidenciaObl
 import { getRoomSummary, DEFAULT_THERAPY_TASKS } from '@/lib/therapy/TherapeuticRadionuclideShielding';
 import { espesorTerapiaGP, nuclidoTerapiaDeSimbolo } from '@/lib/terapiaEspectroGP';
 import { OPTIMIZATION_MATERIALS, requiredThickness, type OptimizationBarrier } from '@/lib/shieldingOptimizer';
-import { DEFAULT_SPECT_PROCEDURES, salaSPECT, SPECT_RADIONUCLIDES, tvlSPECT } from '@/lib/spect/IPEMReport109';
+import { DEFAULT_SPECT_PROCEDURES, salaSPECT, SPECT_RADIONUCLIDES, transmisionSPECT, tvlSPECT } from '@/lib/spect/IPEMReport109';
 import { generarBunker } from '@/lib/bunkerParametrico';
 import { aplicarEquipoAFuente } from '@/lib/equipoAFuente';
 import { tvlEquivalente511 } from '@/lib/bimRAD';
@@ -123,13 +123,17 @@ describe('Modelos locales → motores normativos (NCRP 147, TG-108)', () => {
     dentro(espesorPET('lead', 0.1), 15.9, 0.02); // 1.er TVL de plomo a 511 keV (citado ahora en la biblioteca de equipos)
   });
 
-  it('SPECT (IPEM 109): TVL de Tc-99m ya no es la HVL; la sala completa se dimensiona por la suma, con TVL continuo', () => {
+  it('SPECT (IPEM 109): TVL de Tc-99m ya no es la HVL; la sala completa se dimensiona por la suma de transmisiones', () => {
     const tc = SPECT_RADIONUCLIDES.find(r => r.symbol === 'Tc-99m')!;
     expect(tc.tenthValueLead_mm).toBeGreaterThan(0.8);
-    dentro(tvlSPECT(tc, 'gypsum'), tc.tenthValueConcrete_mm * 2.35 / 0.705, 1e-9);
-    const s = salaSPECT(DEFAULT_SPECT_PROCEDURES, 2, 0, 'lead', 100);
-    const resto = s.resultados.reduce((a, r, k) => a + r.weeklyKerma_uSv * Math.pow(10, -s.plomo_mm / tvlSPECT(SPECT_RADIONUCLIDES.find(x => x.symbol === DEFAULT_SPECT_PROCEDURES[k].radionuclide)!, 'lead')), 0);
-    dentro(resto, 100, 1e-6);
+    // Fase 11 (#57 N3): yeso por equivalencia másica con el concreto 2.35 en la regla espectral GP.
+    dentro(tvlSPECT(tc, 'gypsum'), tc.tenthValueConcrete_mm * 2.35 / 0.705, 1e-3);
+    for (const mat of ['lead', 'concrete'] as const) {
+      const s = salaSPECT(DEFAULT_SPECT_PROCEDURES, 2, 0, mat, 100);
+      const t = mat === 'lead' ? s.plomo_mm : s.concreto_mm;
+      const resto = s.resultados.reduce((a, r, k) => a + r.weeklyKerma_uSv * transmisionSPECT(SPECT_RADIONUCLIDES.find(x => x.symbol === DEFAULT_SPECT_PROCEDURES[k].radionuclide)!, mat, t), 0);
+      dentro(resto, 100, 1e-6);
+    }
   });
 
   it('terapia con radiofármacos: la sala se compara con la meta una vez (antes meta × número de tareas)', () => {

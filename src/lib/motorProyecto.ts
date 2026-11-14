@@ -5,7 +5,7 @@
  * lateral, tecla F5, botones «Calcular» del lienzo, cálculo preliminar de un DXF confirmado, cálculo por lotes) pasa
  * por `calcularBarrerasValidadas`: puntos de muestreo de `shieldingMath`, kerma sin blindaje del motor de campo
  * (`doseFieldEngine`, TG-108 para PET), espesores de `normativeBarrierEngine` (NCRP 147 diagnóstico y TC, NCRP 151
- * teleterapia; PET con la curva de banda ancha de TG-108 a 511 keV, `espesorPET511`; I-131 y Lu-177 por espectro completo con
+ * teleterapia; PET con la curva de banda ancha de TG-108 a 511 keV, `espesorPET511`; I-131, Lu-177 y SPECT Tc-99m por espectro completo con
  * buildup GP de ANSI/ANS-6.4.3 y la regla «el mayor entre haz estrecho a la línea más energética y haz ancho»,
  * `espesorTerapiaGP`) y trazas de auditoría. El estado de cumplimiento es el de `verificarBarrera` (instalado ≥ requerido,
  * sólo con traza del motor).
@@ -30,7 +30,7 @@ import {
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 import { espesorPET511 } from '@/lib/transmisionTG108';
-import { espesorTerapiaGP, notasTerapia, nuclidoTerapiaDe, REFERENCIA_GP_ANS643 } from '@/lib/terapiaEspectroGP';
+import { ESPECTROS_TERAPIA, espesorTerapiaGP, lineaEstrecha, notasTerapia, nuclidoTerapiaDe, REFERENCIA_GP_ANS643 } from '@/lib/terapiaEspectroGP';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
 import { codigoCatalogo, dosisEnPunto } from '@/lib/doseFieldEngine';
 import { verificarBarrera, verificarPlano } from '@/lib/estadoProyecto';
@@ -110,7 +110,7 @@ function calcularUna(
   // NCRP 147/151: B = P / (K·T). T fuera de (0, 1] → T = 1 (conservador; la auditoría lo marca).
   const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 && b.occupancyFactor <= 1 ? b.occupancyFactor : 1;
   const metaEfectiva = b.designGoal_mSv_per_wk / T;
-  // I-131 / Lu-177: espectro completo con buildup GP (ANSI/ANS-6.4.3) y regla max(haz estrecho, haz ancho) (Fase 11).
+  // I-131 / Lu-177 / Tc-99m: espectro completo con buildup GP (ANSI/ANS-6.4.3) y regla max(haz estrecho, haz ancho) (Fase 11).
   const nuclidoGP = esCiclotron ? null : nuclidoTerapiaDe(sources);
   const rigeGP: string[] = [];
   for (const mat of esCiclotron ? [] : MATERIALS) {
@@ -151,7 +151,9 @@ function calcularUna(
   });
   if (nuclidoGP && !normativo) {
     calculationTrace.formulaId = 'ANS643_GP_ESPECTRO_MAX_HAZ_ESTRECHO';
-    calculationTrace.standard = 'ANSI/ANS-6.4.3 GP + haz estrecho (CNSNS)';
+    calculationTrace.standard = lineaEstrecha(nuclidoGP) === null
+      ? 'ANSI/ANS-6.4.3 GP'
+      : `ANSI/ANS-6.4.3 GP + haz estrecho${ESPECTROS_TERAPIA[nuclidoGP].terapia ? ' (CNSNS)' : ''}`;
     calculationTrace.assumptions = [...calculationTrace.assumptions, ...notasTerapia(nuclidoGP), `Rige: ${rigeGP.join('; ') || '—'}.`, REFERENCIA_GP_ANS643];
   }
   if (normativo) {

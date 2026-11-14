@@ -25,6 +25,7 @@ import {
   muroMapeo,
   computeMeshStats,
 } from '@/lib/doseMappingEngine';
+import { transmisionTG108 } from '@/lib/transmisionTG108';
 import { MATERIALS, MODALITIES, type Barrier, type FloorPlan, type RadiationSource } from '@/types/radshield';
 
 const modalidad = (id: string) => MODALITIES.find((m) => m.id === id)!;
@@ -189,12 +190,14 @@ describe('Fase 3 — doseMappingEngine delega en el motor', () => {
     expect(tasaDosisMapeo_uSv_h({ x: 3, y: 2.5, z: 2 }, fuente, 1, null)).toBeCloseTo(143 / 2, 9);
   });
 
-  it('TVL de 511 keV del catálogo (TG-108): 1.66 cm de plomo y 17.6 cm de concreto = 1 TVL', () => {
+  it('511 keV: curva de banda ancha de TG-108 (Tabla V), la misma del motor de barreras (revisión del #58, H1)', () => {
     const sin = tasaDosisMapeo_uSv_h({ x: 5, y: 1.5, z: 2 }, fuente, 1, null);
     const pb = tasaDosisMapeo_uSv_h({ x: 5, y: 1.5, z: 2 }, fuente, 1, muroMapeo(fuente, 1, 1.66, 'lead'));
     const co = tasaDosisMapeo_uSv_h({ x: 5, y: 1.5, z: 2 }, fuente, 1, muroMapeo(fuente, 1, 17.6, 'concrete'));
-    expect(pb / sin).toBeCloseTo(0.1, 6);
-    expect(co / sin).toBeCloseTo(0.1, 6);
+    // Antes: 1 TVL de catálogo (0.1). TG-108 con su «hombro» de haz ancho: más transmisión con poco espesor.
+    expect(pb / sin).toBeCloseTo(transmisionTG108('lead', 16.6), 6);
+    expect(co / sin).toBeCloseTo(transmisionTG108('concrete', 176), 6);
+    expect(co / sin).toBeGreaterThan(0.1);
     expect(MATERIALS.find((m) => m.code === 'PB')!.TVL_mm['511keV']).toBe(16.6);
   });
 

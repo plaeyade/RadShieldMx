@@ -7,7 +7,8 @@
  * Fase 11: el espesor mínimo de I-131 y Lu-177 sale de `terapiaEspectroGP` (espectro ENSDF completo, buildup GP de
  * ANSI/ANS-6.4.3, mayor entre haz estrecho a la línea más energética con Iγ ≥ 0.1 %, 722.9 / 321.3 keV, y haz ancho).
  * Las TVL de la tabla quedan como dato de biblioteca (I-131: 11 mm de Delacroix et al. 2002; la de haz estrecho a
- * 722.9 keV, que rige en plomo, es 20.3 mm; Lu-177 a 321.3 keV, 5.7 mm).
+ * 722.9 keV, que rige en plomo, es 21.68 mm; Lu-177 a 321.3 keV, 6.25 mm; µ sin dispersión coherente, como ORNL/RSIC-49;
+ * 2.ª revisión del #58, M1).
  */
 import { espesorTerapiaGP, nuclidoTerapiaDeSimbolo } from '@/lib/terapiaEspectroGP';
 
