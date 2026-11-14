@@ -55,15 +55,21 @@ describe('materialDatabase frente a NCRP 151 Tabla B.2', () => {
     for (const k of E) expect(w.TVL_primary_cm[k]!).toBeGreaterThanOrEqual((TABLA_B_2.lead[clave(k)].tvl1_cm * 11.34 * max) / 17 - 0.005);
   });
 
-  it('tungsteno (#57 N4): factor por energía con µ/ρ de NIST para W y Pb; Co-60 a 1.1732 MeV ≈ 1.059 (antes 1.054)', () => {
-    // Python (log-log entre 1.0 y 1.25 MeV de NIST z82/z74): 1.1732 MeV → 1.059124, 1.3325 → 1.050374, 1.25 → 1.053613.
+  it('tungsteno (#57 N4 → revisión del #58): factor por energía de la ALEACIÓN 17.0 g/cm³ (ASTM B777 clase 1), NIST XCOM', () => {
+    // W puro (referencia, NIST SRD 126 log-log): 1.1732 MeV → 1.059124, 1.3325 → 1.050374, 1.25 → 1.053613.
     expect(cocientePbW(1.1732)).toBeCloseTo(1.059124, 5);
     expect(cocientePbW(1.3325)).toBeCloseTo(1.050374, 5);
     expect(cocientePbW(1)).toBeCloseTo(0.07102 / 0.06618, 9);
-    expect(factorWPb('Co60')).toBeCloseTo(1.059124, 5);
-    for (const e of ['6', '10', '15', '18', '25'] as const) expect(factorWPb(e)).toBeCloseTo(1.053613, 5);
-    expect(FACTOR_W_PB).toBeCloseTo(1.059124, 5);
-    expect(pisoMasa(getMaterialById('tungsten')!, 'Co60', 'primary')).toBeCloseTo((4.0 * 11.34 * 1.059124) / 17, 2);
+    // Aleación (peor caso 90W-7Ni-3Fe / 90W-6Ni-4Cu; Python con XCOM): mayor que con W puro en todos los haces.
+    const esperado = { Co60: 1.0639, '6': 1.0694, '10': 1.0844, '15': 1.0941, '18': 1.0975, '25': 1.0996 } as const;
+    for (const [e, f] of Object.entries(esperado)) {
+      expect(factorWPb(e as keyof typeof esperado), e).toBeCloseTo(f, 3);
+      expect(factorWPb(e as keyof typeof esperado), e).toBeGreaterThan(e === 'Co60' ? 1.059124 : 1.053613);
+    }
+    expect(FACTOR_W_PB).toBeCloseTo(1.0996, 3);
+    expect(pisoMasa(getMaterialById('tungsten')!, 'Co60', 'primary')).toBeCloseTo((4.0 * 11.34 * factorWPb('Co60')) / 17, 2);
+    // 6–20 MV: con el factor único anterior (1.054) el TVL de la aleación quedaba 1.5–4 % corto.
+    expect(factorWPb('18') / 1.053613 - 1).toBeGreaterThan(0.04);
   });
 
   it('getRecommendedMaterial: espesor equivalente al mismo número de TVL que el concreto', () => {

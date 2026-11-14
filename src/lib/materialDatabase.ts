@@ -6,6 +6,7 @@
 
 import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
 import { densidadDiseno, tvlDisenoHD, tvlFugaHD } from '@/lib/ininBloquesHD';
+import { ENERGIAS_HAZ_W, factorWPbHaz } from '@/lib/equivalenciaWPb';
 
 // Fuente única para los materiales de referencia de NCRP 151: Tabla B.2 (primaria, TVL₁) y
 // Tabla B.7 (fuga en concreto, TVL₁). Para acero y plomo la secundaria usa la primaria (conservador).
@@ -53,11 +54,11 @@ export interface ShieldingMaterial {
  * - mezclas minerales (Ca, Si, Fe, Ba) y materiales ligeros: envolvente por masa de concreto y acero (`tvlDisenoHD`
  *   primaria, `tvlFugaHD` secundaria), el mismo criterio que los bloques HD;
  * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `factorWPb(energía)`. Por masa el W atenúa menos
- *   que el Pb en Co-60 y MV: (µ/ρ)_W/(µ/ρ)_Pb de NIST SRD 126 (Hubbell y Seltzer) = 0.932 a 1 MeV, 0.949 a 1.25 MeV,
- *   0.958 a 1.5, 0.962 a 2–4, 0.959 a 6, 0.955 a 10 y 0.950 a 20 MeV. El factor es el máximo de (µ/ρ)_Pb/(µ/ρ)_W
- *   (log-log entre filas de NIST) en las energías que rigen el TVL de cada haz: Co-60 sus dos líneas, 1.1732 y
- *   1.3325 MeV (1.059, a 1.1732 MeV; antes se usaba 1.054 para todo, 0.5 % corto en Co-60, revisión de #57 N4); MV de
- *   1.25 MeV a la energía nominal (espectro endurecido; 1.054, a 1.25 MeV).
+ *   que el Pb en Co-60 y MV, y la aleación (W-Ni-Fe/Cu, ASTM B777) aún menos, porque el aglutinante casi no produce
+ *   pares. El factor es el máximo de (µ/ρ)_Pb/(µ/ρ)_aleación (NIST XCOM, log-log) en las energías que rigen el TVL de cada
+ *   haz: Co-60 sus dos líneas, 1.1732 y 1.3325 MeV; MV de 1.25 MeV a la energía nominal (espectro endurecido); aleación
+ *   del catálogo (17.0 g/cm³) = peor caso de la clase 1 de ASTM B777. Revisión del #58: Co-60 1.064, 6 MV 1.069, 18 MV
+ *   1.098 (antes 1.059 / 1.054 con W puro: TVL de W ≈ 4 % corto en 6–20 MV). `src/lib/equivalenciaWPb.ts`.
  * Pendiente: el bario atenúa por masa algo menos que el concreto en Co-60 (Compton, Z/A 0.41 frente a ≈ 0.50); la
  * envolvente concreto/acero no lo cubre del todo en barita a Co-60: usar una medición o el µ/ρ de la mezcla.
  */
@@ -282,7 +283,7 @@ export const NIST_MU_RHO_PB_W: readonly (readonly [number, number, number])[] = 
   [15, 0.05658, 0.05384], [20, 0.06206, 0.05893],
 ];
 
-/** (µ/ρ)_Pb/(µ/ρ)_W a E (MeV), cada µ/ρ interpolado log-log entre filas de NIST (1–20 MeV). */
+/** (µ/ρ)_Pb/(µ/ρ)_W PURO a E (MeV), log-log entre filas de NIST (1–20 MeV). Referencia: el factor de diseño es `factorWPb` (aleación). */
 export function cocientePbW(E: number): number {
   const t = NIST_MU_RHO_PB_W;
   const e = Math.min(Math.max(E, t[0][0]), t[t.length - 1][0]);
@@ -295,23 +296,17 @@ export function cocientePbW(E: number): number {
   return ll(pb0, pb1) / ll(w0, w1);
 }
 
-/** Energías de fotón (MeV) que rigen el TVL de cada haz: Co-60, sus dos líneas; MV, de 1.25 MeV a la nominal. */
-const ENERGIAS_TVL: Record<ClaveB2, readonly number[]> = {
-  Co60: [1.1732, 1.3325],
-  '6': [1.25, 1.5, 2, 3, 4, 5, 6],
-  '10': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10],
-  '15': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15],
-  '18': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 18],
-  '25': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 20],
-};
-
-/** Factor de masa W→Pb por haz: máximo de (µ/ρ)_Pb/(µ/ρ)_W en las energías que rigen su TVL. */
+/**
+ * Factor de masa W→Pb por haz para la ALEACIÓN de W del catálogo (17.0 g/cm³, ASTM B777 clase 1, peor caso Ni-Fe/Ni-Cu):
+ * máximo de (µ/ρ)_Pb/(µ/ρ)_aleación (NIST XCOM) en las energías que rigen su TVL (`equivalenciaWPb`, revisión del #58).
+ * Co-60 1.064, 6 MV 1.069, 10 MV 1.084, 15 MV 1.094, 18 MV 1.098, 25 MV 1.100. Antes, con W puro: 1.059 / 1.054.
+ */
 export function factorWPb(e: ClaveB2): number {
-  return Math.max(...ENERGIAS_TVL[e].map(cocientePbW));
+  return factorWPbHaz(e);
 }
 
-/** Máximo del factor W→Pb sobre todos los haces (Co-60: 1.059). */
-export const FACTOR_W_PB = Math.max(...(Object.keys(ENERGIAS_TVL) as ClaveB2[]).map(factorWPb));
+/** Máximo del factor W→Pb sobre todos los haces (25 MV: 1.0996). */
+export const FACTOR_W_PB = Math.max(...(Object.keys(ENERGIAS_HAZ_W) as ClaveB2[]).map(factorWPb));
 
 /** Piso por masa (cm) de un TVL que NCRP 151 no tabula; null si el material no se acota así (polietileno boratado). */
 export function pisoMasa(m: Pick<ShieldingMaterial, 'id' | 'density_g_cm3' | 'category'>, energia: keyof typeof ENERGIAS, tipo: 'primary' | 'secondary'): number | null {
