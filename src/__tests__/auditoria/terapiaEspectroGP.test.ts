@@ -226,11 +226,16 @@ describe('I-123 (diálogos): 6 líneas ENSDF ≥ 0.1 % (Chen 2021), sólo haz an
       expect(transmisionRegla('I123', m, t)).toBe(transmisionEspectroGP('I123', m, t));
     }
   });
-  it('frente al haz estrecho a 529 keV desde B = 1: menos plomo a B ≥ 0.1, más plomo a B = 0.01 y más concreto siempre', () => {
+  // N1 (#57): a peso 1 desde B = 1 el haz estrecho a 529 keV da MÁS plomo que el GP en todo el rango útil (13.66 mm por
+  // TVL: 13.7 / 27.3 / 41.0 mm a B = 1e-1…1e-3 frente a 2.1 / 15.7 / 31.1 mm); el GP sólo lo supera por debajo de
+  // B ≈ 1e-7. En concreto pasa lo contrario: sin buildup el haz estrecho queda corto (112.6 mm por TVL).
+  it('frente al haz estrecho a 529 keV desde B = 1: menos plomo en todo el rango útil y más concreto siempre', () => {
     const pb = (B: number) => espesorTerapiaGP('I123', 1, B, { code: 'PB', density: 11.35 });
     const co = (B: number) => espesorTerapiaGP('I123', 1, B, { code: 'CONCRETE235', density: 2.35 });
-    expect(pb(0.1).espesor_mm).toBeCloseTo(2.115, 2); // estrecho 529 keV: 13.6 mm
-    expect(pb(0.01).espesor_mm).toBeCloseTo(15.704, 2); // estrecho: 27.2 mm; asintótico de 1 TVL a B = 0.1: 13.6
+    const tvlEstrecho529 = 13.66;
+    for (const B of [1e-1, 1e-2, 1e-3, 1e-4, 1e-6]) expect(pb(B).espesor_mm).toBeLessThan(-Math.log10(B) * tvlEstrecho529);
+    expect(pb(0.1).espesor_mm).toBeCloseTo(2.115, 2); // estrecho 529 keV: 13.7 mm
+    expect(pb(0.01).espesor_mm).toBeCloseTo(15.704, 2); // estrecho desde B = 1: 27.3 mm
     expect(co(0.1).espesor_mm).toBeCloseTo(164.21, 1); // estrecho: 112.6 mm
     expect(co(0.01).espesor_mm).toBeCloseTo(272.79, 1); // estrecho: 225.3 mm
     expect(pb(0.1).rige).toBe('GP espectro');
@@ -293,11 +298,13 @@ describe('bibliotecas de los diálogos: nuclearMedicine y TherapeuticRadionuclid
     return Math.exp(Math.log(v0) + (Math.log(E / e0) / Math.log(e1 / e0)) * Math.log(v1 / v0));
   };
   const tvl = (t: [number, number][], E: number, rho: number) => (10 * Math.log(10)) / (ll(t, E) * rho);
-  const lineaDura: Record<string, number> = { 'Tc-99m': 0.1405, 'In-111': 0.2454, 'Tl-201': 0.1674, 'Zr-89': 0.909 };
+  // Línea dura con Iγ ≥ 0.1 % (antes ≥ 1 %): Tc-99m 140.5, In-111 245.35, Tl-201 167.43 keV.
+  const lineaDura: Record<string, number> = { 'Tc-99m': 0.140511, 'In-111': 0.24535, 'Tl-201': 0.16743 };
 
-  it('I-131, Lu-177 e I-123: HVL y TVL de la tabla = primer espesor de la regla espectral (B = 0.5 y 0.1)', async () => {
+  it('nucleidos con espectro: HVL y TVL de la tabla = primer espesor de la regla espectral (B = 0.5 y 0.1)', async () => {
     const { RADIONUCLIDES } = await import('@/lib/nuclearMedicine');
-    const casos = [['I-131', 'I131'], ['I-131-NaI', 'I131'], ['Lu-177', 'Lu177'], ['I-123', 'I123']] as const;
+    const casos = [['I-131', 'I131'], ['I-131-NaI', 'I131'], ['Lu-177', 'Lu177'], ['I-123', 'I123'], ['Tc-99m', 'Tc99m'],
+      ['Tl-201', 'Tl201'], ['In-111', 'In111'], ['Zr-89', 'Zr89']] as const;
     for (const [sym, nuc] of casos) {
       const r = RADIONUCLIDES.find((x) => x.symbol === sym)!;
       const t = (B: number, code: string, density: number) => espesorTerapiaGP(nuc, 1, B, { code, density }).espesor_mm;
@@ -308,7 +315,7 @@ describe('bibliotecas de los diálogos: nuclearMedicine y TherapeuticRadionuclid
     }
   });
 
-  it('ninguna TVL de plomo ni de concreto por debajo de la de haz estrecho de la línea dura', async () => {
+  it('ninguna TVL de plomo ni de concreto por debajo de la de haz estrecho de la línea dura (Iγ ≥ 0.1 %)', async () => {
     const { RADIONUCLIDES } = await import('@/lib/nuclearMedicine');
     for (const [sym, E] of Object.entries(lineaDura)) {
       const r = RADIONUCLIDES.find((x) => x.symbol === sym)!;
@@ -339,7 +346,11 @@ describe('bibliotecas de los diálogos: nuclearMedicine y TherapeuticRadionuclid
     const B = 100 / r.weeklyDose_uSv;
     expect(r.minLead_mm).toBeCloseTo(espesorTerapiaGP('I131', 1, B, { code: 'PB', density: 11.35 }).espesor_mm, 9);
     expect(r.minConcrete_mm).toBeCloseTo(espesorTerapiaGP('I131', 1, B, { code: 'CONCRETE235', density: 2.35 }).espesor_mm, 9);
-    expect(espesorRadionuclidoTerapia('Tc-99m', 'lead', 0.01, 0.9).mm).toBeCloseTo(1.8, 9);
+    // Tc-99m ya no es n·TVL (#57 N3): regla espectral GP, 2.142 mm a B = 0.01 (Python).
+    expect(espesorRadionuclidoTerapia('Tc-99m', 'lead', 0.01, 0.9).mm).toBeCloseTo(2.142, 2);
+    // N2: el texto del método sólo dice «vs haz estrecho» cuando el nucleido tiene criterio (a).
+    expect(espesorRadionuclidoTerapia('I-123', 'lead', 0.01, 2.1).metodo).not.toMatch(/haz estrecho/);
+    expect(espesorRadionuclidoTerapia('I-131', 'lead', 0.01, 20.3).metodo).toMatch(/vs haz estrecho a 722\.9 keV/);
     // I-123 también por el GP del espectro (no n·TVL).
     const i123 = espesorRadionuclidoTerapia('I-123', 'concrete', 0.01, 164);
     expect(i123.mm).toBeCloseTo(espesorTerapiaGP('I123', 1, 0.01, { code: 'CONCRETE235', density: 2.35 }).espesor_mm, 9);

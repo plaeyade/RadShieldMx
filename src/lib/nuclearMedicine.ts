@@ -5,7 +5,7 @@
 // =============================================================================
 
 import { P_CONTROLADA_uSv_semana, P_NO_CONTROLADA_uSv_semana } from './limitesDosis';
-import { espesorTerapiaGP, nuclidoTerapiaDeSimbolo } from './terapiaEspectroGP';
+import { espesorTerapiaGP, metodoEspectro, nuclidoTerapiaDeSimbolo } from './terapiaEspectroGP';
 
 // ── Radionuclide database with TG 108 constants ──
 export interface Radionuclide {
@@ -30,23 +30,25 @@ export interface Radionuclide {
 
 /**
  * Fase 11 — contraste de las TVL de biblioteca (antes «pendientes de contraste»):
- * - I-131, Lu-177 e I-123: el espesor de los diálogos sale de `terapiaEspectroGP` (espectro ENSDF completo, líneas con
- *   Iγ ≥ 0.1 %, con buildup GP de ANSI/ANS-6.4.3; en terapia, además, max con el haz estrecho a la línea más energética
- *   con Iγ ≥ 0.1 %: I-131 722.9 keV, Lu-177 321.3 keV). Las HVL y TVL de la tabla de estos tres son el primer espesor
- *   de esa regla (B = 0.5 y B = 0.1, Pb 11.35 y concreto 2.35 g/cm³) y sólo se muestran: el cálculo usa la curva
- *   entera, que en plomo tiende a la pendiente de la línea dura y en concreto incluye el buildup.
- *   I-123 ya no usa la TVL de haz estrecho a 529 keV (1.27 %) desde B = 1: daba 13.7 mm de Pb por TVL (≈ 6× el GP a
- *   B = 0.1) y, sin buildup, quedaba corta en concreto (113 mm por TVL frente a 164 mm del GP a B = 0.1 y 273 mm a
- *   B = 0.01) e incluso en plomo a B = 0.01 (13.6 frente a 15.7 mm).
- * - Resto: la TVL no puede ser menor que la de haz estrecho de la línea más penetrante con rendimiento ≥ 1 % (NIST
- *   XCOM/SRD 126, Pb 11.35 y concreto ordinario 2.35 g/cm³, log-log; líneas de NNDC/ENSDF), que es la pendiente
- *   asintótica del espectro (mismo criterio que la revisión 8c de `TherapeuticRadionuclideShielding`). Se corrigieron:
- *   Tl-201 (167.4 keV, 10 %): Pb 0.5 → 1.4 mm, concreto 50 → 72 mm; Zr-89 (909 keV, 99 %): Pb 21.6 → 26.0 mm.
- *   Tc-99m (140.5 keV: 0.86 / 66 mm) e In-111 (245 keV: 3.2 / 83 mm) ya cumplían. F-18, Ga-68 y Cu-64 usan la curva de
- *   TG-108 a 511 keV en los diálogos.
+ * - I-131, Lu-177, I-123, Tc-99m, Tl-201, In-111 y Zr-89: el espesor de los diálogos sale de `terapiaEspectroGP`
+ *   (espectro ENSDF completo, líneas con Iγ ≥ 0.1 %, con buildup GP de ANSI/ANS-6.4.3, y el mayor con el haz estrecho a
+ *   la línea más energética con Iγ ≥ 0.1 % en terapia —I-131 722.9 keV, Lu-177 321.3 keV— y en los diagnósticos cuya
+ *   línea dura es también la dominante —Tc-99m 140.5, Tl-201 167.4, In-111 245.4 keV—). Las HVL y TVL de la tabla de
+ *   estos nucleidos son el primer espesor de esa regla (B = 0.5 y B = 0.1, Pb 11.35 y concreto 2.35 g/cm³) y sólo se
+ *   muestran: el cálculo usa la curva entera, que en plomo tiende a la pendiente de la línea dura y en concreto incluye
+ *   el buildup.
+ *   I-123 ya no usa la TVL de haz estrecho a 529 keV (1.27 %): con peso 1 desde B = 1 daba 13.7 mm de Pb por TVL
+ *   (≈ 6× el GP a B = 0.1 y 27.2 frente a 15.7 mm a B = 0.01; el GP sólo supera n·13.66 mm por debajo de B ≈ 1e-7) y,
+ *   sin buildup, quedaba corta en concreto (113 mm por TVL frente a 164 mm del GP a B = 0.1 y 273 mm a B = 0.01).
+ * - Seguimiento de #57 (N3): Tc-99m, Tl-201, In-111 y Zr-89 usaban n·TVL de haz estrecho sin buildup. En concreto,
+ *   Tc-99m (76 mm por TVL) y Tl-201 (72 mm) quedaban 1.6–2.2× por debajo del GP (148/237 y 156/251 mm a B = 0.1/0.01) e
+ *   In-111 (149 mm) un 15 % por debajo a B = 0.1 (176 mm). El umbral de línea de la biblioteca pasa de 1 % a 0.1 %, el mismo del espectro: en Zr-89 entra
+ *   la línea de 1713 keV (0.745 %) y las de 1657 y 1744.5 keV.
+ * - F-18, Ga-68 y Cu-64 usan la curva de TG-108 a 511 keV en los diálogos (la tabla sólo se muestra).
  * - Y-90, Ra-223 y Ac-225: Γ y TVL alineadas con `TherapeuticRadionuclideShielding` (revisión 8c: cadena en equilibrio,
  *   línea dura de la cadena); las de aquí eran las de las gammas blandas del padre. Y-90 (bremsstrahlung) sigue pendiente
- *   de caso publicado. Las HVL de la tabla son las de la línea principal (primer espesor), no TVL/3.32.
+ *   de caso publicado. Las HVL de la tabla son las de la línea principal (primer espesor), no TVL/3.32. Son los únicos que
+ *   siguen con n·TVL.
  */
 export const RADIONUCLIDES: Radionuclide[] = [
   // ═══ PET TRACERS ═══
@@ -78,7 +80,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'Zr-89', name: 'Zirconium-89 (Immuno-PET)', halfLife_hours: 78.4, halfLife_text: '78.4 h',
     gammaConstant_mSv_m2_GBq_h: 0.101, primaryEnergies_keV: [511, 909],
     emissionType: ' positron', avgBetaEnergy_MeV: 0.144, maxBetaEnergy_MeV: 0.902,
-    HVL_lead_mm: 6.5, TVL_lead_mm: 26.0, HVL_concrete_mm: 200, TVL_concrete_mm: 662,
+    HVL_lead_mm: 9.5, TVL_lead_mm: 31.3, HVL_concrete_mm: 112, TVL_concrete_mm: 261,
     notes: 'Long half-life for antibody imaging. Immuno-PET applications.',
     category: 'PET',
   },
@@ -87,7 +89,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'Tc-99m', name: 'Technetium-99m', halfLife_hours: 6.01, halfLife_text: '6.01 h',
     gammaConstant_mSv_m2_GBq_h: 0.030, primaryEnergies_keV: [140],
     emissionType: 'gamma',
-    HVL_lead_mm: 0.27, TVL_lead_mm: 0.90, HVL_concrete_mm: 23, TVL_concrete_mm: 76,
+    HVL_lead_mm: 0.44, TVL_lead_mm: 1.16, HVL_concrete_mm: 77, TVL_concrete_mm: 148,
     notes: 'Most common SPECT tracer. Low energy, easy to shield. Dose: 0.37-1.11 GBq.',
     category: 'SPECT',
   },
@@ -111,7 +113,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'In-111', name: 'Indium-111 (Octreoscan)', halfLife_hours: 67.2, halfLife_text: '67.2 h',
     gammaConstant_mSv_m2_GBq_h: 0.080, primaryEnergies_keV: [172, 247],
     emissionType: 'gamma',
-    HVL_lead_mm: 1.0, TVL_lead_mm: 3.3, HVL_concrete_mm: 45, TVL_concrete_mm: 149,
+    HVL_lead_mm: 0.97, TVL_lead_mm: 3.21, HVL_concrete_mm: 89, TVL_concrete_mm: 176,
     notes: 'Neuroendocrine tumor imaging. Higher energy gamma, requires moderate shielding.',
     category: 'SPECT',
   },
@@ -119,7 +121,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'Tl-201', name: 'Thallium-201', halfLife_hours: 73.0, halfLife_text: '73.0 h',
     gammaConstant_mSv_m2_GBq_h: 0.046, primaryEnergies_keV: [69, 71, 81],
     emissionType: 'gamma',
-    HVL_lead_mm: 0.15, TVL_lead_mm: 1.4, HVL_concrete_mm: 15, TVL_concrete_mm: 72,
+    HVL_lead_mm: 0.52, TVL_lead_mm: 1.53, HVL_concrete_mm: 79, TVL_concrete_mm: 156,
     notes: 'Cardiac perfusion imaging. Very low energy, minimal shielding needed.',
     category: 'SPECT',
   },
@@ -259,17 +261,18 @@ export function calculateWeeklyKerma(
 }
 
 /**
- * Espesor (mm) para la transmisión B en plomo o concreto: I-131, Lu-177 e I-123 por la regla espectral GP
- * (`terapiaEspectroGP`); el resto, n·TVL de la biblioteca. Devuelve también el método para mostrarlo.
+ * Espesor (mm) para la transmisión B en plomo o concreto: los nucleidos con espectro (I-131, Lu-177, I-123, Tc-99m,
+ * Tl-201, In-111, Zr-89) por la regla espectral GP (`terapiaEspectroGP`); el resto, n·TVL de la biblioteca. Devuelve
+ * también el método para mostrarlo.
  */
 export function espesorRadionuclidoTerapia(simbolo: string, material: 'lead' | 'concrete', B: number, tvl_mm: number): { mm: number; metodo: string } {
   if (B >= 1) return { mm: 0, metodo: '—' };
   const nuc = nuclidoTerapiaDeSimbolo(simbolo);
   if (nuc) {
     const r = espesorTerapiaGP(nuc, 1, B, material === 'lead' ? { code: 'PB', density: 11.35 } : { code: 'CONCRETE235', density: 2.35 });
-    return { mm: r.espesor_mm, metodo: `ANSI/ANS-6.4.3 GP, espectro completo vs haz estrecho (rige: ${r.rige ?? '—'})` };
+    return { mm: r.espesor_mm, metodo: metodoEspectro(nuc, r.rige) };
   }
-  return { mm: -Math.log10(B) * tvl_mm, metodo: 'TVL de biblioteca (≥ haz estrecho de la línea más penetrante)' };
+  return { mm: -Math.log10(B) * tvl_mm, metodo: 'TVL de biblioteca (n·TVL; cadena en equilibrio de la revisión 8c)' };
 }
 
 /** Required shielding thickness for nuclear medicine room (mm)

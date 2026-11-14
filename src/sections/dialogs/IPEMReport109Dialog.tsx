@@ -4,7 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { X, Activity, Table, Download } from 'lucide-react';
-import { DEFAULT_SPECT_PROCEDURES, calculateSPECTShielding, salaSPECT } from '@/lib/spect/IPEMReport109';
+import { DEFAULT_SPECT_PROCEDURES, SPECT_RADIONUCLIDES, calculateSPECTShielding, metodoSPECT, salaSPECT } from '@/lib/spect/IPEMReport109';
 import type { SPECTProcedure } from '@/lib/spect/IPEMReport109';
 
 export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }) {
@@ -52,7 +52,7 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
           <div className="grid grid-cols-2 gap-2 text-xs" data-testid="ipem-sala">
             <div className="p-2 rounded border bg-white">Plomo total para la sala (suma de procedimientos): <strong data-testid="ipem-plomo">{sala.plomo_mm.toFixed(2)} mm</strong></div>
             <div className="p-2 rounded border bg-white">Concreto total: <strong data-testid="ipem-concreto">{sala.concreto_mm.toFixed(0)} mm</strong></div>
-            <div className="col-span-2 text-[10px] text-slate-500">TVL de haz estrecho sin acumulación ni atenuación del paciente (conservador en la atenuación del paciente, no en la acumulación); número de TVL continuo. Los «Pb req» por fila son para cada procedimiento aislado.</div>
+            <div className="col-span-2 text-[10px] text-slate-500" data-testid="ipem-metodo">Espectro ENSDF completo (líneas ≥ 0.1 %) con buildup GP de ANSI/ANS-6.4.3 por nucleido (el mismo método que Medicina Nuclear), sin atenuación del paciente (conservador); la sala suma las transmisiones de cada procedimiento. Los «Pb req» por fila son para cada procedimiento aislado.</div>
           </div>
 
           <div className="border rounded-lg overflow-hidden">
@@ -77,7 +77,9 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
             <p className="font-semibold text-indigo-800">Referencia IPEM Report 109:</p>
             <p>• Kerma = N_pacientes × A_admin(GBq) × Γ(uSv·m²/GBq·h) × t_imaging(h) / d²(m²)</p>
             <p>• Tc-99m Γ=0.0593 | Tl-201 Γ=0.0364 | I-123 Γ=0.0583 | I-131 Γ=0.0595 | Ga-67 Γ=0.0215</p>
-            <p>• TVL Tc-99m: Pb=0.25mm, Concrete=22mm | I-131: Pb=3.0mm, Concrete=170mm</p>
+            {SPECT_RADIONUCLIDES.filter(r => procedures.some(p => p.radionuclide === r.symbol)).map(r => (
+              <p key={r.symbol}>• {r.symbol}: {metodoSPECT(r)}; primer TVL Pb {r.tenthValueLead_mm.toFixed(2)} mm, concreto {r.tenthValueConcrete_mm.toFixed(0)} mm</p>
+            ))}
           </div>
         </div>
         <div className="flex justify-between px-5 py-3 border-t bg-slate-50 rounded-b-lg"><span className="text-xs text-slate-500">IPEM 109 v50</span><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>

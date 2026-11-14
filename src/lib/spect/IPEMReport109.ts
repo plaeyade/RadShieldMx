@@ -1,3 +1,5 @@
+import { espesorTerapiaGP, materialGPCatalogo, metodoEspectro, nuclidoTerapiaDeSimbolo, transmisionRegla, type NuclidoTerapia } from '@/lib/terapiaEspectroGP';
+
 /**
  * IPEMReport109 — MC-02: SPECT Shielding segun IPEM Report 109 (2014)
  * Metodologia para blindaje de salas SPECT y SPECT/CT con factores
@@ -12,24 +14,60 @@ export interface SPECTRadionuclide {
   tenthValueLead_mm: number; tenthValueConcrete_mm: number;
 }
 
+/** Material del diálogo → material del catálogo para `terapiaEspectroGP` (yeso por equivalencia másica con concreto 2.35). */
+const MATERIAL_SPECT: Record<'lead' | 'concrete' | 'gypsum', { code: string; density: number }> = {
+  lead: { code: 'PB', density: 11.35 },
+  concrete: { code: 'CONCRETE235', density: 2.35 },
+  gypsum: { code: 'GYPSUM', density: 0.705 },
+};
+
+function nuclidoSPECT(symbol: string): NuclidoTerapia {
+  const n = nuclidoTerapiaDeSimbolo(symbol);
+  if (!n) throw new Error(`Sin espectro ENSDF para ${symbol}`);
+  return n;
+}
+
+/** Espesor (mm) de la regla espectral de `terapiaEspectroGP` para la transmisión B. */
+function espesorSPECT(symbol: string, material: 'lead' | 'concrete' | 'gypsum', B: number): number {
+  return espesorTerapiaGP(nuclidoSPECT(symbol), 1, B, MATERIAL_SPECT[material]).espesor_mm;
+}
+
 /**
- * TVL (mm). Revisión independiente de la Fase 8c: varias TVL eran en realidad HVL o menores (no conservador).
- * - Plomo: TVL de Delacroix et al. (2002), Radionuclide and Radiation Protection Data Handbook, recogidas en las
- *   fichas de isótopos de la Universidad de Cincinnati: I-123 2 mm, I-131 11 mm, In-111 3 mm, Ga-67 6 mm.
- *   Tl-201: 1.3 mm = TVL de haz estrecho (XCOM) a 167 keV, la línea más penetrante (10 %), que domina tras 1–2 TVL.
- * - Concreto (2.35 g/cm³): TVL de haz estrecho de XCOM a la línea más penetrante relevante (Tc-99m 140 keV → 66 mm,
- *   Tl-201 167 keV → 72, I-123 159 keV → 70, Ga-67 300 keV → 92, In-111 245 keV → 85, Sm-153 103 keV → 58).
- *   Sin acumulación siguen siendo un mínimo: en concreto la TVL de banda ancha es mayor.
+ * Fase 11 (seguimiento de #57, N3): el blindaje ya no es n·TVL. Las TVL fijas (Delacroix 2002 en plomo; haz estrecho de
+ * XCOM en concreto, sin buildup) quedaban cortas en concreto (I-123: 70 mm por TVL, 140 mm a B = 0.01 frente a 273 mm
+ * del GP) y daban otro resultado que el diálogo de Medicina Nuclear para el mismo nucleido. Ahora la transmisión y los
+ * espesores salen de `terapiaEspectroGP` (espectro ENSDF completo con Iγ ≥ 0.1 % y buildup GP de ANSI/ANS-6.4.3; el
+ * mayor con el haz estrecho a la línea dura en I-131 y en los diagnósticos cuya línea dura es la dominante), igual que
+ * en los demás diálogos. `tenthValueLead_mm` y `tenthValueConcrete_mm` son el primer espesor de esa regla (B = 0.1) y
+ * sólo se muestran. IPEM Report 109 es de pago y no se pudo contrastar; sus valores no se copian aquí.
  */
+const RAD = (name: string, symbol: string, halfLife_h: number, gamma_MeV: number, photonYield: number, gammaConstant_uSvm2perGBqh: number): SPECTRadionuclide => ({
+  name, symbol, halfLife_h, gamma_MeV, photonYield, gammaConstant_uSvm2perGBqh,
+  tenthValueLead_mm: +espesorSPECT(symbol, 'lead', 0.1).toFixed(2),
+  tenthValueConcrete_mm: +espesorSPECT(symbol, 'concrete', 0.1).toFixed(1),
+});
+
 export const SPECT_RADIONUCLIDES: SPECTRadionuclide[] = [
-  { name: 'Technetium-99m', symbol: 'Tc-99m', halfLife_h: 6.01, gamma_MeV: 0.140, photonYield: 0.885, gammaConstant_uSvm2perGBqh: 0.0593, tenthValueLead_mm: 0.83, tenthValueConcrete_mm: 66 },
-  { name: 'Thallium-201', symbol: 'Tl-201', halfLife_h: 73.1, gamma_MeV: 0.135, photonYield: 0.53, gammaConstant_uSvm2perGBqh: 0.0364, tenthValueLead_mm: 1.3, tenthValueConcrete_mm: 72 },
-  { name: 'Iodine-123', symbol: 'I-123', halfLife_h: 13.2, gamma_MeV: 0.159, photonYield: 0.83, gammaConstant_uSvm2perGBqh: 0.0583, tenthValueLead_mm: 2.0, tenthValueConcrete_mm: 70 },
-  { name: 'Iodine-131', symbol: 'I-131', halfLife_h: 193.6, gamma_MeV: 0.364, photonYield: 0.81, gammaConstant_uSvm2perGBqh: 0.0595, tenthValueLead_mm: 11, tenthValueConcrete_mm: 170 },
-  { name: 'Gallium-67', symbol: 'Ga-67', halfLife_h: 78.3, gamma_MeV: 0.093, photonYield: 0.65, gammaConstant_uSvm2perGBqh: 0.0215, tenthValueLead_mm: 6.0, tenthValueConcrete_mm: 92 },
-  { name: 'Indium-111', symbol: 'In-111', halfLife_h: 67.3, gamma_MeV: 0.171, photonYield: 0.90, gammaConstant_uSvm2perGBqh: 0.0479, tenthValueLead_mm: 3.0, tenthValueConcrete_mm: 85 },
-  { name: 'Samarium-153', symbol: 'Sm-153', halfLife_h: 46.3, gamma_MeV: 0.103, photonYield: 0.28, gammaConstant_uSvm2perGBqh: 0.0092, tenthValueLead_mm: 0.55, tenthValueConcrete_mm: 58 },
+  RAD('Technetium-99m', 'Tc-99m', 6.01, 0.140, 0.885, 0.0593),
+  RAD('Thallium-201', 'Tl-201', 73.1, 0.135, 0.53, 0.0364),
+  RAD('Iodine-123', 'I-123', 13.2, 0.159, 0.83, 0.0583),
+  RAD('Iodine-131', 'I-131', 193.6, 0.364, 0.81, 0.0595),
+  RAD('Gallium-67', 'Ga-67', 78.3, 0.093, 0.65, 0.0215),
+  RAD('Indium-111', 'In-111', 67.3, 0.171, 0.90, 0.0479),
+  RAD('Samarium-153', 'Sm-153', 46.3, 0.103, 0.28, 0.0092),
 ];
+
+/** Transmisión de kerma en aire de la pared (regla espectral GP) para el nucleido y el material. */
+export function transmisionSPECT(rad: SPECTRadionuclide, material: 'lead' | 'concrete' | 'gypsum', t_mm: number): number {
+  if (!(t_mm > 0)) return 1;
+  const { mat, escala } = materialGPCatalogo(MATERIAL_SPECT[material]);
+  return transmisionRegla(nuclidoSPECT(rad.symbol), mat, t_mm / 10 / escala);
+}
+
+/** Texto del método para el diálogo. */
+export function metodoSPECT(rad: SPECTRadionuclide): string {
+  return metodoEspectro(nuclidoSPECT(rad.symbol), null);
+}
 
 // IPEM 109 — Scatter factors per procedure type (kerma scatter per patient at 1m, uGy)
 export interface SPECTProcedure {
@@ -61,25 +99,23 @@ export interface SPECTShieldingResult {
   transmission: number;
 }
 
-/**
- * TVL por material (Fase 8c). Tc-99m y Tl-201 traían la HVL como TVL (0.25 y 0.21 mm Pb); ahora 3.32 × HVL
- * (Tc-99m: 0.83 mm, coherente con μ/ρ = 2.3 cm²/g de XCOM a 140 keV). El yeso se escala por densidad desde el
- * concreto (2.35/0.705), en lugar del factor 1.5 sin fuente. Siguen siendo TVL de haz estrecho: sin acumulación.
- */
+/** TVL mostrada (mm): primer espesor de la regla espectral (B = 0.1) en el material; no se usa para calcular. */
 export function tvlSPECT(rad: SPECTRadionuclide, material: 'lead' | 'concrete' | 'gypsum'): number {
   if (material === 'lead') return rad.tenthValueLead_mm;
-  return material === 'concrete' ? rad.tenthValueConcrete_mm : rad.tenthValueConcrete_mm * (2.35 / 0.705);
+  return material === 'concrete' ? rad.tenthValueConcrete_mm : espesorSPECT(rad.symbol, 'gypsum', 0.1);
 }
+
+const radDe = (symbol: string) => SPECT_RADIONUCLIDES.find(r => r.symbol === symbol) || SPECT_RADIONUCLIDES[0];
 
 /** Sala completa: la suma de todos los procedimientos se compara con la meta una sola vez. */
 export function salaSPECT(procs: SPECTProcedure[], distance_m: number, wallThickness_mm: number, wallMaterial: 'lead' | 'concrete' | 'gypsum', designGoal_uSv_week: number) {
   const r = procs.map(p => calculateSPECTShielding({ procedure: p, distance_m, wallThickness_mm, wallMaterial, designGoal_uSv_week }));
   const total = r.reduce((a, x) => a + x.weeklyKerma_uSv, 0);
   const totalBlindado = r.reduce((a, x) => a + x.shieldedKerma_uSv, 0);
-  // Espesor que lleva la suma a la meta (bisección sobre Σ Kᵢ·10^(−t/TVLᵢ)).
+  // Espesor que lleva la suma a la meta (bisección sobre Σ Kᵢ·Tᵢ(t), Tᵢ de la regla espectral de cada nucleido).
   const espesor = (mat: 'lead' | 'concrete') => {
-    const tv = procs.map(p => tvlSPECT(SPECT_RADIONUCLIDES.find(x => x.symbol === p.radionuclide) || SPECT_RADIONUCLIDES[0], mat));
-    const f = (t: number) => r.reduce((a, x, k) => a + x.weeklyKerma_uSv * Math.pow(10, -t / tv[k]), 0);
+    const rads = procs.map(p => radDe(p.radionuclide));
+    const f = (t: number) => r.reduce((a, x, k) => a + x.weeklyKerma_uSv * transmisionSPECT(rads[k], mat, t), 0);
     if (f(0) <= designGoal_uSv_week) return 0;
     let lo = 0, hi = 1;
     while (f(hi) > designGoal_uSv_week && hi < 1e5) hi *= 2;
@@ -90,17 +126,22 @@ export function salaSPECT(procs: SPECTProcedure[], distance_m: number, wallThick
 }
 
 export function calculateSPECTShielding(i: SPECTShieldingInput): SPECTShieldingResult {
-  const rad = SPECT_RADIONUCLIDES.find(r => r.symbol === i.procedure.radionuclide) || SPECT_RADIONUCLIDES[0];
+  const rad = radDe(i.procedure.radionuclide);
   const admin_GBq = i.procedure.avgAdminActivity_MBQ / 1000;
   const time_h = i.procedure.avgImagingTime_min / 60;
   const weeklyKerma = i.procedure.patientsPerWeek * admin_GBq * rad.gammaConstant_uSvm2perGBqh * time_h * 1000 / (i.distance_m * i.distance_m);
-  const tvl = tvlSPECT(rad, i.wallMaterial);
-  const transmission = i.wallThickness_mm > 0 ? Math.pow(10, -i.wallThickness_mm / tvl) : 1;
+  const transmission = transmisionSPECT(rad, i.wallMaterial, i.wallThickness_mm);
   const shieldedKerma = weeklyKerma * transmission;
-  // Número de TVL continuo (antes Math.ceil); espesor total requerido (sin descontar la pared actual).
+  // Espesor total requerido (sin descontar la pared actual) por la regla espectral; requiredTVL = décadas de atenuación.
   const ratio0 = weeklyKerma > 0 ? i.designGoal_uSv_week / weeklyKerma : Infinity;
-  const reqTvl = ratio0 > 0 && ratio0 < 1 ? -Math.log10(ratio0) : 0;
-  return { weeklyKerma_uSv: weeklyKerma, shieldedKerma_uSv: shieldedKerma, withinGoal: shieldedKerma <= i.designGoal_uSv_week, requiredLead_mm: reqTvl * rad.tenthValueLead_mm, requiredConcrete_mm: reqTvl * rad.tenthValueConcrete_mm, requiredTVL: reqTvl, transmission };
+  const necesita = ratio0 > 0 && ratio0 < 1;
+  const reqTvl = necesita ? -Math.log10(ratio0) : 0;
+  return {
+    weeklyKerma_uSv: weeklyKerma, shieldedKerma_uSv: shieldedKerma, withinGoal: shieldedKerma <= i.designGoal_uSv_week,
+    requiredLead_mm: necesita ? espesorSPECT(rad.symbol, 'lead', ratio0) : 0,
+    requiredConcrete_mm: necesita ? espesorSPECT(rad.symbol, 'concrete', ratio0) : 0,
+    requiredTVL: reqTvl, transmission,
+  };
 }
 
 export function getSPECTWeeklyTotal(procedures: SPECTProcedure[], distance_m: number): number {

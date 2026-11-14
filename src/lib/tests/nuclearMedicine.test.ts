@@ -26,7 +26,8 @@ describe('Nuclear Medicine — Radionuclide Database', () => {
     expect(tc).toBeDefined();
     expect(tc!.halfLife_hours).toBe(6.01);
     expect(tc!.primaryEnergies_keV).toContain(140);
-    expect(tc!.HVL_lead_mm).toBe(0.27);
+    // Fase 11 (#57 N3): HVL de la tabla = primer espesor de la regla espectral GP a B = 0.5 (antes 0.27 mm, haz estrecho).
+    expect(tc!.HVL_lead_mm).toBe(0.44);
   });
 
   it('Lu-177 therapy properties are correct', () => {

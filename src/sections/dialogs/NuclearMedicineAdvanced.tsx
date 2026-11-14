@@ -65,7 +65,7 @@ interface Props { open: boolean; onOpenChange: (v: boolean) => void; }
 
 const EMISORES_511 = new Set(['F-18', 'Ga-68', 'Cu-64']);
 
-/** Espesor (mm) para la transmisión B: TG-108 Tabla V para emisores β+; I-131, Lu-177 e I-123 por la regla espectral GP; si no, n·TVL. */
+/** Espesor (mm) para la transmisión B: TG-108 Tabla V para F-18, Ga-68 y Cu-64; los nucleidos con espectro ENSDF (I-131, Lu-177, I-123, Tc-99m, Tl-201, In-111, Zr-89) por la regla espectral GP; si no, n·TVL. */
 function espesorNM(simbolo: string, material: string, B: number, tvl_mm: number): { mm: number; metodo: string } {
   if (B >= 1) return { mm: 0, metodo: '—' };
   if (EMISORES_511.has(simbolo) && (material === 'lead' || material === 'concrete')) {
@@ -123,8 +123,8 @@ export default function NuclearMedicineAdvanced({ open, onOpenChange }: Props) {
 
   // ── Calculations ──
   // Fase 8c: para emisores β+ (511 keV) el espesor sale de la transmisión de banda ancha de AAPM TG-108 Tabla V
-  // (`espesorPET`; antes, TVL de biblioteca: F-18 plomo 13.6 mm frente a ≈ 16.5 mm de TG-108, no conservador). Para el
-  // resto se conserva el TVL de la biblioteca, rotulado como no validado.
+  // (`espesorPET`; antes, TVL de biblioteca: F-18 plomo 13.6 mm frente a ≈ 16.5 mm de TG-108, no conservador). Fase 11:
+  // los nucleidos con espectro ENSDF, por la regla GP de `terapiaEspectroGP`; Y-90, Ra-223 y Ac-225 siguen con n·TVL.
   const shieldingCalc = useMemo(() => {
     if (!nuclide) return null;
     const A = parseFloat(activity_GBq) || 0;
