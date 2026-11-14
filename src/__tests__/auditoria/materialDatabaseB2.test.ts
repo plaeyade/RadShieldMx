@@ -3,7 +3,7 @@
  * acero y plomo son las de la tabla; el resto no puede quedar por debajo del piso por masa (`pisoMasa`).
  */
 import { describe, expect, it } from 'vitest';
-import { FACTOR_W_PB, MATERIALS_DB, getMaterialById, getRecommendedMaterial, pisoMasa } from '@/lib/materialDatabase';
+import { FACTOR_W_PB, MATERIALS_DB, cocientePbW, factorWPb, getMaterialById, getRecommendedMaterial, pisoMasa } from '@/lib/materialDatabase';
 import { TABLA_B_2, TABLA_B_7 } from '@/lib/ncrp151';
 
 const E = ['6MV', '10MV', '15MV', '18MV', '25MV', 'Co60'] as const;
@@ -38,7 +38,7 @@ describe('materialDatabase frente a NCRP 151 Tabla B.2', () => {
     }
     // Casos corregidos.
     expect(getMaterialById('concrete-barite-335')!.TVL_secondary_cm['6MV']).toBeCloseTo((34 * 2.35) / 3.35, 1);
-    expect(getMaterialById('tungsten')!.TVL_primary_cm.Co60).toBeCloseTo((4.0 * 11.34 * 1.054) / 17, 2);
+    expect(getMaterialById('tungsten')!.TVL_primary_cm.Co60).toBeCloseTo((4.0 * 11.34 * factorWPb('Co60')) / 17, 2);
   });
 
   it('tungsteno: factor por masa frente al plomo = máximo de (µ/ρ)_Pb/(µ/ρ)_W de NIST SRD 126 en 1.25–20 MeV', () => {
@@ -49,9 +49,21 @@ describe('materialDatabase frente a NCRP 151 Tabla B.2', () => {
     ];
     const max = Math.max(...nist.map(([, pb, w]) => pb / w));
     expect(FACTOR_W_PB).toBeGreaterThanOrEqual(+max.toFixed(3));
+    for (const [E, pb, w] of nist) expect(cocientePbW(E)).toBeCloseTo(pb / w, 9);
     for (const [, pb, w] of nist) expect(pb / w).toBeGreaterThan(1); // el W no es conservador por masa sin el factor
     const w = getMaterialById('tungsten')!;
     for (const k of E) expect(w.TVL_primary_cm[k]!).toBeGreaterThanOrEqual((TABLA_B_2.lead[clave(k)].tvl1_cm * 11.34 * max) / 17 - 0.005);
+  });
+
+  it('tungsteno (#57 N4): factor por energía con µ/ρ de NIST para W y Pb; Co-60 a 1.1732 MeV ≈ 1.059 (antes 1.054)', () => {
+    // Python (log-log entre 1.0 y 1.25 MeV de NIST z82/z74): 1.1732 MeV → 1.059124, 1.3325 → 1.050374, 1.25 → 1.053613.
+    expect(cocientePbW(1.1732)).toBeCloseTo(1.059124, 5);
+    expect(cocientePbW(1.3325)).toBeCloseTo(1.050374, 5);
+    expect(cocientePbW(1)).toBeCloseTo(0.07102 / 0.06618, 9);
+    expect(factorWPb('Co60')).toBeCloseTo(1.059124, 5);
+    for (const e of ['6', '10', '15', '18', '25'] as const) expect(factorWPb(e)).toBeCloseTo(1.053613, 5);
+    expect(FACTOR_W_PB).toBeCloseTo(1.059124, 5);
+    expect(pisoMasa(getMaterialById('tungsten')!, 'Co60', 'primary')).toBeCloseTo((4.0 * 11.34 * 1.059124) / 17, 2);
   });
 
   it('getRecommendedMaterial: espesor equivalente al mismo número de TVL que el concreto', () => {

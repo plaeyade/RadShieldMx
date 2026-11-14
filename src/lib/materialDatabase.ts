@@ -52,10 +52,12 @@ export interface ShieldingMaterial {
  * el mayor entre el valor de la ficha y el piso por masa (`pisoMasa`):
  * - mezclas minerales (Ca, Si, Fe, Ba) y materiales ligeros: envolvente por masa de concreto y acero (`tvlDisenoHD`
  *   primaria, `tvlFugaHD` secundaria), el mismo criterio que los bloques HD;
- * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `FACTOR_W_PB` = 1.054. Por masa el W atenúa menos
- *   que el Pb en Co-60 y MV: (µ/ρ)_W/(µ/ρ)_Pb de NIST SRD 126 (Hubbell y Seltzer) = 0.949 a 1.25 MeV, 0.958 a 1.5,
- *   0.962 a 2–4, 0.959 a 6, 0.955 a 10 y 0.950 a 20 MeV; se toma el mínimo (0.949 → factor 1/0.949 = 1.054) para
- *   todas las energías, porque el espectro de MV incluye la región de 1.25 MeV.
+ * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `factorWPb(energía)`. Por masa el W atenúa menos
+ *   que el Pb en Co-60 y MV: (µ/ρ)_W/(µ/ρ)_Pb de NIST SRD 126 (Hubbell y Seltzer) = 0.932 a 1 MeV, 0.949 a 1.25 MeV,
+ *   0.958 a 1.5, 0.962 a 2–4, 0.959 a 6, 0.955 a 10 y 0.950 a 20 MeV. El factor es el máximo de (µ/ρ)_Pb/(µ/ρ)_W
+ *   (log-log entre filas de NIST) en las energías que rigen el TVL de cada haz: Co-60 sus dos líneas, 1.1732 y
+ *   1.3325 MeV (1.059, a 1.1732 MeV; antes se usaba 1.054 para todo, 0.5 % corto en Co-60, revisión de #57 N4); MV de
+ *   1.25 MeV a la energía nominal (espectro endurecido; 1.054, a 1.25 MeV).
  * Pendiente: el bario atenúa por masa algo menos que el concreto en Co-60 (Compton, Z/A 0.41 frente a ≈ 0.50); la
  * envolvente concreto/acero no lo cubre del todo en barita a Co-60: usar una medición o el µ/ρ de la mezcla.
  */
@@ -271,15 +273,51 @@ const RAW_DB: ShieldingMaterial[] = [
 ];
 
 const RHO_PB = 11.34;
-/** (µ/ρ)_Pb/(µ/ρ)_W máximo en 1.25–20 MeV (NIST SRD 126: 0.05876/0.05577 a 1.25 MeV). */
-export const FACTOR_W_PB = 1.054;
 type ClaveB2 = '6' | '10' | '15' | '18' | '25' | 'Co60';
+
+/** µ/ρ total con coherente (cm²/g) de NIST SRD 126: [E (MeV), Pb z82, W z74]. */
+export const NIST_MU_RHO_PB_W: readonly (readonly [number, number, number])[] = [
+  [1, 0.07102, 0.06618], [1.25, 0.05876, 0.05577], [1.5, 0.05222, 0.05], [2, 0.04606, 0.04433], [3, 0.04234, 0.04075],
+  [4, 0.04197, 0.04038], [5, 0.04272, 0.04103], [6, 0.04391, 0.0421], [8, 0.04675, 0.04472], [10, 0.04972, 0.04747],
+  [15, 0.05658, 0.05384], [20, 0.06206, 0.05893],
+];
+
+/** (µ/ρ)_Pb/(µ/ρ)_W a E (MeV), cada µ/ρ interpolado log-log entre filas de NIST (1–20 MeV). */
+export function cocientePbW(E: number): number {
+  const t = NIST_MU_RHO_PB_W;
+  const e = Math.min(Math.max(E, t[0][0]), t[t.length - 1][0]);
+  let i = 0;
+  while (i < t.length - 2 && t[i + 1][0] < e) i++;
+  const [e0, pb0, w0] = t[i];
+  const [e1, pb1, w1] = t[i + 1];
+  const f = Math.log(e / e0) / Math.log(e1 / e0);
+  const ll = (a: number, b: number) => Math.exp(Math.log(a) + f * Math.log(b / a));
+  return ll(pb0, pb1) / ll(w0, w1);
+}
+
+/** Energías de fotón (MeV) que rigen el TVL de cada haz: Co-60, sus dos líneas; MV, de 1.25 MeV a la nominal. */
+const ENERGIAS_TVL: Record<ClaveB2, readonly number[]> = {
+  Co60: [1.1732, 1.3325],
+  '6': [1.25, 1.5, 2, 3, 4, 5, 6],
+  '10': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10],
+  '15': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15],
+  '18': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 18],
+  '25': [1.25, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 20],
+};
+
+/** Factor de masa W→Pb por haz: máximo de (µ/ρ)_Pb/(µ/ρ)_W en las energías que rigen su TVL. */
+export function factorWPb(e: ClaveB2): number {
+  return Math.max(...ENERGIAS_TVL[e].map(cocientePbW));
+}
+
+/** Máximo del factor W→Pb sobre todos los haces (Co-60: 1.059). */
+export const FACTOR_W_PB = Math.max(...(Object.keys(ENERGIAS_TVL) as ClaveB2[]).map(factorWPb));
 
 /** Piso por masa (cm) de un TVL que NCRP 151 no tabula; null si el material no se acota así (polietileno boratado). */
 export function pisoMasa(m: Pick<ShieldingMaterial, 'id' | 'density_g_cm3' | 'category'>, energia: keyof typeof ENERGIAS, tipo: 'primary' | 'secondary'): number | null {
   if (m.category === 'borated' || !(m.density_g_cm3 > 0)) return null;
   const e = ENERGIAS[energia] as ClaveB2;
-  if (m.id === 'tungsten') return +((TABLA_B_2.lead[e].tvl1_cm * RHO_PB * FACTOR_W_PB) / m.density_g_cm3).toFixed(2);
+  if (m.id === 'tungsten') return +((TABLA_B_2.lead[e].tvl1_cm * RHO_PB * factorWPb(e)) / m.density_g_cm3).toFixed(2);
   return tipo === 'primary' ? tvlDisenoHD(m.density_g_cm3, e).tvl1_cm : tvlFugaHD(m.density_g_cm3, e);
 }
 
