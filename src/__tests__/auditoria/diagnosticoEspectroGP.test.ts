@@ -24,6 +24,7 @@ import {
   nuclidoTerapiaDe,
   nuclidoTerapiaDeSimbolo,
   transmisionEspectroGP,
+  transmisionEstrecha,
   transmisionRegla,
   type MaterialGP,
   type NuclidoTerapia,
@@ -138,12 +139,19 @@ describe('H2: µ del haz estrecho de NIST XCOM en malla fina', () => {
       expect(rel(r[4], co), `concreto ${E}`).toBeLessThan(5e-4);
     }
   });
-  it('In-111/Pb a B = 0.1: 3.26 mm (antes 3.21, 1.6 % corto); I-131 722.9 keV: µ/ρ = 0.09924 (antes 0.1001, +0.8 %)', () => {
-    expect(espesorTerapiaGP('In111', 1, 0.1, PB).espesor_mm).toBeCloseTo(3.26, 2);
+  it('M1 (2.ª revisión del #58): el haz estrecho usa µ SIN coherente (ORNL/RSIC-49): In-111/Pb B = 0.1 3.50 mm (con coherente 3.26); I-131 TVL 21.68 mm (20.44)', () => {
+    expect(espesorTerapiaGP('In111', 1, 0.1, PB).espesor_mm).toBeCloseTo(3.504, 2);
     expect(espesorTerapiaGP('In111', 1, 0.1, PB).rige).toBe('haz estrecho');
-    expect(transmisionRegla('In111', 'Pb', 0.326)).toBeCloseTo(Math.exp(-0.62222 * 11.35 * 0.326), 6);
-    expect(transmisionRegla('I131', 'Pb', 2)).toBeCloseTo(Math.exp(-0.099237 * 11.35 * 2), 8);
-    expect(espesorTerapiaGP('I131', 1, 0.1, PB).espesor_mm).toBeCloseTo(20.443, 2);
+    // µ/ρ sin coherente de XCOM en la línea dura (`muRhoSinCohLineas`): 245.35 keV 0.57901, 722.911 keV 0.093614.
+    const sc = (n: NuclidoTerapia, E: number) => xcom.muRhoSinCohLineas[n].find((x) => x[0] === E)![1];
+    expect(rel(sc('In111', 245.35), 0.57901)).toBeLessThan(2e-4);
+    expect(transmisionEstrecha('In111', 'Pb', 0.35)).toBeCloseTo(Math.exp(-0.579 * 11.35 * 0.35), 8);
+    expect(rel(-Math.log(transmisionEstrecha('In111', 'Pb', 1)), sc('In111', 245.35) * 11.35)).toBeLessThan(2e-4);
+    expect(rel(-Math.log(transmisionEstrecha('I131', 'Pb', 1)), sc('I131', 722.911) * 11.35)).toBeLessThan(1e-3);
+    expect(transmisionRegla('I131', 'Pb', 2)).toBeCloseTo(Math.exp(-0.09356 * 11.35 * 2), 8);
+    expect(espesorTerapiaGP('I131', 1, 0.1, PB).espesor_mm).toBeCloseTo(21.684, 2);
+    // Nunca por debajo de la componente sin colisión del GP: con un nucleido de una línea, (a) = e^(−µ_sc·t) exacto.
+    for (const t of [0.05, 0.2, 1]) expect(transmisionEstrecha('Tc99m', 'Pb', t)).toBeCloseTo(Math.exp(-2.25074 * 11.35 * t), 10);
   });
   it('H5: el µ sin coherente de Elam (GP) frente al de XCOM, línea por línea: ≤ 1.5 % con peso ≥ 1 % del kerma', () => {
     const sinCoh = xcom.muRhoSinCohLineas;
@@ -180,10 +188,10 @@ describe('transmisión GP del espectro frente al Python (±0.5 %)', () => {
 describe('espesores (Python): GP del espectro y haz estrecho a la línea dura', () => {
   // [nucleido, material, B, GP (mm), haz estrecho (mm) o null]
   const casos: [NuclidoTerapia, 'PB' | 'CO', number, number, number | null][] = [
-    ['Tc99m', 'PB', 0.1, 1.164, 0.857], ['Tc99m', 'PB', 0.01, 2.142, 1.713], ['Tc99m', 'CO', 0.1, 148.024, 66.429], ['Tc99m', 'CO', 0.01, 236.56, 132.857],
-    ['Tl201', 'PB', 0.1, 1.53, 1.321], ['Tl201', 'PB', 0.01, 2.949, 2.641], ['Tl201', 'CO', 0.1, 156.413, 71.333], ['Tl201', 'CO', 0.01, 251.495, 142.665],
-    ['In111', 'PB', 0.1, 3.129, 3.26], ['In111', 'PB', 0.01, 6.641, 6.521], ['In111', 'CO', 0.1, 176.025, 82.609], ['In111', 'CO', 0.01, 284.0, 165.218],
-    ['Sm153', 'PB', 0.01, 1.674, 0.791], ['Sm153', 'CO', 0.01, 194.48, 114.733],
+    ['Tc99m', 'PB', 0.1, 1.164, 0.901], ['Tc99m', 'PB', 0.01, 2.142, 1.803], ['Tc99m', 'CO', 0.1, 148.024, 68.924], ['Tc99m', 'CO', 0.01, 236.56, 137.848],
+    ['Tl201', 'PB', 0.1, 1.53, 1.399], ['Tl201', 'PB', 0.01, 2.949, 2.798], ['Tl201', 'CO', 0.1, 156.413, 73.368], ['Tl201', 'CO', 0.01, 251.495, 146.735],
+    ['In111', 'PB', 0.1, 3.129, 3.504], ['In111', 'PB', 0.01, 6.641, 7.008], ['In111', 'CO', 0.1, 176.025, 83.889], ['In111', 'CO', 0.01, 284.0, 167.778],
+    ['Sm153', 'PB', 0.01, 1.674, 0.824], ['Sm153', 'CO', 0.01, 194.48, 121.589],
     ['Ga67', 'PB', 0.1, 5.036, null], ['Ga67', 'PB', 0.01, 14.041, null], ['Ga67', 'CO', 0.01, 299.5, null],
     ['Zr89', 'PB', 0.1, 31.333, null], ['Zr89', 'PB', 0.01, 62.321, null], ['Zr89', 'CO', 0.1, 261.333, null], ['Zr89', 'CO', 0.01, 445.342, null],
   ];
@@ -195,12 +203,12 @@ describe('espesores (Python): GP del espectro y haz estrecho a la línea dura', 
     expect(r.rige).toBe(estrecho !== null && estrecho > gp ? 'haz estrecho' : 'GP espectro');
   });
 
-  it('el haz estrecho sólo rige en In-111/Pb con B ≳ 0.05; en concreto rige siempre el GP', () => {
+  it('el haz estrecho sólo rige en In-111/Pb (con µ sin coherente, hasta B = 1e-3: 10.51 frente a 10.19 mm); en concreto rige siempre el GP', () => {
     for (const n of ['Tc99m', 'Tl201', 'Sm153'] as const) {
       for (const B of [0.5, 0.1, 1e-2, 1e-4]) expect(espesorTerapiaGP(n, 1, B, PB).rige).toBe('GP espectro');
     }
     expect(espesorTerapiaGP('In111', 1, 0.1, PB).rige).toBe('haz estrecho');
-    expect(espesorTerapiaGP('In111', 1, 0.01, PB).rige).toBe('GP espectro');
+    for (const B of [0.5, 0.01, 1e-3]) expect(espesorTerapiaGP('In111', 1, B, PB).rige).toBe('haz estrecho');
     for (const n of DIAG) for (const B of [0.5, 0.1, 1e-3]) expect(espesorTerapiaGP(n, 1, B, CO).rige, n).toBe('GP espectro');
   });
 });

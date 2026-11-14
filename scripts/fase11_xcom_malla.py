@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """
-Fase 11 (revisión del #58, H2/H4/H5) — malla fina de µ/ρ total (con dispersión coherente) de NIST XCOM para el haz
-estrecho del criterio (a) de `src/lib/terapiaEspectroGP.ts` (`XCOM_MU_RHO_MALLA`).
+Fase 11 (revisión del #58, H2/H4/H5) — malla fina de µ/ρ total (con dispersión coherente) de NIST XCOM
+(`XCOM_MU_RHO_MALLA` de `src/lib/terapiaEspectroGP.ts`) para la equivalencia W↔Pb y los controles, y µ/ρ SIN coherente
+de XCOM en cada línea de los espectros (`muRhoSinCohLineas`).
+
+2.ª revisión del #58 (M1): el haz estrecho del criterio (a) ya NO usa la malla con coherente, sino el µ/ρ sin coherente
+de la línea dura (`muRhoSinCoh`, el mismo del GP), como ORNL/RSIC-49 (Trubey 1988, Ap. II, borrador de ANSI/ANS-6.4.3):
+la dispersión coherente desvía el fotón pocos grados sin cambiarle la energía y, con fuente puntual y muro extenso, no
+lo saca del haz que llega al punto. La columna `muRhoSinCohLineas` de este script es la referencia XCOM de ese µ
+(In-111 245.35 keV Pb 0.57901, I-131 722.911 keV 0.093614, Lu-177 321.3159 keV 0.32439 cm²/g; se imprimen al final).
 
 Fuente: base de datos de NIST XCOM 3.1 (Berger MJ, Hubbell JH, Seltzer SM et al., «XCOM: Photon Cross Sections
 Database», NIST Standard Reference Database 8 / NBSIR 87-3597), archivos por elemento `MDATX3.zzz` (secciones eficaces
@@ -236,6 +243,10 @@ def main(dirx):
     print('escrito', ruta, len(filas), 'filas')
     for r in yeso:
         print(f'  yeso/concreto {r[0]} MeV: {r[1]} / {r[2]} = {r[1] / r[2]:.3f}')
+    # Haz estrecho (a), µ sin coherente en Pb a las líneas duras: TVL = ln 10 / (µ/ρ · 11.35).
+    for n, E in (('In111', 245.35), ('I131', 722.911), ('Lu177', 321.3159)):
+        mu = next(r[1] for r in sincoh[n] if r[0] == E)
+        print(f'  haz estrecho {n} {E} keV, Pb: µ/ρ sin coherente {mu} cm²/g, TVL {10 * math.log(10) / (mu * 11.35):.2f} mm')
 
 
 if __name__ == '__main__':

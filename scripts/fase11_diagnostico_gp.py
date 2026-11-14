@@ -12,12 +12,10 @@ Método (el mismo del módulo, implementado aquí desde cero):
   B_GP: fórmula de Harima (ANS-6.4.3), coeficientes de exposición de la Tabla 5.1 de NUREG/CR-5740
   (= ORNL/RSIC-49/R1, Trubey 1991), 0.03–2 MeV; b, c, X_k log-log y a, d lineales en ln E; K congelado en K(40).
 
-Uso: python3 scripts/fase11_diagnostico_gp.py  (requiere `pip install xraydb==4.6.1` y `scripts/fase11_xcom_mu_rho.json`). Imprime los µ por línea que
+Uso: python3 scripts/fase11_diagnostico_gp.py  (requiere `pip install xraydb==4.6.1`). Imprime los µ por línea que
 se transcriben en `ESPECTROS_TERAPIA` y los valores de referencia de `src/__tests__/auditoria/diagnosticoEspectroGP.test.ts`.
 """
-import json
 import math
-import os
 
 import xraydb
 
@@ -144,21 +142,11 @@ ESPECTROS = {
 }
 
 
-# Haz estrecho (criterio (a)): µ/ρ total NIST XCOM con coherente, malla fina de `scripts/fase11_xcom_malla.py`
-# (`fase11_xcom_mu_rho.json`; exacta en las líneas duras), log-log. Revisión del #58, H2: con la malla de SRD 126
-# (0.2/0.3 MeV) In-111/Pb quedaba un 1.6 % corto y 722.9 keV un 0.8 %.
-_MALLA = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fase11_xcom_mu_rho.json')))['muRhoTotal']
-NIST_MU_ESTRECHO = {'Pb': [(r[0], r[1]) for r in _MALLA], 'Concreto': [(r[0], r[4]) for r in _MALLA]}
+# Haz estrecho (criterio (a)): µ/ρ SIN dispersión coherente de la línea dura (el mismo `MU` del GP, = XCOM sin coherente
+# a ≤ 0.02 %), como ORNL/RSIC-49 (Trubey 1988, Ap. II): la coherente no saca el fotón del haz que llega al punto.
+# 2.ª revisión del #58, M1: antes µ/ρ total con coherente (malla de `fase11_xcom_mu_rho.json`), 5–8 % más alto.
 # Criterio único (revisión del #58): (a) si la línea dura (la más energética con Iγ ≥ 0.1 %) aporta ≥ 2 % del kerma.
 PESO_MIN_LINEA_DURA = 0.02
-
-
-def loglog_malla(tab, E):
-    for (e0, v0), (e1, v1) in zip(tab, tab[1:]):
-        if E <= e1 and e1 > e0:
-            w = math.log(E / e0) / math.log(e1 / e0)
-            return math.exp(math.log(v0) + w * math.log(v1 / v0))
-    return tab[-1][1]
 
 
 def linea_dura(nuc):
@@ -173,8 +161,14 @@ def haz_estrecho(nuc):
 
 def estrecho_mm(nuc, mat, B):
     """Haz estrecho a la línea dura (se calcule o no el criterio: sirve también para el caso hipotético)."""
-    E = linea_dura(nuc)[0] / 1000
-    return -math.log(B) / (loglog_malla(NIST_MU_ESTRECHO[mat], E) * RHO[mat]) * 10
+    return -math.log(B) / (mu_estrecho(nuc, mat) * RHO[mat]) * 10
+
+
+def mu_estrecho(nuc, mat):
+    """µ/ρ sin coherente de la línea dura (cm²/g)."""
+    E = linea_dura(nuc)[0]
+    i = next(k for k, (Ek, _) in enumerate(ESPECTROS[nuc]) if Ek == E)
+    return MU[nuc][i][mat]
 
 
 def fracciones(nuc):
@@ -220,6 +214,5 @@ if __name__ == '__main__':
             print(f'  {mat} estrecho{"" if haz_estrecho(nuc) else " (hipotético: no aplica)"}: ' + ' '.join(f'B={B:g}:{estrecho_mm(nuc, mat, B):.3f}' for B in (0.5, 0.1, 0.01, 1e-3)))
         for mat, ts in (('Pb', (0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0, 1.2, 2.0, 3.5)), ('Concreto', (5, 10, 15, 20, 25, 30))):
             print(f'  T {mat}: ' + ' '.join(f'{t}:{T_gp(nuc, mat, t):.6g}' for t in ts))
-            E = linea_dura(nuc)[0] / 1000
-            mu = loglog_malla(NIST_MU_ESTRECHO[mat], E) * RHO[mat]
+            mu = mu_estrecho(nuc, mat) * RHO[mat]
             print(f'  T estrecho {mat}: ' + ' '.join(f'{t}:{math.exp(-mu * t):.7g}' for t in ts))

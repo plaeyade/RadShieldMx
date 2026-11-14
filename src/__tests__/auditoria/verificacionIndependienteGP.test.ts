@@ -3,14 +3,14 @@
  *
  * No importa nada del cálculo del módulo ni de `scripts/fase11_diagnostico_gp.py` (el script del autor, con xraydb/Elam):
  * - µ/ρ de NIST XCOM 3.1 en cada línea (salida de `scripts/fase11_xcom_malla.py`, que lee la base de datos de XCOM):
- *   total con coherente para el haz estrecho y sin coherente para el GP;
+ *   sin coherente para el GP y para el haz estrecho (como ORNL/RSIC-49; 2.ª revisión del #58, M1);
  * - buildup de exposición de ANSI/ANS-6.4.3 con la fórmula GP evaluada aquí, con las filas de la Tabla 5.1
  *   (ORNL/RSIC-49 / NUREG/CR-5740; Pb p. impresa 92, concreto 96) copiadas sólo para las energías que encierran cada
  *   línea, e interpolando el BUILDUP B(E) en log-log entre esas dos filas a mfp fijo (el módulo interpola los
  *   coeficientes: otro esquema, de modo que la comparación también prueba la interpolación);
  * - pesos por kerma en aire con µ_en/ρ del aire de NIST SRD 126 («Air, Dry»), interpolado log-log aquí.
- * Tres casos: Tc-99m en concreto (el e2e de Medicina Nuclear, 152.2 mm), In-111 en plomo (los dos criterios) y Zr-89
- * en plomo (GP de 5 líneas, 31.3 mm). Tolerancia 1 % en espesor.
+ * Casos: Tc-99m en concreto (el e2e de Medicina Nuclear, 152.2 mm), In-111 en plomo (los dos criterios), I-131 y Lu-177
+ * en plomo (haz estrecho) y Zr-89 en plomo (GP de 5 líneas, 31.3 mm). Tolerancia 1 % en espesor.
  */
 import { describe, expect, it } from 'vitest';
 import { espesorTerapiaGP } from '@/lib/terapiaEspectroGP';
@@ -73,14 +73,27 @@ describe('H5: verificación independiente (NIST XCOM + Tabla 5.1 de ANS-6.4.3, s
     expect(rel(espesorTerapiaGP('Tc99m', 1, 0.0901, CO).espesor_mm, t)).toBeLessThan(0.01);
   });
 
-  it('In-111, plomo, B = 0.1: haz estrecho a 245.35 keV (µ XCOM total 0.62222) 3.26 mm > GP de 2 líneas ≈ 3.13 mm', () => {
-    const estrecho = (-Math.log(0.1) / (0.62222 * 11.35)) * 10;
+  it('In-111, plomo, B = 0.1: haz estrecho a 245.35 keV (µ XCOM sin coherente 0.57901) 3.50 mm > GP de 2 líneas ≈ 3.13 mm', () => {
+    const estrecho = (-Math.log(0.1) / (0.57901 * 11.35)) * 10;
     const gp = invertir((x) => T_GP([[171.28, 90.7, 1.37], [245.35, 94.1, 0.57901]], 'Pb', x), 0.1);
-    expect(estrecho).toBeCloseTo(3.26, 2);
+    expect(estrecho).toBeCloseTo(3.50, 2);
     expect(gp).toBeLessThan(estrecho);
     const r = espesorTerapiaGP('In111', 1, 0.1, PB);
     expect(rel(r.espesor_mm, estrecho)).toBeLessThan(0.01);
     expect(rel(r.porCriterio.hazAncho_mm, gp)).toBeLessThan(0.01);
+  });
+
+  it('I-131 y Lu-177, plomo: haz estrecho con µ XCOM sin coherente (0.093614 a 722.911 keV, 0.32439 a 321.3159 keV)', () => {
+    // TVL 21.67 / 6.25 mm; e2e de Medicina Nuclear (B = 0.0458): 29.0 mm.
+    const I = (B: number) => (-Math.log(B) / (0.093614 * 11.35)) * 10;
+    const Lu = (B: number) => (-Math.log(B) / (0.32439 * 11.35)) * 10;
+    expect(I(0.1)).toBeCloseTo(21.67, 2);
+    expect(I(0.0458)).toBeCloseTo(29.0, 1);
+    expect(Lu(0.1)).toBeCloseTo(6.25, 2);
+    for (const B of [0.1, 0.0458, 0.01]) {
+      expect(rel(espesorTerapiaGP('I131', 1, B, PB).porCriterio.estrecho_mm, I(B))).toBeLessThan(0.01);
+      expect(rel(espesorTerapiaGP('Lu177', 1, B, PB).porCriterio.estrecho_mm, Lu(B))).toBeLessThan(0.01);
+    }
   });
 
   it('Zr-89, plomo, B = 0.1: GP de las 5 líneas ≈ 31.3 mm (sin haz estrecho: 1744.5 keV pesa 0.16 %)', () => {

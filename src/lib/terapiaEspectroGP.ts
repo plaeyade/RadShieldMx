@@ -23,9 +23,14 @@
  *       Cualquier umbral en (1.33 %, 2.58 %] da la misma clasificación; el margen es estrecho y una prueba falla si
  *       cambia. Con peso 1 desde B = 1, una línea de < 2 % del kerma multiplicaba el plomo sin base física (a B = 0.1:
  *       I-123 ×6.6, Ga-67 ×5.0, Zr-89 ×1.33); esa línea entra en (b) con su peso real y buildup.
- *       T_a = exp(−µ·t), µ = µ/ρ total de NIST XCOM (con dispersión coherente, la de haz estrecho) × ρ, interpolado
- *       log-log en la malla fina `XCOM_MU_RHO_MALLA` (exacta en las líneas duras; antes la malla de SRD 126 dejaba
- *       In-111/Pb un 1.6 % corto y la línea de 722.9 keV un 0.8 %).
+ *       T_a = exp(−µ·t), µ = µ/ρ SIN dispersión coherente de la línea dura (`muRhoSinCoh`, el mismo de (b); coincide
+ *       con XCOM a ≤ 0.02 %) × ρ. Es el µ de ORNL/RSIC-49 (Trubey 1988, Ap. II, borrador de ANSI/ANS-6.4.3), que no
+ *       cuenta la dispersión coherente ni como atenuación ni como buildup: desvía el fotón pocos grados sin cambiarle la
+ *       energía y, con fuente puntual y muro extenso, no lo saca del haz que llega al punto (por eso XCOM da la columna
+ *       «Total attenuation without coherent scattering» para blindaje). Con el µ total (con coherente) (a) quedaba por
+ *       debajo de la componente sin colisión de (b) y la cota inferior perdía un 5–8 % de µ que no retira fotones
+ *       (2.ª revisión del #58, M1: In-111/Pb B = 0.1 3.26 → 3.50 mm; TVL I-131 20.44 → 21.68, Lu-177 5.78 → 6.25 mm).
+ *       La malla `XCOM_MU_RHO_MALLA` (con coherente) queda para W↔Pb y los controles.
  *   (b) haz ancho del espectro completo con buildup GP de ANSI/ANS-6.4.3:
  *       T_GP = Σᵢ fᵢ·B_GP(Eᵢ, µᵢt)·exp(−µᵢt), fᵢ = Iᵢ·Eᵢ·(µ_en/ρ)_aire(Eᵢ) normalizada (peso por kerma en aire),
  *       µᵢ SIN dispersión coherente (ANS-6.4.3 §4.1, la que cuenta los mfp de los coeficientes).
@@ -150,7 +155,8 @@ export const RHO_REF: Record<MaterialGP, number> = { Pb: 11.35, Fe: 7.874, Concr
 
 /**
  * µ/ρ total CON dispersión coherente (cm²/g) de NIST XCOM 3.1 (Berger et al., NIST SRD 8; mismos datos que NIST SRD 126 /
- * XAAMDI de Hubbell y Seltzer, a los que reproduce a ±0.05 % en sus energías): haz estrecho del criterio (a).
+ * XAAMDI de Hubbell y Seltzer, a los que reproduce a ±0.05 % en sus energías): W↔Pb y controles (desde la 2.ª revisión del #58, M1, el haz
+ * estrecho (a) usa el µ SIN coherente de la línea dura, `muRhoSinCoh`).
  * Filas [E (MeV), Pb z82, W z74, Fe z26, concreto ordinario NIST]. Malla fina generada por
  * `scripts/fase11_xcom_malla.py` (→ `scripts/fase11_xcom_mu_rho.json`, que una prueba compara con esta tabla): malla de
  * SRD 126, 20 puntos por década, las líneas duras de los espectros y las energías pedidas en la revisión del #58 (171.28,
@@ -501,14 +507,14 @@ function modelo(nuc: NuclidoTerapia, mat: MaterialGP): ModeloGP {
       f: fraccionesKerma(nuc),
       mu: ls.map((l) => l.muRhoSinCoh[mat] * RHO_REF[mat]),
       coef: ls.map((l) => coeficientesGP(mat, l.E_keV / 1000)),
-      muEstrecho: Ek === null ? null : interpLogLog(NIST_MU_RHO[mat], Ek / 1000) * RHO_REF[mat],
+      muEstrecho: Ek === null ? null : ls.find((l) => l.E_keV === Ek)!.muRhoSinCoh[mat] * RHO_REF[mat],
     };
     MODELOS.set(k, m);
   }
   return m;
 }
 
-/** (a) Transmisión de haz estrecho a la línea dura (µ total XCOM con coherente); t en cm del material de referencia. 0 si no aplica (I-123, Ga-67, Zr-89). */
+/** (a) Transmisión de haz estrecho a la línea dura (µ sin coherente, como ORNL/RSIC-49 y (b)); t en cm del material de referencia. 0 si no aplica (I-123, Ga-67, Zr-89). */
 export function transmisionEstrecha(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: number): number {
   const mu = modelo(nuc, mat).muEstrecho;
   if (mu === null) return 0;
@@ -675,7 +681,7 @@ export function notasTerapia(nuc: NuclidoTerapia): string[] {
   return [
     Ea === null
       ? `${e.etiqueta}: espesor = ${b}.`
-      : `${e.etiqueta}: espesor = el mayor entre (a) haz estrecho a ${Ea.toFixed(1)} keV, la línea más energética con Iγ ≥ ${UMBRAL_LINEA_PCT} % (µ NIST con coherente), y (b) ${b}.`,
+      : `${e.etiqueta}: espesor = el mayor entre (a) haz estrecho a ${Ea.toFixed(1)} keV, la línea más energética con Iγ ≥ ${UMBRAL_LINEA_PCT} % (µ sin dispersión coherente, como ANSI/ANS-6.4.3), y (b) ${b}.`,
     e.oumano
       ? 'Concreto y materiales por equivalencia másica: (b) = max(Oumano 2025, 1.2·GP).'
       : 'Sin ajuste publicado de haz ancho (Oumano 2025) para este nucleido: (b) = GP.',
