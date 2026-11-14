@@ -63,8 +63,8 @@ estima la dosis tras el margen (P·10^(−margen/TVL)); `types/ctIsodosis` inter
 | `lib/agents/tools.ts` (`checkSkyshine`, `compareMaterials`, `validateTVL`) | Transmisión con tabla TVL propia | Diálogo del agente de diseño | **Corregido**: Tabla B.2 de `ncrp151` (TVL₁/TVLₑ); las barreras ya usaban `barreraMV` (Fase 8a) |
 | `lib/uaqProtocol.ts` vía `controlledZoneCalculationAdapter` | LINAC, PET/CT, Gamma Knife, HDR (preliminar F55) | `LayoutBunkerDialog` | **Corregido** (depuración, etapa 8): `lib/zonaControladaMotor.ts` con `barreraMV`, `dosisSemanalTG108` y TVL del catálogo como `motorProyecto`; `f149NormativeNumericQa` apunta al motor |
 | `lib/materialDatabase.ts` (`getRecommendedMaterial`) | Espesor equivalente por TVL de catálogo | Asistentes de equipo/memoria (lista de materiales) | **Contrastado** (rama `fase11-terapia-gp`): concreto/acero/plomo = Tabla B.2/B.7; el resto con piso por masa (envolvente concreto/acero, tungsteno por plomo), `isNCRP151` sólo en los tres tabulados; `getRecommendedMaterial` devolvía el mismo espesor para todo material (corregido; sin importadores) |
-| `lib/nuclearMedicine.ts` | n TVL con Γ·A·t/d² | `NuclearMedicineAdvanced`, herramientas por categoría, GATE | Revisado en 8c (β+ por TG-108 Tabla V). **Fase 11 (`fase11-terapia-gp`)**: I-131, Lu-177 e I-123 por `terapiaEspectroGP` (HVL/TVL mostradas = primer espesor de la regla: I-123 Pb 0.59/2.1 mm, concreto 83/164 mm); resto, TVL ≥ haz estrecho de la línea más penetrante (≥ 1 %): Tl-201 0.5 → 1.4 mm, Zr-89 21.6 → 26.0 mm; Y-90, Ra-223 y Ac-225 alineados con la revisión 8c del módulo de terapia |
-| `lib/therapy/TherapeuticRadionuclideShielding.ts`, `lib/spect/IPEMReport109.ts` | TVL por radionúclido (I-131, Lu-177, SPECT) | Diálogos de terapia e IPEM 109 | Revisados en 8c (TVL que eran HVL). **Fase 11**: I-131 y Lu-177 de terapia por `terapiaEspectroGP` (casos: tablas GP/MC/Oumano). IPEM 109 I-123 (2 mm Pb) coincide con la primera TVL del GP del espectro (2.1 mm). Pendiente: Y-90 (bremsstrahlung) sin caso publicado |
+| `lib/nuclearMedicine.ts` | n TVL con Γ·A·t/d² | `NuclearMedicineAdvanced`, herramientas por categoría, GATE | Revisado en 8c (β+ por TG-108 Tabla V). **Fase 11 (`fase11-terapia-gp`)**: I-131, Lu-177 e I-123 por `terapiaEspectroGP` (HVL/TVL mostradas = primer espesor de la regla: I-123 Pb 0.59/2.1 mm, concreto 83/164 mm). **Seguimiento de #57 (`fase11-diagnostico-gp`, N3)**: Tc-99m, Tl-201, In-111 y Zr-89 también por `terapiaEspectroGP` (antes n·TVL sin buildup, 1.6–2.2× corto en concreto); umbral de línea único 0.1 % (antes 1 %; en Zr-89 entran 1657, 1713 y 1744.5 keV). Sólo Y-90, Ra-223 y Ac-225 siguen con n·TVL (alineados con la revisión 8c del módulo de terapia) |
+| `lib/therapy/TherapeuticRadionuclideShielding.ts`, `lib/spect/IPEMReport109.ts` | TVL por radionúclido (I-131, Lu-177, SPECT) | Diálogos de terapia e IPEM 109 | Revisados en 8c (TVL que eran HVL). **Fase 11**: I-131 y Lu-177 de terapia por `terapiaEspectroGP` (casos: tablas GP/MC/Oumano). **Seguimiento de #57 (N3)**: IPEM 109 ya no es n·TVL: transmisión de pared, espesores y sala completa por `terapiaEspectroGP` para sus 7 nucleidos (Tc-99m, Tl-201, I-123, I-131, Ga-67, In-111, Sm-153); I-123 da lo mismo que en Medicina Nuclear (antes 4.0/140 mm frente a 15.7/273 mm a B = 0.01). IPEM 109 es de pago: no se pudieron contrastar sus valores. Pendiente: Y-90 (bremsstrahlung) sin caso publicado |
 | `lib/bimRAD.ts` | Transmisión por capas BIM | Diálogo BIM-RAD | Revisado en 8c (β+); pendiente de caso publicado |
 | `sections/dialogs/BuildupFactorDialog`, `NeutronRemovalDialog`, `MaterialPropertyCalculator`, `ConcreteActivationDialog`, `lib/phyXData`, `lib/xcomAttenuation`, `lib/electronEngine` | µ, buildup, remoción de neutrones, activación | Diálogos de física de materiales | Física de apoyo (no dimensionan la barrera del plano); los de 8c llevan aviso de resultado sintético |
 | `VersaHD15MVDialog`, `ElectronApplicatorDialog`, `CrossValidationDialog`, `ModelingToolboxDialog` | Barreras MV | Diálogos | Ya delegan en `calculadorasNormativas`/`ncrp151` (Fase 8a/8c) |
@@ -101,6 +101,45 @@ Pruebas: `src/__tests__/auditoria/terapiaEspectroGP.test.ts` (Tabla 3 de ORNL/RS
 concreto 15–30 cm contra el cálculo independiente en Python, GP vs MC, Oumano, motor y diálogos),
 `materialDatabaseB2.test.ts` y `e2e/fase11-terapia-gp.spec.ts` (Medicina Nuclear, I-131 en plomo 27.2 mm; no se pudo
 ejecutar en la primera versión; ejecutada en la revisión con el Chromium del sistema). Citas en `docs/REFERENCIAS.md`.
+
+### Diagnóstico por espectro GP (rama `fase11-diagnostico-gp`, seguimiento de #57)
+
+Segunda revisión de #57 (aprobado con observaciones N1–N4). Cambios:
+
+- **N3 (media).** Tc-99m, Tl-201, In-111 y Zr-89 (`nuclearMedicine`), los 7 nucleidos de IPEM 109 (Tc-99m, Tl-201,
+  I-123, I-131, Ga-67, In-111, Sm-153) y la modalidad `spect-tc99m` del motor (antes TVL de catálogo a 140 keV: 45 mm de
+  concreto, 1 mm de Pb) usan `terapiaEspectroGP`: espectro ENSDF (NuDat 3) con Iγ ≥ 0.1 %, buildup GP de exposición de
+  ANS-6.4.3 y µ sin coherente. Coeficientes GP ampliados a 0.03–2 MeV con la Tabla 5.1 de NUREG/CR-5740 (ORNL/RSIC-49/R1,
+  1991; las filas de 0.06–1 MeV coinciden con las de ORNL/RSIC-49); µ por encima de 0.8 MeV = NIST total − coherente de
+  Elam·(0.8/E)². Criterio (a) (haz estrecho a la línea más energética ≥ 0.1 %, peso 1 desde B = 1): en terapia siempre;
+  en diagnóstico sólo cuando esa línea pesa ≥ 50 % del kerma (Tc-99m, Tl-201, In-111, Sm-153). En la práctica sólo
+  rige en In-111/Pb con B ≳ 0.05 (3.21 frente a 3.13 mm a B = 0.1). No se aplica a I-123 (538.5 keV, 1.3 % del kerma),
+  Ga-67 (887.7 keV, 0.9 %) ni Zr-89 (1744.5 keV, 0.16 %): con peso 1 multiplicaba el plomo ≈ 6× (I-123) y ≈ 5× (Ga-67) a
+  B = 0.1 sin base física. Omitir los rayos X sigue siendo conservador: en Tl-201 (rayos X K del Hg ≈ 76 % del kerma),
+  T_X/T_γ ≤ 1.005 hasta 1 cm de concreto y < 1 después.
+
+  | Nucleido | Antes, n·TVL concreto (mm/TVL) | GP del espectro, concreto B = 0.1 / 0.01 (mm) | Pb B = 0.1 / 0.01 (mm) |
+  |---|---|---|---|
+  | Tc-99m | 76 | 148.0 / 236.6 | 1.16 / 2.14 |
+  | Tl-201 | 72 | 156.4 / 251.5 | 1.53 / 2.95 |
+  | In-111 | 149 | 176.0 / 284.0 | 3.21 (a) / 6.64 |
+  | Zr-89 | 662 (Pb 26.0) | 261.3 / 445.3 | 31.3 / 62.3 |
+  | Ga-67 (IPEM 109) | 92 (Pb 6) | 177.4 / 299.5 | 5.04 / 14.04 |
+  | Sm-153 (IPEM 109) | 58 (Pb 0.55) | 119.5 / 194.5 | 0.85 / 1.67 |
+
+  El concreto de Zr-89 baja (la TVL de 662 mm no tenía fuente) y el plomo sube (26.0 → 31.3 mm a B = 0.1).
+- **N1/N2 (baja).** Corregidos los comentarios de `nuclearMedicine.ts` y el título de la prueba de I-123: el haz estrecho
+  a 529 keV desde B = 1 da MÁS plomo que el GP en todo el rango útil (27.3 frente a 15.7 mm a B = 0.01); el GP sólo lo
+  supera por debajo de B ≈ 1e-7. El método mostrado (`metodoEspectro`) dice «vs haz estrecho» sólo si hay criterio (a).
+- **N4 (baja).** Factor del W frente al Pb por haz (`factorWPb`), con µ/ρ de NIST SRD 126 de W y Pb interpolados
+  log-log: Co-60 = máximo a 1.1732/1.3325 MeV = 1.0591 (antes 1.054 para todo, 0.5 % corto); MV = máximo en 1.25 MeV–
+  nominal = 1.0536.
+
+Referencia independiente: `scripts/fase11_diagnostico_gp.py` (Python, xraydb 4.6.1; reproduce los µ y los espesores de
+I-123 del módulo a 1e-5). Pruebas: `src/__tests__/auditoria/diagnosticoEspectroGP.test.ts`, `materialDatabaseB2.test.ts`
+y `e2e/fase11-diagnostico-gp.spec.ts` (Medicina Nuclear, Tc-99m en concreto 152.2 mm, antes 79.4 mm). Verificado:
+`fase11-terapia-gp`, `fase11-motor-unico` y «Guíame» (17.96 mm Pb / 213.77 mm de concreto) sin cambio.
+Pendiente: el mapa de dosis (`doseFieldEngine`, con HEATMAP_GPU apagado) sigue atenuando Tc-99m con la TVL de catálogo.
 
 ### Alcance y referencias
 
