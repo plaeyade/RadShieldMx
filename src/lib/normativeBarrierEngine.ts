@@ -215,7 +215,7 @@ function tomografia(
       kermaMax = Math.max(kermaMax, terminos.reduce((a, t) => a + t.K, 0));
       peor = Math.max(peor, espesorMultiFuente(terminos, P / T));
     }
-    if (peor > 0) espesores[m.code] = peor;
+    espesores[m.code] = peor; // etapa 2: 0 si no requiere blindaje
   }
   if (fuentes.some((s) => !kvpTC(s))) notas.push('kVp no definido (120–140): se toma la mayor transmisión de las curvas de 120 y 140 kVp.');
   return { metodo: 'NCRP147', espesores_mm: espesores, kermaMax_mSv_semana: kermaMax, notas };
@@ -245,7 +245,7 @@ function diagnostico(
       kermaMax = Math.max(kermaMax, terminos.reduce((a, t) => a + t.K, 0));
       peor = Math.max(peor, espesorMultiFuente(terminos, P / T));
     }
-    if (peor > 0) espesores[m.code] = peor;
+    espesores[m.code] = peor; // etapa 2: 0 si no requiere blindaje
   }
   if (esPrimaria && fuentes.some((s) => !DISTRIBUCION_POR_MODALIDAD[s.modality.id].primaria)) {
     notas.push('Fluoroscopía/mastografía: el haz primario lo intercepta el receptor; se calcula como secundaria.');
@@ -316,7 +316,7 @@ function teleterapia(
       peor = Math.max(peor, regla, directo);
     }
     if (porSumaDirecta) notas.push(`${m.code}: la suma directa de componentes exige más espesor que la regla de NCRP 151; se usa la suma directa.`);
-    if (peor > 0) espesores[m.code] = peor * 10 * esc;
+    espesores[m.code] = peor * 10 * esc; // etapa 2: 0 si no requiere blindaje
     if (esc !== 1) notas.push(`${m.code}: espesor por equivalencia másica con concreto (ρ = ${m.density} g/cm³).`);
   }
   return { metodo: 'NCRP151', espesores_mm: espesores, kermaMax_mSv_semana: kermaMax, notas };

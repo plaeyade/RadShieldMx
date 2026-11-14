@@ -71,7 +71,7 @@ function toReportBarrier(barrier: Barrier, scale_m_per_pixel: number): Controlle
   const length_m = Math.sqrt((barrier.x2 - barrier.x1) ** 2 + (barrier.y2 - barrier.y1) ** 2) * scale_m_per_pixel;
   const thickness_mm = typeof barrier.requiredThickness_mm === 'number'
     ? barrier.requiredThickness_mm
-    : barrier.requiredThickness_mm?.[barrier.materialCode] || barrier.thickness_mm || 0;
+    : barrier.requiredThickness_mm?.[barrier.materialCode] ?? barrier.thickness_mm ?? 0;
 
   return {
     id: barrier.id,

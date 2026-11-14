@@ -3,7 +3,13 @@
  * Calculador dedicado de blindaje para salas de preparacion y administracion
  * de Y-90, Lu-177, Ac-225, Pb-212, I-131.
  * Referencia: ICRP 128, 140, AAPM TG 377, MIRD Pamphlet 26
+ *
+ * Fase 11: el espesor mínimo de I-131 y Lu-177 sale de `terapiaEspectroGP` (espectro ENSDF completo, buildup GP de
+ * ANSI/ANS-6.4.3, mayor entre haz estrecho a la línea más energética con Iγ ≥ 0.1 %, 722.9 / 321.3 keV, y haz ancho).
+ * Las TVL de la tabla quedan como dato de biblioteca (I-131: 11 mm de Delacroix et al. 2002; la de haz estrecho a
+ * 722.9 keV, que rige en plomo, es 20.3 mm; Lu-177 a 321.3 keV, 5.7 mm).
  */
+import { espesorTerapiaGP, nuclidoTerapiaDeSimbolo } from '@/lib/terapiaEspectroGP';
 
 export interface TherapyNuclide {
   name: string; symbol: string; halfLife_h: number;
@@ -99,6 +105,14 @@ export function calculateTaskDose(task: TherapyRoomTask, designLimit_uSv_week: n
   // Número de TVL continuo (antes se redondeaba hacia arriba a un entero, lo que inflaba el espesor hasta 1 TVL).
   const tvlNeeded = ratio > 0 && ratio < 1 ? -Math.log10(ratio) : 0;
 
+  // Fase 11: I-131 y Lu-177 por espectro completo con buildup GP (ANSI/ANS-6.4.3) y la regla max(haz estrecho a la línea
+  // más energética, haz ancho) de `terapiaEspectroGP`; el resto, n·TVL (línea dura de la cadena, revisión 8c).
+  const gp = nuclidoTerapiaDeSimbolo(nuc.symbol);
+  if (gp && ratio < 1) {
+    const pb = espesorTerapiaGP(gp, 1, ratio, { code: 'PB', density: 11.35 }).espesor_mm;
+    const conc = espesorTerapiaGP(gp, 1, ratio, { code: 'CONCRETE235', density: 2.35 }).espesor_mm;
+    return { task, nuclide: nuc, weeklyDose_uSv, annualDose_mSv, fractionOfLimit, shieldingRequired, minLead_mm: pb, minConcrete_mm: conc };
+  }
   return { task, nuclide: nuc, weeklyDose_uSv, annualDose_mSv, fractionOfLimit, shieldingRequired, minLead_mm: tvlNeeded * nuc.tenthValueLead_mm, minConcrete_mm: tvlNeeded * nuc.tenthValueConcrete_mm };
 }
 

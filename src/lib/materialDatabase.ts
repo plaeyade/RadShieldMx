@@ -43,7 +43,23 @@ export interface ShieldingMaterial {
   isNCRP151?: boolean;
 }
 
-export const MATERIALS_DB: ShieldingMaterial[] = [
+/**
+ * Fase 11 — contraste con NCRP 151 Tabla B.2. La Tabla B.2 (primaria, TVL₁) y la B.7 (fuga en concreto) sólo tabulan
+ * concreto 2.35, acero y plomo: esas filas salen de `ncrp151` (`tvlNCRP`) y son las únicas «referencia NCRP 151»
+ * (`isNCRP151`). Los demás materiales (barita, concreto con hierro, Nelco, VeriShield, V-250, tungsteno, aluminio,
+ * agua) traían TVL sin fuente y algunos quedaban por debajo de la equivalencia por masa con la Tabla B.2 (p. ej.
+ * barita fuga 6 MV 22 cm < 34·2.35/3.35 = 23.9 cm; tungsteno Co-60 0.8 cm < 4.0·11.34/17 = 2.7 cm). Ahora cada TVL es
+ * el mayor entre el valor de la ficha y el piso por masa (`pisoMasa`):
+ * - mezclas minerales (Ca, Si, Fe, Ba) y materiales ligeros: envolvente por masa de concreto y acero (`tvlDisenoHD`
+ *   primaria, `tvlFugaHD` secundaria), el mismo criterio que los bloques HD;
+ * - tungsteno: equivalencia por masa con el plomo de la Tabla B.2 × `FACTOR_W_PB` = 1.054. Por masa el W atenúa menos
+ *   que el Pb en Co-60 y MV: (µ/ρ)_W/(µ/ρ)_Pb de NIST SRD 126 (Hubbell y Seltzer) = 0.949 a 1.25 MeV, 0.958 a 1.5,
+ *   0.962 a 2–4, 0.959 a 6, 0.955 a 10 y 0.950 a 20 MeV; se toma el mínimo (0.949 → factor 1/0.949 = 1.054) para
+ *   todas las energías, porque el espectro de MV incluye la región de 1.25 MeV.
+ * Pendiente: el bario atenúa por masa algo menos que el concreto en Co-60 (Compton, Z/A 0.41 frente a ≈ 0.50); la
+ * envolvente concreto/acero no lo cubre del todo en barita a Co-60: usar una medición o el µ/ρ de la mezcla.
+ */
+const RAW_DB: ShieldingMaterial[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   // CONCRETOS
   // ═══════════════════════════════════════════════════════════════════════════
@@ -254,6 +270,38 @@ export const MATERIALS_DB: ShieldingMaterial[] = [
   },
 ];
 
+const RHO_PB = 11.34;
+/** (µ/ρ)_Pb/(µ/ρ)_W máximo en 1.25–20 MeV (NIST SRD 126: 0.05876/0.05577 a 1.25 MeV). */
+export const FACTOR_W_PB = 1.054;
+type ClaveB2 = '6' | '10' | '15' | '18' | '25' | 'Co60';
+
+/** Piso por masa (cm) de un TVL que NCRP 151 no tabula; null si el material no se acota así (polietileno boratado). */
+export function pisoMasa(m: Pick<ShieldingMaterial, 'id' | 'density_g_cm3' | 'category'>, energia: keyof typeof ENERGIAS, tipo: 'primary' | 'secondary'): number | null {
+  if (m.category === 'borated' || !(m.density_g_cm3 > 0)) return null;
+  const e = ENERGIAS[energia] as ClaveB2;
+  if (m.id === 'tungsten') return +((TABLA_B_2.lead[e].tvl1_cm * RHO_PB * FACTOR_W_PB) / m.density_g_cm3).toFixed(2);
+  return tipo === 'primary' ? tvlDisenoHD(m.density_g_cm3, e).tvl1_cm : tvlFugaHD(m.density_g_cm3, e);
+}
+
+const TABULADOS_B2 = new Set(['concrete-normal-235', 'steel-normal', 'lead-cast', 'lead-sheet']);
+
+function conPiso(m: ShieldingMaterial): ShieldingMaterial {
+  if (TABULADOS_B2.has(m.id) || m.manufacturer === 'TM NIPOL (México)') return m;
+  const ajusta = (tabla: Record<string, number | null>, tipo: 'primary' | 'secondary') =>
+    Object.fromEntries(Object.entries(tabla).map(([k, v]) => {
+      const piso = k in ENERGIAS ? pisoMasa(m, k as keyof typeof ENERGIAS, tipo) : null;
+      return [k, v === null || piso === null ? v : Math.max(v, piso)];
+    }));
+  return {
+    ...m,
+    TVL_primary_cm: ajusta(m.TVL_primary_cm, 'primary'),
+    TVL_secondary_cm: ajusta(m.TVL_secondary_cm, 'secondary'),
+    isNCRP151: false,
+  };
+}
+
+export const MATERIALS_DB: ShieldingMaterial[] = RAW_DB.map(conPiso);
+
 // ─── Funciones de búsqueda ───
 export function getMaterialById(id: string): ShieldingMaterial | undefined {
   return MATERIALS_DB.find(m => m.id === id);
@@ -278,13 +326,18 @@ export function getTVL(materialId: string, energy_MeV: number, type: 'primary' |
   return mat.TVL_secondary_cm[key] || null;
 }
 
+/**
+ * Espesor equivalente en cada material a `thickness_cm` de CONCRETO normal a la energía dada (mismo número de TVL
+ * primarios). Antes n = log₁₀(10^(t/TVL_m)) y t_m = n·TVL_m devolvía el mismo espesor para todos los materiales.
+ */
 export function getRecommendedMaterial(thickness_cm: number, energy_MeV: number): { material: ShieldingMaterial; actualThickness: number; weight_kg_m2: number }[] {
   // Ordenar por TVL más pequeño = menos espesor necesario
   const mats = getMaterialsByEnergy(energy_MeV);
+  const key = energy_MeV === 60 ? 'Co60' : `${energy_MeV}MV`;
+  const tvlConcreto = getMaterialById('concrete-normal-235')?.TVL_primary_cm[key] || 40;
+  const n = thickness_cm / tvlConcreto;
   return mats.map(m => {
-    const key = energy_MeV === 60 ? 'Co60' : `${energy_MeV}MV`;
     const TVL = m.TVL_primary_cm[key] || 40;
-    const n = Math.log10(1 / Math.pow(10, -thickness_cm / TVL));
     const actual_t = n * TVL;
     return { material: m, actualThickness: actual_t, weight_kg_m2: (actual_t / 100) * m.density_g_cm3 * 1000 };
   }).sort((a, b) => a.actualThickness - b.actualThickness);

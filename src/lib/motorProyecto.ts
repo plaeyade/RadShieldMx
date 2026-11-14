@@ -5,7 +5,9 @@
  * lateral, tecla F5, botones «Calcular» del lienzo, cálculo preliminar de un DXF confirmado, cálculo por lotes) pasa
  * por `calcularBarrerasValidadas`: puntos de muestreo de `shieldingMath`, kerma sin blindaje del motor de campo
  * (`doseFieldEngine`, TG-108 para PET), espesores de `normativeBarrierEngine` (NCRP 147 diagnóstico y TC, NCRP 151
- * teleterapia; PET con la curva de banda ancha de TG-108 a 511 keV, `espesorPET511`) y trazas de auditoría. El estado de cumplimiento es el de `verificarBarrera` (instalado ≥ requerido,
+ * teleterapia; PET con la curva de banda ancha de TG-108 a 511 keV, `espesorPET511`; I-131 y Lu-177 por espectro completo con
+ * buildup GP de ANSI/ANS-6.4.3 y la regla «el mayor entre haz estrecho a la línea más energética y haz ancho»,
+ * `espesorTerapiaGP`) y trazas de auditoría. El estado de cumplimiento es el de `verificarBarrera` (instalado ≥ requerido,
  * sólo con traza del motor).
  *
  * Sustituye a `AsyncShieldingEngine` (Fase 10, hallazgo crítico): aquel worker serializaba sólo posición, carga y
@@ -28,6 +30,7 @@ import {
 } from '@/lib/shieldingMath';
 import { buildCalculationCacheKey } from '@/lib/calculationCacheKey';
 import { espesorPET511 } from '@/lib/transmisionTG108';
+import { espesorTerapiaGP, notasTerapia, nuclidoTerapiaDe, REFERENCIA_GP_ANS643 } from '@/lib/terapiaEspectroGP';
 import { calcularBarreraNormativa } from '@/lib/normativeBarrierEngine';
 import { codigoCatalogo, dosisEnPunto } from '@/lib/doseFieldEngine';
 import { verificarBarrera, verificarPlano } from '@/lib/estadoProyecto';
@@ -107,6 +110,9 @@ function calcularUna(
   // NCRP 147/151: B = P / (K·T). T fuera de (0, 1] → T = 1 (conservador; la auditoría lo marca).
   const T = Number.isFinite(b.occupancyFactor) && b.occupancyFactor > 0 && b.occupancyFactor <= 1 ? b.occupancyFactor : 1;
   const metaEfectiva = b.designGoal_mSv_per_wk / T;
+  // I-131 / Lu-177: espectro completo con buildup GP (ANSI/ANS-6.4.3) y regla max(haz estrecho, haz ancho) (Fase 11).
+  const nuclidoGP = esCiclotron ? null : nuclidoTerapiaDe(sources);
+  const rigeGP: string[] = [];
   for (const mat of esCiclotron ? [] : MATERIALS) {
     let thickness = 0;
     if (sources[0]?.modality.category === 'diagnostic') {
@@ -114,13 +120,18 @@ function calcularUna(
       thickness = inverseArcher(B, mat);
     } else if (sources[0]?.modality.category === 'therapy') {
       thickness = tvlThickness(maxKerma, metaEfectiva, mat, energyKey);
+    } else if (nuclidoGP) {
+      const r = espesorTerapiaGP(nuclidoGP, maxKerma, metaEfectiva, mat);
+      thickness = r.espesor_mm;
+      if (r.rige) rigeGP.push(`${mat.code}: ${r.rige}${r.fueraRangoGP ? ` (línea con peso ≥ 1 % a ${r.mfpMaxLineas.toFixed(0)} mfp: fuera de 0.5–40 mfp del GP)` : ''}`);
     } else if (energyKey === '511keV') {
       // PET: curva de banda ancha de AAPM TG-108 (Tabla V) invertida numéricamente, no un TVL único (Fase 11, etapa 8).
       thickness = espesorPET511(maxKerma, metaEfectiva, mat);
     } else {
       thickness = exponentialThickness(maxKerma, metaEfectiva, mat, energyKey);
     }
-    if (thickness > 0) requiredThickness[mat.code] = thickness;
+    // Etapa 2: kerma·T ≤ P → requerido 0 (antes quedaba vacío y la barrera salía «sin cálculo»). Ciclotrón: sin espesor.
+    if (Number.isFinite(thickness) && thickness >= 0) requiredThickness[mat.code] = Math.max(0, thickness);
   }
   // NCRP 147 (diagnóstico) y NCRP 151 (teleterapia MV) sustituyen al punto-kernel cuando aplican.
   const normativo = esCiclotron ? null : calcularBarreraNormativa(b, sources, points, scale_m_per_pixel, MATERIALS, ctIsodosisProfile);
@@ -138,6 +149,11 @@ function calcularUna(
     requiredThickness_mm: requiredThickness,
     samplePointCount: points.length,
   });
+  if (nuclidoGP && !normativo) {
+    calculationTrace.formulaId = 'ANS643_GP_ESPECTRO_MAX_HAZ_ESTRECHO';
+    calculationTrace.standard = 'ANSI/ANS-6.4.3 GP + haz estrecho (CNSNS)';
+    calculationTrace.assumptions = [...calculationTrace.assumptions, ...notasTerapia(nuclidoGP), `Rige: ${rigeGP.join('; ') || '—'}.`, REFERENCIA_GP_ANS643];
+  }
   if (normativo) {
     calculationTrace.formulaId = normativo.metodo === 'NCRP147' ? 'NCRP147_TABLES_4.5_4.7_B1_C1' : 'NCRP151_PRIMARY_LEAKAGE_SCATTER';
     calculationTrace.standard = normativo.metodo;
