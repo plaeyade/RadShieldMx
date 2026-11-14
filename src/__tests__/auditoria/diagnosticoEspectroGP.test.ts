@@ -10,9 +10,13 @@
  * aire de NIST; coeficientes GP de exposición de NUREG/CR-5740, Tabla 5.1). Intensidades ENSDF de NNDC NuDat 3.
  */
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   ESPECTROS_TERAPIA,
-  PESO_MIN_LINEA_ESTRECHA_DIAGNOSTICO,
+  NIST_MU_RHO,
+  PESO_MIN_LINEA_DURA,
+  XCOM_MU_RHO_MALLA,
+  criterioHazEstrecho,
   UMBRAL_LINEA_PCT,
   espesorTerapiaGP,
   fraccionesKerma,
@@ -30,6 +34,10 @@ import { calcularProyecto } from '@/lib/motorProyecto';
 import { MATERIALS, MODALITIES, type Barrier, type FloorPlan, type RadiationSource } from '@/types/radshield';
 
 const rel = (a: number, b: number) => Math.abs(a / b - 1);
+/** Salida de `scripts/fase11_xcom_malla.py` (NIST XCOM 3.1). */
+const xcom = JSON.parse(readFileSync('scripts/fase11_xcom_mu_rho.json', 'utf8')) as {
+  muRhoTotal: number[][]; muRhoSinCohLineas: Record<string, number[][]>; yesoVsConcreto: { filas: number[][] };
+};
 const PB = { code: 'PB', density: 11.35 };
 const CO = { code: 'CONCRETE235', density: 2.35 };
 const DIAG: NuclidoTerapia[] = ['Tc99m', 'Tl201', 'In111', 'Ga67', 'Sm153', 'Zr89', 'I123'];
@@ -59,20 +67,98 @@ describe('espectros ENSDF (NuDat 3), Iγ ≥ 0.1 %', () => {
     for (const [n, f] of Object.entries(ref)) fraccionesKerma(n as NuclidoTerapia).forEach((v, i) => expect(v, n).toBeCloseTo(f[i], 4));
   });
 
-  it('criterio (a) en diagnóstico sólo si la línea dura pesa ≥ 50 % del kerma (Tc-99m, Tl-201, In-111, Sm-153)', () => {
-    expect(PESO_MIN_LINEA_ESTRECHA_DIAGNOSTICO).toBe(0.5);
-    for (const n of DIAG) {
-      const ls = ESPECTROS_TERAPIA[n].lineas;
-      const f = fraccionesKerma(n);
-      const i = ls.reduce((m, x, k) => (x.E_keV > ls[m].E_keV ? k : m), 0);
-      expect(ESPECTROS_TERAPIA[n].terapia, n).toBe(false);
-      expect(ESPECTROS_TERAPIA[n].hazEstrecho, n).toBe(f[i] >= PESO_MIN_LINEA_ESTRECHA_DIAGNOSTICO);
+  it('criterio único (a): línea dura (Iγ ≥ 0.1 %) con peso ≥ 2 % del kerma, para todo el catálogo; hazEstrecho derivado', () => {
+    expect(PESO_MIN_LINEA_DURA).toBe(0.02);
+    // Clasificación esperada y peso de la línea dura (Python). Si cambia un espectro, el umbral o el µ_en del aire de modo
+    // que algún nucleido cambie de lado, esta prueba falla: el margen es estrecho (1.33 % < umbral ≤ 2.58 %).
+    const esperado: Record<NuclidoTerapia, [number, number, boolean]> = {
+      I131: [722.911, 0.03358, true], Lu177: [321.3159, 0.02576, true], Tc99m: [140.511, 1, true], Tl201: [167.43, 0.78886, true],
+      In111: [245.35, 0.61521, true], Sm153: [103.18012, 0.85863, true],
+      I123: [538.54, 0.01329, false], Ga67: [887.688, 0.00911, false], Zr89: [1744.5, 0.0016, false],
+    };
+    for (const n of Object.keys(ESPECTROS_TERAPIA) as NuclidoTerapia[]) {
+      const c = criterioHazEstrecho(n);
+      const [E, peso, aplica] = esperado[n];
+      expect(c.E_keV, n).toBe(E);
+      expect(c.peso, n).toBeCloseTo(peso, 4);
+      expect(c.aplica, n).toBe(aplica);
+      // hazEstrecho no se escribe a mano: es exactamente el criterio.
+      expect(ESPECTROS_TERAPIA[n].hazEstrecho, n).toBe(aplica);
+      // Mismo criterio en terapia y en diagnóstico (ya no hay regla «terapia siempre / diagnóstico ≥ 50 %»).
+      expect(lineaEstrecha(n), n).toBe(aplica ? E : null);
     }
-    expect(lineaEstrecha('Tc99m')).toBe(140.511);
-    expect(lineaEstrecha('Tl201')).toBe(167.43);
-    expect(lineaEstrecha('In111')).toBe(245.35);
-    expect(lineaEstrecha('Sm153')).toBe(103.18012);
-    for (const n of ['Ga67', 'Zr89', 'I123'] as const) expect(lineaEstrecha(n)).toBeNull();
+    // Margen: cualquier umbral en (1.33 %, 2.58 %] da la misma clasificación; fuera de él cambia.
+    const pesos = Object.values(esperado);
+    const clasif = (u: number) => pesos.map(([, p]) => p >= u);
+    for (const u of [0.0134, 0.015, 0.02, 0.025, 0.0257]) expect(clasif(u)).toEqual(pesos.map(([, , a]) => a));
+    expect(clasif(0.013)).not.toEqual(pesos.map(([, , a]) => a));
+    expect(clasif(0.026)).not.toEqual(pesos.map(([, , a]) => a));
+    for (const n of DIAG) expect(ESPECTROS_TERAPIA[n].terapia, n).toBe(false);
+  });
+
+  it('caso hipotético para la memoria: haz estrecho siempre (I-123, Ga-67, Zr-89) frente al GP (mm de Pb, B = 0.1 / 0.01)', () => {
+    const muE = (E_keV: number, m: 'Pb' | 'Concreto') => {
+      const t = NIST_MU_RHO[m];
+      const E = E_keV / 1000;
+      const i = t.findIndex(([e]) => e >= E);
+      const [[e0, v0], [e1, v1]] = [t[i - 1], t[i]];
+      return Math.exp(Math.log(v0) + (Math.log(E / e0) / Math.log(e1 / e0)) * Math.log(v1 / v0));
+    };
+    const estrecho = (E: number, B: number) => (-Math.log(B) / (muE(E, 'Pb') * 11.35)) * 10;
+    expect(estrecho(1744.5, 0.1)).toBeCloseTo(41.85, 1); // Zr-89: 41.9 frente a 31.3 mm (×1.34)
+    expect(espesorTerapiaGP('Zr89', 1, 0.1, PB).espesor_mm).toBeCloseTo(31.33, 1);
+    expect(estrecho(1744.5, 0.01)).toBeCloseTo(83.7, 1); // frente a 62.3 mm
+    expect(estrecho(887.688, 0.1)).toBeCloseTo(25.48, 1); // Ga-67: 25.5 frente a 5.0 mm (×5.1)
+    expect(espesorTerapiaGP('Ga67', 1, 0.1, PB).espesor_mm).toBeCloseTo(5.04, 1);
+    expect(estrecho(538.54, 0.1)).toBeCloseTo(14.02, 1); // I-123: 14.0 frente a 2.1 mm (×6.6)
+  });
+});
+
+describe('H2: µ del haz estrecho de NIST XCOM en malla fina', () => {
+  it('la tabla del módulo es la que genera scripts/fase11_xcom_malla.py (JSON)', () => {
+    expect(XCOM_MU_RHO_MALLA.map((r) => [...r])).toEqual(xcom.muRhoTotal);
+  });
+  it('incluye las energías pedidas y los bordes K/L de Pb y W (duplicados)', () => {
+    const E = XCOM_MU_RHO_MALLA.map((r) => r[0]);
+    for (const e of [0.17128, 0.24535, 0.3213159, 0.364489, 0.52897, 0.636989, 0.722911]) expect(E, String(e)).toContain(e);
+    for (const b of [0.0880045, 0.0158608, 0.0152, 0.0130352, 0.069525, 0.0120998, 0.011544, 0.0102068]) {
+      expect(E.filter((e) => e === b).length, String(b)).toBe(2);
+    }
+    // Saltos de borde de NIST: Pb K 1.910 → 7.684 cm²/g; W K 2.552 → 11.23 cm²/g.
+    const pbK = XCOM_MU_RHO_MALLA.filter((r) => r[0] === 0.0880045);
+    expect([pbK[0][1], pbK[1][1]]).toEqual([1.9098, 7.6838]);
+    const wK = XCOM_MU_RHO_MALLA.filter((r) => r[0] === 0.069525);
+    expect([wK[0][2], wK[1][2]]).toEqual([2.5516, 11.234]);
+  });
+  it('reproduce NIST SRD 126 en sus energías (±0.05 %)', () => {
+    const srd: [number, number, number][] = [[0.1, 5.549, 0.1738], [0.2, 0.9985, 0.1282], [0.3, 0.4031, 0.1097], [0.6, 0.1248, 0.08236], [0.8, 0.0887, 0.07227], [1, 0.07102, 0.06495], [2, 0.04606, 0.04557]];
+    for (const [E, pb, co] of srd) {
+      const r = XCOM_MU_RHO_MALLA.find((x) => x[0] === E)!;
+      expect(rel(r[1], pb), `Pb ${E}`).toBeLessThan(5e-4);
+      expect(rel(r[4], co), `concreto ${E}`).toBeLessThan(5e-4);
+    }
+  });
+  it('In-111/Pb a B = 0.1: 3.26 mm (antes 3.21, 1.6 % corto); I-131 722.9 keV: µ/ρ = 0.09924 (antes 0.1001, +0.8 %)', () => {
+    expect(espesorTerapiaGP('In111', 1, 0.1, PB).espesor_mm).toBeCloseTo(3.26, 2);
+    expect(espesorTerapiaGP('In111', 1, 0.1, PB).rige).toBe('haz estrecho');
+    expect(transmisionRegla('In111', 'Pb', 0.326)).toBeCloseTo(Math.exp(-0.62222 * 11.35 * 0.326), 6);
+    expect(transmisionRegla('I131', 'Pb', 2)).toBeCloseTo(Math.exp(-0.099237 * 11.35 * 2), 8);
+    expect(espesorTerapiaGP('I131', 1, 0.1, PB).espesor_mm).toBeCloseTo(20.443, 2);
+  });
+  it('H5: el µ sin coherente de Elam (GP) frente al de XCOM, línea por línea: ≤ 1.5 % con peso ≥ 1 % del kerma', () => {
+    const sinCoh = xcom.muRhoSinCohLineas;
+    for (const n of Object.keys(ESPECTROS_TERAPIA) as NuclidoTerapia[]) {
+      const f = fraccionesKerma(n);
+      ESPECTROS_TERAPIA[n].lineas.forEach((l, i) => {
+        const x = sinCoh[n][i];
+        expect(x[0]).toBe(l.E_keV);
+        if (f[i] < 0.01) return;
+        (['Pb', 'Fe', 'Concreto'] as const).forEach((m, k) => expect(rel(l.muRhoSinCoh[m], x[k + 1]), `${n} ${l.E_keV} ${m}`).toBeLessThan(0.015));
+      });
+    }
+  });
+  it('H4: el yeso CaSO₄·2H₂O (PNNL-15870) atenúa más por unidad de masa que el concreto (equivalencia másica conservadora)', () => {
+    for (const [E, yeso, concreto] of xcom.yesoVsConcreto.filas) expect(yeso, String(E)).toBeGreaterThanOrEqual(concreto);
   });
 });
 
@@ -94,10 +180,10 @@ describe('transmisión GP del espectro frente al Python (±0.5 %)', () => {
 describe('espesores (Python): GP del espectro y haz estrecho a la línea dura', () => {
   // [nucleido, material, B, GP (mm), haz estrecho (mm) o null]
   const casos: [NuclidoTerapia, 'PB' | 'CO', number, number, number | null][] = [
-    ['Tc99m', 'PB', 0.1, 1.164, 0.855], ['Tc99m', 'PB', 0.01, 2.142, 1.711], ['Tc99m', 'CO', 0.1, 148.024, 66.166], ['Tc99m', 'CO', 0.01, 236.56, 132.331],
-    ['Tl201', 'PB', 0.1, 1.53, 1.317], ['Tl201', 'PB', 0.01, 2.949, 2.634], ['Tl201', 'CO', 0.1, 156.413, 71.256], ['Tl201', 'CO', 0.01, 251.495, 142.511],
-    ['In111', 'PB', 0.1, 3.129, 3.209], ['In111', 'PB', 0.01, 6.641, 6.419], ['In111', 'CO', 0.1, 176.025, 82.675], ['In111', 'CO', 0.01, 284.0, 165.35],
-    ['Sm153', 'PB', 0.01, 1.674, 0.791], ['Sm153', 'CO', 0.01, 194.48, 114.427],
+    ['Tc99m', 'PB', 0.1, 1.164, 0.857], ['Tc99m', 'PB', 0.01, 2.142, 1.713], ['Tc99m', 'CO', 0.1, 148.024, 66.429], ['Tc99m', 'CO', 0.01, 236.56, 132.857],
+    ['Tl201', 'PB', 0.1, 1.53, 1.321], ['Tl201', 'PB', 0.01, 2.949, 2.641], ['Tl201', 'CO', 0.1, 156.413, 71.333], ['Tl201', 'CO', 0.01, 251.495, 142.665],
+    ['In111', 'PB', 0.1, 3.129, 3.26], ['In111', 'PB', 0.01, 6.641, 6.521], ['In111', 'CO', 0.1, 176.025, 82.609], ['In111', 'CO', 0.01, 284.0, 165.218],
+    ['Sm153', 'PB', 0.01, 1.674, 0.791], ['Sm153', 'CO', 0.01, 194.48, 114.733],
     ['Ga67', 'PB', 0.1, 5.036, null], ['Ga67', 'PB', 0.01, 14.041, null], ['Ga67', 'CO', 0.01, 299.5, null],
     ['Zr89', 'PB', 0.1, 31.333, null], ['Zr89', 'PB', 0.01, 62.321, null], ['Zr89', 'CO', 0.1, 261.333, null], ['Zr89', 'CO', 0.01, 445.342, null],
   ];

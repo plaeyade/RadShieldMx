@@ -3,8 +3,9 @@
  * 722.9 keV y haz ancho» (`lib/terapiaEspectroGP`), visible en el módulo de Medicina Nuclear.
  *
  * Valores por omisión del diálogo: 3.7 GBq, 2 m, 40 h/semana, objetivo 100 µSv/semana → K = 0.059·3.7·40/4 =
- * 2.183 mSv/semana, B = 0.0458. En plomo rige el haz estrecho a 722.9 keV (µ = 1.134 cm⁻¹, NIST): 27.2 mm
- * (antes 13.4 mm con la TVL de biblioteca de 10 mm).
+ * 2.183 mSv/semana, B = 0.0458. En plomo rige el haz estrecho a 722.9 keV (µ = 1.126 cm⁻¹, NIST XCOM exacto a la línea):
+ * 27.4 mm (27.2 mm con µ = 1.134 cm⁻¹ interpolado en la malla gruesa de SRD 126, 0.8 % corto; revisión del #58, H2;
+ * antes 13.4 mm con la TVL de biblioteca de 10 mm).
  *
  * Local: npx playwright test e2e/fase11-terapia-gp.spec.ts --project=chromium (tras `npm run build`).
  */
@@ -24,7 +25,7 @@ async function entrar(page: Page) {
 }
 
 test.describe('Fase 11 — terapia I-131 con buildup GP', () => {
-  test('Medicina Nuclear: I-131 en plomo da 27.2 mm por haz estrecho a 722.9 keV (regla ANS-6.4.3)', async ({ page }) => {
+  test('Medicina Nuclear: I-131 en plomo da 27.4 mm por haz estrecho a 722.9 keV (regla ANS-6.4.3)', async ({ page }) => {
     test.setTimeout(2 * 60_000);
     const errores: string[] = [];
     page.on('pageerror', (e) => errores.push(e.message));
@@ -38,7 +39,7 @@ test.describe('Fase 11 — terapia I-131 con buildup GP', () => {
 
     await expect(page.getByTestId('nm-metodo')).toContainText('ANS-6.4.3');
     await expect(page.getByTestId('nm-metodo')).toContainText('rige: haz estrecho');
-    await expect(dialogo.getByText('27.2 mm', { exact: true })).toBeVisible();
+    await expect(dialogo.getByText('27.4 mm', { exact: true })).toBeVisible();
     expect(errores).toEqual([]);
   });
 });

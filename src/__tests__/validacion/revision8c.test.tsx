@@ -21,7 +21,7 @@ describe('TVL de radionúclidos (Delacroix 2002 / XCOM de haz estrecho)', () => 
     expect(spect('Ga-67').tenthValueConcrete_mm).toBeGreaterThanOrEqual(92);
     expect(spect('In-111').tenthValueConcrete_mm).toBeGreaterThanOrEqual(85);
     expect(spect('I-123').tenthValueLead_mm).toBeGreaterThanOrEqual(2);
-    expect(spect('I-131').tenthValueLead_mm).toBeCloseTo(20.3, 1); // 1 TVL de haz estrecho a 722.9 keV (antes 11 mm)
+    expect(spect('I-131').tenthValueLead_mm).toBeCloseTo(20.44, 2); // 1 TVL de haz estrecho a 722.9 keV, µ XCOM (antes 11 mm; 20.3 con la malla de SRD 126)
     expect(spect('In-111').tenthValueLead_mm).toBeGreaterThanOrEqual(3);
   });
 

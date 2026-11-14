@@ -32,8 +32,9 @@ export interface Radionuclide {
  * Fase 11 — contraste de las TVL de biblioteca (antes «pendientes de contraste»):
  * - I-131, Lu-177, I-123, Tc-99m, Tl-201, In-111 y Zr-89: el espesor de los diálogos sale de `terapiaEspectroGP`
  *   (espectro ENSDF completo, líneas con Iγ ≥ 0.1 %, con buildup GP de ANSI/ANS-6.4.3, y el mayor con el haz estrecho a
- *   la línea más energética con Iγ ≥ 0.1 % en terapia —I-131 722.9 keV, Lu-177 321.3 keV— y en los diagnósticos cuya
- *   línea dura es también la dominante —Tc-99m 140.5, Tl-201 167.4, In-111 245.4 keV—). Las HVL y TVL de la tabla de
+ *   la línea más energética con Iγ ≥ 0.1 % cuando ésta aporta ≥ 2 % del kerma sin blindaje —criterio único de la
+ *   revisión del #58: I-131 722.9 keV, Lu-177 321.3 keV, Tc-99m 140.5, Tl-201 167.4, In-111 245.4 keV—; µ de XCOM en
+ *   malla fina: In-111 Pb TVL 3.26 mm, I-131 20.44 mm, Lu-177 5.78 mm). Las HVL y TVL de la tabla de
  *   estos nucleidos son el primer espesor de esa regla (B = 0.5 y B = 0.1, Pb 11.35 y concreto 2.35 g/cm³) y sólo se
  *   muestran: el cálculo usa la curva entera, que en plomo tiende a la pendiente de la línea dura y en concreto incluye
  *   el buildup.
@@ -97,7 +98,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'I-131', name: 'Iodine-131 (NaI)', halfLife_hours: 193.0, halfLife_text: '8.02 d',
     gammaConstant_mSv_m2_GBq_h: 0.059, primaryEnergies_keV: [364, 637],
     emissionType: 'gamma+beta', avgBetaEnergy_MeV: 0.192, maxBetaEnergy_MeV: 0.606,
-    HVL_lead_mm: 6.1, TVL_lead_mm: 20.3, HVL_concrete_mm: 115, TVL_concrete_mm: 224,
+    HVL_lead_mm: 6.15, TVL_lead_mm: 20.44, HVL_concrete_mm: 115, TVL_concrete_mm: 224,
     notes: 'Thyroid therapy and diagnosis. Long half-life, beta+gamma emitter. High shielding needs.',
     category: 'Therapy',
   },
@@ -113,7 +114,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'In-111', name: 'Indium-111 (Octreoscan)', halfLife_hours: 67.2, halfLife_text: '67.2 h',
     gammaConstant_mSv_m2_GBq_h: 0.080, primaryEnergies_keV: [172, 247],
     emissionType: 'gamma',
-    HVL_lead_mm: 0.97, TVL_lead_mm: 3.21, HVL_concrete_mm: 89, TVL_concrete_mm: 176,
+    HVL_lead_mm: 0.98, TVL_lead_mm: 3.26, HVL_concrete_mm: 89, TVL_concrete_mm: 176,
     notes: 'Neuroendocrine tumor imaging. Higher energy gamma, requires moderate shielding.',
     category: 'SPECT',
   },
@@ -130,7 +131,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'Lu-177', name: 'Lutetium-177 (DOTATATE/PSMA)', halfLife_hours: 161.0, halfLife_text: '6.71 d',
     gammaConstant_mSv_m2_GBq_h: 0.005, primaryEnergies_keV: [113, 208],
     emissionType: 'gamma+beta', avgBetaEnergy_MeV: 0.134, maxBetaEnergy_MeV: 0.498,
-    HVL_lead_mm: 1.7, TVL_lead_mm: 5.7, HVL_concrete_mm: 84, TVL_concrete_mm: 168,
+    HVL_lead_mm: 1.74, TVL_lead_mm: 5.78, HVL_concrete_mm: 84, TVL_concrete_mm: 168,
     notes: 'PRRT for NETs (Lutathera) and prostate cancer (Pluvicto). 7.4 GBq/dose. Growing use.',
     category: 'Therapy',
   },
@@ -162,7 +163,7 @@ export const RADIONUCLIDES: Radionuclide[] = [
     symbol: 'I-131-NaI', name: 'I-131 (Therapy, high dose)', halfLife_hours: 193.0, halfLife_text: '8.02 d',
     gammaConstant_mSv_m2_GBq_h: 0.059, primaryEnergies_keV: [364, 637],
     emissionType: 'gamma+beta', avgBetaEnergy_MeV: 0.192, maxBetaEnergy_MeV: 0.606,
-    HVL_lead_mm: 6.1, TVL_lead_mm: 20.3, HVL_concrete_mm: 115, TVL_concrete_mm: 224,
+    HVL_lead_mm: 6.15, TVL_lead_mm: 20.44, HVL_concrete_mm: 115, TVL_concrete_mm: 224,
     notes: 'Thyroid ablation: 1.85-7.4 GBq. Hyperthyroidism: 0.15-0.55 GBq.',
     category: 'Therapy',
   },

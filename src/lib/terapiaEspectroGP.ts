@@ -13,22 +13,23 @@
  * Regla regulatoria adoptada (por material, sobre la transmisión de kerma en aire T(t)):
  *
  *   T_regla(t) = max( T_a(t), T_b(t) )
- *   (a) terapia, y diagnóstico cuando la línea más energética con Iγ ≥ 0.1 % es también la de mayor peso en kerma
- *       (≥ 50 %: Tc-99m 140.5, Tl-201 167.4, In-111 245.4 y Sm-153 103.2 keV): haz estrecho a esa línea, con peso 1
- *       desde B = 1. En diagnóstico sólo cambia el resultado en In-111/Pb con B ≳ 0.05 (+3 %); en los demás el GP
- *       queda siempre por encima. Cuando la línea dura es una línea débil (I-123 538.5 keV, 1.3 % del kerma; Ga-67
- *       887.7 keV, 0.9 %; Zr-89 1744.5 keV, 0.16 %) no se aplica: con peso 1 desde B = 1 multiplicaba el plomo ≈ 6× en
- *       I-123 y ≈ 5× en Ga-67 a B = 0.1, sin base física ni requisito regulatorio; esa línea entra en (b) con su peso.
- *       Terapia (umbral igual al del espectro):
- *       I-131 722.9 keV (1.77 %, lo que pide la CNSNS); Lu-177 321.3 keV (0.2186 %; con un umbral de 1 % sería
- *       208.4 keV, que deja fuera la línea que domina la cola en plomo). T_a = exp(−µ·t), µ = µ/ρ total de NIST (con
- *       dispersión coherente) × ρ. I-123 (diagnóstico) no tiene criterio (a): su línea de 529 keV (1.27 %) a peso 1
- *       desde B = 1 multiplicaba ≈ 6× el plomo a B = 0.1 y, a la vez, quedaba corta en concreto (sin buildup); se
- *       dimensiona sólo por (b).
+ *   (a) haz estrecho a la «línea dura» (la más energética con Iγ ≥ 0.1 %), con peso 1 desde B = 1, para TODO nucleido
+ *       del catálogo (terapia o diagnóstico) cuya línea dura aporte ≥ 2 % del kerma en aire sin blindaje
+ *       (`PESO_MIN_LINEA_DURA`; revisión independiente del #58). `hazEstrecho` se deriva de ese criterio
+ *       (`criterioHazEstrecho`), no se escribe a mano. Clasificación resultante:
+ *         sí: I-131 722.9 keV (3.36 %, lo que pide la CNSNS), Lu-177 321.3 keV (2.58 %), Tc-99m 140.5 (100 %),
+ *             Tl-201 167.4 (78.9 %), Sm-153 103.2 (85.9 %), In-111 245.4 keV (61.5 %);
+ *         no: I-123 538.5 keV (1.33 %), Ga-67 887.7 keV (0.91 %), Zr-89 1744.5 keV (0.16 %).
+ *       Cualquier umbral en (1.33 %, 2.58 %] da la misma clasificación; el margen es estrecho y una prueba falla si
+ *       cambia. Con peso 1 desde B = 1, una línea de < 2 % del kerma multiplicaba el plomo sin base física (a B = 0.1:
+ *       I-123 ×6.6, Ga-67 ×5.0, Zr-89 ×1.33); esa línea entra en (b) con su peso real y buildup.
+ *       T_a = exp(−µ·t), µ = µ/ρ total de NIST XCOM (con dispersión coherente, la de haz estrecho) × ρ, interpolado
+ *       log-log en la malla fina `XCOM_MU_RHO_MALLA` (exacta en las líneas duras; antes la malla de SRD 126 dejaba
+ *       In-111/Pb un 1.6 % corto y la línea de 722.9 keV un 0.8 %).
  *   (b) haz ancho del espectro completo con buildup GP de ANSI/ANS-6.4.3:
  *       T_GP = Σᵢ fᵢ·B_GP(Eᵢ, µᵢt)·exp(−µᵢt), fᵢ = Iᵢ·Eᵢ·(µ_en/ρ)_aire(Eᵢ) normalizada (peso por kerma en aire),
  *       µᵢ SIN dispersión coherente (ANS-6.4.3 §4.1, la que cuenta los mfp de los coeficientes).
- *       En concreto, cuando se dispone del ajuste de Oumano et al. 2025 (sólo I-131): T_b = max(T_Oumano, 1.2·T_GP).
+ *       En concreto, cuando se dispone del ajuste de Oumano et al. 2025 (sólo I-131): T_b = max(T_Oumano, 1.2·GP).
  *
  * El espesor requerido es el que da T_regla(t) = P/(K·T); como cada término decrece con t, es el mayor de los
  * espesores de cada criterio, y la traza dice cuál rige.
@@ -148,15 +149,59 @@ export const GP_ANS643: Record<MaterialGP, readonly FilaGP[]> = {
 export const RHO_REF: Record<MaterialGP, number> = { Pb: 11.35, Fe: 7.874, Concreto: 2.35 };
 
 /**
- * µ/ρ total con dispersión coherente (cm²/g), NIST X-Ray Mass Attenuation Coefficients (Hubbell y Seltzer, NIST SRD
- * 126; Pb z82, Fe z26, «Concrete, Ordinary»): haz estrecho. Filas [E (MeV), µ/ρ]; en Pb sólo por encima del borde K
- * salvo la fila de 0.08 (bajo el borde), que no se usa para el haz estrecho.
+ * µ/ρ total CON dispersión coherente (cm²/g) de NIST XCOM 3.1 (Berger et al., NIST SRD 8; mismos datos que NIST SRD 126 /
+ * XAAMDI de Hubbell y Seltzer, a los que reproduce a ±0.05 % en sus energías): haz estrecho del criterio (a).
+ * Filas [E (MeV), Pb z82, W z74, Fe z26, concreto ordinario NIST]. Malla fina generada por
+ * `scripts/fase11_xcom_malla.py` (→ `scripts/fase11_xcom_mu_rho.json`, que una prueba compara con esta tabla): malla de
+ * SRD 126, 20 puntos por década, las líneas duras de los espectros y las energías pedidas en la revisión del #58 (171.28,
+ * 245.35, 321.3159, 364.489, 528.97, 636.989, 722.911 keV…) y los bordes K y L1–L3 de Pb y W duplicados (debajo/encima),
+ * como en NIST. Interpolación log-log lineal: ≤ 0.33 % de XCOM entre nodos (Pb ≤ 0.19 %), exacta en las líneas duras.
  */
+export const XCOM_MU_RHO_MALLA: readonly (readonly [number, number, number, number, number])[] = [
+  [0.01, 130.64, 96.9, 170.69, 20.448], [0.0102068, 124.08, 91.998, 161.61, 19.277], [0.0102068, 124.08, 233.37, 161.61, 19.277],
+  [0.011220185, 97.74, 181.96, 125.43, 14.67], [0.011544, 90.975, 168.87, 116.21, 13.513], [0.011544, 90.975, 231.2, 116.21, 13.513],
+  [0.0120998, 80.809, 206.52, 102.39, 11.798], [0.0120998, 80.809, 238.16, 102.39, 11.798], [0.012589254, 73.131, 215.76, 91.99, 10.521],
+  [0.0130352, 67.003, 197.81, 83.716, 9.5158], [0.0130352, 162.1, 197.81, 83.716, 9.5158], [0.014125375, 130.76, 161.73, 67.287, 7.5489],
+  [0.015, 111.57, 138.88, 57.085, 6.3508], [0.0152, 107.77, 134.27, 55.046, 6.1137], [0.0152, 148.52, 134.27, 55.046, 6.1137],
+  [0.015848932, 134.6, 120.6, 49.061, 5.423], [0.0158608, 134.36, 120.37, 48.96, 5.4113], [0.0158608, 154.82, 120.37, 48.96, 5.4113],
+  [0.017782794, 116.21, 89.418, 35.66, 3.9055], [0.019952623, 86.896, 66.13, 25.854, 2.8245], [0.02, 86.374, 65.72, 25.683, 2.8059],
+  [0.022387211, 64.738, 48.915, 18.709, 2.0555], [0.025118864, 48.088, 36.192, 13.518, 1.5091], [0.028183829, 35.662, 26.773, 9.7589, 1.1211],
+  [0.03, 30.317, 22.729, 8.1764, 0.96005], [0.031622777, 26.438, 19.792, 7.0429, 0.84559], [0.035481339, 19.605, 14.622, 5.0855, 0.64984],
+  [0.039810717, 14.538, 10.803, 3.6778, 0.51056], [0.04, 14.36, 10.669, 3.6292, 0.50578], [0.044668359, 10.778, 7.9872, 2.6677, 0.41118],
+  [0.05, 8.0416, 5.9501, 1.9573, 0.34119], [0.050118723, 7.9922, 5.9135, 1.9447, 0.33994], [0.056234133, 5.9322, 4.3871, 1.428, 0.28852],
+  [0.06, 5.0197, 3.7126, 1.2049, 0.26601], [0.063095734, 4.4119, 3.2639, 1.0585, 0.25104], [0.069525, 3.445, 2.5516, 0.83009, 0.22718],
+  [0.069525, 3.445, 11.234, 0.83009, 0.22718], [0.070794578, 3.2906, 10.716, 0.79417, 0.22335], [0.079432823, 2.4628, 7.9527, 0.60496, 0.20251],
+  [0.08, 2.4194, 7.8089, 0.5952, 0.2014], [0.0880045, 1.9098, 6.1275, 0.48213, 0.18806], [0.0880045, 7.6838, 6.1275, 0.48213, 0.18806],
+  [0.089125094, 7.4392, 5.9346, 0.46932, 0.18648], [0.1, 5.5491, 4.4369, 0.37174, 0.1738], [0.10318, 5.1264, 4.098, 0.35026, 0.1708],
+  [0.112201845, 4.1509, 3.3095, 0.30119, 0.16346], [0.125892541, 3.1124, 2.4656, 0.24983, 0.15475], [0.140511, 2.3686, 1.8643, 0.21359, 0.1475],
+  [0.141253754, 2.3378, 1.8396, 0.2121, 0.14718], [0.15, 2.0145, 1.5812, 0.19644, 0.14355], [0.158489319, 1.7583, 1.3782, 0.18401, 0.14039],
+  [0.159, 1.7444, 1.3672, 0.18334, 0.14021], [0.16743, 1.5361, 1.2034, 0.17317, 0.13736], [0.17128, 1.4528, 1.1382, 0.16907, 0.13614],
+  [0.177827941, 1.3256, 1.0388, 0.16276, 0.13416], [0.199526231, 1.0043, 0.78886, 0.14635, 0.12834], [0.2, 0.99862, 0.78447, 0.14605, 0.12823],
+  [0.223872114, 0.76651, 0.60443, 0.13336, 0.12283], [0.24535, 0.62222, 0.49276, 0.12482, 0.11861], [0.251188643, 0.59039, 0.46815, 0.12283, 0.11755],
+  [0.281838293, 0.45959, 0.36723, 0.11407, 0.11245], [0.3, 0.40321, 0.32382, 0.10987, 0.10975], [0.316227766, 0.36211, 0.29221, 0.10659, 0.1075],
+  [0.3213159, 0.3507, 0.28344, 0.10563, 0.10683], [0.354813389, 0.28914, 0.23615, 0.10006, 0.1027], [0.364489, 0.27489, 0.22521, 0.09864, 0.10159],
+  [0.398107171, 0.23423, 0.19397, 0.09423, 0.098023], [0.4, 0.23228, 0.19247, 0.094002, 0.097833], [0.446683592, 0.19261, 0.16195, 0.088934, 0.093483],
+  [0.5, 0.16135, 0.13781, 0.084146, 0.08915], [0.501187234, 0.16077, 0.13736, 0.084049, 0.089059], [0.52897, 0.14846, 0.12781, 0.081876, 0.087023],
+  [0.53854, 0.14469, 0.12487, 0.081168, 0.086351], [0.562341325, 0.13615, 0.11822, 0.079487, 0.084742], [0.6, 0.12475, 0.1093, 0.077037, 0.082362],
+  [0.630957344, 0.11691, 0.10312, 0.075187, 0.080542], [0.636989, 0.11551, 0.10202, 0.074842, 0.080201], [0.707945784, 0.10166, 0.091033, 0.071109, 0.076467],
+  [0.722911, 0.099237, 0.089097, 0.070389, 0.075739], [0.794328235, 0.089379, 0.08121, 0.067228, 0.072511], [0.8, 0.088699, 0.080664, 0.066994, 0.072271],
+  [0.887688, 0.07963, 0.073361, 0.063646, 0.068803], [0.891250938, 0.079312, 0.073102, 0.06352, 0.068672], [1.0, 0.071019, 0.066177, 0.059947, 0.064946],
+  [1.122018454, 0.064096, 0.060259, 0.056523, 0.061337], [1.25, 0.058752, 0.055763, 0.053501, 0.058072], [1.258925412, 0.058441, 0.055498, 0.053309, 0.057861],
+  [1.412537545, 0.054081, 0.051677, 0.050307, 0.054539], [1.5, 0.052223, 0.049998, 0.048831, 0.052878], [1.584893192, 0.050715, 0.048626, 0.047535, 0.051404],
+  [1.7445, 0.048474, 0.046578, 0.045406, 0.048929], [1.77827941, 0.048082, 0.046217, 0.045, 0.048447], [1.995262315, 0.046099, 0.044361, 0.042693, 0.045623],
+  [2.0, 0.046065, 0.044329, 0.042648, 0.045566],
+];
+
+const columnaMalla = (k: 1 | 2 | 3 | 4): readonly (readonly [number, number])[] => XCOM_MU_RHO_MALLA.map((r) => [r[0], r[k]] as const);
+
+/** µ/ρ total con coherente (cm²/g) por material GP: columnas de `XCOM_MU_RHO_MALLA`. */
 export const NIST_MU_RHO: Record<MaterialGP, readonly (readonly [number, number])[]> = {
-  Pb: [[0.1, 5.549], [0.15, 2.014], [0.2, 0.9985], [0.3, 0.4031], [0.4, 0.2323], [0.5, 0.1614], [0.6, 0.1248], [0.8, 0.0887], [1, 0.07102], [1.25, 0.05876], [1.5, 0.05222], [2, 0.04606]],
-  Fe: [[0.08, 0.5952], [0.1, 0.3717], [0.15, 0.1964], [0.2, 0.146], [0.3, 0.1099], [0.4, 0.094], [0.5, 0.08414], [0.6, 0.07704], [0.8, 0.06699], [1, 0.05995], [1.25, 0.0535], [1.5, 0.04883], [2, 0.04265]],
-  Concreto: [[0.08, 0.2014], [0.1, 0.1738], [0.15, 0.1436], [0.2, 0.1282], [0.3, 0.1097], [0.4, 0.09783], [0.5, 0.08915], [0.6, 0.08236], [0.8, 0.07227], [1, 0.06495], [1.25, 0.05807], [1.5, 0.05288], [2, 0.04557]],
+  Pb: columnaMalla(1),
+  Fe: columnaMalla(3),
+  Concreto: columnaMalla(4),
 };
+/** µ/ρ total con coherente del W (cm²/g), misma malla: referencia para los bordes del W (sin GP de W). */
+export const NIST_MU_RHO_W: readonly (readonly [number, number])[] = columnaMalla(2);
 
 /** µ_en/ρ del aire (cm²/g), NIST SRD 126 («Air, Dry»), 0.03–2 MeV: peso de cada línea en el kerma en aire. */
 export const NIST_MUEN_AIRE: readonly (readonly [number, number])[] = [
@@ -180,28 +225,33 @@ export interface EspectroTerapia {
   etiqueta: string;
   fuente: string;
   lineas: LineaGamma[];
-  /** Terapia (I-131, Lu-177) o diagnóstico. */
+  /** Terapia (I-131, Lu-177) o diagnóstico: sólo informativo (texto «CNSNS» de la traza); no decide el criterio (a). */
   terapia: boolean;
   /**
-   * Aplica el criterio (a), haz estrecho a la línea más energética con Iγ ≥ `UMBRAL_LINEA_PCT`: siempre en terapia; en
-   * diagnóstico sólo si esa línea pesa ≥ 50 % del kerma (`PESO_MIN_LINEA_ESTRECHA_DIAGNOSTICO`).
+   * Aplica el criterio (a): DERIVADO de `criterioHazEstrecho` (línea dura con peso ≥ `PESO_MIN_LINEA_DURA` del kerma),
+   * igual para terapia y diagnóstico. No se escribe a mano en `ESPECTROS_TERAPIA`.
    */
-  hazEstrecho: boolean;
+  readonly hazEstrecho: boolean;
   /** Ajuste de Archer (x en mm) de haz ancho del espectro completo, si está publicado. */
   oumano?: Partial<Record<MaterialGP, { alpha: number; beta: number; gamma: number }>>;
 }
 
 const L = (E_keV: number, I_pct: number, Pb: number, Fe: number, Concreto: number): LineaGamma => ({ E_keV, I_pct, muRhoSinCoh: { Pb, Fe, Concreto } });
 
-/** Peso mínimo en kerma de la línea dura para aplicar el criterio (a) a un nucleido de diagnóstico. */
-export const PESO_MIN_LINEA_ESTRECHA_DIAGNOSTICO = 0.5;
+/**
+ * Peso mínimo en kerma sin blindaje de la línea dura (la más energética con Iγ ≥ `UMBRAL_LINEA_PCT`) para aplicar el
+ * criterio (a), a todo el catálogo. Pesos: I-131 3.36 %, Lu-177 2.58 % (sí); I-123 1.33 %, Ga-67 0.91 %, Zr-89 0.16 %
+ * (no). Cualquier valor en (1.33 %, 2.58 %] da la misma clasificación.
+ */
+export const PESO_MIN_LINEA_DURA = 0.02;
 
 /**
- * Espectros (ENSDF): líneas gamma con Iγ ≥ 0.1 %, sin rayos X del hijo. µ/ρ sin coherente de cada línea: Elam, Ravel y
+ * Espectros (ENSDF): líneas gamma con Iγ ≥ 0.1 %, sin rayos X del hijo (`hazEstrecho` se deriva en `ESPECTROS_TERAPIA`).
+ * µ/ρ sin coherente de cada línea: Elam, Ravel y
  * Sieber 2002 (xraydb 4.6.1), fracciones en masa de NIST para el concreto ordinario. Los espectros diagnósticos y sus µ
  * salen de `scripts/fase11_diagnostico_gp.py` (intensidades de NNDC NuDat 3 / ENSDF, citadas en cada uno).
  */
-export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
+const ESPECTROS_DATOS: Record<NuclidoTerapia, Omit<EspectroTerapia, 'hazEstrecho'>> = {
   I131: {
     nuclido: 'I131',
     etiqueta: 'I-131',
@@ -218,7 +268,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(722.911, 1.77, 0.09356, 0.06953, 0.0755),
     ],
     terapia: true,
-    hazEstrecho: true,
     // Oumano et al. 2025 (GATE 9.2 + MCNP6, espectro ICRP-107): Pb y concreto de peso normal; aplicado al concreto
     // 2.35 sin reescalar (conservador si el concreto del artículo es ≤ 2.35 g/cm³). Los parámetros de Pb se guardan
     // como referencia y para las pruebas, pero la regla no los usa: en todos los espesores quedan por debajo del haz
@@ -240,7 +289,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(321.3159, 0.2186, 0.32437, 0.10149, 0.10577),
     ],
     terapia: true,
-    hazEstrecho: true,
   },
   I123: {
     nuclido: 'I123',
@@ -255,7 +303,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(538.54, 0.31, 0.13478, 0.07967, 0.08597),
     ],
     terapia: false,
-    hazEstrecho: false, // 538.54 keV (la más energética ≥ 0.1 %) pesa 1.3 % del kerma
   },
   Tc99m: {
     nuclido: 'Tc99m',
@@ -263,7 +310,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
     fuente: 'ENSDF: Browne E, Tuli JK. Nucl Data Sheets 2017;145:25 (A = 99), TI de 99mTc (6.0072 h); 142.63 keV (0.0222 %) < 0.1 %',
     lineas: [L(140.511, 89.0, 2.25074, 0.19345, 0.14216)],
     terapia: false,
-    hazEstrecho: true, // 140.5 keV: 100 % del kerma
   },
   Tl201: {
     nuclido: 'Tl201',
@@ -277,7 +323,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(167.43, 10.0, 1.44992, 0.15869, 0.13355),
     ],
     terapia: false,
-    hazEstrecho: true, // 167.43 keV: 78.9 % del kerma de las gammas
   },
   In111: {
     nuclido: 'In111',
@@ -288,7 +333,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(245.35, 94.1, 0.579, 0.11784, 0.1168),
     ],
     terapia: false,
-    hazEstrecho: true, // 245.35 keV: 61.5 % del kerma
   },
   Ga67: {
     nuclido: 'Ga67',
@@ -304,7 +348,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(887.688, 0.148, 0.07622, 0.06306, 0.06862),
     ],
     terapia: false,
-    hazEstrecho: false, // 887.7 keV pesa 0.9 % del kerma
   },
   Sm153: {
     nuclido: 'Sm153',
@@ -319,7 +362,6 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(103.18012, 29.14, 4.92435, 0.31465, 0.16117),
     ],
     terapia: false,
-    hazEstrecho: true, // 103.18 keV: 85.9 % del kerma
   },
   Zr89: {
     nuclido: 'Zr89',
@@ -333,15 +375,47 @@ export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = {
       L(1744.5, 0.123, 0.04792, 0.04534, 0.04887),
     ],
     terapia: false,
-    hazEstrecho: false, // 1744.5 keV pesa 0.16 % del kerma
   },
 };
 
-/** Línea del criterio (a): la más energética con Iγ ≥ `UMBRAL_LINEA_PCT`; null si el nucleido no tiene criterio (a) (I-123, Ga-67, Zr-89). */
+/** Fracción del kerma en aire sin blindaje de cada línea (Iᵢ·Eᵢ·(µ_en/ρ)_aire normalizado). */
+function fraccionesKermaLineas(ls: readonly LineaGamma[]): number[] {
+  const k = ls.map((l) => (l.I_pct / 100) * l.E_keV * interpLogLog(NIST_MUEN_AIRE, l.E_keV / 1000));
+  const s = k.reduce((a, b) => a + b, 0);
+  return k.map((v) => v / s);
+}
+
+export interface LineaDura {
+  /** Energía (keV) de la línea más energética con Iγ ≥ `UMBRAL_LINEA_PCT`. */
+  E_keV: number;
+  /** Fracción del kerma en aire sin blindaje que aporta. */
+  peso: number;
+  /** peso ≥ `PESO_MIN_LINEA_DURA`: se aplica el criterio (a). */
+  aplica: boolean;
+}
+
+function lineaDuraDe(ls: readonly LineaGamma[]): LineaDura {
+  const f = fraccionesKermaLineas(ls);
+  let i = -1;
+  ls.forEach((l, k) => { if (l.I_pct >= UMBRAL_LINEA_PCT && (i < 0 || l.E_keV > ls[i].E_keV)) i = k; });
+  return { E_keV: ls[i].E_keV, peso: f[i], aplica: f[i] >= PESO_MIN_LINEA_DURA };
+}
+
+/** Criterio único del haz estrecho (a): la línea dura y si su peso en kerma alcanza `PESO_MIN_LINEA_DURA`. */
+export function criterioHazEstrecho(nuc: NuclidoTerapia): LineaDura {
+  return lineaDuraDe(ESPECTROS_DATOS[nuc].lineas);
+}
+
+/** Espectros con `hazEstrecho` derivado del criterio único (no escrito a mano). */
+export const ESPECTROS_TERAPIA: Record<NuclidoTerapia, EspectroTerapia> = Object.fromEntries(
+  (Object.keys(ESPECTROS_DATOS) as NuclidoTerapia[]).map((n) => [n, { ...ESPECTROS_DATOS[n], hazEstrecho: lineaDuraDe(ESPECTROS_DATOS[n].lineas).aplica }]),
+) as Record<NuclidoTerapia, EspectroTerapia>;
+
+/** Línea del criterio (a): la línea dura si aplica el criterio único; null si no (I-123, Ga-67, Zr-89). */
 export function lineaEstrecha(nuc: NuclidoTerapia): number | null {
   const e = ESPECTROS_TERAPIA[nuc];
   if (!e.hazEstrecho) return null;
-  return Math.max(...e.lineas.filter((l) => l.I_pct >= UMBRAL_LINEA_PCT).map((l) => l.E_keV));
+  return criterioHazEstrecho(nuc).E_keV;
 }
 
 /**
@@ -411,28 +485,43 @@ export function buildupPorAtenuacion(p: CoefGP, x: number): number {
 
 /** Fracción del kerma en aire sin blindaje de cada línea (Iᵢ·Eᵢ·(µ_en/ρ)_aire normalizado). */
 export function fraccionesKerma(nuc: NuclidoTerapia): number[] {
-  const ls = ESPECTROS_TERAPIA[nuc].lineas;
-  const k = ls.map((l) => (l.I_pct / 100) * l.E_keV * interpLogLog(NIST_MUEN_AIRE, l.E_keV / 1000));
-  const s = k.reduce((a, b) => a + b, 0);
-  return k.map((v) => v / s);
+  return fraccionesKermaLineas(ESPECTROS_TERAPIA[nuc].lineas);
 }
 
-/** (a) Transmisión de haz estrecho a la línea del criterio; t en cm del material de referencia. 0 si no aplica (I-123, Ga-67, Zr-89). */
+/** Datos precalculados por nucleido y material (pesos, µ y coeficientes GP por línea; µ del haz estrecho). */
+interface ModeloGP { f: number[]; mu: number[]; coef: CoefGP[]; muEstrecho: number | null }
+const MODELOS = new Map<string, ModeloGP>();
+function modelo(nuc: NuclidoTerapia, mat: MaterialGP): ModeloGP {
+  const k = `${nuc}|${mat}`;
+  let m = MODELOS.get(k);
+  if (!m) {
+    const ls = ESPECTROS_TERAPIA[nuc].lineas;
+    const Ek = lineaEstrecha(nuc);
+    m = {
+      f: fraccionesKerma(nuc),
+      mu: ls.map((l) => l.muRhoSinCoh[mat] * RHO_REF[mat]),
+      coef: ls.map((l) => coeficientesGP(mat, l.E_keV / 1000)),
+      muEstrecho: Ek === null ? null : interpLogLog(NIST_MU_RHO[mat], Ek / 1000) * RHO_REF[mat],
+    };
+    MODELOS.set(k, m);
+  }
+  return m;
+}
+
+/** (a) Transmisión de haz estrecho a la línea dura (µ total XCOM con coherente); t en cm del material de referencia. 0 si no aplica (I-123, Ga-67, Zr-89). */
 export function transmisionEstrecha(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: number): number {
-  const Ek = lineaEstrecha(nuc);
-  if (Ek === null) return 0;
-  const E = Ek / 1000;
-  return Math.exp(-interpLogLog(NIST_MU_RHO[mat], E) * RHO_REF[mat] * Math.max(0, t_cm));
+  const mu = modelo(nuc, mat).muEstrecho;
+  if (mu === null) return 0;
+  return Math.exp(-mu * Math.max(0, t_cm));
 }
 
 /** (b) Transmisión de haz ancho del espectro completo con buildup GP; t en cm del material de referencia. */
 export function transmisionEspectroGP(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: number): number {
-  const ls = ESPECTROS_TERAPIA[nuc].lineas;
-  const f = fraccionesKerma(nuc);
-  return ls.reduce((s, l, i) => {
-    const x = l.muRhoSinCoh[mat] * RHO_REF[mat] * Math.max(0, t_cm);
-    return s + f[i] * buildupPorAtenuacion(coeficientesGP(mat, l.E_keV / 1000), x);
-  }, 0);
+  const m = modelo(nuc, mat);
+  const t = Math.max(0, t_cm);
+  let s = 0;
+  for (let i = 0; i < m.f.length; i++) s += m.f[i] * buildupPorAtenuacion(m.coef[i], m.mu[i] * t);
+  return s;
 }
 
 /** Ajuste de Oumano 2025 (Archer, x en mm); null si no está publicado para ese nucleido y material. */
@@ -456,6 +545,26 @@ export function transmisionHazAncho(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: 
 /** Regla adoptada: max(haz estrecho, haz ancho). */
 export function transmisionRegla(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: number): number {
   return Math.max(transmisionEstrecha(nuc, mat, t_cm), transmisionHazAncho(nuc, mat, t_cm).T);
+}
+
+/** Paso (cm) de la caché de la regla para el mapa de dosis: 0.1 µm (error relativo ≤ 1.3e-4 en Pb a 140 keV). */
+const PASO_CACHE_CM = 1e-5;
+const CACHE_REGLA = new Map<string, number>();
+const MAX_CACHE_REGLA = 200_000;
+
+/**
+ * `transmisionRegla` con caché por nucleido, material y espesor (redondeado a 0.1 µm) para el mapa de dosis y los visores
+ * (`doseFieldEngine.transmisionCapa`): la misma transmisión del motor de barreras, sin recalcular el GP en cada celda.
+ */
+export function transmisionReglaCache(nuc: NuclidoTerapia, mat: MaterialGP, t_cm: number): number {
+  const q = Math.round(Math.max(0, t_cm) / PASO_CACHE_CM);
+  const k = `${nuc}|${mat}|${q}`;
+  const v = CACHE_REGLA.get(k);
+  if (v !== undefined) return v;
+  const T = transmisionRegla(nuc, mat, q * PASO_CACHE_CM);
+  if (CACHE_REGLA.size >= MAX_CACHE_REGLA) CACHE_REGLA.clear();
+  CACHE_REGLA.set(k, T);
+  return T;
 }
 
 /** Inversión por bisección de una transmisión monótona decreciente (t en cm). */
