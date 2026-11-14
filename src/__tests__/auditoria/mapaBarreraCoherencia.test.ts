@@ -6,7 +6,9 @@
  * que la meta que la barrera supone.
  *
  * Prueba: con la barrera dimensionada por el motor (espesor requerido instalado), el kerma del mapa en el punto de
- * máximo kerma de la barrera debe ser la meta efectiva P/T (diferencia < 5 %).
+ * máximo kerma de la barrera debe ser la meta efectiva P/T (diferencia < 1 %; medido ≤ 0.34 %, siempre del lado de la
+ * barrera; 2.ª revisión del #58, B1: antes ±5 %). Lu-177 con 7.4 GBq (Γ·A·40 h a ≈ 2.2 m: B ≈ 0.07), que exige espesor > 0
+ * (con la carga de las demás filas daba 0 mm).
  */
 import { describe, expect, it } from 'vitest';
 import { calcularProyecto } from '@/lib/motorProyecto';
@@ -20,8 +22,9 @@ const muro = (id: string, d_m: number, materialCode: string): Barrier => ({
   id, name: id, x1: d_m * 100, y1: -150, x2: d_m * 100, y2: 150, barrierType: 'secondary', useFactor: 1,
   occupancyFactor: 1, designGoal_mSv_per_wk: 0.02, materialCode,
 } as Barrier);
-const fuente = (id: string): RadiationSource => ({
-  id: `n-${id}`, x: 0, y: 0, name: id, modality: MODALITIES.find((m) => m.id === id)!, workloadValue: 2,
+/** `actividad_MBq`: para modalidades sin carga «estilo TG-108» (Lu-177), Γ·A·40 h con A = `workloadValue` en MBq. */
+const fuente = (id: string, actividad_MBq?: number): RadiationSource => ({
+  id: `n-${id}`, x: 0, y: 0, name: id, modality: MODALITIES.find((m) => m.id === id)!, workloadValue: actividad_MBq ?? 2,
   workloadUnit: 'pacientes/semana', isocenterHeight_m: 1, useFactor: 1,
   tg108: { A0_MBq: 740, pacientesSemana: 30, tU_h: 1, tI_h: 0.5, sala: 'captacion' },
 } as RadiationSource);
@@ -32,10 +35,11 @@ describe('H1: mapa de dosis ↔ barrera en el mismo punto', () => {
     ['spect-tc99m', 'CONCRETE235'], ['spect-tc99m', 'PB'],
     ['radioiodine-i131', 'CONCRETE235'], ['radioiodine-i131', 'PB'],
     ['pet-f18', 'CONCRETE235'], ['pet-f18', 'PB'],
-  ] as const)('%s, %s: kerma del mapa tras el espesor requerido = P/T (±5 %)', (mod, code) => {
+    ['lu177', 'CONCRETE235', 7400], ['lu177', 'PB', 7400],
+  ] as const)('%s, %s: kerma del mapa tras el espesor requerido = P/T (±1 %)', (mod, code, A0?: number) => {
     const plano = {
       id: 'p', name: 'p', imageUrl: null, width_pixels: 2000, height_pixels: 2000, scale_m_per_pixel: 0.01,
-      barriers: [muro('m', 2, code)], sources: [fuente(mod)], regions: [], criticalPoints: [],
+      barriers: [muro('m', 2, code)], sources: [fuente(mod, A0)], regions: [], criticalPoints: [],
     } as unknown as FloorPlan;
     const r = calcularProyecto(plano);
     const b = r.barriers[0];
@@ -45,7 +49,9 @@ describe('H1: mapa de dosis ↔ barrera en el mismo punto', () => {
     const d = dosisEnPunto(plano.sources, p.x, p.y, plano.scale_m_per_pixel, { barriers: [b], materials: MATERIALS });
     const meta = b.designGoal_mSv_per_wk / b.occupancyFactor;
     expect(d.kermaSinBlindaje_mSv_semana).toBeCloseTo(b.maxKerma!, 9);
-    expect(Math.abs(d.kerma_mSv_semana / meta - 1), `${mod} ${code}: mapa ${d.kerma_mSv_semana} vs meta ${meta}`).toBeLessThan(0.05);
+    expect(Math.abs(d.kerma_mSv_semana / meta - 1), `${mod} ${code}: mapa ${d.kerma_mSv_semana} vs meta ${meta}`).toBeLessThan(0.01);
+    // Del lado de la barrera: el mapa no da más kerma que la meta (la barrera no queda corta para el mapa).
+    expect(d.kerma_mSv_semana / meta).toBeLessThanOrEqual(1 + 1e-9);
   });
 
   it('transmisionCapa usa el modelo del motor (GP / TG-108) y ya no la TVL de catálogo', () => {
