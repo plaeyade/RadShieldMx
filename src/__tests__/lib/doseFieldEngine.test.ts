@@ -12,6 +12,7 @@ import {
 import { calculateUnshieldedKerma, tvlTransmission } from '@/lib/shieldingMath';
 import { TABLA_B_2, TABLA_B_7, espesorTVL, transmisionTVL } from '@/lib/ncrp151';
 import { TABLA_C_1, transmisionArcher } from '@/lib/ncrp147';
+import { transmisionTG108 } from '@/lib/transmisionTG108';
 import { MATERIALS, MODALITIES, type Barrier, type RadiationSource } from '@/types/radshield';
 
 const fuente = (id: string, extra: Partial<RadiationSource> = {}): RadiationSource => ({
@@ -122,10 +123,12 @@ describe('doseFieldEngine — barreras', () => {
     expect(d.porFuente[0].cruces[0].capas[0].metodo).toBe('NCRP147_ARCHER');
   });
 
-  it('medicina nuclear: TVL del material', () => {
+  it('medicina nuclear PET: curva de TG-108 (Tabla V), la misma del motor de barreras (revisión del #58, H1)', () => {
     const s = fuente('pet-f18', { nuclearActivity_GBq: 0.5 });
     const d = dosisEnPunto([s], 6, 0, 1, { barriers: [barrera({ barrierType: 'nuclear', materialCode: 'PB', thickness_mm: 10 })] });
-    expect(d.porFuente[0].transmision).toBeCloseTo(tvlTransmission(10, material('PB'), '511keV'), 12);
+    expect(d.porFuente[0].transmision).toBeCloseTo(transmisionTG108('lead', 10), 12);
+    // Antes: TVL de catálogo de 16.6 mm (10^(−10/16.6) = 0.250; TG-108 Tabla IV: 0.2485).
+    expect(d.porFuente[0].transmision).not.toBeCloseTo(tvlTransmission(10, material('PB'), '511keV'), 4);
   });
 
   it('dos barreras cruzadas multiplican su transmisión; capas laminadas también', () => {

@@ -16,7 +16,11 @@
  *   el haz y secundaria K¹_sec·N/d² (Tabla 4.7, 135°, Archer C.1) en todo el plano (`terminoNCRP147`).
  *   Preblindaje de la Tabla 4.6 opcional (`preblindaje`), sin acreditar por omisión como el motor normativo.
  * - Resto (TC κ, medicina nuclear TG-108 por paciente, braquiterapia, ciclotrón…): K₀ único de
- *   `calculateUnshieldedKerma` y la transmisión de la Fase 1 (`transmisionCapa`).
+ *   `calculateUnshieldedKerma` y la transmisión de `transmisionCapa`. Medicina nuclear (revisión del #58, H1): la MISMA
+ *   transmisión que dimensiona la barrera en `motorProyecto` — I-131, Lu-177 y Tc-99m con la regla espectral GP de
+ *   `terapiaEspectroGP` (con caché por nucleido/material/espesor) y PET de 511 keV con la curva de TG-108 (Tabla V) —,
+ *   no la TVL de catálogo (Tc-99m: 45 mm de concreto frente a 148 mm del primer décimo GP; el mapa daba ≈ 200× menos
+ *   dosis detrás de la barrera de diseño que la que supone la barrera). El resto sigue con la TVL de catálogo.
  *
  * ¿Dónde llega la primaria? Con `ejeGantry_deg` en la fuente, en la franja que barre el haz al girar el
  * gantry: |desplazamiento a lo largo del eje| ≤ 0.283·(distancia en el plano del haz + SAD 1 m) (semidiagonal
@@ -56,6 +60,8 @@ import {
   getShieldingEnergyKey,
   tvlTransmission,
 } from '@/lib/shieldingMath';
+import { MODALIDAD_NUCLIDO_TERAPIA, materialGPCatalogo, transmisionReglaCache } from '@/lib/terapiaEspectroGP';
+import { ajusteTG108Catalogo, transmisionTG108 } from '@/lib/transmisionTG108';
 import { PREBLINDAJE_MM, TABLA_B_1, TABLA_C_1, transmisionArcher, transmisionTC, type Archer, type MaterialNCRP147 } from '@/lib/ncrp147';
 import {
   OBLICUIDAD_MAX_DATOS_DEG,
@@ -105,6 +111,8 @@ export type MetodoTransmision =
   | 'NCRP147_ARCHER'
   | 'ARCHER_MATERIAL'
   | 'TVL_MATERIAL'
+  | 'ANS643_GP_REGLA'
+  | 'TG108_TABLA_V'
   | 'SIN_MATERIAL';
 
 export interface CapaBlindaje { materialCode: string; thickness_mm: number }
@@ -371,7 +379,7 @@ export function enHazPrimario(source: RadiationSource, x: number, y: number, sca
   return aLoLargo <= SEMIDIAGONAL_CAMPO_MAX * (enPlano + SAD_M) + EPS;
 }
 
-/** Transmisión de una capa con el modelo de la Fase 1 (K₀ único): se conserva para el resto de modalidades. */
+/** Transmisión de una capa con K₀ único: medicina nuclear con el motor de barreras (GP / TG-108); el resto, Fase 1. */
 export function transmisionCapa(
   source: RadiationSource,
   barrierType: Barrier['barrierType'],
@@ -407,6 +415,19 @@ export function transmisionCapa(
       return { transmision: clampTransmission(transmisionArcher(recorrido_mm, ajuste)), metodo: 'NCRP147_ARCHER' };
     }
     return { transmision: archerTransmission(recorrido_mm, material, 0), metodo: 'ARCHER_MATERIAL' };
+  }
+
+  // Medicina nuclear (H1 de la revisión del #58): la transmisión del motor de barreras, por radionúclido y material.
+  if (mod.category === 'nuclear') {
+    const nuc = MODALIDAD_NUCLIDO_TERAPIA[mod.id];
+    if (nuc) {
+      const { mat, escala } = materialGPCatalogo(material);
+      return { transmision: clampTransmission(transmisionReglaCache(nuc, mat, recorrido_mm / 10 / escala)), metodo: 'ANS643_GP_REGLA' };
+    }
+    if (getShieldingEnergyKey(source) === '511keV') {
+      const { material: m, escala } = ajusteTG108Catalogo(material);
+      return { transmision: clampTransmission(transmisionTG108(m, recorrido_mm / escala)), metodo: 'TG108_TABLA_V' };
+    }
   }
 
   return { transmision: tvlTransmission(recorrido_mm, material, getShieldingEnergyKey(source)), metodo: 'TVL_MATERIAL' };
