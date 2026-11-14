@@ -14,7 +14,15 @@ export interface SPECTRadionuclide {
   tenthValueLead_mm: number; tenthValueConcrete_mm: number;
 }
 
-/** Material del diálogo → material del catálogo para `terapiaEspectroGP` (yeso por equivalencia másica con concreto 2.35). */
+/**
+ * Material del diálogo → material del catálogo para `terapiaEspectroGP`. Yeso (placa, 0.705 g/cm³) por equivalencia
+ * másica con concreto ordinario 2.35 (revisión del #58, H4): con la composición del yeso CaSO₄·2H₂O de PNNL-15870 Rev. 1
+ * (McConn et al. 2011, «Gypsum (Plaster of Paris)»: H 2.34 %, O 55.76 %, S 18.62 %, Ca 23.28 % en masa) y NIST XCOM,
+ * su µ/ρ es MAYOR que el del concreto ordinario de NIST en todo el intervalo útil (×1.10 a 100 keV, ×1.05 a 140 keV,
+ * ×1.02 a 200 keV, ×1.007 a 400 keV, ×1.004 a 1 MeV; `scripts/fase11_xcom_mu_rho.json`). Tratarlo como concreto de la
+ * misma masa subestima su atenuación: el espesor de yeso resultante es conservador. El buildup del concreto (Z efectivo
+ * algo menor) tampoco queda por debajo del del yeso.
+ */
 const MATERIAL_SPECT: Record<'lead' | 'concrete' | 'gypsum', { code: string; density: number }> = {
   lead: { code: 'PB', density: 11.35 },
   concrete: { code: 'CONCRETE235', density: 2.35 },
@@ -37,7 +45,7 @@ function espesorSPECT(symbol: string, material: 'lead' | 'concrete' | 'gypsum', 
  * XCOM en concreto, sin buildup) quedaban cortas en concreto (I-123: 70 mm por TVL, 140 mm a B = 0.01 frente a 273 mm
  * del GP) y daban otro resultado que el diálogo de Medicina Nuclear para el mismo nucleido. Ahora la transmisión y los
  * espesores salen de `terapiaEspectroGP` (espectro ENSDF completo con Iγ ≥ 0.1 % y buildup GP de ANSI/ANS-6.4.3; el
- * mayor con el haz estrecho a la línea dura en I-131 y en los diagnósticos cuya línea dura es la dominante), igual que
+ * mayor con el haz estrecho a la línea dura cuando ésta aporta ≥ 2 % del kerma: I-131, Tc-99m, Tl-201, In-111, Sm-153), igual que
  * en los demás diálogos. `tenthValueLead_mm` y `tenthValueConcrete_mm` son el primer espesor de esa regla (B = 0.1) y
  * sólo se muestran. IPEM Report 109 es de pago y no se pudo contrastar; sus valores no se copian aquí.
  */
@@ -64,9 +72,14 @@ export function transmisionSPECT(rad: SPECTRadionuclide, material: 'lead' | 'con
   return transmisionRegla(nuclidoSPECT(rad.symbol), mat, t_mm / 10 / escala);
 }
 
-/** Texto del método para el diálogo. */
-export function metodoSPECT(rad: SPECTRadionuclide): string {
-  return metodoEspectro(nuclidoSPECT(rad.symbol), null);
+/** Nota de la traza del yeso (H4 de la revisión del #58). */
+export const NOTA_YESO_IPEM =
+  'yeso = concreto ordinario de la misma masa (µ/ρ del CaSO₄·2H₂O de PNNL-15870 Rev. 1 ≥ concreto en NIST XCOM: conservador)';
+
+/** Texto del método para el diálogo; con pared de yeso añade la nota de la equivalencia másica. */
+export function metodoSPECT(rad: SPECTRadionuclide, material?: 'lead' | 'concrete' | 'gypsum'): string {
+  const m = metodoEspectro(nuclidoSPECT(rad.symbol), null);
+  return material === 'gypsum' ? `${m}; ${NOTA_YESO_IPEM}` : m;
 }
 
 // IPEM 109 — Scatter factors per procedure type (kerma scatter per patient at 1m, uGy)

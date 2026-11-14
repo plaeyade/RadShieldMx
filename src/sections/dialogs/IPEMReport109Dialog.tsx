@@ -78,7 +78,7 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
             <p>• Kerma = N_pacientes × A_admin(GBq) × Γ(uSv·m²/GBq·h) × t_imaging(h) / d²(m²)</p>
             <p>• Tc-99m Γ=0.0593 | Tl-201 Γ=0.0364 | I-123 Γ=0.0583 | I-131 Γ=0.0595 | Ga-67 Γ=0.0215</p>
             {SPECT_RADIONUCLIDES.filter(r => procedures.some(p => p.radionuclide === r.symbol)).map(r => (
-              <p key={r.symbol}>• {r.symbol}: {metodoSPECT(r)}; primer TVL Pb {r.tenthValueLead_mm.toFixed(2)} mm, concreto {r.tenthValueConcrete_mm.toFixed(0)} mm</p>
+              <p key={r.symbol}>• {r.symbol}: {metodoSPECT(r, wallMaterial)}; primer TVL Pb {r.tenthValueLead_mm.toFixed(2)} mm, concreto {r.tenthValueConcrete_mm.toFixed(0)} mm</p>
             ))}
           </div>
         </div>
