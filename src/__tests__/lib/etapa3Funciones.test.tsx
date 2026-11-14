@@ -32,6 +32,14 @@ describe('ventilación Ar-41', () => {
     expect(con.emisionChimenea_Bq_s).toBeCloseTo(con.concentracionFinIrradiacion_Bq_m3 * (10 * 120) / 3600, 6);
   });
 
+  it('avisa por debajo de 6 renovaciones/h (ASHRAE 170-2021, Tabla 8-1)', () => {
+    const base = { volumenSala_m3: 100, flujoTermico_n_cm2_s: 1e5, horasIrradiacion: 1 };
+    const bajo = calcularVentilacionAr41({ ...base, renovaciones_h: 4 });
+    expect(bajo.advertencias.join(' ')).toContain('Menos de 6 renovaciones/h');
+    const ok = calcularVentilacionAr41({ ...base, renovaciones_h: 6 });
+    expect(ok.advertencias.join(' ')).not.toContain('renovaciones/h (ASHRAE');
+  });
+
   it('límites de 10 CFR 20 Ap. B y validación de entradas', () => {
     expect(AR41.DAC_Bq_m3).toBeCloseTo(1.11e5, -2);
     expect(AR41.efluente_Bq_m3).toBeCloseTo(370, 6);
