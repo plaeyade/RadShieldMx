@@ -42,6 +42,7 @@ Revisión: 2026-11-13.
 | `src/lib/normativaMx.ts`, `controlledZoneFeasibility.ts` | Requisitos de medicina nuclear | NOM-040-NUCL-2016 (DOF 04-08-2016) | Abierto (DOF) |
 | `src/lib/normativaMx.ts` | Egreso de pacientes | NOM-013-NUCL-2009 | Abierto (DOF) |
 | `src/lib/normativaMx.ts` | Teleterapia con aceleradores | NOM-033-NUCL-2016 (DOF 04-08-2016) | Abierto (DOF) |
+| `src/lib/ventilacionBunker.ts` | Aviso por debajo de 3 renovaciones/h en la bóveda | Decisión del proyecto. ANSI/ASHRAE/ASHE Standard 170-2021, *Ventilation of Health Care Facilities*. ASHRAE, Peachtree Corners (GA), 2021 (sustituye a la 170-2017), no tiene fila para bóveda de ciclotrón ni búnker de linac; la más cercana, «Cancer treatment area» (Tabla 8-1), pide 6 renovaciones/h totales y 2 de aire exterior. El hot lab de medicina nuclear (Tabla 7-1) pide presión negativa, 6 renovaciones/h y todo el aire extraído al exterior | De pago (ASHRAE) |
 | Bloques HD (`docs/validacion-bloques-hd.md`) | Atenuación medida de bloques de alta densidad | ININ, informe técnico LSCD-589 (2024) | Informe de laboratorio |
 
 Datos de buildup del método punto-kernel: Trubey DK, ORNL/RSIC-49, 1988, y su revisión NUREG/CR-5740 (ORNL/RSIC-49/R1,
@@ -58,6 +59,7 @@ barita ni de concreto pesado: queda abierto).
 - IPEM Report 75, 2.ª ed. (2017) e IPEM Report 109 (2014) (de pago).
 - McGinley PH. *Shielding Techniques for Radiation Oncology Facilities*, 2.ª ed. Medical Physics Publishing, 2002.
 - NRC. NUREG-1556 vol. 9 rev. 3, *Program-Specific Guidance About Medical Use Licenses* (2019).
+- ANSI/ASHRAE/ASHE Standard 170-2021, *Ventilation of Health Care Facilities*. ASHRAE, Peachtree Corners (GA), 2021 (sustituye a la 170-2017) (de pago; sustituye a la 170-2013).
 
 ## 3. Sustituidas o por verificar
 
