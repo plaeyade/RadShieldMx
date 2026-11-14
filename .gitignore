@@ -55,3 +55,7 @@ data/pdf/ncrp_147.pdf
 # Retirados de git (derechos de terceros; docs/fuentes-locales.md)
 data/pdf/tg108_pet_shielding.pdf
 data/pdf/room_shield_design.pdf
+
+# Python
+__pycache__/
+*.pyc

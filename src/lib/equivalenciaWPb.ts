@@ -5,7 +5,7 @@
  * Las piezas de blindaje son aleaciones pesadas de W (ASTM B777, W-Ni-Fe o W-Ni-Cu con 90–97 % de W, 16.85–18.85 g/cm³);
  * el aglutinante (Ni, Fe, Cu) atenúa por gramo mucho menos que el W fuera de la zona Compton, así que el factor crece:
  *   · MV (pares): 1.069 a 6 MeV, 1.084 a 10, 1.098 a 18 MeV (W puro: 1.043–1.052) → con el factor único el TVL de W
- *     quedaba ≈ 4 % corto en 6–20 MV; y 1.082 a 1 MeV, que fija el factor de 4 y 6 MV (ver «Energías de MV»);
+ *     quedaba ≈ 4 % corto en 6–20 MV; y 1.082 a 1 MeV, que fija el factor de 6 MV (no hay clave de 4 MV) (ver «Energías de MV»);
  *   · medicina nuclear (fotoeléctrico): 1.21 a 511 keV, 1.39 a 140.5 keV (W puro 1.17 y 1.27);
  *   · entre los bordes K del W (69.525 keV) y del Pb (88.0045 keV) el W atenúa MÁS por gramo (factor 0.31–0.34): ahí la
  *     equivalencia por masa no es conservadora en sentido inverso (Pb por W), y se toma el máximo sobre el espectro.
