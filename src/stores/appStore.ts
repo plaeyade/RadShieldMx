@@ -12,7 +12,7 @@ import { create } from "zustand";
 
 // ─── Dialog registry ───
 const DIALOG_NAMES = [
-  "export","cnsns","mc","projects","viewer3d","maze","quickBarrier","equipmentDB",
+  "memoria","export","cnsns","mc","projects","viewer3d","maze","quickBarrier","equipmentDB",
   "mcCloud","mcConfig","barrierCalculator","batchImport","costOptimizer","neutron",
   "seasonal","uncertainty","ventilation","dicom","techSpecs","cnsnsDashboard",
   "dxfViewer","auditTrail","epaGuidance","shleien","gammaKnife","braquiCo60",
@@ -147,6 +147,14 @@ export const DIALOGOS_REDIRIGIDOS: Readonly<Record<string, string>> = {
   solutionField3D: 'viewer3d',
   uncertainty: 'gumUncertainty',
   validationDashboard: 'ncrpValidation',
+  // Fase 12, paso 3: un solo flujo de memoria analítica y CNSNS (radshield/memoria@1) en el menú 5.
+  memoriaAI: 'memoria',
+  memoriaWizard: 'memoria',
+  cnsns: 'memoria',
+  cnsnsAutoReport: 'memoria',
+  pdfReport: 'memoria',
+  regulatoryReport: 'memoria',
+  batchReportExporter: 'memoria',
 };
 
 export const resolverDialogo = (name: string): string => DIALOGOS_REDIRIGIDOS[name] ?? name;

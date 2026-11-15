@@ -110,7 +110,7 @@ export default function Minimap({ floorPlan, viewport, onViewportChange, width =
   }, [bounds, minimapScale, viewport, onViewportChange]);
 
   return (
-    <div className="absolute bottom-4 right-4 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-40" style={{ width, height }}>
+    <div className="absolute bottom-4 right-4 box-content bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-40" style={{ width, height }}>
       <canvas
         ref={canvasRef}
         width={width}

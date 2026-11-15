@@ -68,7 +68,7 @@ export default function DxfImportReviewPanel({
     : calculationStatus === 'blocked-no-source'
       ? 'Agregue o confirme una fuente/equipo radiologico y vuelva a ejecutar Calcular.'
       : calculationStatus === 'complete'
-        ? 'Abra Memoria IA o Evidence Pack para usar la evidencia CAD/DXF revisada.'
+        ? 'Abra la memoria analítica o el Evidence Pack para usar la evidencia CAD/DXF revisada.'
         : calculationStatus === 'error'
           ? 'Revise advertencias, escala y fuentes antes de repetir el calculo.'
           : 'Ejecute Calcular para vincular barreras DXF con resultados preliminares.';
@@ -98,7 +98,7 @@ export default function DxfImportReviewPanel({
   return (
     <section
       data-testid="dxf-import-review-panel"
-      className="fixed bottom-9 right-4 z-[65] w-[340px] max-w-[calc(100vw-2rem)] rounded-md border border-slate-200 bg-white/98 shadow-xl"
+      className="fixed bottom-9 right-4 z-[65] w-[340px] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-7.5rem)] overflow-y-auto rounded-md border border-slate-200 bg-white shadow-xl"
       aria-label="Revision de geometria DXF para memoria"
     >
       <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-3 py-2">
@@ -263,7 +263,7 @@ export default function DxfImportReviewPanel({
             <Calculator className="mr-1 h-3.5 w-3.5" /> Calcular
           </Button>
           <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={onOpenMemoriaAI} data-testid="dxf-review-memoria">
-            <FileText className="mr-1 h-3.5 w-3.5" /> Memoria IA
+            <FileText className="mr-1 h-3.5 w-3.5" /> Memoria analítica
           </Button>
           <Button size="sm" variant="outline" className="h-8 text-[11px]" onClick={onOpenEvidencePack} data-testid="dxf-review-evidence">
             <FileSearch className="mr-1 h-3.5 w-3.5" /> Evidencia

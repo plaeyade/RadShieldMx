@@ -27,6 +27,11 @@ export interface CadBimDxfImportOptions {
   prioritizeRepresentativeSegments?: boolean;
   /** Material por capa elegido por el usuario (gana a `REGLAS_MATERIAL_CAPA`). */
   layerMaterialOverrides?: Record<string, string>;
+  /**
+   * Espesor instalado por capa elegido en el asistente de capas (mm; gana al espesor declarado en el nombre). null
+   * quita el espesor declarado (la barrera queda «por calcular»); sin clave se usa la regla del nombre.
+   */
+  layerThicknessOverrides?: Record<string, number | null>;
 }
 
 export interface CadBimDxfImportImpact {
@@ -149,14 +154,14 @@ export function espesorDeclaradoCapa(layer: string): number | null {
   return m[2] === 'm' ? v * 1000 : m[2] === 'cm' ? v * 10 : v;
 }
 
-function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint, materialOverride?: string): Barrier {
+function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint, materialOverride?: string, thicknessOverride?: number | null): Barrier {
   // Material, tipo y espesor se leen del nombre LOCAL de la capa (sin el prefijo del XREF ligado).
   const local = nombreLocalCapa(layer);
   const materialCode = materialOverride || inferMaterial(layer);
   // Fase 4: el espesor se lee sólo de la capa (antes también del nombre «DXF n (…)», que daba «n mm»). Si la
   // capa lo declara con unidad, es el espesor INSTALADO (`thickness_mm`): el motor de campo lo atenúa y la
   // verificación lo compara con el requerido.
-  const declarado = espesorDeclaradoCapa(local);
+  const declarado = thicknessOverride !== undefined ? thicknessOverride : espesorDeclaradoCapa(local);
   const tipo = inferBarrierType(local);
   return {
     id,
@@ -336,6 +341,7 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
     segment.start,
     segment.end,
     options.layerMaterialOverrides?.[segment.layer],
+    options.layerThicknessOverrides && segment.layer in options.layerThicknessOverrides ? options.layerThicknessOverrides[segment.layer] : undefined,
   ));
   const sinMaterial = [...new Set(limitedSegments.map((sg) => sg.layer))]
     .filter((l) => !options.layerMaterialOverrides?.[l] && !inferirMaterialCapa(l).declarado);

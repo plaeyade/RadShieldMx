@@ -1,0 +1,639 @@
+{
+  "$id": "https://github.com/plaeyade/RadShieldMx/docs/esquemas/radshield-memoria-1.schema.json",
+  "title": "radshield/memoria@1",
+  "description": "Memoria analítica de blindaje (NOM-040-NUCL-2016 §4.8) generada por RadShield-MX; DOCX y PDF se generan de este objeto.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contrato": {
+      "type": "string",
+      "const": "radshield/memoria@1"
+    },
+    "id": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "origen": {
+      "type": "object",
+      "properties": {
+        "proyecto": {
+          "type": "string"
+        },
+        "app": {
+          "type": "string"
+        },
+        "fecha": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "motor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "proyecto",
+        "app",
+        "fecha",
+        "motor"
+      ],
+      "additionalProperties": false
+    },
+    "preliminar": {
+      "type": "boolean",
+      "const": true
+    },
+    "instalacion": {
+      "type": "object",
+      "properties": {
+        "nombre": {
+          "type": "string"
+        },
+        "razonSocial": {
+          "type": "string"
+        },
+        "domicilio": {
+          "type": "string"
+        },
+        "responsableSR": {
+          "type": "string"
+        },
+        "elaboro": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "tipoInstalacion": {
+          "type": "string"
+        },
+        "clasificacionNOM003": {
+          "type": "string"
+        },
+        "nivel": {
+          "type": "string"
+        },
+        "actividades": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "colindancias": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "orientacion": {
+                "type": "string"
+              },
+              "descripcion": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "orientacion",
+              "descripcion"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "escala_m_px": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "nombre",
+        "razonSocial",
+        "domicilio",
+        "responsableSR",
+        "elaboro",
+        "revision",
+        "tipoInstalacion",
+        "clasificacionNOM003",
+        "nivel",
+        "actividades",
+        "colindancias",
+        "escala_m_px"
+      ],
+      "additionalProperties": false
+    },
+    "objetivo": {
+      "type": "string"
+    },
+    "alcance": {
+      "type": "string"
+    },
+    "marcoNormativo": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "aplica": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "titulo",
+          "aplica"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fuentes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "modalidad": {
+            "type": "string"
+          },
+          "modalidadId": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "metodo": {
+            "type": "string"
+          },
+          "posicion_m": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          },
+          "alturaFuente_m": {
+            "type": "number"
+          },
+          "carga": {
+            "type": "string"
+          },
+          "detalleCarga": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "categoria",
+          "metodo",
+          "posicion_m",
+          "alturaFuente_m",
+          "carga",
+          "detalleCarga"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ocupaciones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "barrera",
+              "region"
+            ]
+          },
+          "zona": {
+            "type": "string",
+            "enum": [
+              "controlada",
+              "no controlada"
+            ]
+          },
+          "T": {
+            "type": "number"
+          },
+          "P_mSv_semana": {
+            "type": "number"
+          },
+          "P_T_mSv_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limiteDerivado_uSv_h": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "area",
+          "tipo",
+          "zona",
+          "T",
+          "P_mSv_semana",
+          "P_T_mSv_semana",
+          "limiteDerivado_uSv_h"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "criterios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "texto"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "metodo": {
+      "type": "object",
+      "properties": {
+        "normas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "descripcion": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "formulas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "expresion": {
+                "type": "string"
+              },
+              "donde": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "expresion",
+              "donde"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "normas",
+        "descripcion",
+        "formulas"
+      ],
+      "additionalProperties": false
+    },
+    "barreras": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "punto": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "secondary",
+              "leakage",
+              "scatter",
+              "nuclear"
+            ]
+          },
+          "material": {
+            "type": "string"
+          },
+          "U": {
+            "type": "number"
+          },
+          "T": {
+            "type": "number"
+          },
+          "P_mSv_semana": {
+            "type": "number"
+          },
+          "zona": {
+            "type": "string",
+            "enum": [
+              "controlada",
+              "no controlada"
+            ]
+          },
+          "kermaSinBlindaje_mSv_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requerido_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requeridoPb_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requeridoConcreto_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "instalado_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "margen_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "CUMPLE",
+              "NO_CUMPLE",
+              "SIN_CALCULO",
+              "SIN_ESPESOR",
+              "REVISAR_MATERIAL"
+            ]
+          },
+          "nota": {
+            "type": "string"
+          },
+          "norma": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "hipotesis": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "punto",
+          "area",
+          "nombre",
+          "tipo",
+          "material",
+          "U",
+          "T",
+          "P_mSv_semana",
+          "zona",
+          "kermaSinBlindaje_mSv_semana",
+          "requerido_mm",
+          "requeridoPb_mm",
+          "requeridoConcreto_mm",
+          "instalado_mm",
+          "margen_mm",
+          "estado",
+          "nota",
+          "norma",
+          "formula",
+          "hipotesis",
+          "avisos"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resultadosPorArea": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "barreras": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cumplen": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "conclusion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "area",
+          "barreras",
+          "cumplen",
+          "total",
+          "conclusion"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "conclusiones": {
+      "type": "object",
+      "properties": {
+        "cumplen": {
+          "type": "number"
+        },
+        "total": {
+          "type": "number"
+        },
+        "sinCalculo": {
+          "type": "number"
+        },
+        "sinEspesor": {
+          "type": "number"
+        },
+        "noCumplen": {
+          "type": "number"
+        },
+        "textos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "cumplen",
+        "total",
+        "sinCalculo",
+        "sinEspesor",
+        "noCumplen",
+        "textos"
+      ],
+      "additionalProperties": false
+    },
+    "referencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "cita": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cita"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "advertencias": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "contrato",
+    "id",
+    "sha256",
+    "origen",
+    "preliminar",
+    "instalacion",
+    "objetivo",
+    "alcance",
+    "marcoNormativo",
+    "fuentes",
+    "ocupaciones",
+    "criterios",
+    "metodo",
+    "barreras",
+    "resultadosPorArea",
+    "conclusiones",
+    "referencias",
+    "advertencias"
+  ],
+  "additionalProperties": false
+}

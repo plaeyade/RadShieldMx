@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('F591-F620 general improvements compact canvas, expandable QA and Memoria IA workflow', async ({ page }) => {
+test('F591-F620 general improvements compact canvas, expandable QA and Memoria workflow', async ({ page }) => {
   fs.mkdirSync(outputDir, { recursive: true });
   await bootWorkspace(page);
 
@@ -43,7 +43,9 @@ test('F591-F620 general improvements compact canvas, expandable QA and Memoria I
   const memoriaButton = page.getByTestId('f374-toolbar-quick-memoria');
   await expect(memoriaButton).toBeVisible({ timeout: 10_000 });
   await memoriaButton.click();
-  await expect(page.getByTestId('f611-f615-memoria-productive-workflow')).toBeVisible({ timeout: 10_000 });
+  // Fase 12, paso 3: el acceso rápido abre el flujo único de memoria (radshield/memoria@1); el panel F611-F615 era del
+  // asistente «Memoria IA», retirado.
+  await expect(page.getByTestId('memoria-unificada')).toBeVisible({ timeout: 10_000 });
   await page.screenshot({
     path: path.join(outputDir, '03_general_improvements_memoria_ia.png'),
     fullPage: true,
@@ -64,7 +66,7 @@ test('F591-F620 general improvements compact canvas, expandable QA and Memoria I
           'F591-F620 panel visible',
           'F550-F590 hidden by default in compact mode',
           'QA inspector expands F586-F590',
-          'Memoria IA shows F611-F615 productive workflow',
+          'Quick Memoria opens the unified radshield/memoria@1 flow',
         ],
       },
       null,

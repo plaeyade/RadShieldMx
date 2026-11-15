@@ -517,9 +517,20 @@ export function renderDXFToCanvas(
     showLayers?: string[];
     lineWidth?: number;
     showLabels?: boolean;
+    /**
+     * Fase 12, paso 4: vista sobre el encuadre a extensión (zoom 1, desplazamiento 0 = extensión). Pantalla =
+     * encuadre(p) · zoom + (dx, dy).
+     */
+    vista?: { zoom: number; dx: number; dy: number };
+    /** Capa resaltada (las demás se atenúan), p. ej. la fila bajo el cursor en el asistente de capas. */
+    resaltarCapa?: string | null;
+    /** Dibuja también capas ocultas (miniaturas del asistente). */
+    incluirOcultas?: boolean;
+    /** Rejilla, marco y pie informativo (por omisión true; false en miniaturas). */
+    decoracion?: boolean;
   }
 ): void {
-  const { width, height, padding = 40, showLayers, lineWidth = 1, showLabels = true } = options;
+  const { width, height, padding = 40, showLayers, lineWidth = 1, showLabels = true, vista, resaltarCapa = null, incluirOcultas = false, decoracion = true } = options;
   const { bounds, layers } = parsed;
 
   ctx.clearRect(0, 0, width, height);
@@ -530,20 +541,26 @@ export function renderDXFToCanvas(
   const contentH = height - padding * 2;
   const dxW = bounds.maxX - bounds.minX;
   const dxH = bounds.maxY - bounds.minY;
-  const scale = Math.min(contentW / (dxW || 1), contentH / (dxH || 1));
-  const offsetX = padding + (contentW - dxW * scale) / 2 - bounds.minX * scale;
-  const offsetY = padding + (contentH - dxH * scale) / 2 - bounds.minY * scale;
+  const z = vista && Number.isFinite(vista.zoom) && vista.zoom > 0 ? vista.zoom : 1;
+  const vdx = vista?.dx ?? 0;
+  const vdy = vista?.dy ?? 0;
+  const fit = Math.min(contentW / (dxW || 1), contentH / (dxH || 1));
+  const scale = fit * z;
+  const offsetX = padding + (contentW - dxW * fit) / 2 - bounds.minX * fit;
+  const offsetY = padding + (contentH - dxH * fit) / 2 - bounds.minY * fit;
 
   const transform = (p: DXFPoint) => ({
-    x: offsetX + p.x * scale,
-    y: height - (offsetY + p.y * scale), // Flip Y
+    x: (offsetX + p.x * fit) * z + vdx,
+    y: (height - (offsetY + p.y * fit)) * z + vdy, // Flip Y
   });
 
   // Grid
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = 0.5;
-  for (let gx = padding; gx < width - padding; gx += 50) { ctx.beginPath(); ctx.moveTo(gx, padding); ctx.lineTo(gx, height - padding); ctx.stroke(); }
-  for (let gy = padding; gy < height - padding; gy += 50) { ctx.beginPath(); ctx.moveTo(padding, gy); ctx.lineTo(width - padding, gy); ctx.stroke(); }
+  if (decoracion) {
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 0.5;
+    for (let gx = padding; gx < width - padding; gx += 50) { ctx.beginPath(); ctx.moveTo(gx, padding); ctx.lineTo(gx, height - padding); ctx.stroke(); }
+    for (let gy = padding; gy < height - padding; gy += 50) { ctx.beginPath(); ctx.moveTo(padding, gy); ctx.lineTo(width - padding, gy); ctx.stroke(); }
+  }
 
   // Draw entities by layer
   const colorMap: Record<number, string> = {
@@ -552,12 +569,13 @@ export function renderDXFToCanvas(
   };
 
   for (const [layerName, layer] of layers) {
-    if (!layer.visible) continue;
+    if (!layer.visible && !incluirOcultas) continue;
     if (showLayers && !showLayers.includes(layerName)) continue;
     const color = colorMap[layer.color] || '#94a3b8';
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    ctx.lineWidth = lineWidth;
+    ctx.globalAlpha = resaltarCapa && resaltarCapa !== layerName ? 0.18 : 1;
+    ctx.lineWidth = resaltarCapa === layerName ? lineWidth * 2.5 : lineWidth;
 
     for (const entity of layer.entities) {
       switch (entity.type) {
@@ -600,6 +618,9 @@ export function renderDXFToCanvas(
     }
   }
 
+  ctx.globalAlpha = 1;
+  if (!decoracion) return;
+
   // Border
   ctx.strokeStyle = '#334155';
   ctx.lineWidth = 1;
@@ -608,7 +629,7 @@ export function renderDXFToCanvas(
   // Info
   ctx.fillStyle = '#94a3b8';
   ctx.font = '10px sans-serif';
-  ctx.fillText(`DXF: ${parsed.entities.length} entidades | ${parsed.layers.size} capas | ${dxW.toFixed(1)} x ${dxH.toFixed(1)} ${parsed.unit}`, padding, height - 10);
+  ctx.fillText(`DXF: ${parsed.entities.length} entidades | ${parsed.layers.size} capas | ${dxW.toFixed(1)} x ${dxH.toFixed(1)} ${parsed.unit}${z !== 1 ? ` | zoom ×${z.toFixed(2)}` : ''}`, padding, height - 10);
 }
 
 // ─── DWG note ───

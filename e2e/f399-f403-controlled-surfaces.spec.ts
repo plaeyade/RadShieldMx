@@ -10,7 +10,6 @@ test.beforeEach(async ({ page }) => {
 const fullscreenSurfaces = [
   ['e2e-open-evidence-pack', 'f392-evidence-pack-fullscreen-shell'],
   ['e2e-open-manual', 'f393-manual-fullscreen-shell'],
-  ['e2e-open-memoria-wizard', 'f394-memoria-analitica-fullscreen-shell'],
   ['e2e-open-layout-bunker', 'f395-layout-bunker-fullscreen-shell'],
   ['e2e-open-dashboard', 'f396-dashboard-fullscreen-shell'],
   ['e2e-open-checklist-cnsns', 'f397-checklist-cnsns-fullscreen-shell'],

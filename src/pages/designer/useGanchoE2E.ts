@@ -20,6 +20,8 @@ export function useGanchoE2E() {
         cerrarTodo: () => s.closeAll(),
         plano: () => useProyectoStore.getState().floorPlan,
         resultados: () => useProyectoStore.getState().barrierResults,
+        // Fase 12, paso 4: mapeos de capas guardados por el asistente de capas.
+        mapeosCapas: () => useProyectoStore.getState().mapeosCapas,
         proyecto: () => {
           const p = useProyectoStore.getState();
           return {
