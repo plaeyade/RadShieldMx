@@ -5,6 +5,8 @@
 import { resolverDialogo } from '@/stores/appStore';
 import { describe, it, expect } from 'vitest';
 import { useAppStore } from '@/stores/appStore';
+import { useProyectoStore } from '@/stores/proyecto';
+import { useCanvasStore } from '@/stores/canvasStore';
 
 // Helper to reset store between tests
 function resetStore() {
@@ -13,7 +15,7 @@ function resetStore() {
   s.setIsCalculating(false);
   s.setMcJob(null);
   s.setLastResult(null);
-  s.setActiveTool('select');
+  useProyectoStore.getState().setActiveTool('select');
   s.setShowSplash(false);
 }
 
@@ -65,28 +67,25 @@ describe('appStore — Dialog Management', () => {
   });
 });
 
-describe('appStore — Canvas State', () => {
+// Fase 12, paso 1: el estado del lienzo dejó appStore y vive en el almacén único del proyecto.
+describe('almacén del proyecto — estado del lienzo', () => {
   it('default active tool is "select"', () => {
-    resetStore();
-    expect(useAppStore.getState().activeTool).toBe('select');
+    useProyectoStore.getState().reset();
+    expect(useProyectoStore.getState().activeTool).toBe('select');
+    expect(useAppStore.getState()).not.toHaveProperty('activeTool');
   });
 
-  it('setActiveTool changes the active tool', () => {
-    resetStore();
-    useAppStore.getState().setActiveTool('barrier');
-    expect(useAppStore.getState().activeTool).toBe('barrier');
-    // Reset for other tests
-    useAppStore.getState().setActiveTool('select');
+  it('setActiveTool changes the active tool (también con función)', () => {
+    useProyectoStore.getState().setActiveTool('barrier');
+    expect(useProyectoStore.getState().activeTool).toBe('barrier');
+    useProyectoStore.getState().setActiveTool((t) => (t === 'pan' ? 'select' : 'pan'));
+    expect(useProyectoStore.getState().activeTool).toBe('pan');
+    useProyectoStore.getState().setActiveTool('select');
   });
 
-  it('toggleSidebar flips sidebar state', () => {
-    resetStore();
-    useAppStore.getState().setActiveTool('select');
-    const initial = useAppStore.getState().sidebarCollapsed;
-    useAppStore.getState().toggleSidebar();
-    expect(useAppStore.getState().sidebarCollapsed).toBe(!initial);
-    // Reset
-    useAppStore.getState().toggleSidebar();
+  it('useCanvasStore es el mismo almacén (sin copias que sincronizar)', () => {
+    expect(useCanvasStore).toBe(useProyectoStore);
+    expect(useAppStore.getState()).not.toHaveProperty('floorPlan');
   });
 });
 
@@ -124,17 +123,18 @@ describe('appStore — Calculation State', () => {
   });
 });
 
-describe('appStore — FloorPlan', () => {
+describe('almacén del proyecto — FloorPlan e historial', () => {
   it('has default floorPlan', () => {
-    resetStore();
-    const { floorPlan } = useAppStore.getState();
+    useProyectoStore.getState().reset();
+    const { floorPlan } = useProyectoStore.getState();
     expect(floorPlan.id).toBe('plan-1');
     expect(floorPlan.barriers).toEqual([]);
     expect(floorPlan.sources).toEqual([]);
   });
 
-  it('setFloorPlan updates floorPlan', () => {
-    resetStore();
+  it('setFloorPlan updates floorPlan; deshacer/rehacer como useUndoRedo (sin apilar cambios iguales)', () => {
+    const st = useProyectoStore.getState;
+    st().reset();
     const newPlan = {
       id: 'plan-2',
       name: 'Test Plan',
@@ -146,15 +146,18 @@ describe('appStore — FloorPlan', () => {
       sources: [],
       occupiedRegions: [],
     };
-    useAppStore.getState().setFloorPlan(newPlan as any);
-    expect(useAppStore.getState().floorPlan.name).toBe('Test Plan');
-    expect(useAppStore.getState().floorPlan.barriers.length).toBe(1);
-    // Reset
-    useAppStore.getState().setFloorPlan({
-      id: 'plan-1', name: 'Plano de Blindaje 1', imageUrl: null,
-      scale_m_per_pixel: 0.01, width_pixels: 1000, height_pixels: 800,
-      barriers: [], sources: [], occupiedRegions: [],
-    } as any);
+    st().setFloorPlan(newPlan as any);
+    expect(st().floorPlan.name).toBe('Test Plan');
+    expect(st().floorPlan.barriers.length).toBe(1);
+    st().setFloorPlan((p) => ({ ...p }));
+    expect(st().pasado.length).toBe(1);
+    st().undo();
+    expect(st().floorPlan.id).toBe('plan-1');
+    expect(st().canRedo).toBe(true);
+    st().redo();
+    expect(st().floorPlan.name).toBe('Test Plan');
+    st().reset();
+    expect(st().canUndo).toBe(false);
   });
 });
 

@@ -41,7 +41,9 @@ import Minimap from '@/components/Minimap';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import SkipToContent from '@/components/SkipToContent';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useUndoRedo } from '@/hooks/useUndoRedo';
+import { useProyectoStore, PLANO_PREDETERMINADO, type HerramientaLienzo } from '@/stores/proyecto';
+import { useGanchoE2E } from '@/pages/designer/useGanchoE2E';
+import { useCalculoProyecto } from '@/pages/designer/useCalculoProyecto';
 import { useAuth } from '@/hooks/useAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -89,7 +91,6 @@ import type { F530F534PlacementPoint } from '@/lib/f530F534EquipmentPlacementPre
 import { buildF545F549GhostSourceCommit } from '@/lib/f545F549GhostSourceCommit';
 import StatusBar from '@/sections/StatusBar';
 import WelcomeScreen from '@/sections/WelcomeScreen';
-import { useCanvasStore } from '@/stores/canvasStore';
 import GuiaPasoAPaso, { type AccionesGuia } from '@/components/GuiaPasoAPaso';
 import { guardarProgreso, leerProgreso, reducirGuia, type AccionGuia, type ProgresoGuia } from '@/lib/guiaPasos';
 import { NOMBRE_EJEMPLO_GUIADO, aplicarOcupacion, esPlanoDemoAntiguo, muestraFuentes, muestraParedes, muestraRegiones, planoTieneContenido, planoVacio } from '@/lib/ejemploGuiado';
@@ -351,19 +352,10 @@ const TutorialDialog = lazy(() => import('@/sections/dialogs/TutorialDialog'));
 /** Fase 10: nombre de archivo seguro (el ejemplo «PET/CT» llevaba «/» y el navegador descartaba el nombre). */
 const nombreArchivo = (nombre: string) => (nombre || 'proyecto').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
 
-type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
+type Tool = HerramientaLienzo;
 
-const defaultFloorPlan: FloorPlan = {
-  id: 'plan-1',
-  name: 'Plano de Blindaje 1',
-  imageUrl: null,
-  scale_m_per_pixel: 0.01,
-  width_pixels: 1000,
-  height_pixels: 800,
-  barriers: [],
-  sources: [],
-  occupiedRegions: []
-};
+/** Fase 12: el plano vacío vive en el almacén del proyecto (src/stores/proyecto). */
+const defaultFloorPlan: FloorPlan = PLANO_PREDETERMINADO;
 
 function DialogFallback() {
   return (
@@ -374,90 +366,66 @@ function DialogFallback() {
 }
 
 export default function ShieldingDesigner() {
-  const { state: floorPlan, setState: setFloorPlan, undo, redo, canUndo, canRedo, reset: resetFloorPlan } = useUndoRedo<FloorPlan>(defaultFloorPlan, { maxHistory: 50 });
-  const [activeTool, setActiveTool] = useState<Tool>('select');
-  // v85: SourceSelector + SmartBarrier AI
-  
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
-  // [ZUSTAND] Replaced: const [showExportDialog, setShowExportDialog] = useState(false);
-  // [ZUSTAND] Replaced: const [showCNSNSDialog, setShowCNSNSDialog] = useState(false);
-  // [ZUSTAND] Replaced: const [showMCDialog, setShowMCDialog] = useState(false);
-  // [ZUSTAND] Replaced: const [showProjectDialog, setShowProjectDialog] = useState(false);
+  // Fase 12, paso 1: plano, historial, herramienta, selección y resultados salen del almacén único del proyecto
+  // (src/stores/proyecto). Antes: useUndoRedo local + canvasStore sincronizados con efectos + useState sueltos.
+  const floorPlan = useProyectoStore((s) => s.floorPlan);
+  const setFloorPlan = useProyectoStore((s) => s.setFloorPlan);
+  const undo = useProyectoStore((s) => s.undo);
+  const redo = useProyectoStore((s) => s.redo);
+  const canUndo = useProyectoStore((s) => s.canUndo);
+  const canRedo = useProyectoStore((s) => s.canRedo);
+  const resetFloorPlan = useProyectoStore((s) => s.reset);
+  const activeTool = useProyectoStore((s) => s.activeTool);
+  const setActiveTool = useProyectoStore((s) => s.setActiveTool);
+  const selectedSourceId = useProyectoStore((s) => s.selectedSourceId);
+  const setSelectedSourceId = useProyectoStore((s) => s.setSelectedSourceId);
+  const { barrierResults, setBarrierResults, sampleLines, setSampleLines, calculationStatus, setCalculationStatus, isDirty, setIsDirty, lastSaved, setLastSaved } = useCalculoProyecto();
   // [ZUSTAND] viewer3d
-  // const [show3DDialog, setShow3DDialog] = useState(false);
   // [ZUSTAND] maze
-  // const [showMazeDialog, setShowMazeDialog] = useState(false);
   // [ZUSTAND] quickBarrier
-  // const [showQuickDialog, setShowQuickDialog] = useState(false);
   // [ZUSTAND] equipmentDB
-  // const [showEquipmentDialog, setShowEquipmentDialog] = useState(false);
   // [ZUSTAND] mcCloud
   // [ZUSTAND] mcConfig
   
   // [ZUSTAND] floorCeiling
   
   // [ZUSTAND] dashboardCalc
-  // const [showDashboardCalcDialog, setShowDashboardCalcDialog] = useState(false);
   // [ZUSTAND] costEstimator
-  // const [showCostEstimatorDialog, setShowCostEstimatorDialog] = useState(false);
   // [ZUSTAND] cnsnsChecklist
-  // const [showCNSNSChecklistDialog, setShowCNSNSChecklistDialog] = useState(false);
   // MC dual-output config state
   const [mcJobConfig, setMcJobConfig] = useState<{ jobId: number; format: string; particles: number; jobName: string } | null>(null);
   // [ZUSTAND] mcResults — managed via calculationStore
   const [lastMCResult] = useState<string | null>(null);
   // [ZUSTAND] barrierCalculator
-  // const [showBarrierCalculatorDialog, setShowBarrierCalculatorDialog] = useState(false);
   // Dark mode
   const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
   // v11.0: 20 improvements dialogs
   // [ZUSTAND] batchImport
-  // const [showBatchImportDialog, setShowBatchImportDialog] = useState(false);
   // [ZUSTAND] costOptimizer
-  // const [showCostOptimizerDialog, setShowCostOptimizerDialog] = useState(false);
   // [ZUSTAND] neutron
-  // const [showNeutronDialog, setShowNeutronDialog] = useState(false);
   // [ZUSTAND] seasonal
-  // const [showSeasonalDialog, setShowSeasonalDialog] = useState(false);
   // [ZUSTAND] uncertainty
-  // const [showUncertaintyDialog, setShowUncertaintyDialog] = useState(false);
   // [ZUSTAND] ventilation
-  // const [showVentilationDialog, setShowVentilationDialog] = useState(false);
   // [ZUSTAND] dicom
-  // const [showDICOMDialog, setShowDICOMDialog] = useState(false);
   // [ZUSTAND] techSpecs
-  // const [showTechSpecsDialog, setShowTechSpecsDialog] = useState(false);
   // [ZUSTAND] cnsnsDashboard
-  // const [showCNSNSDashboardDialog, setShowCNSNSDashboardDialog] = useState(false);
   // [ZUSTAND] dxfViewer
-  // const [showDXFViewer, setShowDXFViewer] = useState(false);
   // [ZUSTAND] auditTrail
-  // const [showAuditTrailDialog, setShowAuditTrailDialog] = useState(false);
   // [ZUSTAND] epaGuidance
-  // const [showEPAGuidanceDialog, setShowEPAGuidanceDialog] = useState(false);
   // [ZUSTAND] shleien
-  // const [showShleienDialog, setShowShleienDialog] = useState(false);
   // [ZUSTAND] gammaKnife
-  // const [showGammaKnifeDialog, setShowGammaKnifeDialog] = useState(false);
   // [ZUSTAND] braquiCo60
-  // const [showBraquiCo60Dialog, setShowBraquiCo60Dialog] = useState(false);
   // [ZUSTAND] versaHD
-  // const [showVersaHDDialog, setShowVersaHDDialog] = useState(false);
   // [ZUSTAND] icru57
   // [ZUSTAND] icru96
   // v13.2: Consolidated library dialogs
   // [ZUSTAND] equipmentLibrary
-  // const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(false);
   // [ZUSTAND] referenceLibrary
-  // const [showReferenceLibrary, setShowReferenceLibrary] = useState(false);
   // [ZUSTAND] ncrp151Tables
-  // const [showNCRP151Tables, setShowNCRP151Tables] = useState(false);
   // v13.4: Shielding Calculator RadSHIELD Mx Protocol
   // [ZUSTAND] shieldingCalculator
-  // const [showShieldingCalculator, setShowShieldingCalculator] = useState(false);
   // v13.7: Memoria Analitica Wizard
-  
-  
+
   // v13.8: Plan Validator
   
   // v14.0: Equipment Shielding Wizard
@@ -465,21 +433,17 @@ export default function ShieldingDesigner() {
   // v14.1: Monte Carlo Simulation
   
   // v14.1: Cyclone KIUBE Wizard
-  
-  
+
   // v14.3: Gap analysis states
 
   // [ZUSTAND] showDashboard → store.dialogs["dashboard"]
-  // const [showDashboard, setShowDashboard] = useState(false);
   
   // v14.4: Special cases
   
   // v14.5: Bibliography
   // [ZUSTAND] showBibliography → store.dialogs["bibliography"]
-  // const [showBibliography, setShowBibliography] = useState(false);
   // v15: New dialogs (keyboardShortcuts → Zustand store)
-  
-  
+
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(() => {
     try {
       const forced = localStorage.getItem('radshield_force_welcome');
@@ -489,9 +453,6 @@ export default function ShieldingDesigner() {
     }
   });
   // v15: Status bar state
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [calculationStatus, setCalculationStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-  const [isDirty, setIsDirty] = useState(false);
   // v15: Command Palette
   
   // v15: Undo/Redo History Panel
@@ -502,40 +463,21 @@ export default function ShieldingDesigner() {
   
   const [helpContext] = useState('default');
   // v15: Visualization dialogs
-  
-  
-  
-  // v15.2: Category C dialogs
-  
-  
 
-  
+  // v15.2: Category C dialogs
+
   // v15.2: MicroShield patterns
-  
-  
-  
-  
-  
+
   // v15.2: Additional features (sketch, examples, CAD import)
-  
-  
-  
+
   // v16: New features
-  
-  
-  
-  
+
   // v17: Phy-X/PSD + Lead-free + Neutron removal
-  
-  
-  
+
   // v18: Nuclear Medicine Advanced + Theme Engine + BIM + Cloud Sync + Validation
 
-
   // [ZUSTAND] showAbout → store.dialogs["about"]
-  // const [showAbout, setShowAbout] = useState(false);
   // [ZUSTAND] showGlossary → store.dialogs["glossary"]
-  // const [showGlossary, setShowGlossary] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
   // v128: Re-added useStates for active dialogs (pending Zustand migration)
@@ -555,78 +497,40 @@ export default function ShieldingDesigner() {
   const [showSourceSelector, setShowSourceSelector] = useState(false);
 
   // [ZUSTAND] themeEngine, bimConnector, cloudSync, validationDashboard
-  // const [showThemeEngine, setShowThemeEngine] = useState(false);
-  // const [showBIMConnector, setShowBIMConnector] = useState(false);
-  // const [showCloudSync, setShowCloudSync] = useState(false);
-  // const [showValidationDashboard, setShowValidationDashboard] = useState(false);
   // v19: External Software Connector
   // [ZUSTAND] externalConnector
-  // const [showExternalConnector, setShowExternalConnector] = useState(false);
   // v20: BIMRAD + Collaboration + GATE PET/SPECT
-  
-  
-  
+
   // v21: Ejes 1, 2, 5 completos + Proteccion Industrial
-  
-  
-  
-  
-  // [ZUSTAND] Replaced: const [showAIAssistant, setShowAIAssistant] = useState(false);
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   // v22: Multi-Source Multi-Detector + PACS Integration
-  
-  
+
   // v23: Eje 3 Regulation + Python Integration
-  
-  
-  
-  
-  
+
   // v25: Native Monte Carlo
   
   // v26: Neutron + Bateman + NIST + Toolbox
-  
-  
-  
-  
+
   // v27: Electron Transport + STEP Import
-  
-  
+
   // v28: Manual de Usuario PDF
   // [ZUSTAND] showManual → store.dialogs["manual"]
-  // const [showManual, setShowManual] = useState(false);
   // v29: Real-Time 3D Design Exploration
   
   // v31: Dose Map Visualization
   
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   // v32: Shielding Optimizer + PACS Real + Electron Applicator
-  
-  
-  
+
   // v33: Voxel Phantoms + MCNP Cyclotron + Shapes Reconstruction + Equipment Manager
-  
-  
-  
-  
+
   // v34: Category Tools Dialog
   
   const [activeCategory, setActiveCategory] = useState<string>('diagnostic');
   // v35: Emergency Procedures
   
   // v38: Mosaic Atomics features
-  
-  
-  
-  
+
   // v39: PHITS, CADMesh, JENDL-5
   const [showPHITSGenerator, setShowPHITSGenerator] = useState(false);
   const [showDCHAINCalc, setShowDCHAINCalc] = useState(false);
@@ -635,8 +539,7 @@ export default function ShieldingDesigner() {
   // v40: Nuevas recomendaciones
 
   // v41: GitHub-inspired integrations (TopasGraphSim, pyshield, OpenXRayMC, matRad)
-  
-  
+
   const [showMonteCarloEngine, setShowMonteCarloEngine] = useState(false);
 
   // v41b: FLUKA.CERN + PENELOPE2023 + Therapy Dosimetry + Shielding Verification
@@ -648,22 +551,12 @@ export default function ShieldingDesigner() {
   const [showCADMapper, setShowCADMapper] = useState(false);
   
   // v46: Recommendations A-E — Engine improvements
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   // v47: St-Germain scatter method
   
   // v49: All remaining audit recommendations
   const [showAlbedo, setShowAlbedo] = useState(false);
-  
-  
-  
+
   const [showAuditLog, setShowAuditLog] = useState(false);
   
   // v82: Canvas panel visibility states
@@ -1044,8 +937,6 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const { calculateHeatmap, roundThickness } = useShieldingEngine();
 
   // RadShield floor-plan driven state
-  const [sampleLines, setSampleLines] = useState<import('@/hooks/useCanvas').CanvasSampleLine[]>([]);
-  const [barrierResults, setBarrierResults] = useState<import('@/hooks/useCanvas').CanvasBarrierResult[]>([]);
   const [showSampleLines, setShowSampleLines] = useState(true);
   const [showSamplePoints, setShowSamplePoints] = useState(true);
   const [showMaxima, setShowMaxima] = useState(true);
@@ -2044,48 +1935,16 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     exportarCSV: exportCSV,
   };
   const proyectoVacio = !planoTieneContenido(floorPlan);
-  // Fase 10: los diálogos que leen `useCanvasStore` (lote, mapas de dosis, auditoría, escenarios, envío CNSNS)
-  // nunca recibían el plano del diseñador y siempre veían un proyecto vacío; se sincroniza aquí.
-  // Revisión Fase 10: en ambos sentidos. «Aplicar al plano» del cálculo por lotes escribe en el store; sin la
-  // vuelta, el diseñador no lo veía y el siguiente cambio del lienzo lo pisaba. El ref evita el eco.
-  const planoSincronizadoRef = useRef<FloorPlan | null>(null);
-  useEffect(() => {
-    planoSincronizadoRef.current = floorPlan;
-    if (useCanvasStore.getState().floorPlan !== floorPlan) useCanvasStore.setState({ floorPlan });
-  }, [floorPlan]);
-  useEffect(() => useCanvasStore.subscribe((s) => {
-    if (s.floorPlan === planoSincronizadoRef.current) return;
-    planoSincronizadoRef.current = s.floorPlan;
-    setFloorPlan(s.floorPlan);
-  }), [setFloorPlan]);
+  // Fase 12: los diálogos que leen `useCanvasStore` comparten el almacén del diseñador (es un alias de
+  // `useProyectoStore`); ya no hacen falta los efectos de sincronización en ambos sentidos de la Fase 10.
   useEffect(() => {
     if (!ajustarVista || floorPlan.barriers.length === 0) return;
     setAjustarVista(false);
     zoomToFit();
   }, [ajustarVista, floorPlan.barriers.length, zoomToFit]);
 
-  // Pruebas E2E (sólo con la bandera local `radshield-e2e-controls`): abrir/cerrar diálogos del store y, desde la
-  // Fase 11, leer el plano y los resultados del cálculo para comparar las rutas (barra superior, lateral, F5).
-  const e2eRef = useRef({ setFloorPlan, barrierResults });
-  useEffect(() => { e2eRef.current = { setFloorPlan, barrierResults }; }, [setFloorPlan, barrierResults]);
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem('radshield-e2e-controls') !== 'true') return;
-      const s = useAppStore.getState();
-      (window as unknown as { __radshieldE2E?: unknown }).__radshieldE2E = {
-        dialogos: () => Object.keys(useAppStore.getState().dialogs),
-        abrir: (n: string) => useAppStore.getState().open(n),
-        cerrarTodo: () => s.closeAll(),
-        plano: () => useCanvasStore.getState().floorPlan,
-        resultados: () => e2eRef.current.barrierResults,
-        limpiarCalculo: (instalado: Record<string, number> = {}) => e2eRef.current.setFloorPlan(p => ({
-          ...p,
-          barriers: p.barriers.map(({ maxKerma: _k, requiredThickness_mm: _r, calculationTrace: _t, ...b }) =>
-            (b.id in instalado ? { ...b, thickness_mm: instalado[b.id], shieldingLayers: undefined } : b)),
-        })),
-      };
-    } catch { /* sin almacenamiento: sin gancho */ }
-  }, []);
+  // Pruebas E2E (sólo con la bandera local `radshield-e2e-controls`): src/pages/designer/useGanchoE2E.ts.
+  useGanchoE2E();
 
   return (
     <>

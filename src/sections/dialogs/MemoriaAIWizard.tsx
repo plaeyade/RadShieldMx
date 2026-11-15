@@ -51,6 +51,7 @@ import { buildF367F370ReleaseIntegration, formatF367F370ReleaseIntegrationText }
 import { buildF409OutputSurfaceIntegration, formatF409OutputSurfaceIntegrationText } from '@/lib/f409OutputSurfaceIntegration';
 import { buildF591F620GeneralImprovements, formatF591F620GeneralImprovementsMarkdown } from '@/lib/f591F620GeneralImprovements';
 import { useAppStore } from '@/stores/appStore';
+import { useProyectoStore } from '@/stores/proyecto';
 import type { FloorPlan } from '@/types/radshield';
 
 interface Props {
@@ -254,7 +255,8 @@ export default function MemoriaAIWizard({
       setStep(Math.min(Math.max(workflowAction.wizardStep, 0), STEPS.length - 1));
     }
     if (workflowAction.tool) {
-      useAppStore.getState().setActiveTool(workflowAction.tool);
+      // Fase 12: la herramienta activa vive en el almacén del proyecto (antes se escribía en appStore y el lienzo no la veía).
+      useProyectoStore.getState().setActiveTool(workflowAction.tool);
     }
     if (workflowAction.dialogName) {
       useAppStore.getState().open(workflowAction.dialogName);
