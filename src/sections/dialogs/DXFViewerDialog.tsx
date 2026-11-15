@@ -1,6 +1,7 @@
 // =============================================================================
 // DXFViewerDialog — Importar y visualizar archivos DXF con capas
-// Soporta: LINE, CIRCLE, ARC, LWPOLYLINE, TEXT/MTEXT
+// Soporta: LINE, CIRCLE, ARC, LWPOLYLINE, POLYLINE, TEXT/MTEXT e INSERT/bloques (explotados). DWG: conversión
+// local a DXF con LibreDWG-wasm (carga diferida, `@/lib/dwgImport`).
 // Capas interactivas (mostrar/ocultar), zoom, pan
 // =============================================================================
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
@@ -15,7 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { Upload, Layers, Eye, EyeOff, ZoomIn, ZoomOut, FileUp, Info, X, SendToBack, Search, CheckSquare, Square, Save, FolderOpen } from 'lucide-react';
 import { parseDXF, renderDXFToCanvas, type DXFParsed, type DXFLayer, isDWGFile, convertDWGNote } from '@/lib/dxfParser';
-import { importDXFToFloorPlan, previewDXFImportImpact, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
+import { importParsedDXFToFloorPlan, previewDXFImportImpact, type CadBimBridgeResult, type CadBimImportSummary } from '@/lib/medical3D/cadBimBridge';
+import { convertirDWGaDXF } from '@/lib/dwgImport';
 import { buildF213DxfLayerMappingQa, inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
@@ -126,9 +128,28 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // v14.5: DWG detection with conversion panel
+    const cargarContenidoDXF = (content: string, nombre: string, origen?: string) => {
+      const result = parseDXF(content);
+      const bridge = importParsedDXFToFloorPlan(result, nombre);
+      setParsed(result);
+      setImportSummary(bridge.summary);
+      setLastBridge(bridge);
+      setLastContent(content);
+      const savedPreset = loadDxfLayerRolePreset(nombre);
+      setLayerRoleOverrides(savedPreset?.roles || {});
+      setHasSavedLayerRolePreset(Boolean(savedPreset));
+      setFileName(nombre);
+      setDwgNotice(null);
+      setZoom(1);
+      const bloques = result.stats?.inserts ? `, ${result.stats.inserts} INSERT explotados` : '';
+      toast.success(`${origen ?? 'DXF'} cargado: ${result.entities.length} entidades${bloques}, ${bridge.summary.mappedBarriers} barreras detectadas`);
+      if (savedPreset) toast.info(`Preset de capas recuperado para ${nombre}`);
+    };
+
+    // DWG: conversión local a DXF con LibreDWG-wasm (sin servidor). Si falla, se muestra el aviso de conversión.
     if (file.name.toLowerCase().endsWith('.dwg')) {
-      const signatureValid = isDWGFile(await file.arrayBuffer());
+      const buffer = await file.arrayBuffer();
+      const signatureValid = isDWGFile(buffer);
       setParsed(null);
       setImportSummary(null);
       setLastBridge(null);
@@ -136,8 +157,21 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
       setLayerRoleOverrides({});
       setHasSavedLayerRolePreset(false);
       setFileName(file.name);
-      setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
-      toast.error('DWG detectado: convierta a DXF/SVG/IFC antes de aplicar al canvas.');
+      if (!signatureValid) {
+        setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
+        toast.error('El archivo no tiene firma DWG válida.');
+        return;
+      }
+      const aviso = toast.loading('Convirtiendo DWG a DXF en el navegador (LibreDWG)…');
+      try {
+        const conv = await convertirDWGaDXF(buffer);
+        toast.dismiss(aviso);
+        cargarContenidoDXF(conv.dxf, file.name, `DWG convertido en ${(conv.ms / 1000).toFixed(1)} s`);
+      } catch (err: any) {
+        toast.dismiss(aviso);
+        setDwgNotice({ fileName: file.name, sizeBytes: file.size, signatureValid });
+        toast.error(`No se pudo convertir el DWG: ${err?.message ?? err}`);
+      }
       return;
     }
 
@@ -145,20 +179,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       try {
-        const result = parseDXF(content);
-        const bridge = importDXFToFloorPlan(content, file.name);
-        setParsed(result);
-        setImportSummary(bridge.summary);
-        setLastBridge(bridge);
-        setLastContent(content);
-        const savedPreset = loadDxfLayerRolePreset(file.name);
-        setLayerRoleOverrides(savedPreset?.roles || {});
-        setHasSavedLayerRolePreset(Boolean(savedPreset));
-        setFileName(file.name);
-        setDwgNotice(null);
-        setZoom(1);
-        toast.success(`DXF cargado: ${result.entities.length} entidades, ${bridge.summary.mappedBarriers} barreras detectadas`);
-        if (savedPreset) toast.info(`Preset de capas recuperado para ${file.name}`);
+        cargarContenidoDXF(content, file.name);
       } catch (err: any) {
         setLastBridge(null);
         toast.error('Error al parsear DXF: ' + err.message);
@@ -253,7 +274,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
     const allBarrierLayerNames = Array.from(parsed.layers.values())
       .filter((layer) => roleForLayer(layer.name) === 'barrier')
       .map((layer) => layer.name);
-    return importDXFToFloorPlan(lastContent, fileName, {
+    return importParsedDXFToFloorPlan(parsed, fileName, {
       barrierLayerNames: visibleBarrierLayerNames.length === allBarrierLayerNames.length ? undefined : visibleBarrierLayerNames,
       simplifyGeometry,
       layerRoleOverrides,
@@ -421,7 +442,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                         Tamano: {(dwgNotice.sizeBytes / 1024 / 1024).toFixed(2)} MB
                       </div>
                       <div data-testid="dwg-conversion-route" className="mt-2 leading-relaxed">
-                        Ruta segura: DWG -&gt; APS/ODA/AutoCAD -&gt; DXF con capas -&gt; mapeo de barreras -&gt; aplicar al canvas.
+                        La conversión local (LibreDWG en el navegador) no pudo leer este DWG. Ruta alterna: DWG -&gt; APS/ODA/AutoCAD -&gt; DXF con capas -&gt; mapeo de barreras -&gt; aplicar al canvas.
                       </div>
                       <div className="mt-2 text-[11px] text-amber-800">
                         RadShield-MX no escribe geometria desde DWG binario directo; conserva estabilidad, escala y trazabilidad.
@@ -433,7 +454,7 @@ export default function DXFViewerDialog({ open, onOpenChange }: Props) {
                   )}
                   <div className="mt-4 flex items-start gap-2 max-w-md text-xs opacity-60 bg-slate-800 p-3 rounded">
                     <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <p>Para archivos DWG: En AutoCAD, use "Guardar como" y seleccione formato DXF. RadShield-MX soporta DXF R12-R2018.</p>
+                    <p>DWG: se convierte en el navegador con LibreDWG (no se envía a ningún servidor). Los XREF deben estar ligados (BIND). DXF R12-R2018 con bloques e INSERT.</p>
                   </div>
                 </div>
               )}

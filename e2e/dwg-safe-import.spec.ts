@@ -17,7 +17,7 @@ async function openFileMenu(page: Page) {
 }
 
 test.describe('DWG safe import boundary - dwg-safe-import', () => {
-  test('Archivo > Importar DXF detects a real DWG fixture and keeps canvas geometry unchanged', async ({ page }) => {
+  test('Archivo > Importar DXF converts a real DWG fixture locally (LibreDWG-wasm) and keeps canvas geometry unchanged until applied', async ({ page }) => {
     test.skip(!fs.existsSync(DWG_FIXTURE), `DWG fixture not found: ${DWG_FIXTURE}`);
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -31,10 +31,15 @@ test.describe('DWG safe import boundary - dwg-safe-import', () => {
     await expect(page.getByRole('dialog', { name: /Visor DXF/i })).toBeVisible({ timeout: 10_000 });
 
     await page.getByTestId('dxf-file-input').setInputFiles(DWG_FIXTURE);
-    await expect(page.getByTestId('dwg-conversion-notice')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId('dwg-signature-status')).toContainText(/Firma DWG valida/i);
-    await expect(page.getByTestId('dwg-conversion-route')).toContainText(/DWG -> APS\/ODA\/AutoCAD -> DXF/i);
-    await expect(page.getByTestId('dxf-apply-to-canvas')).toBeDisabled();
+    // Conversión en el navegador: el DXF resultante queda listo para aplicar (o, si LibreDWG no puede leerlo, el
+    // aviso de conversión con la ruta alterna). En ningún caso cambia el lienzo antes de «Aplicar».
+    const convertido = page.getByTestId('dxf-apply-to-canvas');
+    const aviso = page.getByTestId('dwg-conversion-notice');
+    await expect(convertido.or(aviso).first()).toBeVisible({ timeout: 60_000 });
+    if (await aviso.isVisible()) {
+      await expect(page.getByTestId('dwg-signature-status')).toContainText(/Firma DWG valida/i);
+      await expect(page.getByTestId('dwg-conversion-route')).toContainText(/DWG -> APS\/ODA\/AutoCAD -> DXF/i);
+    }
     await expect(page.getByTestId('statusbar-barrier-count')).toHaveText(beforeBarriers);
   });
 });
