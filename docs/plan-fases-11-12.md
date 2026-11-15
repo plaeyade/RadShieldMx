@@ -390,3 +390,37 @@ diálogo huérfano y el recorrido guiado en verde.
   tope en la ventana), el panel de revisión DXF (salía por arriba de la ventana), el aviso inferior y el minimapa.
   Pruebas: `src/__tests__/validacion/fase12Paso4.test.ts` y `e2e/fase12-asistente-capas.spec.ts` (DXF sintético
   generado en `src/test/dxfCapasSinteticas.ts`).
+
+## Fase 13 — Geometría del motor y contrato con Cyclotron-SIM
+
+Fecha: 2026-11-15 · Propuesta para revisión del responsable. Los 4 hallazgos críticos de la auditoría independiente
+2026-11 quedaron resueltos en #61 y la Fase 12: bloques/INSERT del DXF, reglas de material por capa, método por
+fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen de la geometría y el contrato
+`radshield/geometria_bunker@1` del documento maestro (Anexo S).
+
+1. **θ de dispersión desde el eje del gantry** (NCRP 151): por punto, en barreras y mapa; aviso si una secundaria
+   queda dentro del semiángulo del haz.
+2. **U de primaria y una sola convención de distancia**: U por barrera según la franja del haz (no U = 1 al importar)
+   y el punto protegido a 0.3 m de la cara exterior, a la altura de ocupación, igual en motor, mapa y memoria.
+3. **Techos y pisos para todas las modalidades** (MN, PET, HDR, Gamma Knife; hoy sólo concreto y sólo linac), con
+   material, espesor y alturas de la sala.
+4. **Materiales de alta densidad con densidad medida y cita** (TD-550/TD-250, NIPOL; Anexo K), sin espesor
+   «requerido» tomado del nombre de capa.
+5. **Contrato `radshield/geometria_bunker@1`** (exportación con `sha256`, sólidos con eje + espesor + lado y
+   receptores con T y P) y lectura de `cyclotron-sim/resultados_mc@1`, con prueba de ida y vuelta.
+
+**Criterio de salida:** cada hallazgo «Alto»/«Medio» con prueba contra una referencia publicada o un caso sintético,
+«Guíame» sin cambio (17.96 mm Pb / 213.77 mm concreto) y el contrato validado por esquema.
+
+### Avance
+
+- **Paso 1** (`fase13-paso1-theta-geometrico`): `anguloDispersionGeometrico` / `anguloDispersion` en
+  `src/lib/normativeBarrierEngine.ts`. Con `ejeGantry_deg` en la fuente, θ = atan(|v·â| / |v × â|), donde v es
+  isocentro → punto en planta y â el eje del gantry: es el ángulo entre esa recta y el plano de giro del haz, el menor
+  ángulo de dispersión posible (NCRP 151 §2.4, θ desde el eje central). Se calcula por punto y fuente. Orden de prioridad:
+  θ declarado en la barrera, después el geométrico y, si no hay ninguno, 30° (antes, siempre 30°). El mapa de dosis
+  (`doseFieldEngine`) usa el mismo θ en cada punto. La traza declara de dónde sale θ, y si una secundaria tiene puntos
+  a menos de 15.8° del plano de giro (semiángulo del campo de 40 × 40 cm a 1 m), avisa de que el haz primario puede
+  alcanzarlos. Campo «Eje gantry °» en el inspector de fuentes de linac (vacío = sin eje). La clave de caché incluye
+  el eje y θ; si no están definidos, la clave no cambia. Pruebas: `src/__tests__/validacion/fase13Paso1.test.ts`.
+  Sin eje no cambia nada: «Guíame» y los ejemplos del §7.1 dan los mismos espesores.

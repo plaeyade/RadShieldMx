@@ -85,6 +85,8 @@ import {
   LINAC,
   MATERIALES_NCRP151,
   TC,
+  ANGULO_DISPERSION_OMISION_DEG,
+  anguloDispersion,
   distancia,
   fuenteTeleterapiaDe,
   geometria147,
@@ -101,7 +103,7 @@ export const SEMIDIAGONAL_CAMPO_MAX = 0.2 * Math.SQRT2;
 /** Distancia blanco–isocentro (SAD) de los aceleradores, m. */
 export const SAD_M = 1;
 /** Ángulo de dispersión del paciente por omisión (como `normativeBarrierEngine`; conservador). */
-export const ANGULO_DISPERSION_DEG = 30;
+export const ANGULO_DISPERSION_DEG = ANGULO_DISPERSION_OMISION_DEG;
 
 export type ComponenteCampo = 'primaria' | 'fuga' | 'dispersion' | 'primaria147' | 'secundaria147' | 'kermaUnico';
 
@@ -626,7 +628,8 @@ function modelosDeFuente(
     const d = distancia(source, { x, y }, scale);
     const U = fraccion(bPrim?.useFactor) ?? fraccion(source.useFactor) ?? 0.25;
     const Us = fraccion(bSec?.useFactor) ?? fraccion(source.useFactor) ?? 0.25;
-    const theta = bSec?.scatterAngle_deg ?? ANGULO_DISPERSION_DEG;
+    // Fase 13, paso 1: el mismo θ que el motor de barreras (declarado, geométrico o 30°) en cada punto del mapa.
+    const theta = anguloDispersion(bSec, source, { x, y }, scale);
     const modelos: ModeloComponente[] = [];
     if (llegaPrimaria) {
       modelos.push({ componente: 'primaria', K0: kermaPrimaria(f, U, d) * 1000, transmitir: (g) => transmitirTVL151(g, 'primaria', f.energia, source, materials) });

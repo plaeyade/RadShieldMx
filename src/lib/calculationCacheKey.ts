@@ -34,6 +34,8 @@ export function buildCalculationCachePayload(fp: FloorPlan) {
       T: stableRound(barrier.occupancyFactor, 6),
       U: stableRound(barrier.useFactor, 6),
       layers: barrier.shieldingLayers?.map((layer) => [layer.materialCode, stableRound(layer.thickness_mm, 3)]) ?? [],
+      // NCRP 151 θ (Fase 13, paso 1); undefined no entra en el JSON: la clave de los proyectos sin θ no cambia.
+      scatterAngle_deg: typeof barrier.scatterAngle_deg === 'number' ? stableRound(barrier.scatterAngle_deg, 4) : undefined,
     })),
     sources: fp.sources.map((source) => ({
       id: source.id,
@@ -49,6 +51,8 @@ export function buildCalculationCachePayload(fp: FloorPlan) {
       nuclearActivity_GBq: stableRound(source.nuclearActivity_GBq ?? 0, 6),
       ctDLP_mGy_cm: stableRound(source.ctDLP_mGy_cm ?? 0, 4),
       ctScansPerPatient: stableRound(source.ctScansPerPatient ?? 0, 4),
+      // Eje del gantry: decide la franja primaria y θ de dispersión (Fase 13, paso 1); undefined no entra en el JSON.
+      ejeGantry_deg: typeof source.ejeGantry_deg === 'number' ? stableRound(source.ejeGantry_deg, 4) : undefined,
       // Modelo por paciente (TG-108 en PET, «estilo TG-108» en SPECT/I-131): cambia la dosis.
       tg108: source.tg108
         ? {
