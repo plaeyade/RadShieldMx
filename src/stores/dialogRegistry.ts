@@ -8,7 +8,7 @@
 
 // All known dialog names for validation and introspection
 const DIALOG_NAMES = new Set([
-  'export','cnsns','mc','projects','viewer3d','maze','quickBarrier','equipmentDB',
+  'memoria','export','cnsns','mc','projects','viewer3d','maze','quickBarrier','equipmentDB',
   'mcCloud','mcConfig','barrierCalculator','batchImport','costOptimizer','neutron',
   'seasonal','uncertainty','ventilation','dicom','techSpecs','cnsnsDashboard',
   'dxfViewer','auditTrail','epaGuidance','shleien','gammaKnife','braquiCo60',

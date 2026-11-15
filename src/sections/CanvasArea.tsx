@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   ZoomIn, ZoomOut, Maximize, Image as ImageIcon, Grid3X3,
-  Upload, Calculator, Eye, EyeOff, Ruler, Crosshair,
+  Upload, Eye, EyeOff, Ruler, Crosshair,
   Box, Cpu, FileSearch, LayoutTemplate, Layers, MapPin, Stethoscope,
   ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles, Move, X,
   MousePointer, Shield, ScanLine, Atom
@@ -220,6 +220,8 @@ interface CanvasAreaProps {
   onTouchMove?: (e: React.TouchEvent<HTMLCanvasElement>) => void;
   onTouchEnd?: (e: React.TouchEvent<HTMLCanvasElement>) => void;
   onZoomToFit: () => void;
+  /** Fase 12, paso 4: zoom por factor centrado en (sx, sy) o en el centro, con los límites del plano. */
+  onZoomBy?: (factor: number, sx?: number, sy?: number) => void;
   onExportPNG: () => void;
   onToggleSnap: () => void;
   onImportFloorPlan?: () => void;
@@ -279,7 +281,7 @@ export default function CanvasArea({
   canvasRef, canvasState, setCanvasState,
   onMouseDown, onMouseMove, onMouseUp, onWheel,
   onTouchStart, onTouchMove, onTouchEnd,
-  onZoomToFit, onExportPNG, onToggleSnap,
+  onZoomToFit, onZoomBy, onExportPNG, onToggleSnap,
   onImportFloorPlan,
   onOpenLayers,
   onOpenRoomTemplates,
@@ -430,12 +432,26 @@ export default function CanvasArea({
         metaKey: e.metaKey,
       }, true);
       setLastF515EventAction(routed.action);
-      const delta = e.deltaY > 0 ? 0.9 : 1.1;
-      setCanvasState((p: CanvasState) => ({ ...p, scale: Math.max(0.1, Math.min(10, p.scale * delta)) }));
-    } else {
-      onWheel(e);
     }
-  }, [onWheel, setCanvasState]);
+    // Fase 12, paso 4: con y sin Ctrl (pellizco del panel táctil) el zoom se centra en el cursor (antes Ctrl+rueda
+    // escalaba alrededor del origen del lienzo y el plano «se iba»).
+    onWheel(e);
+  }, [onWheel]);
+
+  // React registra «wheel» como oyente pasivo: su `preventDefault` no evita el desplazamiento de la página ni el
+  // zoom del navegador con Ctrl. Un oyente nativo no pasivo sobre el lienzo lo hace.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const bloquear = (ev: WheelEvent) => ev.preventDefault();
+    canvas.addEventListener('wheel', bloquear, { passive: false });
+    return () => canvas.removeEventListener('wheel', bloquear);
+  }); // sin dependencias: el lienzo puede montarse después (pantalla de bienvenida)
+
+  const zoomBoton = useCallback((factor: number) => {
+    if (onZoomBy) onZoomBy(factor);
+    else setCanvasState((p: CanvasState) => ({ ...p, scale: Math.max(0.1, Math.min(10, p.scale * factor)) }));
+  }, [onZoomBy, setCanvasState]);
 
   const getF561PointerMode = (eventType: 'pointerdown' | 'pointermove' | 'pointerup'): CanvasEventModeV2 => {
     if (activeTool === 'pan') return 'pan';
@@ -1280,7 +1296,8 @@ export default function CanvasArea({
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
     { id: 'zone', label: 'Zona/control', ready: regionCount > 0 || controlledZoneSummary.hasControlledZone, action: onOpenControlPoints, actionLabel: 'Puntos de control' },
-    { id: 'calc', label: 'Calculo', ready: hasResults, action: onRunCalculations, actionLabel: 'Calcular' },
+    // Fase 12, paso 2: indicador de estado; el cálculo se lanza con el único botón «Calcular» de la barra superior (F5).
+    { id: 'calc', label: 'Calculo', ready: hasResults, action: undefined, actionLabel: 'Calcular (barra superior, F5)' },
     { id: 'memory', label: 'Memoria', ready: hasResults && controlledZoneSummary.warnings.length === 0, action: onOpenEvidencePack, actionLabel: 'Evidence pack' },
   ];
   const offlineContinuitySteps = [
@@ -1314,7 +1331,6 @@ export default function CanvasArea({
     { id: 'barrier', label: 'Muro', detail: 'Dibujar barrera', icon: Box, action: () => activateCanvasTool('barrier') },
     { id: 'source', label: 'Fuente', detail: 'Colocar equipo/fuente', icon: Atom, action: () => activateCanvasTool('source') },
     { id: 'region', label: 'Zona', detail: 'Dibujar zona controlada/publica', icon: Shield, action: () => activateCanvasTool('region') },
-    { id: 'calc', label: 'Calc', detail: 'Ejecutar calculo', icon: Calculator, action: onRunCalculations },
     { id: 'medical3d', label: '3D', detail: 'Inspeccion medica 3D', icon: Stethoscope, action: onOpenMedical3D ?? onOpen3DViewer },
     { id: 'evidence', label: 'Evid', detail: 'Abrir evidencia', icon: FileSearch, action: onOpenEvidencePack },
   ];
@@ -1572,7 +1588,6 @@ export default function CanvasArea({
     { id: 'equipment', label: 'Equipos', detail: 'Colocar fuente o equipo con footprint', icon: Atom, action: () => activateCanvasTool('source') },
     { id: 'shielding', label: 'Blindaje', detail: 'Dibujar barrera y revisar espesor', icon: Shield, action: () => activateCanvasTool('barrier') },
     { id: 'annotate', label: 'Anotar', detail: 'Medir, acotar o preparar llamada visual', icon: Ruler, action: () => activateCanvasTool('measure') },
-    { id: 'verify', label: 'Verificar', detail: 'Ejecutar calculo de blindaje', icon: Calculator, action: onRunCalculations },
     { id: 'reports', label: 'Reportar', detail: 'Exportar captura PNG del canvas', icon: ImageIcon, action: onExportPNG },
     { id: 'evidence', label: 'Evidencia', detail: 'Abrir Evidence Pack del proyecto', icon: FileSearch, action: onOpenEvidencePack },
   ];
@@ -1639,20 +1654,22 @@ export default function CanvasArea({
   return (
     <div className="relative flex-1 flex flex-col overflow-hidden bg-[#f3f4f1]" ref={containerRef}>
       {/* ═══ BREADCRUMB + TOOLBAR SUPERIOR (Recomendacion #5 + mejoras) ═══ */}
-      <div className="shrink-0 h-8 bg-white border-b border-slate-200 flex items-center px-2 gap-1">
-        <div className="flex items-center gap-1 text-[10px] text-slate-400">
+      {/* Fase 12, paso 4: la fila desbordaba 413 px a 1024 y 270 px a 1280 (scrollWidth > clientWidth): la ruta, la
+          descripción de la herramienta y las etiquetas largas se muestran desde 1536 px y los accesos rápidos desde 1280 px. */}
+      <div data-testid="f12-lienzo-cabecera" className="shrink-0 h-8 min-w-0 bg-white border-b border-slate-200 flex items-center px-2 gap-1">
+        <div className="hidden 2xl:flex items-center gap-1 text-[10px] text-slate-400">
           <span className="font-semibold text-slate-500">RadShield-MX</span>
           <span>/</span>
           <span className="text-[#f97316] font-medium">Canvas</span>
           <span>/</span>
           <span className="truncate max-w-[150px]">{hasResults ? 'Con resultados' : 'Edicion'}</span>
         </div>
-        <div className="w-px h-3.5 bg-slate-200 mx-1.5" />
+        <div className="hidden 2xl:block w-px h-3.5 bg-slate-200 mx-1.5" />
         {/* Active tool indicator */}
         <div data-testid="f98-active-canvas-tool-indicator" className="flex items-center gap-1 text-[10px] text-slate-500">
           <ToolIcon className="w-3 h-3" style={{ color: currentTool.color }} />
           <span className="font-medium">{currentTool.label}</span>
-          <span className="text-slate-400 hidden sm:inline">- {currentTool.description}</span>
+          <span className="text-slate-400 hidden 2xl:inline">- {currentTool.description}</span>
         </div>
         <div className="hidden lg:flex items-center gap-1 text-[9px] text-slate-400 ml-1">
           <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600" title="Barreras">{barrierCount}B</span>
@@ -1702,7 +1719,7 @@ export default function CanvasArea({
             </button>
           ))}
         </div>
-        <div className="hidden md:flex items-center gap-0.5 mr-1">
+        <div className="hidden xl:flex items-center gap-0.5 mr-1">
           {onImportFloorPlan && (
             <Button size="sm" variant="ghost" className="h-6 w-6 p-0" aria-label="Importar plano base para trazar muros y zonas" title="Importar plano base para trazar muros, zonas controladas y equipos antes de calcular blindaje" onClick={onImportFloorPlan}>
               <Upload className="w-3.5 h-3.5" />
@@ -1762,7 +1779,7 @@ export default function CanvasArea({
               aria-label="Mostrar u ocultar lineas de evaluacion a 0.3 metros"
               onClick={() => setShowSampleLines(!showSampleLines)}>
               {showSampleLines ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-              Lineas 0.3m
+              <span className="2xl:hidden">0.3 m</span><span className="hidden 2xl:inline">Lineas 0.3m</span>
             </Button>
           )}
           {setShowSamplePoints && (
@@ -1771,7 +1788,7 @@ export default function CanvasArea({
               aria-label="Mostrar u ocultar puntos de muestreo"
               onClick={() => setShowSamplePoints(!showSamplePoints)}>
               {showSamplePoints ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-              Puntos
+              <span className="2xl:hidden">Pts</span><span className="hidden 2xl:inline">Puntos</span>
             </Button>
           )}
           {setShowMaxima && (
@@ -1780,7 +1797,7 @@ export default function CanvasArea({
               aria-label="Mostrar u ocultar maximos de calculo"
               onClick={() => setShowMaxima(!showMaxima)}>
               {showMaxima ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-              Maximos
+              <span className="2xl:hidden">Máx</span><span className="hidden 2xl:inline">Maximos</span>
             </Button>
           )}
           {onToggleHeatmap && (
@@ -1794,7 +1811,7 @@ export default function CanvasArea({
               aria-label="Activar o desactivar mapa de calor de dosis"
             >
               {heatmapEnabled ? <Grid3X3 className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-              Heatmap
+              <span className="2xl:hidden">Heat</span><span className="hidden 2xl:inline">Heatmap</span>
             </Button>
           )}
         </div>
@@ -1899,11 +1916,6 @@ export default function CanvasArea({
               <Layers className="h-3 w-3" /> Material
             </button>
           )}
-          {onRunCalculations && (
-            <button type="button" className="h-6 rounded-md border border-orange-200 bg-orange-50 px-2 text-[10px] font-semibold text-orange-700 hover:bg-orange-100 flex items-center gap-1" onClick={onRunCalculations} title="Ejecutar calculo analitico de blindaje con geometria, fuente, material, P/T/U/W y escala actuales" aria-label="Calcular blindaje analitico del plano actual">
-              <Calculator className="h-3 w-3" /> Calcular
-            </button>
-          )}
           <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onExportPNG} title="Exportar captura visual del canvas para Memoria IA, PDF o Evidence Pack" aria-label="Exportar snapshot visual del canvas para reportes">
             <ImageIcon className="h-3 w-3" /> Snapshot
           </button>
@@ -1970,7 +1982,7 @@ export default function CanvasArea({
               <span
                 key={`${label}-${value}`}
                 data-testid="f191c-inspector-chip"
-                className="shrink-0 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-mono text-slate-600"
+                className="min-w-0 shrink truncate rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-mono text-slate-600"
                 title={`${label}: ${value}`}
               >
                 {label}:{value}
@@ -2004,18 +2016,6 @@ export default function CanvasArea({
                 aria-label="Abrir materiales para seleccion"
               >
                 Mat
-              </button>
-            )}
-            {onRunCalculations && (
-              <button
-                type="button"
-                data-testid="f191d-action-calculate"
-                className="h-5 rounded border border-orange-200 bg-white px-1.5 text-[9px] font-semibold text-orange-700 hover:bg-orange-50"
-                onClick={onRunCalculations}
-                title="Recalcular blindaje con el contexto actual"
-                aria-label="Recalcular blindaje"
-              >
-                Calc
               </button>
             )}
             {onOpenEvidencePack && (
@@ -3788,6 +3788,9 @@ export default function CanvasArea({
               ref={canvasRef}
               data-testid="f100-main-floorplan-canvas"
               data-f515b-last-event-action={lastF515EventAction}
+              data-escala={canvasState.scale}
+              data-offset-x={canvasState.offsetX}
+              data-offset-y={canvasState.offsetY}
               className="absolute inset-0 w-full h-full"
               style={{
                 cursor: activeTool === 'barrier' || activeTool === 'measure' ? 'crosshair' :
@@ -4169,8 +4172,8 @@ export default function CanvasArea({
                   aria-label="Navegacion BIM del viewport"
                 >
                   {([
-                    ['zoom-in', 'Acercar vista', ZoomIn, () => setCanvasState((prev: CanvasState) => ({ ...prev, scale: Math.min(10, prev.scale * 1.2) }))],
-                    ['zoom-out', 'Alejar vista', ZoomOut, () => setCanvasState((prev: CanvasState) => ({ ...prev, scale: Math.max(0.1, prev.scale / 1.2) }))],
+                    ['zoom-in', 'Acercar vista', ZoomIn, () => zoomBoton(1.2)],
+                    ['zoom-out', 'Alejar vista', ZoomOut, () => zoomBoton(1 / 1.2)],
                     ['fit', 'Ajustar a pantalla', Maximize, onZoomToFit],
                     ['pan', 'Activar desplazamiento de vista', Move, () => activateCanvasTool('pan')],
                     ['top', 'Vista superior / planta', Crosshair, () => applyVisualMode('plan')],
@@ -6179,11 +6182,11 @@ export default function CanvasArea({
                 <Maximize className="w-4 h-4" />
               </Button>
               <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Acercar vista del floorplan sin modificar escala real del proyecto"
-                onClick={() => setCanvasState((p: CanvasState) => ({ ...p, scale: Math.min(10, p.scale * 1.2) }))}>
+                onClick={() => zoomBoton(1.2)}>
                 <ZoomIn className="w-4 h-4" />
               </Button>
               <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md bg-white hover:bg-[#fff7ed]" title="Alejar vista para revisar layout, zonas controladas y rutas de acceso"
-                onClick={() => setCanvasState((p: CanvasState) => ({ ...p, scale: Math.max(0.1, p.scale / 1.2) }))}>
+                onClick={() => zoomBoton(1 / 1.2)}>
                 <ZoomOut className="w-4 h-4" />
               </Button>
               <Button size="icon" variant={canvasState.snapToGrid ? "default" : "secondary"} className="h-8 w-8 shadow-md"
@@ -6244,11 +6247,6 @@ export default function CanvasArea({
         )}
         {hasResults && <span className="text-emerald-600 font-medium">Resultados calculados</span>}
         <div className="flex-1" />
-        {onRunCalculations && (
-          <Button size="sm" className="h-4 text-[9px] px-2 bg-[#f97316] hover:bg-[#ea580c] text-white gap-0.5" onClick={onRunCalculations}>
-            <Calculator className="w-2.5 h-2.5" /> Calcular
-          </Button>
-        )}
       </div>
     </div>
   );

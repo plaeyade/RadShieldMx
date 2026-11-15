@@ -7,34 +7,12 @@
 
 import { create } from "zustand";
 
-// ─── Types ───
-export interface FloorPlan {
-  id: string;
-  name: string;
-  imageUrl: string | null;
-  scale_m_per_pixel: number;
-  width_pixels: number;
-  height_pixels: number;
-  barriers: any[];
-  sources: any[];
-  occupiedRegions: any[];
-}
-
-const defaultFloorPlan: FloorPlan = {
-  id: "plan-1",
-  name: "Plano de Blindaje 1",
-  imageUrl: null,
-  scale_m_per_pixel: 0.01,
-  width_pixels: 1000,
-  height_pixels: 800,
-  barriers: [],
-  sources: [],
-  occupiedRegions: [],
-};
+// Fase 12, paso 1: el plano, la herramienta activa y el panel lateral viven sólo en el almacén del proyecto
+// (src/stores/proyecto). Aquí quedan los diálogos y el estado de la aplicación.
 
 // ─── Dialog registry ───
 const DIALOG_NAMES = [
-  "export","cnsns","mc","projects","viewer3d","maze","quickBarrier","equipmentDB",
+  "memoria","export","cnsns","mc","projects","viewer3d","maze","quickBarrier","equipmentDB",
   "mcCloud","mcConfig","barrierCalculator","batchImport","costOptimizer","neutron",
   "seasonal","uncertainty","ventilation","dicom","techSpecs","cnsnsDashboard",
   "dxfViewer","auditTrail","epaGuidance","shleien","gammaKnife","braquiCo60",
@@ -141,14 +119,6 @@ interface AppState {
   /** C.10: Check if any dialog is open */
   readonly isAnyOpen: boolean;
 
-  // ── Canvas / FloorPlan ──
-  floorPlan: FloorPlan;
-  setFloorPlan: (p: FloorPlan) => void;
-  activeTool: string;
-  setActiveTool: (t: string) => void;
-  sidebarCollapsed: boolean;
-  toggleSidebar: () => void;
-
   // ── Calculation ──
   isCalculating: boolean;
   setIsCalculating: (v: boolean) => void;
@@ -177,6 +147,14 @@ export const DIALOGOS_REDIRIGIDOS: Readonly<Record<string, string>> = {
   solutionField3D: 'viewer3d',
   uncertainty: 'gumUncertainty',
   validationDashboard: 'ncrpValidation',
+  // Fase 12, paso 3: un solo flujo de memoria analítica y CNSNS (radshield/memoria@1) en el menú 5.
+  memoriaAI: 'memoria',
+  memoriaWizard: 'memoria',
+  cnsns: 'memoria',
+  cnsnsAutoReport: 'memoria',
+  pdfReport: 'memoria',
+  regulatoryReport: 'memoria',
+  batchReportExporter: 'memoria',
 };
 
 export const resolverDialogo = (name: string): string => DIALOGOS_REDIRIGIDOS[name] ?? name;
@@ -226,14 +204,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   get isAnyOpen() {
     return Object.values(get().dialogs).some((v) => v);
   },
-
-  // Canvas
-  floorPlan: defaultFloorPlan,
-  setFloorPlan: (p) => set({ floorPlan: p }),
-  activeTool: "select",
-  setActiveTool: (t) => set({ activeTool: t }),
-  sidebarCollapsed: false,
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   // Calculation
   isCalculating: false,

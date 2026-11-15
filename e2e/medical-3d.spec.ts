@@ -76,8 +76,9 @@ test.describe('Medical 3D Floor Plan', () => {
     // Fase 10: sin plano de ejemplo al arrancar; el JSON exportado debe traer barreras.
     await cargarEjemploGuiame(page);
 
-    await page.getByRole('button', { name: /Diseno|Diseño/i }).click();
-    await page.getByText('Medical 3D Floor Plan').click();
+    // Fase 12: la inspección 3D está en «1. Proyecto y plano».
+    await page.getByTestId('f12-menu-proyecto').click();
+    await page.getByTestId('f12-plano-3d-medico').click();
 
     const dialog = page.locator('[role="dialog"]').filter({ hasText: 'Medical 3D Floor Plan' });
     await expect(dialog).toBeVisible({ timeout: 10000 });
@@ -180,8 +181,9 @@ test.describe('Medical 3D Floor Plan', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await bootWorkspace(page);
 
-    await page.getByRole('button', { name: /Diseno|DiseÃ±o/i }).click();
-    await page.getByText('Medical 3D Floor Plan').click();
+    // Fase 12: la inspección 3D está en «1. Proyecto y plano».
+    await page.getByTestId('f12-menu-proyecto').click();
+    await page.getByTestId('f12-plano-3d-medico').click();
 
     const dialog = page.locator('[role="dialog"]').filter({ hasText: 'Medical 3D Floor Plan' });
     await expect(dialog).toBeVisible({ timeout: 10000 });

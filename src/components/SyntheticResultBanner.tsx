@@ -12,7 +12,7 @@ export function SyntheticResultBanner({ detalle }: { detalle?: string }) {
 
 export function NotForSignatureNotice() {
   return (
-    <div className="pointer-events-none fixed bottom-0 left-1/2 z-[9999] -translate-x-1/2 rounded-t-md bg-amber-500/95 px-3 py-0.5 text-[10px] font-semibold text-black shadow">
+    <div className="pointer-events-none fixed bottom-0 left-1/2 z-[9999] w-max max-w-[calc(100vw-16px)] -translate-x-1/2 truncate rounded-t-md bg-amber-500/95 px-3 py-0.5 text-[10px] font-semibold text-black shadow">
       Resultados preliminares — no válidos para firma ni presentación regulatoria (pendiente validación del núcleo de cálculo)
     </div>
   );

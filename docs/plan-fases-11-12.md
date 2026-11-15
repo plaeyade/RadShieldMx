@@ -337,3 +337,56 @@ de un solo sentido; la Fase 12 debe dejar **un** almacén del proyecto.
 
 **Criterio de salida:** cada acción con una sola entrada en menús, ≤ 2 superficies de mando visibles, ningún
 diálogo huérfano y el recorrido guiado en verde.
+
+### Avance
+
+- **Paso 1** (`fase12-store-e2e`, PR #62): almacén Zustand único del proyecto (`src/stores/proyecto/`) y prueba E2E de
+  «Guíame» (`e2e/fase12-guiame-store.spec.ts`).
+- **Paso 2** (`fase12-menus-calcular`): barra superior con **5 menús por etapa** del flujo de «Guíame» —
+  1. Proyecto y plano, 2. Fuentes y cargas de trabajo, 3. Barreras y materiales, 4. Verificación y cumplimiento,
+  5. Memoria analítica y CNSNS— más Ayuda; «Avanzado» (rendimiento, CAD → Monte Carlo, agente, 3D en tiempo real,
+  nube de puntos, RTSTRUCT) sólo con `VITE_MENU_AVANZADO=true`. Se retiraron los menús Archivo, Diseño, Equipos,
+  Blindaje, Evidencia e Integraciones (7 entradas al mismo Performance Dashboard, «RAG deep dive» = Evidence Pack) y la
+  zona oculta `f114-deduped-legacy-menu-zone`; Tour, Manual y «Floor Plan Tools» pasaron a los menús.
+  **Un solo botón «Calcular»** (barra superior, entre las etapas 3 y 4; F5, la paleta de comandos y el menú contextual
+  del lienzo quedan como atajos). Se quitaron los «Calcular» de la barra lateral, la barra del lienzo, la barra «CAD»,
+  la cinta BIM, el flujo del lienzo, el inspector y la línea de estado, y el cálculo preliminar del DXF confirmado ya
+  no llama al motor por su cuenta: todo pasa por `calcularPlano` (una sola llamada a `calcularProyectoAsync`). Los 7
+  espesores del ejemplo son idénticos (muro norte 17.96 mm Pb / 213.77 mm concreto).
+  **Ctrl+Z/Ctrl+Y**: había dos oyentes `keydown` y los dos llamaban a `undo()`/`redo()` (dos pasos por pulsación;
+  Ctrl+K abría y cerraba la paleta). Queda uno (`src/pages/designer/atajosTeclado.ts`), probado en
+  `src/__tests__/validacion/fase12Paso2.test.tsx` y en la E2E de «Guíame» (un paso por pulsación).
+  Pendiente para el paso 3: retirar la fila «Acceso rápido» y la barra «CAD» inferior, y la barra lateral sólo para
+  propiedades.
+- **Paso 3** (`fase12-memoria-unificada`): **un solo flujo de memoria analítica y CNSNS** en el menú 5
+  (`src/sections/dialogs/MemoriaDialog.tsx`, clave `memoria`): 1. datos de la instalación (el asistente pide sólo lo
+  que el plano no tiene), 2. revisión, 3. exportar. DOCX, PDF y JSON se generan del **mismo objeto**
+  `radshield/memoria@1` (`construirMemoria` → `salidaMemoria`, `src/lib/memoriaFlujo.ts`), y un JSON importado se
+  valida contra el esquema (`src/lib/memoriaEsquema.ts`; JSON Schema en `docs/esquemas/radshield-memoria-1.schema.json`)
+  y el sello sha256 antes de volver a exportarlo. Se retiraron las rutas duplicadas: asistente «Memoria IA»
+  (`memoriaAI`, texto con valores típicos de una tabla interna), asistente `memoriaWizard`, diálogo CNSNS (.docx de
+  `useCNSNSReport`), «Exportar PDF» (`usePDFGenerator`), reporte CNSNS en HTML (`reporteCNSNSHtml`, `cnsnsAutoReport`),
+  reporte regulatorio y exportador «batch»; sus claves se redirigen a `memoria` con `DIALOGOS_REDIRIGIDOS`. El
+  «Exportar PDF» de «Guíame» descarga el PDF de la misma memoria. El JSON de memoria del ejemplo «Guíame» es idéntico
+  antes y después salvo `origen.fecha` (y el `sha256`, que sella la fecha). Prueba E2E:
+  `e2e/fase12-memoria-unificada.spec.ts` (valida el JSON descargado contra el esquema); unitarias en
+  `src/__tests__/validacion/fase12Paso3.test.tsx`.
+- **Paso 4** (`fase12-asistente-capas`): **asistente de capas DWG/DXF** en el visor DXF
+  (`src/sections/dialogs/DXFViewerDialog.tsx`, lógica pura en `src/lib/asistenteCapas.ts`): al importar, una fila por
+  capa con conteo de entidades (por tipo), miniatura de la capa sobre la extensión del plano y resaltado en la vista
+  previa; propuesta de rol, material y espesor por las reglas de #61 (`inferDxfLayerRole`, `REGLAS_MATERIAL_CAPA`,
+  `espesorDeclaradoCapa`; una capa sin rol con material de blindaje declarado se propone como muro) y edición por capa
+  (rol, material, espesor instalado o vacío = por calcular, «Ignorar»). El mapeo se guarda en el almacén único
+  (`useProyectoStore().mapeosCapas`, sustituye al preset de roles en `localStorage`) y en
+  `floorPlan.importMetadata.mapeoCapas`, y se reutiliza por nombre de capa al importar otro plano. El importador recibe
+  `layerThicknessOverrides` además de los roles y materiales por capa.
+  **Zoom y desbordes**: `src/lib/vistaLienzo.ts` (encuadre, zoom en un punto, límites según px/m y el encuadre del
+  contenido). Zoom a extensión al aplicar un DXF (antes escala 1 y desplazamiento fijo: un DXF en mm lejos del origen
+  quedaba fuera de vista, y el mínimo 0.1 impedía encuadrarlo); rueda y Ctrl+rueda centradas en el cursor con oyente no
+  pasivo; botones, teclado y pellizco con los mismos límites; vista previa del visor con rueda, arrastre y «Extensión».
+  Desbordes medidos con Playwright (scrollWidth > clientWidth) a 1280×720, 1920×1080 y 1024×768: la barra de menús
+  (302 px a 1024, 46 px a 1280; los menús 4, 5 y Ayuda quedaban tapados), la cabecera del lienzo (413/270 px), el visor
+  DXF (los `DialogContent` con `max-w-*` propio quedaban en 512 px por `sm:max-w-lg`; ahora respetan su ancho con
+  tope en la ventana), el panel de revisión DXF (salía por arriba de la ventana), el aviso inferior y el minimapa.
+  Pruebas: `src/__tests__/validacion/fase12Paso4.test.ts` y `e2e/fase12-asistente-capas.spec.ts` (DXF sintético
+  generado en `src/test/dxfCapasSinteticas.ts`).

@@ -26,12 +26,18 @@ export async function bootWorkspace(page: Page) {
   await disableBlockingOnboarding(page);
   await page.goto(BASE);
   await closeSplashIfVisible(page);
-  await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('f12-menu-proyecto')).toBeVisible({ timeout: 15000 });
 }
 
-/** Carga el ejemplo «Guíame» (PET/CT) desde el menú Archivo; desde la Fase 10 la app arranca sin plano. */
+/** Fase 12: abre uno de los menús de la barra superior (proyecto, fuentes, barreras, verificacion, reportes, ayuda). */
+export async function abrirMenu(page: Page, id: string) {
+  await page.getByTestId(`f12-menu-${id}`).click();
+  await expect(page.getByTestId(`f12-menu-${id}-contenido`)).toBeVisible({ timeout: 5000 });
+}
+
+/** Carga el ejemplo «Guíame» (PET/CT) desde el menú Ayuda; desde la Fase 10 la app arranca sin plano. */
 export async function cargarEjemploGuiame(page: Page) {
-  await page.getByTestId('f295-primary-file-dropdown').click();
+  await page.getByTestId('f12-menu-ayuda').click();
   await page.getByTestId('f10-help-guiame').click();
   await page.getByTestId('guia-crear-proyecto').click();
   await page.getByTestId('guia-siguiente').click();

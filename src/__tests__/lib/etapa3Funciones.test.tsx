@@ -92,7 +92,8 @@ describe('redirecciones y historial', () => {
     const d = useAppStore.getState().dialogs as Record<string, boolean>;
     expect(d.barrierCalculator).toBe(true);
     expect(d.quickBarrier).toBe(false);
-    expect(Object.keys(DIALOGOS_REDIRIGIDOS)).toHaveLength(6);
+    // Fase 12, paso 3: + 7 claves de memoria/informe/CNSNS → «memoria».
+    expect(Object.keys(DIALOGOS_REDIRIGIDOS)).toHaveLength(13);
   });
 
   it('el historial lista acciones y marca la actual', () => {

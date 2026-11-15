@@ -56,7 +56,7 @@ function botonesDelPaso(id: IdPaso, a: AccionesGuia, visitar: (id: IdPaso) => vo
     case 'calculo': return { propios: [{ etiqueta: 'Calcular espesores', accion: a.calcular, principal: true, testId: 'guia-calcular' }] };
     case 'cumplimiento': return { propios: [{ etiqueta: 'Abrir validador del plano', accion: () => { a.validarPlano(); visitar('cumplimiento'); }, principal: true, testId: 'guia-validar' }] };
     case 'reporte': return { propios: [
-      { etiqueta: 'Exportar PDF', accion: () => { a.exportarPDF(); visitar('reporte'); }, principal: true, testId: 'guia-exportar-pdf' },
+      { etiqueta: 'Exportar memoria (PDF)', accion: () => { a.exportarPDF(); visitar('reporte'); }, principal: true, testId: 'guia-exportar-pdf' },
       { etiqueta: 'Exportar CSV', accion: () => { a.exportarCSV(); visitar('reporte'); }, testId: 'guia-exportar-csv' },
     ] };
   }

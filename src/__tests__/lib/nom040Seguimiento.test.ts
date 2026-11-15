@@ -149,11 +149,10 @@ describe('3 · Reportes de linac: NOM-033-NUCL-2016, no NOM-040-NUCL-2016', () =
   it('ni el checklist de certificación ni los reportes llevan la NOM-040 fija', () => {
     const conNom040Fija = [
       'sections/dialogs/CertificationModeDialog.tsx',
-      'sections/dialogs/PdfReportDialog.tsx',
-      'sections/dialogs/RegulatoryReportDialog.tsx',
+      // Fase 12, paso 3: PdfReport, RegulatoryReport, usePDFGenerator y useCNSNSReport se unificaron en MemoriaDialog.
+      'sections/dialogs/MemoriaDialog.tsx',
+      'lib/memoriaFlujo.ts',
       'lib/excelExport.ts',
-      'hooks/usePDFGenerator.ts',
-      'hooks/useCNSNSReport.ts',
     ].filter((rel) => /NOM-040|NOM_040/.test(leer(rel).replace(/^\s*(?:\/\/|\*).*$/gm, '')));
     expect(conNom040Fija).toEqual([]);
   });

@@ -44,7 +44,7 @@ async function entrar(page: Page) {
 }
 
 async function cargarEjemploGuiame(page: Page) {
-  await page.getByTestId('f295-primary-file-dropdown').click();
+  await page.getByTestId('f12-menu-ayuda').click();
   await page.getByTestId('f10-help-guiame').click();
   await page.getByTestId('guia-crear-proyecto').click();
   await page.getByTestId('guia-siguiente').click();
@@ -65,8 +65,7 @@ test.describe('Humo de depuración', () => {
     await entrar(page);
     await cargarEjemploGuiame(page);
 
-    await page.getByTestId('f107-migrated-shielding-dropdown').click();
-    await page.getByTestId('f107-migrated-shielding-menu').getByText('Calcular Blindaje', { exact: true }).click();
+    await page.getByTestId('f12-calcular').click();
     await page.waitForFunction(() => {
       const g = (window as unknown as { __radshieldE2E: Gancho }).__radshieldE2E;
       const bs = g.plano().barriers;
