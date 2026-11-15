@@ -222,7 +222,7 @@ jobs:
         env:
           VITE_BASE_PATH: /RadShieldMx/
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4174/RadShieldMx/
-        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/fase11-zona-controlada-motor.spec.ts e2e/static-deploy.spec.ts --project=chromium
+        run: npx playwright test e2e/fase10-inicio.spec.ts e2e/fase11-motor-unico.spec.ts e2e/fase11-zona-controlada-motor.spec.ts e2e/static-deploy.spec.ts e2e/fase12-guiame-store.spec.ts e2e/fase12-memoria-unificada.spec.ts e2e/fase12-asistente-capas.spec.ts --project=chromium
 
       - name: Upload smoke report
         if: failure()

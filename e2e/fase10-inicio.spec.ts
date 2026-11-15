@@ -56,7 +56,7 @@ test.describe('Fase 10 inicio vacío', () => {
     const errores = registrarErrores(page);
     await entrar(page);
     const titulo = page.getByTestId('guia-titulo');
-    await page.getByTestId('f295-primary-file-dropdown').click();
+    await page.getByTestId('f12-menu-ayuda').click();
     await page.getByTestId('f10-help-guiame').click();
     await expect(titulo).toHaveText('Crear el proyecto');
     await page.getByTestId('guia-crear-proyecto').click();
@@ -87,8 +87,8 @@ test.describe('Fase 10 inicio vacío', () => {
     expect(readFileSync((await descarga.path())!).subarray(0, 5).toString()).toBe('%PDF-');
     await page.getByTestId('guia-siguiente').click();
     await expect(page.getByTestId('guia-paso-a-paso')).toHaveCount(0);
-    await page.getByTestId('f295-primary-file-dropdown').click();
-    // El menú Archivo es más alto que 720 px pero se desplaza (max-h de Radix, 78c7e09): clic real, como el usuario.
+    await page.getByTestId('f12-menu-ayuda').click();
+    // Menú Ayuda (Fase 12): clic real, como el usuario.
     await page.getByTestId('f10-help-guia-reiniciar').click();
     await expect(titulo).toHaveText('Crear el proyecto');
     expect(errores).toEqual([]);

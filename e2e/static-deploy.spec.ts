@@ -24,7 +24,7 @@ test.describe('Static deploy smoke', () => {
     await page.goto('./', { waitUntil: 'networkidle' });
     await closeSplashIfVisible(page);
     await expect(page).toHaveTitle(/RadShield-MX/i);
-    await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('f12-menu-proyecto')).toBeVisible({ timeout: 15000 });
 
     const artifactPaths = [
       'manifest.json',

@@ -28,8 +28,8 @@ test.describe('F342 Centro Neuro visual browser smoke', () => {
     addCheck('screenshot:update-center-f342', true);
     await page.getByLabel(/Cerrar/i).click();
 
-    await page.getByRole('button', { name: /Diseno|Dise/i }).click();
-    await page.getByText('Medical 3D Floor Plan').click();
+    await page.getByTestId('f12-menu-proyecto').click();
+    await page.getByTestId('f12-plano-3d-medico').click();
     const dialog3d = page.locator('[role="dialog"]').filter({ hasText: 'Medical 3D Floor Plan' });
     await expect(dialog3d).toBeVisible({ timeout: 15_000 });
     await expect(dialog3d.locator('canvas').first()).toBeVisible({ timeout: 15_000 });

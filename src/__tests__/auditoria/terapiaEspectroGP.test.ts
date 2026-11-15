@@ -270,7 +270,9 @@ describe('motor validado (motorProyecto): I-131 y Lu-177 usan la regla espectral
 
   for (const [id, nuc] of [['radioiodine-i131', 'I131'], ['lu177', 'Lu177']] as const) {
     it(`${id}: espesores = espesorTerapiaGP(kerma máximo) en todos los materiales, traza ANS-6.4.3`, () => {
-      const r = calcularProyecto(plano(id, [muro('pb', 2, 'PB', 1e-6), muro('c', 3, 'CONCRETE235', 1e-6), muro('lejos', 3, 'PB', 1e6)], [fuente(id, 7400)]));
+      // Muros paralelos uno detrás de otro: se evalúa cada uno solo (sin crédito de muros en serie) para comparar
+      // con `espesorTerapiaGP` del mismo kerma.
+      const r = calcularProyecto(plano(id, [muro('pb', 2, 'PB', 1e-6), muro('c', 3, 'CONCRETE235', 1e-6), muro('lejos', 3, 'PB', 1e6)], [fuente(id, 7400)]), undefined, { murosEnSerie: false });
       for (const b of r.barriers.slice(0, 2)) {
         const t = b.requiredThickness_mm as Record<string, number>;
         expect(b.calculationTrace?.formulaId).toBe('ANS643_GP_ESPECTRO_MAX_HAZ_ESTRECHO');

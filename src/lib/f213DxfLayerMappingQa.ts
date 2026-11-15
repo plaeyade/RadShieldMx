@@ -34,8 +34,11 @@ function normalize(value: string): string {
 }
 
 export function inferDxfLayerRole(layerName: string): F213DxfLayerRole {
-  const value = normalize(layerName);
-  if (/(wall|muro|barrier|barrera|shield|blind|lead|plomo|concrete|concreto|primary|secondary|primaria|secundaria|bunker|tablaroca|columna|column|estructura|structural|losa|puerta|door)/.test(value)) return 'barrier';
+  // Capas de XREF ligado («XREF PB HOSPITAL$0$MUROS»): el rol sale del nombre local, no del archivo referenciado.
+  const i = layerName.lastIndexOf('$');
+  const value = normalize(i >= 0 ? layerName.slice(i + 1) : layerName);
+  // Hallazgo 7: «bóveda»/«vault»/«tabique» son barrera aunque la capa diga «cyclotron» (la bóveda del ciclotrón).
+  if (/(wall|muro|barrier|barrera|shield|blind|lead|plomo|concrete|concreto|primary|secondary|primaria|secundaria|bunker|boveda|vault|tabique|tablaroca|columna|column|estructura|structural|losa|puerta|door)/.test(value)) return 'barrier';
   if (/(source|fuente|linac|ct|pet|spect|gamma|knife|hdr|cyclotron|ciclotron|equipo|equipment|machine)/.test(value)) return 'equipment';
   if (/(zone|zona|controlled|controlada|public|publica|hot|room|sala|area)/.test(value)) return 'zone';
   if (/(dim|cota|dimension|measure|medida|axis|eje)/.test(value)) return 'dimension';

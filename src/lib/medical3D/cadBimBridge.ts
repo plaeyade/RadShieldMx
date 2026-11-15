@@ -25,6 +25,13 @@ export interface CadBimDxfImportOptions {
   layerRoleOverrides?: Record<string, F213DxfLayerRole>;
   maxBarrierSegments?: number;
   prioritizeRepresentativeSegments?: boolean;
+  /** Material por capa elegido por el usuario (gana a `REGLAS_MATERIAL_CAPA`). */
+  layerMaterialOverrides?: Record<string, string>;
+  /**
+   * Espesor instalado por capa elegido en el asistente de capas (mm; gana al espesor declarado en el nombre). null
+   * quita el espesor declarado (la barrera queda «por calcular»); sin clave se usa la regla del nombre.
+   */
+  layerThicknessOverrides?: Record<string, number | null>;
 }
 
 export interface CadBimDxfImportImpact {
@@ -55,14 +62,66 @@ function unitToMeters(unit: string) {
   return DEFAULT_SCALE_M_PER_UNIT;
 }
 
+/**
+ * Nombre local de una capa: lo que sigue al último «$» de una capa de XREF ligado («XREF PB HOSPITAL$0$MUROS» →
+ * «MUROS»). El prefijo es el nombre del archivo referenciado («PB» = planta baja, «1N» = nivel 1) y no describe
+ * el material ni el tipo de la barrera.
+ */
+export function nombreLocalCapa(layer: string): string {
+  const i = layer.lastIndexOf('$');
+  return (i >= 0 ? layer.slice(i + 1) : layer).trim();
+}
+
+/** Minúsculas, sin acentos y con «_» como separador de palabra («DOOR_LEAD_6MM» → «door lead 6mm»). */
+const normalizarCapa = (v: string) => v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/_+/g, ' ');
+
+export interface ReglaMaterialCapa {
+  id: string;
+  /** Código de material del importador (alias del catálogo en `ALIAS_MATERIAL_CATALOGO`) o código del catálogo. */
+  material: string;
+  descripcion: string;
+  prueba: (nombreLocalNormalizado: string) => boolean;
+}
+
+const VIDRIO = /\b(vidrio|cristal|glass|ventana|mirilla|window)/;
+const PLOMO = /\b(plomo|plomad[oa]s?|emplomad[oa]s?|lead)\b/;
+/** «Pb» sólo cuenta como plomo con un espesor detrás («PB 2MM», «Pb-1.5», «PB2») o como «lámina/placa de Pb». */
+const PB_CON_ESPESOR = /\bpb\s*[-_]?\s*\d/;
+const LAMINA_PB = /\b(lamina|placa|hoja|forro)\s+(de\s+)?pb\b/;
+
+/**
+ * Reglas explícitas de material por nombre de capa (hallazgo 2 de la auditoría independiente 2026-11: `includes('pb')` convertía en
+ * plomo toda capa «XREF PB …»). Se evalúan en orden sobre el nombre local normalizado; la primera que coincide
+ * gana. Sin coincidencia: concreto por omisión, marcado como no declarado.
+ */
+export const REGLAS_MATERIAL_CAPA: readonly ReglaMaterialCapa[] = [
+  { id: 'vidrio-plomado', material: 'vidrio_plomo', descripcion: 'vidrio/ventana/mirilla con plomo', prueba: (v) => VIDRIO.test(v) && (PLOMO.test(v) || /\bpb\b/.test(v)) },
+  { id: 'plomo', material: 'plomo', descripcion: '«plomo», «plomado», «emplomado» o «lead» como palabra', prueba: (v) => PLOMO.test(v) },
+  { id: 'pb-espesor', material: 'plomo', descripcion: '«Pb» seguido de un espesor o «lámina/placa de Pb»', prueba: (v) => PB_CON_ESPESOR.test(v) || LAMINA_PB.test(v) },
+  { id: 'baritado', material: 'concreto_baritado', descripcion: '«barita»/«baritado»', prueba: (v) => /barit/.test(v) },
+  { id: 'acero', material: 'acero', descripcion: '«acero» o «steel»', prueba: (v) => /\b(acero|steel)\b/.test(v) },
+  { id: 'tungsteno', material: 'tungsteno', descripcion: '«tungsteno» o «wolframio»', prueba: (v) => /\b(tungsten|tungsteno|wolfram|wolframio)\b/.test(v) },
+  { id: 'nipol-5', material: 'NIPOL500', descripcion: 'NIPOL densidad 5', prueba: (v) => /nipol/.test(v) && /\b(5(\.0)?|500)\b/.test(v) },
+  { id: 'nipol-4', material: 'NIPOL400', descripcion: 'NIPOL densidad 4', prueba: (v) => /nipol/.test(v) && /\b(4(\.0)?|400)\b/.test(v) },
+  { id: 'nipol-3.5', material: 'NIPOL350', descripcion: 'NIPOL densidad 3.5 (o sin densidad)', prueba: (v) => /nipol/.test(v) },
+  { id: 'concreto', material: 'concreto', descripcion: 'concreto, búnker, bóveda, tabique o losa', prueba: (v) => /(concreto|concrete|hormigon|bunker|boveda|vault|tabique|losa|blindad)/.test(v) },
+];
+
+export interface MaterialCapaInferido {
+  material: string;
+  regla: string;
+  /** false si ninguna regla explícita coincidió (concreto por omisión). */
+  declarado: boolean;
+}
+
+export function inferirMaterialCapa(layer: string): MaterialCapaInferido {
+  const v = normalizarCapa(nombreLocalCapa(layer));
+  for (const r of REGLAS_MATERIAL_CAPA) if (r.prueba(v)) return { material: r.material, regla: r.id, declarado: true };
+  return { material: 'concreto', regla: 'omision', declarado: false };
+}
+
 function inferMaterial(text: string) {
-  const value = text.toLowerCase();
-  if (value.includes('lead') || value.includes('plomo') || value.includes('pb')) return 'plomo';
-  if (value.includes('barit')) return 'concreto_baritado';
-  if (value.includes('steel') || value.includes('acero')) return 'acero';
-  if (value.includes('glass') || value.includes('window') || value.includes('vidrio')) return 'vidrio_plomo';
-  if (value.includes('tungsten') || value.includes('wolfram')) return 'tungsteno';
-  return 'concreto';
+  return inferirMaterialCapa(text).material;
 }
 
 function inferBarrierType(text: string): Barrier['barrierType'] {
@@ -95,13 +154,15 @@ export function espesorDeclaradoCapa(layer: string): number | null {
   return m[2] === 'm' ? v * 1000 : m[2] === 'cm' ? v * 10 : v;
 }
 
-function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint): Barrier {
-  const layerText = `${layer} ${name}`;
-  const materialCode = inferMaterial(layerText);
+function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, end: DXFPoint, materialOverride?: string, thicknessOverride?: number | null): Barrier {
+  // Material, tipo y espesor se leen del nombre LOCAL de la capa (sin el prefijo del XREF ligado).
+  const local = nombreLocalCapa(layer);
+  const materialCode = materialOverride || inferMaterial(layer);
   // Fase 4: el espesor se lee sólo de la capa (antes también del nombre «DXF n (…)», que daba «n mm»). Si la
   // capa lo declara con unidad, es el espesor INSTALADO (`thickness_mm`): el motor de campo lo atenúa y la
   // verificación lo compara con el requerido.
-  const declarado = espesorDeclaradoCapa(layer);
+  const declarado = thicknessOverride !== undefined ? thicknessOverride : espesorDeclaradoCapa(local);
+  const tipo = inferBarrierType(local);
   return {
     id,
     x1: start.x,
@@ -109,12 +170,13 @@ function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, e
     x2: end.x,
     y2: end.y,
     name,
-    barrierType: inferBarrierType(layerText),
-    useFactor: inferBarrierType(layerText) === 'primary' ? 1 : 0.25,
+    barrierType: tipo,
+    useFactor: tipo === 'primary' ? 1 : 0.25,
     occupancyFactor: 1,
     designGoal_mSv_per_wk: 0.02,
     materialCode,
-    requiredThickness_mm: inferThicknessMm(layer, materialCode === 'plomo' ? 3 : 200),
+    // Hallazgo 6: antes el primer número de la capa («XREF 1N…» → 1 mm). Ahora sólo un espesor con unidad.
+    requiredThickness_mm: declarado ?? (materialCode === 'plomo' ? 3 : 200),
     ...(declarado ? { thickness_mm: declarado } : {}),
   };
 }
@@ -278,13 +340,18 @@ function analyzeDxfBarrierSegments(parsed: DXFParsed, options: CadBimDxfImportOp
     segment.layer,
     segment.start,
     segment.end,
+    options.layerMaterialOverrides?.[segment.layer],
+    options.layerThicknessOverrides && segment.layer in options.layerThicknessOverrides ? options.layerThicknessOverrides[segment.layer] : undefined,
   ));
+  const sinMaterial = [...new Set(limitedSegments.map((sg) => sg.layer))]
+    .filter((l) => !options.layerMaterialOverrides?.[l] && !inferirMaterialCapa(l).declarado);
 
   if (ignored > 0) warnings.push(`${ignored} segmentos DXF degenerados fueron ignorados.`);
   if (skippedNonBarrierSegments > 0) warnings.push(`${skippedNonBarrierSegments} segmentos en capas no clasificadas como barrera fueron conservados solo como referencia.`);
   if (selectedBarrierLayers && selectedBarrierLayers.size > 0) warnings.push(`Importacion filtrada a ${selectedBarrierLayers.size} capa(s) de barrera visibles.`);
   if (simplification.removed > 0) warnings.push(`Limpieza geometrica: ${simplification.removed} segmento(s) duplicados o colineales fueron consolidados antes de aplicar al canvas.`);
   if (cappedByLimit > 0) warnings.push(`Importacion ligera priorizada: ${cappedByLimit} segmento(s) quedaron fuera por limite de seguridad (${maxBarrierSegments}).`);
+  if (sinMaterial.length > 0) warnings.push(`${sinMaterial.length} capa(s) de barrera sin material declarado en el nombre: se asigna concreto por omisión (revise): ${sinMaterial.slice(0, 5).join(', ')}${sinMaterial.length > 5 ? '…' : ''}.`);
   if (barriers.length === 0) warnings.push('No se detectaron LINE/LWPOLYLINE en capas de muro/barrera; revise nombres de capas o remapee manualmente.');
   return {
     barriers,
@@ -317,8 +384,13 @@ export function previewDXFImportImpact(parsed: DXFParsed, options: CadBimDxfImpo
 }
 
 export function importDXFToFloorPlan(content: string, fileName = 'import.dxf', options: CadBimDxfImportOptions = {}): CadBimBridgeResult {
-  const parsed = parseDXF(content);
-  const { barriers, warnings } = collectDxfBarriers(parsed, options);
+  return importParsedDXFToFloorPlan(parseDXF(content), fileName, options);
+}
+
+/** Igual que `importDXFToFloorPlan` sobre un DXF ya leído (evita leer dos veces un plano de ~100 MB). */
+export function importParsedDXFToFloorPlan(parsed: DXFParsed, fileName = 'import.dxf', options: CadBimDxfImportOptions = {}): CadBimBridgeResult {
+  const { barriers, warnings: avisosBarreras } = collectDxfBarriers(parsed, options);
+  const warnings = [...(parsed.warnings ?? []), ...avisosBarreras];
   const scale = unitToMeters(parsed.unit);
   const width = Math.max(parsed.bounds.maxX - parsed.bounds.minX, 1);
   const height = Math.max(parsed.bounds.maxY - parsed.bounds.minY, 1);

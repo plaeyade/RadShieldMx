@@ -17,7 +17,8 @@ import {
   saveControlledZoneShieldingPlanSnapshot,
 } from '../controlledZoneFloorPlanAdapter';
 import { extractControlledZoneReportContext } from '../controlledZoneReportAdapter';
-import { generateCNSNSReport } from '../../hooks/useCNSNSReport';
+import { construirMemoria } from '../memoriaAnalitica';
+import { salidaMemoria } from '../memoriaFlujo';
 
 const emptyFloorPlan: FloorPlan = {
   id: 'f65-functional-smoke',
@@ -80,15 +81,10 @@ describe('controlled-zone functional smoke flow', () => {
     expect(dbDraft.calculations).toHaveLength(importedPlan.calculations.length);
     expect(JSON.parse(exportedDbDraft.body).planKey).toBe(dbDraft.planKey);
 
-    const reportBlob = await generateCNSNSReport({
-      floorPlan: canvasResult.floorPlan,
-      projectName: 'F65 Smoke - Zona Controlada',
-      date: '2026-07-12',
-      preparerName: 'RadShield MX',
-      reviewerName: 'QA',
-      institution: 'Codex Stabilization',
-      licenseNumber: 'SMOKE-F65',
-    });
+    // Fase 12, paso 3: la memoria CNSNS sale de radshield/memoria@1 (antes useCNSNSReport).
+    const reportBlob = await salidaMemoria(construirMemoria({ ...canvasResult.floorPlan, name: 'F65 Smoke - Zona Controlada' }, {
+      elaboro: 'RadShield MX', responsableSR: 'QA', razonSocial: 'Codex Stabilization',
+    }), 'docx');
     expect(reportBlob.type).toBe('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     expect(reportBlob.size).toBeGreaterThan(1000);
   });

@@ -18,7 +18,7 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
   test('SplashScreen se cierra al hacer clic en Continuar', async ({ page }) => {
     await page.goto(BASE);
     await closeSplashIfVisible(page);
-    await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('f12-menu-proyecto')).toBeVisible({ timeout: 15000 });
   });
 
   // Fase 10: la pantalla de bienvenida y el demo R&F se retiraron; el lienzo vacío ofrece estas acciones
@@ -32,11 +32,11 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
 
   test('Toolbar muestra todos los menus principales', async ({ page }) => {
     await bootWorkspace(page);
-    await expect(page.getByRole('button', { name: /Archivo/i })).toBeVisible();
-    // Menús canónicos desde F97–F110 (Física, Med. Nuclear, Normativa y Herramientas quedaron como respaldo oculto).
-    for (const menu of ['Diseno', 'Equipos', 'Blindaje', 'Verificacion', 'Reportes', 'Evidencia', 'Integraciones']) {
+    // Fase 12, paso 2: 5 menús por etapa del flujo, un solo «Calcular» y Ayuda («Avanzado» sólo con VITE_MENU_AVANZADO).
+    for (const menu of ['1. Proyecto y plano', '2. Fuentes y cargas de trabajo', '3. Barreras y materiales', '4. Verificación y cumplimiento', '5. Memoria analítica y CNSNS', 'Ayuda']) {
       await expect(page.getByRole('button', { name: menu, exact: true }).first()).toBeVisible();
     }
+    await expect(page.getByRole('button', { name: 'Calcular blindaje (F5)', exact: true })).toHaveCount(1);
   });
 
   test('Abrir Update Center desde menu', async ({ page }) => {
@@ -60,8 +60,8 @@ test.describe('RadShield-MX - Flujos Criticos', () => {
 
   test('AI Assistant responde en modo estatico/offline', async ({ page }) => {
     await bootWorkspace(page);
-    await page.getByTestId('f110-migrated-evidence-dropdown').click();
-    await page.getByText('AI source review', { exact: true }).click();
+    await page.getByTestId('f12-menu-ayuda').click();
+    await page.getByTestId('f12-ayuda-asistente').click();
     await expect(page.getByRole('heading', { name: /RadShield AI Assistant RAG/i })).toBeVisible();
     await page.getByPlaceholder(/Pregunta con RAG|Pregunta directa/i).fill('TVL concreto 6 MV');
     await page.getByRole('button', { name: /Enviar pregunta AI/i }).click();

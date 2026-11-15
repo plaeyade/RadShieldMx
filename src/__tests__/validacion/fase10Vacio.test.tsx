@@ -2,12 +2,13 @@
  * Fase 10 — sin proyecto: los diálogos de reporte y tablero muestran un estado vacío útil y ningún dato inventado;
  * con el ejemplo PET/CT la tabla del reporte sale del proyecto.
  */
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useAppStore } from '@/stores/appStore';
 import { planoEjemploCompleto, planoVacio } from '@/lib/ejemploGuiado';
 import AvisoProyectoVacio from '@/components/AvisoProyectoVacio';
-import PdfReportDialog from '@/sections/dialogs/PdfReportDialog';
+import MemoriaDialog from '@/sections/dialogs/MemoriaDialog';
+import { calcularProyecto } from '@/lib/motorProyecto';
 import VersionHistoryDialog from '@/sections/dialogs/VersionHistoryDialog';
 import CNSNSDashboardDialog from '@/sections/dialogs/CNSNSDashboardDialog';
 import DashboardCalcDialog from '@/sections/dialogs/DashboardCalcDialog';
@@ -26,19 +27,20 @@ describe('estado vacío (Fase 10)', () => {
     expect(screen.queryByTestId('f10-aviso-proyecto-vacio')).toBeNull();
   });
 
-  it('PdfReport sin proyecto: sin filas fijas «Pared A/B: cumple»', () => {
-    render(<PdfReportDialog open floorPlan={planoVacio()} />);
+  // Fase 12, paso 3: PdfReport se unificó en la memoria radshield/memoria@1.
+  it('Memoria sin proyecto: aviso de proyecto vacío y sin filas fijas «Pared A/B: cumple»', () => {
+    render(<MemoriaDialog open onOpenChange={nada} floorPlan={planoVacio()} />);
     expect(screen.queryByText(/Pared A/)).toBeNull();
     expect(screen.getByTestId('f10-aviso-proyecto-vacio')).toBeTruthy();
-    expect(screen.getByTestId('pdf-report-conclusion').textContent).toMatch(/Sin barreras/);
+    expect(screen.getByTestId('memoria-vacio')).toBeTruthy();
   });
 
-  it('PdfReport con el ejemplo: una fila por barrera del proyecto', () => {
-    render(<PdfReportDialog open floorPlan={planoEjemploCompleto()} />);
-    const tabla = screen.getByTestId('pdf-report-resultados');
+  it('Memoria con el ejemplo calculado: una fila por barrera del proyecto', () => {
+    render(<MemoriaDialog open onOpenChange={nada} floorPlan={{ ...planoEjemploCompleto(), barriers: calcularProyecto(planoEjemploCompleto()).barriers }} />);
+    fireEvent.click(screen.getByTestId('memoria-paso-revision'));
+    const tabla = screen.getByTestId('memoria-tabla-barreras');
     expect(tabla.querySelectorAll('tr')).toHaveLength(1 + 7);
     expect(tabla.textContent).toMatch(/Muro común captación/);
-    expect(screen.getByTestId('pdf-report-conclusion').textContent).toMatch(/sin cálculo/);
   });
 
   it('VersionHistory sin versiones inventadas', () => {
