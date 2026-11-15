@@ -13,6 +13,7 @@ import { CBCT_SYSTEMS, HVL_CBCT_KV, getCBCTShieldingRecommendation } from '@/lib
 import { OBJETIVOS_DISENO, blindajeTC } from '@/lib/calculadorasNormativas';
 import { transmisionTC } from '@/lib/ncrp147';
 import { toast } from 'sonner';
+import CapaModal from '@/components/CapaModal';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 const COL = ['bg-blue-50 border-blue-200','bg-emerald-50 border-emerald-200','bg-amber-50 border-amber-200','bg-violet-50 border-violet-200'];
@@ -20,9 +21,9 @@ const COL = ['bg-blue-50 border-blue-200','bg-emerald-50 border-emerald-200','bg
 export default function CBCTIGRTDialog({ open, onOpenChange }: Props) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }} role="dialog" aria-modal="true" aria-label="Blindaje CBCT / IGRT">
+    <CapaModal onCerrar={() => onOpenChange(false)} className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }} aria-label="Blindaje CBCT / IGRT">
       <CBCTContent onOpenChange={onOpenChange} />
-    </div>
+    </CapaModal>
   );
 }
 

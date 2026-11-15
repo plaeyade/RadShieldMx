@@ -9,6 +9,7 @@ import { X, Activity, Table, FileDown } from 'lucide-react';
 import { buildF172AResearchMethodology } from '@/lib/f172aArxivResearchMethodology';
 import { dosisSemanalTG108, NUCLIDOS_PET, type NuclidoPET } from '@/lib/tg108';
 import { espesorPET, MATERIALES_PET, NOMBRE_MATERIAL, transmisionPET, type MaterialPET } from '@/lib/calculadorasNormativas';
+import CapaModal from '@/components/CapaModal';
 
 interface PETProcedure { name: string; patientsPerWeek: number; avgAdminActivity_MBQ: number; avgScanTime_min: number; ctScans: number; }
 
@@ -74,7 +75,7 @@ export default function AAPMTG108PETDialog({ onClose }: { onClose: () => void })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="tg108-title">
+    <CapaModal onCerrar={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" aria-labelledby="tg108-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-t-lg">
           <div className="flex items-center gap-3">
@@ -150,6 +151,6 @@ export default function AAPMTG108PETDialog({ onClose }: { onClose: () => void })
           <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-blue-600 text-white text-xs font-medium hover:bg-blue-700"><FileDown className="w-3.5 h-3.5" />Exportar CSV</button>
         </div>
       </div>
-    </div>
+    </CapaModal>
   );
 }

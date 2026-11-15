@@ -6,6 +6,7 @@ import { useState, useMemo } from 'react';
 import { X, Activity, Table, Download } from 'lucide-react';
 import { DEFAULT_SPECT_PROCEDURES, SPECT_RADIONUCLIDES, calculateSPECTShielding, metodoSPECT, salaSPECT } from '@/lib/spect/IPEMReport109';
 import type { SPECTProcedure } from '@/lib/spect/IPEMReport109';
+import CapaModal from '@/components/CapaModal';
 
 export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }) {
   const [procedures, setProcedures] = useState<SPECTProcedure[]>(DEFAULT_SPECT_PROCEDURES);
@@ -29,7 +30,7 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="ipem-title">
+    <CapaModal onCerrar={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" aria-labelledby="ipem-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-indigo-600 to-blue-700 text-white rounded-t-lg">
           <div className="flex items-center gap-3"><Activity className="w-6 h-6" /><div><h2 id="ipem-title" className="text-lg font-bold">Blindaje SPECT (IPEM Report 109)</h2><p className="text-xs text-indigo-100">Institute of Physics and Engineering in Medicine, 2014 — v50</p></div></div>
@@ -84,6 +85,6 @@ export default function IPEMReport109Dialog({ onClose }: { onClose: () => void }
         </div>
         <div className="flex justify-between px-5 py-3 border-t bg-slate-50 rounded-b-lg"><span className="text-xs text-slate-500">IPEM 109 v50</span><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>
       </div>
-    </div>
+    </CapaModal>
   );
 }

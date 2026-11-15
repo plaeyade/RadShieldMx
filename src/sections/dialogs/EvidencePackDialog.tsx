@@ -80,6 +80,8 @@ export default function EvidencePackDialog({
 }: Props) {
   const [pack, setPack] = useState<EvidencePack>(() => createEvidencePack(projectName));
   const [importError, setImportError] = useState<string | null>(null);
+  // Ediciones del usuario que sólo viven en este diálogo hasta exportar el JSON (Escape pide confirmación).
+  const [cambiosSinExportar, setCambiosSinExportar] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const generatedSources = useMemo(() => createFloorPlanEvidenceSources(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
   const calculationSnapshot = useMemo(() => buildAnalyticMemorySnapshot(floorPlan, barrierResults, sampleLines), [floorPlan, barrierResults, sampleLines]);
@@ -131,10 +133,12 @@ export default function EvidencePackDialog({
   if (!open) return null;
 
   const updatePack = (updates: Partial<EvidencePack>) => {
+    setCambiosSinExportar(true);
     setPack((current) => ({ ...current, ...updates, updatedAt: new Date().toISOString() }));
   };
 
   const updateSource = (id: string, updates: Partial<EvidenceSource>) => {
+    setCambiosSinExportar(true);
     setPack((current) => {
       const sources = current.sources.map((source) => {
         if (source.id !== id) return source;
@@ -155,6 +159,7 @@ export default function EvidencePackDialog({
   };
 
   const addSource = () => {
+    setCambiosSinExportar(true);
     setPack((current) => {
       const sources = [createEvidenceSource({ title: 'Nueva fuente', sourceType: 'official' }), ...current.sources];
       return {
@@ -167,6 +172,7 @@ export default function EvidencePackDialog({
   };
 
   const removeSource = (id: string) => {
+    setCambiosSinExportar(true);
     setPack((current) => {
       const sources = current.sources.filter((source) => source.id !== id);
       return {
@@ -184,6 +190,7 @@ export default function EvidencePackDialog({
     try {
       const parsed = JSON.parse(await file.text());
       setPack(normalizeEvidencePack(parsed, projectName));
+      setCambiosSinExportar(true);
       setImportError(null);
     } catch {
       setImportError('No se pudo importar el Evidence Pack. Revise que sea JSON valido.');
@@ -200,6 +207,7 @@ export default function EvidencePackDialog({
       accentClassName="bg-emerald-600"
       traceId="f392-evidence-pack-fullscreen-shell"
       onClose={() => onOpenChange(false)}
+      confirmarCierre={() => !cambiosSinExportar || window.confirm('El paquete de evidencia tiene cambios sin exportar. ¿Cerrar y descartarlos?')}
     >
       <div className="px-6 py-4 border-b bg-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -454,7 +462,7 @@ export default function EvidencePackDialog({
             <Button className="w-full justify-start" size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
               <FileUp className="w-4 h-4 mr-2" /> Importar JSON
             </Button>
-            <Button className="w-full justify-start" size="sm" variant="outline" onClick={() => downloadJson(`evidence_pack_${pack.projectName.replace(/\W+/g, '_')}.json`, pack)}>
+            <Button className="w-full justify-start" size="sm" variant="outline" onClick={() => { downloadJson(`evidence_pack_${pack.projectName.replace(/\W+/g, '_')}.json`, pack); setCambiosSinExportar(false); }}>
               <Download className="w-4 h-4 mr-2" /> Exportar JSON
             </Button>
             {importError && <div className="text-xs text-red-600">{importError}</div>}

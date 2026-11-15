@@ -6,6 +6,7 @@ import { useState, useMemo } from 'react';
 import { X, Pill, Download } from 'lucide-react';
 import { DEFAULT_THERAPY_TASKS, THERAPY_NUCLIDES, getRoomSummary } from '@/lib/therapy/TherapeuticRadionuclideShielding';
 import type { TherapyRoomTask } from '@/lib/therapy/TherapeuticRadionuclideShielding';
+import CapaModal from '@/components/CapaModal';
 
 export default function TherapyShieldingDialog({ onClose }: { onClose: () => void }) {
   const [tasks, setTasks] = useState<TherapyRoomTask[]>(DEFAULT_THERAPY_TASKS);
@@ -25,7 +26,7 @@ export default function TherapyShieldingDialog({ onClose }: { onClose: () => voi
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="therapy-title">
+    <CapaModal onCerrar={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" aria-labelledby="therapy-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-rose-600 to-pink-700 text-white rounded-t-lg">
           <div className="flex items-center gap-3"><Pill className="w-6 h-6" /><div><h2 id="therapy-title" className="text-lg font-bold">Blindaje para radiofármacos terapéuticos</h2><p className="text-xs text-rose-100">ICRP 128/140, AAPM TG 377 — v50</p></div></div>
@@ -75,6 +76,6 @@ export default function TherapyShieldingDialog({ onClose }: { onClose: () => voi
         </div>
         <div className="flex justify-between px-5 py-3 border-t bg-slate-50 rounded-b-lg"><span className="text-xs text-slate-500">La sala cumple si la suma semanal de todas las tareas ≤ meta; espesores con número de TVL continuo.</span><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-600 text-white text-xs font-medium hover:bg-rose-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>
       </div>
-    </div>
+    </CapaModal>
   );
 }

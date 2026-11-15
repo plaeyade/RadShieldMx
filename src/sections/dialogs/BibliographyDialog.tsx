@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import '@/components/ui/scroll-area';
 import { X, BookOpen, Search, ExternalLink, FileText } from 'lucide-react';
 import { ALL_REFERENCES, searchRefs, getRefsByType } from '@/lib/bibliography';
+import CapaModal from '@/components/CapaModal';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -40,7 +41,7 @@ function BibliographyContent({ onOpenChange }: { onOpenChange: (open: boolean) =
   const types = [...new Set(ALL_REFERENCES.map(r => r.type))];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }}>
+    <CapaModal onCerrar={() => onOpenChange(false)} className="fixed inset-0 z-50 flex flex-col bg-white" style={{ width: '100vw', height: '100vh' }} aria-label="Bibliografía">
       <div className="flex items-center justify-between px-6 py-3 border-b bg-slate-50">
         <div className="flex items-center gap-3">
           <div className="bg-slate-700 text-white p-2 rounded-lg"><BookOpen className="w-5 h-5" /></div>
@@ -92,6 +93,6 @@ function BibliographyContent({ onOpenChange }: { onOpenChange: (open: boolean) =
           </div>
         </div>
       </div>
-    </div>
+    </CapaModal>
   );
 }
