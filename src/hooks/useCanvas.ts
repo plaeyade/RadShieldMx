@@ -9,6 +9,7 @@ import {
 import { getBarrierLayerDisplay, getBarrierRiskColor, getBarrierRiskLevel } from '@/lib/canvasF85Workflow';
 import { drawCanvasBackgroundGrid, drawCanvasScaleHud, drawFloorPlanImageLayer } from '@/lib/canvas/renderStaticHelpers';
 import { drawCanvasHeatmapLayer, drawCanvasSampleLinesLayer } from '@/lib/canvas/renderDynamicHelpers';
+import { acotar, encuadrar, extensionPlano, factorRueda, limitesZoom, zoomEnPunto, type LimitesZoom } from '@/lib/vistaLienzo';
 
 type Tool = 'select' | 'barrier' | 'source' | 'region' | 'measure' | 'pan' | 'eraser' | 'reset';
 
@@ -1211,27 +1212,34 @@ export function useCanvas(
     }
   }, [canvasState.isDragging, drawingState, activeTool, floorPlan, onFloorPlanChange, selectionWindow, lassoPath, pointInPolygon, snapAdvanced]);
 
+  // Fase 12, paso 4: límites de zoom según el plano (px/m y encuadre del contenido), no [0.1, 10] fijos.
+  const limitesRef = useRef<LimitesZoom>(limitesZoom(floorPlan.scale_m_per_pixel));
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const caja = extensionPlano(floorPlan);
+    const ajuste = caja && canvas && canvas.width > 0 && canvas.height > 0 ? encuadrar(caja, canvas.width, canvas.height).scale : null;
+    limitesRef.current = limitesZoom(floorPlan.scale_m_per_pixel, ajuste);
+  }, [floorPlan]);
+
+  /** Zoom por `factor` centrado en el punto de pantalla (sx, sy); sin punto, en el centro del lienzo. */
+  const zoomEn = useCallback((factor: number, sx?: number, sy?: number) => {
+    const canvas = canvasRef.current;
+    const cx = sx ?? (canvas ? canvas.width / 2 : 0);
+    const cy = sy ?? (canvas ? canvas.height / 2 : 0);
+    setCanvasState(prev => {
+      const v = zoomEnPunto(prev, cx, cy, factor, limitesRef.current);
+      return v === prev ? prev : { ...prev, ...v };
+    });
+  }, []);
+
+  // Rueda: zoom centrado en el cursor. Con actualización funcional para que varios eventos seguidos (panel táctil)
+  // no partan de una vista vieja; `preventDefault` real lo pone el oyente no pasivo de CanvasArea.
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const rect = canvasRef.current!.getBoundingClientRect();
-    const sx = e.clientX - rect.left;
-    const sy = e.clientY - rect.top;
-    const worldBefore = screenToWorld(sx, sy);
-
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.max(0.1, Math.min(10, canvasState.scale * zoomFactor));
-
-    // Adjust offset to zoom toward mouse position
-    const newOffsetX = sx - worldBefore.x * newScale;
-    const newOffsetY = sy - worldBefore.y * newScale;
-
-    setCanvasState(prev => ({
-      ...prev,
-      scale: newScale,
-      offsetX: newOffsetX,
-      offsetY: newOffsetY
-    }));
-  }, [canvasState.scale, screenToWorld]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    zoomEn(factorRueda(e.deltaY, e.deltaMode), e.clientX - rect.left, e.clientY - rect.top);
+  }, [zoomEn]);
 
   // Resize canvas
   useEffect(() => {
@@ -1326,27 +1334,15 @@ export function useCanvas(
 
   // Zoom to fit all objects
   const zoomToFit = useCallback(() => {
-    if (!floorPlan.sources.length && !floorPlan.barriers.length) return;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const s of floorPlan.sources) {
-      minX = Math.min(minX, s.x - 50); minY = Math.min(minY, s.y - 50);
-      maxX = Math.max(maxX, s.x + 50); maxY = Math.max(maxY, s.y + 50);
-    }
-    for (const b of floorPlan.barriers) {
-      minX = Math.min(minX, b.x1, b.x2); minY = Math.min(minY, b.y1, b.y2);
-      maxX = Math.max(maxX, b.x1, b.x2); maxY = Math.max(maxY, b.y1, b.y2);
-    }
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const padding = 60;
-    const contentW = maxX - minX;
-    const contentH = maxY - minY;
-    const scaleX = (canvas.width - padding * 2) / contentW;
-    const scaleY = (canvas.height - padding * 2) / contentH;
-    const newScale = Math.max(0.1, Math.min(10, Math.min(scaleX, scaleY)));
-    const newOffsetX = padding - minX * newScale;
-    const newOffsetY = padding - minY * newScale;
-    setCanvasState(prev => ({ ...prev, scale: newScale, offsetX: newOffsetX, offsetY: newOffsetY }));
+    const caja = extensionPlano(floorPlan);
+    if (!canvas || !caja || canvas.width <= 0 || canvas.height <= 0) return;
+    // Margen proporcional (12–60 px): con el lienzo bajo (1280 × 720 con la tabla de resultados abierta) 60 px fijos
+    // dejaban el plano en un tercio de la altura disponible.
+    const margen = Math.max(12, Math.min(60, Math.min(canvas.width, canvas.height) * 0.08));
+    const v = encuadrar(caja, canvas.width, canvas.height, margen);
+    limitesRef.current = limitesZoom(floorPlan.scale_m_per_pixel, v.scale);
+    setCanvasState(prev => ({ ...prev, ...v }));
   }, [floorPlan, canvasRef]);
 
   // Export canvas as PNG
@@ -1464,7 +1460,7 @@ export function useCanvas(
       if (now - ts.lastTouchTime < 300 && Math.hypot(pos.x - ts.lastTouchX, pos.y - ts.lastTouchY) < 20) {
         // Double-tap: zoom to point
         const worldPos = screenToWorld(pos.x, pos.y);
-        const newScale = Math.min(5, canvasState.scale * 1.5);
+        const newScale = acotar(canvasState.scale * 1.5, limitesRef.current);
         setCanvasState(prev => ({
           ...prev,
           scale: newScale,
@@ -1495,7 +1491,7 @@ export function useCanvas(
       const dy = t2.y - t1.y;
       const newDist = Math.hypot(dx, dy);
       const pinchScale = newDist / (ts.startDist || 1);
-      const newScale = Math.max(0.1, Math.min(10, ts.startScale * pinchScale));
+      const newScale = acotar(ts.startScale * pinchScale, limitesRef.current);
 
       // Zoom around midpoint
       const worldMidX = (ts.midX - ts.startOffsetX) / ts.startScale;
@@ -1561,6 +1557,7 @@ export function useCanvas(
     handleMouseMove,
     handleMouseUp,
     handleWheel,
+    zoomEn,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
