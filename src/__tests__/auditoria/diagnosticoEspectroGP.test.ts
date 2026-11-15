@@ -289,7 +289,8 @@ describe('motor: la modalidad SPECT Tc-99m usa la regla espectral', () => {
     expect(nuclidoTerapiaDe([fuente('spect-tc99m'), fuente('lu177')])).toBeNull();
     const plano = { id: 'tc', name: 'tc', imageUrl: null, width_pixels: 2000, height_pixels: 2000, scale_m_per_pixel: 0.01,
       barriers: [muro('pb', 2, 'PB'), muro('c', 3, 'CONCRETE235')], sources: [fuente('spect-tc99m')], regions: [], criticalPoints: [] } as unknown as FloorPlan;
-    const r = calcularProyecto(plano);
+    // Muros paralelos uno detrás de otro: cada uno solo (sin crédito de muros en serie).
+    const r = calcularProyecto(plano, undefined, { murosEnSerie: false });
     for (const b of r.barriers) {
       expect(b.calculationTrace?.formulaId).toBe('ANS643_GP_ESPECTRO_MAX_HAZ_ESTRECHO');
       expect(b.calculationTrace?.standard).toBe('ANSI/ANS-6.4.3 GP + haz estrecho');
