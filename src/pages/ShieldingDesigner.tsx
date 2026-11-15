@@ -3,6 +3,7 @@ import { generarBunker, type ConfigBunker } from '@/lib/bunkerParametrico';
 import { useState, useCallback, Suspense, lazy, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { CriticalPoint, FloorPlan, Barrier, RadiationSource, OccupiedRegion } from '@/types/radshield';
+import type { MapeoCapas } from '@/lib/asistenteCapas';
 import { MATERIALS, MODALITIES } from '@/types/radshield';
 import { useShieldingEngine } from '@/hooks/useShieldingEngine';
 import { useCanvas } from '@/hooks/useCanvas';
@@ -44,6 +45,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useProyectoStore, PLANO_PREDETERMINADO, type HerramientaLienzo } from '@/stores/proyecto';
 import { useGanchoE2E } from '@/pages/designer/useGanchoE2E';
 import { useCalculoProyecto } from '@/pages/designer/useCalculoProyecto';
+import { useAtajosTeclado } from '@/pages/designer/atajosTeclado';
 import { useAuth } from '@/hooks/useAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -54,7 +56,6 @@ import { buildKimiOAuthUrl } from '@/lib/authConfig';
 import { trpc } from '@/providers/trpc';
 import type { CTIsodosisProfile } from '@/types/ctIsodosis';
 // Fase 6: docx (≈690 kB) y jspdf (≈340 kB) se cargan bajo demanda al generar el reporte.
-import type { CNSNSReportData } from '@/hooks/useCNSNSReport';
 import type { MCConfig } from '@/hooks/useMCBridge';
 // ═══ State Management: Zustand stores (Phase 0 - ready for v53-v60) ═══
 import { useAppStore } from '@/stores/appStore';
@@ -124,7 +125,8 @@ const CADImportDialog = lazy(() => import('@/sections/dialogs/CADImportDialog'))
 const ParametricBunkerDesigner = lazy(() => import('@/sections/dialogs/ParametricBunkerDesigner'));
 const MLPredictionDialog = lazy(() => import('@/sections/dialogs/MLPredictionDialog'));
 const KeyboardConfigDialog = lazy(() => import('@/sections/dialogs/KeyboardConfigDialog'));
-const CNSNSAutoReportDialog = lazy(() => import('@/sections/dialogs/CNSNSAutoReportDialog'));
+// Fase 12, paso 3: un solo flujo de memoria analítica y CNSNS (radshield/memoria@1).
+const MemoriaDialog = lazy(() => import('@/sections/dialogs/MemoriaDialog'));
 const OnboardingTour = lazy(() => import('@/components/OnboardingTour'));
 const MaterialPropertyCalculator = lazy(() => import('@/sections/dialogs/MaterialPropertyCalculator'));
 const MaterialLibraryDialog = lazy(() => import('@/sections/dialogs/MaterialLibraryDialog'));
@@ -175,8 +177,6 @@ const ModelingToolboxDialog = lazy(() => import('@/sections/dialogs/ModelingTool
 const ElectronTransportDialog = lazy(() => import('@/sections/dialogs/ElectronTransportDialog'));
 const STEPImporterDialog = lazy(() => import('@/sections/dialogs/STEPImporterDialog'));
 const ManualDialog = lazy(() => import('@/sections/dialogs/ManualDialog'));
-const MemoriaAIWizard = lazy(() => import('@/sections/dialogs/MemoriaAIWizard'));
-const MemoriaAnaliticaWizard = lazy(() => import('@/sections/dialogs/MemoriaAnaliticaWizard'));
 const DoseMapDialog = lazy(() => import('@/sections/dialogs/DoseMapDialog'));
 const RealTime3DDialog = lazy(() => import('@/sections/dialogs/RealTime3DDialog'));
 const MedicalFloorPlan3DDialog = lazy(() => import('@/sections/dialogs/MedicalFloorPlan3DDialog'));
@@ -217,11 +217,9 @@ const MultiObjectiveOptimizerDialog = lazy(() => import('@/sections/dialogs/Mult
 // v106: Material Comparison
 const MaterialComparisonDialog = lazy(() => import('@/sections/dialogs/MaterialComparisonDialog'));
 // v110: Batch Report Exporter
-const BatchReportExporterDialog = lazy(() => import('@/sections/dialogs/BatchReportExporterDialog'));
 // v108: Spatial Dose Map 2D
 const SpatialDoseMapDialog = lazy(() => import('@/sections/dialogs/SpatialDoseMapDialog'));
 // v110: Regulatory Report Generator
-const RegulatoryReportDialog = lazy(() => import('@/sections/dialogs/RegulatoryReportDialog'));
 // v114: Multi-Layer Shield Calculator
 const MultiLayerShieldDialog = lazy(() => import('@/sections/dialogs/MultiLayerShieldDialog'));
 // v115: Source Library
@@ -229,7 +227,6 @@ const SourceLibraryDialog = lazy(() => import('@/sections/dialogs/SourceLibraryD
 // v127: 3D Isosurface Dose Map
 const Isosurface3DDialog = lazy(() => import('@/sections/dialogs/Isosurface3DDialog'));
 // v117: PDF Report Generator
-const PdfReportDialog = lazy(() => import('@/sections/dialogs/PdfReportDialog'));
 // v119: NSGA-III Pareto Optimizer
 const ParetoOptimizerDialog = lazy(() => import('@/sections/dialogs/ParetoOptimizerDialog'));
 // v127: 3D Parametric Primitives
@@ -278,7 +275,6 @@ const CBCTIGRTDialog = lazy(() => import('@/sections/dialogs/CBCTIGRTDialog'));
 const MaintenanceLogDialog = lazy(() => import('@/sections/dialogs/MaintenanceLogDialog'));
 const ScenarioAnalysisDialog = lazy(() => import('@/sections/dialogs/ScenarioAnalysisDialog'));
 const ChecklistCNSNSDialog = lazy(() => import('@/sections/dialogs/ChecklistCNSNSDialog'));
-const CNSNSDialog = lazy(() => import('@/sections/dialogs/CNSNSDialog'));
 // v14.4: Special cases (24 hojas restantes del Excel)
 const SpecialCasesDialog = lazy(() => import('@/sections/dialogs/SpecialCasesDialog'));
 // v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points
@@ -724,44 +720,36 @@ export default function ShieldingDesigner() {
   const profilerRef = useRef(createProfiler());
   const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([]);
 
-  // ═══ Keyboard Shortcuts (Recomendacion #8) ═══
-  // Fase 11: el oyente se registra una vez y llama al manejador del último render (antes, con `[]`, F5 ejecutaba el
-  // cálculo del primer render —plano vacío— y Ctrl+Z/Ctrl+S usaban también funciones obsoletas).
-  const atajosRef = useRef<(e: KeyboardEvent) => void>(() => {});
-  useEffect(() => {
-    atajosRef.current = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const key = e.key.toLowerCase();
-      const ctrl = e.ctrlKey || e.metaKey;
-      if (!ctrl) {
-        switch (key) {
-          case 'b': e.preventDefault(); setActiveTool('barrier'); toast.info('Tool: Barrier'); break;
-          case 'f': e.preventDefault(); setActiveTool('source'); toast.info('Tool: Source'); break;
-          case 's': e.preventDefault(); setActiveTool('select'); toast.info('Tool: Select'); break;
-          case 'm': e.preventDefault(); setActiveTool('measure'); toast.info('Tool: Measure'); break;
-          case 'h': e.preventDefault(); setActiveTool('pan'); toast.info('Tool: Pan'); break;
-          case 'escape': setActiveTool('select'); break;
-          case 'f5': e.preventDefault(); runRadShieldCalculations(); break;
-        }
-      } else {
-        switch (key) {
-          case 's': e.preventDefault(); handleNativeSave(); break;
-          case 'o': e.preventDefault(); handleNativeOpen(); break;
-          case 'b': e.preventDefault(); useAppStore.getState().open('quickBarrier'); break;
-          case 'l': e.preventDefault(); useAppStore.getState().open('maze'); break;
-          case 'z': e.preventDefault(); undo(); toast.info('Undo'); break;
-          case 'y': e.preventDefault(); redo(); toast.info('Redo'); break;
-          case 'k': e.preventDefault(); setShowCommandPalette(true); break;
-          case 'g': e.preventDefault(); setActiveTool('region'); toast.info('Tool: Region'); break;
-        }
-      }
-    };
+  // ═══ Atajos de teclado ═══
+  // Fase 12, paso 2: UN solo oyente (`useAtajosTeclado`). Había dos y los dos llamaban a undo()/redo(), así que cada
+  // Ctrl+Z deshacía dos pasos y cada Ctrl+Y rehacía dos. El oyente lee los manejadores del último render (Fase 11).
+  const togglePanelAyuda = () => {
+    const s = useAppStore.getState();
+    if ((s.dialogs as Record<string, boolean>)['helpPanel']) s.close('helpPanel' as any); else s.open('helpPanel' as any);
+  };
+  useAtajosTeclado({
+    herramientaBarrera: () => { setActiveTool('barrier'); toast.info('Tool: Barrier'); },
+    herramientaFuente: () => { setActiveTool('source'); toast.info('Tool: Source'); },
+    herramientaSeleccion: () => { setActiveTool('select'); toast.info('Tool: Select'); },
+    herramientaMedir: () => { setActiveTool('measure'); toast.info('Tool: Measure'); },
+    herramientaPan: () => { setActiveTool('pan'); toast.info('Tool: Pan'); },
+    herramientaRegion: () => { setActiveTool('region'); toast.info('Tool: Region'); },
+    cancelar: () => setActiveTool('select'),
+    calcular: () => { void runCalculations(); },
+    guardar: () => { void handleNativeSave(); },
+    abrir: () => { void handleNativeOpen(); },
+    barreraRapida: () => useAppStore.getState().open('quickBarrier'),
+    laberinto: () => useAppStore.getState().open('maze'),
+    deshacer: () => { undo(); toast.info('Undo'); },
+    rehacer: () => { redo(); toast.info('Redo'); },
+    paletaComandos: () => setShowCommandPalette(v => !v),
+    panelHistorial: () => setShowHistoryPanel(v => !v),
+    panelAyuda: togglePanelAyuda,
+    atajos: () => {
+      const store = useAppStore.getState();
+      if (store.dialogs.keyboardShortcuts) store.close('keyboardShortcuts'); else store.open('keyboardShortcuts');
+    },
   });
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => atajosRef.current(e);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // Fase 10: ya no se carga un plano de ejemplo al arrancar. La app abre con el proyecto vacío y el
   // asistente «Guíame» ofrece el ejemplo PET/CT sólo si el usuario lo pide.
@@ -927,9 +915,6 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const [isodosisProfiles] = useState<CTIsodosisProfile[]>([]);
   const [selectedIsodosisId] = useState<string | null>(null);
 
-  const [reportMeta, setReportMeta] = useState({
-    preparerName: '', reviewerName: '', institution: '', licenseNumber: ''
-  });
   const [mcConfig, setMcConfig] = useState<MCConfig>({
     numParticles: 1_000_000, physicsList: 'QGSP_BIC_EMY', cutValue_mm: 0.1, useVarianceReduction: true
   });
@@ -941,7 +926,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const [showSamplePoints, setShowSamplePoints] = useState(true);
   const [showMaxima, setShowMaxima] = useState(true);
 
-  const { canvasRef, canvasState, setCanvasState, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
+  const { canvasRef, canvasState, setCanvasState, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, zoomEn, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
 
   useEffect(() => {
     const handleDxfImported = (event: Event) => {
@@ -950,6 +935,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
         summary?: { mappedBarriers?: number; warnings?: string[]; fileName?: string };
         importMode?: 'light' | 'full';
         preliminary?: boolean;
+        mapeoCapas?: MapeoCapas | null;
       }>;
       const nextPlan = customEvent.detail?.floorPlan;
       if (!nextPlan) return;
@@ -967,9 +953,13 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
           importedAt: new Date().toISOString(),
           calculationStatus: 'not-started',
           warnings,
+          ...(customEvent.detail?.mapeoCapas ? { mapeoCapas: customEvent.detail.mapeoCapas } : {}),
         },
       });
-      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
+      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select' }));
+      // Fase 12, paso 4: zoom a extensión del plano importado (antes escala 1 y desplazamiento fijo: un DXF en mm
+      // con coordenadas lejos del origen quedaba fuera de la vista).
+      setAjustarVista(true);
       setShowWelcomeScreen(false);
       setShowDxfImportReview(true);
       toast.success(`${preliminary ? 'DXF preliminar' : 'DXF'} aplicado al canvas: ${mapped} barreras detectadas`);
@@ -978,6 +968,21 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     window.addEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
     return () => window.removeEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
   }, [resetFloorPlan, setCanvasState]);
+
+  // Fase 12, paso 2: el ÚNICO cuerpo del cálculo. «Calcular» (botón de la barra superior, F5, paleta de comandos,
+  // menú contextual del lienzo, «Guíame») y el cálculo preliminar del DXF confirmado pasan por aquí: mismo motor
+  // (`calcularProyectoAsync` → NCRP 147/151, TG-108), mismo perfil de isodosis y mismo guardado en el almacén.
+  const calcularPlano = useCallback(async (plan: FloorPlan, onProgress?: (pct: number) => void) => {
+    const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
+    const r = await profilerRef.current.run('motorProyecto', () => calcularProyectoAsync(plan, {
+      ctIsodosisProfile: ctProfile,
+      onProgress,
+    }));
+    setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
+    setBarrierResults(r.barrierResults);
+    setSampleLines(r.sampleLines);
+    return r;
+  }, [isodosisProfiles, selectedIsodosisId, setFloorPlan, setBarrierResults, setSampleLines]);
 
   const runConfirmedDxfPreliminaryCalculation = useCallback(async (plan: FloorPlan) => {
     if (plan.barriers.length === 0) {
@@ -1020,15 +1025,8 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }));
 
     try {
-      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
-      const r = await calcularProyectoAsync(plan, {
-        ctIsodosisProfile: ctProfile,
-        onProgress: (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }),
-      });
+      const r = await calcularPlano(plan, (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }));
       const results = r.barrierResults;
-      setBarrierResults(results);
-      setSampleLines(r.sampleLines);
-      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
       setCalculationStatus('success');
       setFloorPlan(prev => ({
         ...prev,
@@ -1062,7 +1060,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
         sources: plan.sources.length,
       });
     }
-  }, [setFloorPlan, isodosisProfiles, selectedIsodosisId]);
+  }, [setFloorPlan, calcularPlano]);
 
   const handlePlaceDxfClinicalSources = useCallback(() => {
     if (!floorPlan.importMetadata || floorPlan.barriers.length === 0) {
@@ -1389,7 +1387,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     floorPlan,
     state: { offsetX: canvasState.offsetX, offsetY: canvasState.offsetY, scale: canvasState.scale, selectedId: canvasState.selectedId },
     onPan: (dx, dy) => setCanvasState(prev => ({ ...prev, offsetX: prev.offsetX + dx * prev.scale, offsetY: prev.offsetY + dy * prev.scale })),
-    onZoom: (factor) => setCanvasState(prev => ({ ...prev, scale: Math.max(0.1, Math.min(10, prev.scale * factor)) })),
+    onZoom: (factor) => zoomEn(factor),
     onSelect: (id) => setCanvasState(prev => ({ ...prev, selectedId: id })),
     onDelete: deleteSelected,
     onFocusElement: (x, y) => setCanvasState(prev => ({
@@ -1530,53 +1528,6 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     return sourceId;
   }, [setCanvasState, setFloorPlan]);
 
-  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / ? / Ctrl+K
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const isCtrl = e.ctrlKey || e.metaKey;
-      // "?" key (Shift + /) — Keyboard shortcuts
-      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
-        e.preventDefault();
-        const store = useAppStore.getState();
-        const isOpen = !!store.dialogs.keyboardShortcuts;
-        if (isOpen) store.close('keyboardShortcuts'); else store.open('keyboardShortcuts');
-        return;
-      }
-      // Ctrl+K — Command Palette
-      if (isCtrl && e.key === 'k') {
-        e.preventDefault();
-        setShowCommandPalette(v => !v);
-        return;
-      }
-      // Ctrl+H — History Panel
-      if (isCtrl && e.key === 'h') {
-        e.preventDefault();
-        setShowHistoryPanel(v => !v);
-        return;
-      }
-      // Ctrl+Shift+H — Help Panel
-      if (isCtrl && e.shiftKey && e.key === 'H') {
-        e.preventDefault();
-        const s = useAppStore.getState();
-        const isOpen = !!(s.dialogs as Record<string, boolean>)['helpPanel'];
-        if (isOpen) s.close('helpPanel' as any); else s.open('helpPanel' as any);
-        return;
-      }
-      if (!isCtrl) return;
-      if (e.key === 'z' && e.shiftKey) {
-        e.preventDefault();
-        redo();
-      } else if (e.key === 'z') {
-        e.preventDefault();
-        undo();
-      } else if (e.key === 'y') {
-        e.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
 
   const handleSaveProject = useCallback((name: string) => {
     saveProjectToStorage(floorPlan, name);
@@ -1635,8 +1586,9 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
   }, [deleteProject, user, cloudProjectsQuery.data, deleteProjectMutation, utils]);
 
-  // Fase 11: UN solo cálculo para todas las rutas (barra superior, «Guíame», «Calc» de la barra lateral, F5, botones
-  // del lienzo, paleta de comandos). Antes la barra lateral, F5 y el lienzo usaban AsyncShieldingEngine (TVL fijo de
+  // Fase 11: UN solo cálculo para todas las rutas. Fase 12, paso 2: además, UN solo botón «Calcular» (barra
+  // superior); se retiraron los de la barra lateral, la barra del lienzo, la barra «CAD», la cinta BIM, el flujo del
+  // lienzo, el inspector y la línea de estado. Antes la barra lateral, F5 y el lienzo usaban AsyncShieldingEngine (TVL fijo de
   // plomo, sin modalidad, energía ni TG-108). Ahora todas llaman a `calcularProyectoAsync` (motorProyecto → NCRP 147,
   // NCRP 151, TG-108), guardan los espesores en el plano y el estado de cumplimiento es el de `verificarBarrera`.
   const runCalculations = useCallback(async () => {
@@ -1648,14 +1600,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     });
     await wakeLock.request();
     try {
-      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
-      const r = await profilerRef.current.run('motorProyecto', () => calcularProyectoAsync(floorPlan, {
-        ctIsodosisProfile: ctProfile,
-        onProgress: (pct) => toast.loading(`Calculando blindajes: ${pct}%`, { id: toastId }),
-      }));
-      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
-      setBarrierResults(r.barrierResults);
-      setSampleLines(r.sampleLines);
+      const r = await calcularPlano(floorPlan, (pct) => toast.loading(`Calculando blindajes: ${pct}%`, { id: toastId }));
       if (heatmapEnabled) {
         await computeCurrentHeatmap();
       }
@@ -1688,10 +1633,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     } finally {
       await wakeLock.release();
     }
-  }, [floorPlan, setFloorPlan, heatmapEnabled, isodosisProfiles, selectedIsodosisId, computeCurrentHeatmap, wakeLock, broadcastChannel, persistCalculationResults]);
-
-  // Barra lateral «Calc», F5 y botones del lienzo: el mismo cálculo que la barra superior.
-  const runRadShieldCalculations = runCalculations;
+  }, [floorPlan, calcularPlano, heatmapEnabled, computeCurrentHeatmap, wakeLock, broadcastChannel, persistCalculationResults]);
 
   const selectedSource = floorPlan.sources.find(s => s.id === canvasState.selectedId) || null;
   const selectedBarrier = floorPlan.barriers.find(b => b.id === canvasState.selectedId) || null;
@@ -1775,10 +1717,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     });
   }, [floorPlan]);
 
-  const generateReport = useCallback(async () => {
-    if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    try { const canvasImageDataUrl = canvasRef.current?.toDataURL('image/png'); const { generateCNSNSReport } = await import('@/hooks/useCNSNSReport'); const blob = await generateCNSNSReport({floorPlan,projectName:floorPlan.name,date:new Date().toLocaleDateString('es-MX'),...reportMeta,canvasImageDataUrl,barrierResults,sampleLines} as CNSNSReportData); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`Memoria_Blindaje_CNSNS_${nombreArchivo(floorPlan.name)}.docx`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast.success('Reporte CNSNS generado'); useAppStore.getState().close('cnsns'); } catch(err) { toast.error('Error: '+(err as Error).message); captureException(err as Error, { context: 'CNSNS Report Generation' }); }
-  }, [floorPlan, reportMeta, canvasRef, barrierResults, sampleLines]);
 
   const generateMCMacro = useCallback(async () => {
     if (!floorPlan.barriers.some(b=>b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
@@ -1791,15 +1729,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
 
   const handleUpdateSelected = useCallback((props: Partial<Barrier> | Partial<RadiationSource> | Partial<CriticalPoint> | Partial<OccupiedRegion>) => { updateSelected(props); }, [updateSelected]);
 
-  // v10.1: PDF generation
-  const handleGeneratePDF = useCallback(async () => {
-    if (!floorPlan.barriers.some(b => b.requiredThickness_mm)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
-    const { generatePDFReport } = await import('@/hooks/usePDFGenerator');
-    const blob = generatePDFReport(floorPlan, { ...reportMeta, date: new Date().toLocaleDateString('es-MX'), barrierResults, sampleLines });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `Memoria_Blindaje_${nombreArchivo(floorPlan.name)}.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success('PDF generado y descargado');
-  }, [floorPlan, reportMeta, barrierResults, sampleLines]);
 
   // v15: Command Palette handlers
   const commandHandlers: Record<string, () => void> = {
@@ -1811,7 +1740,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     onMazeCalculator: () => useAppStore.getState().open('maze'),
     onFloorCeiling: () => useAppStore.getState().open('floorCeiling'),
     onUAQ: () => useAppStore.getState().open('shieldingCalculator'),
-    onMemoriaAI: () => useAppStore.getState().open('memoriaAI'),
+    onMemoria: () => useAppStore.getState().open('memoria'),
     onNeutron: () => useAppStore.getState().open('neutron'),
     onCBCTIGRT: () => useAppStore.getState().open('cbctIgrt'),
     onVentilation: () => useAppStore.getState().open('ventilation'),
@@ -1824,9 +1753,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     onChecklistCNSNS: () => useAppStore.getState().open('checklistCNSNS'),
     onScenarioAnalysis: () => useAppStore.getState().open('scenarioAnalysis'),
     onDashboard: () => useAppStore.getState().open('dashboard'),
-    onMemoriaWizard: () => useAppStore.getState().open('memoriaAI'),
-    onCNSNS: () => useAppStore.getState().open('cnsns'),
-    onPDF: handleGeneratePDF,
     onMaintenanceLog: () => useAppStore.getState().open('maintenanceLog'),
     onLogFileAnalysis: () => useAppStore.getState().open('logFileAnalysis'),
     onDXFViewer: () => useAppStore.getState().open('dxfViewer'),
@@ -1854,7 +1780,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     onParametricBunker: () => useAppStore.getState().open('parametricBunker'),
     onMLPrediction: () => useAppStore.getState().open('mlPrediction'),
     onKeyboardConfig: () => useAppStore.getState().open('keyboardConfig'),
-    onCNSNSAutoReport: () => useAppStore.getState().open('cnsnsAutoReport'),
     onEquipmentLibrary: () => useAppStore.getState().open('equipmentLibrary'),
     onReferenceLibrary: () => useAppStore.getState().open('referenceLibrary'),
     onBibliography: () => useAppStore.getState().open('bibliography'),
@@ -1931,7 +1856,17 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
     },
     calcular: runCalculations,
     validarPlano: () => useAppStore.getState().open('planValidator'),
-    exportarPDF: () => { void handleGeneratePDF(); },
+    // Fase 12, paso 3: el PDF de la guía es el de la memoria radshield/memoria@1 (mismo objeto que el menú 5).
+    exportarPDF: () => {
+      if (!floorPlan.barriers.some(b => b.calculationTrace)) { toast.error('Ejecute primero el calculo de blindaje'); return; }
+      void (async () => {
+        const [{ construirMemoria }, { salidaMemoria, nombreArchivoMemoria }] = await Promise.all([import('@/lib/memoriaAnalitica'), import('@/lib/memoriaFlujo')]);
+        const m = construirMemoria(floorPlan);
+        const url = URL.createObjectURL(await salidaMemoria(m, 'pdf'));
+        const a = document.createElement('a'); a.href = url; a.download = nombreArchivoMemoria(m, 'pdf'); a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast.success('Memoria analítica PDF generada');
+      })().catch((err) => toast.error(`No se pudo generar la memoria: ${(err as Error).message}`));
+    },
     exportarCSV: exportCSV,
   };
   const proyectoVacio = !planoTieneContenido(floorPlan);
@@ -1957,7 +1892,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
             setCanvasState(prev => ({...prev, selectedId: null, selectedIds: [], mode: 'select'}));
             setShowWelcomeScreen(false);
             toast.success('Nuevo proyecto listo');
-          }} onSaveProject={() => handleSaveProject(floorPlan.name)} onExport={() => useAppStore.getState().open('export')} onShare={handleShare} onCNSNS={() => useAppStore.getState().open('cnsns')} onMC={() => useAppStore.getState().open('mc')} onProjects={() => { useAppStore.getState().open('projects'); setShowWelcomeScreen(false); }} on3D={()=>useAppStore.getState().open('viewer3d')} onMaze={()=>useAppStore.getState().open('maze')} onQuick={()=>useAppStore.getState().open('quickBarrier')} onEquipment={()=>useAppStore.getState().open('equipmentDB')} onPDF={handleGeneratePDF} onMCCloud={()=>useAppStore.getState().open('mcConfig')} onFloorCeiling={()=>useAppStore.getState().open('floorCeiling')} onBatchImport={()=>useAppStore.getState().open('batchImport')} onCostOptimizer={()=>useAppStore.getState().open('costOptimizer')} onNeutron={()=>useAppStore.getState().open('neutron')} onSeasonal={()=>useAppStore.getState().open('seasonal')} onUncertainty={()=>useAppStore.getState().open('uncertainty')} onVentilation={()=>useAppStore.getState().open('ventilation')} onDICOM={()=>useAppStore.getState().open('dicom')} onTechSpecs={()=>useAppStore.getState().open('techSpecs')} onCNSNSDashboard={()=>useAppStore.getState().open('cnsnsDashboard')} onAuditTrail={()=>useAppStore.getState().open('auditTrail')} onDashboardCalc={()=>useAppStore.getState().open('dashboardCalc')} onCostEstimator={()=>useAppStore.getState().open('costEstimator')} onCostDashboard={()=>useAppStore.getState().open('costEstimator')} onCNSNSChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onCNSNSReport={()=>useAppStore.getState().open('cnsns')} onCNSNSReportChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onBarrierCalculator={()=>useAppStore.getState().open('barrierCalculator')} onEPA={()=>useAppStore.getState().open('epaGuidance')} onEPAGuidance={()=>useAppStore.getState().open('epaGuidance')} onShleien={()=>useAppStore.getState().open('shleien')} onGammaKnife={()=>useAppStore.getState().open('gammaKnife')} onBraquiCo60={()=>useAppStore.getState().open('braquiCo60')} onVersaHD={()=>useAppStore.getState().open('versaHD')} onICRU57={()=>useAppStore.getState().open('icru57')} onICRU96={()=>useAppStore.getState().open('icru96')} onEquipmentLibrary={()=>useAppStore.getState().open('equipmentLibrary')} onReferenceLibrary={()=>useAppStore.getState().open('referenceLibrary')} onNCRP151Tables={()=>useAppStore.getState().open('ncrp151Tables')} onNCRP151Detail={()=>useAppStore.getState().open('ncrp151Tables')} onShieldingCalculator={()=>useAppStore.getState().open('shieldingCalculator')} onCompareScenarios={()=>useAppStore.getState().open('compareScenarios')} onTornadoSensitivity={()=>useAppStore.getState().open('tornadoSensitivity')} onNCRPValidation={()=>useAppStore.getState().open('ncrpValidation')} onDXFViewer={()=>useAppStore.getState().open('dxfViewer')} onMemoriaWizard={()=>useAppStore.getState().open('memoriaWizard')} onPlanValidator={()=>useAppStore.getState().open('planValidator')} onEquipmentShieldingWizard={()=>useAppStore.getState().open('equipmentShieldingWizard')} onMonteCarloSim={()=>useAppStore.getState().open('monteCarloSim')} onCycloneKIUBE={()=>useAppStore.getState().open('cycloneKIUBE')} onTutorial={()=>useAppStore.getState().open('tutorial')} onCBCTIGRT={()=>useAppStore.getState().open('cbctIgrt')} onLayoutBunker={()=>useAppStore.getState().open('layoutBunker')} onMaintenanceLog={()=>useAppStore.getState().open('maintenanceLog')} onScenarioAnalysis={()=>useAppStore.getState().open('scenarioAnalysis')} onDashboard={()=>useAppStore.getState().open('dashboard')} onChecklistCNSNS={()=>useAppStore.getState().open('checklistCNSNS')} onSpecialCases={()=>useAppStore.getState().open('specialCases')} onBibliography={()=>useAppStore.getState().open('bibliography')} onBibliografia={()=>useAppStore.getState().open('bibliography')} onEvidencePack={()=>useAppStore.getState().open('evidencePack')} isDarkMode={isDarkMode} onDarkModeToggle={toggleDarkMode} onKeyboardShortcuts={()=>useAppStore.getState().open('keyboardShortcuts')} onSmartSearchDICOM={()=>useAppStore.getState().open('smartSearchDICOM')} onLogFileAnalysis={()=>useAppStore.getState().open('logFileAnalysis')}
+          }} onSaveProject={() => handleSaveProject(floorPlan.name)} onExport={() => useAppStore.getState().open('export')} onShare={handleShare} onMemoria={() => useAppStore.getState().open('memoria')} onMC={() => useAppStore.getState().open('mc')} onProjects={() => { useAppStore.getState().open('projects'); setShowWelcomeScreen(false); }} on3D={()=>useAppStore.getState().open('viewer3d')} onMaze={()=>useAppStore.getState().open('maze')} onQuick={()=>useAppStore.getState().open('quickBarrier')} onEquipment={()=>useAppStore.getState().open('equipmentDB')} onMCCloud={()=>useAppStore.getState().open('mcConfig')} onFloorCeiling={()=>useAppStore.getState().open('floorCeiling')} onBatchImport={()=>useAppStore.getState().open('batchImport')} onCostOptimizer={()=>useAppStore.getState().open('costOptimizer')} onNeutron={()=>useAppStore.getState().open('neutron')} onSeasonal={()=>useAppStore.getState().open('seasonal')} onUncertainty={()=>useAppStore.getState().open('uncertainty')} onVentilation={()=>useAppStore.getState().open('ventilation')} onDICOM={()=>useAppStore.getState().open('dicom')} onTechSpecs={()=>useAppStore.getState().open('techSpecs')} onCNSNSDashboard={()=>useAppStore.getState().open('cnsnsDashboard')} onAuditTrail={()=>useAppStore.getState().open('auditTrail')} onDashboardCalc={()=>useAppStore.getState().open('dashboardCalc')} onCostEstimator={()=>useAppStore.getState().open('costEstimator')} onCostDashboard={()=>useAppStore.getState().open('costEstimator')} onCNSNSChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onCNSNSReportChecklist={()=>useAppStore.getState().open('cnsnsChecklist')} onBarrierCalculator={()=>useAppStore.getState().open('barrierCalculator')} onEPA={()=>useAppStore.getState().open('epaGuidance')} onEPAGuidance={()=>useAppStore.getState().open('epaGuidance')} onShleien={()=>useAppStore.getState().open('shleien')} onGammaKnife={()=>useAppStore.getState().open('gammaKnife')} onBraquiCo60={()=>useAppStore.getState().open('braquiCo60')} onVersaHD={()=>useAppStore.getState().open('versaHD')} onICRU57={()=>useAppStore.getState().open('icru57')} onICRU96={()=>useAppStore.getState().open('icru96')} onEquipmentLibrary={()=>useAppStore.getState().open('equipmentLibrary')} onReferenceLibrary={()=>useAppStore.getState().open('referenceLibrary')} onNCRP151Tables={()=>useAppStore.getState().open('ncrp151Tables')} onNCRP151Detail={()=>useAppStore.getState().open('ncrp151Tables')} onShieldingCalculator={()=>useAppStore.getState().open('shieldingCalculator')} onCompareScenarios={()=>useAppStore.getState().open('compareScenarios')} onTornadoSensitivity={()=>useAppStore.getState().open('tornadoSensitivity')} onNCRPValidation={()=>useAppStore.getState().open('ncrpValidation')} onDXFViewer={()=>useAppStore.getState().open('dxfViewer')} onPlanValidator={()=>useAppStore.getState().open('planValidator')} onEquipmentShieldingWizard={()=>useAppStore.getState().open('equipmentShieldingWizard')} onMonteCarloSim={()=>useAppStore.getState().open('monteCarloSim')} onCycloneKIUBE={()=>useAppStore.getState().open('cycloneKIUBE')} onTutorial={()=>useAppStore.getState().open('tutorial')} onCBCTIGRT={()=>useAppStore.getState().open('cbctIgrt')} onLayoutBunker={()=>useAppStore.getState().open('layoutBunker')} onMaintenanceLog={()=>useAppStore.getState().open('maintenanceLog')} onScenarioAnalysis={()=>useAppStore.getState().open('scenarioAnalysis')} onDashboard={()=>useAppStore.getState().open('dashboard')} onChecklistCNSNS={()=>useAppStore.getState().open('checklistCNSNS')} onSpecialCases={()=>useAppStore.getState().open('specialCases')} onBibliography={()=>useAppStore.getState().open('bibliography')} onBibliografia={()=>useAppStore.getState().open('bibliography')} onEvidencePack={()=>useAppStore.getState().open('evidencePack')} isDarkMode={isDarkMode} onDarkModeToggle={toggleDarkMode} onKeyboardShortcuts={()=>useAppStore.getState().open('keyboardShortcuts')} onSmartSearchDICOM={()=>useAppStore.getState().open('smartSearchDICOM')} onLogFileAnalysis={()=>useAppStore.getState().open('logFileAnalysis')}
         onSourceTool={() => setActiveTool('source')}
           // v83: Canvas clear + new map
           onClearCanvas={() => {
@@ -2137,7 +2072,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           <div className="flex flex-1 overflow-hidden" style={{ display: 'flex' }}>
             {/* Sidebar Panel */}
             <div className="w-80 min-w-[200px] max-w-[450px] bg-white border-r border-gray-200 flex flex-col shrink-0">
-              <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} selectedCriticalPoint={selectedCriticalPoint} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} onRunCalculations={runRadShieldCalculations} onUAQ={() => useAppStore.getState().open('shieldingCalculator')} onMemoriaAI={() => useAppStore.getState().open('memoriaAI')} onMazeCalculator={() => useAppStore.getState().open('maze')} onDXFViewer={() => useAppStore.getState().open('dxfViewer')} />
+              <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} selectedCriticalPoint={selectedCriticalPoint} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} onUAQ={() => useAppStore.getState().open('shieldingCalculator')} onMemoriaAI={() => useAppStore.getState().open('memoria')} onMazeCalculator={() => useAppStore.getState().open('maze')} onDXFViewer={() => useAppStore.getState().open('dxfViewer')} />
             </div>
             {/* Resize Handle */}
             <div className="w-1.5 bg-slate-200 hover:bg-[#f97316] active:bg-[#ea580c] transition-colors relative cursor-col-resize shrink-0">
@@ -2176,7 +2111,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   floorPlan={floorPlan}
                   onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
                   onWheel={handleWheel} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-                  onZoomToFit={zoomToFit} onExportPNG={exportPNG} onToggleSnap={toggleSnap}
+                  onZoomToFit={zoomToFit} onZoomBy={zoomEn} onExportPNG={exportPNG} onToggleSnap={toggleSnap}
                   onImportFloorPlan={() => document.getElementById('floorplan-upload')?.click()}
                   onOpenLayers={() => setShowLayersPanel(prev => !prev)}
                   onOpenRoomTemplates={() => setShowRoomTemplates(prev => !prev)}
@@ -2206,7 +2141,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   heatmapEnabled={heatmapEnabled}
                   onToggleHeatmap={handleToggleHeatmap}
                   heatmapPointCount={heatmapData.length}
-                  onRunCalculations={runRadShieldCalculations}
+                  onRunCalculations={runCalculations}
                   activeTool={activeTool}
                   setActiveTool={(tool) => setActiveTool(tool as Tool)}
                   // v65: Canvas enhancements connected
@@ -2284,7 +2219,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           onConfirm={handleConfirmDxfGeometry}
           onPlaceClinicalSources={handlePlaceDxfClinicalSources}
           onRunCalculations={() => void runConfirmedDxfPreliminaryCalculation(floorPlan)}
-          onOpenMemoriaAI={() => useAppStore.getState().open('memoriaAI')}
+          onOpenMemoriaAI={() => useAppStore.getState().open('memoria')}
           onOpenEvidencePack={() => useAppStore.getState().open('evidencePack')}
         /></Suspense>
       )}
@@ -2301,8 +2236,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
       {!showWelcomeScreen && typeof window !== 'undefined' && window.localStorage.getItem('radshield-e2e-controls') === 'true' && (
         <div data-testid="e2e-dialog-controls" className="fixed bottom-2 left-2 z-[70] flex max-w-[calc(100vw-1rem)] flex-wrap gap-1 rounded bg-white/95 p-1 shadow">
           <button data-testid="e2e-open-evidence-pack" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('evidencePack')}>Evidence</button>
-          <button data-testid="e2e-open-memoria-ai" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('memoriaAI')}>Memoria</button>
-          <button data-testid="e2e-open-memoria-wizard" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('memoriaWizard')}>MA Wizard</button>
+          <button data-testid="e2e-open-memoria" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('memoria')}>Memoria</button>
           <button data-testid="e2e-open-layout-bunker" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('layoutBunker')}>Layout</button>
           <button data-testid="e2e-open-manual" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('manual')}>Manual</button>
           <button data-testid="e2e-open-dashboard" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('dashboard')}>Dash</button>
@@ -2311,17 +2245,12 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           <button data-testid="e2e-open-compare-scenarios" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('compareScenarios')}>Compare</button>
           <button data-testid="e2e-open-tutorial" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('tutorial')}>Tutorial</button>
           <button data-testid="e2e-open-version-history" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('versionHistory')}>Version</button>
-          <button data-testid="e2e-open-regulatory-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('regulatoryReport')}>Reg</button>
-          <button data-testid="e2e-open-pdf-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('pdfReport')}>PDF</button>
-          <button data-testid="e2e-open-cnsns-report" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('cnsns')}>CNSNS</button>
           <button data-testid="e2e-open-cnsns-checklist" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('cnsnsChecklist')}>Check</button>
-          <button data-testid="e2e-open-batch-report-exporter" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('batchReportExporter')}>Batch</button>
           <button data-testid="e2e-open-medical-3d" className="text-[10px] px-2 py-1 border rounded" onClick={() => useAppStore.getState().open('medicalFloorPlan3D')}>3D</button>
         </div>
       )}
       <Suspense fallback={<DialogFallback />}>
         <LazyDialog name="export" component={ExportDialog} floorPlan={floorPlan} onExportCSV={exportCSV} onExportJSON={exportJSON} onExportExcel={exportExcel} />
-        <LazyDialog name="cnsns" component={CNSNSDialog} floorPlan={floorPlan} meta={reportMeta} setMeta={setReportMeta} onGenerate={generateReport} />
         <LazyDialog name="mc" component={MCDialog} config={mcConfig} setConfig={setMcConfig} onGenerate={generateMCMacro} />
         <LazyDialog name="projects" component={ProjectManagerDialog} projects={projects} cloudProjects={cloudProjectsQuery.data || []} currentProjectName={floorPlan.name} onSave={handleSaveProject} onLoad={handleLoadProject} onDelete={handleDeleteProject} onRename={renameProject} onExport={exportProjectJSON} onImport={importProjectJSON} isLoggedIn={!!user?.unionId} />
         <LazyDialog name="materialLibrary" component={MaterialLibraryDialog} builtinMaterials={backendMaterials.builtinMaterials} customMaterials={backendMaterials.customMaterials} onCreateMaterial={backendMaterials.createMaterial} onDeleteMaterial={backendMaterials.deleteMaterial} isLoading={backendMaterials.isLoading} />
@@ -2343,20 +2272,15 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="multiObjectiveOptimizer" component={MultiObjectiveOptimizerDialog} />
         {/* v106: Material Comparison */}
         <LazyDialog name="materialComparison" component={MaterialComparisonDialog} />
-        {/* v110: Batch Report Exporter */}
-        <LazyDialog name="batchReportExporter" component={BatchReportExporterDialog} />
         {/* v108: Spatial Dose Map */}
         <LazyDialog name="spatialDoseMap" component={SpatialDoseMapDialog} />
         {/* v109: Neutron Shielding */}
         <LazyDialog name="neutronShielding" component={NeutronShieldingDialog} />
-        {/* v110: Regulatory Report */}
-        <LazyDialog name="regulatoryReport" component={RegulatoryReportDialog} floorPlan={floorPlan} />
         {/* v114-116: Multi-Layer Shield / Source Library / 3D Isosurface */}
         <LazyDialog name="multiLayerShield" component={MultiLayerShieldDialog} />
         <LazyDialog name="sourceLibrary" component={SourceLibraryDialog} />
         {visorDisponible('isosurface3d') && <LazyDialog name="isosurface3d" component={Isosurface3DDialog} />}
-        {/* v117-120: PDF Report / Pareto / Parametric 3D */}
-        <LazyDialog name="pdfReport" component={PdfReportDialog} floorPlan={floorPlan} />
+        {/* v117-120: Pareto / Parametric 3D */}
         <LazyDialog name="paretoOptimizer" component={ParetoOptimizerDialog} />
         <LazyDialog name="parametric3d" component={Parametric3DDialog} />
         {/* v121-123: Design Compare / ALARA Wizard / Nuclide Library */}
@@ -2397,18 +2321,8 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="ncrp151Tables" component={NCRP151TablesDialog} />
         <LazyDialog name="dxfViewer" component={DXFViewerDialog} />
         <LazyDialog name="mcResults" component={MCResultsDialog} resultJson={lastMCResult} />
-                <LazyDialog
-                  name="memoriaWizard"
-                  component={MemoriaAnaliticaWizard}
-                />
-        {/* v30: AI-Powered Analytical Memory Wizard */}
-        <LazyDialog
-          name="memoriaAI"
-          component={MemoriaAIWizard}
-          floorPlan={floorPlan}
-          barrierResults={barrierResults}
-          sampleLines={sampleLines}
-        />
+        {/* Fase 12, paso 3: memoria analítica y CNSNS (radshield/memoria@1), única salida de memoria e informe */}
+        <LazyDialog name="memoria" component={MemoriaDialog} floorPlan={floorPlan} />
                 <LazyDialog name="planValidator" component={PlanValidatorDialog} floorPlan={floorPlan} />
                 <LazyDialog name="equipmentShieldingWizard" component={EquipmentShieldingWizard} />
                 <LazyDialog name="monteCarloSim" component={MonteCarloSimulationWizard} />
@@ -2479,7 +2393,6 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         }} />
         <LazyDialog name="mlPrediction" component={MLPredictionDialog} />
         <LazyDialog name="keyboardConfig" component={KeyboardConfigDialog} />
-        <LazyDialog name="cnsnsAutoReport" component={CNSNSAutoReportDialog} />
         {/* v17: Phy-X/PSD + Lead-free + Neutron removal */}
         <LazyDialog name="materialProperty" component={MaterialPropertyCalculator} />
         <LazyDialog name="neutronRemoval" component={NeutronRemovalDialog} />
@@ -2567,7 +2480,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="emergencyProcedures" component={EmergencyProceduresDialog} />
         {/* v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points */}
         {showBarrierEditor && (
-          <BarrierEditorDialog barriers={floorPlan.barriers} onUpdateBarrier={(id, updates) => setFloorPlan(p => ({ ...p, barriers: p.barriers.map(b => b.id === id ? { ...b, ...updates } : b) }))} onClose={() => setShowBarrierEditor(false)} onGenerateRecommendations={runRadShieldCalculations} />
+          <BarrierEditorDialog barriers={floorPlan.barriers} onUpdateBarrier={(id, updates) => setFloorPlan(p => ({ ...p, barriers: p.barriers.map(b => b.id === id ? { ...b, ...updates } : b) }))} onClose={() => setShowBarrierEditor(false)} onGenerateRecommendations={runCalculations} />
         )}
         {showAirKermaOverlay && (
           <AirKermaOverlayDialog distributions={barrierResults.map(r => ({

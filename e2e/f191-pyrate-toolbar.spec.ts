@@ -22,7 +22,8 @@ test('F191 pyrateShield-inspired toolbar is visible and changes canvas modes', a
   await expect(page.getByTestId('f191d-context-actions')).toBeVisible();
   await expect(page.getByTestId('f191e-action-edit')).toBeVisible();
   await expect(page.getByTestId('f191e-action-edit')).toBeDisabled();
-  await expect(page.getByTestId('f191d-action-calculate')).toBeVisible();
+  // Fase 12, paso 2: el inspector ya no tiene «Calc»; el único «Calcular» está en la barra superior.
+  await expect(page.getByTestId('f191d-action-calculate')).toHaveCount(0);
   await expect(page.getByTestId('f191d-action-focus')).toBeDisabled();
 
   await page.getByTestId('f191-tool-barrier').click();

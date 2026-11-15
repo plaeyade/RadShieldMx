@@ -16,7 +16,7 @@ const STEPS = [
   { title: 'Paso 2: Agregar fuente', icon: MousePointer, desc: 'En el canvas principal, dibuje la sala de tratamiento y posicione la fuente de radiacion en el isocentro o punto de emision principal.', color: 'teal' },
   { title: 'Paso 3: Dibujar barrera', icon: MousePointer, desc: 'Trace paredes, techo, piso y areas adyacentes. Use capas, snapping, cotas y seleccion para mantener trazabilidad geometrica.', color: 'amber' },
   { title: 'Paso 4: Calcular blindaje', icon: Calculator, desc: 'Abra calculo de blindaje, seleccione modalidad, equipo, energia, carga de trabajo, material, P/T/U y meta de diseno. Revise advertencias clinicas y normativa.', color: 'emerald' },
-  { title: 'Paso 5: Generar memoria', icon: FileText, desc: 'Use Memoria IA para construir el documento desde plano/equipo hasta formula, cita, entrada, salida, evidencia y anexos.', color: 'violet' },
+  { title: 'Paso 5: Generar memoria', icon: FileText, desc: 'Use «5. Memoria analítica y CNSNS» para construir el documento desde plano/equipo hasta formula, cita, entrada, salida, evidencia y anexos.', color: 'violet' },
   { title: 'Completado', icon: CheckCircle, desc: 'Explore NCRP/IAEA/UAQ, biblioteca de equipos, materiales, Evidence Pack, 3D medico y reportes CNSNS. Todo resultado preliminar requiere revision del fisico medico/RSO.', color: 'green' },
 ];
 

@@ -20,6 +20,8 @@ export function useGanchoE2E() {
         cerrarTodo: () => s.closeAll(),
         plano: () => useProyectoStore.getState().floorPlan,
         resultados: () => useProyectoStore.getState().barrierResults,
+        // Fase 12, paso 4: mapeos de capas guardados por el asistente de capas.
+        mapeosCapas: () => useProyectoStore.getState().mapeosCapas,
         proyecto: () => {
           const p = useProyectoStore.getState();
           return {
@@ -30,6 +32,9 @@ export function useGanchoE2E() {
             calculationStatus: p.calculationStatus,
             activeTool: p.activeTool,
             canUndo: p.canUndo,
+            // Fase 12, paso 2: tamaño del historial, para comprobar que Ctrl+Z/Ctrl+Y mueven UN paso.
+            pasado: p.pasado.length,
+            futuro: p.futuro.length,
           };
         },
         limpiarCalculo: (instalado: Record<string, number> = {}) => useProyectoStore.getState().setFloorPlan(p => ({

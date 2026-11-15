@@ -15,7 +15,7 @@ import { calculateFloorCeiling } from '@/hooks/useFloorCeilingCalc';
 import { calculateNeutronShielding } from '@/hooks/useNeutronCalc';
 import { puerta } from '@/lib/ncrp151Laberinto';
 import { calculateDoseAtPoint } from '@/lib/mallaNuclear';
-import { generarReporteCNSNSHtml } from '@/lib/reporteCNSNSHtml';
+import { construirMemoria } from '@/lib/memoriaAnalitica';
 import { importDXFToFloorPlan } from '@/lib/medical3D/cadBimBridge';
 import { useShieldingEngine } from '@/hooks/useShieldingEngine';
 import { useCanvasStore } from '@/stores/canvasStore';
@@ -25,7 +25,7 @@ import ElectronApplicatorDialog from '@/sections/dialogs/ElectronApplicatorDialo
 import AAPMTG108PETDialog from '@/sections/dialogs/AAPMTG108PETDialog';
 import CrossValidationDialog from '@/sections/dialogs/CrossValidationDialog';
 import TornadoSensitivityDialog from '@/sections/dialogs/TornadoSensitivityDialog';
-import CNSNSAutoReportDialog from '@/sections/dialogs/CNSNSAutoReportDialog';
+import MemoriaDialog from '@/sections/dialogs/MemoriaDialog';
 import ComplianceCertificationDialog from '@/sections/dialogs/ComplianceCertificationDialog';
 import RegulatoryAlertsDialog from '@/sections/dialogs/RegulatoryAlertsDialog';
 
@@ -153,22 +153,24 @@ describe('8b — datos falsos fuera', () => {
       x: floorPlan.width_pixels / 2, y: floorPlan.height_pixels / 2, workloadValue: 125, workloadUnit: 'pacientes/semana', isocenterHeight_m: 1.2, useFactor: 1 }] };
   };
 
-  it('reporte CNSNS: sale del proyecto (barreras y requeridos del motor); sin cálculo no hay reporte', () => {
+  // Fase 12, paso 3: el reporte CNSNS en HTML se retiró; la memoria radshield/memoria@1 es la salida única.
+  it('memoria CNSNS: sale del proyecto (barreras y requeridos del motor); sin cálculo no hay memoria', () => {
     const p = plano();
-    expect(generarReporteCNSNSHtml(p, new Set(['barriers']))).toBeNull();
     const { result } = renderHook(() => useShieldingEngine());
     const calculado = { ...p, barriers: result.current.calculateAllBarriers(p.barriers, p.sources, p.scale_m_per_pixel) };
-    const html = generarReporteCNSNSHtml(calculado, new Set(['cover', 'barriers', 'conclusions']))!;
-    for (const b of calculado.barriers) expect(html).toContain(b.name);
-    expect(html).not.toMatch(/300 Gy|7\/7|6 MV \(fotones\)/);
-    expect(html).toContain('NCRP147');
+    const m = construirMemoria(calculado);
+    const texto = JSON.stringify(m);
+    for (const b of calculado.barriers) expect(texto).toContain(b.name);
+    expect(texto).not.toMatch(/300 Gy|7\/7|6 MV \(fotones\)/);
+    expect(m.barreras.map((b) => b.norma).join(' ')).toContain('NCRP147');
   });
 
-  it('diálogo del reporte CNSNS: estado vacío honesto si el plano no está calculado', () => {
+  it('diálogo de la memoria: estado vacío honesto si el plano no está calculado', () => {
     act(() => useCanvasStore.getState().setFloorPlan(plano()));
-    render(<CNSNSAutoReportDialog open onOpenChange={() => {}} />);
-    expect(screen.getByTestId('cnsns-vacio')).toBeTruthy();
-    expect((screen.getByTestId('cnsns-exportar') as HTMLButtonElement).disabled).toBe(true);
+    render(<MemoriaDialog open onOpenChange={() => {}} />);
+    expect(screen.getByTestId('memoria-vacio')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('memoria-paso-exportar'));
+    expect((screen.getByTestId('memoria-docx') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('cumplimiento: sin certificaciones CE/FDA/ISO inventadas', () => {

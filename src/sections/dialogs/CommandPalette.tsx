@@ -10,12 +10,12 @@ import {
 } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
-  Play, Calculator, BookOpen, Layers, BarChart3, FileText, Pencil,
+  Play, Calculator, BookOpen, Layers, BarChart3, Pencil,
   Scan, Cpu, Atom, FolderOpen, Wand2, Settings,
   ClipboardCheck, GitBranch, Cloud, Zap, Construction,
   ArrowUpDown, Wind, CalendarDays, Table, Library, Brain, Hexagon,
   FlaskConical, Ruler, FileCheck, Box,
-  Upload, Download, FileDown, Sun,
+  Upload, Download, Sun,
   Globe, Activity, Keyboard, Search, FileBarChart, HelpCircle, Map,
   Flame, Grid3x3
 } from 'lucide-react';
@@ -65,9 +65,8 @@ export const DEFAULT_COMMANDS = (handlers: Record<string, () => void>): CommandA
   { id: 'whatif', name: 'Escenarios What-If', icon: GitBranch, group: 'Validacion', action: handlers.onScenarioAnalysis },
   { id: 'dash', name: 'Dashboard Ejecutivo', icon: BarChart3, group: 'Validacion', action: handlers.onDashboard },
   // Reportes
-  { id: 'memoria', name: 'Memoria Analitica', icon: BookOpen, shortcut: 'Ctrl+M', group: 'Reportes', action: handlers.onMemoriaWizard },
-  { id: 'cnsns', name: 'Reporte CNSNS', icon: FileText, group: 'Reportes', action: handlers.onCNSNS },
-  { id: 'pdf', name: 'Exportar PDF', icon: FileDown, shortcut: 'Ctrl+P', group: 'Reportes', action: handlers.onPDF },
+  // Fase 12, paso 3: memoria, reporte CNSNS y PDF son un solo flujo (radshield/memoria@1 → DOCX, PDF y JSON).
+  { id: 'memoria', name: 'Memoria analítica y CNSNS (DOCX, PDF, JSON)', icon: BookOpen, shortcut: 'Ctrl+M', group: 'Reportes', action: handlers.onMemoria },
   { id: 'maintenance', name: 'Registro Mantenimiento', icon: CalendarDays, group: 'Reportes', action: handlers.onMaintenanceLog },
   { id: 'loganalysis', name: 'Log File Analysis', icon: FileBarChart, group: 'Reportes', action: handlers.onLogFileAnalysis },
   // Visualizacion
@@ -102,7 +101,6 @@ export const DEFAULT_COMMANDS = (handlers: Record<string, () => void>): CommandA
   { id: 'examples', name: 'Wizard de Ejemplos', icon: Wand2, group: 'Herramientas', action: handlers.onExampleWizard },
   { id: 'parametric', name: 'Parametric Bunker Designer', icon: Box, group: 'Herramientas', action: handlers.onParametricBunker },
   { id: 'mlpredict', name: 'ML Shielding Predictor', icon: Brain, group: 'Calculo', action: handlers.onMLPrediction },
-  { id: 'cnsnsreport', name: 'Reporte CNSNS Automatico', icon: FileText, group: 'Reportes', action: handlers.onCNSNSAutoReport },
   { id: 'keyboard', name: 'Configurar Atajos', icon: Keyboard, group: 'Utilidades', action: handlers.onKeyboardConfig },
   // Utilidades
   { id: 'shortcuts', name: 'Atajos de Teclado', icon: Keyboard, group: 'Utilidades', action: handlers.onKeyboardShortcuts },

@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('F409 output surfaces are visible in Memoria IA, Evidence Pack and Medical 3D', async ({ page }) => {
+test('F409 output surfaces are visible in Memoria, Evidence Pack and Medical 3D', async ({ page }) => {
   test.setTimeout(180_000);
   await mkdir(outputDir, { recursive: true });
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -27,12 +27,13 @@ test('F409 output surfaces are visible in Memoria IA, Evidence Pack and Medical 
   const screenshots: string[] = [];
   const checks: Array<{ id: string; status: 'ready'; evidence: string }> = [];
 
-  await page.getByTestId('e2e-open-memoria-ai').click();
-  const memoriaSurface = page.getByTestId('f409-output-surface-integration-memoria');
+  // Fase 12, paso 3: «Memoria IA» se unificó en el flujo de memoria radshield/memoria@1 (menú 5).
+  await page.getByTestId('e2e-open-memoria').click();
+  const memoriaSurface = page.getByTestId('memoria-unificada');
   await expect(memoriaSurface).toBeVisible({ timeout: 20_000 });
-  await expect(memoriaSurface).toContainText(/F409 salidas reales/i);
-  screenshots.push(await capture(page, '01_memoria_ai_f409_surface'));
-  checks.push({ id: 'memoria-ai-f409-surface', status: 'ready', evidence: 'f409-output-surface-integration-memoria' });
+  await expect(memoriaSurface).toContainText(/radshield\/memoria@1/);
+  screenshots.push(await capture(page, '01_memoria_unificada'));
+  checks.push({ id: 'memoria-unificada', status: 'ready', evidence: 'memoria-unificada' });
   await page.keyboard.press('Escape');
   await expect(memoriaSurface).toBeHidden({ timeout: 10_000 });
 

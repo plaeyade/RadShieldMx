@@ -152,9 +152,10 @@ describe('Fase 11 — todas las rutas usan el motor validado', () => {
   it('ninguna ruta del diseñador usa AsyncShieldingEngine ni otro motor paralelo', () => {
     const sd = readFileSync('src/pages/ShieldingDesigner.tsx', 'utf8');
     expect(sd).not.toMatch(/new AsyncShieldingEngine|lib\/engine\/|asyncEngineRef|engine\.calculate\(|useSmartBarrier\(|useWebWorker\(|useWorkerCalculation\(|useWASM\(|lib\/shieldingEngine/);
-    expect(sd).toMatch(/const runRadShieldCalculations = runCalculations;/);
-    expect(sd).toMatch(/case 'f5': e\.preventDefault\(\); runRadShieldCalculations\(\)/);
-    expect(sd.match(/calcularProyectoAsync\(/g)?.length).toBe(2); // runCalculations y DXF confirmado
+    // Fase 12, paso 2: F5 y el único botón «Calcular» llaman a runCalculations; ésta y el DXF confirmado comparten
+    // el único cuerpo `calcularPlano`.
+    expect(sd).toMatch(/calcular: \(\) => \{ void runCalculations\(\); \}/);
+    expect(sd.match(/calcularProyectoAsync\(/g)?.length).toBe(1);
   });
 });
 
