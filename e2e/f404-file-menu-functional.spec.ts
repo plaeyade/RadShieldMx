@@ -44,7 +44,8 @@ test.describe('F404 Archivo menu functional QA (Fase 12: menús por etapa) - f40
       ['f404-file-import-dxf', /Visor DXF/i, 'proyecto'],
       ['f404-file-import-step', /STEP \/ IGES Native Importer/i, 'proyecto'],
       ['f404-file-export-csv', /Exportar Resultados/i, 'reportes'],
-      ['f404-file-export-cnsns', /Generar Memoria Analitica CNSNS/i, 'reportes'],
+      // Fase 12, paso 3: memoria, PDF y reporte CNSNS son un solo diálogo.
+      ['f12-reportes-memoria', /Memoria analítica y CNSNS/i, 'reportes'],
       ['f404-file-audit-trail', /Audit Trail/i, 'reportes'],
       ['f404-file-log-analysis', /Requerido contra instalado/i, 'reportes'],
     ];

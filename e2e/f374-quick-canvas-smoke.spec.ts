@@ -17,7 +17,7 @@ test.describe('F374 quick actions and canvas command dock', () => {
     await expect(page.getByRole('button', { name: /Calc: Calcular blindaje/i })).toHaveCount(0);
     await expect(page.getByTestId('f374-command-calc')).toHaveCount(0);
     await page.getByRole('button', { name: /^Mem: /i }).click();
-    await expect(quickStatus).toContainText(/Memoria IA/i);
+    await expect(quickStatus).toContainText(/Memoria/i);
     await expect(page.getByRole('dialog').first()).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);

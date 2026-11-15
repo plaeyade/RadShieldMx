@@ -358,3 +358,16 @@ diálogo huérfano y el recorrido guiado en verde.
   `src/__tests__/validacion/fase12Paso2.test.tsx` y en la E2E de «Guíame» (un paso por pulsación).
   Pendiente para el paso 3: retirar la fila «Acceso rápido» y la barra «CAD» inferior, y la barra lateral sólo para
   propiedades.
+- **Paso 3** (`fase12-memoria-unificada`): **un solo flujo de memoria analítica y CNSNS** en el menú 5
+  (`src/sections/dialogs/MemoriaDialog.tsx`, clave `memoria`): 1. datos de la instalación (el asistente pide sólo lo
+  que el plano no tiene), 2. revisión, 3. exportar. DOCX, PDF y JSON se generan del **mismo objeto**
+  `radshield/memoria@1` (`construirMemoria` → `salidaMemoria`, `src/lib/memoriaFlujo.ts`), y un JSON importado se
+  valida contra el esquema (`src/lib/memoriaEsquema.ts`; JSON Schema en `docs/esquemas/radshield-memoria-1.schema.json`)
+  y el sello sha256 antes de volver a exportarlo. Se retiraron las rutas duplicadas: asistente «Memoria IA»
+  (`memoriaAI`, texto con valores típicos de una tabla interna), asistente `memoriaWizard`, diálogo CNSNS (.docx de
+  `useCNSNSReport`), «Exportar PDF» (`usePDFGenerator`), reporte CNSNS en HTML (`reporteCNSNSHtml`, `cnsnsAutoReport`),
+  reporte regulatorio y exportador «batch»; sus claves se redirigen a `memoria` con `DIALOGOS_REDIRIGIDOS`. El
+  «Exportar PDF» de «Guíame» descarga el PDF de la misma memoria. El JSON de memoria del ejemplo «Guíame» es idéntico
+  antes y después salvo `origen.fecha` (y el `sha256`, que sella la fecha). Prueba E2E:
+  `e2e/fase12-memoria-unificada.spec.ts` (valida el JSON descargado contra el esquema); unitarias en
+  `src/__tests__/validacion/fase12Paso3.test.tsx`.

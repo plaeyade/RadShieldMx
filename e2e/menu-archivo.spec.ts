@@ -31,7 +31,7 @@ test.describe('Menús por etapa (antes Menu Archivo)', () => {
   test('5. Memoria y CNSNS: exportación, CNSNS y trazabilidad', async ({ page }) => {
     await abrirMenu(page, 'reportes');
     const menu = contenido(page, 'reportes');
-    for (const texto of ['Exportar CSV', 'Exportar PDF', 'Compartir', 'Reporte CNSNS', 'Audit Trail', 'Analisis de Logs', 'Paquete de evidencia']) {
+    for (const texto of ['Memoria analítica y CNSNS', 'Exportar CSV', 'Compartir', 'Audit Trail', 'Analisis de Logs', 'Paquete de evidencia']) {
       await expect(menu.getByText(texto, { exact: false }).first()).toBeVisible();
     }
     await expect(menu.getByText('Especificaciones Tecnicas', { exact: true })).toBeVisible();
@@ -43,10 +43,10 @@ test.describe('Menús por etapa (antes Menu Archivo)', () => {
     await expect(page.locator('text=Exportar Resultados')).toBeVisible({ timeout: 5000 });
   });
 
-  test('Reporte CNSNS abre el diálogo CNSNS', async ({ page }) => {
+  test('Memoria analítica y CNSNS abre el flujo único de memoria', async ({ page }) => {
     await abrirMenu(page, 'reportes');
-    await contenido(page, 'reportes').getByText('Reporte CNSNS', { exact: true }).click();
-    await expect(page.getByRole('dialog', { name: /Generar Memoria Analitica CNSNS/i })).toBeVisible({ timeout: 5000 });
+    await contenido(page, 'reportes').getByText('Memoria analítica y CNSNS', { exact: true }).click();
+    await expect(page.getByRole('dialog', { name: /Memoria analítica y CNSNS/i })).toBeVisible({ timeout: 5000 });
   });
 
   test('Glosario abre el panel del glosario', async ({ page }) => {

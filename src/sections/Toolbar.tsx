@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from
 import { useI18n } from '@/hooks/useI18n';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import {
-  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Cloud, FileDown, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Crosshair, Calculator, Layers, Cpu, Scan, GitBranch, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, FileBarChart, Star, Radio, ScanLine, FileBox, HelpCircle, Compass, Stethoscope, Save, Printer, Plus, Siren, PenTool, MapPin, Languages, Pill, Contrast, Info, FileSearch, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
+  Play, Download, FileText, Microscope, FolderOpen, Box, Zap, Database, Cloud, ArrowUpDown, Upload, TrendingDown, Atom, CalendarDays, BarChart3, Gauge, Undo, Redo, Activity, Moon, Sun, Shield, DollarSign, ClipboardCheck, BookOpen, Library, Brain, GitCompareArrows, Crosshair, Calculator, Layers, Cpu, Scan, GitBranch, ChevronDown, Settings, ShieldCheck, PinOff, Keyboard, FileBarChart, Star, Radio, ScanLine, FileBox, HelpCircle, Compass, Stethoscope, Save, Plus, Siren, PenTool, MapPin, Languages, Pill, Contrast, Info, FileSearch, Bot, Share2, Shapes, MessageSquare, RefreshCw, LayoutTemplate, Trash2, FilePlus, User, LogIn, LogOut, ScanEye, Sparkles,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
@@ -106,7 +106,9 @@ interface ToolbarProps {
   [key: string]: any;
   /* 7 functional menus */
   onNewProject: () => void; onOpenProject: () => void; onSaveProject: () => void; onSaveAs: () => void;
-  onExport: () => void; onPDF: () => void; onShare: () => void; onCNSNS: () => void;
+  onExport: () => void; onShare: () => void;
+  /** Fase 12, paso 3: memoria analítica y CNSNS (radshield/memoria@1), única salida de memoria e informe. */
+  onMemoria: () => void;
   onImportImage: () => void; onBatchImport: () => void; onDXFViewer: () => void; onSTEPImporter: () => void;
   onToggleTheme: () => void; isDarkMode: boolean;
   onUndo: () => void; onRedo: () => void;
@@ -115,7 +117,7 @@ interface ToolbarProps {
   onEquipmentShieldingWizard: () => void; onQuick: () => void; onMazeCalculator: () => void;
   onFloorCeiling: () => void; onShieldingOptimizer: () => void; onCostOptimizer: () => void;
   onCostEstimator: () => void; onUncertainty: () => void; onGUMUncertainty: () => void;
-  onUAQ: () => void; onMemoriaAI: () => void;
+  onUAQ: () => void;
   on3D: () => void; on3DModels: () => void; onMedicalFloorPlan3D: () => void; onPointCloud: () => void;
   onAutoBarrier: () => void;
   onRealTime3D: () => void; onBIMRAD: () => void;
@@ -132,7 +134,7 @@ interface ToolbarProps {
   onCBCTIGRT: () => void; onShieldingEquipos: () => void;
   onInternationalRegulations: () => void; onRegulatoryComparison: () => void;
   onComplianceCertification: () => void; onRegulatoryAlerts: () => void;
-  onCNSNSDashboard: () => void; onCNSNSChecklist: () => void; onCNSNSReport: () => void;
+  onCNSNSDashboard: () => void; onCNSNSChecklist: () => void;
   onNCRP151Detail: () => void; onNCRPValidation: () => void; onEPAGuidance: () => void; onShleien: () => void;
   onICRU57: () => void; onICRU96: () => void; onBibliografia: () => void;
   onDashboard: () => void; onCostDashboard: () => void; onCNSNSReportChecklist: () => void;
@@ -274,9 +276,9 @@ const F113_PROFILE_CHIPS: Record<F113ModalityProfileId, string> = {
 
 export default function Toolbar(props: ToolbarRuntimeProps) {
   const {
-    onNewProject, onSaveProject, floorPlan, barrierResults, heatmapEnabled, onExport, onPDF, onShare, onCNSNS,
+    onNewProject, onSaveProject, floorPlan, barrierResults, heatmapEnabled, onExport, onShare, onMemoria,
     onBatchImport, onDXFViewer, onSTEPImporter, onUndo, onRedo, onTechSpecs, onAuditTrail, onLogFileAnalysis,
-    onCalculate, onShieldingCalculator, onQuick, onFloorCeiling, onCostOptimizer, onGUMUncertainty, onMemoriaAI,
+    onCalculate, onShieldingCalculator, onQuick, onFloorCeiling, onCostOptimizer, onGUMUncertainty,
     on3D, onMedicalFloorPlan3D, onPointCloud, onAutoBarrier, onRealTime3D, onShapesReconstruction,
     onNeutronShielding, onDoseMap, onMaterialProps, onNuclearMedicine, onAAPMTG108PET, onIPEM109,
     onTherapyShielding, onGammaKnife, onBraquiCo60, onCBCTIGRT, onShieldingEquipos, onNCRPValidation,
@@ -374,11 +376,11 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
     }
   };
   const f112Favorites = useMemo(() => [
-    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: invoke(onMemoriaAI, 'memoriaAI', 'Memoria IA'), tip: 'Memoria IA' },
+    { id: 'memoria' as const, label: 'Memoria', icon: Star, className: 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-100', onClick: invoke(onMemoria, 'memoria', 'Memoria'), tip: 'Memoria analítica y CNSNS' },
     { id: 'evidence' as const, label: 'Evidencia', icon: FileSearch, className: 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-100', onClick: invoke(onEvidencePack, 'evidencePack', 'Evidence Pack'), tip: 'Evidence Pack' },
     { id: 'validate' as const, label: 'Validar', icon: ShieldCheck, className: 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-100', onClick: invoke(onNCRPValidation, 'ncrpValidation', 'Validacion NCRP'), tip: 'NCRP Validation' },
     { id: 'heatmap' as const, label: 'Heatmap', icon: Crosshair, className: 'text-red-700 bg-red-50 hover:bg-red-100 border-red-100', onClick: invoke(onDoseMap, 'doseMap', 'Heatmap'), tip: 'Mapa de dosis/isodosis' },
-  ], [onDoseMap, onEvidencePack, onMemoriaAI, onNCRPValidation]);
+  ], [onDoseMap, onEvidencePack, onMemoria, onNCRPValidation]);
 
   const toggleF112Favorite = (id: F112FavoriteId) => {
     setF112FavoriteIds((current) => {
@@ -515,9 +517,8 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
 
             <MenuEtapa numero={5} etiqueta="Memoria" titulo="Memoria analítica y CNSNS" id="reportes" icon={FileText} tono={TONOS.reportes}>
               <SectionLabel label="Memoria y CNSNS" color="text-orange-600" />
-              <SmartItem testId="f12-reportes-memoria" icon={Brain} iconColor={c.tool} label="Memoria analítica" onClick={invoke(onMemoriaAI, 'memoriaAI')} desc="Memoria guiada por el flujo" />
-              <SmartItem testId="f404-file-export-pdf" icon={FileDown} iconColor={c.report} label="Exportar PDF" onClick={invoke(onPDF, 'pdfReport')} desc="Memoria analítica PDF" />
-              <SmartItem testId="f404-file-export-cnsns" icon={Printer} iconColor={c.report} label="Reporte CNSNS" onClick={invoke(onCNSNS, 'cnsns')} desc="Salida regulatoria" />
+              {/* Fase 12, paso 3: un solo flujo (antes Memoria IA, Exportar PDF y Reporte CNSNS por separado). */}
+              <SmartItem testId="f12-reportes-memoria" icon={FileText} iconColor={c.report} label="Memoria analítica y CNSNS" onClick={invoke(onMemoria, 'memoria')} desc="Datos, revisión y DOCX/PDF/JSON (radshield/memoria@1)" />
               <SmartItem icon={ClipboardCheck} iconColor={c.report} label={t('reports.cnsnsChecklist')} onClick={invoke(onCNSNSReportChecklist)} />
               <SmartItem icon={CalendarDays} iconColor="bg-emerald-500" label="Dosis anual" onClick={invoke(onAnnualDose, 'annualDose')} desc="Acumulado anual ICRP/CNSNS" />
               <SmartItem icon={BarChart3} iconColor={c.report} label={t('reports.dashboard')} onClick={invoke(onDashboard)} />
