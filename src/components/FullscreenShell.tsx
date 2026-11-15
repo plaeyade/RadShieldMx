@@ -1,5 +1,6 @@
 import { Maximize2, Minimize2, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import CapaModal from '@/components/CapaModal';
 
 interface FullscreenShellProps {
   title: string;
@@ -10,6 +11,8 @@ interface FullscreenShellProps {
   children: ReactNode;
   onClose: () => void;
   traceId: string;
+  /** Escape: devuelve `false` para no cerrar (cambios sin guardar). */
+  confirmarCierre?: () => boolean;
 }
 
 export default function FullscreenShell({
@@ -21,15 +24,16 @@ export default function FullscreenShell({
   children,
   onClose,
   traceId,
+  confirmarCierre,
 }: FullscreenShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [contained, setContained] = useState(false);
 
   return (
-    <div
+    <CapaModal
+      onCerrar={onClose}
+      confirmarCierre={confirmarCierre}
       className={`fixed inset-0 z-50 flex bg-white ${contained ? 'items-center justify-center bg-black/35 p-4' : 'flex-col'}`}
-      role="dialog"
-      aria-modal="true"
       aria-label={title}
       data-testid={traceId}
       data-fullscreen-shell-contained={contained ? 'true' : 'false'}
@@ -85,6 +89,6 @@ export default function FullscreenShell({
         </div>
         {!collapsed && <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>}
       </div>
-    </div>
+    </CapaModal>
   );
 }

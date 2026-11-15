@@ -16,6 +16,7 @@ import {
 } from '@/types/equipmentDB';
 import { MATERIALS_DB } from '@/lib/materialDatabase';
 import { blindajeEquipo } from '@/lib/blindajeEquipo';
+import CapaModal from '@/components/CapaModal';
 import {
   Wand2, ChevronRight, ChevronLeft, Download, Calculator, Ruler,
   Shield, FileText, Crosshair,
@@ -197,7 +198,12 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    <CapaModal
+      onCerrar={() => onOpenChange(false)}
+      confirmarCierre={() => state.step <= 1 || window.confirm('¿Cerrar el asistente de blindaje por equipo? Se perderá el avance.')}
+      className="fixed inset-0 z-50 flex flex-col bg-white"
+      aria-label="Wizard de Blindaje por Equipo"
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-900 text-white">
         <div className="flex items-center gap-2">
@@ -627,7 +633,7 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
           {state.step === 4 ? <><Calculator className="w-3 h-3 mr-1" /> Calcular</> : <><ChevronRight className="w-3 h-3 mr-1" /> Siguiente</>}
         </Button>
       </div>
-    </div>
+    </CapaModal>
   );
 }
 

@@ -11,6 +11,7 @@ import {
   ENERGIAS_MV_TABULADAS, energiaTabuladaMV,
 } from '@/lib/calculadorasNormativas';
 import { anguloSolidoCampo, skyshineFotones, transmisionTVL, tvlPrimaria } from '@/lib/ncrp151';
+import CapaModal from '@/components/CapaModal';
 
 const DISTANCIAS_M = [5, 7.5, 10, 15, 20, 30, 50];
 
@@ -46,7 +47,7 @@ export default function ChiltonSkyshineDialog({ onClose }: { onClose: () => void
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" role="dialog" aria-modal="true" aria-labelledby="sky-title">
+    <CapaModal onCerrar={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2" aria-labelledby="sky-title">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-3 border-b bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-t-lg">
           <div className="flex items-center gap-3"><Cloud className="w-6 h-6" /><div><h2 id="sky-title" className="text-lg font-bold">Skyshine de fotones</h2><p className="text-xs text-sky-100">NCRP 151 §5.1, Ec. 5.1 (McGinley, 2002)</p></div></div>
@@ -93,6 +94,6 @@ export default function ChiltonSkyshineDialog({ onClose }: { onClose: () => void
         </div>
         <div className="flex justify-end px-5 py-3 border-t bg-slate-50 rounded-b-lg"><button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-600 text-white text-xs font-medium hover:bg-sky-700"><Download className="w-3.5 h-3.5" />Exportar CSV</button></div>
       </div>
-    </div>
+    </CapaModal>
   );
 }

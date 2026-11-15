@@ -6,6 +6,7 @@
 import { Maximize2, Minimize2, Move, X } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
+import CapaModal from '@/components/CapaModal';
 
 interface DialogShellProps {
   title: string;
@@ -16,6 +17,8 @@ interface DialogShellProps {
   footer?: ReactNode;
   children: ReactNode;
   onClose: () => void;
+  /** Escape: devuelve `false` para no cerrar (cambios sin guardar). */
+  confirmarCierre?: () => boolean;
 }
 
 export default function DialogShell({
@@ -27,6 +30,7 @@ export default function DialogShell({
   footer,
   children,
   onClose,
+  confirmarCierre,
 }: DialogShellProps) {
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
@@ -69,10 +73,11 @@ export default function DialogShell({
   }, []);
 
   return (
-    <div
+    <CapaModal
+      onCerrar={onClose}
+      confirmarCierre={confirmarCierre}
+      exigirFocoDentro={minimized}
       className={`fixed inset-0 z-50 flex items-center justify-center p-2 ${minimized ? 'pointer-events-none bg-transparent' : 'bg-black/40'}`}
-      role="dialog"
-      aria-modal="true"
       aria-label={title}
       data-testid="f376-dialog-overlay"
       data-f376-dialog-pass-through={minimized ? 'true' : 'false'}
@@ -147,6 +152,6 @@ export default function DialogShell({
           </div>
         )}
       </div>
-    </div>
+    </CapaModal>
   );
 }
