@@ -364,9 +364,9 @@ export const EXISTING_REFERENCES: BibEntry[] = [
     notes: 'Norma Oficial Mexicana sobre uso de radiofármacos en humanos. Establece requisitos para preparación, control de calidad, administración y protección radiológica en instalaciones de medicina nuclear en México. Aplicable a laboratorios de radiofármacos con ciclotrón.',
   },
   {
-    id: 'REF074', type: 'NOM', year: 2015,
-    citation: 'NOM-012-NUCL-2015. Requisitos de protección radiológica y seguridad para la autorización y operación de instalaciones de ciclotrón. Comisión Nacional de Seguridad Nuclear y Salvaguardias (CNSNS), México.',
-    notes: 'Norma Oficial Mexicana para instalaciones de ciclotrón. Especifica requisitos de protección radiológica y seguridad para autorización y operación de ciclotrones en México, incluyendo producción de radiofármacos.',
+    id: 'REF074', type: 'NOM', year: 2016,
+    citation: 'NOM-012-NUCL-2016. Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
+    notes: 'Sustituye y cancela la NOM-012-NUCL-2002 (monitores de radiación ionizante), a la que remite la NOM-040-NUCL-2016 §6.1.1. Antes este registro citaba una «NOM-012-NUCL-2015, instalaciones de ciclotrón» inexistente; para la radiofarmacia del ciclotrón véanse NOM-027-NUCL-2021 (diseño) y NOM-003-NUCL-2021 (clase).',
   },
   // ── v51: CATIA-GDML y CAD-to-ROOT (PDF analysis) ──
   {

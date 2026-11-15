@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { NOM_008_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
+import { NOM_008_NUCL, NOM_012_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
 import { ALL_REFERENCES } from '@/lib/bibliography';
 import { getRegulationById } from '@/lib/internationalRegulations';
 
@@ -89,5 +89,32 @@ describe('NOM-040-NUCL-2016 (medicina nuclear)', () => {
       .filter((p) => readFileSync(p, 'utf-8').split('\n').some((l) => malTitulada.test(l) || glosario.test(l)))
       .map((p) => relative(SRC, p));
     expect(conTituloErroneo).toEqual([]);
+  });
+});
+
+describe('NOM-012-NUCL-2016 (instrumentos de medición; cancela la NOM-012-NUCL-2002)', () => {
+  it('ficha con edición vigente, DOF y la edición que cancela', () => {
+    expect(NOM_012_NUCL.clave).toBe('NOM-012-NUCL-2016');
+    expect(NOM_012_NUCL.titulo).toMatch(/^Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante/);
+    expect(NOM_012_NUCL.publicacionDof).toBe('2017-01-16');
+    expect(NOM_012_NUCL.urlDof).toMatch(/codigo=5469138/);
+    expect(NOM_012_NUCL.sustituyeA).toMatch(/^NOM-012-NUCL-2002/);
+    expect(NOM_012_NUCL.alcance).toMatch(/No trata blindajes ni ciclotrones/);
+  });
+
+  it('NOM-040 §6.1.1 remite a la edición vigente y REF074 ya no es una «NOM-012» de ciclotrón', () => {
+    const r = NOM_040_NUCL.requisitosDiseno.find((x) => x.seccion === '§6.1.1')!;
+    expect(r.texto).toMatch(/cancelada por la NOM-012-NUCL-2016/);
+    const ref = ALL_REFERENCES.find((b) => b.id === 'REF074');
+    expect(ref?.citation).toBe(NOM_012_NUCL.cita);
+    expect(ref?.year).toBe(2016);
+  });
+
+  it('ningún archivo de src cita la inexistente NOM-012-NUCL-2015 (salvo entre «» como antecedente)', () => {
+    const cita = /(?<!«)NOM-012-NUCL-2015/;
+    const conCita = archivos(SRC)
+      .filter((p) => readFileSync(p, 'utf-8').split('\n').some((l) => cita.test(l)))
+      .map((p) => relative(SRC, p));
+    expect(conCita).toEqual([]);
   });
 });

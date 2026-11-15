@@ -78,7 +78,7 @@ export const NOM_040_NUCL = {
     { seccion: '§5.3.2', texto: 'Almacenes de material y de desechos: puerta que abre desde dentro sin llave y paso al área de preparación por puerta o ventana de transferencia; si están en el cuarto caliente, área exclusiva con separación física entre material sin usar y desechos.' },
     { seccion: '§5.3.3–5.3.6', texto: 'Descontaminación (regadera de emergencia) adyacente a preparación; administración adyacente a preparación o almacén; sala de espera con un área por paciente o mamparas que mantengan fuera de cada área el límite de público del RGSR, adjunta a la sala de estudios.' },
     { seccion: '§5.3.7', texto: 'Cuarto de hospitalización (p. ej. I-131): un área por paciente o mamparas, baño completo exclusivo con apertura sin contacto, y prohibido usar cuartos externos a la instalación de medicina nuclear.' },
-    { seccion: '§6.1.1', texto: 'Monitoreo: detector de área permanente en el exterior de la puerta del almacén, detector portátil, detector de contaminación y, con pacientes hospitalizados, detector de área con alarma en la puerta del cuarto de hospitalización (NOM-012-NUCL-2002).' },
+    { seccion: '§6.1.1', texto: 'Monitoreo: detector de área permanente en el exterior de la puerta del almacén, detector portátil, detector de contaminación y, con pacientes hospitalizados, detector de área con alarma en la puerta del cuarto de hospitalización. La NOM-040 remite a la NOM-012-NUCL-2002, cancelada por la NOM-012-NUCL-2016 (DOF 16-01-2017): los detectores deben cumplir la NOM-012-NUCL-2016.' },
     { seccion: '§8.2.1 / §8.3', texto: 'El material que entra a la zona controlada no transita por zonas no controladas (condiciona la circulación del proyecto); desechos según NOM-028-NUCL-2009.' },
   ],
   /**
@@ -147,6 +147,32 @@ export const NOM_033_NUCL = {
     { seccion: '§5.3', texto: 'Detector de neutrones en instalaciones con aceleradores de 10 MeV o más.' },
     { seccion: 'Apéndice A (A7, A12)', texto: 'Verificación diaria del interruptor de seguridad de la puerta de la sala de tratamiento y de los monitores de área.' },
   ],
+} as const;
+
+/**
+ * Ficha única de la NOM-012-NUCL-2016 (instrumentos de medición de radiación ionizante). La NOM-040-NUCL-2016 §6.1.1
+ * pide los detectores de área, portátil y de contaminación conforme a la «NOM-012-NUCL-2002, Requerimientos y
+ * calibración de monitores de radiación ionizante» (DOF 19-06-2002), que esta edición sustituye y cancela. Antes la
+ * bibliografía citaba una «NOM-012-NUCL-2015, instalaciones de ciclotrón» (REF074) que no existe: la NOM-012-NUCL
+ * nunca ha tratado de ciclotrones (su diseño está en NOM-027-NUCL-2021 y su clase en NOM-003-NUCL-2021).
+ *
+ * NOM-012-NUCL-2016, «Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de
+ * radiación ionizante y los dosímetros de lectura directa» (SENER/CNSNS), DOF 16-01-2017, en vigor el 18-03-2017.
+ * Vigente según PLATIICA (Secretaría de Economía); revisión sistemática del 31-03-2022 con resultado «Modificación»,
+ * sin norma sustituta publicada (consultado el 15-11-2026). Regula instrumentos, no blindajes.
+ */
+export const NOM_012_NUCL = {
+  clave: 'NOM-012-NUCL-2016',
+  titulo: 'Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa',
+  emisor: 'SENER/CNSNS',
+  anio: 2016,
+  publicacionDof: '2017-01-16',
+  entradaEnVigor: '2017-03-18',
+  sustituyeA: 'NOM-012-NUCL-2002, Requerimientos y calibración de monitores de radiación ionizante (DOF 19-06-2002)',
+  urlDof: 'https://www.dof.gob.mx/nota_detalle.php?codigo=5469138&fecha=16/01/2017',
+  urlPdf: 'https://platiica.economia.gob.mx/wp-content/uploads/sites/2/PDF_Normas_Publicas/012nucl2017.pdf',
+  cita: 'NOM-012-NUCL-2016. Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
+  alcance: 'Requisitos y criterios de funcionamiento de los instrumentos de medición de radiación ionizante (monitores de área, portátiles y de contaminación) y de los dosímetros de lectura directa. No trata blindajes ni ciclotrones.',
 } as const;
 
 /** Rótulo del RGSR, la base de límites de dosis en México (véase limitesDosis.ts). */

@@ -6,7 +6,7 @@ import { announce } from '@/components/A11yAnnouncer';
 // GMPCyclotronCertificationDialog — Certificación GMP para laboratorios de
 // producción de radiofármacos con ciclotrón
 // Basado en: IAEA TCS-88, WHO TRS 1025 Annex 2, EMA CHMP/QWP/363827/2025,
-// PIC/S Annex 3, EANM cGRPP 2021, IAEA SSG-46, NOM-012-NUCL-2015
+// PIC/S Annex 3, EANM cGRPP 2021, IAEA SSG-46, NOM-027-NUCL-2021 (diseño de la radiofarmacia)
 // =============================================================================
 
 interface GMPRequirement {
@@ -37,13 +37,13 @@ const REQUIREMENTS: GMPRequirement[] = [
   { id: 'QMS-10', category: 'Sistema de Gestión de Calidad', text: 'La evaluación de riesgos cubre la naturaleza única de los agentes radiactivos con controles adaptados al proceso real de producción.', reference: 'WHO TRS 1025 Annex 2 §3.6 | Faivre-Chauvet 2022 (REF053)', weight: 1 },
 
   // ── PERSONAL ──
-  { id: 'PER-01', category: 'Personal y Capacitación', text: 'Todas las operaciones de fabricación se realizan bajo responsabilidad de personal con competencia en protección radiológica.', reference: 'PIC/S Annex 3 §13-15 | WHO TRS 1025 Annex 2 §8 | NOM-012-NUCL-2015 (REF074)', weight: 1 },
+  { id: 'PER-01', category: 'Personal y Capacitación', text: 'Todas las operaciones de fabricación se realizan bajo responsabilidad de personal con competencia en protección radiológica.', reference: 'PIC/S Annex 3 §13-15 | WHO TRS 1025 Annex 2 §8', weight: 1 },
   { id: 'PER-02', category: 'Personal y Capacitación', text: 'El personal de producción, control analítico y liberación está debidamente capacitado en aspectos específicos de radiofármacos del QMS.', reference: 'WHO QAS/24.969 §5 | IAEA TCS-88 §2.2 | EANM Technologist Guide (REF047)', weight: 1 },
   { id: 'PER-03', category: 'Personal y Capacitación', text: 'La persona autorizada (Qualified Person) tiene completa responsabilidad para la liberación de productos.', reference: 'PIC/S Annex 3 §13 | EMA CHMP/QWP/363827/2025 §4', weight: 1 },
   { id: 'PER-04', category: 'Personal y Capacitación', text: 'Todo el personal (incluido limpieza y mantenimiento) recibe formación adicional adaptada a productos radiactivos.', reference: 'PIC/S Annex 3 §14 | WHO TRS 1025 Annex 2 §8.4', weight: 2 },
   { id: 'PER-05', category: 'Personal y Capacitación', text: 'Cuando las instalaciones se comparten con investigación, el personal de investigación está entrenado en normas GMP.', reference: 'PIC/S Annex 3 §15 | Bormans 2017 (REF054)', weight: 2 },
   { id: 'PER-06', category: 'Personal y Capacitación', text: 'El programa de capacitación incluye formación específica en: radioquímica, síntesis automatizada, control de calidad, y prácticas asépticas.', reference: 'IAEA TCS-88 §5 (Modules 4-6) | IAEA STI/PUB/1342 Level 3 (REF046)', weight: 1 },
-  { id: 'PER-07', category: 'Personal y Capacitación', text: 'El personal que opera el ciclotrón cuenta con certificación específica en operación de aceleradores de partículas.', reference: 'IAEA TCS-88 §5.2 | NOM-012-NUCL-2015 (REF074)', weight: 1 },
+  { id: 'PER-07', category: 'Personal y Capacitación', text: 'El personal que opera el ciclotrón cuenta con certificación específica en operación de aceleradores de partículas.', reference: 'IAEA TCS-88 §5.2', weight: 1 },
   { id: 'PER-08', category: 'Personal y Capacitación', text: 'Se mantienen registros de capacitación, evaluación de competencias y planes de desarrollo profesional continuo.', reference: 'IAEA TCS-88 §7 | WHO QAS/24.969 §5.1', weight: 2 },
 
   // ── INSTALACIONES Y EQUIPO ──
@@ -56,8 +56,8 @@ const REQUIREMENTS: GMPRequirement[] = [
   { id: 'FAC-07', category: 'Instalaciones y Equipo', text: 'El equipo que contacta el producto está construido de manera que las superficies no sean reactivas, aditivas o absorbentes.', reference: 'PIC/S Annex 3 §22 | EMA CHMP/QWP/363827/2025 §5.1.2', weight: 2 },
   { id: 'FAC-08', category: 'Instalaciones y Equipo', text: 'Para radiofármacos estériles, la zona de trabajo cumple con requisitos de Grado A/B/C/D según tipo de operación.', reference: 'PIC/S Annex 3 §25-28 | EudraLex Vol 4 Annex 1 | Marengo (REF069)', weight: 1 },
   { id: 'FAC-09', category: 'Instalaciones y Equipo', text: 'Se dispone de cabina de flujo laminar (LAF) o aislador para manipulaciones asépticas.', reference: 'EANM Technologist Guide Ch.2 (REF047) | IAEA STI/PUB/1342 (REF046)', weight: 1 },
-  { id: 'FAC-10', category: 'Instalaciones y Equipo', text: 'El ciclotrón y líneas de transferencia al sintetizador están calificados (IQ/OQ/PQ) y mantenidos.', reference: 'NOM-012-NUCL-2015 (REF074) | IAEA TCS-88 §5.2 (REF045)', weight: 1 },
-  { id: 'FAC-11', category: 'Instalaciones y Equipo', text: 'Se dispone de celdas calientes (hot cells) con blindaje adecuado para el radionucleido producido.', reference: 'IAEA STI/PUB/1342 (REF046) | IAEA SSG-46 | NOM-012-NUCL-2015', weight: 1 },
+  { id: 'FAC-10', category: 'Instalaciones y Equipo', text: 'El ciclotrón y líneas de transferencia al sintetizador están calificados (IQ/OQ/PQ) y mantenidos.', reference: 'IAEA TCS-88 §5.2 (REF045)', weight: 1 },
+  { id: 'FAC-11', category: 'Instalaciones y Equipo', text: 'Se dispone de celdas calientes (hot cells) con blindaje adecuado para el radionucleido producido.', reference: 'IAEA STI/PUB/1342 (REF046) | IAEA SSG-46 | NOM-027-NUCL-2021', weight: 1 },
   { id: 'FAC-12', category: 'Instalaciones y Equipo', text: 'Las salidas de aire están diseñadas para minimizar contaminación ambiental por partículas radiactivas y gases.', reference: 'PIC/S Annex 3 §23 | WHO TRS 1025 Annex 2 §9.5', weight: 1 },
   { id: 'FAC-13', category: 'Instalaciones y Equipo', text: 'Se dispone de laboratorio separado para control de calidad con equipos calibrados y calificados.', reference: 'IAEA TCS-88 §3.2 | WHO QAS/24.969 §10-12', weight: 2 },
 

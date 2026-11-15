@@ -16,7 +16,7 @@ import { verificarBarrera, type FilaVerificacion } from '@/lib/verificacionBlind
 import { codigoCatalogo } from '@/lib/shieldingMath';
 import { claveMetodoFuente } from '@/lib/motorProyecto';
 import { LIMITES_DOSIS, P_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
-import { NOM_013_NUCL, NOM_033_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
+import { NOM_012_NUCL, NOM_013_NUCL, NOM_033_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
 
 export const CONTRATO_MEMORIA = 'radshield/memoria@1' as const;
 export const POR_COMPLETAR = 'Por completar';
@@ -222,6 +222,7 @@ const REFERENCIAS_BASE: Record<string, string> = {
   [NOM_040_NUCL.clave]: `${NOM_040_NUCL.cita} (§4.8 memoria analítica; §5.2.1).`,
   'NOM-003-NUCL-2021': 'NOM-003-NUCL-2021, «Clasificación de instalaciones que utilizan fuentes abiertas», DOF 12-10-2021 (Tablas A.1–A.3).',
   'NOM-027-NUCL-2021': 'NOM-027-NUCL-2021, «Especificaciones de diseño para las instalaciones radiactivas tipo II clases A, B y C», DOF 03-08-2021.',
+  [NOM_012_NUCL.clave]: NOM_012_NUCL.cita,
   [NOM_013_NUCL.clave]: NOM_013_NUCL.cita,
   'NOM-028-NUCL-2009': 'NOM-028-NUCL-2009, «Manejo de desechos radiactivos en instalaciones radiactivas que utilizan fuentes abiertas», DOF 04-08-2009.',
   [NOM_033_NUCL.clave]: NOM_033_NUCL.cita,
@@ -295,6 +296,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     marco.push({ id: 'NOM-003-NUCL-2021', titulo: REFERENCIAS_BASE['NOM-003-NUCL-2021'], aplica: 'Clase de la instalación (II-A, II-B o II-C).' });
     marco.push({ id: 'NOM-027-NUCL-2021', titulo: REFERENCIAS_BASE['NOM-027-NUCL-2021'], aplica: 'Especificaciones de diseño de la instalación tipo II.' });
     marco.push({ id: 'NOM-028-NUCL-2009', titulo: REFERENCIAS_BASE['NOM-028-NUCL-2009'], aplica: 'Almacén y manejo de desechos de fuentes abiertas.' });
+    marco.push({ id: NOM_012_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_012_NUCL.clave], aplica: 'Detectores de área, portátil y de contaminación de la NOM-040 §6.1.1 (que remite a la NOM-012-NUCL-2002, cancelada por esta edición).' });
   }
   if (ids.has('radioiodine-i131') || ids.has('lu177')) marco.push({ id: NOM_013_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_013_NUCL.clave], aplica: 'Egreso de pacientes y necesidad de cuarto de hospitalización.' });
   if (plano.sources.some((s) => /^linac-/.test(s.modality?.id ?? ''))) marco.push({ id: NOM_033_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_033_NUCL.clave], aplica: 'Teleterapia con aceleradores lineales.' });
