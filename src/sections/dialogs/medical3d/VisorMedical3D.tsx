@@ -64,7 +64,7 @@ export function VisorMedical3D({ estado, contratos }: Pick<PanelMedical3DProps, 
         </div>
       )}
 
-      <div className="absolute left-4 top-4 flex gap-2">
+      <div className="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
         <Badge className="bg-emerald-50/95 text-emerald-900 border-emerald-200 shadow-sm" variant="outline">
           F364: {visualWorkflowPresets.find((workflow) => workflow.id === visualWorkflow)?.label || visualWorkflow}
         </Badge>
