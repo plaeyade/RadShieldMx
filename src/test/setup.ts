@@ -36,15 +36,18 @@ global.indexedDB = {
   })),
 } as any;
 
-// Mock navigator.clipboard
-Object.defineProperty(global.navigator, 'clipboard', {
-  value: {
-    writeText: vi.fn(),
-    readText: vi.fn(),
-  },
-  writable: true,
-  configurable: true,
-});
+// Mock navigator.clipboard. En Node 20 (CI) no hay `navigator` global con `@vitest-environment node`
+// (dwgImport.test.ts, memoriaAnalitica.test.ts): sin esta guarda el setup lanza «defineProperty called on non-object».
+if (typeof globalThis.navigator !== 'undefined') {
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
+    value: {
+      writeText: vi.fn(),
+      readText: vi.fn(),
+    },
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock PerformanceObserver
 global.PerformanceObserver = vi.fn().mockImplementation((_callback: any) => ({
