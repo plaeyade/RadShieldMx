@@ -3,6 +3,7 @@ import { generarBunker, type ConfigBunker } from '@/lib/bunkerParametrico';
 import { useState, useCallback, Suspense, lazy, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { CriticalPoint, FloorPlan, Barrier, RadiationSource, OccupiedRegion } from '@/types/radshield';
+import type { MapeoCapas } from '@/lib/asistenteCapas';
 import { MATERIALS, MODALITIES } from '@/types/radshield';
 import { useShieldingEngine } from '@/hooks/useShieldingEngine';
 import { useCanvas } from '@/hooks/useCanvas';
@@ -925,7 +926,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
   const [showSamplePoints, setShowSamplePoints] = useState(true);
   const [showMaxima, setShowMaxima] = useState(true);
 
-  const { canvasRef, canvasState, setCanvasState, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
+  const { canvasRef, canvasState, setCanvasState, handleMouseDown, handleMouseMove, handleMouseUp, handleWheel, zoomEn, handleTouchStart, handleTouchMove, handleTouchEnd, deleteSelected, updateSelected, calibrateScale, resetView, zoomToFit, exportPNG, toggleSnap } = useCanvas(floorPlan, setFloorPlan, activeTool, heatmapEnabled ? heatmapData : undefined, sampleLines);
 
   useEffect(() => {
     const handleDxfImported = (event: Event) => {
@@ -934,6 +935,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
         summary?: { mappedBarriers?: number; warnings?: string[]; fileName?: string };
         importMode?: 'light' | 'full';
         preliminary?: boolean;
+        mapeoCapas?: MapeoCapas | null;
       }>;
       const nextPlan = customEvent.detail?.floorPlan;
       if (!nextPlan) return;
@@ -951,9 +953,13 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
           importedAt: new Date().toISOString(),
           calculationStatus: 'not-started',
           warnings,
+          ...(customEvent.detail?.mapeoCapas ? { mapeoCapas: customEvent.detail.mapeoCapas } : {}),
         },
       });
-      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select', offsetX: 40, offsetY: 40, scale: 1 }));
+      setCanvasState(prev => ({ ...prev, selectedId: null, selectedIds: [], mode: 'select' }));
+      // Fase 12, paso 4: zoom a extensión del plano importado (antes escala 1 y desplazamiento fijo: un DXF en mm
+      // con coordenadas lejos del origen quedaba fuera de la vista).
+      setAjustarVista(true);
       setShowWelcomeScreen(false);
       setShowDxfImportReview(true);
       toast.success(`${preliminary ? 'DXF preliminar' : 'DXF'} aplicado al canvas: ${mapped} barreras detectadas`);
@@ -1381,7 +1387,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     floorPlan,
     state: { offsetX: canvasState.offsetX, offsetY: canvasState.offsetY, scale: canvasState.scale, selectedId: canvasState.selectedId },
     onPan: (dx, dy) => setCanvasState(prev => ({ ...prev, offsetX: prev.offsetX + dx * prev.scale, offsetY: prev.offsetY + dy * prev.scale })),
-    onZoom: (factor) => setCanvasState(prev => ({ ...prev, scale: Math.max(0.1, Math.min(10, prev.scale * factor)) })),
+    onZoom: (factor) => zoomEn(factor),
     onSelect: (id) => setCanvasState(prev => ({ ...prev, selectedId: id })),
     onDelete: deleteSelected,
     onFocusElement: (x, y) => setCanvasState(prev => ({
@@ -2105,7 +2111,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   floorPlan={floorPlan}
                   onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
                   onWheel={handleWheel} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-                  onZoomToFit={zoomToFit} onExportPNG={exportPNG} onToggleSnap={toggleSnap}
+                  onZoomToFit={zoomToFit} onZoomBy={zoomEn} onExportPNG={exportPNG} onToggleSnap={toggleSnap}
                   onImportFloorPlan={() => document.getElementById('floorplan-upload')?.click()}
                   onOpenLayers={() => setShowLayersPanel(prev => !prev)}
                   onOpenRoomTemplates={() => setShowRoomTemplates(prev => !prev)}

@@ -90,7 +90,9 @@ function MenuEtapa({ numero, etiqueta, titulo, id, icon, tono, siempreVisible = 
           ) : (
             <MiniIcon icon={icon} color={tono.icono} />
           )}
-          <span className="hidden sm:inline">{etiqueta}</span>
+          {/* Fase 12, paso 4: por debajo de 1280 px sólo el número de etapa (la etiqueta sigue en aria-label/title);
+              a 1024 px los menús 4, 5 y Ayuda quedaban debajo de los controles de la derecha. */}
+          <span className={numero ? 'hidden xl:inline' : 'hidden sm:inline'}>{etiqueta}</span>
           <ChevronDown className={`w-3 h-3 ${tono.chevron}`} />
         </Button>
       </DropdownMenuTrigger>
@@ -407,11 +409,13 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
         <div className="h-11 bg-white border-b border-slate-200 flex items-center px-3 gap-2 shrink-0 shadow-sm">
 
           {/* Logo */}
-          <div className="toolbar-brand flex items-center gap-2 shrink-0">
+          <div className="toolbar-brand flex items-center gap-2 shrink-0" title="RadShield-MX v127">
             <div className="w-7 h-7 bg-[#f97316] rounded-lg flex items-center justify-center">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <div className="leading-none">
+            {/* El nombre también está en el panel lateral; por debajo de 1536 px sólo el logotipo, para que los cinco
+                menús quepan sin montarse en los controles de la derecha (desborde de 46 px a 1280 × 720). */}
+            <div className="leading-none hidden 2xl:block">
               <span className="text-[13px] font-bold text-slate-800 tracking-tight">RadShield-MX</span>
               <span className="text-[8px] text-slate-400 ml-1 font-mono">v127</span>
             </div>
@@ -565,7 +569,7 @@ export default function Toolbar(props: ToolbarRuntimeProps) {
           <div className="flex-1" />
 
           {/* Right side controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Dark Mode Toggle */}
             <Tooltip><TooltipTrigger asChild>
               <Button aria-label={isDark ? 'Light Mode' : 'Dark Mode'} variant="ghost" size="sm" className="h-8 text-[11px] text-slate-600 hover:text-[#f97316] hover:bg-[#fff7ed] gap-1 font-medium" onClick={toggleDark}>

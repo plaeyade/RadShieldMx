@@ -371,3 +371,22 @@ diálogo huérfano y el recorrido guiado en verde.
   antes y después salvo `origen.fecha` (y el `sha256`, que sella la fecha). Prueba E2E:
   `e2e/fase12-memoria-unificada.spec.ts` (valida el JSON descargado contra el esquema); unitarias en
   `src/__tests__/validacion/fase12Paso3.test.tsx`.
+- **Paso 4** (`fase12-asistente-capas`): **asistente de capas DWG/DXF** en el visor DXF
+  (`src/sections/dialogs/DXFViewerDialog.tsx`, lógica pura en `src/lib/asistenteCapas.ts`): al importar, una fila por
+  capa con conteo de entidades (por tipo), miniatura de la capa sobre la extensión del plano y resaltado en la vista
+  previa; propuesta de rol, material y espesor por las reglas de #61 (`inferDxfLayerRole`, `REGLAS_MATERIAL_CAPA`,
+  `espesorDeclaradoCapa`; una capa sin rol con material de blindaje declarado se propone como muro) y edición por capa
+  (rol, material, espesor instalado o vacío = por calcular, «Ignorar»). El mapeo se guarda en el almacén único
+  (`useProyectoStore().mapeosCapas`, sustituye al preset de roles en `localStorage`) y en
+  `floorPlan.importMetadata.mapeoCapas`, y se reutiliza por nombre de capa al importar otro plano. El importador recibe
+  `layerThicknessOverrides` además de los roles y materiales por capa.
+  **Zoom y desbordes**: `src/lib/vistaLienzo.ts` (encuadre, zoom en un punto, límites según px/m y el encuadre del
+  contenido). Zoom a extensión al aplicar un DXF (antes escala 1 y desplazamiento fijo: un DXF en mm lejos del origen
+  quedaba fuera de vista, y el mínimo 0.1 impedía encuadrarlo); rueda y Ctrl+rueda centradas en el cursor con oyente no
+  pasivo; botones, teclado y pellizco con los mismos límites; vista previa del visor con rueda, arrastre y «Extensión».
+  Desbordes medidos con Playwright (scrollWidth > clientWidth) a 1280×720, 1920×1080 y 1024×768: la barra de menús
+  (302 px a 1024, 46 px a 1280; los menús 4, 5 y Ayuda quedaban tapados), la cabecera del lienzo (413/270 px), el visor
+  DXF (los `DialogContent` con `max-w-*` propio quedaban en 512 px por `sm:max-w-lg`; ahora respetan su ancho con
+  tope en la ventana), el panel de revisión DXF (salía por arriba de la ventana), el aviso inferior y el minimapa.
+  Pruebas: `src/__tests__/validacion/fase12Paso4.test.ts` y `e2e/fase12-asistente-capas.spec.ts` (DXF sintético
+  generado en `src/test/dxfCapasSinteticas.ts`).

@@ -98,7 +98,7 @@ export default function DxfImportReviewPanel({
   return (
     <section
       data-testid="dxf-import-review-panel"
-      className="fixed bottom-9 right-4 z-[65] w-[340px] max-w-[calc(100vw-2rem)] rounded-md border border-slate-200 bg-white/98 shadow-xl"
+      className="fixed bottom-9 right-4 z-[65] w-[340px] max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-7.5rem)] overflow-y-auto rounded-md border border-slate-200 bg-white shadow-xl"
       aria-label="Revision de geometria DXF para memoria"
     >
       <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-3 py-2">

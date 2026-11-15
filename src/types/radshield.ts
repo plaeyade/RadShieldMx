@@ -1,4 +1,5 @@
 import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '../lib/limitesDosis';
+import type { MapeoCapas } from '../lib/asistenteCapasTipos';
 // RadShield-MX Unified Shielding Types
 // Supports: NCRP 147 (Diagnostic X-ray), NCRP 151 (Therapy LINAC), Nuclear (PET, HDR, GK, Cyclotron)
 
@@ -523,5 +524,7 @@ export interface FloorPlan {
     calculatedBarriers?: number;
     calculationMessage?: string;
     warnings?: string[];
+    /** Fase 12, paso 4: mapeo de capas confirmado en el asistente (rol, material, espesor, ignorar). */
+    mapeoCapas?: MapeoCapas;
   };
 }
