@@ -5,15 +5,14 @@ import { bootWorkspace } from './helpers';
 const DWG_FIXTURE = process.env.RADSHIELD_DWG_FIXTURE_PATH || 'C:/Users/carlo/Downloads/0760030003b.dwg';
 
 async function openFileMenu(page: Page) {
-  const fileButton = page.getByRole('button', { name: /Archivo/i }).first();
+  const fileButton = page.getByTestId('f12-menu-proyecto');
   await fileButton.click();
   const menu = page.locator('[role="menu"]').first();
   if (!(await menu.isVisible({ timeout: 2500 }).catch(() => false))) {
     await fileButton.click({ force: true });
   }
   await expect(menu).toBeVisible({ timeout: 5000 });
-  await expect(page.getByTestId('f295-primary-file-menu')).toBeVisible({ timeout: 5000 });
-  await expect(page.getByTestId('f114-deduped-legacy-menu-zone')).toBeHidden();
+  await expect(page.getByTestId('f12-menu-proyecto-contenido')).toBeVisible({ timeout: 5000 });
 }
 
 test.describe('DWG safe import boundary - dwg-safe-import', () => {

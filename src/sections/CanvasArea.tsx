@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   ZoomIn, ZoomOut, Maximize, Image as ImageIcon, Grid3X3,
-  Upload, Calculator, Eye, EyeOff, Ruler, Crosshair,
+  Upload, Eye, EyeOff, Ruler, Crosshair,
   Box, Cpu, FileSearch, LayoutTemplate, Layers, MapPin, Stethoscope,
   ChevronDown, ChevronUp, CheckCircle2, Circle, FileText, Database, Sparkles, Move, X,
   MousePointer, Shield, ScanLine, Atom
@@ -1280,7 +1280,8 @@ export default function CanvasArea({
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
     { id: 'zone', label: 'Zona/control', ready: regionCount > 0 || controlledZoneSummary.hasControlledZone, action: onOpenControlPoints, actionLabel: 'Puntos de control' },
-    { id: 'calc', label: 'Calculo', ready: hasResults, action: onRunCalculations, actionLabel: 'Calcular' },
+    // Fase 12, paso 2: indicador de estado; el cálculo se lanza con el único botón «Calcular» de la barra superior (F5).
+    { id: 'calc', label: 'Calculo', ready: hasResults, action: undefined, actionLabel: 'Calcular (barra superior, F5)' },
     { id: 'memory', label: 'Memoria', ready: hasResults && controlledZoneSummary.warnings.length === 0, action: onOpenEvidencePack, actionLabel: 'Evidence pack' },
   ];
   const offlineContinuitySteps = [
@@ -1314,7 +1315,6 @@ export default function CanvasArea({
     { id: 'barrier', label: 'Muro', detail: 'Dibujar barrera', icon: Box, action: () => activateCanvasTool('barrier') },
     { id: 'source', label: 'Fuente', detail: 'Colocar equipo/fuente', icon: Atom, action: () => activateCanvasTool('source') },
     { id: 'region', label: 'Zona', detail: 'Dibujar zona controlada/publica', icon: Shield, action: () => activateCanvasTool('region') },
-    { id: 'calc', label: 'Calc', detail: 'Ejecutar calculo', icon: Calculator, action: onRunCalculations },
     { id: 'medical3d', label: '3D', detail: 'Inspeccion medica 3D', icon: Stethoscope, action: onOpenMedical3D ?? onOpen3DViewer },
     { id: 'evidence', label: 'Evid', detail: 'Abrir evidencia', icon: FileSearch, action: onOpenEvidencePack },
   ];
@@ -1572,7 +1572,6 @@ export default function CanvasArea({
     { id: 'equipment', label: 'Equipos', detail: 'Colocar fuente o equipo con footprint', icon: Atom, action: () => activateCanvasTool('source') },
     { id: 'shielding', label: 'Blindaje', detail: 'Dibujar barrera y revisar espesor', icon: Shield, action: () => activateCanvasTool('barrier') },
     { id: 'annotate', label: 'Anotar', detail: 'Medir, acotar o preparar llamada visual', icon: Ruler, action: () => activateCanvasTool('measure') },
-    { id: 'verify', label: 'Verificar', detail: 'Ejecutar calculo de blindaje', icon: Calculator, action: onRunCalculations },
     { id: 'reports', label: 'Reportar', detail: 'Exportar captura PNG del canvas', icon: ImageIcon, action: onExportPNG },
     { id: 'evidence', label: 'Evidencia', detail: 'Abrir Evidence Pack del proyecto', icon: FileSearch, action: onOpenEvidencePack },
   ];
@@ -1899,11 +1898,6 @@ export default function CanvasArea({
               <Layers className="h-3 w-3" /> Material
             </button>
           )}
-          {onRunCalculations && (
-            <button type="button" className="h-6 rounded-md border border-orange-200 bg-orange-50 px-2 text-[10px] font-semibold text-orange-700 hover:bg-orange-100 flex items-center gap-1" onClick={onRunCalculations} title="Ejecutar calculo analitico de blindaje con geometria, fuente, material, P/T/U/W y escala actuales" aria-label="Calcular blindaje analitico del plano actual">
-              <Calculator className="h-3 w-3" /> Calcular
-            </button>
-          )}
           <button type="button" className="h-6 rounded-md border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:bg-white hover:text-orange-700 flex items-center gap-1" onClick={onExportPNG} title="Exportar captura visual del canvas para Memoria IA, PDF o Evidence Pack" aria-label="Exportar snapshot visual del canvas para reportes">
             <ImageIcon className="h-3 w-3" /> Snapshot
           </button>
@@ -2004,18 +1998,6 @@ export default function CanvasArea({
                 aria-label="Abrir materiales para seleccion"
               >
                 Mat
-              </button>
-            )}
-            {onRunCalculations && (
-              <button
-                type="button"
-                data-testid="f191d-action-calculate"
-                className="h-5 rounded border border-orange-200 bg-white px-1.5 text-[9px] font-semibold text-orange-700 hover:bg-orange-50"
-                onClick={onRunCalculations}
-                title="Recalcular blindaje con el contexto actual"
-                aria-label="Recalcular blindaje"
-              >
-                Calc
               </button>
             )}
             {onOpenEvidencePack && (
@@ -6244,11 +6226,6 @@ export default function CanvasArea({
         )}
         {hasResults && <span className="text-emerald-600 font-medium">Resultados calculados</span>}
         <div className="flex-1" />
-        {onRunCalculations && (
-          <Button size="sm" className="h-4 text-[9px] px-2 bg-[#f97316] hover:bg-[#ea580c] text-white gap-0.5" onClick={onRunCalculations}>
-            <Calculator className="w-2.5 h-2.5" /> Calcular
-          </Button>
-        )}
       </div>
     </div>
   );

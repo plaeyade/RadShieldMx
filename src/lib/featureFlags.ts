@@ -90,6 +90,13 @@ export const DEPURACION_RENDER: boolean = import.meta.env.VITE_DEPURACION_RENDER
 /** `false`: la vista previa Babylon (F455–F474) de Inspección 3D no se monta ni descarga @babylonjs/*. */
 export const VISOR_3D_BABYLON: boolean = import.meta.env.VITE_VISOR_3D_BABYLON === 'true';
 
+/**
+ * Fase 12, paso 2: `false` (por omisión): la barra superior muestra sólo los 5 menús por etapa del flujo de diseño
+ * (Proyecto y plano, Fuentes y cargas, Barreras y materiales, Verificación, Memoria y CNSNS) más Ayuda. Con `true`
+ * aparece además el menú «Avanzado» (integraciones, rendimiento, CAD→Monte Carlo, agente de diseño, 3D en tiempo real).
+ */
+export const MENU_AVANZADO: boolean = import.meta.env.VITE_MENU_AVANZADO === 'true';
+
 export const NOTA_VISOR_EN_REVISION = 'En revisión: se reactivará con el motor de dosis unificado';
 
 /**

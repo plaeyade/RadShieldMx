@@ -1,69 +1,75 @@
 /**
- * E.14: E2E Tests - Menu Archivo
- * Validates all 15 items in the Archivo menu open correct dialogs
+ * E.14 → Fase 12, paso 2: menús por etapa del flujo de diseño.
+ * Lo que era el menú «Archivo» se repartió en «1. Proyecto y plano», «5. Memoria analítica y CNSNS» y «Ayuda».
  */
-import { test, expect } from '@playwright/test';
-import { bootWorkspace } from './helpers';
+import { test, expect, type Page } from '@playwright/test';
+import { abrirMenu, bootWorkspace } from './helpers';
 
-test.describe('Menu Archivo - All 15 items', () => {
+const contenido = (page: Page, id: string) => page.getByTestId(`f12-menu-${id}-contenido`);
+
+test.describe('Menús por etapa (antes Menu Archivo)', () => {
   test.beforeEach(async ({ page }) => {
     await bootWorkspace(page);
   });
 
-  test('Archivo menu opens and shows all items', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    // Fase 10: el estado vacío del lienzo también ofrece «Abrir proyecto»; se busca sólo dentro del menú.
-    const menu = page.getByRole('menu');
-    await expect(menu.locator('text=Nuevo Proyecto')).toBeVisible();
-    await expect(menu.locator('text=Abrir Proyecto')).toBeVisible();
-    await expect(menu.locator('text=Guardar')).toBeVisible();
-    await expect(menu.locator('text=Importar CSV')).toBeVisible();
-    await expect(menu.locator('text=Importar DXF')).toBeVisible();
-    await expect(menu.locator('text=Importar STEP')).toBeVisible();
-    await expect(menu.locator('text=Exportar CSV')).toBeVisible();
-    await expect(menu.locator('text=Exportar PDF')).toBeVisible();
-    await expect(menu.locator('text=Compartir')).toBeVisible();
-    await expect(menu.locator('text=Reporte CNSNS')).toBeVisible();
-    await expect(menu.getByText('Especificaciones Tecnicas', { exact: true })).toBeVisible();
-    await expect(menu.locator('text=Audit Trail')).toBeVisible();
-    await expect(menu.locator('text=Analisis de Logs')).toBeVisible();
-    await expect(menu.locator('text=Glosario')).toBeVisible();
-    await expect(menu.locator('text=Acerca de')).toBeVisible();
+  test('la barra superior muestra las 5 etapas, «Calcular» y Ayuda', async ({ page }) => {
+    for (const nombre of ['1. Proyecto y plano', '2. Fuentes y cargas de trabajo', '3. Barreras y materiales', '4. Verificación y cumplimiento', '5. Memoria analítica y CNSNS', 'Ayuda']) {
+      await expect(page.getByRole('button', { name: nombre, exact: true })).toBeVisible();
+    }
+    await expect(page.getByTestId('f12-calcular')).toBeVisible();
+    await expect(page.getByTestId('f12-menu-avanzado')).toHaveCount(0);
   });
 
-  test('Exportar CSV opens Export dialog', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText('Exportar CSV').click();
+  test('1. Proyecto y plano: proyecto, importación y plano', async ({ page }) => {
+    await abrirMenu(page, 'proyecto');
+    const menu = contenido(page, 'proyecto');
+    for (const texto of ['Nuevo Proyecto', 'Abrir Proyecto', 'Guardar', 'Importar CSV', 'Importar DXF', 'Importar STEP', 'Herramientas del plano']) {
+      await expect(menu.getByText(texto, { exact: false }).first()).toBeVisible();
+    }
+  });
+
+  test('5. Memoria y CNSNS: exportación, CNSNS y trazabilidad', async ({ page }) => {
+    await abrirMenu(page, 'reportes');
+    const menu = contenido(page, 'reportes');
+    for (const texto of ['Exportar CSV', 'Exportar PDF', 'Compartir', 'Reporte CNSNS', 'Audit Trail', 'Analisis de Logs', 'Paquete de evidencia']) {
+      await expect(menu.getByText(texto, { exact: false }).first()).toBeVisible();
+    }
+    await expect(menu.getByText('Especificaciones Tecnicas', { exact: true })).toBeVisible();
+  });
+
+  test('Exportar CSV abre el diálogo de exportación', async ({ page }) => {
+    await abrirMenu(page, 'reportes');
+    await contenido(page, 'reportes').getByText('Exportar CSV').click();
     await expect(page.locator('text=Exportar Resultados')).toBeVisible({ timeout: 5000 });
   });
 
-  test('Reporte CNSNS opens CNSNS dialog', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText(/Reporte CNSNS/).click();
+  test('Reporte CNSNS abre el diálogo CNSNS', async ({ page }) => {
+    await abrirMenu(page, 'reportes');
+    await contenido(page, 'reportes').getByText('Reporte CNSNS', { exact: true }).click();
     await expect(page.getByRole('dialog', { name: /Generar Memoria Analitica CNSNS/i })).toBeVisible({ timeout: 5000 });
   });
 
-  test('Glosario opens glossary panel', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText('Glosario').click();
+  test('Glosario abre el panel del glosario', async ({ page }) => {
+    await abrirMenu(page, 'ayuda');
+    await contenido(page, 'ayuda').getByText('Glosario').click();
     await expect(page.locator('text=Glosario de Terminologia')).toBeVisible({ timeout: 5000 });
   });
 
-  test('Acerca de opens about dialog', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText('Acerca de').click();
+  test('Acerca de abre el diálogo', async ({ page }) => {
+    await abrirMenu(page, 'ayuda');
+    await contenido(page, 'ayuda').getByText('Acerca de').click();
     await expect(page.getByRole('dialog')).toContainText(/RadShield-MX/i, { timeout: 5000 });
   });
 
-  test('Especificaciones Tecnicas opens dialog', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByRole('menu').getByText('Especificaciones Tecnicas', { exact: true }).click();
+  test('Especificaciones Tecnicas abre el diálogo', async ({ page }) => {
+    await abrirMenu(page, 'reportes');
+    await contenido(page, 'reportes').getByText('Especificaciones Tecnicas', { exact: true }).click();
     await expect(page.getByRole('dialog')).toContainText(/Especificaciones T[eé]cnicas/i, { timeout: 5000 });
   });
 
-  test('Audit Trail opens dialog', async ({ page }) => {
-    await page.getByRole('button', { name: /Archivo/i }).click();
-    await page.getByText('Audit Trail').click();
+  test('Audit Trail abre el diálogo', async ({ page }) => {
+    await abrirMenu(page, 'reportes');
+    await contenido(page, 'reportes').getByText('Audit Trail').click();
     await expect(page.locator('text=Trazabilidad CNSNS')).toBeVisible({ timeout: 5000 });
   });
 });

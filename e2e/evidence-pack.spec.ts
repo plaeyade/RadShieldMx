@@ -38,8 +38,8 @@ test.describe('Evidence Pack', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await bootWorkspace(page);
 
-    await page.getByTestId('f109-migrated-reports-dropdown').click();
-    await page.getByRole('menuitem', { name: /Evidence Pack bridge/ }).click();
+    await page.getByTestId('f12-menu-reportes').click();
+    await page.getByTestId('f12-reportes-evidencia').click();
 
     await expect(page.getByRole('heading', { name: 'Evidence Pack' }).first()).toBeVisible();
     await expect(page.getByText('FSB queda como navegador supervisado externo')).toBeVisible();

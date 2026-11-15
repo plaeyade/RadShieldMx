@@ -18,7 +18,7 @@ test.describe('F341 Centro Neuro browser smoke', () => {
     const checks: Array<{ name: string; ok: boolean; detail?: Record<string, unknown> }> = [];
     const addCheck = (name: string, ok: boolean, detail?: Record<string, unknown>) => checks.push({ name, ok, detail });
 
-    for (const menu of ['Archivo', 'Diseno', 'Equipos', 'Blindaje', 'Verificacion', 'Reportes', 'Evidencia', 'Integraciones']) {
+    for (const menu of ['Proyecto y plano', 'Fuentes y cargas', 'Barreras y materiales', 'Verificación', 'Memoria analítica', 'Ayuda']) {
       await expect(page.getByRole('button', { name: new RegExp(menu, 'i') }).first()).toBeVisible({ timeout: 15_000 });
       addCheck(`topbar:${menu}`, true);
     }

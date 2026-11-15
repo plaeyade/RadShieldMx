@@ -1,8 +1,9 @@
 /**
  * Fase 11 — las rutas de cálculo del diseñador dan el mismo resultado sobre el mismo proyecto.
  *
- * Proyecto: el ejemplo PET/CT de «Guíame» (TG-108, F-18). Rutas: barra superior (Blindaje → Calcular Blindaje),
- * barra lateral «Calc», tecla F5 y botón «Calcular» del lienzo. Antes de cada ruta se borra el cálculo del plano y se
+ * Proyecto: el ejemplo PET/CT de «Guíame» (TG-108, F-18). Rutas (Fase 12, paso 2: un solo botón «Calcular»): el
+ * botón «Calcular» de la barra superior, la tecla F5, la paleta de comandos (Ctrl+K) y el menú contextual del lienzo.
+ * La barra lateral, la barra del lienzo, la barra «CAD» y la línea de estado ya no tienen «Calcular». Antes de cada ruta se borra el cálculo del plano y se
  * fija el espesor instalado (una barrera corta y el resto sobradas) para comparar también el estado de cumplimiento.
  * Contra el build de Pages: PLAYWRIGHT_NO_WEBSERVER=1 PLAYWRIGHT_TEST_BASE_URL=http://host/RadShieldMx/
  */
@@ -34,7 +35,7 @@ async function entrar(page: Page) {
 }
 
 async function cargarEjemplo(page: Page) {
-  await page.getByTestId('f295-primary-file-dropdown').click();
+  await page.getByTestId('f12-menu-ayuda').click();
   await page.getByTestId('f10-help-guiame').click();
   await page.getByTestId('guia-crear-proyecto').click();
   await page.getByTestId('guia-siguiente').click();
@@ -66,7 +67,7 @@ async function esperarCalculo(page: Page) {
 }
 
 test.describe('Fase 11 motor único', () => {
-  test('barra superior, barra lateral, F5 y lienzo dan los mismos espesores y estados', async ({ page }) => {
+  test('botón «Calcular», F5, paleta de comandos y menú contextual dan los mismos espesores y estados', async ({ page }) => {
     test.setTimeout(3 * 60_000);
     const errores: string[] = [];
     page.on('pageerror', (e) => errores.push(e.message));
@@ -74,8 +75,7 @@ test.describe('Fase 11 motor único', () => {
     await cargarEjemplo(page);
 
     // Referencia: primer cálculo para conocer los requeridos y fijar el espesor instalado.
-    await page.getByTestId('f107-migrated-shielding-dropdown').click();
-    await page.getByTestId('f107-migrated-shielding-menu').getByText('Calcular Blindaje', { exact: true }).click();
+    await page.getByTestId('f12-calcular').click();
     await esperarCalculo(page);
     const instalado = await gancho(page, (g) => {
       const out: Record<string, number> = {};
@@ -90,20 +90,26 @@ test.describe('Fase 11 motor único', () => {
     });
 
     const rutas: Record<string, () => Promise<void>> = {
-      'barra superior': async () => {
-        await page.getByTestId('f107-migrated-shielding-dropdown').click();
-        await page.getByTestId('f107-migrated-shielding-menu').getByText('Calcular Blindaje', { exact: true }).click();
-      },
-      'barra lateral «Calc»': async () => { await page.getByTestId('sidebar-action-calcular-blindaje-f5').click(); },
+      'botón «Calcular»': async () => { await page.getByTestId('f12-calcular').click(); },
       'tecla F5': async () => {
-        await page.locator('body').click({ position: { x: 5, y: 5 }, force: true }).catch(() => undefined);
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
         await page.keyboard.press('F5');
       },
+      'paleta de comandos': async () => {
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.keyboard.press('Control+k');
+        await page.getByPlaceholder('Escribe para buscar comandos...').fill('Calcular Blindaje');
+        await page.getByRole('option', { name: /Calcular Blindaje/ }).first().click();
+      },
+      'menú contextual del lienzo': async () => {
+        await page.getByTestId('f100-main-floorplan-canvas').click({ button: 'right' });
+        await page.getByTestId('canvas-context-action-calc').click();
+      },
     };
-    // Botón «Calcular» de la barra de herramientas del lienzo (Sel, Muro, Fuente… Calcular).
-    const lienzo = page.locator('button[title^="Ejecutar calculo analitico de blindaje"]');
-    await expect(lienzo.first()).toBeVisible();
-    rutas['lienzo «Calcular»'] = async () => { await lienzo.first().click(); };
+    // Un solo botón «Calcular» visible: los demás se retiraron.
+    await expect(page.locator('button[title^="Ejecutar calculo analitico de blindaje"]')).toHaveCount(0);
+    await expect(page.getByTestId('sidebar-action-calcular-blindaje-f5')).toHaveCount(0);
+    await expect(page.getByTestId('f191d-action-calculate')).toHaveCount(0);
 
     const fotos: Record<string, Awaited<ReturnType<typeof instantanea>>> = {};
     for (const [nombre, pulsar] of Object.entries(rutas)) {

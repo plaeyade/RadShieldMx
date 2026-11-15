@@ -174,8 +174,8 @@ const IO_TOOLS = [
 /* ═══════════════════════════════════════════
    QUICK ACTIONS — Integrated from QAB
    ═══════════════════════════════════════════ */
+// Fase 12, paso 2: sin «Calc»; el único botón «Calcular» está en la barra superior (F5).
 const QUICK_ACTIONS = [
-  { icon: Play,        label: 'Calc', action: 'calculate',  title: 'Calcular blindaje (F5)',            color: '#f97316', bg: '#fff7ed' },
   { icon: Calculator,  label: 'UAQ',  action: 'uaq',        title: 'Unidad de Atenuacion Cualitativa',   color: '#10b981', bg: '#ecfdf5' },
   { icon: FileSpreadsheet, label: 'Mem', action: 'memoria', title: 'Memoria Analitica AI',              color: '#8b5cf6', bg: '#f5f3ff' },
   { icon: GitCompareArrows, label: 'Mat', action: 'material', title: 'Toolbox materiales: TVL, densidad, peso, costo, tiempo y carga estructural', color: '#ea580c', bg: '#fff7ed' },
@@ -213,7 +213,6 @@ interface SidebarProps {
   deleteSelected: () => void;
   resetView: () => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRunCalculations?: () => void;
   onUAQ?: () => void;
   onMemoriaAI?: () => void;
   onMazeCalculator?: () => void;
@@ -223,7 +222,7 @@ interface SidebarProps {
 export default function Sidebar({
   floorPlan, setFloorPlan, activeTool, setActiveTool,
   selectedSource, selectedBarrier, selectedCriticalPoint, updateSelected, deleteSelected, resetView, onImageUpload,
-  onRunCalculations, onUAQ, onMemoriaAI, onMazeCalculator: _onMazeCalculator, onDXFViewer,
+  onUAQ, onMemoriaAI, onMazeCalculator: _onMazeCalculator, onDXFViewer,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth);
@@ -259,7 +258,6 @@ export default function Sidebar({
 
   const dispatchQuickAction = (action: string) => {
     switch (action) {
-      case 'calculate': runQuickAction('Calcular blindaje', onRunCalculations, 'dashboardCalc'); break;
       case 'uaq': runQuickAction('UAQ / Atenuacion', onUAQ, 'shieldingCalculator'); break;
       case 'memoria': runQuickAction('Memoria IA', onMemoriaAI, 'memoriaAI'); break;
       case 'material': runQuickAction('Toolbox materiales', () => open('materialComparison')); break;
@@ -364,7 +362,7 @@ export default function Sidebar({
             className="mt-1 rounded-md border border-orange-100 bg-white/80 px-2 py-1 text-[9px] font-medium text-slate-500"
             title="Confirmacion de que el acceso rapido envio una accion real o abrio su fallback"
           >
-            {lastQuickAction ? `Ultima accion: ${lastQuickAction}` : 'Accesos conectados: calculo, UAQ, Memoria IA, materiales y DXF.'}
+            {lastQuickAction ? `Ultima accion: ${lastQuickAction}` : 'Accesos conectados: UAQ, Memoria IA, materiales y DXF («Calcular» está en la barra superior, F5).'}
           </div>
         </div>
 

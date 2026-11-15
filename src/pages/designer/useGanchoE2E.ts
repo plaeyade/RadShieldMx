@@ -30,6 +30,9 @@ export function useGanchoE2E() {
             calculationStatus: p.calculationStatus,
             activeTool: p.activeTool,
             canUndo: p.canUndo,
+            // Fase 12, paso 2: tamaño del historial, para comprobar que Ctrl+Z/Ctrl+Y mueven UN paso.
+            pasado: p.pasado.length,
+            futuro: p.futuro.length,
           };
         },
         limpiarCalculo: (instalado: Record<string, number> = {}) => useProyectoStore.getState().setFloorPlan(p => ({

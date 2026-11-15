@@ -4,14 +4,14 @@ import fs from 'node:fs';
 const realDxfPath = process.env.RADSHIELD_REAL_DXF_PATH || 'C:/Users/carlo/Desktop/ZUMAYA/plano.dxf';
 
 async function openFileMenu(page: Page) {
-  const fileButton = page.getByRole('button', { name: /Archivo/i }).first();
+  const fileButton = page.getByTestId('f12-menu-proyecto');
   await fileButton.click();
   const menu = page.locator('[role="menu"]').first();
   if (!(await menu.isVisible({ timeout: 2500 }).catch(() => false))) {
     await fileButton.click({ force: true });
   }
   await expect(menu).toBeVisible({ timeout: 5000 });
-  await expect(page.getByTestId('f295-primary-file-menu')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId('f12-menu-proyecto-contenido')).toBeVisible({ timeout: 5000 });
 }
 
 test.describe('Real DXF heavy import QA - real-dxf-heavy-import', () => {

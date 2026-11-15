@@ -44,6 +44,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useProyectoStore, PLANO_PREDETERMINADO, type HerramientaLienzo } from '@/stores/proyecto';
 import { useGanchoE2E } from '@/pages/designer/useGanchoE2E';
 import { useCalculoProyecto } from '@/pages/designer/useCalculoProyecto';
+import { useAtajosTeclado } from '@/pages/designer/atajosTeclado';
 import { useAuth } from '@/hooks/useAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -724,44 +725,36 @@ export default function ShieldingDesigner() {
   const profilerRef = useRef(createProfiler());
   const [controlPoints, setControlPoints] = useState<Array<{id: string; name: string; x: number; y: number; designGoal_mSv_per_wk: number; occupancyFactor: number; notes: string}>>([]);
 
-  // ═══ Keyboard Shortcuts (Recomendacion #8) ═══
-  // Fase 11: el oyente se registra una vez y llama al manejador del último render (antes, con `[]`, F5 ejecutaba el
-  // cálculo del primer render —plano vacío— y Ctrl+Z/Ctrl+S usaban también funciones obsoletas).
-  const atajosRef = useRef<(e: KeyboardEvent) => void>(() => {});
-  useEffect(() => {
-    atajosRef.current = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const key = e.key.toLowerCase();
-      const ctrl = e.ctrlKey || e.metaKey;
-      if (!ctrl) {
-        switch (key) {
-          case 'b': e.preventDefault(); setActiveTool('barrier'); toast.info('Tool: Barrier'); break;
-          case 'f': e.preventDefault(); setActiveTool('source'); toast.info('Tool: Source'); break;
-          case 's': e.preventDefault(); setActiveTool('select'); toast.info('Tool: Select'); break;
-          case 'm': e.preventDefault(); setActiveTool('measure'); toast.info('Tool: Measure'); break;
-          case 'h': e.preventDefault(); setActiveTool('pan'); toast.info('Tool: Pan'); break;
-          case 'escape': setActiveTool('select'); break;
-          case 'f5': e.preventDefault(); runRadShieldCalculations(); break;
-        }
-      } else {
-        switch (key) {
-          case 's': e.preventDefault(); handleNativeSave(); break;
-          case 'o': e.preventDefault(); handleNativeOpen(); break;
-          case 'b': e.preventDefault(); useAppStore.getState().open('quickBarrier'); break;
-          case 'l': e.preventDefault(); useAppStore.getState().open('maze'); break;
-          case 'z': e.preventDefault(); undo(); toast.info('Undo'); break;
-          case 'y': e.preventDefault(); redo(); toast.info('Redo'); break;
-          case 'k': e.preventDefault(); setShowCommandPalette(true); break;
-          case 'g': e.preventDefault(); setActiveTool('region'); toast.info('Tool: Region'); break;
-        }
-      }
-    };
+  // ═══ Atajos de teclado ═══
+  // Fase 12, paso 2: UN solo oyente (`useAtajosTeclado`). Había dos y los dos llamaban a undo()/redo(), así que cada
+  // Ctrl+Z deshacía dos pasos y cada Ctrl+Y rehacía dos. El oyente lee los manejadores del último render (Fase 11).
+  const togglePanelAyuda = () => {
+    const s = useAppStore.getState();
+    if ((s.dialogs as Record<string, boolean>)['helpPanel']) s.close('helpPanel' as any); else s.open('helpPanel' as any);
+  };
+  useAtajosTeclado({
+    herramientaBarrera: () => { setActiveTool('barrier'); toast.info('Tool: Barrier'); },
+    herramientaFuente: () => { setActiveTool('source'); toast.info('Tool: Source'); },
+    herramientaSeleccion: () => { setActiveTool('select'); toast.info('Tool: Select'); },
+    herramientaMedir: () => { setActiveTool('measure'); toast.info('Tool: Measure'); },
+    herramientaPan: () => { setActiveTool('pan'); toast.info('Tool: Pan'); },
+    herramientaRegion: () => { setActiveTool('region'); toast.info('Tool: Region'); },
+    cancelar: () => setActiveTool('select'),
+    calcular: () => { void runCalculations(); },
+    guardar: () => { void handleNativeSave(); },
+    abrir: () => { void handleNativeOpen(); },
+    barreraRapida: () => useAppStore.getState().open('quickBarrier'),
+    laberinto: () => useAppStore.getState().open('maze'),
+    deshacer: () => { undo(); toast.info('Undo'); },
+    rehacer: () => { redo(); toast.info('Redo'); },
+    paletaComandos: () => setShowCommandPalette(v => !v),
+    panelHistorial: () => setShowHistoryPanel(v => !v),
+    panelAyuda: togglePanelAyuda,
+    atajos: () => {
+      const store = useAppStore.getState();
+      if (store.dialogs.keyboardShortcuts) store.close('keyboardShortcuts'); else store.open('keyboardShortcuts');
+    },
   });
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => atajosRef.current(e);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // Fase 10: ya no se carga un plano de ejemplo al arrancar. La app abre con el proyecto vacío y el
   // asistente «Guíame» ofrece el ejemplo PET/CT sólo si el usuario lo pide.
@@ -979,6 +972,21 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     return () => window.removeEventListener('radshield:dxf-imported-floorplan', handleDxfImported);
   }, [resetFloorPlan, setCanvasState]);
 
+  // Fase 12, paso 2: el ÚNICO cuerpo del cálculo. «Calcular» (botón de la barra superior, F5, paleta de comandos,
+  // menú contextual del lienzo, «Guíame») y el cálculo preliminar del DXF confirmado pasan por aquí: mismo motor
+  // (`calcularProyectoAsync` → NCRP 147/151, TG-108), mismo perfil de isodosis y mismo guardado en el almacén.
+  const calcularPlano = useCallback(async (plan: FloorPlan, onProgress?: (pct: number) => void) => {
+    const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
+    const r = await profilerRef.current.run('motorProyecto', () => calcularProyectoAsync(plan, {
+      ctIsodosisProfile: ctProfile,
+      onProgress,
+    }));
+    setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
+    setBarrierResults(r.barrierResults);
+    setSampleLines(r.sampleLines);
+    return r;
+  }, [isodosisProfiles, selectedIsodosisId, setFloorPlan, setBarrierResults, setSampleLines]);
+
   const runConfirmedDxfPreliminaryCalculation = useCallback(async (plan: FloorPlan) => {
     if (plan.barriers.length === 0) {
       setFloorPlan(prev => ({
@@ -1020,15 +1028,8 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }));
 
     try {
-      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
-      const r = await calcularProyectoAsync(plan, {
-        ctIsodosisProfile: ctProfile,
-        onProgress: (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }),
-      });
+      const r = await calcularPlano(plan, (pct) => toast.loading(`DXF confirmado: ${pct}%`, { id: toastId }));
       const results = r.barrierResults;
-      setBarrierResults(results);
-      setSampleLines(r.sampleLines);
-      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
       setCalculationStatus('success');
       setFloorPlan(prev => ({
         ...prev,
@@ -1062,7 +1063,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
         sources: plan.sources.length,
       });
     }
-  }, [setFloorPlan, isodosisProfiles, selectedIsodosisId]);
+  }, [setFloorPlan, calcularPlano]);
 
   const handlePlaceDxfClinicalSources = useCallback(() => {
     if (!floorPlan.importMetadata || floorPlan.barriers.length === 0) {
@@ -1530,53 +1531,6 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     return sourceId;
   }, [setCanvasState, setFloorPlan]);
 
-  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z / ? / Ctrl+K
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const isCtrl = e.ctrlKey || e.metaKey;
-      // "?" key (Shift + /) — Keyboard shortcuts
-      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
-        e.preventDefault();
-        const store = useAppStore.getState();
-        const isOpen = !!store.dialogs.keyboardShortcuts;
-        if (isOpen) store.close('keyboardShortcuts'); else store.open('keyboardShortcuts');
-        return;
-      }
-      // Ctrl+K — Command Palette
-      if (isCtrl && e.key === 'k') {
-        e.preventDefault();
-        setShowCommandPalette(v => !v);
-        return;
-      }
-      // Ctrl+H — History Panel
-      if (isCtrl && e.key === 'h') {
-        e.preventDefault();
-        setShowHistoryPanel(v => !v);
-        return;
-      }
-      // Ctrl+Shift+H — Help Panel
-      if (isCtrl && e.shiftKey && e.key === 'H') {
-        e.preventDefault();
-        const s = useAppStore.getState();
-        const isOpen = !!(s.dialogs as Record<string, boolean>)['helpPanel'];
-        if (isOpen) s.close('helpPanel' as any); else s.open('helpPanel' as any);
-        return;
-      }
-      if (!isCtrl) return;
-      if (e.key === 'z' && e.shiftKey) {
-        e.preventDefault();
-        redo();
-      } else if (e.key === 'z') {
-        e.preventDefault();
-        undo();
-      } else if (e.key === 'y') {
-        e.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
 
   const handleSaveProject = useCallback((name: string) => {
     saveProjectToStorage(floorPlan, name);
@@ -1635,8 +1589,9 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     }
   }, [deleteProject, user, cloudProjectsQuery.data, deleteProjectMutation, utils]);
 
-  // Fase 11: UN solo cálculo para todas las rutas (barra superior, «Guíame», «Calc» de la barra lateral, F5, botones
-  // del lienzo, paleta de comandos). Antes la barra lateral, F5 y el lienzo usaban AsyncShieldingEngine (TVL fijo de
+  // Fase 11: UN solo cálculo para todas las rutas. Fase 12, paso 2: además, UN solo botón «Calcular» (barra
+  // superior); se retiraron los de la barra lateral, la barra del lienzo, la barra «CAD», la cinta BIM, el flujo del
+  // lienzo, el inspector y la línea de estado. Antes la barra lateral, F5 y el lienzo usaban AsyncShieldingEngine (TVL fijo de
   // plomo, sin modalidad, energía ni TG-108). Ahora todas llaman a `calcularProyectoAsync` (motorProyecto → NCRP 147,
   // NCRP 151, TG-108), guardan los espesores en el plano y el estado de cumplimiento es el de `verificarBarrera`.
   const runCalculations = useCallback(async () => {
@@ -1648,14 +1603,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     });
     await wakeLock.request();
     try {
-      const ctProfile = isodosisProfiles.find(p => p.id === selectedIsodosisId);
-      const r = await profilerRef.current.run('motorProyecto', () => calcularProyectoAsync(floorPlan, {
-        ctIsodosisProfile: ctProfile,
-        onProgress: (pct) => toast.loading(`Calculando blindajes: ${pct}%`, { id: toastId }),
-      }));
-      setFloorPlan(prev => ({ ...prev, barriers: r.barriers }));
-      setBarrierResults(r.barrierResults);
-      setSampleLines(r.sampleLines);
+      const r = await calcularPlano(floorPlan, (pct) => toast.loading(`Calculando blindajes: ${pct}%`, { id: toastId }));
       if (heatmapEnabled) {
         await computeCurrentHeatmap();
       }
@@ -1688,10 +1636,7 @@ Factores NCRP aplicados: T promedio = ${(newBarriers.reduce((s, b) => s + b.occu
     } finally {
       await wakeLock.release();
     }
-  }, [floorPlan, setFloorPlan, heatmapEnabled, isodosisProfiles, selectedIsodosisId, computeCurrentHeatmap, wakeLock, broadcastChannel, persistCalculationResults]);
-
-  // Barra lateral «Calc», F5 y botones del lienzo: el mismo cálculo que la barra superior.
-  const runRadShieldCalculations = runCalculations;
+  }, [floorPlan, calcularPlano, heatmapEnabled, computeCurrentHeatmap, wakeLock, broadcastChannel, persistCalculationResults]);
 
   const selectedSource = floorPlan.sources.find(s => s.id === canvasState.selectedId) || null;
   const selectedBarrier = floorPlan.barriers.find(b => b.id === canvasState.selectedId) || null;
@@ -2137,7 +2082,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
           <div className="flex flex-1 overflow-hidden" style={{ display: 'flex' }}>
             {/* Sidebar Panel */}
             <div className="w-80 min-w-[200px] max-w-[450px] bg-white border-r border-gray-200 flex flex-col shrink-0">
-              <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} selectedCriticalPoint={selectedCriticalPoint} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} onRunCalculations={runRadShieldCalculations} onUAQ={() => useAppStore.getState().open('shieldingCalculator')} onMemoriaAI={() => useAppStore.getState().open('memoriaAI')} onMazeCalculator={() => useAppStore.getState().open('maze')} onDXFViewer={() => useAppStore.getState().open('dxfViewer')} />
+              <Sidebar floorPlan={floorPlan} setFloorPlan={setFloorPlan} activeTool={activeTool} setActiveTool={setActiveTool} selectedSource={selectedSource} selectedBarrier={selectedBarrier} selectedCriticalPoint={selectedCriticalPoint} updateSelected={handleUpdateSelected} deleteSelected={deleteSelected} resetView={resetView} onImageUpload={handleImageUpload} onUAQ={() => useAppStore.getState().open('shieldingCalculator')} onMemoriaAI={() => useAppStore.getState().open('memoriaAI')} onMazeCalculator={() => useAppStore.getState().open('maze')} onDXFViewer={() => useAppStore.getState().open('dxfViewer')} />
             </div>
             {/* Resize Handle */}
             <div className="w-1.5 bg-slate-200 hover:bg-[#f97316] active:bg-[#ea580c] transition-colors relative cursor-col-resize shrink-0">
@@ -2206,7 +2151,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
                   heatmapEnabled={heatmapEnabled}
                   onToggleHeatmap={handleToggleHeatmap}
                   heatmapPointCount={heatmapData.length}
-                  onRunCalculations={runRadShieldCalculations}
+                  onRunCalculations={runCalculations}
                   activeTool={activeTool}
                   setActiveTool={(tool) => setActiveTool(tool as Tool)}
                   // v65: Canvas enhancements connected
@@ -2567,7 +2512,7 @@ Factores de ocupacion NCRP 147 se aplicaran a las barreras detectadas.`,
         <LazyDialog name="emergencyProcedures" component={EmergencyProceduresDialog} />
         {/* v38: Mosaic Atomics — Barrier Editor, Air Kerma Overlay, Project Manager, Control Points */}
         {showBarrierEditor && (
-          <BarrierEditorDialog barriers={floorPlan.barriers} onUpdateBarrier={(id, updates) => setFloorPlan(p => ({ ...p, barriers: p.barriers.map(b => b.id === id ? { ...b, ...updates } : b) }))} onClose={() => setShowBarrierEditor(false)} onGenerateRecommendations={runRadShieldCalculations} />
+          <BarrierEditorDialog barriers={floorPlan.barriers} onUpdateBarrier={(id, updates) => setFloorPlan(p => ({ ...p, barriers: p.barriers.map(b => b.id === id ? { ...b, ...updates } : b) }))} onClose={() => setShowBarrierEditor(false)} onGenerateRecommendations={runCalculations} />
         )}
         {showAirKermaOverlay && (
           <AirKermaOverlayDialog distributions={barrierResults.map(r => ({

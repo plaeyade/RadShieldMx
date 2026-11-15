@@ -2,11 +2,12 @@
  * Fase 12, paso 1 — prueba E2E de «Guíame» sobre el almacén único del proyecto.
  *
  * Recorre «Guíame» por la interfaz (Ayuda → Guíame → crear proyecto → plano → fuentes → ocupación), calcula con
- * «Blindaje → Calcular Blindaje» y comprueba el control obligatorio del muro norte de captación:
+ * el único botón «Calcular» de la barra superior (Fase 12, paso 2) y comprueba el control obligatorio del muro norte de captación:
  * 17.96 mm Pb / 213.77 mm de concreto (TG-108, curva de banda ancha; src/__tests__/validacion/ejemploGuiado.test.ts).
  *
  * Además verifica que el plano, los resultados y el historial salen de un solo almacén: el lienzo, el gancho E2E
  * (`plano()` y `proyecto()`) y los diálogos ven el mismo estado, y deshacer/rehacer funciona tras el cálculo.
+ * Paso 2: cada Ctrl+Z deshace UN paso y cada Ctrl+Y rehace UNO (antes dos oyentes de teclado movían dos).
  *
  * Local: npm run build && npx playwright test e2e/fase12-guiame-store.spec.ts --project=chromium
  */
@@ -14,7 +15,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 interface ResumenProyecto {
   nombre: string; barreras: number; fuentes: number; resultados: number;
-  calculationStatus: string; activeTool: string; canUndo: boolean;
+  calculationStatus: string; activeTool: string; canUndo: boolean; pasado: number; futuro: number;
 }
 interface Gancho {
   plano: () => { name: string; barriers: { id: string; requiredThickness_mm?: Record<string, number>; calculationTrace?: unknown }[] };
@@ -53,7 +54,7 @@ test.describe('Fase 12 — Guíame sobre el almacén único', () => {
     expect(inicial.resultados).toBe(0);
 
     // «Guíame» paso a paso, por la interfaz.
-    await page.getByTestId('f295-primary-file-dropdown').click();
+    await page.getByTestId('f12-menu-ayuda').click();
     await page.getByTestId('f10-help-guiame').click();
     await expect(page.getByTestId('guia-paso-a-paso')).toBeVisible();
     await page.getByTestId('guia-crear-proyecto').click();
@@ -68,9 +69,9 @@ test.describe('Fase 12 — Guíame sobre el almacén único', () => {
     await page.getByTestId('guia-cerrar').click();
     await expect(page.getByTestId('guia-paso-a-paso')).toHaveCount(0);
 
-    // Un solo «Calcular».
-    await page.getByTestId('f107-migrated-shielding-dropdown').click();
-    await page.getByTestId('f107-migrated-shielding-menu').getByText('Calcular Blindaje', { exact: true }).click();
+    // Un solo «Calcular» (barra superior).
+    await expect(page.getByTestId('f12-calcular')).toHaveCount(1);
+    await page.getByTestId('f12-calcular').click();
     await page.waitForFunction(() => {
       const g = (window as unknown as { __radshieldE2E: Gancho }).__radshieldE2E;
       const bs = g.plano().barriers;
@@ -91,14 +92,21 @@ test.describe('Fase 12 — Guíame sobre el almacén único', () => {
     expect(Math.abs(norte!.PB! - MURO_NORTE.PB)).toBeLessThanOrEqual(0.005);
     expect(Math.abs(norte!.CONCRETE235! - MURO_NORTE.CONCRETE235)).toBeLessThanOrEqual(0.005);
 
-    // Deshacer/rehacer actúa sobre el mismo almacén que leen el lienzo y los diálogos.
+    // Deshacer/rehacer actúa sobre el mismo almacén que leen el lienzo y los diálogos, un paso por pulsación.
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    const h0 = await proyecto(page);
+    expect(h0.pasado).toBeGreaterThanOrEqual(2);
+    expect(h0.futuro).toBe(0);
     await page.keyboard.press('Control+z');
+    await expect.poll(async () => (await proyecto(page)).pasado).toBe(h0.pasado - 1);
+    expect((await proyecto(page)).futuro).toBe(1);
     await expect.poll(async () => {
       const b = await page.evaluate((id) => (window as unknown as { __radshieldE2E: Gancho }).__radshieldE2E.plano().barriers.find((x) => x.id === id)?.calculationTrace, MURO_NORTE.id);
       return Boolean(b);
     }).toBe(false);
     await page.keyboard.press('Control+y');
+    await expect.poll(async () => (await proyecto(page)).pasado).toBe(h0.pasado);
+    expect((await proyecto(page)).futuro).toBe(0);
     await expect.poll(async () => page.evaluate((id) => (window as unknown as { __radshieldE2E: Gancho }).__radshieldE2E.plano().barriers.find((x) => x.id === id)?.requiredThickness_mm?.PB, MURO_NORTE.id)).toBeCloseTo(MURO_NORTE.PB, 2);
 
     expect(errores).toEqual([]);

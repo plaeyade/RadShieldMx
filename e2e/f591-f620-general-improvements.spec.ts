@@ -39,7 +39,8 @@ test('F591-F620 general improvements compact canvas, expandable QA and Memoria I
     fullPage: true,
   });
 
-  const memoriaButton = page.getByRole('button', { name: /Memoria|MA Wizard/i }).first();
+  // Fase 12: «Memoria» también nombra el menú «5. Memoria analítica y CNSNS»; se usa el acceso rápido.
+  const memoriaButton = page.getByTestId('f374-toolbar-quick-memoria');
   await expect(memoriaButton).toBeVisible({ timeout: 10_000 });
   await memoriaButton.click();
   await expect(page.getByTestId('f611-f615-memoria-productive-workflow')).toBeVisible({ timeout: 10_000 });

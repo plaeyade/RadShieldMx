@@ -7,9 +7,9 @@ test.describe('Nuclear Medicine IDAC-Dose readiness', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await bootWorkspace(page);
 
-    // Desde F97 el módulo vive en el menú «Equipos» (ya no hay botón «Med. Nuclear» en la barra superior).
-    await page.getByTestId('f97-migrated-equipment-dropdown').click();
-    await page.getByTestId('f97-migrated-equipment-menu').getByText('Medicina Nuclear', { exact: true }).click();
+    // Fase 12: el módulo vive en el menú «2. Fuentes y cargas de trabajo».
+    await page.getByTestId('f12-menu-fuentes').click();
+    await page.getByTestId('f12-menu-fuentes-contenido').getByText('Medicina Nuclear', { exact: true }).click();
 
     await expect(page.getByText('Advanced Nuclear Medicine Shielding Module')).toBeVisible();
     const dicomDialog = page.locator('[role="dialog"]').filter({ hasText: 'Importar DICOM / PACS' });

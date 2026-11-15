@@ -20,7 +20,7 @@ test.describe('F134 release-candidate browser smoke', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await bootWorkspace(page);
 
-    const canonicalMenus = ['Archivo', 'Diseno', 'Equipos', 'Blindaje', 'Verificacion', 'Reportes', 'Evidencia', 'Integraciones'];
+    const canonicalMenus = ['Proyecto y plano', 'Fuentes y cargas', 'Barreras y materiales', 'Verificación', 'Memoria analítica', 'Ayuda'];
     for (const menu of canonicalMenus) {
       await expect(page.getByRole('button', { name: new RegExp(menu, 'i') }).first()).toBeVisible({ timeout: 15000 });
       addCheck(`topbar:${menu}`, true);

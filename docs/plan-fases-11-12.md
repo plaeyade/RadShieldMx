@@ -337,3 +337,24 @@ de un solo sentido; la Fase 12 debe dejar **un** almacén del proyecto.
 
 **Criterio de salida:** cada acción con una sola entrada en menús, ≤ 2 superficies de mando visibles, ningún
 diálogo huérfano y el recorrido guiado en verde.
+
+### Avance
+
+- **Paso 1** (`fase12-store-e2e`, PR #62): almacén Zustand único del proyecto (`src/stores/proyecto/`) y prueba E2E de
+  «Guíame» (`e2e/fase12-guiame-store.spec.ts`).
+- **Paso 2** (`fase12-menus-calcular`): barra superior con **5 menús por etapa** del flujo de «Guíame» —
+  1. Proyecto y plano, 2. Fuentes y cargas de trabajo, 3. Barreras y materiales, 4. Verificación y cumplimiento,
+  5. Memoria analítica y CNSNS— más Ayuda; «Avanzado» (rendimiento, CAD → Monte Carlo, agente, 3D en tiempo real,
+  nube de puntos, RTSTRUCT) sólo con `VITE_MENU_AVANZADO=true`. Se retiraron los menús Archivo, Diseño, Equipos,
+  Blindaje, Evidencia e Integraciones (7 entradas al mismo Performance Dashboard, «RAG deep dive» = Evidence Pack) y la
+  zona oculta `f114-deduped-legacy-menu-zone`; Tour, Manual y «Floor Plan Tools» pasaron a los menús.
+  **Un solo botón «Calcular»** (barra superior, entre las etapas 3 y 4; F5, la paleta de comandos y el menú contextual
+  del lienzo quedan como atajos). Se quitaron los «Calcular» de la barra lateral, la barra del lienzo, la barra «CAD»,
+  la cinta BIM, el flujo del lienzo, el inspector y la línea de estado, y el cálculo preliminar del DXF confirmado ya
+  no llama al motor por su cuenta: todo pasa por `calcularPlano` (una sola llamada a `calcularProyectoAsync`). Los 7
+  espesores del ejemplo son idénticos (muro norte 17.96 mm Pb / 213.77 mm concreto).
+  **Ctrl+Z/Ctrl+Y**: había dos oyentes `keydown` y los dos llamaban a `undo()`/`redo()` (dos pasos por pulsación;
+  Ctrl+K abría y cerraba la paleta). Queda uno (`src/pages/designer/atajosTeclado.ts`), probado en
+  `src/__tests__/validacion/fase12Paso2.test.tsx` y en la E2E de «Guíame» (un paso por pulsación).
+  Pendiente para el paso 3: retirar la fila «Acceso rápido» y la barra «CAD» inferior, y la barra lateral sólo para
+  propiedades.

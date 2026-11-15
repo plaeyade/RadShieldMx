@@ -13,8 +13,14 @@ test.describe('F374 quick actions and canvas command dock', () => {
 
     const quickStatus = page.getByTestId('f374-quick-action-status');
     await expect(quickStatus).toBeVisible();
-    await page.getByRole('button', { name: /Calc: Calcular blindaje/i }).click();
-    await expect(quickStatus).toContainText(/Calcular blindaje/i);
+    // Fase 12, paso 2: «Calc» salió de las acciones rápidas y del dock (un solo «Calcular», en la barra superior).
+    await expect(page.getByRole('button', { name: /Calc: Calcular blindaje/i })).toHaveCount(0);
+    await expect(page.getByTestId('f374-command-calc')).toHaveCount(0);
+    await page.getByRole('button', { name: /^Mem: /i }).click();
+    await expect(quickStatus).toContainText(/Memoria IA/i);
+    await expect(page.getByRole('dialog').first()).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
 
     await page.getByTestId('f374-command-barrier').click();
     await expect(page.getByTestId('f98-active-canvas-tool-indicator')).toContainText(/barrera/i);
