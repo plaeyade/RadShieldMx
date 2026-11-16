@@ -296,7 +296,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     marco.push({ id: 'NOM-003-NUCL-2021', titulo: REFERENCIAS_BASE['NOM-003-NUCL-2021'], aplica: 'Clase de la instalación (II-A, II-B o II-C).' });
     marco.push({ id: 'NOM-027-NUCL-2021', titulo: REFERENCIAS_BASE['NOM-027-NUCL-2021'], aplica: 'Especificaciones de diseño de la instalación tipo II.' });
     marco.push({ id: 'NOM-028-NUCL-2009', titulo: REFERENCIAS_BASE['NOM-028-NUCL-2009'], aplica: 'Almacén y manejo de desechos de fuentes abiertas.' });
-    marco.push({ id: NOM_012_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_012_NUCL.clave], aplica: 'Detectores de área, portátil y de contaminación de la NOM-040 §6.1.1 (que remite a la NOM-012-NUCL-2002, cancelada por esta edición).' });
+    marco.push({ id: NOM_012_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_012_NUCL.clave], aplica: 'Instrumentos con que se verifica el blindaje (detectores de la NOM-040 §6.1.1, que remite a la NOM-012-NUCL-2002, sustituida por esta edición): §4.1, §4.2 (calibración al menos anual), §5.1.1, §5.1.3 (verificación al iniciar turno), §6.1 y Apéndices A y C (C.3). No fija límites de dosis (RGSR).' });
   }
   if (ids.has('radioiodine-i131') || ids.has('lu177')) marco.push({ id: NOM_013_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_013_NUCL.clave], aplica: 'Egreso de pacientes y necesidad de cuarto de hospitalización.' });
   if (plano.sources.some((s) => /^linac-/.test(s.modality?.id ?? ''))) marco.push({ id: NOM_033_NUCL.clave, titulo: REFERENCIAS_BASE[NOM_033_NUCL.clave], aplica: 'Teleterapia con aceleradores lineales.' });

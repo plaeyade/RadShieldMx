@@ -159,7 +159,9 @@ export const NOM_033_NUCL = {
  * NOM-012-NUCL-2016, «Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de
  * radiación ionizante y los dosímetros de lectura directa» (SENER/CNSNS), DOF 16-01-2017, en vigor el 18-03-2017.
  * Vigente según PLATIICA (Secretaría de Economía); revisión sistemática del 31-03-2022 con resultado «Modificación»,
- * sin norma sustituta publicada (consultado el 15-11-2026). Regula instrumentos, no blindajes.
+ * sin norma sustituta publicada (consultado el 15-11-2026). Rige los instrumentos con que se verifica el blindaje
+ * (§4.1, §4.2 calibración al menos anual, §5.1.1, §5.1.3 verificación al iniciar turno, §6.1, Apéndices A y C.3). No fija
+ * límites de dosis ni blindajes: los límites son los del RGSR (DOF 22-11-1988; art. 37–38 para el público).
  */
 export const NOM_012_NUCL = {
   clave: 'NOM-012-NUCL-2016',
@@ -171,8 +173,19 @@ export const NOM_012_NUCL = {
   sustituyeA: 'NOM-012-NUCL-2002, Requerimientos y calibración de monitores de radiación ionizante (DOF 19-06-2002)',
   urlDof: 'https://www.dof.gob.mx/nota_detalle.php?codigo=5469138&fecha=16/01/2017',
   urlPdf: 'https://platiica.economia.gob.mx/wp-content/uploads/sites/2/PDF_Normas_Publicas/012nucl2017.pdf',
-  cita: 'NOM-012-NUCL-2016. Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
+  cita: 'NORMA Oficial Mexicana NOM-012-NUCL-2016, Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
   alcance: 'Requisitos y criterios de funcionamiento de los instrumentos de medición de radiación ionizante (monitores de área, portátiles y de contaminación) y de los dosímetros de lectura directa. No trata blindajes ni ciclotrones.',
+  /** Numerales que aplican a los instrumentos con que se verifica el blindaje (cotejados con el texto oficial). */
+  numerales: [
+    { seccion: '§4.1', texto: 'Requisitos de los instrumentos de medición de radiación ionizante.' },
+    { seccion: '§4.2', texto: 'Calibración al menos una vez al año.' },
+    { seccion: '§5.1.1', texto: 'Criterios de funcionamiento de los instrumentos.' },
+    { seccion: '§5.1.3', texto: 'Verificación del funcionamiento al iniciar cada turno.' },
+    { seccion: '§6.1', texto: 'Dosímetros de lectura directa.' },
+    { seccion: 'Apéndices A y C (C.3)', texto: 'Apéndices de calibración y verificación.' },
+  ],
+  /** No fija límites de dosis: los del público y del POE son los del RGSR (DOF 22-11-1988; público, art. 37–38). */
+  noFija: 'Límites de dosis (RGSR, DOF 22-11-1988, art. 37–38 para el público).',
 } as const;
 
 /** Rótulo del RGSR, la base de límites de dosis en México (véase limitesDosis.ts). */

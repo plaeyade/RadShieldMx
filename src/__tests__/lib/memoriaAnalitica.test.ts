@@ -57,6 +57,7 @@ describe('memoria analítica estructurada', () => {
     // NOM-040 §6.1.1 remite a la NOM-012-NUCL-2002, cancelada: la memoria cita la edición vigente.
     const nom012 = m.marcoNormativo.find((x) => x.id === 'NOM-012-NUCL-2016');
     expect(nom012?.titulo).toMatch(/16 de enero de 2017/);
+    expect(nom012?.aplica).toMatch(/§4\.2 \(calibración al menos anual\).*§5\.1\.3 \(verificación al iniciar turno\).*C\.3.*No fija límites de dosis/);
     expect(JSON.stringify(m)).not.toMatch(/NOM-012-NUCL-2015/);
     expect(m.resultadosPorArea.map((a) => a.area)).toEqual(['Captación', 'General', 'Sala PET/CT']);
     expect(m.conclusiones.total).toBe(7);

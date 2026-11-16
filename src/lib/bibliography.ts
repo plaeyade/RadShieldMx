@@ -365,7 +365,7 @@ export const EXISTING_REFERENCES: BibEntry[] = [
   },
   {
     id: 'REF074', type: 'NOM', year: 2016,
-    citation: 'NOM-012-NUCL-2016. Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
+    citation: 'NORMA Oficial Mexicana NOM-012-NUCL-2016, Requisitos y criterios de funcionamiento que deben cumplir los instrumentos de medición de radiación ionizante y los dosímetros de lectura directa. SENER/CNSNS. Diario Oficial de la Federación, 16 de enero de 2017.',
     notes: 'Sustituye y cancela la NOM-012-NUCL-2002 (monitores de radiación ionizante), a la que remite la NOM-040-NUCL-2016 §6.1.1. Antes este registro citaba una «NOM-012-NUCL-2015, instalaciones de ciclotrón» inexistente; para la radiofarmacia del ciclotrón véanse NOM-027-NUCL-2021 (diseño) y NOM-003-NUCL-2021 (clase).',
   },
   // ── v51: CATIA-GDML y CAD-to-ROOT (PDF analysis) ──

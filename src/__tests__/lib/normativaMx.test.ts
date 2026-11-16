@@ -100,6 +100,9 @@ describe('NOM-012-NUCL-2016 (instrumentos de medición; cancela la NOM-012-NUCL-
     expect(NOM_012_NUCL.urlDof).toMatch(/codigo=5469138/);
     expect(NOM_012_NUCL.sustituyeA).toMatch(/^NOM-012-NUCL-2002/);
     expect(NOM_012_NUCL.alcance).toMatch(/No trata blindajes ni ciclotrones/);
+    expect(NOM_012_NUCL.cita).toMatch(/^NORMA Oficial Mexicana NOM-012-NUCL-2016, /);
+    expect(NOM_012_NUCL.numerales.map((n) => n.seccion)).toEqual(['§4.1', '§4.2', '§5.1.1', '§5.1.3', '§6.1', 'Apéndices A y C (C.3)']);
+    expect(NOM_012_NUCL.noFija).toMatch(/RGSR, DOF 22-11-1988, art\. 37–38/);
   });
 
   it('NOM-040 §6.1.1 remite a la edición vigente y REF074 ya no es una «NOM-012» de ciclotrón', () => {
