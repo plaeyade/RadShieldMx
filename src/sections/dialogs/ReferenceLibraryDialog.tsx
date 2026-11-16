@@ -2,7 +2,8 @@
  * Biblioteca de referencias: evidencia citada por GAMMA-AI (`gamma/evidencia@1`).
  *
  * Dos caminos, la misma verificación (SHA-256 del texto, identidad de la fuente):
- * - En vivo: consulta `GET /v1/ecosistema/evidencia` del servicio de GAMMA (`VITE_GAMMA_URL`).
+ * - En vivo: consulta `GET /v1/ecosistema/evidencia` del servicio de GAMMA (`VITE_GAMMA_URL`) con el token Bearer
+ *   que el usuario escribe aquí; sólo vive en la memoria de esta pestaña (src/lib/gammaCliente.ts).
  * - Archivo: el JSON que entrega GAMMA.
  * Cada cita verificada se puede copiar a la memoria con su identificador verificable.
  */
@@ -13,7 +14,7 @@ import {
   verificarEvidenciaGamma,
   type ResultadoEvidencia,
 } from '@/lib/gammaEvidence';
-import { consultarGamma, urlGamma } from '@/lib/gammaCliente';
+import { borrarTokenGamma, consultarGamma, establecerTokenGamma, hayTokenGamma, urlGamma } from '@/lib/gammaCliente';
 
 interface ReferenceLibraryDialogProps {
   open?: boolean;
@@ -43,6 +44,8 @@ export default function ReferenceLibraryDialog({
   const [consulta, setConsulta] = useState('');
   const [enRevision, setEnRevision] = useState(false);
   const [consultando, setConsultando] = useState(false);
+  const [token, setToken] = useState('');
+  const [conToken, setConToken] = useState(hayTokenGamma());
   const servicio = gammaUrl ?? urlGamma();
 
   if (!open) return null;
@@ -66,6 +69,11 @@ export default function ReferenceLibraryDialog({
     setConsultando(true);
     setCopiada(null);
     setArchivo(`GAMMA en vivo`);
+    if (token.trim()) {
+      establecerTokenGamma(token);
+      setToken('');
+      setConToken(true);
+    }
     setResultado(await consultarGamma(q, { url: servicio ?? '', k: 5, revision: enRevision, fetchFn }));
     setConsultando(false);
   };
@@ -114,6 +122,25 @@ export default function ReferenceLibraryDialog({
               {consultando ? 'Consultando…' : 'Consultar'}
             </button>
           </div>
+          {servicio && (
+            <div className="flex items-center gap-2 text-xs text-slate-600">
+              <input
+                type="password"
+                aria-label="Token de GAMMA"
+                autoComplete="off"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder={conToken ? 'Token guardado en esta sesión' : 'Token Bearer del servicio (sólo esta sesión)'}
+                className="flex-1 rounded border px-2 py-1"
+                data-testid="gamma-token"
+              />
+              {conToken && (
+                <button type="button" className="rounded border px-2 py-1" onClick={() => { borrarTokenGamma(); setConToken(false); }}>
+                  Olvidar token
+                </button>
+              )}
+            </div>
+          )}
           <label className="flex items-center gap-1 text-xs text-slate-600">
             <input type="checkbox" checked={enRevision} onChange={(e) => setEnRevision(e.target.checked)} />
             Incluir documentos en revisión (se declara en la evidencia)
