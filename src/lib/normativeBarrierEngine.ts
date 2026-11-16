@@ -96,6 +96,37 @@ export interface ResultadoNormativo {
 }
 
 /** Distancia fuente → punto (m), con la altura del isocentro y un mínimo de 0.3 m. */
+/**
+ * Fase 13, paso 1: ángulo de dispersión del paciente desde la geometría (NCRP 151 §2.4: θ se mide desde el eje
+ * central del haz). Con `ejeGantry_deg` el haz gira en el plano perpendicular al eje del gantry; el menor ángulo entre
+ * cualquier dirección del haz y la recta isocentro → punto es el ángulo entre esa recta y el plano de giro:
+ * θ = atan(|v·â| / |v × â|), con v en planta (el punto a la altura del isocentro; otra altura sólo lo reduce, y el
+ * motor ya toma el ángulo tabulado inmediato inferior, lo conservador). Es la misma descomposición que la franja del
+ * haz primario de `doseFieldEngine.enHazPrimario`. Devuelve null sin `ejeGantry_deg` o con el punto en el isocentro;
+ * entonces rige θ = 30° por omisión (antes, siempre: hallazgo «θ = 30° por omisión» de la auditoría 2026-11).
+ */
+export function anguloDispersionGeometrico(s: RadiationSource, p: PuntoMuestreo, escala: number): number | null {
+  if (typeof s.ejeGantry_deg !== 'number' || !Number.isFinite(s.ejeGantry_deg)) return null;
+  const ax = Math.cos((s.ejeGantry_deg * Math.PI) / 180), ay = Math.sin((s.ejeGantry_deg * Math.PI) / 180);
+  const dx = (p.x - s.x) * escala, dy = (p.y - s.y) * escala;
+  const aLoLargo = Math.abs(dx * ax + dy * ay);
+  const enPlano = Math.abs(dx * ay - dy * ax);
+  if (aLoLargo + enPlano < 1e-9) return null;
+  return (Math.atan2(aLoLargo, enPlano) * 180) / Math.PI;
+}
+
+/** Semiángulo del haz primario con el campo máximo de 40 × 40 cm a 1 m (diagonal; como `doseFieldEngine`). */
+export const SEMIANGULO_HAZ_MAX_DEG = (Math.atan(0.2 * Math.SQRT2) * 180) / Math.PI;
+
+/** θ de NCRP 151 en un punto: el de la barrera si lo declara; si no, el geométrico; si no, 30°. */
+export function anguloDispersion(barrera: Pick<Barrier, 'scatterAngle_deg'> | undefined, s: RadiationSource, p: PuntoMuestreo, escala: number): number {
+  if (typeof barrera?.scatterAngle_deg === 'number' && Number.isFinite(barrera.scatterAngle_deg)) return barrera.scatterAngle_deg;
+  return anguloDispersionGeometrico(s, p, escala) ?? ANGULO_DISPERSION_OMISION_DEG;
+}
+
+/** θ por omisión (conservador para barreras laterales; NCRP 151 §7.1.5 usa 30° en el ejemplo). */
+export const ANGULO_DISPERSION_OMISION_DEG = 30;
+
 export function distancia(s: RadiationSource, p: PuntoMuestreo, escala: number): number {
   const dx = (p.x - s.x) * escala;
   const dy = (p.y - s.y) * escala;
@@ -259,12 +290,24 @@ function teleterapia(
 ): ResultadoNormativo {
   const P = P_mSv / 1000; // Sv/semana
   const U = barrera.useFactor > 0 && barrera.useFactor <= 1 ? barrera.useFactor : 0.25;
-  const theta = barrera.scatterAngle_deg ?? 30;
+  // θ por punto y fuente: el de la barrera, el de la geometría (eje del gantry) o 30° (Fase 13, paso 1).
+  const thetas = esPrimaria ? [] : puntos.flatMap((p) => fuentes.map((s) => anguloDispersion(barrera, s, p, escala)));
+  const declarado = typeof barrera.scatterAngle_deg === 'number' && Number.isFinite(barrera.scatterAngle_deg);
+  const geometrico = !declarado && fuentes.some((s) => typeof s.ejeGantry_deg === 'number' && Number.isFinite(s.ejeGantry_deg));
+  const thetaMin = thetas.length ? Math.min(...thetas) : ANGULO_DISPERSION_OMISION_DEG;
+  const thetaTexto = declarado
+    ? `${barrera.scatterAngle_deg}° (declarado en la barrera)`
+    : geometrico
+      ? `θ de la geometría del gantry (mínimo ${thetaMin.toFixed(1)}° en los puntos de la barrera)`
+      : `${ANGULO_DISPERSION_OMISION_DEG}° (por omisión; declare el eje del gantry o θ en la barrera)`;
   const notas: string[] = [
     esPrimaria
       ? 'NCRP 151: primaria (Ec. 2.1, 2.3; Tabla B.2).'
-      : `NCRP 151: fuga (Ec. 2.8, Tabla B.7) + dispersión del paciente a ${theta}° (Ec. 2.7, Tablas B.4/B.5a), regla de dos fuentes por tipo (§7.1.5).`,
+      : `NCRP 151: fuga (Ec. 2.8, Tabla B.7) + dispersión del paciente a ${thetaTexto} (Ec. 2.7, Tablas B.4/B.5a), regla de dos fuentes por tipo (§7.1.5).`,
   ];
+  if (!esPrimaria && !declarado && geometrico && thetaMin < SEMIANGULO_HAZ_MAX_DEG) {
+    notas.push(`Barrera secundaria con puntos a ${thetaMin.toFixed(1)}° del plano de giro (< ${SEMIANGULO_HAZ_MAX_DEG.toFixed(1)}°, semiángulo del campo máximo): el haz primario puede alcanzarlos; revise si debe ser primaria.`);
+  }
   const fts = fuentes.map(fuenteTeleterapiaDe);
   if (!esPrimaria && fuentes.some((s) => s.imrtFraction === undefined)) {
     notas.push('Fuga con IMRT por omisión: 50 % de la carga con C_I = 5 (valores del ejemplo §7.1.4).');
@@ -290,6 +333,7 @@ function teleterapia(
           const tvl = tvlPrimaria(f.energia, mat);
           directos.push({ K_Sv_semana: kermaPrimaria(f, U, d), transmision: (t) => transmisionTVL(t, tvl) });
         } else {
+          const theta = anguloDispersion(barrera, s, p, escala);
           const g = { U, dsec_m: d, theta_deg: theta };
           const cf = fuga(f, { P_Sv_semana: P, T, dL_m: d, material: mat });
           const cd = dispersion(f, { P_Sv_semana: P, T, ...g, material: mat });

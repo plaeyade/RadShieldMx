@@ -1292,6 +1292,18 @@ export default function CanvasArea({
     onUpdateSelected({ [field]: numeric } as Partial<Barrier | RadiationSource | OccupiedRegion | CriticalPoint>);
     toast.success('Parametro actualizado', { description: `${field}: ${numeric}` });
   };
+  // Fase 13, paso 1: eje del gantry (vacío = sin eje: θ = 30° por omisión).
+  const applyEjeGantryUpdate = (value: string) => {
+    if (!onUpdateSelected) return;
+    const texto = value.trim();
+    const numeric = Number(texto);
+    if (texto && !Number.isFinite(numeric)) {
+      toast.error('Valor numerico no valido');
+      return;
+    }
+    onUpdateSelected({ ejeGantry_deg: texto ? ((numeric % 180) + 180) % 180 : undefined } as Partial<RadiationSource>);
+    toast.success('Parametro actualizado', { description: texto ? `ejeGantry_deg: ${numeric}` : 'ejeGantry_deg: sin eje (θ = 30°)' });
+  };
   const workflowSteps = [
     { id: 'layout', label: 'Layout', ready: Boolean(floorPlan?.imageUrl) || barrierCount > 0, action: onImportFloorPlan, actionLabel: 'Importar plano' },
     { id: 'template', label: 'Smart room', ready: barrierCount > 0 && sourceCount > 0, action: onOpenRoomTemplates, actionLabel: 'Smart rooms' },
@@ -2144,6 +2156,20 @@ export default function CanvasArea({
                     onBlur={(event) => applyInspectorNumberUpdate('isocenterHeight_m', event.currentTarget.value)}
                   />
                 </label>
+                {/^linac-/.test(selectedSource.modality?.id ?? '') && (
+                  <label className="text-[10px] font-semibold text-slate-500" title="Orientación en planta del eje de rotación del gantry (0° = +x). Con ella el motor calcula θ de dispersión por punto (NCRP 151); vacío = 30° por omisión.">
+                    Eje gantry °
+                    <input
+                      data-testid="fase13-editor-eje-gantry"
+                      className="mt-1 h-7 w-full rounded border border-slate-200 px-2 text-xs text-slate-800 outline-none focus:border-violet-300"
+                      type="number"
+                      step="1"
+                      placeholder="θ = 30°"
+                      defaultValue={selectedSource.ejeGantry_deg ?? ''}
+                      onBlur={(event) => applyEjeGantryUpdate(event.currentTarget.value)}
+                    />
+                  </label>
+                )}
               </>
             )}
             {(selectedBarrier || selectedSource) && (
