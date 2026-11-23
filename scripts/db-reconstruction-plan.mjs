@@ -180,10 +180,11 @@ const checks = [
   {
     name: "DB compose defaults",
     ok:
-      composeDb.includes("MYSQL_DATABASE: radshield_mx_test") &&
-      composeDb.includes("MYSQL_USER: radshield") &&
-      composeDb.includes("3306:3306"),
-    detail: "mysql:8.0 radshield_mx_test on 127.0.0.1:3306",
+      composeDb.includes("MYSQL_DATABASE: ${MYSQL_DATABASE:-radshield_mx_test}") &&
+      composeDb.includes("MYSQL_USER: ${MYSQL_USER:?") &&
+      composeDb.includes("MYSQL_PASSWORD: ${MYSQL_PASSWORD:?") &&
+      composeDb.includes('"127.0.0.1:3306:3306"'),
+    detail: "mysql:8.0 radshield_mx_test on 127.0.0.1:3306 (credenciales desde .env)",
   },
   {
     name: "package scripts",

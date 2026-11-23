@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
     restart: unless-stopped
     networks:
       - radshield-net
@@ -19,11 +19,12 @@ services:
       context: .
       dockerfile: Dockerfile.api
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: mysql://radshield:radshield@db:3306/radshield_mx_test
+      # Mismas credenciales que el servicio db (si la contraseña tiene caracteres especiales, codifíquela para URL).
+      DATABASE_URL: mysql://${MYSQL_USER:?Defina MYSQL_USER en .env}:${MYSQL_PASSWORD:?Defina MYSQL_PASSWORD en .env}@db:3306/${MYSQL_DATABASE:-radshield_mx_test}
       APP_ID: ${APP_ID:-}
       APP_SECRET: ${APP_SECRET:-}
       KIMI_AUTH_URL: ${KIMI_AUTH_URL:-}
@@ -39,16 +40,18 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: radshield-root
-      MYSQL_DATABASE: radshield_mx_test
-      MYSQL_USER: radshield
-      MYSQL_PASSWORD: radshield
+      # Credenciales de prueba desde .env (copie .env.example y ponga valores propios; nunca se versionan).
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Defina MYSQL_ROOT_PASSWORD en .env (vea .env.example)}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-radshield_mx_test}
+      MYSQL_USER: ${MYSQL_USER:?Defina MYSQL_USER en .env (vea .env.example)}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Defina MYSQL_PASSWORD en .env (vea .env.example)}
     ports:
-      - "3306:3306"
+      # Sólo en la interfaz local: la base de prueba no queda expuesta a la red.
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uradshield", "-pradshield"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\""]
       interval: 10s
       timeout: 5s
       retries: 10
