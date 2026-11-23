@@ -57,7 +57,17 @@ analítica para la CNSNS con cada número citado.
 - Sin validación regulatoria: cada memoria debe revisarla y firmarla el físico médico.
 - La app abre con un proyecto vacío. **Ayuda → Guíame** recorre el flujo completo (proyecto, plano,
   fuentes, ocupación, cálculo, cumplimiento y reporte) y ofrece, sólo si se pide, un ejemplo PET/CT sintético.
-- Siguiente: beta con el equipo de física médica sobre planos reales, laberinto y puerta para
+- **Fusionado al 22-11-2026:** fase 12 completa (#62–#66: almacén único del proyecto, 5 menús por
+  etapa con un solo «Calcular» y deshacer/rehacer, un solo flujo de memoria analítica
+  `radshield/memoria@1`, asistente de capas DWG/DXF y QA a 1024 px); DWG directo y memoria analítica
+  en DOCX/PDF/JSON (#61); cita oficial de la NOM-012-NUCL-2016 (#68); token Bearer del servicio de
+  evidencia de GAMMA-AI sólo en la sesión (#69); y **fase 13, paso 1**: θ de dispersión NCRP 151
+  medido desde el eje del gantry (#70).
+- **En revisión: fase 13, paso 2** (#71, abierto): factor de uso U de la barrera primaria según la
+  franja que barre el haz (U = 1/4 por omisión para primarias importadas del DXF) y una sola
+  convención de distancia al punto protegido en el motor de barreras, el mapa de dosis y la memoria.
+- Siguiente: fusionar #71 y seguir con la fase 13 (`docs/plan-fases-11-12.md`); después, beta con el
+  equipo de física médica sobre planos reales, laberinto y puerta para
   ≥ 10 MV (NCRP 151 §2.4–2.5), importación BIM (IFC) y recorrido WebXR con el mapa de dosis.
 
 ## Instalación y uso
