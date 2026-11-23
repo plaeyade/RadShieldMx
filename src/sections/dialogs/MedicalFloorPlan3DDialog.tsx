@@ -4,7 +4,7 @@
  *   exportaciones: `useExportacionesMedical3D`;
  * - paneles de la barra lateral: `PanelFlujoVisual`, `PanelesIntegracion`, `PanelMotor3D`, `ControlesVisuales`,
  *   `PanelesInspeccion`; visor: `VisorMedical3D` → `escena/RoomScene`.
- * Babylon sigue tras `VISOR_3D_BABYLON` (apagada por omisión) en `BabylonRuntimeSmokePreview`.
+ * Vista 3D Babylon en `BabylonRuntimeSmokePreview`, tras `VISOR_3D_BABYLON` (activa por omisión desde el 23-11-2026).
  */
 import { Stethoscope } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';

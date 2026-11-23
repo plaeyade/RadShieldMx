@@ -6,8 +6,10 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
-  // Con VITE_VISOR_3D_BABYLON apagada Babylon queda como rama muerta; asignarle un chunk sólo daría un chunk vacío.
-  const babylonActivo = loadEnv(mode, process.cwd(), 'VITE_').VITE_VISOR_3D_BABYLON === 'true';
+  // Vista 3D Babylon activa por omisión (23-11-2026); misma regla que `visor3DBabylonActivo` en featureFlags.ts.
+  // Con VITE_VISOR_3D_BABYLON=false Babylon queda como rama muerta; asignarle un chunk sólo daría un chunk vacío.
+  const babylonEnv = loadEnv(mode, process.cwd(), 'VITE_').VITE_VISOR_3D_BABYLON;
+  const babylonActivo = babylonEnv !== 'false' && babylonEnv !== '0';
   // Fase 9 (GitHub Pages): el CI construye con VITE_BASE_PATH=/RadShieldMx/ (el sitio vive en /<repo>/); en local,
   // Netlify, Vercel y Docker la base relativa './' sigue sirviendo desde cualquier carpeta.
   const base = process.env.VITE_BASE_PATH || './';
@@ -31,7 +33,8 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       output: {
         // Fase 6: los motores 3D y el shader GPU van en chunks propios que sólo se descargan al abrir
-        // su visor (todos sus importadores son lazy()/import()). Babylon se conserva tras VISOR_3D_BABYLON.
+        // su visor (todos sus importadores son lazy()/import()). Babylon (`vendor-babylon`) sólo lo importa
+        // BabylonRuntimeSmokePreview con import() al abrir la vista 3D.
         // Las dependencias compartidas con la entrada (react, zustand, sonner, ayudantes de Rollup) se
         // fijan en `vendor-react`; si no, Rollup las metería en el chunk 3D/GPU y la entrada lo importaría
         // de forma estática (se descargaría al arrancar).

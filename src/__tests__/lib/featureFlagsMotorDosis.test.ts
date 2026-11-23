@@ -4,6 +4,7 @@ import {
   HEATMAP_GPU,
   NOTA_VISOR_EN_REVISION,
   VISOR_3D_BABYLON,
+  visor3DBabylonActivo,
   VISORES_EN_REVISION,
   esVisorEnRevision,
   filtrarVisoresEnRevision,
@@ -16,8 +17,17 @@ describe('banderas de la Fase 1 del motor de dosis', () => {
     expect(VISORES_EN_REVISION).toBe(false);
     expect(HEATMAP_GPU).toBe(false);
     expect(DEPURACION_RENDER).toBe(false);
-    expect(VISOR_3D_BABYLON).toBe(false);
     expect(NOTA_VISOR_EN_REVISION).toMatch(/En revisión/);
+  });
+
+  it('la vista 3D Babylon está activa por omisión (autorización del propietario, 23-11-2026) y se puede apagar', () => {
+    // Única excepción autorizada: HEATMAP_GPU, VISORES_EN_REVISION y VISOR_* siguen en false (arriba y abajo).
+    expect(VISOR_3D_BABYLON).toBe(true);
+    expect(visor3DBabylonActivo(undefined)).toBe(true);
+    expect(visor3DBabylonActivo('')).toBe(true);
+    expect(visor3DBabylonActivo('true')).toBe(true);
+    expect(visor3DBabylonActivo('false')).toBe(false);
+    expect(visor3DBabylonActivo('0')).toBe(false);
   });
 
   it('identifica los visores en revisión sin distinguir mayúsculas', () => {

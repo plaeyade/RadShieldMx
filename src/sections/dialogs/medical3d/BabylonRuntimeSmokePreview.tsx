@@ -33,6 +33,26 @@ function finiteBabylonFps(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : null;
 }
 
+/**
+ * ¿Hay WebGL? Se prueba en un canvas aparte (no en el de la vista: un `getContext` previo fijaría sus atributos y
+ * Babylon ya no podría pedir `preserveDrawingBuffer`) y se libera el contexto. Sin WebGL no se descarga Babylon.
+ */
+export function navegadorSoportaWebGL(): boolean {
+  if (typeof document === 'undefined') return false;
+  try {
+    const prueba = document.createElement('canvas');
+    const gl = (prueba.getContext('webgl2') || prueba.getContext('webgl')) as WebGLRenderingContext | null;
+    if (!gl) return false;
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const MENSAJE_SIN_WEBGL =
+  'Este navegador no ofrece WebGL: la vista 3D Babylon no puede dibujarse. Use el visor Three/R3F de la derecha o la planta 2D; el cálculo no cambia.';
+
 export function BabylonRuntimeSmokePreview({
   scene,
   enabled,
@@ -51,6 +71,9 @@ export function BabylonRuntimeSmokePreview({
   const [metrics, setMetrics] = useState<BabylonPerformanceMetrics>({ firstFrameMs: null, fps: null, meshes: 0 });
   const [cameraMode, setCameraMode] = useState<BabylonDeepCameraMode>('iso');
   const [pickedEntity, setPickedEntity] = useState<BabylonPickedEntity>(null);
+  // Vista ampliada: la tarjeta cubre el diálogo para inspeccionar el búnker (la barra lateral sólo da ~240 px).
+  const [ampliada, setAmpliada] = useState(false);
+  const engineRef = useRef<any>(null);
   // Fase 13: GLB a escala real del equipo (opcional, `VITE_EQUIPO_GLB_BASE`); respaldo = caja + toro.
   const [mostrarGlb, setMostrarGlb] = useState(true);
   const [orientacionGlb_deg, setOrientacionGlb_deg] = useState(() => orientacionPorOmisionGlb_deg());
@@ -68,6 +91,10 @@ export function BabylonRuntimeSmokePreview({
       respaldo.forEach((mesh) => mesh.setEnabled(!mostrarGlb));
     });
   }, [mostrarGlb, orientacionGlb_deg]);
+
+  useEffect(() => {
+    engineRef.current?.resize();
+  }, [ampliada]);
 
   const applyCameraMode = (mode: BabylonDeepCameraMode) => {
     setCameraMode(mode);
@@ -101,6 +128,8 @@ export function BabylonRuntimeSmokePreview({
     let engine: any = null;
     let babylonScene: any = null;
     let resizeHandler: (() => void) | null = null;
+    let observadorTamano: ResizeObserver | null = null;
+    let observadorVisible: IntersectionObserver | null = null;
 
     const setSmokeStatus = (nextStatus: BabylonSmokeStatus, nextMessage: string) => {
       if (disposed) return;
@@ -116,18 +145,25 @@ export function BabylonRuntimeSmokePreview({
       };
     }
 
-    setSmokeStatus('loading', 'Cargando @babylonjs/core/loaders/materials...');
-    setMetrics({ firstFrameMs: null, fps: null, meshes: 0 });
-
-    // Con VISOR_3D_BABYLON apagada el componente no se monta; la guarda además deja la rama
-    // muerta para que el build no emita los chunks de @babylonjs/* (Fase 6: consolidar en r3f).
+    // Con VITE_VISOR_3D_BABYLON=false el componente no se monta; la guarda además deja la rama
+    // muerta para que ese build no emita el chunk `vendor-babylon`.
     if (!VISOR_3D_BABYLON) return () => { disposed = true; };
+
+    // Sin WebGL no tiene caso descargar ~5 MB de Babylon: se avisa y se remite al visor Three/R3F.
+    if (!navegadorSoportaWebGL()) {
+      setSmokeStatus('sin-webgl', MENSAJE_SIN_WEBGL);
+      return () => { disposed = true; };
+    }
+
+    setSmokeStatus('loading', 'Cargando la vista 3D (@babylonjs/core y cargador glTF)...');
+    setMetrics({ firstFrameMs: null, fps: null, meshes: 0 });
 
     void (async () => {
       try {
+        // Carga perezosa: chunk `vendor-babylon`, sólo al abrir Inspección 3D con geometría.
+        // (@babylonjs/materials no se usa: los materiales PBR/Standard vienen de core.)
         const babylon = await import('@babylonjs/core');
         await import('@babylonjs/loaders');
-        await import('@babylonjs/materials');
 
         if (disposed || !canvasRef.current) return;
 
@@ -143,6 +179,7 @@ export function BabylonRuntimeSmokePreview({
           preserveDrawingBuffer: true,
           stencil: true,
         });
+        engineRef.current = engine;
         babylonScene = new babylon.Scene(engine);
         babylonScene.clearColor = new babylon.Color4(0.035, 0.052, 0.075, 1);
 
@@ -392,7 +429,7 @@ export function BabylonRuntimeSmokePreview({
         });
 
         let frameCount = 0;
-        engine.runRenderLoop(() => {
+        const renderFrame = () => {
           frameCount += 1;
           if (frameCount === 1 && !disposed) {
             setMetrics({
@@ -405,9 +442,24 @@ export function BabylonRuntimeSmokePreview({
             setMetrics((prev) => ({ ...prev, fps: finiteBabylonFps(engine?.getFps?.()), meshes: babylonScene?.meshes?.length || prev.meshes }));
           }
           babylonScene?.render();
-        });
+        };
+        engine.runRenderLoop(renderFrame);
         resizeHandler = () => engine?.resize();
         window.addEventListener('resize', resizeHandler);
+        // Rendimiento: se redimensiona con el contenedor (vista ampliada) y se pausa el bucle de render
+        // mientras el canvas no se ve (barra lateral desplazada, pestaña oculta).
+        if (typeof ResizeObserver !== 'undefined') {
+          observadorTamano = new ResizeObserver(() => engine?.resize());
+          observadorTamano.observe(canvas);
+        }
+        if (typeof IntersectionObserver !== 'undefined') {
+          observadorVisible = new IntersectionObserver(([entrada]) => {
+            if (!engine || disposed) return;
+            engine.stopRenderLoop(renderFrame);
+            if (entrada?.isIntersecting) engine.runRenderLoop(renderFrame);
+          });
+          observadorVisible.observe(canvas);
+        }
         setSmokeStatus('ready', `Babylon parity activo: ${scene.walls.length} barreras, ${scene.equipment.length} equipos, ${scene.zones.length} zonas.`);
       } catch (error) {
         setSmokeStatus('failed', error instanceof Error ? error.message : 'No fue posible cargar Babylon runtime.');
@@ -417,7 +469,10 @@ export function BabylonRuntimeSmokePreview({
     return () => {
       disposed = true;
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+      observadorTamano?.disconnect();
+      observadorVisible?.disconnect();
       cameraRef.current = null;
+      engineRef.current = null;
       glbNodosRef.current = [];
       babylonScene?.dispose();
       engine?.dispose();
@@ -425,27 +480,55 @@ export function BabylonRuntimeSmokePreview({
   }, [enabled, onStatusChange, scene]);
 
   return (
-    <div className="space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2" data-testid="f455-babylon-runtime-smoke">
+    <section
+      className={`space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2 ${ampliada ? 'fixed inset-3 z-50 overflow-auto shadow-2xl' : ''}`}
+      data-testid="f455-babylon-runtime-smoke"
+      data-ampliada={ampliada ? 'true' : 'false'}
+      aria-label="Vista 3D Babylon del búnker"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <div className="text-[11px] font-semibold uppercase text-cyan-950">F456-F458 Babylon parity</div>
-          <div className="text-[9px] text-cyan-900">Escena real, FPS/fallback y export visual para Evidence.</div>
+          <div className="text-[11px] font-semibold uppercase text-cyan-950">Vista 3D Babylon</div>
+          <div className="text-[9px] text-cyan-900">Búnker en 3D: barreras por rol y material, equipo e isocentro, guía de haz. Visual: no cambia el cálculo.</div>
         </div>
         <Badge variant="outline" className="bg-white text-[9px]" data-testid="f455-babylon-runtime-status">
           {status}
         </Badge>
       </div>
-      <div className="relative h-40 overflow-hidden rounded border border-cyan-100 bg-slate-950">
-        <canvas ref={canvasRef} className="h-full w-full" data-testid="f455-babylon-runtime-canvas" />
+      <div className={`relative overflow-hidden rounded border border-cyan-100 bg-slate-950 ${ampliada ? 'h-[62vh]' : 'h-40'}`}>
+        <canvas
+          ref={canvasRef}
+          className="h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          data-testid="f455-babylon-runtime-canvas"
+          role="img"
+          tabIndex={0}
+          aria-label={`Vista 3D de ${scene.roomName}: ${scene.walls.length} barreras, ${scene.equipment.length} equipos. Arrastre o use las flechas para girar la cámara; rueda para acercar.`}
+        />
         {status !== 'ready' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 px-3 text-center text-[10px] text-cyan-50">
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 px-3 text-center text-[10px] text-cyan-50" aria-hidden="true">
             {message}
           </div>
         )}
       </div>
-      <div className={`text-[9px] leading-relaxed ${status === 'failed' ? 'text-red-700' : 'text-cyan-900'}`}>
+      <div
+        className={`text-[9px] leading-relaxed ${status === 'failed' || status === 'sin-webgl' ? 'text-red-700' : 'text-cyan-900'}`}
+        role="status"
+        aria-live="polite"
+        data-testid="f455-babylon-runtime-mensaje"
+      >
         {message}
       </div>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-7 w-full bg-white text-[10px]"
+        onClick={() => setAmpliada((v) => !v)}
+        aria-pressed={ampliada}
+        disabled={status === 'sin-webgl'}
+        data-testid="f13-babylon-ampliar"
+      >
+        {ampliada ? 'Reducir vista 3D' : 'Ampliar vista 3D'}
+      </Button>
       <div className="grid gap-2 md:grid-cols-[1fr_1fr]" data-testid="f470-f474-babylon-deep-runtime">
         <div className="rounded border border-cyan-100 bg-white/85 p-2 text-[9px] leading-relaxed text-cyan-950" data-testid="f471-babylon-pick-hud">
           <div className="mb-1 flex items-center justify-between gap-2">
@@ -499,6 +582,7 @@ export function BabylonRuntimeSmokePreview({
             variant={cameraMode === mode ? 'default' : 'outline'}
             className="h-7 text-[10px]"
             onClick={() => applyCameraMode(mode)}
+            aria-pressed={cameraMode === mode}
             data-testid={`f472-babylon-camera-${mode}`}
           >
             {mode === 'iso' ? 'Iso' : mode === 'top' ? 'Planta' : 'Frente'}
@@ -520,6 +604,6 @@ export function BabylonRuntimeSmokePreview({
       >
         <Download className="w-3.5 h-3.5 mr-2" /> Export PNG Babylon
       </Button>
-    </div>
+    </section>
   );
 }

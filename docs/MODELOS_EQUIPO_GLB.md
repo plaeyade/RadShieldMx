@@ -2,8 +2,8 @@
 
 ## Qué hace
 
-La vista previa Babylon de Inspección 3D (`BabylonRuntimeSmokePreview`, tras la bandera `VISOR_3D_BABYLON`,
-**apagada por omisión y sin cambiar en esta fase**) dibuja cada equipo de la escena (`MedicalScene.equipment`,
+La vista 3D Babylon de Inspección 3D (`BabylonRuntimeSmokePreview`, bandera `VISOR_3D_BABYLON`, **activa por
+omisión desde el 23-11-2026**; se apaga con `VITE_VISOR_3D_BABYLON=false`) dibuja cada equipo de la escena (`MedicalScene.equipment`,
 una entrada por fuente del plano) con una caja de huella y un toro de gantry. Ahora, si hay ruta configurada,
 intenta además cargar el GLB a escala real que corresponde al equipo:
 
@@ -55,7 +55,7 @@ Uso local (desarrollo o build de escritorio que no se publica):
 New-Item -ItemType Directory -Force public\modelos-equipo | Out-Null
 Copy-Item ..\3D-Models\modelos\*\glb\*_web.glb public\modelos-equipo\
 # .env.local (no versionado)
-#   VITE_VISOR_3D_BABYLON=true      <- sólo en tu máquina, para ver la vista Babylon
+#   (VITE_VISOR_3D_BABYLON ya no hace falta: la vista Babylon está activa por omisión)
 #   VITE_EQUIPO_GLB_BASE=/modelos-equipo/
 npm run dev
 ```

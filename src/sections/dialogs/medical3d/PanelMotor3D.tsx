@@ -3,12 +3,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_3D_RENDER_STRATEGIES, type Medical3DRenderEngine } from '@/lib/medical3D/renderStrategy';
-import { NOTA_VISOR_EN_REVISION, VISOR_3D_BABYLON } from '@/lib/featureFlags';
+import { VISOR_3D_BABYLON } from '@/lib/featureFlags';
 import { BabylonRuntimeSmokePreview } from './BabylonRuntimeSmokePreview';
 import { UnityWebglExportedBuildPreview } from './PanelesUnityFotoreal';
 import type { PanelMedical3DProps } from './tipos';
 
-/** Selector de motor 3D (F307-F309): Three/R3F activo; Babylon tras VISOR_3D_BABYLON; puente Unity. */
+/** Selector de motor 3D (F307-F309): Three/R3F; vista Babylon (activa por omisión, se apaga con VITE_VISOR_3D_BABYLON=false); puente Unity. */
 export function PanelMotor3D({ estado, contratos, exportar, open }: PanelMedical3DProps) {
   const { hasGeometry, pbrMaterialDb, renderEngine, renderStrategy, scene, setBabylonSmokeStatus, setRenderEngine } = estado;
   const { babylonDeepContract, f520ToF524DeepRendererBabylon, unityExportedBuildContract, unityLaunchPacket } = contratos;
@@ -45,9 +45,9 @@ export function PanelMotor3D({ estado, contratos, exportar, open }: PanelMedical
         ) : (
           <div
             className="rounded border border-amber-200 bg-amber-50 p-2 text-[10px] text-amber-900"
-            data-testid="babylon-visor-en-revision"
+            data-testid="babylon-visor-desactivado"
           >
-            Vista previa Babylon — {NOTA_VISOR_EN_REVISION}. El visor 3D activo es Three/R3F.
+            Vista 3D Babylon desactivada en esta compilación (VITE_VISOR_3D_BABYLON=false). El visor 3D activo es Three/R3F.
           </div>
         )}
         <div
