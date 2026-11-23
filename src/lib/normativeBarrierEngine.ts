@@ -37,7 +37,7 @@ import {
   type FuenteTeleterapia,
   type MaterialNCRP151,
 } from '@/lib/ncrp151';
-import { calculateUnshieldedKerma, getShieldingEnergyKey } from '@/lib/shieldingMath';
+import { calculateUnshieldedKerma, desnivelPuntoProtegido_m, getShieldingEnergyKey } from '@/lib/shieldingMath';
 import type { CTIsodosisProfile } from '@/types/ctIsodosis';
 
 /** Distribución de carga de NCRP 147 (TG9) por modalidad del catálogo. */
@@ -95,7 +95,6 @@ export interface ResultadoNormativo {
   notas: string[];
 }
 
-/** Distancia fuente → punto (m), con la altura del isocentro y un mínimo de 0.3 m. */
 /**
  * Fase 13, paso 1: ángulo de dispersión del paciente desde la geometría (NCRP 151 §2.4: θ se mide desde el eje
  * central del haz). Con `ejeGantry_deg` el haz gira en el plano perpendicular al eje del gantry; el menor ángulo entre
@@ -127,11 +126,58 @@ export function anguloDispersion(barrera: Pick<Barrier, 'scatterAngle_deg'> | un
 /** θ por omisión (conservador para barreras laterales; NCRP 151 §7.1.5 usa 30° en el ejemplo). */
 export const ANGULO_DISPERSION_OMISION_DEG = 30;
 
+/**
+ * Distancia fuente → punto protegido (m), con un mínimo de 0.3 m. Fase 13, paso 2: el desnivel vertical es el de la
+ * convención única (`desnivelPuntoProtegido_m`: altura ocupada de 0 a 1.7 m más cercana a la fuente); antes se
+ * sumaba la altura del isocentro entera (punto en el piso). La usan el motor de barreras y el mapa de dosis.
+ */
 export function distancia(s: RadiationSource, p: PuntoMuestreo, escala: number): number {
   const dx = (p.x - s.x) * escala;
   const dy = (p.y - s.y) * escala;
-  const dz = s.isocenterHeight_m || 0;
+  const dz = desnivelPuntoProtegido_m(s);
   return Math.max(0.3, Math.sqrt(dx * dx + dy * dy + dz * dz));
+}
+
+/** Semidiagonal del campo máximo de 40 × 40 cm en el isocentro (m) y distancia blanco–isocentro (SAD, m). */
+const SEMIDIAGONAL_CAMPO_MAX_M = 0.2 * Math.SQRT2;
+const SAD_ISOCENTRO_M = 1;
+
+/**
+ * ¿Está el punto en la franja que barre el haz primario al girar el gantry? |desplazamiento a lo largo del eje| ≤
+ * 0.283·(distancia en el plano de giro + SAD). null si la fuente no trae `ejeGantry_deg` (no se sabe). La comparten
+ * el motor de barreras (U por franja, Fase 13, paso 2) y el mapa (`doseFieldEngine.enHazPrimario`).
+ */
+export function enHazPrimario(source: RadiationSource, x: number, y: number, escala: number): boolean | null {
+  if (typeof source.ejeGantry_deg !== 'number' || !Number.isFinite(source.ejeGantry_deg)) return null;
+  const ax = Math.cos((source.ejeGantry_deg * Math.PI) / 180), ay = Math.sin((source.ejeGantry_deg * Math.PI) / 180);
+  const dx = (x - source.x) * escala, dy = (y - source.y) * escala;
+  const aLoLargo = Math.abs(dx * ax + dy * ay);
+  const enPlano = Math.abs(dx * ay - dy * ax);
+  return aLoLargo <= SEMIDIAGONAL_CAMPO_MAX_M * (enPlano + SAD_ISOCENTRO_M) + 1e-9;
+}
+
+/**
+ * U de una barrera primaria de teleterapia por omisión: el gantry reparte el haz entre cuatro direcciones (dos
+ * muros, techo y piso), 1/4 cada una (NCRP 151, ejemplos de §7.1). Es el valor que reciben las primarias importadas
+ * (antes U = 1 al importar del DXF: primaria ×4).
+ */
+export const U_PRIMARIA_OMISION = 0.25;
+
+/** Fracción válida (0, 1] o undefined. */
+const fraccionValida = (v: unknown): number | undefined => (typeof v === 'number' && v > 0 && v <= 1 ? v : undefined);
+
+/**
+ * Fase 13, paso 2: U de la primaria de una fuente en un punto, según la franja del haz. Fuera de la franja (con
+ * `ejeGantry_deg`) el haz no llega: U = 0. Dentro (o sin eje), el U de la barrera; sin barrera (mapa: punto en la
+ * franja que no está detrás de una primaria), el de la fuente; si ninguno es válido, 1/4. La misma regla en el
+ * motor de barreras y en el mapa de dosis.
+ */
+export function factorUsoPrimaria(
+  barrera: Pick<Barrier, 'useFactor'> | undefined, s: RadiationSource, p: PuntoMuestreo, escala: number,
+): number {
+  if (enHazPrimario(s, p.x, p.y, escala) === false) return 0;
+  if (barrera) return fraccionValida(barrera.useFactor) ?? U_PRIMARIA_OMISION;
+  return fraccionValida(s.useFactor) ?? U_PRIMARIA_OMISION;
 }
 
 /** Material del catálogo → material de las tablas NCRP 147 (null si no está tabulado). */
@@ -289,7 +335,10 @@ function teleterapia(
   P_mSv: number, T: number, esPrimaria: boolean, barrera: Barrier,
 ): ResultadoNormativo {
   const P = P_mSv / 1000; // Sv/semana
-  const U = barrera.useFactor > 0 && barrera.useFactor <= 1 ? barrera.useFactor : 0.25;
+  const U = fraccionValida(barrera.useFactor) ?? U_PRIMARIA_OMISION;
+  // Fase 13, paso 2: con el eje del gantry, la primaria sólo llega a los puntos de la franja del haz; fuera de ella
+  // el punto de una barrera primaria se calcula como secundaria (fuga + dispersión).
+  const primariaEn = (s: RadiationSource, p: PuntoMuestreo) => esPrimaria && factorUsoPrimaria(barrera, s, p, escala) > 0;
   // θ por punto y fuente: el de la barrera, el de la geometría (eje del gantry) o 30° (Fase 13, paso 1).
   const thetas = esPrimaria ? [] : puntos.flatMap((p) => fuentes.map((s) => anguloDispersion(barrera, s, p, escala)));
   const declarado = typeof barrera.scatterAngle_deg === 'number' && Number.isFinite(barrera.scatterAngle_deg);
@@ -308,8 +357,21 @@ function teleterapia(
   if (!esPrimaria && !declarado && geometrico && thetaMin < SEMIANGULO_HAZ_MAX_DEG) {
     notas.push(`Barrera secundaria con puntos a ${thetaMin.toFixed(1)}° del plano de giro (< ${SEMIANGULO_HAZ_MAX_DEG.toFixed(1)}°, semiángulo del campo máximo): el haz primario puede alcanzarlos; revise si debe ser primaria.`);
   }
+  if (esPrimaria) {
+    const conEje = fuentes.some((s) => typeof s.ejeGantry_deg === 'number' && Number.isFinite(s.ejeGantry_deg));
+    const pares = puntos.flatMap((p) => fuentes.map((s) => primariaEn(s, p)));
+    if (conEje) notas.push(`U = ${U} en la franja del haz (eje del gantry); fuera de ella U = 0 y el punto se calcula como secundaria.`);
+    if (!fraccionValida(barrera.useFactor)) notas.push(`U no válido en la barrera: U = ${U_PRIMARIA_OMISION} por omisión (1/4 por dirección del gantry).`);
+    if (conEje && !pares.some(Boolean)) {
+      notas.push('La barrera primaria queda fuera de la franja del haz: se calcula como secundaria; revise su tipo.');
+    }
+    if (U === 1) {
+      notas.push('U = 1 en una primaria de teleterapia: NCRP 151 reparte el uso entre las direcciones del gantry (1/4 por muro); revise si es un valor de importación.');
+    }
+  }
+  const secundariaEnPrimaria = esPrimaria && puntos.some((p) => fuentes.some((s) => !primariaEn(s, p)));
   const fts = fuentes.map(fuenteTeleterapiaDe);
-  if (!esPrimaria && fuentes.some((s) => s.imrtFraction === undefined)) {
+  if ((!esPrimaria || secundariaEnPrimaria) && fuentes.some((s) => s.imrtFraction === undefined)) {
     notas.push('Fuga con IMRT por omisión: 50 % de la carga con C_I = 5 (valores del ejemplo §7.1.4).');
   }
   const espesores: Record<string, number> = {};
@@ -328,7 +390,7 @@ function teleterapia(
         const f = fts[i];
         if (!f) return;
         const d = distancia(s, p, escala);
-        if (esPrimaria) {
+        if (primariaEn(s, p)) {
           comps.push(primaria(f, { P_Sv_semana: P, T, U, d_m: d, material: mat }));
           const tvl = tvlPrimaria(f.energia, mat);
           directos.push({ K_Sv_semana: kermaPrimaria(f, U, d), transmision: (t) => transmisionTVL(t, tvl) });
@@ -354,7 +416,14 @@ function teleterapia(
       // Σ K·B ≤ P/T del motor de campo; se toma el mayor de los dos espesores.
       // Secundaria (§7.1.5, pp. 114–115; §7.1.8, p. 123): dos fuentes por tipo (dispersión entre energías, fuga
       // entre energías) y después dispersión vs. fuga con el mayor HVL.
-      const regla = esPrimaria ? Math.max(0, ...comps.map((c) => c.espesor_cm)) : combinarPorTipo([porTipo.dispersion, porTipo.fuga]);
+      // Fase 13, paso 2: en una primaria, los puntos fuera de la franja del haz sólo tienen fuga + dispersión.
+      const primarias = comps.filter((c) => !porTipo.fuga.includes(c) && !porTipo.dispersion.includes(c));
+      const hayPrimaria = primarias.length > 0;
+      const haySecundaria = porTipo.fuga.length > 0;
+      const regla = Math.max(
+        hayPrimaria ? Math.max(0, ...primarias.map((c) => c.espesor_cm)) : 0,
+        haySecundaria ? combinarPorTipo([porTipo.dispersion, porTipo.fuga]) : 0,
+      );
       const directo = espesorSumaDirecta(directos, P, T);
       if (directo > regla + 1e-6) porSumaDirecta = true;
       peor = Math.max(peor, regla, directo);

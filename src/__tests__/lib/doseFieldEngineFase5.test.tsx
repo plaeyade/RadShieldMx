@@ -211,10 +211,17 @@ describe('Fase 5 — Isosuperficie 3D ↔ motor', () => {
       const ref = dosisEnPunto(fuentesAAltura(p, q.z_m), q.x_px, q.y_px, p.scale_m_per_pixel, { barriers: p.barriers }).kerma_mSv_semana;
       expect(Math.abs(q.kerma_mSv_semana - ref) / Math.max(ref, 1e-30)).toBeLessThan(0.01);
     }
-    // A z = 0 es exactamente el plano 2D del motor (la fuente queda a isocenterHeight_m).
+    // A z = 0 el punto está en el piso: la fuente queda a isocenterHeight_m de él.
     const [q0] = malla3DPlano(p, { columnas: 20, alturas_m: [0] });
-    const ref0 = dosisEnPunto(p.sources, q0.x_px, q0.y_px, p.scale_m_per_pixel, { barriers: p.barriers }).kerma_mSv_semana;
+    const enPiso = p.sources.map((f) => ({ ...f, alturaPuntoProtegido_m: 0 }));
+    const ref0 = dosisEnPunto(enPiso, q0.x_px, q0.y_px, p.scale_m_per_pixel, { barriers: p.barriers }).kerma_mSv_semana;
     expect(Math.abs(q0.kerma_mSv_semana - ref0) / ref0).toBeLessThan(1e-6);
+    // Fase 13, paso 2: el plano 2D usa la altura ocupada más cercana a cada fuente (isocentros de 1.2–1.3 m:
+    // desnivel 0), no el piso: da más dosis que el corte a z = 0.
+    const plano2D = dosisEnPunto(p.sources, q0.x_px, q0.y_px, p.scale_m_per_pixel, { barriers: p.barriers }).kerma_mSv_semana;
+    const aSuAltura = p.sources.map((f) => ({ ...f, alturaPuntoProtegido_m: f.isocenterHeight_m }));
+    expect(dosisEnPunto(aSuAltura, q0.x_px, q0.y_px, p.scale_m_per_pixel, { barriers: p.barriers }).kerma_mSv_semana).toBeCloseTo(plano2D, 12);
+    expect(plano2D).toBeGreaterThan(q0.kerma_mSv_semana);
     // La isosuperficie es el subconjunto ≥ nivel.
     const iso = isosuperficie3D(p, 0.1, { columnas: 20 });
     expect(iso.length).toBeGreaterThan(0);

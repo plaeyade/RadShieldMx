@@ -12,6 +12,7 @@ import {
   buildConservativeCalculationComparison,
   calculateUnshieldedKerma,
   exponentialThickness,
+  desnivelPuntoProtegido_m,
   generateSamplePoints,
   getCalculationAuditWarnings,
   getShieldingEnergyKey,
@@ -131,7 +132,7 @@ export function calculateRealClinicalTrialCase(params: {
   for (const point of points) {
     const dx = (point.x - params.source.x) * scale;
     const dy = (point.y - params.source.y) * scale;
-    const dz = params.source.isocenterHeight_m || 0;
+    const dz = desnivelPuntoProtegido_m(params.source); // Fase 13, paso 2
     minSourceDistance_m = Math.min(minSourceDistance_m, Math.hypot(dx, dy, dz));
     maxKerma = Math.max(maxKerma, calculateUnshieldedKerma(params.source, point.x, point.y, scale));
   }

@@ -88,6 +88,8 @@ import {
   ANGULO_DISPERSION_OMISION_DEG,
   anguloDispersion,
   distancia,
+  enHazPrimario as enHazPrimarioNormativo,
+  factorUsoPrimaria,
   fuenteTeleterapiaDe,
   geometria147,
   kvpTC,
@@ -371,15 +373,11 @@ function inglete(
   ];
 }
 
-/** ¿Está el punto en la franja que barre el haz primario? null si la fuente no trae `ejeGantry_deg`. */
-export function enHazPrimario(source: RadiationSource, x: number, y: number, scale_m_per_pixel: number): boolean | null {
-  if (typeof source.ejeGantry_deg !== 'number' || !Number.isFinite(source.ejeGantry_deg)) return null;
-  const ax = Math.cos(source.ejeGantry_deg * RAD), ay = Math.sin(source.ejeGantry_deg * RAD);
-  const dx = (x - source.x) * scale_m_per_pixel, dy = (y - source.y) * scale_m_per_pixel;
-  const aLoLargo = Math.abs(dx * ax + dy * ay);
-  const enPlano = Math.abs(dx * ay - dy * ax);
-  return aLoLargo <= SEMIDIAGONAL_CAMPO_MAX * (enPlano + SAD_M) + EPS;
-}
+/**
+ * ¿Está el punto en la franja que barre el haz primario? null si la fuente no trae `ejeGantry_deg`. Fase 13, paso 2:
+ * la misma función que usa el motor de barreras para U por franja (`normativeBarrierEngine.enHazPrimario`).
+ */
+export const enHazPrimario = enHazPrimarioNormativo;
 
 /** Transmisión de una capa con K₀ único: medicina nuclear con el motor de barreras (GP / TG-108); el resto, Fase 1. */
 export function transmisionCapa(
@@ -626,7 +624,8 @@ function modelosDeFuente(
   const f: FuenteTeleterapia | null = fuenteTeleterapiaDe(source);
   if (f) {
     const d = distancia(source, { x, y }, scale);
-    const U = fraccion(bPrim?.useFactor) ?? fraccion(source.useFactor) ?? 0.25;
+    // Fase 13, paso 2: el mismo U por franja que el motor de barreras (barrera primaria → fuente → 1/4).
+    const U = factorUsoPrimaria(bPrim, source, { x, y }, scale);
     const Us = fraccion(bSec?.useFactor) ?? fraccion(source.useFactor) ?? 0.25;
     // Fase 13, paso 1: el mismo θ que el motor de barreras (declarado, geométrico o 30°) en cada punto del mapa.
     const theta = anguloDispersion(bSec, source, { x, y }, scale);

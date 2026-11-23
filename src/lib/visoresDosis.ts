@@ -117,12 +117,12 @@ export interface PuntoDosis3D {
 export const DISTANCIA_MIN_FUENTE_3D_M = 0.3;
 
 /**
- * Fuentes vistas desde la altura `z_m`: el motor es de planta y toma `isocenterHeight_m` como distancia
- * vertical fuente–punto (en 2D el punto está en z = 0). Aquí la fuente queda a su altura de isocentro y el
- * punto a z_m: distancia vertical |h − z|. La oblicuidad vertical en las barreras no se acredita (conservador).
+ * Fuentes vistas desde la altura `z_m`: el motor es de planta; aquí la fuente queda a su altura de isocentro y el
+ * punto protegido a z_m (`alturaPuntoProtegido_m`, Fase 13, paso 2): distancia vertical |h − z|. La oblicuidad
+ * vertical en las barreras no se acredita (conservador).
  */
 export function fuentesAAltura(plano: PlanoDosis, z_m: number): PlanoDosis['sources'] {
-  return plano.sources.map((s) => ({ ...s, isocenterHeight_m: Math.abs((s.isocenterHeight_m ?? 0) - z_m) }));
+  return plano.sources.map((s) => ({ ...s, alturaPuntoProtegido_m: z_m }));
 }
 
 /** Alturas por omisión de los cortes 3D (m): 0.25 a 2.75 cada 0.5 m. */

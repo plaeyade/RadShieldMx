@@ -154,6 +154,8 @@ export function fuenteMapeo(sourcePos: { x: number; z: number }, activity_GBq: n
     nuclearActivity_GBq: activity_GBq,
     workloadHoursPerWeek: 1,
     isocenterHeight_m: Math.abs(dy_m),
+    // Fase 13, paso 2: el vóxel fija la altura del punto (0 respecto de la fuente a |dy|): desnivel exacto |dy|.
+    alturaPuntoProtegido_m: 0,
     useFactor: 1,
   };
 }

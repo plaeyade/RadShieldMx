@@ -380,6 +380,9 @@ export interface RadiationSource {
   // Motor de campo (Fase 2): orientación en planta del eje de rotación del gantry (grados, 0 = +x del
   // lienzo). Si existe, la primaria sólo llega a la franja que barre el haz; si no, a las barreras primarias.
   ejeGantry_deg?: number;
+  // Fase 13, paso 2: altura (m) del punto protegido sobre el piso. Sin ella, la altura ocupada (0–1.7 m) más
+  // cercana a la fuente; la fijan los cortes 3D del visor (`fuentesAAltura`).
+  alturaPuntoProtegido_m?: number;
 }
 
 export interface Barrier {

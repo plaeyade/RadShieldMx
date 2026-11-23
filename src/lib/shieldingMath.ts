@@ -23,6 +23,35 @@ import { interiorArcher } from './ncrp147';
 export const SAMPLING_DISTANCE_M = 0.3;
 export const SAMPLING_SPACING_M = 0.2;
 
+/**
+ * Fase 13, paso 2 — convención única del punto protegido (motor, mapa y memoria):
+ * - En planta, a `SAMPLING_DISTANCE_M` (0.3 m) de la cara exterior: la línea dibujada (cara interior) más el
+ *   espesor INSTALADO (`espesorInstalado_mm`: capas del preset o espesor capturado; el requerido no, porque depende
+ *   del propio cálculo).
+ * - En altura, a la altura ocupada más cercana a la fuente: una persona ocupa del piso a 1.7 m (la altura que
+ *   NCRP 147 y NCRP 151 toman para una persona de pie). Con la fuente entre 0 y 1.7 m (isocentro de 1.0–1.3 m,
+ *   paciente de PET) el desnivel es 0 y la distancia es la de planta, como en los ejemplos de NCRP 151 §7.1 y
+ *   TG-108. Antes `isocenterHeight_m` se sumaba entero como desnivel (punto en el piso): con 1.2 m la distancia
+ *   crecía y la dosis bajaba (no conservador).
+ * - `alturaPuntoProtegido_m` en la fuente fija la altura del punto (cortes 3D del visor): desnivel |h − z|.
+ */
+export const ALTURA_OCUPACION_MAX_M = 1.7;
+
+/** Desnivel vertical (m) fuente → punto protegido con la convención anterior. */
+export function desnivelPuntoProtegido_m(s: Pick<RadiationSource, 'isocenterHeight_m' | 'alturaPuntoProtegido_m'>): number {
+  const h = Number.isFinite(s.isocenterHeight_m) ? s.isocenterHeight_m : 0;
+  if (typeof s.alturaPuntoProtegido_m === 'number' && Number.isFinite(s.alturaPuntoProtegido_m)) return Math.abs(h - s.alturaPuntoProtegido_m);
+  if (h < 0) return -h;
+  return Math.max(0, h - ALTURA_OCUPACION_MAX_M);
+}
+
+/** Espesor instalado de una barrera (mm): suma de `shieldingLayers` o, si no hay capas, `thickness_mm`; si no, 0. */
+export function espesorInstalado_mm(barrier: Pick<Barrier, 'shieldingLayers' | 'thickness_mm'>): number {
+  const capas = (barrier.shieldingLayers ?? []).filter((c) => c.materialCode && Number.isFinite(c.thickness_mm) && c.thickness_mm > 0);
+  if (capas.length) return capas.reduce((a, c) => a + c.thickness_mm, 0);
+  return Number.isFinite(barrier.thickness_mm) && (barrier.thickness_mm ?? 0) > 0 ? (barrier.thickness_mm as number) : 0;
+}
+
 export interface CalculationInputWarning {
   field: string;
   severity: 'warning' | 'error';
@@ -451,7 +480,7 @@ export function calculateCTKerma(
 ): number {
   const dx = (pointX - source.x) * scale_m_per_pixel;
   const dy = (pointY - source.y) * scale_m_per_pixel;
-  const dz = source.isocenterHeight_m;
+  const dz = desnivelPuntoProtegido_m(source);
   const d_m = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (d_m < 0.1) return 1e6;
 
@@ -477,7 +506,7 @@ export function calculateNuclearKerma(
 ): number {
   const dx = (pointX - source.x) * scale_m_per_pixel;
   const dy = (pointY - source.y) * scale_m_per_pixel;
-  const dz = source.isocenterHeight_m;
+  const dz = desnivelPuntoProtegido_m(source);
   const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (d < 0.1) return 1e6;
 
@@ -526,7 +555,7 @@ export function calculateUnshieldedKerma(
 
   const dx = (pointX - source.x) * scale_m_per_pixel;
   const dy = (pointY - source.y) * scale_m_per_pixel;
-  const dz = source.isocenterHeight_m;
+  const dz = desnivelPuntoProtegido_m(source);
   const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (d < 0.1) return 1e6;
 
@@ -569,8 +598,8 @@ export function calculateUnshieldedKerma(
 // ───────────────────────────────────────────────────────────────
 /**
  * Puntos a 0.3 m de la barrera (NCRP 147/151), del lado OPUESTO a las fuentes: el área protegida.
- * Antes la normal era fija y podía caer del lado de la fuente. Si se conoce el espesor de la barrera
- * (`thickness_mm`), el desplazamiento se mide desde su cara exterior.
+ * Antes la normal era fija y podía caer del lado de la fuente. Si se conoce el espesor instalado de la barrera
+ * (`shieldingLayers` o `thickness_mm`), el desplazamiento se mide desde su cara exterior.
  */
 export function generateSamplePoints(
   barrier: Barrier,
@@ -592,7 +621,8 @@ export function generateSamplePoints(
     const cy = sources.reduce((a, s) => a + s.y, 0) / sources.length;
     if ((cx - mx) * nx + (cy - my) * ny > 0) { nx = -nx; ny = -ny; }
   }
-  const espesor_m = Number.isFinite(barrier.thickness_mm) && (barrier.thickness_mm ?? 0) > 0 ? (barrier.thickness_mm as number) / 1000 : 0;
+  // Fase 13, paso 2: desde la cara exterior con el espesor instalado (capas o espesor capturado), como el mapa.
+  const espesor_m = espesorInstalado_mm(barrier) / 1000;
   const offset_pixels = (SAMPLING_DISTANCE_M + espesor_m) / scale_m_per_pixel;
   const numPoints = Math.max(2, Math.ceil(length_m / SAMPLING_SPACING_M) + 1);
 
