@@ -402,7 +402,9 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
    queda dentro del semiángulo del haz.
 2. **U de primaria y una sola convención de distancia**: U por barrera según la franja del haz (no U = 1 al importar)
    y el punto protegido a 0.3 m de la cara exterior, a la altura de ocupación, igual en motor, mapa y memoria.
-3. **Techos y pisos para todas las modalidades** (MN, PET, HDR, Gamma Knife; hoy sólo concreto y sólo linac), con
+3. **Laberinto y puerta ≥ 10 MV en el motor del proyecto** (NCRP 151 §2.4: fotones en la puerta, captura gamma y
+   neutrones por Kersey o Wu–McGinley). Acordado como paso 3 el 22-11-2026; techos y pisos pasa a 3b.
+3b. **Techos y pisos para todas las modalidades** (MN, PET, HDR, Gamma Knife; hoy sólo concreto y sólo linac), con
    material, espesor y alturas de la sala.
 4. **Materiales de alta densidad con densidad medida y cita** (TD-550/TD-250, NIPOL; Anexo K), sin espesor
    «requerido» tomado del nombre de capa.
@@ -449,3 +451,25 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
     z = 0 fijan ahora el punto en el piso (`alturaPuntoProtegido_m = 0`). «Guíame» (fuentes a 0 m y muros sin espesor
     instalado) y los ejemplos del §7.1 dan los mismos espesores: 17.96 mm Pb / 213.77 mm de concreto en el muro norte.
     Pruebas: `src/__tests__/validacion/fase13Paso2.test.ts`.
+- **Paso 3** (`fase13-paso3-laberinto`): laberinto y puerta de teleterapia en el motor del proyecto, con las
+  ecuaciones ya validadas de `ncrp151Laberinto.ts` (antes sólo las usaba el diálogo, con una energía).
+  - **Modelo.** `FloorPlan.laberintos` (`LaberintoPuertaPlano`): geometría de las Figs. 2.7 y 2.8 en m y m² (la
+    captura el usuario; aún no se mide del plano), espesor de concreto del muro interior, sala para neutrones
+    (d₁, d₂, S_r, S₀, S₁), Q_n/H₀ del fabricante por energía (sin ellos, el máximo de la Tabla B.9), método de
+    neutrones, P y T del lado exterior y la puerta instalada (BPE y plomo).
+  - **Cálculo** (`src/lib/laberintoPuerta.ts`, `evaluarLaberintoPuerta`): fotones de la Ec. 2.9–2.14 por energía y
+    sumados (§7.1.10); con energías ≥ 10 MV, captura (Ec. 2.15–2.17) y neutrones (Kersey Ec. 2.18 o Wu–McGinley
+    Ec. 2.19–2.21; por omisión el mayor), ambos con la carga de fuga W_L de la Ec. 3.6 (§7.1.11–7.1.12). Puerta con
+    la regla de §7.1.13 (neutrones con BPE, TVL 45 mm, y captura con plomo, TVL 61 mm, cada uno a (P/T)/2; sólo
+    fotones: plomo con TVL 6 mm a P/T) y, si la SUMA de las tres componentes detrás de esa puerta rebasa P/T, más
+    plomo hasta cumplirla (en §7.1.13 sin IMRT la regla deja ≈ 107 µSv detrás de 53.3 mm BPE + 7.1 mm Pb; el motor
+    adopta 8.9 mm Pb). Estado con la puerta instalada (CUMPLE / NO_CUMPLE / SIN_ESPESOR; SIN_DATOS si falta la sala
+    con ≥ 10 MV) y tasa media en 40 h de haz. Aviso si el laberinto sale del intervalo de la Ec. 2.14.
+  - **Proyecto y memoria.** `calcularProyecto` devuelve `laberintos` sólo si el plano los declara; la memoria añade
+    `puertas` (opcional en `radshield/memoria@1`, esquema regenerado), el criterio «puerta», las fórmulas y una
+    conclusión por puerta. Sin laberintos, el proyecto y la memoria no cambian (mismo sello). El diálogo
+    «Laberinto y puerta» usa la misma función.
+  - Pruebas: `src/__tests__/validacion/fase13Paso3.test.ts` (§7.1.10–7.1.13: fotones 100, captura 65.3, Kersey 765 →
+    930 µSv; 53.6 mm BPE + 7.3 mm Pb; IMRT 72 + 32 mm). «Guíame» sin cambio (17.96 mm Pb / 213.77 mm concreto).
+  - Pendiente para el físico médico: método de neutrones por omisión, neutrones desde 10 MV, la regla de la suma
+    frente a §7.1.13 tal cual, laberintos de dos tramos y geometría medida del plano.

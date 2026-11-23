@@ -65,6 +65,28 @@ export const EsquemaBarreraMemoria = z.strictObject({
   avisos: z.array(texto),
 });
 
+/** Fase 13, paso 3: puerta de un laberinto de teleterapia (NCRP 151 §2.4). Opcional: sólo si el plano declara laberintos. */
+export const EsquemaPuertaMemoria = z.strictObject({
+  id: texto,
+  nombre: texto,
+  fuentes: z.array(texto),
+  T: num,
+  P_mSv_semana: num,
+  fotones_uSv_semana: num,
+  captura_uSv_semana: num,
+  neutrones_uSv_semana: num,
+  total_uSv_semana: num,
+  metodoNeutrones: z.enum(['kersey', 'wu-mcginley', 'mayor']),
+  requeridoBPE_mm: num,
+  requeridoPb_mm: num,
+  instaladoBPE_mm: numNulo,
+  instaladoPb_mm: numNulo,
+  residual_uSv_semana: numNulo,
+  estado: z.enum(['CUMPLE', 'NO_CUMPLE', 'SIN_ESPESOR', 'SIN_DATOS']),
+  notas: z.array(texto),
+  avisos: z.array(texto),
+});
+
 export const EsquemaMemoria = z.strictObject({
   contrato: z.literal('radshield/memoria@1'),
   id: texto,
@@ -97,6 +119,7 @@ export const EsquemaMemoria = z.strictObject({
     formulas: z.array(z.strictObject({ id: texto, expresion: texto, donde: texto })),
   }),
   barreras: z.array(EsquemaBarreraMemoria),
+  puertas: z.array(EsquemaPuertaMemoria).optional(),
   resultadosPorArea: z.array(z.strictObject({ area: texto, barreras: z.array(texto), cumplen: num, total: num, conclusion: texto })),
   conclusiones: z.strictObject({ cumplen: num, total: num, sinCalculo: num, sinEspesor: num, noCumplen: num, textos: z.array(texto) }),
   referencias: z.array(z.strictObject({ id: texto, cita: texto })),

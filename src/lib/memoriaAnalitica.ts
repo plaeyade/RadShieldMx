@@ -16,6 +16,7 @@ import { verificarBarrera, type FilaVerificacion } from '@/lib/verificacionBlind
 import { ALTURA_OCUPACION_MAX_M, codigoCatalogo } from '@/lib/shieldingMath';
 import { U_PRIMARIA_OMISION } from '@/lib/normativeBarrierEngine';
 import { claveMetodoFuente } from '@/lib/motorProyecto';
+import { evaluarLaberintosDelPlano, type EstadoPuerta } from '@/lib/laberintoPuerta';
 import { LIMITES_DOSIS, P_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 import { NOM_012_NUCL, NOM_013_NUCL, NOM_033_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
 
@@ -87,6 +88,28 @@ export interface BarreraMemoria {
   avisos: string[];
 }
 
+/** Fase 13, paso 3: puerta de un laberinto de teleterapia (NCRP 151 §2.4), en µSv/semana y mm. */
+export interface PuertaMemoria {
+  id: string;
+  nombre: string;
+  fuentes: string[];
+  T: number;
+  P_mSv_semana: number;
+  fotones_uSv_semana: number;
+  captura_uSv_semana: number;
+  neutrones_uSv_semana: number;
+  total_uSv_semana: number;
+  metodoNeutrones: 'kersey' | 'wu-mcginley' | 'mayor';
+  requeridoBPE_mm: number;
+  requeridoPb_mm: number;
+  instaladoBPE_mm: number | null;
+  instaladoPb_mm: number | null;
+  residual_uSv_semana: number | null;
+  estado: EstadoPuerta;
+  notas: string[];
+  avisos: string[];
+}
+
 export interface MemoriaAnalitica {
   contrato: typeof CONTRATO_MEMORIA;
   id: string;
@@ -106,6 +129,8 @@ export interface MemoriaAnalitica {
   criterios: { id: string; texto: string }[];
   metodo: { normas: string[]; descripcion: string[]; formulas: { id: string; expresion: string; donde: string }[] };
   barreras: BarreraMemoria[];
+  /** Sólo si el plano declara laberintos. */
+  puertas?: PuertaMemoria[];
   resultadosPorArea: { area: string; barreras: string[]; cumplen: number; total: number; conclusion: string }[];
   conclusiones: { cumplen: number; total: number; sinCalculo: number; sinEspesor: number; noCumplen: number; textos: string[] };
   referencias: { id: string; cita: string }[];
@@ -276,6 +301,21 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     };
   });
 
+  const r6 = (x: number) => +x.toFixed(6);
+  const puertas: PuertaMemoria[] = evaluarLaberintosDelPlano(plano).map((r) => {
+    const l = plano.laberintos!.find((x) => x.id === r.id)!;
+    return {
+      id: r.id, nombre: r.nombre, fuentes: r.fuentes, T: Tvalido(l.T), P_mSv_semana: l.P_mSv_semana,
+      fotones_uSv_semana: r6(r.H_fotones_Sv * 1e6), captura_uSv_semana: r6(r.H_captura_Sv * 1e6),
+      neutrones_uSv_semana: r6(r.H_neutrones_Sv * 1e6), total_uSv_semana: r6(r.H_total_Sv * 1e6),
+      metodoNeutrones: r.metodoNeutrones,
+      requeridoBPE_mm: r6(r.requerido.bpe_mm), requeridoPb_mm: r6(r.requerido.plomo_mm),
+      instaladoBPE_mm: r.instalado ? r.instalado.bpe_mm : null, instaladoPb_mm: r.instalado ? r.instalado.plomo_mm : null,
+      residual_uSv_semana: r.residual_Sv === null ? null : r6(r.residual_Sv * 1e6),
+      estado: r.estado, notas: r.notas, avisos: r.avisos,
+    };
+  });
+
   const ocupaciones: OcupacionMemoria[] = [
     ...plano.barriers.map((b) => ({ id: b.id, area: b.name, tipo: 'barrera' as const, T: Tvalido(b.occupancyFactor), P: b.designGoal_mSv_per_wk })),
     ...(plano.occupiedRegions ?? []).map((o: OccupiedRegion) => ({ id: o.id, area: o.name, tipo: 'region' as const, T: Tvalido(o.occupancyFactor), P: o.designGoal_mSv_per_wk })),
@@ -318,6 +358,12 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
   if (normas.has('NCRP147')) formulas.push({ id: 'NCRP147-Archer', expresion: 'B(x) = [(1+β/α)·e^{αγx} − β/α]^{−1/γ}', donde: 'α, β, γ: parámetros de ajuste por material y distribución de carga (NCRP 147, Apéndices B y C).' });
   if (normas.has('TG108')) formulas.push({ id: 'TG108-paciente', expresion: 'D = 0.092·A₀·t·R_t·N / d²  (µSv);  R_t = 1.443·(T½/t)·[1 − exp(−0.693·t/T½)]', donde: 'Γ efectiva = 0.092 µSv·m²/(MBq·h) a 1 m del paciente (incluye la autoatenuación del cuerpo); A₀: actividad administrada; t: estancia; N: pacientes/semana; d: distancia (m).' });
   if (normas.has('GP')) formulas.push({ id: 'GP-punto-kernel', expresion: 'Ḣ(x) = Σ_i Γ_i·A / d² · B_GP,i(μ_i·x) · e^{−μ_i·x}', donde: 'i: líneas gamma con Iγ ≥ 1 %; B_GP: buildup geométrico-progresivo de ANSI/ANS-6.4.3; μ: coeficiente lineal del material.' });
+  if (puertas.length) {
+    add('NCRP-151');
+    formulas.push({ id: 'NCRP151-2.14', expresion: 'H_Tot = 2.64·(f·H_S + H_LS + H_ps + H_LT)', donde: 'Fotones en la puerta del laberinto (NCRP 151 Ec. 2.9–2.14): dispersión del haz en los muros, fuga dispersada, dispersión del paciente y fuga a través del muro interior.' });
+    formulas.push({ id: 'NCRP151-2.15', expresion: 'H_cg = W_L·6.9×10⁻¹⁶·φ_A·10^(−d₂/TVD);  H_n = W_L·H_n,D (Kersey Ec. 2.18 o Wu–McGinley Ec. 2.19–2.21)', donde: 'Energías ≥ 10 MV: rayos gamma de captura y neutrones en la puerta; W_L: carga de fuga (Ec. 3.6); φ_A: fluencia de neutrones en la entrada interior (Ec. 2.16).' });
+    formulas.push({ id: 'NCRP151-puerta', expresion: 'x_BPE = 45 mm·log₁₀(H_n / (P/2T));  x_Pb = 61 mm·log₁₀(H_cg / (P/2T))  (≤ 10 MV: 6 mm·log₁₀(H_Tot·T/P))', donde: 'Puerta (§2.4.3, §7.1.13); se añade plomo si la suma de las tres componentes detrás de la puerta rebasa P/T.' });
+  }
   if (normas.has('COMB')) formulas.push({ id: 'combinacion', expresion: 'Σ_g K_g·B_g(x) ≤ P / T', donde: 'g: grupo de fuentes del mismo método.' });
 
   const total = barreras.length;
@@ -338,7 +384,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     };
   });
 
-  const advertencias = [...new Set(barreras.flatMap((b) => b.avisos))];
+  const advertencias = [...new Set([...barreras.flatMap((b) => b.avisos), ...puertas.flatMap((p) => p.avisos)])];
   if (plano.sources.some((s) => s.modality?.category === 'cyclotron')) advertencias.push('El ciclotrón no tiene espesor del motor genérico: anexar el cálculo del módulo KIUBE o de Monte Carlo.');
   if (!plano.sources.length) advertencias.push('El proyecto no tiene fuentes: no hay cálculo.');
 
@@ -347,6 +393,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     ...(noCumplen ? [`${noCumplen} barrera(s) requieren más blindaje que el instalado.`] : []),
     ...(sinEspesor ? [`${sinEspesor} barrera(s) sin espesor instalado declarado: no se puede afirmar el cumplimiento.`] : []),
     ...(sinCalculo ? [`${sinCalculo} barrera(s) sin cálculo.`] : []),
+    ...puertas.map((p) => `Puerta «${p.nombre}» (NCRP 151 §2.4): ${p.total_uSv_semana.toFixed(1)} µSv/semana sin blindaje; requiere ${p.requeridoBPE_mm.toFixed(1)} mm de polietileno borado y ${p.requeridoPb_mm.toFixed(1)} mm de plomo; ${p.estado.replace('_', ' ').toLowerCase()}.`),
     'Documento PRELIMINAR generado por RadShield-MX a partir del proyecto; debe revisarlo y firmarlo el responsable de la memoria antes de presentarlo a la CNSNS.',
   ];
 
@@ -382,6 +429,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
       { id: 'punto', texto: `Punto protegido a 0.3 m de la cara exterior de la barrera (línea dibujada más el espesor instalado: capas o espesor capturado) y a la altura ocupada más cercana a la fuente, entre el piso y ${ALTURA_OCUPACION_MAX_M} m; la misma convención en el cálculo por barrera y en el mapa de dosis.` },
       { id: 'U', texto: `Factor de uso U de las barreras primarias de teleterapia: el de cada barrera (por omisión ${U_PRIMARIA_OMISION}, 1/4 por dirección del gantry, NCRP 151 §7.1). Si el equipo declara el eje del gantry, la primaria sólo llega a la franja que barre el haz; fuera de ella U = 0.` },
       { id: 'cumple', texto: 'Una barrera cumple sólo si su espesor instalado es mayor o igual al requerido.' },
+      ...(puertas.length ? [{ id: 'puerta', texto: `Puerta del laberinto de teleterapia (NCRP 151 §2.4): fotones de la Ec. 2.14 sumados entre energías; con energías ≥ 10 MV, rayos gamma de captura y neutrones (el mayor de Kersey y Wu–McGinley salvo que se indique otro), con la carga de fuga W_L; Q_n y H₀ del fabricante o, sin ellos, el máximo de la Tabla B.9. La puerta cumple si la suma de las componentes detrás del blindaje instalado no rebasa P/T.` }] : []),
     ],
     metodo: {
       normas: [...normas].map((k) => DESCRIPCION_NORMA[k].norma),
@@ -389,6 +437,7 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
       formulas,
     },
     barreras,
+    ...(puertas.length ? { puertas } : {}),
     resultadosPorArea,
     conclusiones: { cumplen, total, sinCalculo, sinEspesor, noCumplen, textos },
     referencias,
