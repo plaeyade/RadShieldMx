@@ -141,15 +141,23 @@ describe('decisión 6: perfil Elekta Versa HD', () => {
     for (const f of p.fuentes) expect(f.url).toMatch(/^https:\/\//);
   });
 
-  it('configuración del proyecto: electrones 6/12/15 MeV, fotones por confirmar (6 y 15 MV) y neutrones activos', () => {
+  it('configuración del proyecto (confirmada 23-11-2026): fotones 6/10/18 MV y FFF 6/10 MV, electrones 4–15 MeV, neutrones activos', () => {
     const c = CONFIG_VERSA_HD_PROYECTO;
-    expect(c.electrones_MeV).toEqual([6, 12, 15]);
-    expect(c.confirmado).toBe(false);
+    expect(c.confirmado).toBe(true);
+    expect(c.fotones.filter((e) => !e.fff).map((e) => e.mv)).toEqual([6, 10, 18]);
+    expect(c.fotones.filter((e) => e.fff).map((e) => e.mv)).toEqual([6, 10]);
+    expect(c.opcionesCitadas).toEqual([{ mv: 15, fff: false }]);
+    expect(c.fotones.some((e) => e.mv === 15)).toBe(false);
+    expect(c.electrones_MeV).toEqual([4, 6, 8, 9, 10, 12, 15]);
     expect(requiereNeutronesLinac(c)).toBe(true);
+    expect(requiereNeutronesLinac({ fotones: [{ mv: 10, fff: false }] })).toBe(true);
+    expect(requiereNeutronesLinac({ fotones: [{ mv: 18, fff: false }] })).toBe(true);
     const avisos = validarConfiguracionLinac(c);
-    expect(avisos.some((a) => /sin confirmar/.test(a))).toBe(true);
+    expect(avisos.some((a) => /sin confirmar/.test(a))).toBe(false);
+    expect(avisos.some((a) => /no está en el catálogo/.test(a))).toBe(false);
     expect(avisos.some((a) => /neutrones y captura/.test(a))).toBe(true);
-    expect(modalidadEquipo({ name: 'Elekta Versa HD', energies: c.fotones.map((e) => e.mv), workload_Gy_week: 500, isoHeight_m: 1 })).toBe('linac-15mv');
+    expect(avisos.filter((a) => /NCRP 151 no tabula haces FFF/.test(a))).toHaveLength(2);
+    expect(modalidadEquipo({ name: 'Elekta Versa HD', energies: c.fotones.map((e) => e.mv), workload_Gy_week: 500, isoHeight_m: 1 })).toBe('linac-18mv');
   });
 
   it('12 MV como fotones no existe en el Versa HD: avisa que 12 MeV es de electrones', () => {
@@ -167,17 +175,27 @@ describe('decisión 6: perfil Elekta Versa HD', () => {
     return { fuentes, avisos, r: evaluarLaberintosDelPlano(plano)[0] };
   };
 
-  it('las fuentes del perfil entran al laberinto: con 15 MV hay neutrones (Tabla B.9 a falta del fabricante)', () => {
-    const { fuentes, r } = conPuerta(CONFIG_VERSA_HD_PROYECTO, { '6 MV': 225, '15 MV': 450 });
-    expect(fuentes.map((f) => f.modality.id)).toEqual(['linac-6mv', 'linac-15mv']);
+  it('las fuentes del perfil entran al laberinto: con 10 y 18 MV hay neutrones y captura (Tabla B.9 a falta del fabricante)', () => {
+    const W = { '6 MV': 150, '10 MV': 100, '18 MV': 100, '6 MV FFF': 50, '10 MV FFF': 50 };
+    const { fuentes, avisos, r } = conPuerta(CONFIG_VERSA_HD_PROYECTO, W);
+    expect(avisos).toEqual([]);
+    expect(fuentes.map((f) => f.modality.id)).toEqual(['linac-6mv', 'linac-10mv', 'linac-18mv', 'linac-6mv', 'linac-10mv']);
+    expect(new Set(fuentes.map((f) => f.id)).size).toBe(5);
     expect(fuentes.every((f) => f.manufacturerVariant === 'Elekta Versa HD')).toBe(true);
-    expect(r.porEnergia.map((c) => c.energia)).toEqual([6, 15]);
     expect(r.H_neutrones_Sv).toBeGreaterThan(0);
     expect(r.H_captura_Sv).toBeGreaterThan(0);
-    expect(r.porEnergia[1].fuenteNeutrones).toMatch(/Tabla B\.9 para 15 MV/);
-    // Sólo 6 MV: sin neutrones. 6 + 10 MV: con neutrones (desde 10 MV inclusive).
-    expect(conPuerta({ ...CONFIG_VERSA_HD_PROYECTO, fotones: [{ mv: 6, fff: false }] }, { '6 MV': 450 }).r.H_neutrones_Sv).toBe(0);
-    expect(conPuerta({ ...CONFIG_VERSA_HD_PROYECTO, fotones: [{ mv: 6, fff: false }, { mv: 10, fff: true }] }, { '6 MV': 225, '10 MV FFF': 450 }).r.H_neutrones_Sv).toBeGreaterThan(0);
+    // Cada energía ≥ 10 MV aporta neutrones por sí sola (10 MV, 10 MV FFF y 18 MV); 6 MV (con o sin filtro) no.
+    const cfg = (fotones: ConfiguracionLinac['fotones']) => ({ ...CONFIG_VERSA_HD_PROYECTO, fotones });
+    expect(conPuerta(cfg([{ mv: 6, fff: false }, { mv: 6, fff: true }]), { '6 MV': 225, '6 MV FFF': 225 }).r.H_neutrones_Sv).toBe(0);
+    for (const [e, nombre] of [[{ mv: 10, fff: false }, '10 MV'], [{ mv: 18, fff: false }, '18 MV'], [{ mv: 10, fff: true }, '10 MV FFF']] as const) {
+      const rr = conPuerta(cfg([{ mv: 6, fff: false }, e]), { '6 MV': 225, [nombre]: 225 }).r;
+      expect(rr.H_neutrones_Sv).toBeGreaterThan(0);
+      expect(rr.H_captura_Sv).toBeGreaterThan(0);
+    }
+    // 15 MV (opción citada, no configurada) sigue calculando con la Tabla B.9 si alguien la añade.
+    const r15 = conPuerta(cfg([{ mv: 15, fff: false }]), { '15 MV': 450 }).r;
+    expect(r15.H_neutrones_Sv).toBeGreaterThan(0);
+    expect(r15.porEnergia[0].fuenteNeutrones).toMatch(/Tabla B\.9 para 15 MV/);
   });
 
   it('15 MV en el laberinto: α₀ de la fila de 10 MV de la Tabla B.8a (antes lanzaba «Tabla B.8a no tiene la fuente 15»)', () => {

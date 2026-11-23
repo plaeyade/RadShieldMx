@@ -3,7 +3,7 @@
  * del proyecto es un ELEKTA Versa HD).
  *
  * El perfil separa lo que el equipo PUEDE tener (catálogo, de fuentes públicas) de lo que tiene ESTA instalación
- * (configuración, a confirmar por el propietario). Las energías de fotones se dan en MV y las de electrones en MeV: no
+ * (configuración, confirmada por el propietario el 23-11-2026). Las energías de fotones se dan en MV y las de electrones en MeV: no
  * son intercambiables. Para el blindaje del búnker cuentan los fotones (NCRP 151); los electrones no generan fuentes.
  *
  * Fuentes (sólo datos públicos; no se incluyen documentos del fabricante):
@@ -105,23 +105,29 @@ export interface ConfiguracionLinac {
   perfil: PerfilLinac;
   fotones: EnergiaFotones[];
   electrones_MeV: number[];
+  /** Energías de fotones que el catálogo cita como opción del modelo pero que esta sala no tiene configuradas. */
+  opcionesCitadas?: EnergiaFotones[];
   /** false mientras el propietario no confirme las energías de fotones. */
   confirmado: boolean;
   nota?: string;
 }
 
 /**
- * Versa HD del proyecto. El propietario dijo «6, 12 y 15 MeV»: 12 MeV sólo existe como electrones (no hay fotones de
- * 12 MV en el Versa HD), así que se leen como electrones 6, 12 y 15 MeV. Las energías de FOTONES no están confirmadas;
- * mientras tanto se asumen 6 y 15 MV, lo conservador para el búnker (15 MV activa neutrones y captura en laberinto y
- * puerta). Cambie `fotones` cuando el propietario confirme.
+ * Versa HD del proyecto, CONFIRMADO por el propietario el 23-11-2026: fotones 6, 10 y 18 MV con filtro, 6 y 10 MV FFF y
+ * electrones de 4 a 15 MeV. 15 MV queda como opción citada del catálogo (Radiology Oncology Systems), no configurada.
+ * La mención anterior de «6, 12 y 15 MeV» como fotones fue un error del propietario. Con 10 y 18 MV (≥ 10 MV) el
+ * laberinto y la puerta calculan neutrones y captura.
  */
 export const CONFIG_VERSA_HD_PROYECTO: ConfiguracionLinac = {
   perfil: PERFIL_ELEKTA_VERSA_HD,
-  fotones: [{ mv: 6, fff: false }, { mv: 15, fff: false }],
-  electrones_MeV: [6, 12, 15],
-  confirmado: false,
-  nota: 'Fotones por confirmar con el propietario («6, 12 y 15 MeV» se leen como electrones); se asumen 6 y 15 MV.',
+  fotones: [
+    { mv: 6, fff: false }, { mv: 10, fff: false }, { mv: 18, fff: false },
+    { mv: 6, fff: true }, { mv: 10, fff: true },
+  ],
+  opcionesCitadas: [{ mv: 15, fff: false }],
+  electrones_MeV: PERFIL_ELEKTA_VERSA_HD.electronesDisponibles_MeV.map((e) => e.mev).filter((mev) => mev >= 4 && mev <= 15),
+  confirmado: true,
+  nota: 'Confirmado por el propietario el 23-11-2026: fotones 6/10/18 MV, FFF 6/10 MV, electrones 4–15 MeV; 15 MV como opción citada.',
 };
 
 const etiqueta = (e: EnergiaFotones) => `${e.mv} MV${e.fff ? ' FFF' : ''}`;
