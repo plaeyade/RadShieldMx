@@ -449,3 +449,13 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
     z = 0 fijan ahora el punto en el piso (`alturaPuntoProtegido_m = 0`). «Guíame» (fuentes a 0 m y muros sin espesor
     instalado) y los ejemplos del §7.1 dan los mismos espesores: 17.96 mm Pb / 213.77 mm de concreto en el muro norte.
     Pruebas: `src/__tests__/validacion/fase13Paso2.test.ts`.
+- **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3 «techos y pisos»): dato del proyecto del
+  22-11-2026, después de planta baja TODOS los niveles miden **5 m de piso a contrapiso** (entrepiso, losa incluida).
+  `src/lib/nivelesEdificio.ts`: `ALTURA_ENTREPISO_M = 5` (configurable con `alturaEntrepiso_m` y por nivel con
+  `alturasPorNivel`), altura propia de planta baja (`alturaPlantaBaja_m`; sin dato, la de entrepiso), sótanos con la
+  de entrepiso, `elevacionNivel_m` (0 = PB) y `distanciaVerticalNivel_m` / `distanciasTechoPiso_m` con el punto
+  protegido a 0.5 m sobre el piso de arriba y a 1.7 m sobre el de abajo (convención de NCRP 147 para pisos y techos).
+  El cálculo de techo y piso (`useFloorCeilingCalc`, opción `niveles`) toma de ahí las distancias isocentro → punto;
+  sin `niveles`, las capturadas, como antes. El diálogo «Suelo y techo» calcula por niveles por omisión (nivel de la
+  sala, altura de PB y de los demás niveles, 5 m) y muestra las distancias. Las alturas interiores de sala de los
+  visores 3D (3.0–3.1 m) no son alturas de nivel y no cambian. Pruebas: `src/__tests__/validacion/nivelesEdificio.test.tsx`.

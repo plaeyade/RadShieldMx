@@ -3,6 +3,7 @@
 import { barreraMV, energiaTabuladaMV, fraccionDispersion } from '@/lib/calculadorasNormativas';
 import { SAD_M } from '@/lib/doseFieldEngine';
 import { tvlPrimaria } from '@/lib/ncrp151';
+import { distanciasTechoPiso_m, type NivelesEdificio } from '@/lib/nivelesEdificio';
 
 export interface FloorCeilingConfig {
   // Source params
@@ -24,6 +25,19 @@ export interface FloorCeilingConfig {
   designGoalBelow_mSv_week: number;
   occupancyAbove: number;      // T factor above
   occupancyBelow: number;      // T factor below
+  /**
+   * Distancias desde los niveles del edificio (nivelesEdificio.ts): si existe, sustituye a distanceToAbove_m /
+   * distanceToBelow_m. Niveles arriba de planta baja de 5 m de piso a contrapiso por omisión; punto 0.5 m sobre el
+   * piso de arriba y 1.7 m sobre el de abajo.
+   */
+  niveles?: {
+    edificio: NivelesEdificio;
+    nivelSala: number;          // 0 = planta baja
+    nivelArriba?: number;       // por omisión nivelSala + 1
+    nivelAbajo?: number;        // por omisión nivelSala − 1
+    alturaPuntoArriba_m?: number;
+    alturaPuntoAbajo_m?: number;
+  };
 }
 
 export interface FloorCeilingResult {
@@ -42,6 +56,10 @@ export interface FloorCeilingResult {
   scatterFraction: number;
   // Recommendations
   recommendation: string;
+  // Distancias isocentro → punto usadas y de dónde salen
+  distanceToAbove_m: number;
+  distanceToBelow_m: number;
+  distanciasDe: 'niveles' | 'captura';
 }
 
 /**
@@ -58,14 +76,23 @@ function barreraLosa(config: FloorCeilingConfig, d_iso_m: number, P: number, T: 
   return { kerma: pri.K_sin_blindaje_mSv_semana, requerido_mm: 10 * Math.max(pri.espesor_cm, sec.espesor_cm) };
 }
 
+/** Distancias isocentro → punto arriba y abajo: de los niveles del edificio si se dan; si no, las capturadas. */
+export function distanciasLosas(config: FloorCeilingConfig): { arriba_m: number; abajo_m: number; de: 'niveles' | 'captura' } {
+  const n = config.niveles;
+  if (!n) return { arriba_m: config.distanceToAbove_m, abajo_m: config.distanceToBelow_m, de: 'captura' };
+  const d = distanciasTechoPiso_m(n.nivelSala, config.isocenterHeight_m, n.edificio, n);
+  return { ...d, de: 'niveles' };
+}
+
 export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingResult {
+  const dist = distanciasLosas(config);
   const scatterAngle_deg = Math.atan2(config.roomHeight_m - config.isocenterHeight_m, 3.0) * 180 / Math.PI;
   const scatterFrac = fraccionDispersion(energiaTabuladaMV(config.energy_MeV), Math.max(10, scatterAngle_deg));
 
   // === CEILING (techo) ===
   let ceilingKerma = 0, ceilingRequired_mm = 0, ceilingExtra_mm = 0, ceilingOK = true;
   if (config.areaAboveOccupied) {
-    const r = barreraLosa(config, config.distanceToAbove_m, config.designGoalAbove_mSv_week, config.occupancyAbove);
+    const r = barreraLosa(config, dist.arriba_m, config.designGoalAbove_mSv_week, config.occupancyAbove);
     ceilingKerma = r.kerma; ceilingRequired_mm = r.requerido_mm;
     ceilingExtra_mm = Math.max(0, ceilingRequired_mm - config.ceilingThickness_m * 1000);
     ceilingOK = ceilingExtra_mm <= 0;
@@ -74,7 +101,7 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
   // === FLOOR (suelo) ===
   let floorKerma = 0, floorRequired_mm = 0, floorExtra_mm = 0, floorOK = true;
   if (config.areaBelowOccupied) {
-    const r = barreraLosa(config, config.distanceToBelow_m, config.designGoalBelow_mSv_week, config.occupancyBelow);
+    const r = barreraLosa(config, dist.abajo_m, config.designGoalBelow_mSv_week, config.occupancyBelow);
     floorKerma = r.kerma; floorRequired_mm = r.requerido_mm;
     floorExtra_mm = Math.max(0, floorRequired_mm - config.floorThickness_m * 1000);
     floorOK = floorExtra_mm <= 0;
@@ -99,5 +126,8 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
     scatterAngle_deg: scatterAngle_deg,
     scatterFraction: scatterFrac,
     recommendation: rec,
+    distanceToAbove_m: dist.arriba_m,
+    distanceToBelow_m: dist.abajo_m,
+    distanciasDe: dist.de,
   };
 }
