@@ -59,3 +59,6 @@ data/pdf/room_shield_design.pdf
 # Python
 __pycache__/
 *.pyc
+# Fase 13: GLB licenciados de equipos (repo privado 3D-Models); nunca versionar ni desplegar desde aquí
+public/modelos-equipo/
+*.glb
