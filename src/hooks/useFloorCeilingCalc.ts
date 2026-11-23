@@ -3,7 +3,7 @@
 import { barreraMV, energiaTabuladaMV, fraccionDispersion } from '@/lib/calculadorasNormativas';
 import { SAD_M } from '@/lib/doseFieldEngine';
 import { tvlPrimaria } from '@/lib/ncrp151';
-import { AlturaSotanoFaltante, distanciaVerticalNivel_m, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M, type NivelesEdificio } from '@/lib/nivelesEdificio';
+import { AlturaSotanoFaltante, NivelInexistente, distanciaVerticalNivel_m, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M, type NivelesEdificio } from '@/lib/nivelesEdificio';
 
 export interface FloorCeilingConfig {
   // Source params
@@ -28,8 +28,9 @@ export interface FloorCeilingConfig {
   /**
    * Distancias desde los niveles del edificio (nivelesEdificio.ts): si existe, sustituye a distanceToAbove_m /
    * distanceToBelow_m. Por omisión planta baja de 5.40 m y niveles arriba de ella de 5 m de piso a contrapiso; los
-   * sótanos no tienen altura por omisión (si se necesita y falta, la distancia queda pendiente). Punto 0.5 m sobre el
-   * piso de arriba y 1.7 m sobre el de abajo.
+   * sótanos no tienen altura por omisión (si se necesita y falta, la distancia queda pendiente). Con
+   * `edificio.sinSotanos` (este proyecto) no hay niveles bajo PB: el suelo de una sala en PB no se calcula. Punto 0.5 m
+   * sobre el piso de arriba y 1.7 m sobre el de abajo.
    */
   niveles?: {
     edificio: NivelesEdificio;
@@ -63,6 +64,8 @@ export interface FloorCeilingResult {
   distanciasDe: 'niveles' | 'captura';
   /** Sótanos sin altura que el cálculo necesita (por niveles); vacío si no falta ninguna. */
   sotanosSinAltura: number[];
+  /** Niveles que no existen (sótanos en un edificio sin sótanos) que el cálculo habría usado; vacío si ninguno. */
+  nivelesInexistentes: number[];
 }
 
 /**
@@ -85,23 +88,34 @@ function barreraLosa(config: FloorCeilingConfig, d_iso_m: number, P: number, T: 
  */
 export function distanciasLosas(config: FloorCeilingConfig): {
   arriba_m: number | null; abajo_m: number | null; de: 'niveles' | 'captura'; sotanosSinAltura: number[];
+  nivelesInexistentes: number[]; abajoInexistente: boolean; salaInexistente: boolean;
 } {
   const n = config.niveles;
-  if (!n) return { arriba_m: config.distanceToAbove_m, abajo_m: config.distanceToBelow_m, de: 'captura', sotanosSinAltura: [] };
+  if (!n) {
+    return { arriba_m: config.distanceToAbove_m, abajo_m: config.distanceToBelow_m, de: 'captura', sotanosSinAltura: [],
+      nivelesInexistentes: [], abajoInexistente: false, salaInexistente: false };
+  }
   const faltan = new Set<number>();
+  const inexistentes = new Set<number>();
   const lado = (nivelDestino: number, alturaPunto_m: number): number | null => {
     try {
       return distanciaVerticalNivel_m({ nivelFuente: n.nivelSala, alturaFuente_m: config.isocenterHeight_m, nivelDestino, alturaPunto_m }, n.edificio);
     } catch (e) {
       if (e instanceof AlturaSotanoFaltante) { faltan.add(e.nivel); return null; }
+      if (e instanceof NivelInexistente) { inexistentes.add(e.nivel); return null; }
       throw e;
     }
   };
+  const nivelAbajo = n.nivelAbajo ?? n.nivelSala - 1;
+  const salaInexistente = n.nivelSala < 0 && n.edificio.sinSotanos === true;
   return {
     arriba_m: lado(n.nivelArriba ?? n.nivelSala + 1, n.alturaPuntoArriba_m ?? ALTURA_PUNTO_NIVEL_ARRIBA_M),
-    abajo_m: lado(n.nivelAbajo ?? n.nivelSala - 1, n.alturaPuntoAbajo_m ?? ALTURA_PUNTO_NIVEL_ABAJO_M),
+    abajo_m: lado(nivelAbajo, n.alturaPuntoAbajo_m ?? ALTURA_PUNTO_NIVEL_ABAJO_M),
     de: 'niveles',
     sotanosSinAltura: [...faltan].sort((a, b) => b - a),
+    nivelesInexistentes: [...inexistentes].sort((a, b) => b - a),
+    abajoInexistente: !salaInexistente && nivelAbajo < 0 && n.edificio.sinSotanos === true,
+    salaInexistente,
   };
 }
 
@@ -112,6 +126,17 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
 
   // === CEILING (techo) ===
   let ceilingKerma = 0, ceilingRequired_mm = 0, ceilingExtra_mm = 0, ceilingOK = true;
+  // Sala en un sótano de un edificio sin sótanos: no se calcula nada.
+  if (dist.salaInexistente) {
+    return {
+      ceilingKerma_unshielded_mSv_week: 0, ceilingRequiredThickness_mm: NaN, ceilingCompliant: false, ceilingExtraNeeded_mm: NaN,
+      floorKerma_unshielded_mSv_week: 0, floorRequiredThickness_mm: NaN, floorCompliant: false, floorExtraNeeded_mm: NaN,
+      scatterAngle_deg, scatterFraction: scatterFrac,
+      recommendation: `El edificio no tiene sótanos: la sala no puede estar en el nivel ${config.niveles!.nivelSala}. Corrija el nivel de la sala o indique que hay sótanos.`,
+      distanceToAbove_m: null, distanceToBelow_m: null, distanciasDe: dist.de, sotanosSinAltura: [],
+      nivelesInexistentes: [config.niveles!.nivelSala],
+    };
+  }
   if (config.areaAboveOccupied && dist.arriba_m === null) {
     ceilingRequired_mm = NaN; ceilingExtra_mm = NaN; ceilingOK = false;
   } else if (config.areaAboveOccupied && dist.arriba_m !== null) {
@@ -122,8 +147,12 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
   }
 
   // === FLOOR (suelo) ===
+  // Sin sótanos (decisión del propietario, 23-11-2026): bajo una sala en PB está el terreno y no hay área ocupada.
+  const sueloSinNivel = config.areaBelowOccupied && dist.abajoInexistente;
   let floorKerma = 0, floorRequired_mm = 0, floorExtra_mm = 0, floorOK = true;
-  if (config.areaBelowOccupied && dist.abajo_m === null) {
+  if (sueloSinNivel) {
+    // no aplica: nada que blindar
+  } else if (config.areaBelowOccupied && dist.abajo_m === null) {
     floorRequired_mm = NaN; floorExtra_mm = NaN; floorOK = false;
   } else if (config.areaBelowOccupied && dist.abajo_m !== null) {
     const r = barreraLosa(config, dist.abajo_m, config.designGoalBelow_mSv_week, config.occupancyBelow);
@@ -135,12 +164,13 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
   // Recommendations
   let rec = '';
   const pendienteTecho = config.areaAboveOccupied && dist.arriba_m === null;
-  const pendienteSuelo = config.areaBelowOccupied && dist.abajo_m === null;
+  const pendienteSuelo = config.areaBelowOccupied && dist.abajo_m === null && !sueloSinNivel;
   if (pendienteTecho || pendienteSuelo) rec = `Falta la altura del sótano (piso a contrapiso): no hay dato y no se asume ninguna. Captúrela para calcular ${pendienteTecho && pendienteSuelo ? 'techo y suelo' : pendienteTecho ? 'el techo' : 'el suelo'}.`;
   else if (!ceilingOK && !floorOK) rec = `Aumentar techo en ${ceilingExtra_mm.toFixed(0)} mm y suelo en ${floorExtra_mm.toFixed(0)} mm de concreto. Considerar plomo laminado sobre techo.`;
   else if (!ceilingOK) rec = `Aumentar techo en ${ceilingExtra_mm.toFixed(0)} mm de concreto o agregar ${(ceilingExtra_mm * tvlPrimaria(energiaTabuladaMV(config.energy_MeV), 'lead').tvle_cm / tvlPrimaria(energiaTabuladaMV(config.energy_MeV), 'concrete').tvle_cm).toFixed(1)} mm de plomo (equivalencia por TVLₑ, NCRP 151 Tabla B.2) sobre techo.`;
   else if (!floorOK) rec = `Aumentar suelo en ${floorExtra_mm.toFixed(0)} mm de concreto en areas ocupadas debajo.`;
   else rec = 'El blindaje de suelo y techo cumple con los objetivos de diseno. No se requieren modificaciones.';
+  if (sueloSinNivel) rec = `Sin sótanos: bajo la sala está el terreno y no hay área ocupada abajo; el suelo no se calcula. ${rec}`;
 
   return {
     ceilingKerma_unshielded_mSv_week: ceilingKerma,
@@ -158,5 +188,6 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
     distanceToBelow_m: dist.abajo_m,
     distanciasDe: dist.de,
     sotanosSinAltura: (pendienteTecho || pendienteSuelo) ? dist.sotanosSinAltura : [],
+    nivelesInexistentes: sueloSinNivel ? dist.nivelesInexistentes : [],
   };
 }

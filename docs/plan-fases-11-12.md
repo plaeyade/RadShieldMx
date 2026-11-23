@@ -471,11 +471,53 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
     «Laberinto y puerta» usa la misma función.
   - Pruebas: `src/__tests__/validacion/fase13Paso3.test.ts` (§7.1.10–7.1.13: fotones 100, captura 65.3, Kersey 765 →
     930 µSv; 53.6 mm BPE + 7.3 mm Pb; IMRT 72 + 32 mm). «Guíame» sin cambio (17.96 mm Pb / 213.77 mm concreto).
-  - Pendiente para el físico médico: método de neutrones por omisión, neutrones desde 10 MV, la regla de la suma
-    frente a §7.1.13 tal cual, laberintos de dos tramos y geometría medida del plano.
+  - Pendiente para el físico médico: laberintos de dos tramos y geometría medida del plano (el método de neutrones,
+    los neutrones desde 10 MV y la regla de la suma los resolvió el propietario el 23-11-2026; ver abajo).
 - **Decisiones del propietario (23-11-2026) sobre el paso 3:** se quedan los valores por omisión del laberinto
   f = 0.25 (fracción transmitida por el paciente), U_G = 0.25 (factor de uso hacia el muro G) y reflexión a 0°
   (`anguloReflexion_deg`, Tablas B.8a/B.8b). Siguen siendo configurables por laberinto.
+- **Decisiones del propietario (23-11-2026), segunda tanda** (`fase13-decisiones-propietario`). Resuelven lo
+  pendiente del paso 3 y fijan datos del edificio y del equipo:
+  1. **Neutrones en la puerta: el MAYOR de Kersey y Wu–McGinley, mostrando ambos.** Ya era el valor por omisión
+     (`metodoNeutrones: 'mayor'`); ahora `evaluarLaberintoPuerta` añade una nota por energía con los dos valores y el
+     adoptado («18 MV: neutrones en la puerta por Kersey … y por Wu–McGinley …; se adopta … (el mayor)»), que llega a la
+     memoria (`puertas[].notas`, sin cambiar el esquema) y al diálogo «Laberinto y puerta», cuya tabla muestra las
+     filas de Kersey, Wu–McGinley y el adoptado.
+  2. **Neutrones desde 10 MV inclusive** (no sólo > 10 MV). El laberinto ya usaba `MV_NEUTRONES_MIN = 10` con ≥; ahora
+     sale de `ENERGIA_NEUTRONES_MIN_MV` (`shieldingMath`), y `requiereNeutrones` hace que una fuente de teleterapia de
+     10 MV también cite «NCRP-151-neutrons», avise de neutrones y laberinto/puerta y lo declare en la traza (antes sólo
+     con > 10). Las demás modalidades siguen con > 10 MeV.
+  3. **Plomo de la puerta: se acepta la regla de la suma** del motor (neutrones + captura + fotones dispersos ≤ P/T):
+     8.9 mm de Pb en §7.1.13 sin IMRT en vez de los ≈ 7.1–7.3 mm de la regla de P/2 por componente. Ya era el valor
+     adoptado; `requeridoNCRP` conserva el de §7.1.13 tal cual para comparar.
+  4. **El edificio NO tiene sótanos.** `EDIFICIO_SIN_SOTANOS = true` y `NivelesEdificio.sinSotanos`: con él, un nivel
+     < 0 no existe (`NivelInexistente`). En «Suelo y techo» el campo «Sótanos» queda oculto por omisión (interruptor
+     «El edificio tiene sótanos (este proyecto: no)»); una sala en PB con «área abajo ocupada» no calcula el suelo
+     (bajo PB está el terreno) y lo dice; una sala en un nivel negativo se rechaza. Sin `sinSotanos` (otro edificio)
+     sigue la regla anterior: sótanos sin altura por omisión y `AlturaSotanoFaltante` si se necesitan.
+  5. **Puntos protegidos de pisos y techos: 0.5 m sobre el piso de arriba y 1.7 m sobre el de abajo** (aceptada; ya
+     eran `ALTURA_PUNTO_NIVEL_ARRIBA_M` y `ALTURA_PUNTO_NIVEL_ABAJO_M`, configurables).
+  6. **Linac: ELEKTA Versa HD.** Perfil `PERFIL_ELEKTA_VERSA_HD` en `src/lib/perfilesEquipo.ts`, sólo con datos
+     públicos citados: fotones 6, 10, 15 y 18 MV con filtro y 6 y 10 MV FFF; electrones 4, 6, 8, 9, 10, 12, 15 y
+     18 MeV; FFF hasta 1400 MU/min (6 MV) y 2400 MU/min (10 MV), 600 MU/min con filtro; fuga 0.1 % a 1 m (límite de
+     IEC 60601-2-1 que usa NCRP 151 §2.3; sin dato público del fabricante). Fuentes: Narayanasamy et al., *J Appl
+     Clin Med Phys* 2016;17(1), doi:10.1120/jacmp.v17i1.5799 (6/10/18 MV, 6/10 MV FFF, electrones 4–15 MeV, tasas
+     FFF) y la tabla comparativa de Radiology Oncology Systems (fuente secundaria; añade 15 MV y electrones de 10 y
+     18 MeV). El propietario dijo «6, 12 y 15 MeV»: no hay fotones de 12 MV en el Versa HD, así que se leen como
+     **electrones** 6/12/15 MeV. `CONFIG_VERSA_HD_PROYECTO` deja los **fotones por confirmar** (`confirmado: false`)
+     y asume 6 y 15 MV, lo conservador: con 15 MV el laberinto y la puerta calculan neutrones y captura (Q_n y H₀
+     del máximo de la Tabla B.9 para 15 MV mientras no haya dato del fabricante). `fuentesDesdeConfiguracion` crea
+     una fuente del plano por energía de fotones con su carga; `validarConfiguracionLinac` avisa de energías fuera
+     del catálogo (p. ej. «12 MV»: existe como electrones), de FFF (NCRP 151 no los tabula: datos del haz con filtro)
+     y de la falta de confirmación. La entrada «Elekta Versa HD» del autollenado toma las energías de esa
+     configuración (antes 6/10 MV y fuga 0.15 % sin fuente).
+  - **Corrección encontrada al probar el Versa HD:** un laberinto con 15 MV (o 20 MV) lanzaba «Tabla B.8a no tiene
+    la fuente 15». α₀ toma ahora la fila tabulada inmediata inferior (`filaAlbedo`: 10 MV para 15 MV), de albedo
+    mayor (conservador), con una nota. Las energías tabuladas no cambian.
+  - Pruebas: `src/__tests__/validacion/fase13Decisiones.test.tsx`. «Guíame» sin cambio (17.96 mm Pb / 213.77 mm
+    concreto); los ejemplos §7.1.10–7.1.13 dan lo mismo.
+  - **Pregunta abierta al propietario:** «¿Las energías de FOTONES del Versa HD de la instalación son 6 y 15 MV
+    (y "6, 12 y 15 MeV" son las de electrones), o tiene también 10 o 18 MV, o modos FFF de 6/10 MV?»
 - **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3b «techos y pisos»). Datos del propietario:
   **planta baja mide 5.40 m de piso a contrapiso** (23-11-2026) y, arriba de planta baja, TODOS los niveles miden
   **5 m de piso a contrapiso** (22-11-2026; entrepiso, losa incluida). Los dos son configurables y se puede dar una

@@ -118,6 +118,9 @@ describe('techo y piso con las distancias de los niveles', () => {
     const valor = (l: string) => (screen.getByLabelText(l) as HTMLInputElement).value;
     expect(valor('Planta baja, piso a contrapiso (m)')).toBe('5.4');
     expect(valor('Demás niveles, piso a contrapiso (m)')).toBe('5');
+    // El edificio del proyecto no tiene sótanos (23-11-2026): el campo está oculto hasta indicar que los hay.
+    expect(screen.queryByLabelText('Sótanos, piso a contrapiso (m)')).toBeNull();
+    fireEvent.click(screen.getByLabelText('El edificio tiene sótanos (este proyecto: no)'));
     expect(valor('Sótanos, piso a contrapiso (m)')).toBe('');
     expect(valor('Distancia isocentro a punto arriba (m)')).toBe('4.6');
     expect(screen.queryByText(/Capture la altura del sótano/)).toBeNull();
