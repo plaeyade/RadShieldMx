@@ -12,6 +12,7 @@ export default defineConfig({
   out: "./db/migrations",
   dialect: "mysql",
   dbCredentials: {
-    url: connectionString ?? "mysql://radshield:radshield@127.0.0.1:3306/radshield_mx",
+    // Sin DATABASE_URL sólo se permite `generate`, que no se conecta: URL sin credenciales.
+    url: connectionString ?? "mysql://127.0.0.1:3306/radshield_mx",
   },
 });

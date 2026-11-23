@@ -34,7 +34,9 @@ assert(
 
 assert(compose.includes('dockerfile: Dockerfile.frontend'), 'docker-compose.yml must build the frontend Dockerfile.');
 assert(compose.includes('dockerfile: Dockerfile.api'), 'docker-compose.yml must build the API Dockerfile.');
-assert(compose.includes('DATABASE_URL: mysql://radshield:radshield@db:3306/radshield_mx_test'), 'compose must wire API to test MySQL.');
+assert(compose.includes('DATABASE_URL: mysql://${MYSQL_USER:?') && compose.includes('@db:3306/${MYSQL_DATABASE:-radshield_mx_test}'), 'compose must wire API to test MySQL with credentials from .env.');
+assert(!/^\s*-\s*"\d+:\d+"/m.test(compose), 'compose must publish ports only on 127.0.0.1.');
+assert(!/MYSQL_(ROOT_)?PASSWORD: [^$]/.test(compose), 'compose must read MySQL passwords from the environment.');
 assert(compose.includes('condition: service_healthy'), 'compose API must wait for a healthy DB.');
 assert(!compose.includes('drizzle-kit migrate'), 'compose must not run migrations implicitly.');
 
