@@ -424,3 +424,28 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
   alcanzarlos. Campo «Eje gantry °» en el inspector de fuentes de linac (vacío = sin eje). La clave de caché incluye
   el eje y θ; si no están definidos, la clave no cambia. Pruebas: `src/__tests__/validacion/fase13Paso1.test.ts`.
   Sin eje no cambia nada: «Guíame» y los ejemplos del §7.1 dan los mismos espesores.
+- **Paso 2** (`fase13-paso2-u-distancia`): U de la primaria por franja del haz y una sola convención del punto
+  protegido, la misma en el motor de barreras, el mapa de dosis y la memoria.
+  - **U.** `enHazPrimario` pasa a `normativeBarrierEngine` (el mapa la reexporta) y `factorUsoPrimaria` da el U de la
+    primaria por punto y fuente: con `ejeGantry_deg`, U = 0 fuera de la franja que barre el haz; dentro (o sin eje),
+    el U de la barrera; en el mapa, sin barrera primaria, el de la fuente; si ninguno es válido, 1/4
+    (`U_PRIMARIA_OMISION`, una de las cuatro direcciones del gantry, NCRP 151 §7.1). En una barrera primaria, los
+    puntos fuera de la franja se calculan como secundaria (fuga + dispersión); si ninguno queda dentro, la traza pide
+    revisar el tipo. Con U = 1 en una primaria de teleterapia la traza avisa de un posible valor de importación. El
+    importador DXF (`cadBimBridge`) ya no pone U = 1 en las primarias: pone 1/4.
+  - **Distancia.** `desnivelPuntoProtegido_m` (en `shieldingMath`): el punto protegido está a la altura ocupada más
+    cercana a la fuente, entre el piso y 1.7 m (`ALTURA_OCUPACION_MAX_M`); con la fuente en ese intervalo el desnivel
+    es 0 y la distancia es la de planta, como en los ejemplos de NCRP 151 §7.1 y TG-108. Antes la altura del isocentro
+    se sumaba entera (punto en el piso): con 1.2–1.3 m la distancia crecía y la dosis bajaba, lo no conservador. La
+    usan `distancia` (motor y mapa), el kerma de TC, medicina nuclear y genérico de `shieldingMath`, la distancia
+    mínima de `motorProyecto` y los casos de `realClinicalTrialCases`. En planta, `generateSamplePoints` mide los
+    0.3 m desde la cara exterior con el espesor instalado (`espesorInstalado_mm`: capas del preset o `thickness_mm`),
+    como la banda del mapa; antes ignoraba las capas. `alturaPuntoProtegido_m` en la fuente fija la altura del punto
+    (cortes 3D del visor y `doseMappingEngine`; desnivel |h − z|) y entra en la clave de caché sólo si existe.
+  - **Memoria.** Los criterios «punto» y «U» describen esa misma convención.
+  - Cambian los resultados de las fuentes con la altura del isocentro entre 0 y 1.7 m distinta de 0 (las que crea el
+    lienzo con 1.0–1.3 m): ahora piden igual o más blindaje. Por eso cambia el hash de la escena 3D de prueba
+    (instantánea de `MedicalFloorPlan3DDialog`). Las pruebas de geometría de `shieldingMath.test.ts` y del corte 3D a
+    z = 0 fijan ahora el punto en el piso (`alturaPuntoProtegido_m = 0`). «Guíame» (fuentes a 0 m y muros sin espesor
+    instalado) y los ejemplos del §7.1 dan los mismos espesores: 17.96 mm Pb / 213.77 mm de concreto en el muro norte.
+    Pruebas: `src/__tests__/validacion/fase13Paso2.test.ts`.

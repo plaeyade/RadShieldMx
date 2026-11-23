@@ -21,6 +21,7 @@ import {
   inverseArcher,
   tvlThickness,
   exponentialThickness,
+  desnivelPuntoProtegido_m,
   generateSamplePoints,
   buildCalculationTrace,
   buildCalculationUnitSnapshot,
@@ -292,7 +293,7 @@ function calcularUna(
     for (const s of sources) {
       const dx = (p.x - s.x) * scale_m_per_pixel;
       const dy = (p.y - s.y) * scale_m_per_pixel;
-      const dz = s.isocenterHeight_m || 0;
+      const dz = desnivelPuntoProtegido_m(s); // Fase 13, paso 2: la misma convención que `distancia`
       minSourceDistance_m = Math.min(minSourceDistance_m, Math.sqrt(dx * dx + dy * dy + dz * dz));
     }
   }

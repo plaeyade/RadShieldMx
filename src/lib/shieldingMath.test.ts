@@ -264,7 +264,8 @@ describe('exponentialThickness() — AAPM TG 108', () => {
 // CALCULATE CT KERMA — NCRP 147 §5.6
 // ═══════════════════════════════════════════════════════════════════
 describe('calculateCTKerma() — NCRP 147 §5.6', () => {
-  const source = mockSource(mockModalityCT, 100, 100);
+  // Fase 13, paso 2: punto en el piso (alturaPuntoProtegido_m = 0) para conservar el desnivel de 1 m de estas pruebas.
+  const source = { ...mockSource(mockModalityCT, 100, 100), alturaPuntoProtegido_m: 0 };
 
   it('kerma decreases with distance', () => {
     const k1 = calculateCTKerma(source, 105, 100, 0.01);
@@ -290,7 +291,8 @@ describe('calculateCTKerma() — NCRP 147 §5.6', () => {
 // CALCULATE NUCLEAR KERMA — AAPM TG 108
 // ═══════════════════════════════════════════════════════════════════
 describe('calculateNuclearKerma() — AAPM TG 108 / IAEA SRS 47', () => {
-  const source = mockSource(mockModalityNuclear, 100, 100);
+  // Fase 13, paso 2: punto en el piso (alturaPuntoProtegido_m = 0) para conservar el desnivel de 1 m de estas pruebas.
+  const source = { ...mockSource(mockModalityNuclear, 100, 100), alturaPuntoProtegido_m: 0 };
 
   it('follows inverse square law', () => {
     // Source at (100,100), height 1m. Points at 200,100 and 300,100 with scale 0.01

@@ -53,6 +53,8 @@ export function buildCalculationCachePayload(fp: FloorPlan) {
       ctScansPerPatient: stableRound(source.ctScansPerPatient ?? 0, 4),
       // Eje del gantry: decide la franja primaria y θ de dispersión (Fase 13, paso 1); undefined no entra en el JSON.
       ejeGantry_deg: typeof source.ejeGantry_deg === 'number' ? stableRound(source.ejeGantry_deg, 4) : undefined,
+      // Altura fija del punto protegido (Fase 13, paso 2; cortes 3D): undefined no entra en el JSON.
+      alturaPuntoProtegido_m: typeof source.alturaPuntoProtegido_m === 'number' ? stableRound(source.alturaPuntoProtegido_m, 4) : undefined,
       // Modelo por paciente (TG-108 en PET, «estilo TG-108» en SPECT/I-131): cambia la dosis.
       tg108: source.tg108
         ? {

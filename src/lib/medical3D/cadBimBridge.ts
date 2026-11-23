@@ -2,6 +2,7 @@ import { extractBIMFromIFC, type BIMModel } from '@/lib/bimRAD';
 import { parseDXF, type DXFParsed, type DXFPoint } from '@/lib/dxfParser';
 import { inferDxfLayerRole, type F213DxfLayerRole } from '@/lib/f213DxfLayerMappingQa';
 import type { Barrier, FloorPlan } from '@/types/radshield';
+import { U_PRIMARIA_OMISION } from '@/lib/normativeBarrierEngine';
 
 export type CadBimImportKind = 'dxf' | 'ifc' | 'step' | 'unknown';
 
@@ -171,7 +172,9 @@ function makeBarrier(id: string, name: string, layer: string, start: DXFPoint, e
     y2: end.y,
     name,
     barrierType: tipo,
-    useFactor: tipo === 'primary' ? 1 : 0.25,
+    // Fase 13, paso 2: antes U = 1 en las primarias importadas (primaria ×4). Ahora 1/4 por dirección del gantry
+    // (NCRP 151 §7.1); el motor la reduce a 0 fuera de la franja del haz si la fuente declara el eje del gantry.
+    useFactor: U_PRIMARIA_OMISION,
     occupancyFactor: 1,
     designGoal_mSv_per_wk: 0.02,
     materialCode,

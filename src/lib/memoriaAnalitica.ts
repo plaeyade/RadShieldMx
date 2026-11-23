@@ -13,7 +13,8 @@
  */
 import type { Barrier, FloorPlan, OccupiedRegion, RadiationSource } from '@/types/radshield';
 import { verificarBarrera, type FilaVerificacion } from '@/lib/verificacionBlindaje';
-import { codigoCatalogo } from '@/lib/shieldingMath';
+import { ALTURA_OCUPACION_MAX_M, codigoCatalogo } from '@/lib/shieldingMath';
+import { U_PRIMARIA_OMISION } from '@/lib/normativeBarrierEngine';
 import { claveMetodoFuente } from '@/lib/motorProyecto';
 import { LIMITES_DOSIS, P_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 import { NOM_012_NUCL, NOM_013_NUCL, NOM_033_NUCL, NOM_040_NUCL } from '@/lib/normativaMx';
@@ -371,14 +372,15 @@ export function construirMemoria(plano: FloorPlan, datos: DatosInstalacion = {},
     preliminar: true,
     instalacion,
     objetivo: `Demostrar mediante cálculo analítico que los blindajes de «${instalacion.nombre}» mantienen el equivalente de dosis en cada colindancia por debajo de su objetivo de diseño P (zona controlada ${LIMITES_DOSIS.objetivosDiseno.controlada_mSv_semana} mSv/semana; no controlada ${LIMITES_DOSIS.objetivosDiseno.noControlada_mSv_semana} mSv/semana), de modo que el POE y el público no rebasen los límites del RGSR.`,
-    alcance: `${plano.sources.length} fuente(s) o equipo(s) y ${total} barrera(s) del plano (escala ${plano.scale_m_per_pixel} m/px). Se evalúa cada barrera en el punto más expuesto a 0.3 m de su cara exterior.`,
+    alcance: `${plano.sources.length} fuente(s) o equipo(s) y ${total} barrera(s) del plano (escala ${plano.scale_m_per_pixel} m/px). Se evalúa cada barrera en el punto más expuesto a 0.3 m de su cara exterior, a la altura ocupada.`,
     marcoNormativo: marco,
     fuentes,
     ocupaciones,
     criterios: [
       { id: 'P', texto: `Objetivos de diseño P: ${LIMITES_DOSIS.objetivosDiseno.controlada_mSv_semana} mSv/semana en zona controlada (POE) y ${LIMITES_DOSIS.objetivosDiseno.noControlada_mSv_semana} mSv/semana en zona no controlada (público) (${LIMITES_DOSIS.objetivosDiseno.referencia}).` },
       { id: 'T', texto: 'Factores de ocupación T por colindancia (NCRP 147 Tabla 4.1, NCRP 151 Tabla B.1; NCRP 49).' },
-      { id: 'punto', texto: 'Punto de cálculo a 0.3 m de la cara exterior de la barrera (más el espesor instalado si está declarado).' },
+      { id: 'punto', texto: `Punto protegido a 0.3 m de la cara exterior de la barrera (línea dibujada más el espesor instalado: capas o espesor capturado) y a la altura ocupada más cercana a la fuente, entre el piso y ${ALTURA_OCUPACION_MAX_M} m; la misma convención en el cálculo por barrera y en el mapa de dosis.` },
+      { id: 'U', texto: `Factor de uso U de las barreras primarias de teleterapia: el de cada barrera (por omisión ${U_PRIMARIA_OMISION}, 1/4 por dirección del gantry, NCRP 151 §7.1). Si el equipo declara el eje del gantry, la primaria sólo llega a la franja que barre el haz; fuera de ella U = 0.` },
       { id: 'cumple', texto: 'Una barrera cumple sólo si su espesor instalado es mayor o igual al requerido.' },
     ],
     metodo: {
