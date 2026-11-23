@@ -114,7 +114,9 @@ export interface ConfiguracionLinac {
 
 /**
  * Versa HD del proyecto, CONFIRMADO por el propietario el 23-11-2026: fotones 6, 10 y 18 MV con filtro, 6 y 10 MV FFF y
- * electrones de 4 a 15 MeV. 15 MV queda como opción citada del catálogo (Radiology Oncology Systems), no configurada.
+ * electrones de 4, 6, 8, 9, 12 y 15 MeV. 15 MV queda como opción citada del catálogo (Radiology Oncology Systems), no configurada.
+ * 10 MeV retirado por confirmación del propietario 23-11-2026: este equipo no tiene electrones de 10 MeV (el catálogo lo
+ * conserva porque lo cita Radiology Oncology Systems).
  * La mención anterior de «6, 12 y 15 MeV» como fotones fue un error del propietario. Con 10 y 18 MV (≥ 10 MV) el
  * laberinto y la puerta calculan neutrones y captura.
  */
@@ -125,9 +127,9 @@ export const CONFIG_VERSA_HD_PROYECTO: ConfiguracionLinac = {
     { mv: 6, fff: true }, { mv: 10, fff: true },
   ],
   opcionesCitadas: [{ mv: 15, fff: false }],
-  electrones_MeV: PERFIL_ELEKTA_VERSA_HD.electronesDisponibles_MeV.map((e) => e.mev).filter((mev) => mev >= 4 && mev <= 15),
+  electrones_MeV: PERFIL_ELEKTA_VERSA_HD.electronesDisponibles_MeV.map((e) => e.mev).filter((mev) => mev >= 4 && mev <= 15 && mev !== 10),
   confirmado: true,
-  nota: 'Confirmado por el propietario el 23-11-2026: fotones 6/10/18 MV, FFF 6/10 MV, electrones 4–15 MeV; 15 MV como opción citada.',
+  nota: 'Confirmado por el propietario el 23-11-2026: fotones 6/10/18 MV, FFF 6/10 MV, electrones 4/6/8/9/12/15 MeV (10 MeV retirado por confirmación del propietario 23-11-2026); 15 MV como opción citada.',
 };
 
 const etiqueta = (e: EnergiaFotones) => `${e.mv} MV${e.fff ? ' FFF' : ''}`;
