@@ -520,6 +520,130 @@
         "additionalProperties": false
       }
     },
+    "puertas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "fuentes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "T": {
+            "type": "number"
+          },
+          "P_mSv_semana": {
+            "type": "number"
+          },
+          "fotones_uSv_semana": {
+            "type": "number"
+          },
+          "captura_uSv_semana": {
+            "type": "number"
+          },
+          "neutrones_uSv_semana": {
+            "type": "number"
+          },
+          "total_uSv_semana": {
+            "type": "number"
+          },
+          "metodoNeutrones": {
+            "type": "string",
+            "enum": [
+              "kersey",
+              "wu-mcginley",
+              "mayor"
+            ]
+          },
+          "requeridoBPE_mm": {
+            "type": "number"
+          },
+          "requeridoPb_mm": {
+            "type": "number"
+          },
+          "instaladoBPE_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "instaladoPb_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "residual_uSv_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "CUMPLE",
+              "NO_CUMPLE",
+              "SIN_ESPESOR",
+              "SIN_DATOS"
+            ]
+          },
+          "notas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "fuentes",
+          "T",
+          "P_mSv_semana",
+          "fotones_uSv_semana",
+          "captura_uSv_semana",
+          "neutrones_uSv_semana",
+          "total_uSv_semana",
+          "metodoNeutrones",
+          "requeridoBPE_mm",
+          "requeridoPb_mm",
+          "instaladoBPE_mm",
+          "instaladoPb_mm",
+          "residual_uSv_semana",
+          "estado",
+          "notas",
+          "avisos"
+        ],
+        "additionalProperties": false
+      }
+    },
     "resultadosPorArea": {
       "type": "array",
       "items": {
