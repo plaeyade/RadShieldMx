@@ -141,14 +141,16 @@ describe('decisión 6: perfil Elekta Versa HD', () => {
     for (const f of p.fuentes) expect(f.url).toMatch(/^https:\/\//);
   });
 
-  it('configuración del proyecto (confirmada 23-11-2026): fotones 6/10/18 MV y FFF 6/10 MV, electrones 4–15 MeV, neutrones activos', () => {
+  it('configuración del proyecto (confirmada 23-11-2026): fotones 6/10/18 MV y FFF 6/10 MV, electrones 4/6/8/9/12/15 MeV (sin 10 MeV), neutrones activos', () => {
     const c = CONFIG_VERSA_HD_PROYECTO;
     expect(c.confirmado).toBe(true);
     expect(c.fotones.filter((e) => !e.fff).map((e) => e.mv)).toEqual([6, 10, 18]);
     expect(c.fotones.filter((e) => e.fff).map((e) => e.mv)).toEqual([6, 10]);
     expect(c.opcionesCitadas).toEqual([{ mv: 15, fff: false }]);
     expect(c.fotones.some((e) => e.mv === 15)).toBe(false);
-    expect(c.electrones_MeV).toEqual([4, 6, 8, 9, 10, 12, 15]);
+    expect(c.electrones_MeV).toEqual([4, 6, 8, 9, 12, 15]);
+    expect(c.electrones_MeV).not.toContain(10); // 10 MeV retirado por confirmación del propietario 23-11-2026
+    expect(c.nota).toMatch(/10 MeV retirado por confirmación del propietario 23-11-2026/);
     expect(requiereNeutronesLinac(c)).toBe(true);
     expect(requiereNeutronesLinac({ fotones: [{ mv: 10, fff: false }] })).toBe(true);
     expect(requiereNeutronesLinac({ fotones: [{ mv: 18, fff: false }] })).toBe(true);

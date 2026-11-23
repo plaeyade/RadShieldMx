@@ -504,8 +504,9 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
      Clin Med Phys* 2016;17(1), doi:10.1120/jacmp.v17i1.5799 (6/10/18 MV, 6/10 MV FFF, electrones 4–15 MeV, tasas
      FFF) y la tabla comparativa de Radiology Oncology Systems (fuente secundaria; añade 15 MV y electrones de 10 y
      18 MeV). **Configuración confirmada por el propietario (23-11-2026):** `CONFIG_VERSA_HD_PROYECTO` tiene fotones
-     **6, 10 y 18 MV** con filtro y **6 y 10 MV FFF**, electrones **4 a 15 MeV** (4, 6, 8, 9, 10, 12 y 15 del
-     catálogo) y `confirmado: true`; **15 MV** queda como opción citada (`opcionesCitadas`), no configurada. Su
+     **6, 10 y 18 MV** con filtro y **6 y 10 MV FFF**, electrones **4, 6, 8, 9, 12 y 15 MeV** del
+     catálogo (**10 MeV retirado por confirmación del propietario 23-11-2026**: su equipo no tiene electrones de
+     10 MeV; el catálogo lo conserva como dato citado) y `confirmado: true`; **15 MV** queda como opción citada (`opcionesCitadas`), no configurada. Su
      mención anterior de «6, 12 y 15 MeV» como fotones fue un error (ya no se asumen 6 y 15 MV). Con 10 y 18 MV
      (≥ 10 MV) el laberinto y la puerta calculan neutrones y captura (Q_n y H₀ de la Tabla B.9 mientras no haya
      dato del fabricante); los FFF usan los datos del haz con filtro de la misma energía. `fuentesDesdeConfiguracion` crea
@@ -519,7 +520,8 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
   - Pruebas: `src/__tests__/validacion/fase13Decisiones.test.tsx`. «Guíame» sin cambio (17.96 mm Pb / 213.77 mm
     concreto); los ejemplos §7.1.10–7.1.13 dan lo mismo.
   - ~~Pregunta abierta al propietario sobre las energías de fotones~~: respondida el 23-11-2026 (6/10/18 MV, FFF
-    6/10 MV, electrones 4–15 MeV; 15 MV como opción citada).
+    6/10 MV, electrones 4/6/8/9/12/15 MeV; 15 MV como opción citada). 10 MeV retirado por confirmación del
+    propietario 23-11-2026.
 - **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3b «techos y pisos»). Datos del propietario:
   **planta baja mide 5.40 m de piso a contrapiso** (23-11-2026) y, arriba de planta baja, TODOS los niveles miden
   **5 m de piso a contrapiso** (22-11-2026; entrepiso, losa incluida). Los dos son configurables y se puede dar una

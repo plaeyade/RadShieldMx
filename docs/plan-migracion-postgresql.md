@@ -60,7 +60,8 @@ Estado: **propuesta** (23-11-2026). No cambia código ni datos; describe el trab
    `.onUpdateNow()` → `$onUpdate(() => new Date())` (o trigger); `float` → `doublePrecision`; columnas JSON →
    `jsonb`; `embedding` → `vector(1536)` con `CREATE EXTENSION vector`.
 3. `drizzle.config.ts`: `dialect: "postgresql"`; generar una migración inicial nueva (`0000_inicial_pg`) en
-   `db/migrations-pg/` y conservar las de MySQL como histórico hasta cerrar la migración.
+   `db/migrations-pg/` y conservar las de MySQL como histórico hasta cerrar la migración. Esta migración se genera
+   ya con `drizzle-kit` en su versión mayor nueva (ver el paso de cierre de la Fase 13 en la sección 5).
 4. `db/f501_f504_regulatory_materials_schema.sql`: reescribir en dialecto PostgreSQL o convertirlo en
    migración de Drizzle.
 
@@ -113,3 +114,9 @@ Estado: **propuesta** (23-11-2026). No cambia código ni datos; describe el trab
 - Esfuerzo estimado: Fases 0–2 en 3 a 5 días de trabajo; Fases 3–4 en 2 a 3 días, más un ciclo de uso estable
   antes de retirar MySQL.
 - Decisión que se pide al propietario: aprobar el plan y fijar la ventana (propuesta: al cerrar la Fase 13).
+
+### Paso obligatorio al cerrar la Fase 13 (dentro de esta migración)
+
+- **Actualizar drizzle-kit a la versión mayor (resuelve las 5 vulnerabilidades moderadas restantes: drizzle-kit →
+  @esbuild-kit → esbuild, y @hono/node-server) y regenerar las migraciones con esa versión dentro de la migración a
+  PostgreSQL. Decisión del propietario 23-11-2026: no antes de esta fase.**
