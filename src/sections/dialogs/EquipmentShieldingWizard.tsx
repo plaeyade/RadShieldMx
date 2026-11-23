@@ -367,7 +367,7 @@ export default function EquipmentShieldingWizard({ open, onOpenChange }: Props) 
                           <div>• <strong>PMC5722598</strong> — Método NCRP 151 para Gamma Knife</div>
                           <div>• <strong>Tres estados operacionales</strong>: puerta cerrada, puerta abierta, tratamiento</div>
                           <div>• <strong>Extrapolación inversa cuadrada</strong> del grid de kerma aire</div>
-                          <div>• <strong>Radiación anisotrópica</strong> — 201 fuentes Co-60</div>
+                          <div>• <strong>Radiación anisotrópica</strong> — 192 fuentes Co-60 (Perfexion/Icon/Esprit; 201 en los modelos B/C/4C)</div>
                         </>
                       )}
                       {state.equipment.category === 'PET-CT' && (
