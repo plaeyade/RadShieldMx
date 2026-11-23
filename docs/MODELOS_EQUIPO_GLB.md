@@ -46,6 +46,11 @@ Además, 15 MB de GLB (sólo versiones web) inflarían cada despliegue. Por eso:
 
 - La fuente es el repo privado `plaeyade/3D-Models` (`modelos/<equipo>/glb/<clave>_web.glb`).
 - La app los pide a `VITE_EQUIPO_GLB_BASE` (URL o ruta relativa, con o sin `/` final).
+- **CSP:** `index.html` declara `connect-src 'self'`, así que la base debe ser del **mismo origen** que la app
+  (p. ej. `/modelos-equipo/`, servida por el mismo servidor o un proxy inverso). Una URL de otro origen
+  (`http://otro-host/…`) la bloquea el navegador y la vista se queda con la representación esquemática;
+  para usarla habría que añadir ese origen a `connect-src` (decisión de seguridad, no se hace por omisión).
+  Verificado el 23-11-2026 al tomar las capturas con el GLB del Versa HD.
 - `.gitignore` ignora `public/modelos-equipo/` y `*.glb` para que no se versionen por accidente.
 
 Uso local (desarrollo o build de escritorio que no se publica):

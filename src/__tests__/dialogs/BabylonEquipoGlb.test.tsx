@@ -1,10 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import {
-  BabylonRuntimeSmokePreview,
-  MENSAJE_SIN_WEBGL,
-  navegadorSoportaWebGL,
-} from '@/sections/dialogs/medical3d/BabylonRuntimeSmokePreview';
+import { BabylonRuntimeSmokePreview } from '@/sections/dialogs/medical3d/BabylonRuntimeSmokePreview';
+import { MENSAJE_SIN_WEBGL, navegadorSoportaWebGL } from '@/lib/medical3D/webglDisponible';
 import { buildMedicalScene } from '@/lib/medical3D/sceneBuilder';
 import { HEATMAP_GPU, MENU_AVANZADO, VISOR_3D_BABYLON } from '@/lib/featureFlags';
 
