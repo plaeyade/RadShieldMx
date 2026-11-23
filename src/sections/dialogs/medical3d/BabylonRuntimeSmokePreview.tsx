@@ -55,6 +55,7 @@ export function BabylonRuntimeSmokePreview({
   // Vista ampliada: la tarjeta cubre el diálogo para inspeccionar el búnker (la barra lateral sólo da ~240 px).
   const [ampliada, setAmpliada] = useState(false);
   const engineRef = useRef<any>(null);
+  const vistaRef = useRef<{ radio: number; objetivo: { clone(): unknown } } | null>(null);
   // Fase 13: GLB a escala real del equipo (opcional, `VITE_EQUIPO_GLB_BASE`); respaldo = caja + toro.
   const [mostrarGlb, setMostrarGlb] = useState(true);
   const [orientacionGlb_deg, setOrientacionGlb_deg] = useState(() => orientacionPorOmisionGlb_deg());
@@ -81,6 +82,10 @@ export function BabylonRuntimeSmokePreview({
     setCameraMode(mode);
     const camera = cameraRef.current;
     if (!camera) return;
+    if (vistaRef.current) {
+      camera.radius = vistaRef.current.radio;
+      camera.setTarget(vistaRef.current.objetivo.clone());
+    }
     if (mode === 'iso') {
       camera.alpha = Math.PI * 0.72;
       camera.beta = Math.PI / 3.2;
@@ -165,16 +170,19 @@ export function BabylonRuntimeSmokePreview({
         babylonScene = new babylon.Scene(engine);
         babylonScene.clearColor = new babylon.Color4(0.035, 0.052, 0.075, 1);
 
-        const camera = new babylon.ArcRotateCamera(
-          'f455Camera',
-          Math.PI * 0.72,
-          Math.PI / 3.2,
-          Math.max(width, depth) * 1.25,
-          new babylon.Vector3(0, 0.9, 0),
-          babylonScene,
+        // Cámara sobre el centro real del búnker (antes apuntaba a (0, 0.9, 0) con radio ≤ 16 m y, en búnkeres con muros
+        // de 1–2 m, quedaba dentro del concreto) y con distancia según su extensión real.
+        const extension = Math.max(
+          Number.isFinite(scene.bounds.width) && scene.bounds.width > 0 ? scene.bounds.width : 7.5,
+          Number.isFinite(scene.bounds.depth) && scene.bounds.depth > 0 ? scene.bounds.depth : 6,
+          3,
         );
-        camera.lowerRadiusLimit = 4;
-        camera.upperRadiusLimit = 16;
+        const objetivo = new babylon.Vector3(scene.bounds.center[0], 0.9, scene.bounds.center[2]);
+        vistaRef.current = { radio: extension * 1.45, objetivo };
+        const camera = new babylon.ArcRotateCamera('f455Camera', Math.PI * 0.72, Math.PI / 3.2, extension * 1.45, objetivo.clone(), babylonScene);
+        camera.lowerRadiusLimit = 1.5;
+        camera.upperRadiusLimit = Math.max(16, extension * 3);
+        camera.wheelDeltaPercentage = 0.02;
         camera.attachControl(canvas, true);
         cameraRef.current = camera;
 
@@ -233,7 +241,7 @@ export function BabylonRuntimeSmokePreview({
           return mat;
         };
 
-        const floor = babylon.MeshBuilder.CreateBox('f455Floor', { width, depth, height: 0.12 }, babylonScene);
+        const floor = babylon.MeshBuilder.CreateBox('f455Floor', { width: Math.max(scene.bounds.width || width, 3), depth: Math.max(scene.bounds.depth || depth, 3), height: 0.12 }, babylonScene);
         floor.position.set(scene.bounds.center[0], -0.06, scene.bounds.center[2]);
         floor.material = interior;
 
@@ -463,7 +471,9 @@ export function BabylonRuntimeSmokePreview({
 
   return (
     <section
-      className={`space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2 ${ampliada ? 'fixed inset-3 z-50 overflow-auto shadow-2xl' : ''}`}
+      className={`space-y-2 rounded border border-cyan-100 bg-cyan-50 p-2 ${ampliada ? 'fixed inset-3 overflow-auto shadow-2xl' : ''}`}
+      // Ampliada: por encima de las etiquetas <Html> de drei del visor R3F (zIndexRange hasta 16 777 271).
+      style={ampliada ? { zIndex: 16777272 } : undefined}
       data-testid="f455-babylon-runtime-smoke"
       data-ampliada={ampliada ? 'true' : 'false'}
       aria-label="Vista 3D Babylon del búnker"
