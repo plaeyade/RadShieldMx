@@ -1,22 +1,38 @@
 /**
- * Alturas de niveles del edificio: arriba de planta baja, todos los niveles miden 5 m de piso a contrapiso
- * (configurable), y las distancias a los puntos protegidos de techo y piso salen de ellas.
+ * Alturas de niveles del edificio (datos del propietario): planta baja 5.40 m y, arriba de ella, todos los niveles
+ * 5 m de piso a contrapiso (configurables, también nivel por nivel). Sótanos sin dato: no se asume altura. Las
+ * distancias a los puntos protegidos de techo y piso salen de ellas.
  */
 import { describe, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
-  ALTURA_ENTREPISO_M, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M,
+  ALTURA_ENTREPISO_M, ALTURA_PLANTA_BAJA_M, ALTURA_PUNTO_NIVEL_ABAJO_M, AlturaSotanoFaltante, ALTURA_PUNTO_NIVEL_ARRIBA_M,
   alturaNivel_m, distanciaVerticalNivel_m, distanciasTechoPiso_m, elevacionNivel_m,
 } from '@/lib/nivelesEdificio';
 import { calculateFloorCeiling, type FloorCeilingConfig } from '@/hooks/useFloorCeilingCalc';
 import FloorCeilingDialog from '@/sections/dialogs/FloorCeilingDialog';
 
-describe('niveles del edificio — 5 m de piso a contrapiso arriba de planta baja', () => {
-  it('por omisión: 5 m en todos los niveles arriba de PB y en sótanos; PB configurable', () => {
+describe('niveles del edificio — PB 5.40 m y 5 m de piso a contrapiso arriba de planta baja', () => {
+  it('por omisión: PB 5.40 m y 5 m en todos los niveles arriba de PB', () => {
+    expect(ALTURA_PLANTA_BAJA_M).toBe(5.4);
     expect(ALTURA_ENTREPISO_M).toBe(5);
-    const cfg = { alturaPlantaBaja_m: 4.2 };
+    expect(alturaNivel_m(0)).toBe(5.4);
+    for (const n of [1, 2, 3, 7]) expect(alturaNivel_m(n)).toBe(5);
+    expect(elevacionNivel_m(1)).toBeCloseTo(5.4, 12);
+    expect(elevacionNivel_m(3)).toBeCloseTo(5.4 + 2 * 5, 12);
+  });
+
+  it('sótanos: sin dato no se asume altura (AlturaSotanoFaltante); con dato, la capturada', () => {
+    expect(() => alturaNivel_m(-1)).toThrow(AlturaSotanoFaltante);
+    expect(() => elevacionNivel_m(-2, { alturasPorNivel: { [-1]: 4 } })).toThrow(AlturaSotanoFaltante);
+    expect(() => distanciasTechoPiso_m(0, 1.3)).toThrow(AlturaSotanoFaltante);
+    // La sala en PB no necesita sótano para el techo.
+    expect(distanciaVerticalNivel_m({ nivelFuente: 0, alturaFuente_m: 1.3, nivelDestino: 1 })).toBeCloseTo(5.4 + 0.5 - 1.3, 12);
+    const cfg = { alturaPlantaBaja_m: 4.2, alturaSotano_m: 5 };
     expect(alturaNivel_m(0, cfg)).toBe(4.2);
     for (const n of [1, 2, 3, 7, -1, -2]) expect(alturaNivel_m(n, cfg)).toBe(5);
+    expect(alturaNivel_m(-1, { alturasPorNivel: { [-1]: 3.8 } })).toBe(3.8);
+    expect(() => alturaNivel_m(-1, { alturaSotano_m: 0 })).toThrow(AlturaSotanoFaltante);
     expect(elevacionNivel_m(0, cfg)).toBe(0);
     expect(elevacionNivel_m(1, cfg)).toBeCloseTo(4.2, 12);
     expect(elevacionNivel_m(2, cfg)).toBeCloseTo(9.2, 12);
@@ -25,8 +41,7 @@ describe('niveles del edificio — 5 m de piso a contrapiso arriba de planta baj
     expect(elevacionNivel_m(-2, cfg)).toBeCloseTo(-10, 12);
   });
 
-  it('sin altura de PB se toma la de entrepiso; entrepiso y niveles concretos configurables', () => {
-    expect(elevacionNivel_m(3)).toBeCloseTo(15, 12);
+  it('PB, entrepiso y niveles concretos configurables', () => {
     expect(elevacionNivel_m(3, { alturaPlantaBaja_m: 6, alturaEntrepiso_m: 4.5 })).toBeCloseTo(6 + 2 * 4.5, 12);
     expect(elevacionNivel_m(3, { alturaPlantaBaja_m: 6, alturasPorNivel: { 2: 7 } })).toBeCloseTo(6 + 5 + 7, 12);
     expect(alturaNivel_m(1, { alturaEntrepiso_m: -1 })).toBe(5); // valor no válido → 5 m
@@ -36,13 +51,15 @@ describe('niveles del edificio — 5 m de piso a contrapiso arriba de planta baj
   it('punto protegido: 0.5 m sobre el piso de arriba y 1.7 m sobre el de abajo', () => {
     expect(ALTURA_PUNTO_NIVEL_ARRIBA_M).toBe(0.5);
     expect(ALTURA_PUNTO_NIVEL_ABAJO_M).toBe(1.7);
-    const cfg = { alturaPlantaBaja_m: 5 };
+    const cfg = { alturaPlantaBaja_m: 5, alturaSotano_m: 5 };
     // Sala en PB, isocentro a 1.3 m: arriba 5 + 0.5 − 1.3 = 4.2 m; abajo (sótano −1) 1.3 + 5 − 1.7 = 4.6 m.
     const d = distanciasTechoPiso_m(0, 1.3, cfg);
     expect(d.arriba_m).toBeCloseTo(4.2, 12);
     expect(d.abajo_m).toBeCloseTo(4.6, 12);
     // Sala en el nivel 2: el nivel 3 está 5 m arriba de su piso (no la altura de PB).
     const d2 = distanciasTechoPiso_m(2, 1.3, { alturaPlantaBaja_m: 3.5 });
+    // Con los valores por omisión, PB 5.40 m: arriba 5.4 + 0.5 − 1.3 = 4.6 m.
+    expect(distanciasTechoPiso_m(0, 1.3, { alturaSotano_m: 5 }).arriba_m).toBeCloseTo(4.6, 12);
     expect(d2.arriba_m).toBeCloseTo(4.2, 12);
     expect(d2.abajo_m).toBeCloseTo(4.6, 12);
     // Dos niveles arriba de PB (nivel 2): 5 + 5 + 0.5 − 1.3.
@@ -79,14 +96,42 @@ describe('techo y piso con las distancias de los niveles', () => {
     expect(alto.ceilingRequiredThickness_mm).toBeLessThan(conNiveles.ceilingRequiredThickness_mm);
   });
 
-  it('el diálogo usa los niveles por omisión (5 m) y muestra las distancias', () => {
+  it('sala en PB con área abajo ocupada y sin altura de sótano: el suelo queda pendiente y se pide el dato', () => {
+    const r = calculateFloorCeiling({ ...base, niveles: { nivelSala: 0, edificio: {} } });
+    expect(r.distanceToAbove_m).toBeCloseTo(5.4 + 0.5 - 1.3, 12);
+    expect(r.distanceToBelow_m).toBeNull();
+    expect(r.sotanosSinAltura).toEqual([-1]);
+    expect(Number.isNaN(r.floorRequiredThickness_mm)).toBe(true);
+    expect(r.floorCompliant).toBe(false);
+    expect(r.recommendation).toMatch(/altura del sótano/);
+    // Con el área de abajo desocupada no hace falta.
+    const sinAbajo = calculateFloorCeiling({ ...base, areaBelowOccupied: false, niveles: { nivelSala: 0, edificio: {} } });
+    expect(sinAbajo.sotanosSinAltura).toEqual([]);
+    expect(sinAbajo.recommendation).not.toMatch(/sótano/);
+    const conDato = calculateFloorCeiling({ ...base, niveles: { nivelSala: 0, edificio: { alturaSotano_m: 4 } } });
+    expect(conDato.distanceToBelow_m).toBeCloseTo(1.3 + 4 - 1.7, 12);
+    expect(conDato.sotanosSinAltura).toEqual([]);
+  });
+
+  it('el diálogo usa los niveles por omisión (PB 5.40 m, demás 5 m, sótano vacío) y muestra las distancias', () => {
     render(<FloorCeilingDialog open onOpenChange={() => {}} />);
-    expect((screen.getByLabelText('Demás niveles, piso a contrapiso (m)') as HTMLInputElement).value).toBe('5');
-    expect((screen.getByLabelText('Distancia isocentro a punto arriba (m)') as HTMLInputElement).value).toBe('4.2');
+    const valor = (l: string) => (screen.getByLabelText(l) as HTMLInputElement).value;
+    expect(valor('Planta baja, piso a contrapiso (m)')).toBe('5.4');
+    expect(valor('Demás niveles, piso a contrapiso (m)')).toBe('5');
+    expect(valor('Sótanos, piso a contrapiso (m)')).toBe('');
+    expect(valor('Distancia isocentro a punto arriba (m)')).toBe('4.6');
+    expect(screen.queryByText(/Capture la altura del sótano/)).toBeNull();
     fireEvent.change(screen.getByLabelText('Demás niveles, piso a contrapiso (m)'), { target: { value: '6' } });
     // En PB el techo da al nivel 1: sólo cambia con la altura de PB.
-    expect((screen.getByLabelText('Distancia isocentro a punto arriba (m)') as HTMLInputElement).value).toBe('4.2');
+    expect(valor('Distancia isocentro a punto arriba (m)')).toBe('4.6');
     fireEvent.change(screen.getByLabelText('Nivel de la sala (0 = PB)'), { target: { value: '1' } });
-    expect((screen.getByLabelText('Distancia isocentro a punto arriba (m)') as HTMLInputElement).value).toBe('5.2');
+    expect(valor('Distancia isocentro a punto arriba (m)')).toBe('5.2');
+    // Sala en sótano: el techo depende de la altura del sótano, que no tiene dato → se pide.
+    fireEvent.change(screen.getByLabelText('Nivel de la sala (0 = PB)'), { target: { value: '-1' } });
+    expect(screen.getByText(/Capture la altura del sótano \(nivel -1\)/)).toBeTruthy();
+    expect(valor('Distancia isocentro a punto arriba (m)')).toBe('');
+    fireEvent.change(screen.getByLabelText('Sótanos, piso a contrapiso (m)'), { target: { value: '4' } });
+    expect(screen.queryByText(/Capture la altura del sótano/)).toBeNull();
+    expect(valor('Distancia isocentro a punto arriba (m)')).toBe('3.2');
   });
 });

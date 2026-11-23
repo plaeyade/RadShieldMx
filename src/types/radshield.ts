@@ -502,6 +502,38 @@ export interface CriticalPoint {
   notes?: string;
 }
 
+/**
+ * Fase 13, paso 3: laberinto y puerta de una sala de teleterapia (NCRP 151 §2.4). Distancias en m, áreas en m²,
+ * con los símbolos de las Figs. 2.7 (fotones) y 2.8 (neutrones y captura). Lo evalúa `laberintoPuerta.ts`.
+ */
+export interface LaberintoPuertaPlano {
+  id: string;
+  nombre: string;
+  /** Fuentes de la sala; vacío = todas las fuentes de teleterapia del plano. */
+  fuenteIds?: string[];
+  /** Ec. 2.9–2.12. `muroZ_cm`: espesor de concreto del muro interior del laberinto (transmisión de la fuga, Tabla B.7). */
+  geometria: {
+    dh_m: number; dr_m: number; dz_m: number; A0_m2: number; Az_m2: number;
+    dsec_m: number; dzz_m: number; A1_m2: number; dL_m: number; muroZ_cm: number;
+    dsca_m?: number; dsecFuga_m?: number;
+  };
+  /** Sección del laberinto para la validez de la Ec. 2.14 (2 < d_zz/√(ancho·alto) < 6; 1 < alto/ancho < 2). */
+  dimensiones?: { ancho_m: number; alto_m: number };
+  /** Ec. 2.15–2.21 (≥ 10 MV): isocentro → A (d₁), A → puerta (d₂), superficie de la sala S_r, secciones S₀ y S₁. */
+  sala?: { d1_m: number; d2_m: number; Sr_m2: number; S0_m2: number; S1_m2: number; beta?: number };
+  /** Q_n (n/Gy) y H₀ (mSv/Gy a 1.41 m) del fabricante; sin ellos, el máximo de la Tabla B.9 para la energía. */
+  neutronesPorEnergia?: { mv: number; Qn: number; H0_mSv_Gy?: number; referencia?: string }[];
+  /** Por omisión «mayor» (el mayor de Kersey y Wu–McGinley). */
+  metodoNeutrones?: 'kersey' | 'wu-mcginley' | 'mayor';
+  /** Fracción transmitida por el paciente f (0.25), U hacia el muro G (0.25), campo (1600 cm²), reflexión α₀/α_z (0°). */
+  fPaciente?: number; UG?: number; campo_cm2?: number; anguloReflexion_deg?: number;
+  /** Objetivo y ocupación del lado exterior de la puerta. */
+  P_mSv_semana: number;
+  T: number;
+  /** Blindaje instalado en la puerta (polietileno borado al 5 % y plomo). */
+  puertaInstalada?: { bpe_mm?: number; plomo_mm?: number };
+}
+
 export interface FloorPlan {
   id: string;
   name: string;
@@ -514,6 +546,8 @@ export interface FloorPlan {
   occupiedRegions: OccupiedRegion[];
   regions?: OccupiedRegion[];
   criticalPoints?: CriticalPoint[];
+  /** Fase 13, paso 3: laberintos y puertas de teleterapia (NCRP 151 §2.4). */
+  laberintos?: LaberintoPuertaPlano[];
   importMetadata?: {
     source?: 'dxf' | 'dwg' | 'ifc' | 'step' | 'manual' | 'unknown';
     fileName?: string;

@@ -1,9 +1,12 @@
 /**
  * Alturas de los niveles del edificio para techos, losas y puntos protegidos en pisos superiores e inferiores.
  *
- * Dato del proyecto (22-11-2026): después de planta baja, TODOS los niveles miden 5 m de piso a contrapiso (altura de
- * entrepiso, losa incluida). Planta baja tiene su propia altura. Las dos son configurables, y se puede dar una altura
- * distinta a un nivel concreto (`alturasPorNivel`).
+ * Datos del propietario: planta baja mide **5.40 m** de piso a contrapiso (23-11-2026) y, arriba de planta baja,
+ * TODOS los niveles miden **5 m** de piso a contrapiso (22-11-2026; altura de entrepiso, losa incluida). Las dos son
+ * configurables, y se puede dar una altura distinta a un nivel concreto (`alturasPorNivel`).
+ *
+ * Sótanos: no hay dato. No se asume ninguna altura: sin `alturaSotano_m` ni `alturasPorNivel[n]` para el sótano `n`,
+ * cualquier cálculo que lo necesite lanza `AlturaSotanoFaltante` (el diálogo «Suelo y techo» la pide).
  *
  * Convención de niveles: 0 = planta baja; 1, 2… = niveles superiores; −1, −2… = sótanos. La elevación de un nivel es
  * la de su piso terminado respecto del piso de planta baja.
@@ -13,7 +16,9 @@
  * pie). Ambos son configurables.
  */
 
-/** Altura de piso a contrapiso de cada nivel arriba de planta baja (m). */
+/** Altura de planta baja, de piso a contrapiso (m). Dato del propietario. */
+export const ALTURA_PLANTA_BAJA_M = 5.4;
+/** Altura de piso a contrapiso de cada nivel arriba de planta baja (m). Dato del propietario. */
 export const ALTURA_ENTREPISO_M = 5;
 /** Altura del punto protegido sobre el piso del nivel de arriba (m). */
 export const ALTURA_PUNTO_NIVEL_ARRIBA_M = 0.5;
@@ -21,24 +26,37 @@ export const ALTURA_PUNTO_NIVEL_ARRIBA_M = 0.5;
 export const ALTURA_PUNTO_NIVEL_ABAJO_M = 1.7;
 
 export interface NivelesEdificio {
-  /** Planta baja, de piso a contrapiso (m). Sin dato, la de entrepiso: confírmela en el proyecto. */
+  /** Planta baja, de piso a contrapiso (m). Por omisión 5.40 m (dato del propietario). */
   alturaPlantaBaja_m?: number;
-  /** Niveles arriba de planta baja y sótanos (m). Por omisión 5 m. */
+  /** Niveles arriba de planta baja (m). Por omisión 5 m (dato del propietario). */
   alturaEntrepiso_m?: number;
-  /** Excepciones: altura de un nivel concreto (m), p. ej. `{ 3: 6 }`. */
+  /** Sótanos, de piso a contrapiso (m). SIN valor por omisión: sin dato, el cálculo que lo use falla y lo pide. */
+  alturaSotano_m?: number;
+  /** Excepciones: altura de un nivel concreto (m), p. ej. `{ 3: 6, -1: 4.5 }`. */
   alturasPorNivel?: Record<number, number>;
+}
+
+/** Falta la altura de un sótano: no hay dato del propietario y no se asume ninguna. */
+export class AlturaSotanoFaltante extends RangeError {
+  readonly nivel: number;
+  constructor(nivel: number) {
+    super(`Falta la altura del sótano (nivel ${nivel}): no hay dato; captúrela (alturaSotano_m o alturasPorNivel).`);
+    this.name = 'AlturaSotanoFaltante';
+    this.nivel = nivel;
+  }
 }
 
 const positivo = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x > 0;
 
-/** Altura de piso a contrapiso del nivel `n` (m). */
+/** Altura de piso a contrapiso del nivel `n` (m). En un sótano sin dato lanza `AlturaSotanoFaltante`. */
 export function alturaNivel_m(n: number, cfg: NivelesEdificio = {}): number {
   if (!Number.isInteger(n)) throw new RangeError(`Nivel no entero: ${n}`);
   const propio = cfg.alturasPorNivel?.[n];
   if (positivo(propio)) return propio;
-  const entrepiso = positivo(cfg.alturaEntrepiso_m) ? cfg.alturaEntrepiso_m : ALTURA_ENTREPISO_M;
-  if (n === 0) return positivo(cfg.alturaPlantaBaja_m) ? cfg.alturaPlantaBaja_m : entrepiso;
-  return entrepiso;
+  if (n === 0) return positivo(cfg.alturaPlantaBaja_m) ? cfg.alturaPlantaBaja_m : ALTURA_PLANTA_BAJA_M;
+  if (n > 0) return positivo(cfg.alturaEntrepiso_m) ? cfg.alturaEntrepiso_m : ALTURA_ENTREPISO_M;
+  if (positivo(cfg.alturaSotano_m)) return cfg.alturaSotano_m;
+  throw new AlturaSotanoFaltante(n);
 }
 
 /** Elevación del piso del nivel `n` sobre el piso de planta baja (m; negativa en sótanos). */

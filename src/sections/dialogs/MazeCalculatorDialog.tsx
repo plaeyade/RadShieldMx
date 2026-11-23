@@ -1,6 +1,8 @@
 /**
  * Laberinto y puerta de teleterapia — NCRP 151 §2.4 (fotones, captura y neutrones).
  * Sustituye al modelo anterior por segmentos, que no seguía las ecuaciones del informe.
+ * Fase 13, paso 3: el cálculo es `evaluarLaberintoPuerta`, el mismo que usa el motor del proyecto para los laberintos
+ * del plano (una sola implementación).
  */
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,18 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calculator } from 'lucide-react';
-import { cargaFuga, type EnergiaMV } from '@/lib/ncrp151';
-import {
-  capturaGammaPorGy, fotonesEnPuerta, fuenteNeutronesConservadora, neutronesKersey, neutronesWuMcGinley,
-  puerta, TABLA_B_9,
-} from '@/lib/ncrp151Laberinto';
+import { type EnergiaMV } from '@/lib/ncrp151';
+import { TABLA_B_9 } from '@/lib/ncrp151Laberinto';
+import { evaluarLaberintoPuerta, MV_NEUTRONES_MIN } from '@/lib/laberintoPuerta';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
 // Valores iniciales: carga y sala del ejemplo NCRP 151 §7.1 (Varian 1800, 18 MV); geometría de fotones ilustrativa.
 const INICIAL = {
   energia: 18 as EnergiaMV, W: 450, fIMRT: 0, cIMRT: 5, P_mSv: 0.1,
-  dh: 7.4, dr: 5.0, dz: 8.5, A0: 2.6, Az: 9.2, dsec: 6.4, dzz: 8.5, A1: 22, dL: 7.3, BZ: 2.41e-4,
+  dh: 7.4, dr: 5.0, dz: 8.5, A0: 2.6, Az: 9.2, dsec: 6.4, dzz: 8.5, A1: 22, dL: 7.3, muroZ: 125,
   equipo: 'conservador', d1: 6.4, d2: 8.5, Sr: 236, S0: 9.2, S1: 8.4,
 };
 
@@ -38,31 +38,30 @@ const fmt = (sv: number) => (sv * 1e6).toLocaleString('es-MX', { maximumFraction
 export default function MazeCalculatorDialog({ open, onOpenChange }: Props) {
   const [v, setV] = useState(INICIAL);
   const set = (k: keyof typeof INICIAL) => (x: number | string) => setV((p) => ({ ...p, [k]: x }));
-  const altaEnergia = typeof v.energia === 'number' && v.energia > 10;
+  const altaEnergia = typeof v.energia === 'number' && v.energia >= MV_NEUTRONES_MIN;
 
   const r = useMemo(() => {
     try {
-      const WL = cargaFuga({ energia: v.energia, W_Gy_semana: v.W, fraccionIMRT: v.fIMRT, factorIMRT: v.cIMRT });
-      const fot = fotonesEnPuerta(
-        { dh_m: v.dh, dr_m: v.dr, dz_m: v.dz, A0_m2: v.A0, Az_m2: v.Az, dsec_m: v.dsec, dzz_m: v.dzz, A1_m2: v.A1, dL_m: v.dL, B_muroZ: v.BZ },
-        { energia: v.energia, W_Gy_semana: v.W, WL_Gy_semana: WL },
+      const fila = TABLA_B_9.find((f) => `${f.fabricante} ${f.modelo} ${f.mv}` === v.equipo);
+      const res = evaluarLaberintoPuerta(
+        {
+          id: 'dialogo', nombre: 'Puerta', P_mSv_semana: v.P_mSv, T: 1, metodoNeutrones: 'mayor',
+          geometria: { dh_m: v.dh, dr_m: v.dr, dz_m: v.dz, A0_m2: v.A0, Az_m2: v.Az, dsec_m: v.dsec, dzz_m: v.dzz, A1_m2: v.A1, dL_m: v.dL, muroZ_cm: v.muroZ },
+          ...(altaEnergia ? { sala: { d1_m: v.d1, d2_m: v.d2, Sr_m2: v.Sr, S0_m2: v.S0, S1_m2: v.S1 } } : {}),
+          ...(fila ? { neutronesPorEnergia: [{ mv: fila.mv, Qn: fila.Qn, H0_mSv_Gy: fila.H0_mSv_Gy, referencia: `Tabla B.9: ${fila.fabricante} ${fila.modelo}` }] } : {}),
+        },
+        [{ nombre: `${v.energia} MV`, f: { energia: v.energia, W_Gy_semana: v.W, fraccionIMRT: v.fIMRT, factorIMRT: v.cIMRT } }],
       );
-      let Hn = 0, Hcg = 0;
-      const notas: string[] = [];
-      if (altaEnergia) {
-        const mv = v.energia as number;
-        const fila = TABLA_B_9.find((f) => `${f.fabricante} ${f.modelo} ${f.mv}` === v.equipo);
-        const fuente = fila ? { Qn: fila.Qn, H0_mSv_Gy: fila.H0_mSv_Gy ?? fuenteNeutronesConservadora(mv).H0_mSv_Gy } : fuenteNeutronesConservadora(mv);
-        if (!fila) notas.push(fuenteNeutronesConservadora(mv).nota);
-        const sala = { Qn: fuente.Qn, d1_m: v.d1, d2_m: v.d2, Sr_m2: v.Sr, S0_m2: v.S0, S1_m2: v.S1, H0_mSv_Gy: fuente.H0_mSv_Gy };
-        Hcg = WL * capturaGammaPorGy(sala, mv);
-        const kersey = neutronesKersey(sala);
-        const wu = neutronesWuMcGinley(sala);
-        Hn = WL * Math.max(kersey, wu);
-        notas.push(`Neutrones: el mayor de Kersey (${(kersey * 1e6).toFixed(2)} µSv/Gy) y Wu–McGinley (${(wu * 1e6).toFixed(2)} µSv/Gy).`);
-      }
-      const door = puerta(v.P_mSv / 1000, { neutrones: Hn, captura: Hcg, fotones: fot.HTot });
-      return { WL, fot, Hn, Hcg, door, notas: [...notas, ...door.notas], error: null as string | null };
+      const c = res.porEnergia[0];
+      const notas = [
+        ...(c?.fuenteNeutrones ? [c.fuenteNeutrones] : []),
+        ...(c?.neutronesKersey_Sv != null && c.neutronesWu_Sv != null
+          ? [`Neutrones: el mayor de Kersey (${(c.neutronesKersey_Sv / c.WL_Gy_semana * 1e6).toFixed(2)} µSv/Gy) y Wu–McGinley (${(c.neutronesWu_Sv / c.WL_Gy_semana * 1e6).toFixed(2)} µSv/Gy).`]
+          : []),
+        ...res.notas, ...res.avisos.filter((a) => !/sin ancho y alto/.test(a)),
+      ];
+      const door = { H_total_Sv: res.H_total_Sv, plomo_mm: res.requerido.plomo_mm, bpe_mm: res.requerido.bpe_mm };
+      return { WL: c?.WL_Gy_semana ?? v.W, fot: c?.fotones, Hn: res.H_neutrones_Sv, Hcg: res.H_captura_Sv, door, notas, error: null as string | null };
     } catch (e) {
       return { error: (e as Error).message } as const;
     }
@@ -106,7 +105,7 @@ export default function MazeCalculatorDialog({ open, onOpenChange }: Props) {
           <Num id="maze-dzz" label="d_zz" value={v.dzz} onChange={set('dzz')} />
           <Num id="maze-A1" label="A₁" value={v.A1} onChange={set('A1')} />
           <Num id="maze-dL" label="d_L" value={v.dL} onChange={set('dL')} />
-          <Num id="maze-BZ" label="B muro Z" value={v.BZ} onChange={set('BZ')} />
+          <Num id="maze-muroZ" label="Muro Z (cm concreto)" value={v.muroZ} onChange={set('muroZ')} />
         </div>
 
         {altaEnergia && (

@@ -402,7 +402,9 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
    queda dentro del semiángulo del haz.
 2. **U de primaria y una sola convención de distancia**: U por barrera según la franja del haz (no U = 1 al importar)
    y el punto protegido a 0.3 m de la cara exterior, a la altura de ocupación, igual en motor, mapa y memoria.
-3. **Techos y pisos para todas las modalidades** (MN, PET, HDR, Gamma Knife; hoy sólo concreto y sólo linac), con
+3. **Laberinto y puerta ≥ 10 MV en el motor del proyecto** (NCRP 151 §2.4: fotones en la puerta, captura gamma y
+   neutrones por Kersey o Wu–McGinley). Acordado como paso 3 el 22-11-2026; techos y pisos pasa a 3b.
+3b. **Techos y pisos para todas las modalidades** (MN, PET, HDR, Gamma Knife; hoy sólo concreto y sólo linac), con
    material, espesor y alturas de la sala.
 4. **Materiales de alta densidad con densidad medida y cita** (TD-550/TD-250, NIPOL; Anexo K), sin espesor
    «requerido» tomado del nombre de capa.
@@ -449,13 +451,46 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
     z = 0 fijan ahora el punto en el piso (`alturaPuntoProtegido_m = 0`). «Guíame» (fuentes a 0 m y muros sin espesor
     instalado) y los ejemplos del §7.1 dan los mismos espesores: 17.96 mm Pb / 213.77 mm de concreto en el muro norte.
     Pruebas: `src/__tests__/validacion/fase13Paso2.test.ts`.
-- **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3 «techos y pisos»): dato del proyecto del
-  22-11-2026, después de planta baja TODOS los niveles miden **5 m de piso a contrapiso** (entrepiso, losa incluida).
-  `src/lib/nivelesEdificio.ts`: `ALTURA_ENTREPISO_M = 5` (configurable con `alturaEntrepiso_m` y por nivel con
-  `alturasPorNivel`), altura propia de planta baja (`alturaPlantaBaja_m`; sin dato, la de entrepiso), sótanos con la
-  de entrepiso, `elevacionNivel_m` (0 = PB) y `distanciaVerticalNivel_m` / `distanciasTechoPiso_m` con el punto
-  protegido a 0.5 m sobre el piso de arriba y a 1.7 m sobre el de abajo (convención de NCRP 147 para pisos y techos).
-  El cálculo de techo y piso (`useFloorCeilingCalc`, opción `niveles`) toma de ahí las distancias isocentro → punto;
-  sin `niveles`, las capturadas, como antes. El diálogo «Suelo y techo» calcula por niveles por omisión (nivel de la
-  sala, altura de PB y de los demás niveles, 5 m) y muestra las distancias. Las alturas interiores de sala de los
-  visores 3D (3.0–3.1 m) no son alturas de nivel y no cambian. Pruebas: `src/__tests__/validacion/nivelesEdificio.test.tsx`.
+- **Paso 3** (`fase13-paso3-laberinto`): laberinto y puerta de teleterapia en el motor del proyecto, con las
+  ecuaciones ya validadas de `ncrp151Laberinto.ts` (antes sólo las usaba el diálogo, con una energía).
+  - **Modelo.** `FloorPlan.laberintos` (`LaberintoPuertaPlano`): geometría de las Figs. 2.7 y 2.8 en m y m² (la
+    captura el usuario; aún no se mide del plano), espesor de concreto del muro interior, sala para neutrones
+    (d₁, d₂, S_r, S₀, S₁), Q_n/H₀ del fabricante por energía (sin ellos, el máximo de la Tabla B.9), método de
+    neutrones, P y T del lado exterior y la puerta instalada (BPE y plomo).
+  - **Cálculo** (`src/lib/laberintoPuerta.ts`, `evaluarLaberintoPuerta`): fotones de la Ec. 2.9–2.14 por energía y
+    sumados (§7.1.10); con energías ≥ 10 MV, captura (Ec. 2.15–2.17) y neutrones (Kersey Ec. 2.18 o Wu–McGinley
+    Ec. 2.19–2.21; por omisión el mayor), ambos con la carga de fuga W_L de la Ec. 3.6 (§7.1.11–7.1.12). Puerta con
+    la regla de §7.1.13 (neutrones con BPE, TVL 45 mm, y captura con plomo, TVL 61 mm, cada uno a (P/T)/2; sólo
+    fotones: plomo con TVL 6 mm a P/T) y, si la SUMA de las tres componentes detrás de esa puerta rebasa P/T, más
+    plomo hasta cumplirla (en §7.1.13 sin IMRT la regla deja ≈ 107 µSv detrás de 53.3 mm BPE + 7.1 mm Pb; el motor
+    adopta 8.9 mm Pb). Estado con la puerta instalada (CUMPLE / NO_CUMPLE / SIN_ESPESOR; SIN_DATOS si falta la sala
+    con ≥ 10 MV) y tasa media en 40 h de haz. Aviso si el laberinto sale del intervalo de la Ec. 2.14.
+  - **Proyecto y memoria.** `calcularProyecto` devuelve `laberintos` sólo si el plano los declara; la memoria añade
+    `puertas` (opcional en `radshield/memoria@1`, esquema regenerado), el criterio «puerta», las fórmulas y una
+    conclusión por puerta. Sin laberintos, el proyecto y la memoria no cambian (mismo sello). El diálogo
+    «Laberinto y puerta» usa la misma función.
+  - Pruebas: `src/__tests__/validacion/fase13Paso3.test.ts` (§7.1.10–7.1.13: fotones 100, captura 65.3, Kersey 765 →
+    930 µSv; 53.6 mm BPE + 7.3 mm Pb; IMRT 72 + 32 mm). «Guíame» sin cambio (17.96 mm Pb / 213.77 mm concreto).
+  - Pendiente para el físico médico: método de neutrones por omisión, neutrones desde 10 MV, la regla de la suma
+    frente a §7.1.13 tal cual, laberintos de dos tramos y geometría medida del plano.
+- **Decisiones del propietario (23-11-2026) sobre el paso 3:** se quedan los valores por omisión del laberinto
+  f = 0.25 (fracción transmitida por el paciente), U_G = 0.25 (factor de uso hacia el muro G) y reflexión a 0°
+  (`anguloReflexion_deg`, Tablas B.8a/B.8b). Siguen siendo configurables por laberinto.
+- **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3b «techos y pisos»). Datos del propietario:
+  **planta baja mide 5.40 m de piso a contrapiso** (23-11-2026) y, arriba de planta baja, TODOS los niveles miden
+  **5 m de piso a contrapiso** (22-11-2026; entrepiso, losa incluida). Los dos son configurables y se puede dar una
+  altura distinta a un nivel concreto.
+  - `src/lib/nivelesEdificio.ts`: `ALTURA_PLANTA_BAJA_M = 5.4` (`alturaPlantaBaja_m`), `ALTURA_ENTREPISO_M = 5`
+    (`alturaEntrepiso_m`), excepciones por nivel con `alturasPorNivel`, `elevacionNivel_m` (0 = PB) y
+    `distanciaVerticalNivel_m` / `distanciasTechoPiso_m` con el punto protegido a 0.5 m sobre el piso de arriba y a
+    1.7 m sobre el de abajo (convención de NCRP 147 para pisos y techos).
+  - **Sótanos: no hay dato y no se asume ninguno.** `alturaSotano_m` (o `alturasPorNivel[-n]`) no tiene valor por
+    omisión; si un cálculo lo necesita y falta, `alturaNivel_m` lanza `AlturaSotanoFaltante`. En el cálculo de techo
+    y piso la distancia de ese lado queda `null`, el espesor requerido sin valor, `sotanosSinAltura` lista los
+    sótanos que faltan y la recomendación pide el dato. El diálogo «Suelo y techo» muestra el campo «Sótanos» vacío
+    y, si se usa (sala en PB con área de abajo ocupada, o sala en sótano), avisa «Capture la altura del sótano».
+  - El cálculo de techo y piso (`useFloorCeilingCalc`, opción `niveles`) toma de ahí las distancias isocentro →
+    punto; sin `niveles`, las capturadas, como antes. El diálogo calcula por niveles por omisión (nivel de la sala,
+    PB 5.40 m, demás niveles 5 m, sótanos sin dato) y muestra las distancias. Las alturas interiores de sala de los
+    visores 3D (3.0–3.1 m) no son alturas de nivel y no cambian. «Guíame» sin cambio (17.96 mm Pb / 213.77 mm
+    concreto). Pruebas: `src/__tests__/validacion/nivelesEdificio.test.tsx`.

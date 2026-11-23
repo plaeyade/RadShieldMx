@@ -15,6 +15,7 @@
  * aportaba (no bloquear la interfaz y avisar del progreso) la da aquí `calcularProyectoAsync`, que cede el hilo entre
  * barreras y ejecuta exactamente la misma función por barrera.
  */
+import { evaluarLaberintosDelPlano, type ResultadoLaberinto } from '@/lib/laberintoPuerta';
 import { MATERIALS, type Barrier, type CalculationInputWarning, type FloorPlan, type RadiationSource } from '@/types/radshield';
 import type { CTIsodosisProfile } from '@/types/ctIsodosis';
 import {
@@ -588,6 +589,8 @@ export interface ResultadoProyecto {
   barrierResults: ResultadoBarrera[];
   sampleLines: LineaMuestreo[];
   resumen: ReturnType<typeof verificarPlano>['resumen'];
+  /** Fase 13, paso 3: puertas de los laberintos declarados en el plano (NCRP 151 §2.4); ausente si no hay. */
+  laberintos?: ResultadoLaberinto[];
 }
 
 function armar(plan: FloorPlan, pares: { barrera: Barrier; linea: LineaMuestreo }[]): ResultadoProyecto {
@@ -597,6 +600,7 @@ function armar(plan: FloorPlan, pares: { barrera: Barrier; linea: LineaMuestreo 
     barrierResults: barriers.map(resultadoDeBarrera),
     sampleLines: pares.map((p) => p.linea),
     resumen: verificarPlano({ ...plan, barriers }).resumen,
+    ...(plan.laberintos?.length ? { laberintos: evaluarLaberintosDelPlano(plan) } : {}),
   };
 }
 
