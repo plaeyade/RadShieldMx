@@ -108,7 +108,7 @@ export function getCalculationInputWarnings(input: Record<string, unknown>): Cal
 /**
  * Energía nominal de fotones en MV/MeV. El catálogo de modalidades declara la energía de los LINAC
  * sólo en la etiqueta («18 MV X-rays») o en el id («linac-18mv»), no en `energy_MeV`; sin este
- * respaldo el aviso de neutrones/laberinto/puerta (>10 MV) nunca se activaba.
+ * respaldo el aviso de neutrones/laberinto/puerta (≥ 10 MV) nunca se activaba.
  */
 export function getModalityEnergy_MeV(source?: RadiationSource): number {
   const modality = source?.modality;
@@ -118,6 +118,22 @@ export function getModalityEnergy_MeV(source?: RadiationSource): number {
   if (label?.[1]) return Number(label[1]);
   const id = modality.id.match(/(\d+(?:\.\d+)?)\s*mv/i);
   return id?.[1] ? Number(id[1]) : 0;
+}
+
+/**
+ * Energía nominal de fotones desde la que un linac pide neutrones, captura y revisión de laberinto y puerta (MV).
+ * Decisión del propietario (23-11-2026): desde 10 MV inclusive, no sólo por encima (NCRP 151 Tabla B.9 tabula equipos
+ * de 10 MV). Es la misma que `MV_NEUTRONES_MIN` de `laberintoPuerta`.
+ */
+export const ENERGIA_NEUTRONES_MIN_MV = 10;
+
+/**
+ * ¿La fuente pide neutrones? Teleterapia (linac) desde 10 MV inclusive; las demás modalidades, como antes, por encima
+ * de 10 MeV.
+ */
+export function requiereNeutrones(source?: RadiationSource): boolean {
+  const e = getModalityEnergy_MeV(source);
+  return source?.modality.category === 'therapy' ? e >= ENERGIA_NEUTRONES_MIN_MV : e > ENERGIA_NEUTRONES_MIN_MV;
 }
 
 export function getShieldingEnergyKey(source?: RadiationSource): string {
@@ -163,7 +179,7 @@ export function getShieldingCitationIds(source?: RadiationSource): string[] {
   if (category === 'therapy') ids.add('NCRP-151');
   if (category === 'nuclear') ids.add('AAPM-TG-108');
   if (category === 'cyclotron') ids.add('IAEA-SRS-47');
-  if (getModalityEnergy_MeV(source) > 10) ids.add('NCRP-151-neutrons');
+  if (requiereNeutrones(source)) ids.add('NCRP-151-neutrons');
   if (!ids.size) ids.add('RadShield-method-note');
   return [...ids];
 }
@@ -201,8 +217,8 @@ export function getCalculationAuditWarnings(params: {
   if (params.barrier.useFactor < 0 || params.barrier.useFactor > 1 || !Number.isFinite(params.barrier.useFactor)) {
     warnings.push({ field: 'useFactor', severity: 'warning', message: 'Use factor U is outside the expected 0..1 range.' });
   }
-  if (getModalityEnergy_MeV(primarySource) > 10) {
-    warnings.push({ field: 'energy_MeV', severity: 'warning', message: 'Energy >10 MV: neutron shielding and maze/door checks are required.' });
+  if (requiereNeutrones(primarySource)) {
+    warnings.push({ field: 'energy_MeV', severity: 'warning', message: 'Energy ≥10 MV: neutron shielding and maze/door checks are required.' });
   }
   if (primarySource?.modality.category === 'cyclotron') {
     warnings.push({
@@ -259,7 +275,7 @@ export function buildCalculationTrace(params: {
     `Sampling spacing ${SAMPLING_SPACING_M} m along barrier.`,
     'Final clinical acceptance requires qualified expert review and measurement survey.',
   ];
-  if (getModalityEnergy_MeV(primarySource) > 10) assumptions.push('High-energy photon mode requires neutron and maze/door evaluation.');
+  if (requiereNeutrones(primarySource)) assumptions.push('High-energy photon mode requires neutron and maze/door evaluation.');
   const finiteThicknesses = Object.values(params.requiredThickness_mm).filter((value) => Number.isFinite(value) && value >= 0);
 
   return {

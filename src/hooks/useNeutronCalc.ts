@@ -1,4 +1,4 @@
-// Blindaje de neutrones para > 10 MV (NCRP 151 §2.4, Tabla B.9).
+// Blindaje de neutrones desde 10 MV inclusive (NCRP 151 §2.4, Tabla B.9).
 //
 // Fase 8a: antes se multiplicaba el número de TVL (log10 H/P) por la HVL del material (espesor ≈ 3.3× menor), con un
 // «rendimiento» de 0.08–0.25 Sv/Gy sin fuente (NCRP 151 Tabla B.9: H₀ ≤ 2 mSv/Gy a 1.41 m) y captura gamma = 30 % fija.

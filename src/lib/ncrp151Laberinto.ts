@@ -131,8 +131,8 @@ export function fotonesEnPuerta(g: GeometriaLaberinto, c: CargaLaberinto): Foton
   const F = c.campo_cm2 ?? 1600;
   const Lf = c.Lf ?? 1e-3;
   const f = c.f ?? 0.25;
-  const e = String(c.energia);
-  const alfa0 = c.alfa0 ?? albedoConcreto(e, 0);
+  // 15 y 20 MV no están en la Tabla B.8a: fila tabulada inmediata inferior (albedo mayor, conservador).
+  const alfa0 = c.alfa0 ?? albedoConcreto(filaAlbedo(c.energia), 0);
   const alfaZ = c.alfaZ ?? albedoConcreto('0.5MeV', 0);           // §2.4.1: 0.5 MeV en la segunda reflexión
   // α₁ (Ec. 2.10 y 2.11): la fuga y la dispersión del paciente llegan al muro G a ~45°; el ejemplo §7.1.10.2–3
   // (pp. 130–131) usa la Tabla B.8b (45°, reflexión 0°): 18 MV 4.5×10⁻³, 6 MV 6.4×10⁻³ y 0.5 MeV 2.2×10⁻².
@@ -153,7 +153,7 @@ export function totalFotones(f: number, HS: number, HLS: number, Hps: number, HL
   return 2.64 * (f * HS + HLS + Hps + HLT);
 }
 
-// ── Alta energía (>10 MV) ────────────────────────────────────────────────────────────────────
+// ── Alta energía (≥ 10 MV) ────────────────────────────────────────────────────────────────────
 
 export interface SalaNeutrones {
   Qn: number;              // neutrones por Gy en el isocentro (Tabla B.9)
@@ -205,7 +205,7 @@ export interface ResultadoPuerta {
 
 /**
  * Puerta: como en §7.1.13, cada componente se lleva por separado a P/2 cuando hay neutrones
- * (el plomo es casi transparente a neutrones y el BPE atenúa poco la captura). Con ≤10 MV sólo
+ * (el plomo es casi transparente a neutrones y el BPE atenúa poco la captura). Sin neutrones (< 10 MV) sólo
  * fotones dispersos y de fuga, llevados a P.
  */
 export function puerta(P_Sv_semana: number, H: { neutrones?: number; captura?: number; fotones: number }): ResultadoPuerta {
@@ -218,10 +218,10 @@ export function puerta(P_Sv_semana: number, H: { neutrones?: number; captura?: n
   if (Hn > 0 || Hc > 0) {
     bpe = n(Hn, P_Sv_semana / 2) * TVL_PUERTA.bpe_neutrones_mm;
     plomo = n(Hc, P_Sv_semana / 2) * TVL_PUERTA.plomo_captura_mm;
-    notas.push('>10 MV: neutrones con BPE y captura con plomo, cada uno a P/2 (§7.1.13). La captura (3.6 MeV) domina sobre los fotones dispersos.');
+    notas.push('≥ 10 MV: neutrones con BPE y captura con plomo, cada uno a P/2 (§7.1.13). La captura (3.6 MeV) domina sobre los fotones dispersos.');
   } else {
     plomo = n(Hf, P_Sv_semana) * TVL_PUERTA.plomo_dispersos_mm;
-    notas.push('≤10 MV: plomo para fotones dispersos con TVL de 6 mm (conservador; 3–6 mm según el laberinto).');
+    notas.push('< 10 MV: plomo para fotones dispersos con TVL de 6 mm (conservador; 3–6 mm según el laberinto).');
   }
   return { H_neutrones_Sv: Hn, H_captura_Sv: Hc, H_fotones_Sv: Hf, H_total_Sv: Hn + Hc + Hf, bpe_mm: bpe, plomo_mm: plomo, notas };
 }

@@ -1,5 +1,6 @@
 // AutoFillEquipmentDialog.tsx — Auto-fill from Equipment Database
 import type { EquipoCatalogo } from '@/lib/equipoAFuente';
+import { CONFIG_VERSA_HD_PROYECTO } from '@/lib/perfilesEquipo';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,9 @@ interface Props { open: boolean; onOpenChange: (v: boolean) => void; onApply?: (
 const EQUIPMENT_DB = [
   { id: 'varian_truebeam', name: 'Varian TrueBeam', vendor: 'Varian', energies: [6, 10, 15, 18], maxMU_min: 2400, leakage_pct: 0.1, fieldSize_cm: '40x40', workload_Gy_week: 500, tvl_concrete_6mv: 37, tvl_concrete_10mv: 37, tvl_concrete_18mv: 45, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
   { id: 'varian_halcyon', name: 'Varian Halcyon', vendor: 'Varian', energies: [6], maxMU_min: 800, leakage_pct: 0.1, fieldSize_cm: '28x28', workload_Gy_week: 300, tvl_concrete_6mv: 37, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
-  { id: 'elekta_versa', name: 'Elekta Versa HD', vendor: 'Elekta', energies: [6, 10], maxMU_min: 2200, leakage_pct: 0.15, fieldSize_cm: '40x40', workload_Gy_week: 500, tvl_concrete_6mv: 37, tvl_concrete_10mv: 37, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
+  // Perfil con cita (perfilesEquipo.ts): energías de fotones de la configuración del proyecto (confirmada 23-11-2026: 6/10/18 MV y FFF 6/10 MV),
+  // FFF hasta 2400 MU/min (10 MV FFF, Narayanasamy 2016) y fuga 0.1 % (NCRP 151 §2.3). Antes 6/10 MV y 0.15 % sin fuente.
+  { id: 'elekta_versa', name: 'Elekta Versa HD', vendor: 'Elekta', energies: [...new Set(CONFIG_VERSA_HD_PROYECTO.fotones.map((e) => e.mv))], maxMU_min: 2400, leakage_pct: 0.1, fieldSize_cm: '40x40', workload_Gy_week: 500, tvl_concrete_6mv: 37, tvl_concrete_15mv: 41, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
   { id: 'siemens_artiste', name: 'Siemens Artiste', vendor: 'Siemens', energies: [6, 15], maxMU_min: 2000, leakage_pct: 0.1, fieldSize_cm: '40x40', workload_Gy_week: 450, tvl_concrete_6mv: 37, tvl_concrete_15mv: 41, isoHeight_m: 1.0, sourceAxis_m: 1.0 },
   { id: 'ge_petct', name: 'GE Discovery 690 PET/CT', vendor: 'GE', energies: [511], maxMU_min: 0, leakage_pct: 0, fieldSize_cm: 'N/A', workload_Gy_week: 0, tvl_concrete_511kev: 170, isoHeight_m: 0.8, sourceAxis_m: 0 },
   { id: 'siemens_petct', name: 'Siemens Biograph mCT', vendor: 'Siemens', energies: [511], maxMU_min: 0, leakage_pct: 0, fieldSize_cm: 'N/A', workload_Gy_week: 0, tvl_concrete_511kev: 170, isoHeight_m: 0.8, sourceAxis_m: 0 },

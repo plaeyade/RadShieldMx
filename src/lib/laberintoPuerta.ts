@@ -16,18 +16,23 @@
  *   dosis residual y el estado (CUMPLE / NO_CUMPLE / SIN_ESPESOR).
  *
  * La geometría (distancias y áreas de las Figs. 2.7 y 2.8) la captura el usuario; todavía no se mide del plano.
+ *
+ * Decisiones del propietario (23-11-2026): neutrones por el MAYOR de Kersey y Wu–McGinley, mostrando los dos valores
+ * (notas por energía); neutrones y captura desde 10 MV inclusive; y la regla de la suma en la puerta (si neutrones +
+ * captura + fotones detrás de la puerta de §7.1.13 rebasan P/T, se añade plomo: 8.9 mm en vez de 7.1 mm sin IMRT).
  */
 import { cargaFuga, transmisionTVL, tvlFuga, type EnergiaMV, type FuenteTeleterapia } from '@/lib/ncrp151';
 import {
-  albedoConcreto, capturaGammaPorGy, fotonesEnPuerta, fuenteNeutronesConservadora, neutronesKersey,
+  albedoConcreto, capturaGammaPorGy, filaAlbedo, fotonesEnPuerta, fuenteNeutronesConservadora, neutronesKersey,
   neutronesWuMcGinley, puerta, TVL_PUERTA, type FotonesPuerta, type SalaNeutrones,
 } from '@/lib/ncrp151Laberinto';
 import { fuenteTeleterapiaDe } from '@/lib/normativeBarrierEngine';
+import { ENERGIA_NEUTRONES_MIN_MV } from '@/lib/shieldingMath';
 import type { FloorPlan, LaberintoPuertaPlano, RadiationSource } from '@/types/radshield';
 
 export const MOTOR_LABERINTO = 'laberintoPuerta/ncrp151-2.4-v1';
-/** Energía nominal desde la que se calculan neutrones y captura (Tabla B.9 tabula equipos de 10 MV). */
-export const MV_NEUTRONES_MIN = 10;
+/** Energía nominal desde la que se calculan neutrones y captura, 10 MV inclusive (decisión del propietario, 23-11-2026; Tabla B.9 tabula equipos de 10 MV). */
+export const MV_NEUTRONES_MIN = ENERGIA_NEUTRONES_MIN_MV;
 /** Horas de haz por semana con que se informa la tasa media en la puerta (misma convención que la memoria). */
 export const HORAS_HAZ_SEMANA = 40;
 
@@ -61,7 +66,7 @@ export interface ResultadoLaberinto {
   metodoNeutrones: 'kersey' | 'wu-mcginley' | 'mayor';
   /** Objetivo en la puerta: P/T (Sv/semana). */
   objetivo_Sv: number;
-  /** Regla de §7.1.13 tal cual: neutrones y captura, cada uno a (P/T)/2; los fotones no entran con > 10 MV. */
+  /** Regla de §7.1.13 tal cual: neutrones y captura, cada uno a (P/T)/2; los fotones no entran con ≥ 10 MV. */
   requeridoNCRP: { bpe_mm: number; plomo_mm: number };
   /** El anterior con el plomo necesario para que la SUMA de las tres componentes no rebase P/T (el que se adopta). */
   requerido: { bpe_mm: number; plomo_mm: number };
@@ -124,7 +129,10 @@ export function evaluarLaberintoPuerta(
   let faltanDatosNeutrones = false;
   for (const { f } of fuentes) {
     const WL = cargaFuga(f);
-    const e = String(f.energia);
+    // 15 y 20 MV (p. ej. el Versa HD de 15 MV) no están en la Tabla B.8a: antes lanzaba un error; se usa la fila
+    // tabulada inmediata inferior (10 MV para 15 MV), de albedo mayor (conservador).
+    const e = filaAlbedo(f.energia);
+    if (e !== String(f.energia)) notas.push(`${f.energia} MV: α₀ de la fila de ${e} MV de la Tabla B.8a (la energía no está tabulada; albedo mayor, conservador).`);
     const fot = fotonesEnPuerta(
       { ...g, B_muroZ: transmisionTVL(g.muroZ_cm, tvlFuga(f.energia, 'concrete')) },
       {
@@ -168,6 +176,9 @@ export function evaluarLaberintoPuerta(
         c.neutrones_Sv = metodo === 'wu-mcginley' || c.neutronesKersey_Sv === null
           ? c.neutronesWu_Sv
           : metodo === 'kersey' ? c.neutronesKersey_Sv : Math.max(c.neutronesKersey_Sv, c.neutronesWu_Sv);
+        // Se muestran los dos valores aunque se adopte uno (decisión del propietario, 23-11-2026).
+        const us = (x: number) => `${(x * 1e6).toFixed(1)} µSv/semana`;
+        notas.push(`${mv} MV: neutrones en la puerta por Kersey ${c.neutronesKersey_Sv === null ? 'sin H₀ (no se calcula)' : us(c.neutronesKersey_Sv)} y por Wu–McGinley ${us(c.neutronesWu_Sv)}; se adopta ${us(c.neutrones_Sv)} (${metodo === 'mayor' ? 'el mayor' : metodo === 'kersey' && c.neutronesKersey_Sv !== null ? 'Kersey' : 'Wu–McGinley'}).`);
       }
     }
     porEnergia.push(c);
@@ -204,7 +215,7 @@ export function evaluarLaberintoPuerta(
   const conRequerida = dosisTrasPuerta(H, door.bpe_mm, door.plomo_mm);
   let plomo_mm = door.plomo_mm;
   if (conRequerida > objetivo_Sv * 1.0001) {
-    // §7.1.13 lleva neutrones y captura a P/2 cada uno y no cuenta los fotones (Ec. 2.14) con > 10 MV; si la suma
+    // §7.1.13 lleva neutrones y captura a P/2 cada uno y no cuenta los fotones (Ec. 2.14) con ≥ 10 MV; si la suma
     // rebasa P/T, se añade plomo (TVL 61 mm para la captura y 6 mm para los fotones) hasta cumplirla.
     let lo = plomo_mm, hi = plomo_mm + 400;
     for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (dosisTrasPuerta(H, door.bpe_mm, m) > objetivo_Sv) lo = m; else hi = m; }

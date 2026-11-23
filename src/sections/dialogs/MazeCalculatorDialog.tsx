@@ -61,7 +61,7 @@ export default function MazeCalculatorDialog({ open, onOpenChange }: Props) {
         ...res.notas, ...res.avisos.filter((a) => !/sin ancho y alto/.test(a)),
       ];
       const door = { H_total_Sv: res.H_total_Sv, plomo_mm: res.requerido.plomo_mm, bpe_mm: res.requerido.bpe_mm };
-      return { WL: c?.WL_Gy_semana ?? v.W, fot: c?.fotones, Hn: res.H_neutrones_Sv, Hcg: res.H_captura_Sv, door, notas, error: null as string | null };
+      return { WL: c?.WL_Gy_semana ?? v.W, fot: c?.fotones, Hn: res.H_neutrones_Sv, HnK: c?.neutronesKersey_Sv ?? null, HnW: c?.neutronesWu_Sv ?? null, Hcg: res.H_captura_Sv, door, notas, error: null as string | null };
     } catch (e) {
       return { error: (e as Error).message } as const;
     }
@@ -146,7 +146,9 @@ export default function MazeCalculatorDialog({ open, onOpenChange }: Props) {
                 <tr><td>Fuga a través del muro Z (H_LT)</td><td className="text-right tabular-nums">{fmt(r.fot.HLT)}</td></tr>
                 <tr className="font-semibold"><td>Fotones en la puerta, H_Tot = 2.64·H_G</td><td className="text-right tabular-nums">{fmt(r.fot.HTot)}</td></tr>
                 {altaEnergia && <tr><td>Gamma de captura (H_cg)</td><td className="text-right tabular-nums">{fmt(r.Hcg)}</td></tr>}
-                {altaEnergia && <tr><td>Neutrones (H_n)</td><td className="text-right tabular-nums">{fmt(r.Hn)}</td></tr>}
+                {altaEnergia && r.HnK !== null && <tr><td className="pl-3 text-muted-foreground">Neutrones por Kersey (Ec. 2.18)</td><td className="text-right tabular-nums text-muted-foreground">{fmt(r.HnK)}</td></tr>}
+                {altaEnergia && r.HnW !== null && <tr><td className="pl-3 text-muted-foreground">Neutrones por Wu–McGinley (Ec. 2.19–2.21)</td><td className="text-right tabular-nums text-muted-foreground">{fmt(r.HnW)}</td></tr>}
+                {altaEnergia && <tr><td>Neutrones adoptados, el mayor (H_n)</td><td className="text-right tabular-nums">{fmt(r.Hn)}</td></tr>}
                 <tr className="font-semibold border-t"><td>Total en la puerta</td><td className="text-right tabular-nums">{fmt(r.door.H_total_Sv)}</td></tr>
               </tbody>
             </table>

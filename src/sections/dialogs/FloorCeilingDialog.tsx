@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import 'sonner';
 import { ArrowUpDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { calculateFloorCeiling, type FloorCeilingConfig } from '@/hooks/useFloorCeilingCalc';
-import { ALTURA_ENTREPISO_M, ALTURA_PLANTA_BAJA_M, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M } from '@/lib/nivelesEdificio';
+import { ALTURA_ENTREPISO_M, ALTURA_PLANTA_BAJA_M, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M, EDIFICIO_SIN_SOTANOS } from '@/lib/nivelesEdificio';
 
 interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -27,19 +27,23 @@ export default function FloorCeilingDialog({ open, onOpenChange }: Props) {
   });
 
   // Niveles del edificio (datos del propietario, configurables): planta baja 5.40 m y demás niveles 5 m de piso a
-  // contrapiso. Sótanos sin dato: el campo empieza vacío y, si el cálculo lo necesita, se pide. Activo por omisión.
+  // contrapiso. El edificio NO tiene sótanos (decisión del propietario, 23-11-2026): el campo de sótanos queda oculto
+  // salvo que se indique que los hay; entonces empieza vacío y, si el cálculo lo necesita, se pide. Activo por omisión.
   const [porNiveles, setPorNiveles] = useState(true);
+  const [haySotanos, setHaySotanos] = useState(!EDIFICIO_SIN_SOTANOS);
   const [niveles, setNiveles] = useState<{ nivelSala: number; alturaPlantaBaja_m: number; alturaEntrepiso_m: number; alturaSotano_m?: number }>(
     { nivelSala: 0, alturaPlantaBaja_m: ALTURA_PLANTA_BAJA_M, alturaEntrepiso_m: ALTURA_ENTREPISO_M });
   const configEfectiva = useMemo<FloorCeilingConfig>(() => (porNiveles
-    ? { ...config, niveles: { nivelSala: niveles.nivelSala, edificio: { alturaPlantaBaja_m: niveles.alturaPlantaBaja_m, alturaEntrepiso_m: niveles.alturaEntrepiso_m, alturaSotano_m: niveles.alturaSotano_m } } }
-    : config), [config, porNiveles, niveles]);
+    ? { ...config, niveles: { nivelSala: niveles.nivelSala, edificio: haySotanos
+      ? { alturaPlantaBaja_m: niveles.alturaPlantaBaja_m, alturaEntrepiso_m: niveles.alturaEntrepiso_m, alturaSotano_m: niveles.alturaSotano_m }
+      : { alturaPlantaBaja_m: niveles.alturaPlantaBaja_m, alturaEntrepiso_m: niveles.alturaEntrepiso_m, sinSotanos: true } } }
+    : config), [config, porNiveles, niveles, haySotanos]);
   const result = useMemo(() => calculateFloorCeiling(configEfectiva), [configEfectiva]);
   const setNivel = (k: keyof typeof niveles) => (e: ChangeEvent<HTMLInputElement>) => {
     const x = parseFloat(e.target.value);
     setNiveles((p) => ({ ...p, [k]: k === 'nivelSala' ? Math.round(x || 0) : k === 'alturaSotano_m' ? (x > 0 ? x : undefined) : x }));
   };
-  const fmt = (d: number | null) => (d === null ? 'pendiente (falta altura de sótano)' : `${d.toFixed(2)} m`);
+  const fmt = (d: number | null) => (d === null ? (haySotanos ? 'pendiente (falta altura de sótano)' : 'no aplica (sin sótanos)') : `${d.toFixed(2)} m`);
   const mm = (x: number) => (Number.isFinite(x) ? x.toFixed(0) : '—');
 
   const update = (field: keyof FloorCeilingConfig, val: number | boolean) => {
@@ -82,12 +86,23 @@ export default function FloorCeilingDialog({ open, onOpenChange }: Props) {
         </div>
         {porNiveles && (
           <>
-            <div className="grid grid-cols-4 gap-3">
+            <div className={`grid ${haySotanos ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
               <div><Label htmlFor="fc-nivel" className="text-xs">Nivel de la sala (0 = PB)</Label><Input id="fc-nivel" type="number" step="1" value={niveles.nivelSala} onChange={setNivel('nivelSala')} className="h-8 text-sm" /></div>
               <div><Label htmlFor="fc-pb" className="text-xs">Planta baja, piso a contrapiso (m)</Label><Input id="fc-pb" type="number" step="0.1" value={niveles.alturaPlantaBaja_m} onChange={setNivel('alturaPlantaBaja_m')} className="h-8 text-sm" /></div>
               <div><Label htmlFor="fc-entrepiso" className="text-xs">Demás niveles, piso a contrapiso (m)</Label><Input id="fc-entrepiso" type="number" step="0.1" value={niveles.alturaEntrepiso_m} onChange={setNivel('alturaEntrepiso_m')} className="h-8 text-sm" /></div>
-              <div><Label htmlFor="fc-sotano" className="text-xs">Sótanos, piso a contrapiso (m)</Label><Input id="fc-sotano" type="number" step="0.1" value={niveles.alturaSotano_m ?? ''} placeholder="sin dato" onChange={setNivel('alturaSotano_m')} className="h-8 text-sm" /></div>
+              {haySotanos && <div><Label htmlFor="fc-sotano" className="text-xs">Sótanos, piso a contrapiso (m)</Label><Input id="fc-sotano" type="number" step="0.1" value={niveles.alturaSotano_m ?? ''} placeholder="sin dato" onChange={setNivel('alturaSotano_m')} className="h-8 text-sm" /></div>}
             </div>
+            <div className="flex items-center gap-2">
+              <Switch id="fc-hay-sotanos" checked={haySotanos} onCheckedChange={setHaySotanos} />
+              <Label htmlFor="fc-hay-sotanos" className="text-xs">El edificio tiene sótanos (este proyecto: no)</Label>
+            </div>
+            {result.nivelesInexistentes.length > 0 && (
+              <Alert className="py-2" role="status">
+                <AlertDescription className="text-xs">
+                  El edificio no tiene sótanos (nivel {result.nivelesInexistentes.join(', ')} no existe): {niveles.nivelSala < 0 ? 'corrija el nivel de la sala.' : 'bajo la sala está el terreno y el suelo no se calcula.'}
+                </AlertDescription>
+              </Alert>
+            )}
             {result.sotanosSinAltura.length > 0 && (
               <Alert variant="destructive" className="py-2" role="alert">
                 <AlertDescription className="text-xs">
@@ -168,8 +183,8 @@ export default function FloorCeilingDialog({ open, onOpenChange }: Props) {
             </div>
           )}
 
-          {/* Floor result */}
-          {config.areaBelowOccupied && (
+          {/* Floor result (sin sótanos, bajo PB no hay nada que blindar) */}
+          {config.areaBelowOccupied && result.nivelesInexistentes.length === 0 && (
             <div className="border rounded p-2">
               <div className="text-xs font-medium flex items-center gap-2">
                 SUELO (abajo):
