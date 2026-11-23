@@ -3,6 +3,7 @@
 import { barreraMV, energiaTabuladaMV, fraccionDispersion } from '@/lib/calculadorasNormativas';
 import { SAD_M } from '@/lib/doseFieldEngine';
 import { tvlPrimaria } from '@/lib/ncrp151';
+import { AlturaSotanoFaltante, distanciaVerticalNivel_m, ALTURA_PUNTO_NIVEL_ABAJO_M, ALTURA_PUNTO_NIVEL_ARRIBA_M, type NivelesEdificio } from '@/lib/nivelesEdificio';
 
 export interface FloorCeilingConfig {
   // Source params
@@ -24,6 +25,20 @@ export interface FloorCeilingConfig {
   designGoalBelow_mSv_week: number;
   occupancyAbove: number;      // T factor above
   occupancyBelow: number;      // T factor below
+  /**
+   * Distancias desde los niveles del edificio (nivelesEdificio.ts): si existe, sustituye a distanceToAbove_m /
+   * distanceToBelow_m. Por omisión planta baja de 5.40 m y niveles arriba de ella de 5 m de piso a contrapiso; los
+   * sótanos no tienen altura por omisión (si se necesita y falta, la distancia queda pendiente). Punto 0.5 m sobre el
+   * piso de arriba y 1.7 m sobre el de abajo.
+   */
+  niveles?: {
+    edificio: NivelesEdificio;
+    nivelSala: number;          // 0 = planta baja
+    nivelArriba?: number;       // por omisión nivelSala + 1
+    nivelAbajo?: number;        // por omisión nivelSala − 1
+    alturaPuntoArriba_m?: number;
+    alturaPuntoAbajo_m?: number;
+  };
 }
 
 export interface FloorCeilingResult {
@@ -42,6 +57,12 @@ export interface FloorCeilingResult {
   scatterFraction: number;
   // Recommendations
   recommendation: string;
+  // Distancias isocentro → punto usadas y de dónde salen (null: falta la altura de un sótano)
+  distanceToAbove_m: number | null;
+  distanceToBelow_m: number | null;
+  distanciasDe: 'niveles' | 'captura';
+  /** Sótanos sin altura que el cálculo necesita (por niveles); vacío si no falta ninguna. */
+  sotanosSinAltura: number[];
 }
 
 /**
@@ -58,14 +79,43 @@ function barreraLosa(config: FloorCeilingConfig, d_iso_m: number, P: number, T: 
   return { kerma: pri.K_sin_blindaje_mSv_semana, requerido_mm: 10 * Math.max(pri.espesor_cm, sec.espesor_cm) };
 }
 
+/**
+ * Distancias isocentro → punto arriba y abajo: de los niveles del edificio si se dan; si no, las capturadas. Si un
+ * lado necesita la altura de un sótano que no se dio, su distancia es null y el sótano queda en `sotanosSinAltura`.
+ */
+export function distanciasLosas(config: FloorCeilingConfig): {
+  arriba_m: number | null; abajo_m: number | null; de: 'niveles' | 'captura'; sotanosSinAltura: number[];
+} {
+  const n = config.niveles;
+  if (!n) return { arriba_m: config.distanceToAbove_m, abajo_m: config.distanceToBelow_m, de: 'captura', sotanosSinAltura: [] };
+  const faltan = new Set<number>();
+  const lado = (nivelDestino: number, alturaPunto_m: number): number | null => {
+    try {
+      return distanciaVerticalNivel_m({ nivelFuente: n.nivelSala, alturaFuente_m: config.isocenterHeight_m, nivelDestino, alturaPunto_m }, n.edificio);
+    } catch (e) {
+      if (e instanceof AlturaSotanoFaltante) { faltan.add(e.nivel); return null; }
+      throw e;
+    }
+  };
+  return {
+    arriba_m: lado(n.nivelArriba ?? n.nivelSala + 1, n.alturaPuntoArriba_m ?? ALTURA_PUNTO_NIVEL_ARRIBA_M),
+    abajo_m: lado(n.nivelAbajo ?? n.nivelSala - 1, n.alturaPuntoAbajo_m ?? ALTURA_PUNTO_NIVEL_ABAJO_M),
+    de: 'niveles',
+    sotanosSinAltura: [...faltan].sort((a, b) => b - a),
+  };
+}
+
 export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingResult {
+  const dist = distanciasLosas(config);
   const scatterAngle_deg = Math.atan2(config.roomHeight_m - config.isocenterHeight_m, 3.0) * 180 / Math.PI;
   const scatterFrac = fraccionDispersion(energiaTabuladaMV(config.energy_MeV), Math.max(10, scatterAngle_deg));
 
   // === CEILING (techo) ===
   let ceilingKerma = 0, ceilingRequired_mm = 0, ceilingExtra_mm = 0, ceilingOK = true;
-  if (config.areaAboveOccupied) {
-    const r = barreraLosa(config, config.distanceToAbove_m, config.designGoalAbove_mSv_week, config.occupancyAbove);
+  if (config.areaAboveOccupied && dist.arriba_m === null) {
+    ceilingRequired_mm = NaN; ceilingExtra_mm = NaN; ceilingOK = false;
+  } else if (config.areaAboveOccupied && dist.arriba_m !== null) {
+    const r = barreraLosa(config, dist.arriba_m, config.designGoalAbove_mSv_week, config.occupancyAbove);
     ceilingKerma = r.kerma; ceilingRequired_mm = r.requerido_mm;
     ceilingExtra_mm = Math.max(0, ceilingRequired_mm - config.ceilingThickness_m * 1000);
     ceilingOK = ceilingExtra_mm <= 0;
@@ -73,8 +123,10 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
 
   // === FLOOR (suelo) ===
   let floorKerma = 0, floorRequired_mm = 0, floorExtra_mm = 0, floorOK = true;
-  if (config.areaBelowOccupied) {
-    const r = barreraLosa(config, config.distanceToBelow_m, config.designGoalBelow_mSv_week, config.occupancyBelow);
+  if (config.areaBelowOccupied && dist.abajo_m === null) {
+    floorRequired_mm = NaN; floorExtra_mm = NaN; floorOK = false;
+  } else if (config.areaBelowOccupied && dist.abajo_m !== null) {
+    const r = barreraLosa(config, dist.abajo_m, config.designGoalBelow_mSv_week, config.occupancyBelow);
     floorKerma = r.kerma; floorRequired_mm = r.requerido_mm;
     floorExtra_mm = Math.max(0, floorRequired_mm - config.floorThickness_m * 1000);
     floorOK = floorExtra_mm <= 0;
@@ -82,7 +134,10 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
 
   // Recommendations
   let rec = '';
-  if (!ceilingOK && !floorOK) rec = `Aumentar techo en ${ceilingExtra_mm.toFixed(0)} mm y suelo en ${floorExtra_mm.toFixed(0)} mm de concreto. Considerar plomo laminado sobre techo.`;
+  const pendienteTecho = config.areaAboveOccupied && dist.arriba_m === null;
+  const pendienteSuelo = config.areaBelowOccupied && dist.abajo_m === null;
+  if (pendienteTecho || pendienteSuelo) rec = `Falta la altura del sótano (piso a contrapiso): no hay dato y no se asume ninguna. Captúrela para calcular ${pendienteTecho && pendienteSuelo ? 'techo y suelo' : pendienteTecho ? 'el techo' : 'el suelo'}.`;
+  else if (!ceilingOK && !floorOK) rec = `Aumentar techo en ${ceilingExtra_mm.toFixed(0)} mm y suelo en ${floorExtra_mm.toFixed(0)} mm de concreto. Considerar plomo laminado sobre techo.`;
   else if (!ceilingOK) rec = `Aumentar techo en ${ceilingExtra_mm.toFixed(0)} mm de concreto o agregar ${(ceilingExtra_mm * tvlPrimaria(energiaTabuladaMV(config.energy_MeV), 'lead').tvle_cm / tvlPrimaria(energiaTabuladaMV(config.energy_MeV), 'concrete').tvle_cm).toFixed(1)} mm de plomo (equivalencia por TVLₑ, NCRP 151 Tabla B.2) sobre techo.`;
   else if (!floorOK) rec = `Aumentar suelo en ${floorExtra_mm.toFixed(0)} mm de concreto en areas ocupadas debajo.`;
   else rec = 'El blindaje de suelo y techo cumple con los objetivos de diseno. No se requieren modificaciones.';
@@ -99,5 +154,9 @@ export function calculateFloorCeiling(config: FloorCeilingConfig): FloorCeilingR
     scatterAngle_deg: scatterAngle_deg,
     scatterFraction: scatterFrac,
     recommendation: rec,
+    distanceToAbove_m: dist.arriba_m,
+    distanceToBelow_m: dist.abajo_m,
+    distanciasDe: dist.de,
+    sotanosSinAltura: (pendienteTecho || pendienteSuelo) ? dist.sotanosSinAltura : [],
   };
 }

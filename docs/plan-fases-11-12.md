@@ -473,3 +473,24 @@ fuente y muros en serie. Quedan los hallazgos «Alto» y «Medio» que dependen 
     930 µSv; 53.6 mm BPE + 7.3 mm Pb; IMRT 72 + 32 mm). «Guíame» sin cambio (17.96 mm Pb / 213.77 mm concreto).
   - Pendiente para el físico médico: método de neutrones por omisión, neutrones desde 10 MV, la regla de la suma
     frente a §7.1.13 tal cual, laberintos de dos tramos y geometría medida del plano.
+- **Decisiones del propietario (23-11-2026) sobre el paso 3:** se quedan los valores por omisión del laberinto
+  f = 0.25 (fracción transmitida por el paciente), U_G = 0.25 (factor de uso hacia el muro G) y reflexión a 0°
+  (`anguloReflexion_deg`, Tablas B.8a/B.8b). Siguen siendo configurables por laberinto.
+- **Alturas de niveles** (`fase13-alturas-niveles`, base del punto 3b «techos y pisos»). Datos del propietario:
+  **planta baja mide 5.40 m de piso a contrapiso** (23-11-2026) y, arriba de planta baja, TODOS los niveles miden
+  **5 m de piso a contrapiso** (22-11-2026; entrepiso, losa incluida). Los dos son configurables y se puede dar una
+  altura distinta a un nivel concreto.
+  - `src/lib/nivelesEdificio.ts`: `ALTURA_PLANTA_BAJA_M = 5.4` (`alturaPlantaBaja_m`), `ALTURA_ENTREPISO_M = 5`
+    (`alturaEntrepiso_m`), excepciones por nivel con `alturasPorNivel`, `elevacionNivel_m` (0 = PB) y
+    `distanciaVerticalNivel_m` / `distanciasTechoPiso_m` con el punto protegido a 0.5 m sobre el piso de arriba y a
+    1.7 m sobre el de abajo (convención de NCRP 147 para pisos y techos).
+  - **Sótanos: no hay dato y no se asume ninguno.** `alturaSotano_m` (o `alturasPorNivel[-n]`) no tiene valor por
+    omisión; si un cálculo lo necesita y falta, `alturaNivel_m` lanza `AlturaSotanoFaltante`. En el cálculo de techo
+    y piso la distancia de ese lado queda `null`, el espesor requerido sin valor, `sotanosSinAltura` lista los
+    sótanos que faltan y la recomendación pide el dato. El diálogo «Suelo y techo» muestra el campo «Sótanos» vacío
+    y, si se usa (sala en PB con área de abajo ocupada, o sala en sótano), avisa «Capture la altura del sótano».
+  - El cálculo de techo y piso (`useFloorCeilingCalc`, opción `niveles`) toma de ahí las distancias isocentro →
+    punto; sin `niveles`, las capturadas, como antes. El diálogo calcula por niveles por omisión (nivel de la sala,
+    PB 5.40 m, demás niveles 5 m, sótanos sin dato) y muestra las distancias. Las alturas interiores de sala de los
+    visores 3D (3.0–3.1 m) no son alturas de nivel y no cambian. «Guíame» sin cambio (17.96 mm Pb / 213.77 mm
+    concreto). Pruebas: `src/__tests__/validacion/nivelesEdificio.test.tsx`.
