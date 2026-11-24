@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { VISOR_3D_BABYLON } from '@/lib/featureFlags';
 import type { PanelMedical3DProps } from './tipos';
 
 /** Integración F367-F370, pila visual F459-F468 y compuerta de capacidades F385-F386. */
@@ -21,7 +22,7 @@ export function PanelesIntegracion({ estado, contratos, exportar }: PanelMedical
         <div className="rounded border border-purple-100 bg-white/85 p-2 text-[9px] text-slate-600">
           <div>Unity: {f367F370ReleaseIntegration.unityWebgl.mode} / fallback {f367F370ReleaseIntegration.unityWebgl.fallback}</div>
           <div>MC: {f367F370ReleaseIntegration.externalEngines.engines.map((engine) => `${engine.id}:${engine.status}`).join(' | ')}</div>
-          <div>Fotoreal: {f367F370ReleaseIntegration.photorealism.activeEngine}; Babylon pendiente</div>
+          <div>Fotoreal: {f367F370ReleaseIntegration.photorealism.activeEngine}; {VISOR_3D_BABYLON ? 'vista Babylon activa (visual)' : 'Babylon desactivado en este build'}</div>
           <div>Beta: {f367F370ReleaseIntegration.releaseGate.decision}</div>
         </div>
         <Button size="sm" variant="outline" className="w-full h-8 justify-start text-xs bg-white" onClick={handleExportF367F370Pack}>
@@ -139,7 +140,11 @@ export function PanelesIntegracion({ estado, contratos, exportar }: PanelMedical
         <div className="flex items-center justify-between gap-2">
           <div>
             <div className="text-[11px] font-semibold text-emerald-900 uppercase">F385-F386 capacidades productivas</div>
-            <div className="text-[9px] text-emerald-800">Solo Three/R3F queda activo en el bundle actual; Unity/Babylon requieren gate live.</div>
+            <div className="text-[9px] text-emerald-800">
+              {VISOR_3D_BABYLON
+                ? 'Three/R3F (visor principal) y la vista Babylon (visual, carga perezosa) quedan activos; Unity requiere gate live.'
+                : 'Solo Three/R3F queda activo en el bundle actual; Unity/Babylon requieren gate live.'}
+            </div>
           </div>
           <Badge variant="outline" className="bg-white text-[9px]">claim guard</Badge>
         </div>

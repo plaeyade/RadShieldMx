@@ -27,7 +27,8 @@ export type VisualEvidenceCapture = {
   stationId?: string | null;
   stationLabel?: string | null;
 };
-export type BabylonSmokeStatus = 'idle' | 'loading' | 'ready' | 'failed';
+/** `sin-webgl`: el navegador no ofrece WebGL; no se descarga Babylon y se remite al visor Three/R3F (o a la planta 2D). */
+export type BabylonSmokeStatus = 'idle' | 'loading' | 'ready' | 'failed' | 'sin-webgl';
 export type BabylonPerformanceMetrics = {
   firstFrameMs: number | null;
   fps: number | null;

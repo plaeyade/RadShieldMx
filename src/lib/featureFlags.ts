@@ -87,8 +87,23 @@ export const HEATMAP_GPU: boolean = import.meta.env.VITE_HEATMAP_GPU === 'true';
 /** `false`: no se dibujan sobre el lienzo los HUD de depuración del renderer (F436–F445, F621–F695). */
 export const DEPURACION_RENDER: boolean = import.meta.env.VITE_DEPURACION_RENDER === 'true';
 
-/** `false`: la vista previa Babylon (F455–F474) de Inspección 3D no se monta ni descarga @babylonjs/*. */
-export const VISOR_3D_BABYLON: boolean = import.meta.env.VITE_VISOR_3D_BABYLON === 'true';
+/**
+ * Vista 3D Babylon (F455–F474 + GLB del equipo de la Fase 13) en Inspección 3D.
+ *
+ * **Activa por omisión** desde el 23-11-2026 (autorización del propietario, sólo para esta vista: `HEATMAP_GPU`,
+ * `MENU_AVANZADO`, `VISORES_EN_REVISION` y `VISOR_*` siguen apagadas). Es visual: no calcula dosis ni cambia
+ * el blindaje. @babylonjs/* se descarga en su chunk `vendor-babylon` sólo al abrir la vista con geometría y
+ * WebGL disponible. Se apaga en el build con `VITE_VISOR_3D_BABYLON=false` (Babylon queda como rama muerta y
+ * no se emite su chunk).
+ */
+// Expresión en línea (no `visor3DBabylonActivo(...)`) para que, con `=false`, Rollup la pliegue a `false` y elimine la rama.
+export const VISOR_3D_BABYLON: boolean =
+  import.meta.env.VITE_VISOR_3D_BABYLON !== 'false' && import.meta.env.VITE_VISOR_3D_BABYLON !== '0';
+
+/** Regla de `VISOR_3D_BABYLON` y de `vite.config.ts`: activa salvo `'false'` / `'0'` explícito (para pruebas y scripts). */
+export function visor3DBabylonActivo(valor: string | undefined): boolean {
+  return valor !== 'false' && valor !== '0';
+}
 
 /**
  * Fase 12, paso 2: `false` (por omisión): la barra superior muestra sólo los 5 menús por etapa del flujo de diseño

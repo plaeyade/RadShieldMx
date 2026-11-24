@@ -84,7 +84,8 @@ test.describe('Medical 3D Floor Plan', () => {
     await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog.locator('div').filter({ hasText: /^LINAC bunker$/ })).toBeVisible();
 
-    const canvas = dialog.locator('canvas').first();
+    // Visor R3F (no la vista Babylon de la barra lateral, activa por omisión desde el 23-11-2026).
+    const canvas = dialog.getByTestId('f324-pointer-lock-workbench').locator('canvas').first();
     await expect(canvas).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1500);
 
@@ -198,7 +199,8 @@ test.describe('Medical 3D Floor Plan', () => {
     await expect(dialog.getByText('Mapeadas: 4')).toBeVisible();
     await expect(dialog.getByText('Tipo: DXF')).toBeVisible();
 
-    const canvas = dialog.locator('canvas').first();
+    // Visor R3F (no la vista Babylon de la barra lateral, activa por omisión desde el 23-11-2026).
+    const canvas = dialog.getByTestId('f324-pointer-lock-workbench').locator('canvas').first();
     await expect(canvas).toBeVisible({ timeout: 10000 });
     await expect(dialog.getByText(/Escala:\s+1\.0000 m\/px/)).toBeVisible();
   });

@@ -1,5 +1,13 @@
 # RadShield-MX - Fases recientes
 
+# Vista 3D Babylon activa por omisión (2026-11-23)
+
+- Autorización del propietario (23-11-2026), sólo para la vista 3D Babylon: `VISOR_3D_BABYLON` pasa a activa por omisión;
+  se apaga con `VITE_VISOR_3D_BABYLON=false`. `HEATMAP_GPU`, `MENU_AVANZADO`, `VISORES_EN_REVISION` y `VISOR_*` siguen apagadas.
+- @babylonjs/* se carga perezosamente (`vendor-babylon`) al abrir Inspección 3D; sin WebGL no se descarga y se avisa.
+- Accesibilidad (canvas enfocable con descripción, estado con `role="status"`), pausa del render fuera de vista y «Ampliar vista 3D».
+- Visual: no cambia el cálculo («Guíame» muro norte 17.96 mm Pb / 213.77 mm concreto) ni el paquete de evidencia.
+
 # Cierre TypeScript post-materiales (2026-08-30)
 
 - Corregidos errores heredados que bloqueaban `tsc -p tsconfig.app.json`: sample lines del canvas, inferencia de modalidad en F409, decision QA F566, literales de renderer F621/F632 y campos reales en Medical 3D.

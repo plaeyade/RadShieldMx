@@ -133,8 +133,11 @@ describe('MedicalFloorPlan3DDialog — render', () => {
       'f363-babylon-install-options', 'f92-3d-inspection-readiness', 'f147-medical-3d-inspection',
       'medical-cad-input', 'f324-pointer-lock-workbench',
     ]) expect(screen.getByTestId(id)).toBeTruthy();
-    // Con VISOR_3D_BABYLON apagado no se monta Babylon; se avisa que está en revisión.
-    expect(screen.getByTestId('babylon-visor-en-revision').textContent).toContain('El visor 3D activo es Three/R3F');
+    // VISOR_3D_BABYLON activa por omisión (23-11-2026): se monta la vista Babylon; en jsdom no hay WebGL,
+    // así que queda en su respaldo sin descargar @babylonjs/*.
+    expect(screen.queryByTestId('babylon-visor-desactivado')).toBeNull();
+    expect(screen.getByTestId('f455-babylon-runtime-smoke')).toBeTruthy();
+    expect(screen.getByTestId('f455-babylon-runtime-status').textContent).toBe('sin-webgl');
     const r = resumen();
     expect(r).toMatchObject({
       mode: 'presentation', walkthrough: false, photorealWalkthrough: false, lightingPreset: 'clinical',

@@ -6,10 +6,10 @@ import { bootWorkspace } from './helpers';
 const outputDir = path.resolve('outputs', 'f455_babylon_runtime_smoke');
 
 
-// Fase 1 motor de dosis: la vista previa Babylon está detrás de VISOR_3D_BABYLON (apagada por omisión).
-// Esta prueba sólo aplica a un build con VITE_VISOR_3D_BABYLON=true; ejecutarla con E2E_VISOR_3D_BABYLON=1.
-const VISOR_3D_BABYLON = process.env.E2E_VISOR_3D_BABYLON === '1';
-test.skip(!VISOR_3D_BABYLON, 'Babylon desactivado (featureFlags.VISOR_3D_BABYLON); ver docs/plan-motores-calculo.md');
+// Vista 3D Babylon activa por omisión desde el 23-11-2026 (VISOR_3D_BABYLON). Contra un build con
+// VITE_VISOR_3D_BABYLON=false, ejecutar con E2E_VISOR_3D_BABYLON=0 para omitir/invertir esta prueba.
+const VISOR_3D_BABYLON = process.env.E2E_VISOR_3D_BABYLON !== '0';
+test.skip(!VISOR_3D_BABYLON, 'Babylon desactivado (E2E_VISOR_3D_BABYLON=0); ver docs/plan-motores-calculo.md');
 
 test('F455 opens Medical 3D and renders Babylon runtime smoke preview', async ({ page }) => {
   test.setTimeout(120_000);

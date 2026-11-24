@@ -20,7 +20,8 @@ banderas en `src/lib/featureFlags.ts` y se reactivan uno por uno cuando pasen pr
 
 ## Banderas (`src/lib/featureFlags.ts`)
 
-Banderas de compilación (variables `VITE_*`), todas `false` por omisión; no se alternan desde
+Banderas de compilación (variables `VITE_*`), todas `false` por omisión salvo `VISOR_3D_BABYLON` (activa desde el
+23-11-2026, ver abajo); no se alternan desde
 localStorage para que una preferencia guardada no reabra visores con dosis no físicas.
 
 | Bandera | Variable | Efecto con `false` |
@@ -28,7 +29,7 @@ localStorage para que una preferencia guardada no reabra visores con dosis no f�
 | `VISORES_EN_REVISION` | `VITE_VISORES_EN_REVISION` | Isodosis, 3D Dose Mapping, Heat Map Avanzado e Isosuperficie 3D sin entrada en paleta/barra lateral y sin montarse |
 | `HEATMAP_GPU` | `VITE_HEATMAP_GPU` | Heat map siempre en CPU con `doseFieldEngine` |
 | `DEPURACION_RENDER` | `VITE_DEPURACION_RENDER` | No se dibujan los HUD F442–F445/F621–F640 sobre el plano (el `<canvas>` overlay sigue montado). Los paneles DOM F621–F695 ya sólo aparecen en modo «guiado» (opt-in) y los usan pruebas E2E: se conservan |
-| `VISOR_3D_BABYLON` | `VITE_VISOR_3D_BABYLON` | Inspección 3D no monta la vista previa Babylon; muestra «En revisión: se reactivará con el motor de dosis unificado» |
+| `VISOR_3D_BABYLON` | `VITE_VISOR_3D_BABYLON` | **Activa por omisión desde el 23-11-2026** (autorización del propietario, sólo esta vista). Con `=false` (o `0`) Inspección 3D no monta la vista Babylon, muestra «Vista 3D Babylon desactivada en esta compilación» y el build no emite `vendor-babylon` |
 | `VISOR_HEATMAP_AVANZADO` | `VITE_VISOR_HEATMAP_AVANZADO` | Fase 5: Heat Map Avanzado (ya conectado al motor) sigue inactivo |
 | `VISOR_ISODOSIS` | `VITE_VISOR_ISODOSIS` | Fase 5: Curvas Isodosis (ya conectado) sigue inactivo |
 | `VISOR_ISOSUPERFICIE_3D` | `VITE_VISOR_ISOSUPERFICIE_3D` | Fase 5: Isosuperficie 3D (ya conectado) sigue inactivo |
@@ -36,6 +37,18 @@ localStorage para que una preferencia guardada no reabra visores con dosis no f�
 
 Un visor en revisión se monta y aparece en menús si `VISORES_EN_REVISION` **o** su bandera propia está en `true`
 (`visorDisponible`, `BANDERAS_VISOR`). Todas siguen en `false` hasta que el responsable autorice cada visor.
+
+**Vista 3D Babylon activada (23-11-2026).** El propietario autorizó activar sólo `VISOR_3D_BABYLON`; `HEATMAP_GPU`,
+`MENU_AVANZADO`, `VISORES_EN_REVISION` y `VISOR_*` siguen en `false`. La vista no calcula dosis: dibuja la geometría
+de `MedicalScene` (barreras con rol/material/espesor del motor, equipo con su GLB opcional e isocentro, zonas y guía
+de haz), así que el motivo original («dosis no físicas») no le aplicaba; lo que la frenaba era el peso del bundle y la
+falta de respaldo. Para activarla: `@babylonjs/*` sólo se descarga con `import()` en `vendor-babylon` al abrir
+Inspección 3D con geometría (la entrada y sus precargas no cambian); sin WebGL no se descarga y se muestra un aviso
+(`sin-webgl`); se quitó `import('@babylonjs/materials')` (no se usaba); el bucle de render se pausa con el canvas
+fuera de vista y se redimensiona con `ResizeObserver`; canvas enfocable con `role="img"`/`aria-label` (flechas
+giran la cámara), mensaje con `role="status"`, botones con `aria-pressed` y «Ampliar vista 3D». Pruebas:
+`featureFlagsMotorDosis.test.ts`, `BabylonEquipoGlb.test.tsx`, `MedicalFloorPlan3DDialog.test.tsx`; E2E Babylon
+corren por omisión (`E2E_VISOR_3D_BABYLON=0` contra un build con la bandera apagada).
 
 ## Fase 1 — Motor de campo único y desactivación controlada (PR #26, fusionada)
 
@@ -62,7 +75,7 @@ Salida / pruebas:
 - `src/__tests__/lib/featureFlagsMotorDosis.test.ts`: banderas apagadas por omisión, filtro de menús y paleta.
 - `tsc -p tsconfig.app.json`, `vitest run`, `lint:ci` (sin errores nuevos) y `vite build` en verde.
 - E2E: las pruebas Babylon F455/F456/F470 se omiten salvo `E2E_VISOR_3D_BABYLON=1` (build con la bandera);
-  F459 valida la tarjeta «en revisión». Ninguna prueba E2E apuntaba a los cuatro visores desactivados.
+  F459 valida la tarjeta «en revisión». (Desde el 23-11-2026 corren por omisión; `E2E_VISOR_3D_BABYLON=0` las omite.) Ninguna prueba E2E apuntaba a los cuatro visores desactivados.
 
 ## Fase 2 — Campo consciente de barreras completo
 
