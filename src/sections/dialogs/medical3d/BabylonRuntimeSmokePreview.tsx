@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { MedicalScene } from '@/lib/medical3D/sceneBuilder';
 import type { BabylonDeepRuntimeContract } from '@/lib/medical3D/babylonDeepRuntime';
 import { VISOR_3D_BABYLON } from '@/lib/featureFlags';
+import { colocacionModeloGlb, orientacionPorOmisionGlb_deg } from '@/lib/medical3D/modelosEquipoGlb';
 import type { BabylonSmokeStatus, BabylonPerformanceMetrics, BabylonDeepCameraMode, BabylonPickedEntity } from './constantes';
 
 function clampBabylonDimension(value: number, fallback: number) {
@@ -50,6 +51,23 @@ export function BabylonRuntimeSmokePreview({
   const [metrics, setMetrics] = useState<BabylonPerformanceMetrics>({ firstFrameMs: null, fps: null, meshes: 0 });
   const [cameraMode, setCameraMode] = useState<BabylonDeepCameraMode>('iso');
   const [pickedEntity, setPickedEntity] = useState<BabylonPickedEntity>(null);
+  // Fase 13: GLB a escala real del equipo (opcional, `VITE_EQUIPO_GLB_BASE`); respaldo = caja + toro.
+  const [mostrarGlb, setMostrarGlb] = useState(true);
+  const [orientacionGlb_deg, setOrientacionGlb_deg] = useState(() => orientacionPorOmisionGlb_deg());
+  const [estadoGlb, setEstadoGlb] = useState('Modelo GLB: sin ruta (VITE_EQUIPO_GLB_BASE vacía); se usa la representación esquemática.');
+  const glbNodosRef = useRef<Array<{ nodo: any; respaldo: any[]; rotacionBase: number }>>([]);
+  const mostrarGlbRef = useRef(mostrarGlb);
+  const orientacionGlbRef = useRef(orientacionGlb_deg);
+
+  useEffect(() => {
+    mostrarGlbRef.current = mostrarGlb;
+    orientacionGlbRef.current = orientacionGlb_deg;
+    glbNodosRef.current.forEach(({ nodo, respaldo, rotacionBase }) => {
+      nodo.setEnabled(mostrarGlb);
+      nodo.rotation.y = rotacionBase + (orientacionGlb_deg * Math.PI) / 180;
+      respaldo.forEach((mesh) => mesh.setEnabled(!mostrarGlb));
+    });
+  }, [mostrarGlb, orientacionGlb_deg]);
 
   const applyCameraMode = (mode: BabylonDeepCameraMode) => {
     setCameraMode(mode);
@@ -276,6 +294,8 @@ export function BabylonRuntimeSmokePreview({
           });
         }
 
+        const cargasGlb: Array<Promise<boolean>> = [];
+        glbNodosRef.current = [];
         scene.equipment.forEach((medicalEquipment, index) => {
           const equipmentEntity = {
             id: medicalEquipment.id,
@@ -307,7 +327,49 @@ export function BabylonRuntimeSmokePreview({
           gantry.rotation.z = index * 0.08;
           gantry.material = equipment;
           registerPick(gantry, equipmentEntity);
+
+          // GLB opcional: origen del modelo (isocentro) en el isocentro del búnker; si falla, queda el respaldo.
+          const colocacion = colocacionModeloGlb(medicalEquipment, { orientacion_deg: 0 });
+          if (!colocacion) return;
+          cargasGlb.push((async () => {
+            try {
+              const resultado = await babylon.ImportMeshAsync(colocacion.url, babylonScene);
+              if (disposed) return false;
+              const nodo = new babylon.TransformNode(`f13EquipoGlb_${medicalEquipment.id}`, babylonScene);
+              nodo.position.set(colocacion.posicion[0], colocacion.posicion[1], colocacion.posicion[2]);
+              nodo.rotation.y = colocacion.rotacionY + (orientacionGlbRef.current * Math.PI) / 180;
+              resultado.meshes.filter((mesh: any) => !mesh.parent).forEach((mesh: any) => { mesh.parent = nodo; });
+              const glbEntity = {
+                ...equipmentEntity,
+                details: [
+                  ...equipmentEntity.details,
+                  `Modelo GLB ${colocacion.modelo.equipo}`,
+                  `Isocentro a ${colocacion.modelo.alturaIsocentro_m.toFixed(3)} m del piso${colocacion.modelo.isocentroEstimado ? ' (estimado)' : ''}`,
+                ],
+              };
+              resultado.meshes.filter((mesh: any) => mesh.getTotalVertices?.() > 0).forEach((mesh: any) => registerPick(mesh, glbEntity));
+              const respaldo = [couch, gantry];
+              nodo.setEnabled(mostrarGlbRef.current);
+              respaldo.forEach((mesh) => mesh.setEnabled(!mostrarGlbRef.current));
+              glbNodosRef.current.push({ nodo, respaldo, rotacionBase: colocacion.rotacionY });
+              return true;
+            } catch {
+              return false;
+            }
+          })());
         });
+        if (cargasGlb.length) {
+          if (!disposed) setEstadoGlb(`Modelo GLB: cargando ${cargasGlb.length}...`);
+          void Promise.all(cargasGlb).then((ok) => {
+            if (disposed) return;
+            const cargados = ok.filter(Boolean).length;
+            setEstadoGlb(cargados === ok.length
+              ? `Modelo GLB: ${cargados} equipo(s) a escala real.`
+              : `Modelo GLB: ${cargados}/${ok.length} cargados; el resto usa la representación esquemática (archivo no encontrado).`);
+          });
+        } else if (!disposed) {
+          setEstadoGlb('Modelo GLB: sin ruta o sin modelo para este equipo; se usa la representación esquemática.');
+        }
 
         const sourceCone = babylon.MeshBuilder.CreateCylinder('f455BeamGuide', {
           diameterTop: 0.08,
@@ -356,6 +418,7 @@ export function BabylonRuntimeSmokePreview({
       disposed = true;
       if (resizeHandler) window.removeEventListener('resize', resizeHandler);
       cameraRef.current = null;
+      glbNodosRef.current = [];
       babylonScene?.dispose();
       engine?.dispose();
     };
@@ -402,6 +465,31 @@ export function BabylonRuntimeSmokePreview({
             ))}
           </div>
         </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-[9px] text-cyan-950" data-testid="f13-equipo-glb-controles">
+        <label className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            checked={mostrarGlb}
+            onChange={(e) => setMostrarGlb(e.target.checked)}
+            data-testid="f13-equipo-glb-mostrar"
+          />
+          Equipo GLB a escala real
+        </label>
+        <label className="flex items-center gap-1">
+          Orientación
+          <select
+            className="rounded border border-cyan-100 bg-white px-1 py-0.5"
+            value={orientacionGlb_deg}
+            onChange={(e) => setOrientacionGlb_deg(Number(e.target.value))}
+            data-testid="f13-equipo-glb-orientacion"
+          >
+            {[...new Set([0, 90, 180, 270, orientacionGlb_deg])].sort((a, b) => a - b).map((deg) => (
+              <option key={deg} value={deg}>{deg}°</option>
+            ))}
+          </select>
+        </label>
+        <span data-testid="f13-equipo-glb-estado">{estadoGlb}</span>
       </div>
       <div className="grid grid-cols-3 gap-1" data-testid="f472-babylon-camera-modes">
         {(['iso', 'top', 'front'] as BabylonDeepCameraMode[]).map((mode) => (
