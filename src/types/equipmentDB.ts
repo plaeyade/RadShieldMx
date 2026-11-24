@@ -96,7 +96,7 @@ export const COMMERCIAL_EQUIPMENT: CommercialEquipment[] = [
   { id: 'canon-exhl', manufacturer: 'Canon (Vantage)', model: 'OASIS Open', category: 'LINAC', modality: 'linac-6mv', energy_MeV_or_kVp: '6 MV', doseRate_Gy_min: 8, maxFieldSize_cm: '30x40', workload_Gy_week: 350, imageUrl: getEquipmentImageUrl('OASIS Open') },
 
   // --- GAMMA KNIFE ---
-  { id: 'elekta-leskell', manufacturer: 'Elekta', model: 'Leksell Gamma Knife Icon', category: 'GammaKnife', modality: 'gamma-knife', energy_MeV_or_kVp: 'Co-60 1.25 MeV', maxFieldSize_cm: 'N/A (201 fuentes)', tvlConcrete_cm_6MV: 21, workload_Gy_week: 50, imageUrl: getEquipmentImageUrl('Leksell Gamma Knife Icon') },
+  { id: 'elekta-leskell', manufacturer: 'Elekta', model: 'Leksell Gamma Knife Icon', category: 'GammaKnife', modality: 'gamma-knife', energy_MeV_or_kVp: 'Co-60 1.25 MeV', maxFieldSize_cm: 'N/A (192 fuentes)', tvlConcrete_cm_6MV: 21, workload_Gy_week: 50, imageUrl: getEquipmentImageUrl('Leksell Gamma Knife Icon') },
   { id: 'elekta-leskell-esprit', manufacturer: 'Elekta', model: 'Leksell Gamma Knife Esprit', category: 'GammaKnife', modality: 'gamma-knife', energy_MeV_or_kVp: 'Co-60 1.25 MeV', maxFieldSize_cm: 'N/A (192 fuentes)', tvlConcrete_cm_6MV: 21, workload_Gy_week: 60, imageUrl: getEquipmentImageUrl('Leksell Gamma Knife Esprit') },
 
   // --- CT ---

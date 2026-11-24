@@ -149,7 +149,7 @@ export const TABLE_B5_CO60: NCRPTable = {
     'Hierro': ['Concreto hierro', 4.50, 3.5, 12.4],
   },
   notes: [
-    'Gamma Knife usa 201 fuentes de Co-60 (1.17 + 1.33 MeV)',
+    'Gamma Knife: 192 fuentes de Co-60 en Perfexion/Icon/Esprit y 201 en los modelos B/C/4C (1.17 + 1.33 MeV)',
     'TVL efectivo considera geometría múltiple fuente',
     'NCRP 151 §4.8.6 método especial para GK',
   ],
