@@ -41,7 +41,10 @@ export default defineConfig(({ mode }) => {
         manualChunks(id: string) {
           if (/\/node_modules\/(react|react-dom|scheduler|sonner|zustand|use-sync-external-store|@babel\/runtime)\//.test(id)
             || id.startsWith('\0commonjsHelpers') || id.includes('vite/preload-helper')) return 'vendor-react';
-          if (babylonActivo && id.includes('/node_modules/@babylonjs/')) return 'vendor-babylon';
+          // Shaders y extensiones glTF de Babylon se piden con import() bajo demanda (material compilado, extensión
+          // declarada por el GLB): fuera de `vendor-babylon` quedan en chunks propios y no inflan el chunk principal.
+          if (babylonActivo && id.includes('/node_modules/@babylonjs/')
+            && !/\/@babylonjs\/(core\/Shaders(WGSL)?|loaders\/glTF\/2\.0\/Extensions)\//.test(id)) return 'vendor-babylon';
           if (id.includes('/node_modules/@react-three/') || id.includes('/node_modules/three-stdlib/')) return 'vendor-r3f';
           if (/\/node_modules\/three\//.test(id)) return 'vendor-three';
           if (/\/src\/hooks\/useWebGPU(Heatmap)?\.ts$/.test(id) || id.endsWith('/src/hooks/WebGPUHeatmapBridge.tsx')) return 'gpu-heatmap';

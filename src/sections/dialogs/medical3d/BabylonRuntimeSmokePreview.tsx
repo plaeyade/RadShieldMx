@@ -135,7 +135,7 @@ export function BabylonRuntimeSmokePreview({
     // muerta para que ese build no emita el chunk `vendor-babylon`.
     if (!VISOR_3D_BABYLON) return () => { disposed = true; };
 
-    // Sin WebGL no tiene caso descargar ~5 MB de Babylon: se avisa y se remite al visor Three/R3F.
+    // Sin WebGL no tiene caso descargar el chunk de Babylon: se avisa y se remite al visor Three/R3F.
     if (!navegadorSoportaWebGL()) {
       setSmokeStatus('sin-webgl', MENSAJE_SIN_WEBGL);
       return () => { disposed = true; };
@@ -147,10 +147,9 @@ export function BabylonRuntimeSmokePreview({
       setMetrics({ firstFrameMs: null, fps: null, meshes: 0 });
       try {
         // Carga perezosa: chunk `vendor-babylon`, sólo al abrir Inspección 3D con geometría.
-        // Sólo el cargador glTF 2.0 (GLB del equipo), no todo @babylonjs/loaders (BVH, FBX, OBJ, STL, SPLAT, glTF 1);
-        // @babylonjs/materials no se usa: los materiales PBR/Standard vienen de core.
-        const babylon = await import('@babylonjs/core');
-        await import('@babylonjs/loaders/glTF/2.0');
+        // Sólo los módulos de @babylonjs/core que usa la escena (rutas individuales, no el barril de ~8 MB) y el
+        // cargador glTF 2.0 con extensiones bajo demanda; @babylonjs/materials no se usa (PBR/Standard vienen de core).
+        const { babylon } = await import('@/lib/medical3D/babylonModulos');
 
         if (disposed || !canvasRef.current) return;
 
