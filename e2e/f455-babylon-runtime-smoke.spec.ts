@@ -18,6 +18,11 @@ test('F455 opens Medical 3D and renders Babylon runtime smoke preview', async ({
     localStorage.setItem('radshield-e2e-controls', 'true');
     localStorage.setItem('radshield_canvas_chrome_mode_f375', 'guided');
   });
+  const erroresBabylon: string[] = [];
+  page.on('pageerror', (error) => { if (/babylon|BJS|effect|shader/i.test(String(error?.stack || error))) erroresBabylon.push(String(error)); });
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' && /BJS|babylon|effect|shader|glTF/i.test(msg.text())) erroresBabylon.push(msg.text());
+  });
   await page.setViewportSize({ width: 1600, height: 960 });
   await bootWorkspace(page);
 
@@ -28,6 +33,17 @@ test('F455 opens Medical 3D and renders Babylon runtime smoke preview', async ({
   await expect(page.getByTestId('f455-babylon-runtime-smoke')).toBeVisible();
   await expect(page.getByTestId('f455-babylon-runtime-canvas')).toBeVisible();
   await expect(page.getByTestId('f455-babylon-runtime-status')).toContainText(/ready|loading/, { timeout: 30_000 });
+  // Fase 13: Babylon se importa por módulos individuales (src/lib/medical3D/babylonModulos.ts); si faltara un módulo
+  // o un efecto secundario, la escena fallaría al crearse o Babylon registraría errores de efecto/shader en consola.
+  const status = page.getByTestId('f455-babylon-runtime-status');
+  await expect(status).toHaveText(/^(ready|failed|sin-webgl)$/, { timeout: 60_000 });
+  const estadoFinal = (await status.textContent())?.trim();
+  const mensajeFinal = await page.getByTestId('f455-babylon-runtime-mensaje').textContent();
+  expect(estadoFinal, `vista Babylon: ${mensajeFinal}`).not.toBe('failed');
+  if (estadoFinal === 'ready') {
+    await page.waitForTimeout(1_500);
+    expect(erroresBabylon, 'errores de Babylon en consola').toEqual([]);
+  }
 
   const cardBox = await page.getByTestId('f455-babylon-runtime-smoke').evaluate((node) => {
     const box = (node as HTMLElement).getBoundingClientRect();
