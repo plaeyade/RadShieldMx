@@ -33,7 +33,7 @@ import { tvlPrimaria, transmisionTVL } from './ncrp151';
 import { AJUSTES_TC, transmisionArcher } from './ncrp147';
 import { transmisionTG108 } from './transmisionTG108';
 import { dosisSemanalTG108, type EntradaTG108 } from './tg108';
-import { P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from './limitesDosis';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Materiales
@@ -292,6 +292,27 @@ export function terminoAtenuado(x: TerminoFuente, material: MaterialSala, t_cm: 
 export const EDIFICIO = { alturaPB_m: 5.4, alturaPisoTipo_m: 5.0, puntoSobrePisoSuperior_m: 0.5, puntoSobrePisoInferior_m: 1.7, sotanos: 0 } as const;
 export const dTecho = (alturaFuente_m: number) => EDIFICIO.alturaPB_m + EDIFICIO.puntoSobrePisoSuperior_m - alturaFuente_m;
 
+/**
+ * Clasificación del punto protegido: «publico» (objetivo de no controlada, el de todos los perímetros) o «controlada»
+ * (objetivo de área controlada para POE). Sólo el pasillo del laberinto HDR es zona controlada (decisión del
+ * propietario 24-11-2026).
+ */
+export type ZonaPunto = 'publico' | 'controlada';
+/** P de diseño por zona (mSv/semana), de la fuente única `limitesDosis.ts` (NCRP 147 §1.3 / NCRP 151 §1.2). */
+export const P_ZONA_mSv_semana: Record<ZonaPunto, number> = { publico: P_NO_CONTROLADA_mSv_semana, controlada: P_CONTROLADA_mSv_semana };
+
+/** Requisitos de operación del pasillo del laberinto HDR como zona controlada (decisión del propietario 24-11-2026). */
+export const REQUISITOS_PASILLO_LABERINTO_HDR = [
+  'Zona controlada: señal de advertencia de radiación (trébol) y leyenda «Zona controlada: sólo personal autorizado» en la entrada del pasillo, por fuera de la puerta',
+  'Acceso restringido: puerta con control de acceso (cerradura o tarjeta) y enclavamiento con la fuente; luz de «irradiando» en la entrada y en el pasillo',
+  'El pasillo no puede ser paso de público ni de pacientes no acompañados: sólo POE y el paciente de la sesión acompañado por el POE',
+  'Durante la exposición de la fuente nadie permanece en el pasillo (T = 1/8 [supuesto] es el de paso del POE)',
+  'Dosimetría personal para el POE que lo cruza y vigilancia de área en el pasillo con la fuente expuesta',
+] as const;
+
+/** Muro interior del laberinto HDR que se construye (cm de concreto 2.35): el modelado en el MC de Cyclotron-SIM #38. */
+export const MURO_INTERIOR_LABERINTO_HDR_cm = 34;
+
 export interface BarreraProyecto {
   id: string;
   nombre: string;
@@ -301,6 +322,10 @@ export interface BarreraProyecto {
   T: number;
   materiales: MaterialSala[];
   nota?: string;
+  /** Zona del punto protegido; si falta, «publico». */
+  zona?: ZonaPunto;
+  /** Señalización y restricciones de acceso que exige la zona. */
+  requisitos?: readonly string[];
 }
 
 export interface SalaProyecto {
@@ -311,8 +336,6 @@ export interface SalaProyecto {
   barreras: BarreraProyecto[];
   supuestos: string[];
 }
-
-const P = P_NO_CONTROLADA_mSv_semana;
 
 /** Cargas de trabajo [supuesto] (sin dato del propietario). */
 export const CARGAS_PROYECTO = {
@@ -332,7 +355,10 @@ export function salasProyecto(): SalaProyecto[] {
   const conc: MaterialSala[] = ['concrete', 'barite', 'lead'];
 
   // HDR: laberinto en L por el sur. Boca de 1.20 m en el extremo oeste del muro sur; pasillo de 1.20 m; puerta al este.
-  const tLab = 0.34; // muro interior del laberinto (m): el espesor que resulta abajo para el pasillo (T = 1/8)
+  // Muro interior del laberinto (m): se construye con 34 cm, el espesor con que se dimensionó a límite de público (T = 1/8)
+  // y el que modela el MC de Cyclotron-SIM #38. Con el pasillo como zona controlada el analítico pide menos (fila
+  // «laberinto»), pero no se adelgaza: el MC preliminar da 2.7 veces el analítico en el pasillo.
+  const tLab = MURO_INTERIOR_LABERINTO_HDR_cm / 100;
   const ir = terminoHDR(cg.hdr);
   const dI = Math.hypot(3.0 - 0.6, 2.5 + tLab + 1.2); // fuente → centro del muro iluminado por la boca
   const dR = 5.7; // centro del área dispersora → puerta
@@ -384,11 +410,17 @@ export function salasProyecto(): SalaProyecto[] {
         'ImagingRing: 20 estudios/semana, DLP 500 mGy·cm, 120 kVp [supuesto]',
         'Laberinto en L: boca 1.20 m, pasillo 1.20 m, α = 0.03 en el muro iluminado (conservador para 0.25–0.5 MeV) [supuesto]',
         'T = 1 en todos los perímetros [supuesto]; piso sobre terreno: sin barrera de piso',
+        'Pasillo del laberinto = zona controlada (decisión del propietario 24-11-2026): P de área controlada con T = 1/8; el resto de los puntos a límite de público',
+        'Muro interior del laberinto: se construye con 34 cm (el del MC preliminar de Cyclotron-SIM #38); pendiente confirmar con la corrida completa',
       ],
       barreras: [
         { id: 'oe', nombre: 'Muros oeste y este', terminos: hdr, dInterior_m: 3.0, T: 1, materiales: conc },
         { id: 'norte', nombre: 'Muro norte', terminos: hdr, dInterior_m: 2.5, T: 1, materiales: conc },
-        { id: 'laberinto', nombre: 'Muro interior del laberinto (sur; pasillo controlado)', terminos: hdr, dInterior_m: 2.5, T: 1 / 8, materiales: conc, nota: 'El pasillo del laberinto es zona controlada de paso (T = 1/8 [supuesto]); el exterior lo protege el muro exterior' },
+        {
+          id: 'laberinto', nombre: 'Muro interior del laberinto (sur; pasillo = zona controlada)', terminos: hdr, dInterior_m: 2.5, T: 1 / 8, materiales: conc,
+          zona: 'controlada', requisitos: REQUISITOS_PASILLO_LABERINTO_HDR,
+          nota: 'Pasillo del laberinto = zona controlada (decisión del propietario 24-11-2026), T = 1/8 [supuesto]; no puede ser paso de público ni de pacientes no acompañados. Se construyen 34 cm (MC preliminar de Cyclotron-SIM #38); el exterior lo protege el muro exterior',
+        },
         { id: 'labext', nombre: 'Muro exterior del laberinto (frente a la boca)', terminos: hdr, dInterior_m: dI, T: 1, materiales: conc },
         { id: 'techo', nombre: 'Losa de techo (punto a +5.90)', terminos: hdr, dFija_m: dTecho(1.117), T: 1, materiales: conc },
         { id: 'puerta', nombre: 'Puerta del laberinto', terminos: [lab, ...dirPuerta], dFija_m: 1, T: 1, materiales: ['lead'], nota: `Dispersión simple + directa por ${(recorrido).toFixed(0)} cm oblicuos del muro del laberinto` },
@@ -402,14 +434,21 @@ export interface FilaDiseno {
   barrera: string;
   nombre: string;
   material: MaterialSala;
+  zona: ZonaPunto;
+  P_mSv_semana: number;
   resultado: ResultadoBarreraSala;
   nota?: string;
+  requisitos?: readonly string[];
 }
 
-/** Tabla de espesores del proyecto (P = objetivo de público). */
+/** Tabla de espesores del proyecto (P = objetivo de público, salvo los puntos declarados zona controlada). */
 export function disenoProyecto(): FilaDiseno[] {
-  return salasProyecto().flatMap((s) => s.barreras.flatMap((b) => b.materiales.map((m) => ({
-    sala: s.id, barrera: b.id, nombre: b.nombre, material: m, nota: b.nota,
-    resultado: barreraSala({ terminos: b.terminos, material: m, P_mSv_semana: P, T: b.T, dInterior_m: b.dInterior_m, dFija_m: b.dFija_m }),
-  }))));
+  return salasProyecto().flatMap((s) => s.barreras.flatMap((b) => b.materiales.map((m) => {
+    const zona = b.zona ?? 'publico';
+    const P = P_ZONA_mSv_semana[zona];
+    return {
+      sala: s.id, barrera: b.id, nombre: b.nombre, material: m, zona, P_mSv_semana: P, nota: b.nota, requisitos: b.requisitos,
+      resultado: barreraSala({ terminos: b.terminos, material: m, P_mSv_semana: P, T: b.T, dInterior_m: b.dInterior_m, dFija_m: b.dFija_m }),
+    };
+  })));
 }

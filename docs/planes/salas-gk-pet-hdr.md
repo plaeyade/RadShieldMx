@@ -9,6 +9,7 @@ Fase 13, 23-11-2026. El cálculo está en `src/lib/salasGkPetHdr.ts` y las prueb
 - Los puntos protegidos quedan a 0.5 m sobre el piso superior y a 1.7 m sobre el inferior. Las tres salas van en PB sobre terreno, así que no hay punto debajo y no se calcula barrera de piso. El punto del techo queda a +5.90 m, 0.5 m sobre la cara superior de la losa de N1 a +5.40.
 - En los muros, el punto queda a 0.3 m de la cara exterior, a la altura de la fuente.
 - T = 1 en todos los perímetros [supuesto]. La única excepción es el pasillo interior del laberinto HDR, con T = 1/8; ese pasillo es zona controlada y no es perímetro.
+- Excepción al objetivo de público: el pasillo del laberinto HDR es zona controlada (decisión del 24-11-2026, sección «Decisión: pasillo del laberinto HDR»). Su P es el de área controlada, 0.1 mSv/semana, también de `limitesDosis.ts`.
 
 ## Método
 
@@ -49,6 +50,37 @@ Por eso la sala no necesita muros de búnker de teleterapia. Sólo el muro que q
 - ImagingRing [supuesto]: 20 estudios/semana, DLP 500 mGy·cm, 120 kVp.
 - Laberinto en L por el sur: boca de 1.20 m en el extremo oeste, pasillo de 1.20 m y puerta al este. Se usa α = 0.03 [supuesto] y A = 3.6 m².
 
+### Decisión: pasillo del laberinto HDR = zona controlada (24-11-2026)
+
+El propietario decidió el 24-11-2026 declarar el pasillo del laberinto de la sala HDR de Elekta Studio como **zona controlada**.
+
+**Motivo.** El MC preliminar de Cyclotron-SIM (PR #38, rama `mc-hdr-fotoneutrones-20261123`, `docs/mc-hdr-studio-fotoneutrones-versa.md`) da en el pasillo, con el muro interior de 34 cm:
+
+| magnitud en el pasillo | valor |
+|---|---:|
+| analítico de este documento (kerma, μGy cada semana) | 145 |
+| MC kerma (μGy cada semana) | 389 ± 6 (2.7 veces el analítico) |
+| MC H*(10) (μSv cada semana) | 584 ± 8 |
+| T · H*(10) con T = 1/8 (μSv cada semana) | 73 |
+
+El analítico sólo cuenta la transmisión por el muro interior. El MC añade la radiación que entra por la boca y se dispersa en el pasillo, y esa parte no baja al engrosar el muro. Con T = 1/8 el pasillo supera el objetivo de público con que se dimensionó, pero cumple el de área controlada (0.1 mSv/semana).
+
+**Qué cambia en el cálculo.**
+
+- `salasGkPetHdr.ts`: la barrera `laberinto` lleva `zona: 'controlada'` y `disenoProyecto()` le aplica `P_ZONA_mSv_semana.controlada` (= `P_CONTROLADA_mSv_semana`). T sigue en 1/8 [supuesto].
+- Todos los demás puntos (GK, PET/CT y el resto del HDR, incluidos el muro exterior del laberinto, el techo y la puerta) siguen con el objetivo de público.
+- Con el objetivo de área controlada el analítico pide 24 cm de concreto (16 de baritado, 2.6 cm de Pb). **Se construyen 34 cm** (`MURO_INTERIOR_LABERINTO_HDR_cm`): es el espesor que modela el MC, y el MC preliminar sólo cumple con ese espesor. Adelgazar el muro sube la parte transmitida, y la geometría del muro exterior y de la puerta se calculó con 34 cm.
+
+**Requisitos de la zona** (`REQUISITOS_PASILLO_LABERINTO_HDR`, en la nota de la fila):
+
+- Señal de advertencia de radiación (trébol) y la leyenda «Zona controlada: sólo personal autorizado» en la entrada del pasillo, por fuera de la puerta.
+- Acceso restringido: puerta con control de acceso (cerradura o tarjeta) y enclavamiento con la fuente; luz de «irradiando» en la entrada y en el pasillo.
+- **El pasillo no puede ser paso de público ni de pacientes no acompañados.** Sólo entran el POE y el paciente de la sesión acompañado por el POE.
+- Durante la exposición de la fuente nadie permanece en el pasillo. T = 1/8 es el de paso del POE [supuesto].
+- Dosimetría personal para el POE que lo cruza y vigilancia de área en el pasillo con la fuente expuesta.
+
+**Pendiente.** Confirmar con la corrida completa del MC de Cyclotron-SIM #38 en la PC de 24 hilos (error esperado ≈ 3 % en muros y laberinto). Si el T · H*(10) del pasillo superara la cifra de área controlada, habría que engrosar el muro interior, cerrar la boca o revisar T. También falta el criterio de la CNSNS sobre la zona controlada en la licencia.
+
 ## Espesores
 
 | Sala | Barrera | Concreto 2.35 (cm) | Baritado 3.5 (cm) | Plomo | Acero (cm) |
@@ -67,12 +99,12 @@ Por eso la sala no necesita muros de búnker de teleterapia. Sólo el muro que q
 | PET/CT | Puerta | — | — | 2 mm | — |
 | HDR | Muros oeste y este | 45 | 31 | 4.9 cm | — |
 | HDR | Muro norte | 47 | 32 | 5.1 cm | — |
-| HDR | Muro interior del laberinto (T = 1/8) | 34 | 23 | 3.7 cm | — |
-| HDR | Muro exterior del laberinto | 40 | 27 | 4.3 cm | — |
+| HDR | Muro interior del laberinto (T = 1/8, zona controlada; se construyen 34 cm de concreto) | 24 | 16 | 2.6 cm | — |
+| HDR | Muro exterior del laberinto | 40 | 28 | 4.3 cm | — |
 | HDR | Techo | 42 | 28 | 4.4 cm | — |
 | HDR | Puerta del laberinto | — | — | 6 mm | — |
 
-La tasa instantánea más alta detrás de un perímetro (muros del HDR) es ≈ 3.9 μSv/h, menor de 20 μSv en cualquier hora.
+La tasa instantánea más alta detrás de un perímetro (muros del HDR) es ≈ 3.9 μSv/h, menor de 20 μSv en cualquier hora. La fila del muro interior del laberinto da el mínimo analítico con el objetivo de área controlada. Con los 34 cm que se construyen, el analítico deja en el pasillo los mismos valores que antes de la decisión. La cifra que manda es la del MC (sección «Decisión»).
 
 ## Datos que faltan para cerrar el diseño
 

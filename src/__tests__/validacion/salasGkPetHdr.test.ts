@@ -4,15 +4,15 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
-  CARGAS_PROYECTO, DENSIDAD_SALA, EDIFICIO, GAMMA_AKR_IR192, GAMMA_KNIFE_ICON, TVL_IR192_SRS47_cm,
-  barreraSala, dTecho, disenoProyecto, salasProyecto, terminoHDR, terminoLaberinto, terminoPET, terminoTC, terminosGammaKnife,
+  CARGAS_PROYECTO, DENSIDAD_SALA, EDIFICIO, GAMMA_AKR_IR192, GAMMA_KNIFE_ICON, MURO_INTERIOR_LABERINTO_HDR_cm,
+  P_ZONA_mSv_semana, REQUISITOS_PASILLO_LABERINTO_HDR, TVL_IR192_SRS47_cm, barreraSala, dTecho, disenoProyecto, salasProyecto, terminoHDR, terminoLaberinto, terminoPET, terminoTC, terminosGammaKnife,
   transmision511, transmisionCo60, transmisionIr192, transmisionTCkVp,
 } from '@/lib/salasGkPetHdr';
 import { dosisSemanalTG108 } from '@/lib/tg108';
 import { transmisionTG108 } from '@/lib/transmisionTG108';
 import { MATERIALS, MODALITIES } from '@/types/radshield';
 import { COMMERCIAL_EQUIPMENT } from '@/types/equipmentDB';
-import { P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
+import { P_CONTROLADA_mSv_semana, P_NO_CONTROLADA_mSv_semana } from '@/lib/limitesDosis';
 
 const P = P_NO_CONTROLADA_mSv_semana;
 
@@ -141,11 +141,15 @@ describe('diseño del proyecto (público en todos los perímetros, sin sótanos,
     expect(fila('pet', 'ventana', 'lead')).toBeCloseTo(0.9, 9);
   });
 
-  it('HDR Studio: 45 / 47 cm de muros, laberinto 34 + 40 cm, techo 42 cm; puerta 6 mm de Pb', () => {
+  it('HDR Studio: 45 / 47 cm de muros, laberinto 24 (controlada; se construyen 34) + 40 cm, techo 42 cm; puerta 6 mm de Pb', () => {
     expect(fila('hdr', 'oe', 'concrete')).toBe(45);
     expect(fila('hdr', 'norte', 'concrete')).toBe(47);
-    expect(fila('hdr', 'laberinto', 'concrete')).toBe(34);
+    expect(fila('hdr', 'laberinto', 'concrete')).toBe(24);
+    expect(fila('hdr', 'laberinto', 'barite')).toBe(16);
+    expect(fila('hdr', 'laberinto', 'lead')).toBeCloseTo(2.6, 9);
+    expect(MURO_INTERIOR_LABERINTO_HDR_cm).toBe(34);
     expect(fila('hdr', 'labext', 'concrete')).toBe(40);
+    expect(fila('hdr', 'labext', 'barite')).toBe(28);
     expect(fila('hdr', 'techo', 'concrete')).toBe(42);
     expect(fila('hdr', 'puerta', 'lead')).toBeCloseTo(0.6, 9);
   });
@@ -157,5 +161,58 @@ describe('diseño del proyecto (público en todos los perímetros, sin sótanos,
       expect(s.fuente_m[0]).toBeLessThan(s.interior_m[0]);
       expect(s.fuente_m[1]).toBeLessThan(s.interior_m[1]);
     }
+  });
+});
+
+describe('pasillo del laberinto HDR = zona controlada (decisión del propietario 24-11-2026)', () => {
+  const d = disenoProyecto();
+  const lab = d.filter((f) => f.sala === 'hdr' && f.barrera === 'laberinto');
+
+  it('el pasillo usa P de área controlada (0.1 mSv/semana, NCRP 147/151) de limitesDosis.ts, con T = 1/8', () => {
+    expect(P_ZONA_mSv_semana.controlada).toBe(P_CONTROLADA_mSv_semana);
+    expect(P_CONTROLADA_mSv_semana).toBe(0.1);
+    expect(lab).toHaveLength(3);
+    const hdr = salasProyecto().find((s) => s.id === 'hdr')!.barreras.find((b) => b.id === 'laberinto')!;
+    expect(hdr.T).toBe(1 / 8);
+    for (const f of lab) {
+      expect(f.zona).toBe('controlada');
+      expect(f.P_mSv_semana).toBe(P_CONTROLADA_mSv_semana);
+      expect(f.resultado.dosisOcupacion_uSv_semana).toBeLessThanOrEqual(P_CONTROLADA_mSv_semana * 1000);
+    }
+  });
+
+  it('todos los demás puntos siguen a límite de público (0.02 mSv/semana)', () => {
+    const resto = d.filter((f) => !(f.sala === 'hdr' && f.barrera === 'laberinto'));
+    expect(resto.length).toBe(d.length - 3);
+    for (const f of resto) {
+      expect(f.zona, `${f.sala}/${f.barrera}`).toBe('publico');
+      expect(f.P_mSv_semana).toBe(P_NO_CONTROLADA_mSv_semana);
+      expect(f.resultado.dosisOcupacion_uSv_semana).toBeLessThanOrEqual(P_NO_CONTROLADA_mSv_semana * 1000 * (1 + 1e-9));
+    }
+  });
+
+  it('señalización, acceso restringido y prohibición de paso de público y de pacientes no acompañados', () => {
+    const r = lab[0].requisitos!;
+    expect(r).toBe(REQUISITOS_PASILLO_LABERINTO_HDR);
+    const txt = r.join(' ');
+    expect(txt).toMatch(/señal/i);
+    expect(txt).toMatch(/[Aa]cceso restringido/);
+    expect(txt).toMatch(/no puede ser paso de público ni de pacientes no acompañados/);
+    expect(lab[0].nota).toMatch(/24-11-2026/);
+    expect(lab[0].nota).toMatch(/Cyclotron-SIM #38/);
+  });
+
+  it('se construyen 34 cm: no se adelgaza al analítico de zona controlada y cubre el MC preliminar (#38)', () => {
+    const conc = lab.find((f) => f.material === 'concrete')!;
+    expect(MURO_INTERIOR_LABERINTO_HDR_cm).toBeGreaterThanOrEqual(conc.resultado.espesorRedondeado_cm);
+    // Los 34 cm son el dimensionado original del pasillo a límite de público (PR #80): el analítico cumple con margen.
+    const term = salasProyecto().find((s) => s.id === 'hdr')!.barreras.find((b) => b.id === 'laberinto')!.terminos;
+    const publico = barreraSala({ terminos: term, material: 'concrete', P_mSv_semana: P, T: 1 / 8, dInterior_m: 2.5 });
+    expect(publico.espesorRedondeado_cm).toBe(MURO_INTERIOR_LABERINTO_HDR_cm);
+    expect(publico.dosisOcupacion_uSv_semana).toBeLessThanOrEqual(1000 * P_NO_CONTROLADA_mSv_semana);
+    // MC preliminar de Cyclotron-SIM #38 con 34 cm: H*(10) = 584 ± 8 μSv en el pasillo cada semana; con T = 1/8, 73.
+    const mcTH_uSv = 584 / 8;
+    expect(mcTH_uSv).toBeGreaterThan(1000 * P_NO_CONTROLADA_mSv_semana);
+    expect(mcTH_uSv).toBeLessThanOrEqual(1000 * P_CONTROLADA_mSv_semana);
   });
 });
